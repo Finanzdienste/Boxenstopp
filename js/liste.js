@@ -4,8 +4,12 @@
  * Der Stand (so liegt er auch als liste.json im Daten-Repo):
  *
  *   { version: 1, rev: 12,
- *     items:  { <Schlüssel>: Eintrag },
- *     cooked: { <Rezept-id>: { at: '2026-10-26', by: 'Tobi' } } }
+ *     items:     { <Schlüssel>: Eintrag },
+ *     cooked:    { <Rezept-id>: { at: '2026-10-26', by: 'Tobi' } },
+ *     bewertung: { <Rezept-id>: { wert: 'hoch' | 'mittel' | 'runter', by: 'Amy', at } } }
+ *
+ * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
+ * zuletzt gedrückt hat, steht dabei.
  *
  * Ein Eintrag:
  *
@@ -27,7 +31,8 @@
  * dazugelegt hat, offen bleibt.
  */
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {} });
+export const DAUMEN = ['hoch', 'mittel', 'runter'];
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const klon = (x) => JSON.parse(JSON.stringify(x));
@@ -120,6 +125,11 @@ export function bereinigen(roh) {
       s.items[k] = e;
     }
   }
+  if (istObj(roh.bewertung)) {
+    for (const [rid, b] of Object.entries(roh.bewertung)) {
+      if (SCHLUESSEL.test(rid) && istObj(b) && DAUMEN.includes(b.wert)) s.bewertung[rid] = { wert: b.wert, by: text(b.by, 40), at: text(b.at, 40) };
+    }
+  }
   if (istObj(roh.cooked)) {
     for (const [rid, c] of Object.entries(roh.cooked)) {
       if (SCHLUESSEL.test(rid) && istObj(c) && TAG.test(String(c.at))) s.cooked[rid] = { at: c.at, by: text(c.by, 40) };
@@ -155,6 +165,8 @@ export const opLeeren = () => ({ typ: 'leeren' });
 export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || null });
 /** Einträge von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
 export const opZusammen = (items) => ({ typ: 'zusammen', items: klon(items) });
+/** Daumen für ein Gericht setzen (wert null nimmt ihn weg) – gilt für beide. */
+export const opBewerten = (rid, wert, by) => ({ typ: 'bewerten', rid, wert: wert || null, by: by || null, at: jetzt() });
 
 function aendere(s, op) {
   if (!istObj(op)) return;
@@ -200,6 +212,12 @@ function aendere(s, op) {
       return;
     case 'leeren':
       s.items = {};
+      return;
+    case 'bewerten':
+      if (!SCHLUESSEL.test(String(op.rid))) return;
+      if (!s.bewertung) s.bewertung = {};
+      if (DAUMEN.includes(op.wert)) s.bewertung[op.rid] = { wert: op.wert, by: op.by || null, at: op.at };
+      else delete s.bewertung[op.rid];
       return;
     case 'gekocht':
       if (SCHLUESSEL.test(String(op.rid)) && TAG.test(String(op.at))) s.cooked[op.rid] = { at: op.at, by: op.by || null };

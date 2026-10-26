@@ -341,3 +341,17 @@ a.btn{text-decoration:none;color:inherit}
 /* Mengen in den Kochschritten */
 .mg{font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--accent) 13%,transparent);border-radius:4px;padding:0 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .step[aria-pressed="true"] .mg{background:transparent;color:inherit;font-weight:600}
+
+/* Daumen: ein gemeinsamer pro Gericht */
+.bewertung{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:14px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.bew-k{font-weight:700;font-size:14px}
+.bew-btns{display:flex;gap:6px}
+.daumen{display:grid;place-items:center;width:46px;height:42px;padding:0;border-radius:11px;border:1.5px solid var(--line-strong);background:var(--surface);color:var(--muted)}
+.daumen .ic{width:22px;height:22px}
+.daumen:hover:not([disabled]){border-color:var(--ink);color:var(--ink)}
+.daumen.d-hoch[aria-pressed="true"]{background:color-mix(in srgb,var(--ok) 16%,transparent);border-color:var(--ok);color:var(--ok)}
+.daumen.d-mittel[aria-pressed="true"]{background:color-mix(in srgb,var(--kh) 16%,transparent);border-color:var(--kh);color:var(--kh)}
+.daumen.d-runter[aria-pressed="true"]{background:color-mix(in srgb,var(--danger) 14%,transparent);border-color:var(--danger);color:var(--danger)}
+.daumen[disabled]{opacity:.5}
+.bew-von{flex:1 1 160px;font-size:13px;color:var(--muted)}
+.pill.p-hoch{color:var(--ok)}.pill.p-mittel{color:var(--kh)}.pill.p-runter{color:var(--danger)}

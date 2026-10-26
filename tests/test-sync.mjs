@@ -102,6 +102,17 @@ check(await bis(() => !!gh.liste()?.cooked?.chili), '„Heute gekocht“ steht i
 await a.click('.tab[data-tab="rezepte"]');
 check(await bis(async () => (await a.locator('[data-open="chili"] .pill', { hasText: 'Zuletzt gekocht' }).count()) === 1), 'Amy sieht beim Chili „Zuletzt gekocht“');
 
+// --- Daumen: einer für beide
+await t.click('[data-bewerten="hoch"]');
+check(await bis(() => gh.liste()?.bewertung?.chili?.wert === 'hoch'), 'Tobis Daumen hoch steht in GitHub');
+check(await bis(async () => (await a.locator('[data-open="chili"] .pill.p-hoch').count()) === 1), 'Amy sieht den Daumen am Chili');
+await a.click('[data-open="chili"]');
+check(await bis(async () => (await a.locator('.bew-von').innerText()).startsWith('Daumen hoch von Tobi')), 'Amy sieht „Daumen hoch von Tobi“');
+await a.click('[data-bewerten="mittel"]');
+check(await bis(async () => (await t.locator('.bew-von').innerText()).startsWith('Geht so von Amy')), 'Amy stellt auf „Geht so“ – Tobi sieht es');
+check((await a.locator('.bew-von').innerText()).startsWith('Geht so von dir'), 'Amy sieht „Geht so von dir“');
+await a.click('[data-act="zurueck"]');
+
 // --- falscher Schlüssel
 const fremd = await handy(browser, { attrappe: gh, adresse: `${APP_URL}#zugang=github_pat_11FALSCHFALSCH000000000_xyz` });
 await fremd.page.fill('#z-name', 'Jemand');

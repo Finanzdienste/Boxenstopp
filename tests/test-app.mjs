@@ -32,6 +32,15 @@ const mengenImSchritt = await page.$$eval('.step-d', (ds) => ds[0].querySelector
 check(mengenImSchritt >= 8, `Schritt 1 nennt die Mengen und hebt sie hervor (${mengenImSchritt})`);
 check((await page.locator('.step-d').first().innerText()).includes('800 g Hähnchenbrust'), '„800 g Hähnchenbrust“ steht direkt im ersten Schritt');
 check(await page.locator('.sub-h', { hasText: 'Extras' }).count() === 1, 'Backpapier steht unter Extras');
+check((await text('.bew-von')).startsWith('Noch nicht bewertet'), 'Daumen: noch nicht bewertet');
+await page.click('[data-bewerten="hoch"]');
+check(await page.getAttribute('[data-bewerten="hoch"]', 'aria-pressed') === 'true', 'Daumen hoch gedrückt');
+check((await text('.bew-von')).startsWith('Daumen hoch'), 'unter den Daumen steht „Daumen hoch“');
+await page.click('[data-bewerten="runter"]');
+check(await page.getAttribute('[data-bewerten="runter"]', 'aria-pressed') === 'true' && await page.getAttribute('[data-bewerten="hoch"]', 'aria-pressed') === 'false', 'umentscheiden: jetzt Daumen runter');
+await page.click('[data-bewerten="runter"]');
+check((await text('.bew-von')).startsWith('Noch nicht bewertet'), 'nochmal tippen nimmt den Daumen weg');
+await page.click('[data-bewerten="hoch"]');
 check((await text('.label .c-kcal .v')).startsWith('434'), 'Etikett: 434 kcal pro Box');
 check((await text('.label .c-kcal .dlt')) === '−9', 'Etikett: 9 kcal unter dem Ziel');
 await page.click('[data-act="alle-dazu"]');
@@ -46,6 +55,10 @@ await page.fill('#pot-empty', '2150');
 await page.fill('#pot-full', '5450');
 check((await text('#per-box b')) === '413 g', `Portionsrechner: 413 g pro Box (${await text('#per-box b')})`);
 await page.click('[data-act="zurueck"]');
+check(await page.locator('[data-open="butter-chicken"] .pill.p-hoch').count() === 1, 'die Box zeigt den Daumen hoch');
+await page.click('[data-filter="top"]');
+check(await page.locator('#grid .box').count() === 1, 'Filter „Daumen hoch“: genau das eine Gericht');
+await page.click('[data-filter="alle"]');
 
 await page.click('[data-open="teriyaki"]');
 await page.click('[data-act="alle-dazu"]');

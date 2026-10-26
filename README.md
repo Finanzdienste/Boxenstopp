@@ -11,7 +11,7 @@ Zwei Reiter:
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 16 Rezepte als Boxen mit Kreppband, Filter (Hähnchen, Rind, Pute, Veggie, Reis, Nudeln, Kartoffel & Co., bis 45 Min., auf der Liste). Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, Schritte zum Abhaken – jede Menge steht direkt im Schritt und ist hervorgehoben („800 g Hähnchenbrust in Würfel schneiden“), damit man nicht nach oben scrollen muss –, „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung |
+| **Rezepte** | 16 Rezepte als Boxen mit Kreppband, Filter (Hähnchen, Rind, Pute, Veggie, Reis, Nudeln, Kartoffel & Co., bis 45 Min., auf der Liste). Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, Schritte zum Abhaken – jede Menge steht direkt im Schritt und ist hervorgehoben („800 g Hähnchenbrust in Würfel schneiden“), damit man nicht nach oben scrollen muss –, „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
@@ -81,7 +81,8 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
   },
   "c-mh8k2x1abcd": { "name": "Bananen", "cat": "obst", "parts": {}, "custom": true, "checked": false, "by": null, "at": "…", "added": "…" }
  },
- "cooked": { "chili": { "at": "2026-10-26", "by": "Tobi" } }
+ "cooked": { "chili": { "at": "2026-10-26", "by": "Tobi" } },
+ "bewertung": { "chili": { "wert": "hoch", "by": "Amy", "at": "2026-10-26T19:10:00.000Z" } }
 }
 ```
 
@@ -90,7 +91,8 @@ Rezepte sich eine Zeile teilen. Eigene Einträge heißen `c-…`. Ein Teil hat
 entweder eine Menge (`q`, `u`, Packungshinweis `h`) oder einen Text (`t`,
 z. B. „2 EL“ bei Vorrat und Gewürzen). Erledigt ist eine Zeile, wenn alle
 Teile `done` sind (eigene Einträge: `checked`). `by` ist der Name aus dem
-Einrichten. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
+Einrichten. `bewertung` hat pro Gericht einen Daumen (`hoch`, `mittel`,
+`runter`) – wer zuletzt drückt, überschreibt ihn für beide. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
 nicht passt.
 
 ## Rezepte ändern

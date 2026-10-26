@@ -8,13 +8,14 @@
  */
 import { app, $, $$, ansicht, ansichtMerken, melde, zeigeReiter, istSchmal, lese, schreibe } from './kern.js';
 import { esc, nf1, nfi, heute, tagKurz, abweichung } from './format.js';
-import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht } from './liste.js';
+import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
 
 const SCHRITTE = 'boxenstopp.schritte.v1';
 const TOPF = 'boxenstopp.topf.v1';
 
 export const FILTER = [
   ['alle', 'Alle', () => true],
+  ['top', 'Daumen hoch', (r) => app.stand.bewertung?.[r.id]?.wert === 'hoch'],
   ['haehnchen', 'Hähnchen', (r) => r.protein.includes('Hähnchen')],
   ['rind', 'Rind', (r) => r.protein.includes('Rind')],
   ['pute', 'Pute', (r) => r.protein.includes('Pute')],
@@ -32,6 +33,20 @@ const PFADE = {
   back: '<path d="M15 5l-7 7 7 7"/>',
   list: '<path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M3.8 6.6l1.3 1.3L7.6 5.4M3.8 12.1l1.3 1.3 2.5-2.5M3.8 17.6l1.3 1.3 2.5-2.5"/>',
 };
+/*
+ * Daumen: ein gemeinsamer pro Gericht (liste.js). Hoch und runter sind
+ * dasselbe Bild, gedreht; zur Seite hat ein eigenes (gedreht sah es aus wie
+ * ein Fäustling): Faust über dem Handgelenk, Daumen nach links.
+ */
+export const DAUMEN_TEXT = { hoch: 'Daumen hoch', mittel: 'Geht so', runter: 'Daumen runter' };
+const HOCH = '<rect x="2.5" y="10" width="4.5" height="10.5" rx="1.2"/><path d="M7 11.2l3.6-7.1c1.6-.2 2.9 1.2 2.6 2.8L12.6 10H19a2 2 0 0 1 2 2.3l-1.2 6.4a2.2 2.2 0 0 1-2.2 1.8H7"/>';
+const DAUMEN_SVG = {
+  hoch: HOCH,
+  mittel: '<rect x="9.5" y="17" width="10.5" height="4.5" rx="1.2"/><path d="M10.5 17v-5.5a3 3 0 0 1 3-3h3.5a3 3 0 0 1 3 3V17"/><path d="M13 8.5H4.6a1.9 1.9 0 0 0 0 3.8h6"/>',
+  runter: `<g transform="rotate(180 12 12)">${HOCH}</g>`,
+};
+export const daumenIc = (wert) => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${DAUMEN_SVG[wert] || ''}</svg>`;
+
 export const ic = (name, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PFADE[name]}</svg>`;
 
 let aktuell = null;
@@ -51,12 +66,14 @@ function karte(r) {
   const st = rezeptStand(app.stand, r);
   const c = app.stand.cooked[r.id];
   const tag = c ? tagKurz(c.at) : '';
+  const b = app.stand.bewertung?.[r.id];
+  const daumen = b ? `<span class="pill p-${b.wert}">${daumenIc(b.wert)}${DAUMEN_TEXT[b.wert]}</span>` : '';
   return `<button type="button" class="box" data-open="${esc(r.id)}">
 <span class="tape">${esc(r.short)}</span><span class="box-time">${r.time} Min.</span>
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}</span>
 <span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
-<span class="box-foot">${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
+<span class="box-foot">${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
 </button>`;
 }
 
@@ -134,6 +151,7 @@ function detailHTML(r) {
 <span class="label-k">Pro Box, eine von acht</span>
 ${etikett(r)}
 <div class="actions" id="d-actions"></div>
+<div class="bewertung" id="d-bewertung" role="group" aria-label="Wie war's?"></div>
 
 <section class="sec" aria-labelledby="h-ing">
   <h2 id="h-ing">Zutaten <small>für 8 Boxen</small></h2>
@@ -205,6 +223,7 @@ export function detailAktualisieren() {
     : `<button type="button" class="btn" data-act="gekocht"${gesperrt}>Heute gekocht</button>`;
   if (c && !heuteGekocht && tagKurz(c.at)) html += `<span class="cooked-note">Zuletzt gekocht am ${esc(tagKurz(c.at))}${c.by ? ` von ${esc(c.by)}` : ''}</span>`;
   $('#d-actions').innerHTML = html;
+  $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
   for (const b of $$('#detail .tog')) {
     const z = zeilen[Number(b.dataset.tog)];
     if (!z) continue;
@@ -213,6 +232,18 @@ export function detailAktualisieren() {
     b.setAttribute('aria-label', `${z.n} ${drauf ? 'von der Einkaufsliste nehmen' : 'auf die Einkaufsliste setzen'}`);
     b.disabled = !app.listeDa;
   }
+}
+
+function bewertungHTML(rid) {
+  const b = app.stand.bewertung?.[rid];
+  const knopf = (w) => `<button type="button" class="daumen d-${w}" data-bewerten="${w}" aria-pressed="${b?.wert === w}" aria-label="${DAUMEN_TEXT[w]}"${app.listeDa ? '' : ' disabled'}>${daumenIc(w)}</button>`;
+  let von = 'Noch nicht bewertet. Gilt für euch beide.';
+  if (b) {
+    const wer = b.by ? ` von ${b.by === app.name() ? 'dir' : esc(b.by)}` : '';
+    const wann = b.at && !Number.isNaN(Date.parse(b.at)) ? ` · ${tagKurz(heute(new Date(b.at)))}` : '';
+    von = `${DAUMEN_TEXT[b.wert]}${wer}${wann}`;
+  }
+  return `<span class="bew-k">Wie war's?</span><div class="bew-btns">${DAUMEN.map(knopf).join('')}</div><span class="bew-von">${von}</span>`;
 }
 
 function schritteZeichnen() {
@@ -333,6 +364,14 @@ export function klickRezepte(el) {
     if (!z || !aktuell) return true;
     if (hatTeil(app.stand, z.k, aktuell)) app.aendern(opTeilWeg(z.k, aktuell));
     else app.aendern(opTeil(z.k, aktuell, teilFuer(z), app.katalog[z.k]));
+    return true;
+  }
+  if (d.bewerten) {
+    if (!aktuell) return true;
+    const vorher = app.stand.bewertung?.[aktuell]?.wert;
+    const neu = vorher === d.bewerten ? null : d.bewerten;
+    app.aendern(opBewerten(aktuell, neu, app.name()));
+    melde(neu ? `Bewertet: ${DAUMEN_TEXT[neu]}` : 'Bewertung entfernt');
     return true;
   }
   if ('step' in d) {

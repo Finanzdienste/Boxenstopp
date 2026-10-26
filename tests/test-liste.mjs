@@ -8,7 +8,7 @@
 import { pruefer } from './hilfe.mjs';
 import {
   leer, anwenden, bereinigen, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl,
-  opTeil, opTeilWeg, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opGekocht, opZusammen,
+  opTeil, opTeilWeg, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opGekocht, opZusammen, opBewerten,
 } from '../js/liste.js';
 import { menge, ungefaehr, abteilung, esc, abweichung, tagKurz, heute } from '../js/format.js';
 import { nachBereichen, alsText } from '../js/bereiche.js';
@@ -82,6 +82,18 @@ check(summen(anwenden(gemeinsam, opZusammen(lokal.items)).items.reis).g === 620,
 const g = anwenden(s, opGekocht('chili', '2026-10-26', 'Tobi'));
 check(g.cooked.chili.at === '2026-10-26' && g.cooked.chili.by === 'Tobi', 'gekocht: Tag und wer');
 check(!anwenden(s, opGekocht('chili', 'gestern', 'Tobi')).cooked.chili, 'gekocht nur mit echtem Datum');
+
+// --- Daumen: einer pro Gericht, gilt für beide
+let bw = anwenden(leer(), opBewerten('chili', 'hoch', 'Tobi'));
+check(bw.bewertung.chili.wert === 'hoch' && bw.bewertung.chili.by === 'Tobi', 'Daumen hoch fürs Chili, von Tobi');
+bw = anwenden(bw, opBewerten('chili', 'mittel', 'Amy'));
+check(bw.bewertung.chili.wert === 'mittel' && bw.bewertung.chili.by === 'Amy', 'Amy stellt auf „geht so“ – ein Daumen für beide, zuletzt von Amy');
+bw = anwenden(bw, opBewerten('gyros', 'runter', 'Tobi'));
+bw = anwenden(bw, opBewerten('chili', null, 'Amy'));
+check(!bw.bewertung.chili && bw.bewertung.gyros.wert === 'runter', 'Daumen wieder weg, die anderen bleiben');
+const bwRoh = bereinigen({ bewertung: { chili: { wert: 'super' }, gyros: { wert: 'runter', by: 'Tobi', at: '2026-10-26T18:00:00Z' }, 'x/../y': { wert: 'hoch' } } });
+check(!bwRoh.bewertung.chili && bwRoh.bewertung.gyros.wert === 'runter' && Object.keys(bwRoh.bewertung).length === 1, 'bereinigen: nur hoch, mittel, runter und gültige Rezepte');
+check(JSON.stringify(bereinigen({ rev: 4, items: {} }).bewertung) === '{}', 'ältere Listen ohne Daumen: leere Bewertung');
 
 // --- bereinigen: was aus GitHub kommt, kann alles sein
 const roh = { rev: 3, items: { 'ok-1': { name: '<b>Milch</b>', cat: 'kuehl', parts: { x: { q: 'viel' }, y: { t: '1 l', done: true } } }, 'kaputt/../x': { name: 'weg' }, 'leer-2': 5 }, cooked: { chili: { at: 'morgen' } } };
