@@ -48,17 +48,19 @@ export function ungefaehr(k, summen) {
 /*
  * Abteilung für einen selbst eingetippten Eintrag. Erst der genaue Name aus
  * dem Katalog, dann Stichwörter – in dieser Reihenfolge, weil „Kokosmilch“
- * sonst bei der Milch landet und „Zahnpasta“ bei den Nudeln.
+ * sonst bei der Milch landet und „Zahnpasta“ bei den Nudeln. Was nichts
+ * trifft, steht unter „Sonstiges“ (bereiche.js).
  */
 const STICHWORT = [
-  ['sonstiges', ['zahn', 'shampoo', 'duschgel', 'klopapier', 'toilettenpapier', 'spülmittel', 'waschmittel', 'müllbeutel', 'küchenrolle', 'alufolie', 'backpapier', 'frischhaltefolie', 'deo', 'seife', 'batterie', 'boxen']],
+  ['haushalt', ['zahn', 'shampoo', 'duschgel', 'klopapier', 'toilettenpapier', 'spülmittel', 'waschmittel', 'müllbeutel', 'küchenrolle', 'alufolie', 'backpapier', 'frischhaltefolie', 'gefrierbeutel', 'deo', 'seife', 'batterie', 'boxen', 'döschen', 'spieß', 'spiess', 'schaschlik', 'schwamm', 'servietten', 'kerze', 'grillkohle', 'anzünder', 'zahnstocher', 'tüten']],
   ['tk', ['tk', 'tiefkühl', 'eis', 'pommes', 'pizza']],
-  ['vorrat', ['öl', 'essig', 'salz', 'pfeffer', 'gewürz', 'zucker', 'honig', 'sauce', 'soße', 'senf', 'ketchup', 'mayo', 'brühe', 'paprikapulver', 'zimt', 'kaffee', 'tee']],
+  ['gewuerz', ['salz', 'pfeffer', 'gewürz', 'paprikapulver', 'zimt', 'kümmel', 'oregano', 'thymian', 'rosmarin', 'majoran', 'kurkuma', 'muskat', 'cayenne', 'lorbeer', 'brühe', 'garam', 'chiliflocken', 'chilipulver', 'currypulver', 'vanillezucker']],
+  ['vorrat', ['öl', 'essig', 'zucker', 'honig', 'sauce', 'soße', 'senf', 'ketchup', 'mayo', 'kaffee', 'tee', 'kakao', 'backpulver', 'hefe', 'stärke']],
   ['fleisch', ['hähnchen', 'huhn', 'hühnchen', 'pute', 'rind', 'hack', 'schwein', 'steak', 'schnitzel', 'wurst', 'würstchen', 'schinken', 'speck', 'salami', 'chicken', 'fleisch', 'lamm', 'filet']],
   ['konserven', ['dose', 'bohnen', 'mais', 'passata', 'tomatenmark', 'kokosmilch', 'kichererbsen', 'linsen', 'pesto', 'ajvar', 'erdnussbutter', 'marmelade', 'konfitüre', 'nutella']],
-  ['kuehl', ['milch', 'joghurt', 'quark', 'skyr', 'käse', 'sahne', 'butter', 'ei', 'frischkäse', 'mozzarella', 'feta', 'schmand', 'gnocchi', 'tofu', 'hummus', 'margarine']],
+  ['kuehl', ['milch', 'joghurt', 'quark', 'skyr', 'käse', 'sahne', 'butter', 'ei', 'frischkäse', 'mozzarella', 'feta', 'schmand', 'tofu', 'hummus', 'margarine']],
   ['obst', ['apfel', 'äpfel', 'banane', 'melone', 'beere', 'traube', 'birne', 'orange', 'mandarine', 'zitrone', 'limette', 'salat', 'gurke', 'tomate', 'paprika', 'zwiebel', 'knoblauch', 'kartoffel', 'möhre', 'karotte', 'brokkoli', 'zucchini', 'pilz', 'champignon', 'spinat', 'kräuter', 'avocado', 'ingwer', 'lauch', 'kohl', 'kiwi', 'mango', 'ananas', 'obst', 'gemüse', 'rucola', 'petersilie', 'basilikum', 'koriander']],
-  ['trocken', ['reis', 'nudel', 'pasta', 'spaghetti', 'penne', 'mehl', 'hafer', 'müsli', 'cornflakes', 'brot', 'toast', 'wrap', 'tortilla', 'nüsse', 'mandeln', 'crunch', 'chips']],
+  ['trocken', ['reis', 'nudel', 'pasta', 'spaghetti', 'penne', 'gnocchi', 'mehl', 'hafer', 'müsli', 'cornflakes', 'brot', 'toast', 'wrap', 'tortilla', 'nüsse', 'mandeln', 'crunch', 'chips', 'whey', 'protein']],
 ];
 export function abteilung(text, katalog = {}) {
   const klein = String(text).toLowerCase().trim();
@@ -68,7 +70,7 @@ export function abteilung(text, katalog = {}) {
     for (const wort of liste) {
       for (const w of woerter) {
         const treffer = wort.length <= 3
-          ? (w === wort || (wort === 'öl' && w.endsWith('öl')) || (wort === 'ei' && w === 'eier'))
+          ? (w === wort || ((wort === 'öl' || wort === 'tee') && w.endsWith(wort)) || (wort === 'ei' && w === 'eier'))
           : w.includes(wort);
         if (treffer) return abt;
       }

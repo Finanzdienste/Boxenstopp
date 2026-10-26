@@ -77,10 +77,23 @@ export function rasterZeichnen() {
 
 function zeilenVon(r) {
   const z = [];
-  for (const it of r.items) z.push({ ...it, art: (typeof it.q === 'number' && !it.pantry && !it.opt) ? 'einkauf' : (it.opt ? 'optional' : 'vorrat') });
+  const art = (it) => {
+    if (it.haus) return 'haushalt';
+    if (typeof it.q === 'number' && !it.pantry && !it.opt) return 'einkauf';
+    return it.opt ? 'optional' : 'vorrat';
+  };
+  for (const it of r.items) z.push({ ...it, art: art(it) });
   for (const s of r.spices) z.push({ n: s.n, a: s.a, k: s.k, h: '', art: 'gewuerz' });
   return z;
 }
+/*
+ * Mengen in den Kochschritten hervorheben („800 g“, „2 EL“, „4 Knoblauchzehen“,
+ * „3 Paprika“), damit man beim Kochen nicht nach oben zu den Zutaten muss.
+ * Läuft auf bereits entschärftem Text, fügt nur <b> ein.
+ */
+const MENGE = new RegExp(String.raw`(?<![\w.,])(?:\d+(?:[.,]\d+)?[½¼¾]?|[½¼¾])(?:\s?[–-]\s?\d+(?:[.,]\d+)?[½¼¾]?)?\s(?:gehäufte\s|große\s|rote\s|gelbe\s)?(?:kg|g|ml|l|EL|TL|Prise|Zehen?|Knoblauchzehen?|Dosen?|Glas|Bund|Stangen?|Stück|Lorbeerblätter|Brühwürfeln|Blatt|Blätter|Zwiebeln?|Paprika|Möhren|Tomaten|Zucchini|Limetten?|Zitronen?|Salatgurke)(?![\wäöüß])`, 'g');
+export const mengenHervor = (html) => html.replace(MENGE, (m) => `<b class="mg">${m}</b>`);
+
 const teilFuer = (z) => (z.art === 'einkauf' ? { q: z.q, u: z.u, h: z.h || '' } : { t: z.a });
 
 function etikett(r) {
@@ -129,6 +142,7 @@ ${etikett(r)}
   ${gruppe('vorrat', 'Aus dem Vorrat')}
   ${gruppe('optional', 'Optional')}
   ${gruppe('gewuerz', 'Gewürze')}
+  ${gruppe('haushalt', 'Extras')}
 </section>
 
 <section class="sec" aria-labelledby="h-steps">
@@ -137,7 +151,7 @@ ${etikett(r)}
     <button type="button" class="switch" id="wake" role="switch" aria-checked="false" data-act="wach" hidden><span class="sw" aria-hidden="true"></span>Bildschirm anlassen</button>
     <button type="button" class="linkbtn" id="reset-steps" data-act="schritte-zurueck" hidden>Haken zurücksetzen</button>
   </div>
-  <ol class="steps">${r.steps.map((s, i) => `<li><button type="button" class="step" data-step="${i}" aria-pressed="false"><span class="step-n"><span class="sn">${i + 1}</span>${ic('check')}</span><span><span class="step-t">${esc(s.t)}</span><span class="step-d">${esc(s.d)}</span></span></button></li>`).join('')}</ol>
+  <ol class="steps">${r.steps.map((s, i) => `<li><button type="button" class="step" data-step="${i}" aria-pressed="false"><span class="step-n"><span class="sn">${i + 1}</span>${ic('check')}</span><span><span class="step-t">${esc(s.t)}</span><span class="step-d">${mengenHervor(esc(s.d))}</span></span></button></li>`).join('')}</ol>
 </section>
 
 <section class="sec" aria-labelledby="h-calc">

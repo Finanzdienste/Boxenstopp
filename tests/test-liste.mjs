@@ -11,6 +11,7 @@ import {
   opTeil, opTeilWeg, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opGekocht, opZusammen,
 } from '../js/liste.js';
 import { menge, ungefaehr, abteilung, esc, abweichung, tagKurz, heute } from '../js/format.js';
+import { nachBereichen, alsText } from '../js/bereiche.js';
 
 const { check, ende } = pruefer();
 const KAT = { haehnchenbrust: { n: 'Hähnchenbrustfilet', c: 'fleisch' }, reis: { n: 'Basmati- oder Jasminreis', c: 'trocken' }, oel: { n: 'Öl, neutral', c: 'vorrat' } };
@@ -99,12 +100,41 @@ check(menge(2, 'Dose') === '2 Dosen' && menge(1, 'Glas') === '1 Glas' && menge(1
 check(menge(1500, 'ml') === '1,5 l', 'Milliliter und Liter');
 check(ungefaehr('knoblauch', { Zehe: 14 }) === '≈ 2 Knollen' && ungefaehr('zwiebeln', { g: 1300 }) === '≈ 13 Stück', 'ungefähre Stückzahl');
 check(ungefaehr('reis', { g: 500 }) === '', 'Reis bekommt keine Stückzahl');
-const abt = { Bananen: 'obst', Zahnpasta: 'sonstiges', Reis: 'trocken', Eis: 'tk', Olivenöl: 'vorrat', Kokosmilch: 'konserven', Eier: 'kuehl', Hähnchenschenkel: 'fleisch', Erdnussbutter: 'konserven', Toast: 'trocken' };
+const abt = { Bananen: 'obst', Zahnpasta: 'haushalt', Schaschlikspieße: 'haushalt', Backpapier: 'haushalt', Reis: 'trocken', Gnocchi: 'trocken', Eis: 'tk', Eistee: 'vorrat', Olivenöl: 'vorrat', Pfeffer: 'gewuerz', Gemüsebrühe: 'gewuerz', Paprika: 'obst', Kokosmilch: 'konserven', Eier: 'kuehl', Hähnchenschenkel: 'fleisch', Erdnussbutter: 'konserven', Toast: 'trocken', Xylophon: 'sonstiges' };
 const falsch = Object.entries(abt).filter(([t, a]) => abteilung(t, {}) !== a).map(([t]) => `${t}→${abteilung(t, {})}`);
 check(!falsch.length, `Abteilungen raten${falsch.length ? `: falsch ${falsch.join(', ')}` : ''}`);
 check(abteilung('Hähnchenbrustfilet', KAT) === 'fleisch', 'genauer Katalogname geht vor');
 check(abweichung(434, 443, true) === '−9' && abweichung(33.8, 33) === '+0,8' && abweichung(15.4, 15.4) === 'genau', 'Abweichung vom Ziel');
 check(tagKurz('2026-10-06') === '6.10.' && tagKurz('quatsch') === '', 'kurzes Datum');
 check(/^\d{4}-\d{2}-\d{2}$/.test(heute()), 'heute als JJJJ-MM-TT');
+
+// --- Bereiche: Reihenfolge wie beim Einkaufen, Text zum Kopieren
+const KAT2 = {
+  zwiebeln: { n: 'Zwiebeln', c: 'obst' }, rinderhack: { n: 'Rinderhackfleisch', c: 'fleisch' }, skyr: { n: 'Skyr natur', c: 'kuehl' },
+  'tk-kraeuter': { n: 'TK-Kräuter', c: 'tk' }, penne: { n: 'Penne', c: 'trocken' }, 'tomaten-dose': { n: 'Stückige Tomaten', c: 'konserven' },
+  salz: { n: 'Salz', c: 'gewuerz' }, backpapier: { n: 'Backpapier', c: 'haushalt' }, limette: { n: 'Limetten', c: 'obst' },
+  // früher stand Brühe bei „vorrat“ – der Katalog von heute gewinnt
+  'bruehe-rind': { n: 'Rinderbrühe', c: 'gewuerz' },
+};
+let k2 = leer();
+const t = (k, teil) => opTeil(k, 'chili', teil, KAT2[k]);
+k2 = anwenden(k2, [
+  t('salz', { t: '1 TL' }), t('penne', { q: 500, u: 'g' }), t('skyr', { q: 300, u: 'g' }), t('backpapier', { t: '1 Blatt' }),
+  t('tk-kraeuter', { q: 1, u: 'Pck' }), t('rinderhack', { q: 500, u: 'g' }), t('zwiebeln', { q: 300, u: 'g' }),
+  t('tomaten-dose', { q: 2, u: 'Dose' }), t('limette', { q: 1, u: 'Stk' }),
+  opEigener('c-x', 'Xylophon', 'sonstiges'),
+]);
+k2 = anwenden(k2, { typ: 'setzen', k: 'bruehe-rind', item: { name: 'Rinderbrühe', cat: 'vorrat', parts: { gulasch: { t: '750 ml', done: false } }, custom: false, checked: false } });
+const gr = nachBereichen(k2, KAT2);
+check(gr.map((g) => g.bereich.name).join(' > ') === 'Frisches > Tierisches > Trockenes > Gewürze > Extras > Sonstiges', `Bereiche in Einkaufsreihenfolge (${gr.map((g) => g.bereich.name).join(' > ')})`);
+check(gr[1].eintraege.map(([k]) => k).join() === 'rinderhack,skyr', 'Tierisches: erst Fleisch, dann Milchprodukte');
+check(gr[2].eintraege.map(([k]) => k).join() === 'penne,tomaten-dose,tk-kraeuter', 'Trockenes: Nudeln, Konserven, dann TK');
+check(gr[3].eintraege.map(([k]) => k).join() === 'bruehe-rind,salz', 'Brühe steht bei den Gewürzen, auch wenn sie früher anders gespeichert wurde');
+const text = alsText(k2, KAT2);
+const erwartet = 'Frisches:\n1 Stk. Limetten\n300 g Zwiebeln (≈ 3 Stück)\n\nTierisches:\n500 g Rinderhackfleisch\n300 g Skyr natur\n\nTrockenes:\n500 g Penne\n2 Dosen Stückige Tomaten\n1 Packung TK-Kräuter\n\nGewürze:\nRinderbrühe\nSalz\n\nExtras:\nBackpapier\n\nSonstiges:\nXylophon';
+check(text === erwartet, `Text zum Kopieren${text === erwartet ? '' : `:\n${text}`}`);
+const fast = anwenden(k2, opHaken(k2, 'penne', true, 'Tobi'));
+check(!alsText(fast, KAT2).includes('Penne'), 'abgehakte Einträge kommen nicht mit in den Text');
+check(alsText(leer(), KAT2) === '', 'leere Liste: leerer Text');
 
 ende();

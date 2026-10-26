@@ -28,6 +28,10 @@ await page.click('[data-filter="alle"]');
 
 await page.click('[data-open="butter-chicken"]');
 check((await text('#d-title')) === 'Butter Chicken mit Reis', 'Butter Chicken öffnet');
+const mengenImSchritt = await page.$$eval('.step-d', (ds) => ds[0].querySelectorAll('.mg').length);
+check(mengenImSchritt >= 8, `Schritt 1 nennt die Mengen und hebt sie hervor (${mengenImSchritt})`);
+check((await page.locator('.step-d').first().innerText()).includes('800 g Hähnchenbrust'), '„800 g Hähnchenbrust“ steht direkt im ersten Schritt');
+check(await page.locator('.sub-h', { hasText: 'Extras' }).count() === 1, 'Backpapier steht unter Extras');
 check((await text('.label .c-kcal .v')).startsWith('434'), 'Etikett: 434 kcal pro Box');
 check((await text('.label .c-kcal .dlt')) === '−9', 'Etikett: 9 kcal unter dem Ziel');
 await page.click('[data-act="alle-dazu"]');
@@ -37,6 +41,7 @@ check(await page.locator('.onlist').count() === 1, '„Alle 10 Zutaten stehen au
 const oel = page.locator('.ing', { has: page.locator('.ing-name', { hasText: /^Öl$/ }) }).locator('.tog');
 await oel.click();
 check(await oel.getAttribute('aria-pressed') === 'true', 'Öl aus dem Vorrat einzeln auf der Liste');
+await page.locator('.ing', { has: page.locator('.ing-name', { hasText: /^Garam Masala$/ }) }).locator('.tog').click();
 await page.fill('#pot-empty', '2150');
 await page.fill('#pot-full', '5450');
 check((await text('#per-box b')) === '413 g', `Portionsrechner: 413 g pro Box (${await text('#per-box b')})`);
@@ -51,7 +56,7 @@ check((await zeile('Knoblauch').locator('.item-qty').innerText()).replace(/\s+/g
 check((await zeile('Öl, neutral').innerText()).includes('Butter Chicken: 10 g'), 'Öl mit Text statt Menge');
 check(await page.locator('#forrow .forchip').count() === 2, '„Für“: Butter Chicken und Teriyaki Bowl');
 const offenVorher = await badge();
-check(offenVorher === 16, `16 offene Einträge (${offenVorher})`);
+check(offenVorher === 17, `17 offene Einträge (${offenVorher})`);
 
 // --- abhaken, eigene Einträge, löschen
 await zeile('Brokkoli').locator('.cb').click();
@@ -61,9 +66,23 @@ await page.fill('#add-input', 'Bananen');
 await page.press('#add-input', 'Enter');
 await page.fill('#add-input', 'Zahnpasta');
 await page.click('#add-btn');
-const gruppeVon = (name) => page.locator('#list-body .grp', { has: page.locator('.item-name', { hasText: new RegExp(`^${name}$`) }) }).locator('h3 span').first().textContent();
-check((await gruppeVon('Bananen')) === 'Obst & Gemüse', 'Bananen landen bei Obst & Gemüse');
-check((await gruppeVon('Zahnpasta')) === 'Sonstiges', 'Zahnpasta bei Sonstiges');
+const gruppeVon = (name) => page.locator('#list-body .grp', { has: page.locator('.item-name', { hasText: new RegExp(`^${name}$`) }) }).getAttribute('data-bereich');
+check((await gruppeVon('Bananen')) === 'frisch', 'Bananen landen bei Frisches');
+check((await gruppeVon('Zahnpasta')) === 'extras', 'Zahnpasta bei Extras');
+const bereiche = await page.$$eval('#list-body .grp:not(.grp-done)', (gs) => gs.map((g) => g.dataset.bereich));
+check(bereiche.join(' > ') === 'frisch > tierisch > trocken > gewuerze > extras', `Bereiche von oben nach unten (${bereiche.join(' > ')})`);
+// Kopieren: der Text kommt in die Zwischenablage (hier abgefangen)
+await page.evaluate(() => { window.__kopie = null; navigator.clipboard.writeText = async (t) => { window.__kopie = t; }; });
+await page.click('#kopieren');
+const kopie = await page.evaluate(() => window.__kopie || '');
+check(kopie.startsWith('Frisches:\n') && kopie.includes('\n\nTierisches:\n') && kopie.includes('\n800 g Hähnchenbrustfilet\n') && kopie.includes('\n\nGewürze:\nGaram Masala\n') && kopie.includes('Extras:\nZahnpasta'), `Liste kopieren: nach Bereichen, mit Mengen (${kopie.split('\n').slice(0, 3).join(' | ')} …)`);
+check(!kopie.includes('Brokkoli'), 'Abgehakter Brokkoli fehlt im kopierten Text');
+if (process.env.ZEIGEN) console.log(kopie);
+// Ohne Zwischenablage: Text zum Markieren
+await page.evaluate(() => { navigator.clipboard.writeText = async () => { throw new Error('nein'); }; });
+await page.click('#kopieren');
+check(await bis(async () => !(await page.locator('#kopie-feld').isHidden())), 'ohne Zwischenablage: der Text steht markiert im Feld');
+check((await page.inputValue('#kopie-feld')).startsWith('Frisches:'), 'im Feld steht dieselbe Liste');
 check((await page.inputValue('#add-input')) === '', 'Eingabefeld ist danach leer');
 await zeile('Sesam').locator('.x').click();
 check(await zeile('Sesam').count() === 0, 'Sesam gelöscht');

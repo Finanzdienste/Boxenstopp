@@ -11,8 +11,8 @@ Zwei Reiter:
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 16 Rezepte als Boxen mit Kreppband, Filter (Hähnchen, Rind, Pute, Veggie, Reis, Nudeln, Kartoffel & Co., bis 45 Min., auf der Liste). Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, Schritte zum Abhaken, „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung |
-| **Einkaufsliste** | Nach Abteilungen sortiert. Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage |
+| **Rezepte** | 16 Rezepte als Boxen mit Kreppband, Filter (Hähnchen, Rind, Pute, Veggie, Reis, Nudeln, Kartoffel & Co., bis 45 Min., auf der Liste). Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, Schritte zum Abhaken – jede Menge steht direkt im Schritt und ist hervorgehoben („800 g Hähnchenbrust in Würfel schneiden“), damit man nicht nach oben scrollen muss –, „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung |
+| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
 15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal.
@@ -107,6 +107,15 @@ Mengen in Supermarkt-Packungen denken (400 g Hähnchen, 500 g Hack, Dosen,
 Becher), 8 Portionen, ordentlich gewürzt. Jede Zutat der Einkaufsliste
 braucht einen Schlüssel im Katalog `CAT`, und ein Schlüssel hat in allen
 Rezepten dieselbe Einheit – sonst lassen sich Mengen nicht addieren.
+
+In den Schritten steht jede Zutat mit ihrer Menge („500 g Putenhack dazugeben“,
+„die Zwiebeln (300 g)“); der Test prüft das für alle Grammangaben. Die App
+hebt Mengen mit Einheit automatisch hervor. Verbrauchsmaterial (Backpapier,
+Döschen, Spieße) kommt mit `H(...)` ins Rezept und steht dann unter
+„Extras“. Die Abteilung im Katalog entscheidet den Bereich der Liste:
+`obst` → Frisches, `fleisch`/`kuehl` → Tierisches,
+`trocken`/`konserven`/`vorrat`/`tk` → Trockenes, `gewuerz` → Gewürze,
+`haushalt` → Extras (js/bereiche.js).
 `daten/rezepte.json` steht nicht im Offline-Vorrat von `sw.js`: Für ein
 neues Rezept muss dort nichts geändert werden.
 
@@ -118,6 +127,7 @@ neues Rezept muss dort nichts geändert werden.
 | `js/app.js` | Start, Speicher wählen, Klicks verteilen, Service Worker |
 | `js/kern.js` | gemeinsamer Zustand, Meldung unten, Reiter |
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
+| `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
 | `js/zugang.js` | Schlüssel und Name, Einladungslink |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | die beiden Reiter |

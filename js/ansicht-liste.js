@@ -1,7 +1,7 @@
 /*
- * Reiter „Einkaufsliste“: die Liste nach Abteilungen, eigene Einträge, das
- * Frühstück für die Woche – und oben bzw. unten das Einrichten der
- * gemeinsamen Liste.
+ * Reiter „Einkaufsliste“: die Liste nach Bereichen (bereiche.js), Kopieren
+ * als Text, eigene Einträge, das Frühstück für die Woche – und oben bzw.
+ * unten das Einrichten der gemeinsamen Liste.
  *
  * listeZeichnen() läuft bei jeder Änderung, auch wenn sie vom anderen Handy
  * kommt. Darum fasst sie die Eingabefelder (Eintrag hinzufügen, Einrichten)
@@ -12,12 +12,7 @@ import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
 import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren } from './liste.js';
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { einladungsLink, schluesselAus } from './zugang.js';
-
-export const ABTEILUNGEN = [
-  ['obst', 'Obst & Gemüse'], ['fleisch', 'Fleisch & Geflügel'], ['kuehl', 'Kühlregal & Käse'], ['tk', 'Tiefkühl'],
-  ['konserven', 'Konserven & Gläser'], ['trocken', 'Nudeln, Reis & Co.'], ['vorrat', 'Vorrat & Gewürze'], ['sonstiges', 'Sonstiges'],
-];
-const NAME_ABT = Object.fromEntries(ABTEILUNGEN);
+import { nachBereichen, alsText } from './bereiche.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
 let leerenFragen = false;
@@ -62,24 +57,26 @@ export function listeZeichnen() {
     return;
   }
   const eintraege = Object.entries(app.stand.items);
-  const offen = eintraege.filter(([, d]) => !erledigt(d));
+  const gruppen = nachBereichen(app.stand, app.katalog);
+  const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0);
   const fertig = eintraege.filter(([, d]) => erledigt(d));
   const nachName = (a, b) => String(a[1].name).localeCompare(String(b[1].name), 'de');
   let html = '';
   if (!eintraege.length) {
     html = '<div class="empty-state"><p class="es-t">Noch nichts auf der Liste.</p><p>Öffne ein Rezept und tippe auf „Alles auf die Einkaufsliste“. Alles andere schreibt ihr oben ins Feld.</p></div>';
   } else {
-    if (!offen.length) html += '<div class="alldone"><b>Alles im Wagen.</b> Erledigtes könnt ihr unten entfernen.</div>';
-    for (const [abt, titel] of ABTEILUNGEN) {
-      const g = offen.filter(([, d]) => (NAME_ABT[d.cat] ? d.cat : 'sonstiges') === abt).sort(nachName);
-      if (g.length) html += `<section class="grp"><h3><span>${esc(titel)}</span><span class="num">${g.length}</span></h3><ul class="items">${g.map(zeile).join('')}</ul></section>`;
+    if (!offen) html += '<div class="alldone"><b>Alles im Wagen.</b> Erledigtes könnt ihr unten entfernen.</div>';
+    for (const { bereich, eintraege: g } of gruppen) {
+      html += `<section class="grp" data-bereich="${bereich.id}"><h3><span class="grp-name">${esc(bereich.name)}${bereich.hinweis ? ` <small>${esc(bereich.hinweis)}</small>` : ''}</span><span class="num">${g.length}</span></h3><ul class="items">${g.map(zeile).join('')}</ul></section>`;
     }
     if (fertig.length) {
       html += `<section class="grp grp-done"><h3><span>Im Wagen</span><span class="num">${fertig.length}</span></h3><ul class="items">${fertig.sort(nachName).map(zeile).join('')}</ul></section>`;
     }
   }
   body.innerHTML = html;
-  $('#l-count').textContent = eintraege.length ? `${offen.length} offen${fertig.length ? ` · ${fertig.length} erledigt` : ''}` : '';
+  $('#l-count').textContent = eintraege.length ? `${offen} offen${fertig.length ? ` · ${fertig.length} erledigt` : ''}` : '';
+  $('#kopieren').hidden = !offen;
+  if (!offen) $('#kopie-feld').hidden = true;
   fussZeichnen(fertig.length);
 }
 
@@ -241,6 +238,22 @@ export function klickListe(el) {
       if (rezeptStand(app.stand, app.extras.fruehstueck).drauf) rezeptVonListe('fruehstueck');
       else rezeptAufListe('fruehstueck');
       return true;
+    case 'kopieren': {
+      const text = alsText(app.stand, app.katalog);
+      const feld = $('#kopie-feld');
+      const zeigen = () => {
+        feld.value = text;
+        feld.hidden = false;
+        feld.focus();
+        feld.select();
+        melde('Kopieren klappt hier nicht. Der Text steht markiert im Feld, lange drücken zum Kopieren.');
+      };
+      if (!text) { melde('Gerade ist nichts offen.'); return true; }
+      try {
+        navigator.clipboard.writeText(text).then(() => { feld.hidden = true; melde('Liste kopiert. Jetzt in deine Einkaufsliste einfügen.'); }, zeigen);
+      } catch { zeigen(); }
+      return true;
+    }
     case 'erledigte-weg': app.aendern(opErledigteWeg()); melde('Erledigtes entfernt'); return true;
     case 'leeren': leerenFragen = true; listeZeichnen(); return true;
     case 'leeren-nein': leerenFragen = false; listeZeichnen(); return true;

@@ -329,3 +329,15 @@ a.btn{text-decoration:none;color:inherit}
 .sync[data-state="zugang"] .dot{background:var(--danger)}
 .list-pane .zugang-form input,.list-pane .z-linkfeld{background:var(--bg)}
 @media (max-width:979.98px){.list-pane .zugang-form input{background:var(--surface)}}
+
+/* Einkaufsliste: Bereiche, Kopieren */
+.grp h3 .grp-name small{margin-left:6px;font:500 11.5px/1 var(--f-body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.l-tools{display:flex;margin-top:10px}
+.kopieren{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 12px;border-radius:12px;border:1.5px solid var(--line-strong);background:var(--surface);font-weight:700;font-size:14px}
+.kopieren .ic{width:18px;height:18px}
+.kopieren:hover{border-color:var(--ink)}
+.kopie-feld{display:block;width:100%;min-width:0;margin-top:10px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--accent);background:var(--surface);font:500 14px/1.5 var(--f-body);color:var(--ink);resize:vertical}
+
+/* Mengen in den Kochschritten */
+.mg{font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--accent) 13%,transparent);border-radius:4px;padding:0 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.step[aria-pressed="true"] .mg{background:transparent;color:inherit;font-weight:600}

@@ -39,6 +39,9 @@
 
     <aside id="view-list" class="pane list-pane" aria-labelledby="l-title">
       <div class="l-head"><h2 id="l-title">Einkaufsliste</h2><span class="l-count" id="l-count"></span></div>
+      <div class="l-tools"><button type="button" class="kopieren" id="kopieren" data-act="kopieren" hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>Liste kopieren</button></div>
+      <label class="sr" for="kopie-feld">Einkaufsliste als Text</label>
+      <textarea id="kopie-feld" class="kopie-feld" rows="10" readonly hidden></textarea>
       <div class="zugang" id="zugang"></div>
       <div class="forrow" id="forrow" hidden></div>
       <form class="addform" id="addform" autocomplete="off">
