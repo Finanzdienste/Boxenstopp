@@ -1,0 +1,5571 @@
+{
+ "version": 1,
+ "ziel": {
+  "kcal": 443,
+  "p": 33,
+  "kh": 39,
+  "f": 15.4
+ },
+ "rezepte": [
+  {
+   "id": "chili",
+   "name": "Chili con Carne mit Süßkartoffel",
+   "short": "Chili con Carne",
+   "desc": "Rind und Pute, Bohnen, Mais und Süßkartoffel im Chili. Schmeckt am zweiten Tag noch besser.",
+   "protein": "Rind & Pute",
+   "base": "Süßkartoffel",
+   "method": "Topf",
+   "time": 60,
+   "timeNote": "davon 35 Min. köcheln",
+   "fridge": "4 Tage",
+   "freeze": "3 Monate",
+   "items": [
+    {
+     "n": "Rinderhackfleisch (max. 20 % Fett)",
+     "a": "500 g",
+     "k": "rinderhack",
+     "q": 500,
+     "u": "g",
+     "h": "1 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Putenhackfleisch",
+     "a": "500 g",
+     "k": "putenhack",
+     "q": 500,
+     "u": "g",
+     "h": "1 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kidneybohnen",
+     "a": "2 Dosen à 400 g (510 g abgetropft)",
+     "k": "kidney",
+     "q": 2,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Mais",
+     "a": "1 Dose à 425 ml (285 g abgetropft)",
+     "k": "mais",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Stückige Tomaten",
+     "a": "2 Dosen à 400 g",
+     "k": "tomaten-dose",
+     "q": 2,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Tomatenmark",
+     "a": "70 g",
+     "k": "tomatenmark",
+     "q": 70,
+     "u": "g",
+     "h": "kleine Dose",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "3 mittlere (300 g)",
+     "k": "zwiebeln",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Paprika (rot, gelb, grün)",
+     "a": "3 Stück (ca. 450 g)",
+     "k": "paprika",
+     "q": 3,
+     "u": "Stk",
+     "h": "3er-Pack",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Süßkartoffel",
+     "a": "600 g (1 große oder 2 mittlere)",
+     "k": "suesskartoffel",
+     "q": 600,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Limette",
+     "a": "1 Stück",
+     "k": "limette",
+     "q": 1,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Backkakao",
+     "a": "1 EL (10 g)",
+     "k": "kakao",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Zucker",
+     "a": "1 TL (5 g)",
+     "k": "zucker",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Rinderbrühe",
+     "a": "2 Würfel für 400 ml",
+     "k": "bruehe-rind",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    }
+   ],
+   "spices": [
+    {
+     "n": "Kreuzkümmel, gemahlen",
+     "a": "2 gehäufte EL",
+     "k": "kreuzkuemmel"
+    },
+    {
+     "n": "Paprika edelsüß",
+     "a": "2 EL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Paprika geräuchert",
+     "a": "1 EL",
+     "k": "paprika-geraeuchert"
+    },
+    {
+     "n": "Oregano",
+     "a": "1 EL",
+     "k": "oregano"
+    },
+    {
+     "n": "Chiliflocken",
+     "a": "1–2 TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Cayennepfeffer",
+     "a": "1 TL",
+     "k": "cayenne"
+    },
+    {
+     "n": "Zimt",
+     "a": "½ TL",
+     "k": "zimt"
+    },
+    {
+     "n": "Lorbeerblätter",
+     "a": "2 Stück",
+     "k": "lorbeer"
+    },
+    {
+     "n": "Salz",
+     "a": "1 TL + zum Abschmecken",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Vorbereiten",
+     "d": "Zwiebeln fein würfeln, Knoblauch hacken, Paprika in 1-cm-Würfel und die geschälte Süßkartoffel in 1,5-cm-Würfel schneiden. Bohnen und Mais im Sieb kalt abspülen. 400 ml Wasser mit 2 Brühwürfeln aufkochen. Den leeren Topf wiegen."
+    },
+    {
+     "t": "Rinderhack anbraten",
+     "d": "Topf stark erhitzen, Rinderhack ohne Öl hineingeben und 2 Minuten liegen lassen. Dann krümelig braten, bis es braun ist und Röstaromen hat. Das Fett vom Rind reicht zum Anbraten."
+    },
+    {
+     "t": "Putenhack dazu",
+     "d": "Putenhack dazugeben, krümelig braten und mit 1 TL Salz würzen. Das dauert etwa 5 Minuten."
+    },
+    {
+     "t": "Zwiebeln",
+     "d": "Hitze auf mittel, Zwiebeln 5 Minuten glasig dünsten, Knoblauch 1 Minute mitbraten."
+    },
+    {
+     "t": "Gewürze anrösten",
+     "d": "Tomatenmark, Kreuzkümmel, beide Paprikapulver, Oregano, Chiliflocken, Cayenne, Zimt und Kakao 2 Minuten unter Rühren rösten, bis es intensiv duftet. Das ist der wichtigste Schritt für den Geschmack."
+    },
+    {
+     "t": "Ablöschen",
+     "d": "Brühe angießen und den Bodensatz loskratzen. Tomaten, Lorbeer, Zucker, Paprika und Süßkartoffel dazugeben und aufkochen."
+    },
+    {
+     "t": "Köcheln",
+     "d": "Zugedeckt 25 Minuten bei kleiner Hitze köcheln, zwischendurch zweimal umrühren. Die Süßkartoffel soll weich sein, aber nicht zerfallen."
+    },
+    {
+     "t": "Bohnen und Mais",
+     "d": "Bohnen und Mais unterrühren und 10 Minuten offen köcheln, bis die Sauce sämig ist."
+    },
+    {
+     "t": "Abschmecken",
+     "d": "Lorbeer herausnehmen. Limettensaft, Pfeffer und Salz dazu. Lieber leicht unterschärfen, Chili wird über Nacht kräftiger."
+    }
+   ],
+   "tips": [
+    "Varianten mit gleichen Werten: 150 g Basmati (roh) statt Süßkartoffel, separat gekocht und auf die Boxen verteilt.",
+    "Nur Rind: 1 kg mageres Rinderhack (max. 8 % Fett) plus 1 EL Öl zum Anbraten, dann ca. 430 kcal und 13 g Fett pro Portion."
+   ],
+   "nut": [
+    [
+     "Rinderhackfleisch",
+     "500 g",
+     1175,
+     92.5,
+     0,
+     85.0
+    ],
+    [
+     "Putenhackfleisch",
+     "500 g",
+     625,
+     100.0,
+     0,
+     24.5
+    ],
+    [
+     "Kidneybohnen, abgetropft",
+     "510 g",
+     484,
+     38.2,
+     61.2,
+     3.1
+    ],
+    [
+     "Mais, abgetropft",
+     "285 g",
+     228,
+     7.1,
+     34.2,
+     3.7
+    ],
+    [
+     "Stückige Tomaten",
+     "800 g",
+     176,
+     8.0,
+     28.0,
+     1.6
+    ],
+    [
+     "Tomatenmark",
+     "70 g",
+     63,
+     3.1,
+     10.5,
+     0.3
+    ],
+    [
+     "Zwiebeln",
+     "300 g",
+     105,
+     3.6,
+     18.0,
+     0.3
+    ],
+    [
+     "Paprika",
+     "450 g",
+     126,
+     4.5,
+     20.2,
+     1.4
+    ],
+    [
+     "Knoblauch",
+     "20 g",
+     30,
+     1.3,
+     6.0,
+     0.1
+    ],
+    [
+     "Süßkartoffel",
+     "600 g",
+     516,
+     9.6,
+     120.0,
+     0.6
+    ],
+    [
+     "Backkakao",
+     "10 g",
+     36,
+     2.2,
+     1.0,
+     1.1
+    ],
+    [
+     "Zucker",
+     "5 g",
+     20,
+     0,
+     5.0,
+     0
+    ]
+   ],
+   "total": [
+    3584,
+    270.1,
+    304.1,
+    121.7
+   ],
+   "m": {
+    "kcal": 448,
+    "p": 33.8,
+    "kh": 38.0,
+    "f": 15.2
+   }
+  },
+  {
+   "id": "butter-chicken",
+   "name": "Butter Chicken mit Reis",
+   "short": "Butter Chicken",
+   "desc": "Hähnchen in Skyr-Marinade aus dem Ofen, cremige Tomaten-Butter-Sauce und Basmati.",
+   "protein": "Hähnchen",
+   "base": "Reis",
+   "method": "Ofen + Topf",
+   "time": 60,
+   "timeNote": "+ 30 Min. Marinieren",
+   "fridge": "4 Tage",
+   "freeze": "3 Monate",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "800 g",
+     "k": "haehnchenbrust",
+     "q": 800,
+     "u": "g",
+     "h": "2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Skyr natur",
+     "a": "300 g",
+     "k": "skyr",
+     "q": 300,
+     "u": "g",
+     "h": "2 Becher à 150 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Schlagsahne 30 %",
+     "a": "200 g",
+     "k": "schlagsahne",
+     "q": 200,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Passierte Tomaten",
+     "a": "500 g",
+     "k": "passata",
+     "q": 500,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Tomatenmark",
+     "a": "70 g",
+     "k": "tomatenmark",
+     "q": 70,
+     "u": "g",
+     "h": "kleine Dose",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "2 große (300 g)",
+     "k": "zwiebeln",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "6 Zehen",
+     "k": "knoblauch",
+     "q": 6,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Ingwer",
+     "a": "30 g (daumengroß)",
+     "k": "ingwer",
+     "q": 30,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zitrone",
+     "a": "1 Stück",
+     "k": "zitrone",
+     "q": 1,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Basmatireis",
+     "a": "280 g",
+     "k": "reis",
+     "q": 280,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Butter",
+     "a": "40 g",
+     "k": "butter",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Öl",
+     "a": "10 g",
+     "k": "oel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Honig",
+     "a": "1 TL (10 g)",
+     "k": "honig",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Koriander, frisch",
+     "a": "zum Servieren",
+     "k": "koriander",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Garam Masala",
+     "a": "1 EL + 1 TL",
+     "k": "garam-masala"
+    },
+    {
+     "n": "Kurkuma",
+     "a": "1 TL",
+     "k": "kurkuma"
+    },
+    {
+     "n": "Paprika edelsüß",
+     "a": "1 EL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Kreuzkümmel, gemahlen",
+     "a": "1½ TL",
+     "k": "kreuzkuemmel"
+    },
+    {
+     "n": "Chilipulver oder Cayenne",
+     "a": "1–1½ TL",
+     "k": "chilipulver"
+    },
+    {
+     "n": "Salz",
+     "a": "2 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Kasuri Methi (optional, Asia-Laden)",
+     "a": "2 EL",
+     "k": "kasuri-methi"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Marinieren",
+     "d": "Hähnchen in 3-cm-Würfel schneiden. 2 Knoblauchzehen und 10 g Ingwer fein reiben, mit 300 g Skyr, 10 g Öl, dem Saft einer halben Zitrone, 1 TL Garam Masala, 1 TL Kurkuma, 1 TL Paprika, ½ TL Kreuzkümmel, ½ TL Chili und 1 TL Salz verrühren. Hähnchen untermischen und mindestens 30 Minuten kühl stellen, über Nacht wird es noch zarter."
+    },
+    {
+     "t": "Vorbereiten",
+     "d": "Ofen auf 230 °C Umluft vorheizen. Zwiebeln fein würfeln, die restlichen 4 Knoblauchzehen und 20 g Ingwer fein reiben. Den leeren Topf wiegen."
+    },
+    {
+     "t": "Hähnchen im Ofen",
+     "d": "Hähnchen mit der Marinade auf einem Blech mit Backpapier verteilen und 12–15 Minuten im oberen Drittel garen, bis die Ränder gebräunt sind. Es muss noch nicht ganz durch sein. Alternativ im Airfryer in 2–3 Durchgängen je 10 Minuten bei 200 °C."
+    },
+    {
+     "t": "Sauce ansetzen",
+     "d": "Parallel 30 g Butter im großen Topf schmelzen und die Zwiebeln 8–10 Minuten goldbraun braten. Knoblauch und Ingwer 1 Minute mitbraten. Tomatenmark, 1 EL Garam Masala, 1 TL Kreuzkümmel, 2 TL Paprika und ½–1 TL Chili 1–2 Minuten anrösten."
+    },
+    {
+     "t": "Köcheln",
+     "d": "Passierte Tomaten, 200 ml Wasser, Honig und 1 TL Salz dazugeben und 15 Minuten halb zugedeckt köcheln. Für eine glatte Sauce wie im Restaurant jetzt pürieren."
+    },
+    {
+     "t": "Reis",
+     "d": "280 g Basmati waschen, bis das Wasser klar ist. Mit 420 ml Wasser und einer Prise Salz aufkochen, zugedeckt 12 Minuten auf kleinster Hitze garen und 10 Minuten ruhen lassen."
+    },
+    {
+     "t": "Hähnchen in die Sauce",
+     "d": "Hähnchen samt Bratensaft in die Sauce geben und 8–10 Minuten leise köcheln, bis es innen nicht mehr rosa ist."
+    },
+    {
+     "t": "Fertigstellen",
+     "d": "200 g Sahne, die restlichen 10 g Butter und optional 2 EL zerriebene Kasuri Methi einrühren. Nicht mehr sprudelnd kochen. Mit Salz und einem Spritzer Zitrone abschmecken."
+    },
+    {
+     "t": "Portionieren",
+     "d": "Curry-Topf wiegen, Leergewicht abziehen und durch 8 teilen. Den Reis separat wiegen und ebenfalls durch 8 teilen, das sind etwa 80–90 g pro Box. Koriander erst beim Essen drüber."
+    }
+   ],
+   "tips": [
+    "Kasuri Methi bringt den typischen Restaurant-Geschmack. Gibt es im Asia-Laden oder online.",
+    "Mit Kochsahne 15 % (400 g) statt Schlagsahne wird die Sauce leichter, dann 270 g Reis nehmen."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "800 g",
+     848,
+     184.0,
+     0,
+     12.0
+    ],
+    [
+     "Skyr natur",
+     "300 g",
+     189,
+     33.0,
+     12.0,
+     0.6
+    ],
+    [
+     "Öl",
+     "10 g",
+     90,
+     0,
+     0,
+     10.0
+    ],
+    [
+     "Butter",
+     "40 g",
+     296,
+     0.3,
+     0.2,
+     32.8
+    ],
+    [
+     "Zwiebeln",
+     "300 g",
+     105,
+     3.6,
+     18.0,
+     0.3
+    ],
+    [
+     "Knoblauch",
+     "24 g",
+     36,
+     1.5,
+     7.2,
+     0.1
+    ],
+    [
+     "Ingwer",
+     "30 g",
+     24,
+     0.5,
+     4.7,
+     0.2
+    ],
+    [
+     "Tomatenmark",
+     "70 g",
+     63,
+     3.2,
+     10.5,
+     0.4
+    ],
+    [
+     "Passierte Tomaten",
+     "500 g",
+     130,
+     6.5,
+     21.5,
+     1.0
+    ],
+    [
+     "Honig",
+     "10 g",
+     32,
+     0,
+     8.0,
+     0
+    ],
+    [
+     "Schlagsahne 30 %",
+     "200 g",
+     584,
+     4.8,
+     6.6,
+     60.0
+    ],
+    [
+     "Gewürze & Zitronensaft",
+     "ca. 26 g",
+     94,
+     3.6,
+     8.2,
+     3.5
+    ],
+    [
+     "Basmatireis, roh",
+     "280 g",
+     980,
+     22.4,
+     215.6,
+     1.7
+    ]
+   ],
+   "total": [
+    3471,
+    263.4,
+    312.5,
+    122.6
+   ],
+   "m": {
+    "kcal": 434,
+    "p": 32.9,
+    "kh": 39.1,
+    "f": 15.3
+   }
+  },
+  {
+   "id": "gulasch",
+   "name": "Rindergulasch mit Kartoffeln",
+   "short": "Rindergulasch",
+   "desc": "Mageres Rind, viel Zwiebeln und Paprika in kräftiger Schmorsauce. Aufgewärmt noch besser.",
+   "protein": "Rind",
+   "base": "Kartoffeln",
+   "method": "Topf",
+   "time": 165,
+   "timeNote": "davon 2 Std. schmoren",
+   "fridge": "4 Tage",
+   "freeze": "3 Monate",
+   "items": [
+    {
+     "n": "Rindergulasch, mager (Keule oder Schulter)",
+     "a": "1 kg",
+     "k": "rindergulasch",
+     "q": 1000,
+     "u": "g",
+     "h": "2 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "1 kg",
+     "k": "zwiebeln",
+     "q": 1000,
+     "u": "g",
+     "h": "1 Netz",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Rote Paprika",
+     "a": "3 Stück (ca. 480 g)",
+     "k": "paprika",
+     "q": 3,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kartoffeln, festkochend",
+     "a": "1.275 g geschält",
+     "k": "kartoffeln",
+     "q": 1500,
+     "u": "g",
+     "h": "Beutel 1,5 kg",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "6 Zehen",
+     "k": "knoblauch",
+     "q": 6,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Tomatenmark",
+     "a": "70 g",
+     "k": "tomatenmark",
+     "q": 70,
+     "u": "g",
+     "h": "kleine Dose",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Butterschmalz",
+     "a": "65 g",
+     "k": "butterschmalz",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Rinderbrühe",
+     "a": "750 ml",
+     "k": "bruehe-rind",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Balsamico oder Rotweinessig",
+     "a": "1 EL",
+     "k": "balsamico",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Zitrone (Abrieb)",
+     "a": "1 Bio-Zitrone",
+     "k": "zitrone",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "3 EL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Paprika rosenscharf",
+     "a": "1 TL",
+     "k": "paprika-rosenscharf"
+    },
+    {
+     "n": "Paprika geräuchert",
+     "a": "1 TL",
+     "k": "paprika-geraeuchert"
+    },
+    {
+     "n": "Kümmel, gemahlen",
+     "a": "2 TL",
+     "k": "kuemmel"
+    },
+    {
+     "n": "Majoran",
+     "a": "2 TL",
+     "k": "majoran"
+    },
+    {
+     "n": "Lorbeerblätter",
+     "a": "2 Stück",
+     "k": "lorbeer"
+    },
+    {
+     "n": "Salz",
+     "a": "2–3 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "frisch gemahlen",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Vorbereiten",
+     "d": "Fleisch trocken tupfen und auf 3–4 cm schneiden. Zwiebeln in feine Streifen, Knoblauch hacken, Paprika in 2-cm-Stücke. Kartoffeln schälen, 1.275 g abwiegen, in 3-cm-Würfel schneiden und in kaltes Wasser legen. Den leeren Topf wiegen."
+    },
+    {
+     "t": "Fleisch anbraten",
+     "d": "25 g Butterschmalz stark erhitzen und das Fleisch in 3 Portionen rundum kräftig braun anbraten, dann herausnehmen. Alles auf einmal würde im eigenen Saft kochen."
+    },
+    {
+     "t": "Zwiebeln bräunen",
+     "d": "Die restlichen 40 g Butterschmalz in den Topf geben. Zwiebeln bei mittlerer Hitze 15–20 Minuten goldbraun schmoren und den Bratensatz lösen. Hier entsteht die Sauce."
+    },
+    {
+     "t": "Würzen",
+     "d": "Knoblauch und Tomatenmark 2 Minuten mitrösten. Topf vom Herd ziehen und alle Paprikapulver, Kümmel und Majoran einrühren. Paprikapulver wird auf voller Hitze schnell bitter."
+    },
+    {
+     "t": "Schmoren",
+     "d": "Sofort mit 750 ml Brühe ablöschen, Fleisch samt Saft und Lorbeer dazu. Zugedeckt 90 Minuten bei kleiner Hitze schmoren, alle 20 Minuten umrühren."
+    },
+    {
+     "t": "Kartoffeln und Paprika",
+     "d": "Kartoffeln abgießen und mit der Paprika und ca. 300 ml Wasser in den Topf geben. Zugedeckt 25–30 Minuten köcheln, bis alles weich ist."
+    },
+    {
+     "t": "Abschmecken",
+     "d": "Lorbeer herausnehmen. Mit Salz, Pfeffer, Balsamico und optional Zitronenabrieb abschmecken. Zu dünn? Offen 5–10 Minuten einkochen."
+    }
+   ],
+   "tips": [
+    "Beim Fleisch schwankt der Fettgehalt stark. Nimm Keule statt Nacken, das ist deutlich magerer."
+   ],
+   "nut": [
+    [
+     "Rindergulasch, mager",
+     "1.000 g",
+     1280,
+     210.0,
+     0,
+     50.0
+    ],
+    [
+     "Butterschmalz",
+     "65 g",
+     584,
+     0,
+     0,
+     64.9
+    ],
+    [
+     "Zwiebeln",
+     "1.000 g",
+     350,
+     12.0,
+     60.0,
+     1.0
+    ],
+    [
+     "Knoblauch",
+     "24 g",
+     36,
+     1.5,
+     7.2,
+     0.1
+    ],
+    [
+     "Tomatenmark",
+     "70 g",
+     63,
+     3.2,
+     10.5,
+     0.4
+    ],
+    [
+     "Rote Paprika",
+     "480 g",
+     144,
+     4.8,
+     24.0,
+     1.4
+    ],
+    [
+     "Kartoffeln, geschält",
+     "1.275 g",
+     918,
+     25.5,
+     197.6,
+     1.3
+    ],
+    [
+     "Rinderbrühe",
+     "750 ml",
+     30,
+     1.5,
+     3.0,
+     1.5
+    ],
+    [
+     "Gewürze & Balsamico",
+     "ca. 50 g",
+     126,
+     5.1,
+     9.8,
+     4.3
+    ]
+   ],
+   "total": [
+    3531,
+    263.6,
+    312.1,
+    124.9
+   ],
+   "m": {
+    "kcal": 441,
+    "p": 33.0,
+    "kh": 39.0,
+    "f": 15.6
+   }
+  },
+  {
+   "id": "tomaten-pasta",
+   "name": "Creamy Tomaten-Hähnchen-Pasta",
+   "short": "Tomaten-Pasta",
+   "desc": "Penne in cremiger Tomatensauce mit getrockneten Tomaten, Spinat und Parmesan.",
+   "protein": "Hähnchen",
+   "base": "Nudeln",
+   "method": "Pfanne",
+   "time": 45,
+   "timeNote": "",
+   "fridge": "3 Tage",
+   "freeze": "2–3 Monate",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "700 g",
+     "k": "haehnchenbrust",
+     "q": 700,
+     "u": "g",
+     "h": "Theke oder 2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Penne",
+     "a": "320 g",
+     "k": "penne",
+     "q": 320,
+     "u": "g",
+     "h": "aus 500-g-Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Getrocknete Tomaten in Öl",
+     "a": "1 Glas (ca. 280 g, 150 g abgetropft)",
+     "k": "getr-tomaten",
+     "q": 1,
+     "u": "Glas",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Passierte Tomaten",
+     "a": "500 g",
+     "k": "passata",
+     "q": 500,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kochsahne 15 %",
+     "a": "200 g",
+     "k": "kochsahne",
+     "q": 200,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Frischkäse leicht",
+     "a": "200 g",
+     "k": "frischkaese",
+     "q": 200,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Parmesan",
+     "a": "50 g",
+     "k": "parmesan",
+     "q": 50,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Babyspinat",
+     "a": "250 g",
+     "k": "spinat",
+     "q": 250,
+     "u": "g",
+     "h": "2 × 125 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "2 Stück (200 g)",
+     "k": "zwiebeln",
+     "q": 200,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "5 Zehen",
+     "k": "knoblauch",
+     "q": 5,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Gemüsebrühe (Pulver)",
+     "a": "1 TL",
+     "k": "bruehe-gemuese",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Basilikum, frisch",
+     "a": "zum Servieren",
+     "k": "basilikum",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "2 TL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Paprika geräuchert",
+     "a": "1 TL",
+     "k": "paprika-geraeuchert"
+    },
+    {
+     "n": "Italienische Kräuter",
+     "a": "2 TL",
+     "k": "ital-kraeuter"
+    },
+    {
+     "n": "Oregano",
+     "a": "1 TL",
+     "k": "oregano"
+    },
+    {
+     "n": "Chiliflocken",
+     "a": "½ TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Knoblauchpulver",
+     "a": "½ TL",
+     "k": "knoblauchpulver"
+    },
+    {
+     "n": "Salz",
+     "a": "nach Geschmack",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "nach Geschmack",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Vorbereiten",
+     "d": "Hähnchen in 2–3-cm-Stücke schneiden und mit 1 TL Paprika edelsüß, ½ TL Knoblauchpulver, 1 TL italienischen Kräutern, Salz und Pfeffer würzen. Zwiebeln würfeln, Knoblauch hacken. Getrocknete Tomaten abtropfen lassen, das Öl auffangen, Tomaten in Streifen schneiden. Die große Pfanne leer wiegen."
+    },
+    {
+     "t": "Nudeln",
+     "d": "Penne in Salzwasser 2 Minuten kürzer kochen als auf der Packung angegeben. Vor dem Abgießen 300 ml Nudelwasser abschöpfen."
+    },
+    {
+     "t": "Hähnchen anbraten",
+     "d": "8 g Tomatenöl stark erhitzen und das Hähnchen in 2 Portionen je 3–4 Minuten goldbraun braten. Herausnehmen."
+    },
+    {
+     "t": "Sauce ansetzen",
+     "d": "Restliche 8 g Tomatenöl, Zwiebeln 3–4 Minuten glasig braten. Knoblauch und getrocknete Tomaten 1 Minute mitbraten, dann restliches Paprikapulver, Kräuter, Oregano und Chiliflocken kurz mitrösten."
+    },
+    {
+     "t": "Köcheln",
+     "d": "Passierte Tomaten, Kochsahne und Brühpulver einrühren und 5 Minuten köcheln. Frischkäse einrühren, bis er geschmolzen ist, Parmesan unterziehen."
+    },
+    {
+     "t": "Spinat und Hähnchen",
+     "d": "Spinat handvollweise unterheben. Hähnchen samt Saft zurückgeben und 4–5 Minuten leise köcheln, bis es durch ist."
+    },
+    {
+     "t": "Mischen",
+     "d": "Penne untermischen und mit Nudelwasser cremig ziehen. Fürs Meal Prep darf die Sauce etwas dünner sein, die Nudeln saugen nach."
+    }
+   ],
+   "tips": [
+    "Frischkäse leicht nehmen (ca. 11 % Fett). Doppelrahmstufe bringt pro Portion rund 3,5 g Fett mehr.",
+    "Vollkorn: 370 g Vollkorn-Penne und nur 12 g Öl, dann ca. 452 kcal bei gleichen Makros."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "700 g",
+     742,
+     161.0,
+     0,
+     10.5
+    ],
+    [
+     "Penne, roh",
+     "320 g",
+     1139,
+     40.0,
+     225.6,
+     5.8
+    ],
+    [
+     "Getr. Tomaten, abgetropft",
+     "150 g",
+     323,
+     7.5,
+     22.5,
+     21.0
+    ],
+    [
+     "Öl aus dem Tomatenglas",
+     "16 g",
+     144,
+     0,
+     0,
+     16.0
+    ],
+    [
+     "Passierte Tomaten",
+     "500 g",
+     130,
+     6.5,
+     21.5,
+     1.0
+    ],
+    [
+     "Kochsahne 15 %",
+     "200 g",
+     320,
+     5.6,
+     7.6,
+     30.0
+    ],
+    [
+     "Frischkäse leicht",
+     "200 g",
+     290,
+     14.0,
+     9.0,
+     22.0
+    ],
+    [
+     "Parmesan",
+     "50 g",
+     195,
+     16.5,
+     0,
+     14.0
+    ],
+    [
+     "Babyspinat",
+     "250 g",
+     58,
+     7.0,
+     2.5,
+     1.0
+    ],
+    [
+     "Zwiebeln",
+     "200 g",
+     70,
+     2.4,
+     12.0,
+     0.2
+    ],
+    [
+     "Knoblauch",
+     "20 g",
+     30,
+     1.3,
+     6.0,
+     0.1
+    ],
+    [
+     "Gewürze & Brühpulver",
+     "ca. 19 g",
+     54,
+     2.2,
+     5.1,
+     1.6
+    ]
+   ],
+   "total": [
+    3495,
+    264.0,
+    311.8,
+    123.2
+   ],
+   "m": {
+    "kcal": 437,
+    "p": 33.0,
+    "kh": 39.0,
+    "f": 15.4
+   }
+  },
+  {
+   "id": "mac-cheese",
+   "name": "Protein-Mac & Cheese mit Brokkoli",
+   "short": "Mac & Cheese",
+   "desc": "Käsesauce aus Hüttenkäse, Quark und kräftigem Cheddar, glatt gemixt. Ganz ohne Fleisch.",
+   "protein": "Vegetarisch",
+   "base": "Nudeln",
+   "method": "Topf",
+   "time": 30,
+   "timeNote": "",
+   "fridge": "3 Tage",
+   "freeze": "2 Monate",
+   "items": [
+    {
+     "n": "Hörnchennudeln oder Makkaroni",
+     "a": "310 g",
+     "k": "hoernchen",
+     "q": 310,
+     "u": "g",
+     "h": "aus 500-g-Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Brokkoli",
+     "a": "1,2 kg",
+     "k": "brokkoli",
+     "q": 1200,
+     "u": "g",
+     "h": "3 Köpfe oder TK",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Hüttenkäse",
+     "a": "800 g",
+     "k": "huettenkaese",
+     "q": 800,
+     "u": "g",
+     "h": "4 × 200 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Magerquark",
+     "a": "250 g",
+     "k": "magerquark",
+     "q": 250,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Milch 1,5 %",
+     "a": "250 ml",
+     "k": "milch",
+     "q": 250,
+     "u": "ml",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Cheddar, kräftig",
+     "a": "200 g",
+     "k": "cheddar",
+     "q": 200,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Butter",
+     "a": "10 g",
+     "k": "butter",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Speisestärke",
+     "a": "10 g",
+     "k": "staerke",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Senf, mittelscharf",
+     "a": "2 EL",
+     "k": "senf",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "1 TL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Paprika geräuchert",
+     "a": "1 TL",
+     "k": "paprika-geraeuchert"
+    },
+    {
+     "n": "Knoblauchpulver",
+     "a": "1 TL",
+     "k": "knoblauchpulver"
+    },
+    {
+     "n": "Zwiebelgranulat",
+     "a": "1 TL",
+     "k": "zwiebelpulver"
+    },
+    {
+     "n": "Cayennepfeffer",
+     "a": "¼–½ TL",
+     "k": "cayenne"
+    },
+    {
+     "n": "Muskat",
+     "a": "1 Prise",
+     "k": "muskat"
+    },
+    {
+     "n": "Salz",
+     "a": "½ TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "ordentlich",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Vorbereiten",
+     "d": "Den leeren großen Topf wiegen. Cheddar reiben, Brokkoli in kleine Röschen teilen, den Strunk schälen und würfeln."
+    },
+    {
+     "t": "Käsesauce mixen",
+     "d": "Hüttenkäse, Magerquark, Milch, Speisestärke, Senf und alle Gewürze in ein hohes Gefäß geben und mit dem Pürierstab ganz glatt mixen. Je glatter, desto cremiger."
+    },
+    {
+     "t": "Nudeln und Brokkoli",
+     "d": "Nudeln in Salzwasser 1 Minute kürzer kochen als angegeben, Brokkoli die letzten 4 Minuten mitkochen. 200 ml Kochwasser abschöpfen, dann abgießen."
+    },
+    {
+     "t": "Sauce erhitzen",
+     "d": "Butter im leeren Topf schmelzen, Sauce dazu und bei mittlerer Hitze erwärmen, bis sie dampft. Nicht sprudelnd kochen, sonst wird sie krisselig. Cheddar nach und nach einrühren."
+    },
+    {
+     "t": "Mischen",
+     "d": "Nudeln und Brokkoli unterheben und mit etwas Kochwasser cremig ziehen. Mit Salz, Pfeffer und Cayenne abschmecken."
+    }
+   ],
+   "tips": [
+    "Knuspriges Topping: 40 g Panko trocken rösten, mit 30 g Parmesan mischen und erst beim Essen drüberstreuen. Pro Portion +33 kcal.",
+    "1–2 EL Hefeflocken in der Sauce machen sie noch käsiger."
+   ],
+   "nut": [
+    [
+     "Hörnchennudeln, roh",
+     "310 g",
+     1104,
+     38.8,
+     218.6,
+     5.6
+    ],
+    [
+     "Brokkoli",
+     "1.200 g",
+     408,
+     36.0,
+     36.0,
+     4.8
+    ],
+    [
+     "Hüttenkäse",
+     "800 g",
+     768,
+     96.0,
+     20.0,
+     34.4
+    ],
+    [
+     "Magerquark",
+     "250 g",
+     168,
+     30.0,
+     10.0,
+     0.5
+    ],
+    [
+     "Milch 1,5 %",
+     "250 ml",
+     118,
+     8.5,
+     12.0,
+     3.8
+    ],
+    [
+     "Cheddar",
+     "200 g",
+     800,
+     50.0,
+     0,
+     66.0
+    ],
+    [
+     "Butter",
+     "10 g",
+     74,
+     0.1,
+     0.1,
+     8.2
+    ],
+    [
+     "Speisestärke",
+     "10 g",
+     35,
+     0,
+     8.6,
+     0
+    ],
+    [
+     "Senf & Gewürze",
+     "ca. 44 g",
+     72,
+     3.6,
+     7.2,
+     2.3
+    ]
+   ],
+   "total": [
+    3547,
+    263.0,
+    312.5,
+    125.6
+   ],
+   "m": {
+    "kcal": 443,
+    "p": 32.9,
+    "kh": 39.1,
+    "f": 15.7
+   }
+  },
+  {
+   "id": "teriyaki",
+   "name": "Chicken Teriyaki Bowl",
+   "short": "Teriyaki Bowl",
+   "desc": "Saftige Hähnchenkeule in glänzender Teriyaki-Sauce mit Brokkoli, Möhren und Sesam.",
+   "protein": "Hähnchen",
+   "base": "Reis",
+   "method": "Wok / Pfanne",
+   "time": 45,
+   "timeNote": "",
+   "fridge": "4 Tage",
+   "freeze": "2 Monate",
+   "items": [
+    {
+     "n": "Hähnchen-Oberkeulenfilet",
+     "a": "1 kg",
+     "k": "haehnchenkeule",
+     "q": 1000,
+     "u": "g",
+     "h": "2 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Basmati- oder Jasminreis",
+     "a": "240 g",
+     "k": "reis",
+     "q": 240,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Brokkoli",
+     "a": "1 kg",
+     "k": "brokkoli",
+     "q": 1000,
+     "u": "g",
+     "h": "2 Köpfe",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Möhren",
+     "a": "300 g (3 Stück)",
+     "k": "moehren",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Frühlingszwiebeln",
+     "a": "1 Bund",
+     "k": "fruehlingszwiebeln",
+     "q": 1,
+     "u": "Bund",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Ingwer",
+     "a": "30 g (daumengroß)",
+     "k": "ingwer",
+     "q": 30,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Sesam",
+     "a": "30 g",
+     "k": "sesam",
+     "q": 30,
+     "u": "g",
+     "h": "Tüte",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Sojasauce",
+     "a": "120 ml",
+     "k": "sojasauce",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Honig",
+     "a": "50 g (2½ EL)",
+     "k": "honig",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Reis- oder Apfelessig",
+     "a": "2 EL",
+     "k": "essig",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Speisestärke",
+     "a": "15 g (1½ EL)",
+     "k": "staerke",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Öl, neutral",
+     "a": "15 g",
+     "k": "oel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Sesamöl",
+     "a": "10 g",
+     "k": "sesamoel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    }
+   ],
+   "spices": [
+    {
+     "n": "Chiliflocken",
+     "a": "½–1 TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "1 Prise für den Reis",
+     "k": "salz"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Vorbereiten",
+     "d": "Hähnchen in 3-cm-Stücke schneiden. Brokkoli in Röschen teilen, Strunk schälen und würfeln. Möhren schräg in dünne Scheiben, Frühlingszwiebeln in Ringe schneiden, Hell und Grün getrennt. Knoblauch und Ingwer fein reiben. Den großen Topf, in dem du am Ende alles mischst, leer wiegen."
+    },
+    {
+     "t": "Sauce anrühren",
+     "d": "Sojasauce, Honig, Essig, Knoblauch, Ingwer, Speisestärke, Chiliflocken und 150 ml Wasser glatt rühren."
+    },
+    {
+     "t": "Reis",
+     "d": "240 g Reis waschen, im kleinen Topf mit 360 ml Wasser und einer Prise Salz aufkochen, zugedeckt 12 Minuten auf kleinster Hitze garen und 10 Minuten ruhen lassen."
+    },
+    {
+     "t": "Gemüse",
+     "d": "Brokkoli und Möhren 3–4 Minuten in Salzwasser blanchieren. Sie sollen bissfest bleiben, beim Aufwärmen garen sie nach. Abgießen."
+    },
+    {
+     "t": "Hähnchen braten",
+     "d": "15 g Öl im Wok oder in der großen Pfanne stark erhitzen. Hähnchen in 2 Portionen je 4–5 Minuten goldbraun braten."
+    },
+    {
+     "t": "Glasieren",
+     "d": "Alles Hähnchen zurück in die Pfanne, das Helle der Frühlingszwiebeln 1 Minute mitbraten. Sauce einrühren und 2 Minuten köcheln, bis sie andickt und glänzt. Sesamöl unterrühren."
+    },
+    {
+     "t": "Sesam rösten",
+     "d": "Sesam in einer trockenen Pfanne 2 Minuten goldbraun rösten."
+    },
+    {
+     "t": "Mischen",
+     "d": "Reis, Gemüse und Teriyaki-Hähnchen im gewogenen großen Topf gut mischen, wiegen und portionieren. Sesam und Frühlingszwiebelgrün drüberstreuen."
+    }
+   ],
+   "tips": [
+    "Oberkeule bleibt beim Aufwärmen viel saftiger als Brust. Mit 1 kg Brust fehlen dir pro Portion ca. 6 g Fett, dann 2 EL Öl mehr nehmen."
+   ],
+   "nut": [
+    [
+     "Hähnchen-Oberkeulenfilet",
+     "1.000 g",
+     1460.0,
+     187.0,
+     0.0,
+     79.0
+    ],
+    [
+     "Basmatireis, roh",
+     "240 g",
+     840.0,
+     19.2,
+     184.8,
+     1.4
+    ],
+    [
+     "Brokkoli",
+     "1.000 g",
+     340.0,
+     30.0,
+     30.0,
+     4.0
+    ],
+    [
+     "Möhren",
+     "300 g",
+     108.0,
+     2.7,
+     21.0,
+     0.6
+    ],
+    [
+     "Frühlingszwiebeln",
+     "100 g",
+     30.0,
+     1.8,
+     4.5,
+     0.3
+    ],
+    [
+     "Sojasauce",
+     "120 ml",
+     84.0,
+     10.8,
+     6.0,
+     0.0
+    ],
+    [
+     "Honig",
+     "50 g",
+     160.0,
+     0.2,
+     40.0,
+     0.0
+    ],
+    [
+     "Knoblauch",
+     "16 g",
+     23.8,
+     1.0,
+     4.8,
+     0.1
+    ],
+    [
+     "Ingwer",
+     "30 g",
+     24.0,
+     0.5,
+     4.7,
+     0.2
+    ],
+    [
+     "Speisestärke",
+     "15 g",
+     52.5,
+     0.0,
+     12.9,
+     0.0
+    ],
+    [
+     "Öl & Sesamöl",
+     "25 g",
+     225.0,
+     0.0,
+     0.0,
+     25.0
+    ],
+    [
+     "Sesam",
+     "30 g",
+     174.0,
+     5.4,
+     3.0,
+     15.0
+    ],
+    [
+     "Gewürze",
+     "ca. 3 g",
+     9.6,
+     0.4,
+     0.9,
+     0.4
+    ]
+   ],
+   "total": [
+    3530.9,
+    259.0,
+    312.6,
+    126.0
+   ],
+   "m": {
+    "kcal": 441,
+    "p": 32.4,
+    "kh": 39.1,
+    "f": 15.8
+   }
+  },
+  {
+   "id": "thai-curry",
+   "name": "Rotes Thai-Curry mit Hähnchen",
+   "short": "Thai-Curry",
+   "desc": "Hähnchen und knackiges Gemüse in Kokos-Currysauce mit Limette, dazu Jasminreis.",
+   "protein": "Hähnchen",
+   "base": "Reis",
+   "method": "Topf",
+   "time": 40,
+   "timeNote": "",
+   "fridge": "4 Tage",
+   "freeze": "3 Monate",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "1 kg",
+     "k": "haehnchenbrust",
+     "q": 1000,
+     "u": "g",
+     "h": "2 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kokosmilch (nicht light)",
+     "a": "1 Dose à 400 ml",
+     "k": "kokosmilch",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Rote Currypaste",
+     "a": "70 g",
+     "k": "currypaste",
+     "q": 1,
+     "u": "Glas",
+     "h": "du brauchst 70 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Paprika",
+     "a": "3 Stück (ca. 480 g)",
+     "k": "paprika",
+     "q": 3,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zucchini",
+     "a": "1 Stück (ca. 300 g)",
+     "k": "zucchini",
+     "q": 1,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zuckerschoten",
+     "a": "200 g",
+     "k": "zuckerschoten",
+     "q": 200,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebel",
+     "a": "1 Stück (100 g)",
+     "k": "zwiebeln",
+     "q": 100,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Ingwer",
+     "a": "20 g",
+     "k": "ingwer",
+     "q": 20,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Limette",
+     "a": "1 Stück",
+     "k": "limette",
+     "q": 1,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Jasminreis",
+     "a": "290 g",
+     "k": "reis",
+     "q": 290,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Sojasauce",
+     "a": "2 EL (30 ml)",
+     "k": "sojasauce",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Zucker",
+     "a": "2 TL (10 g)",
+     "k": "zucker",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Öl, neutral",
+     "a": "20 g",
+     "k": "oel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Thai-Basilikum oder Koriander",
+     "a": "zum Servieren",
+     "k": "koriander",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Chiliflocken (optional)",
+     "a": "nach Schärfe",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "nach Geschmack",
+     "k": "salz"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Vorbereiten",
+     "d": "Hähnchen in mundgerechte Stücke schneiden. Paprika in Streifen, Zucchini in Halbmonde, Zuckerschoten halbieren, Zwiebel in Streifen. Knoblauch und Ingwer fein hacken. Den leeren Topf wiegen."
+    },
+    {
+     "t": "Reis",
+     "d": "290 g Jasminreis waschen, mit 435 ml Wasser aufkochen, zugedeckt 12 Minuten auf kleinster Hitze garen und 10 Minuten ruhen lassen."
+    },
+    {
+     "t": "Hähnchen anbraten",
+     "d": "10 g Öl im großen Topf stark erhitzen und das Hähnchen in 2 Portionen kurz anbraten. Herausnehmen, es muss noch nicht durch sein."
+    },
+    {
+     "t": "Paste anrösten",
+     "d": "Restliches Öl in den Topf, Zwiebel 2 Minuten braten. Knoblauch, Ingwer und Currypaste 1 Minute rösten. Die dicke Kokoscreme oben aus der Dose dazugeben und 1 Minute mitrösten, das bringt den Geschmack."
+    },
+    {
+     "t": "Köcheln",
+     "d": "Restliche Kokosmilch, 200 ml Wasser, Sojasauce und Zucker einrühren. Paprika und Zucchini 5 Minuten köcheln."
+    },
+    {
+     "t": "Fertig garen",
+     "d": "Hähnchen und Zuckerschoten dazugeben und 4–5 Minuten leise köcheln, bis das Hähnchen durch ist."
+    },
+    {
+     "t": "Abschmecken",
+     "d": "Limettensaft einrühren, mit Salz oder Sojasauce abschmecken. Wer es schärfer mag, nimmt Chiliflocken."
+    },
+    {
+     "t": "Mischen",
+     "d": "Reis unter das Curry heben, dann wiegen und portionieren."
+    }
+   ],
+   "tips": [
+    "Currypasten sind unterschiedlich scharf. Fang mit 50 g an und gib den Rest erst nach dem Probieren dazu."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "1.000 g",
+     1060.0,
+     230.0,
+     0.0,
+     15.0
+    ],
+    [
+     "Kokosmilch",
+     "400 ml",
+     720.0,
+     6.4,
+     12.0,
+     72.0
+    ],
+    [
+     "Rote Currypaste",
+     "70 g",
+     105.0,
+     2.1,
+     9.1,
+     6.3
+    ],
+    [
+     "Paprika",
+     "480 g",
+     134.4,
+     4.8,
+     21.6,
+     1.4
+    ],
+    [
+     "Zucchini",
+     "300 g",
+     57.0,
+     4.5,
+     6.6,
+     1.2
+    ],
+    [
+     "Zuckerschoten",
+     "200 g",
+     84.0,
+     6.0,
+     14.0,
+     0.4
+    ],
+    [
+     "Zwiebel",
+     "100 g",
+     35.0,
+     1.2,
+     6.0,
+     0.1
+    ],
+    [
+     "Knoblauch",
+     "16 g",
+     23.8,
+     1.0,
+     4.8,
+     0.1
+    ],
+    [
+     "Ingwer",
+     "20 g",
+     16.0,
+     0.4,
+     3.2,
+     0.2
+    ],
+    [
+     "Sojasauce",
+     "30 ml",
+     21.0,
+     2.7,
+     1.5,
+     0.0
+    ],
+    [
+     "Zucker",
+     "10 g",
+     40.0,
+     0.0,
+     10.0,
+     0.0
+    ],
+    [
+     "Limettensaft",
+     "30 g",
+     7.5,
+     0.1,
+     0.8,
+     0.0
+    ],
+    [
+     "Öl",
+     "20 g",
+     180.0,
+     0.0,
+     0.0,
+     20.0
+    ],
+    [
+     "Jasminreis, roh",
+     "290 g",
+     1015.0,
+     23.2,
+     223.3,
+     1.7
+    ]
+   ],
+   "total": [
+    3498.7,
+    282.4,
+    312.9,
+    118.4
+   ],
+   "m": {
+    "kcal": 437,
+    "p": 35.3,
+    "kh": 39.1,
+    "f": 14.8
+   }
+  },
+  {
+   "id": "burrito-bowl",
+   "name": "Burrito Bowl mit Hähnchen",
+   "short": "Burrito Bowl",
+   "desc": "Taco-Hähnchen, Limettenreis, Bohnen, Mais, Fajita-Gemüse, Salsa, Cheddar und Limetten-Schmand.",
+   "protein": "Hähnchen",
+   "base": "Reis",
+   "method": "Pfanne",
+   "time": 40,
+   "timeNote": "",
+   "fridge": "4 Tage",
+   "freeze": "2 Monate, ohne Salsa und Schmand",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "800 g",
+     "k": "haehnchenbrust",
+     "q": 800,
+     "u": "g",
+     "h": "2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Langkorn- oder Basmatireis",
+     "a": "240 g",
+     "k": "reis",
+     "q": 240,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Schwarze Bohnen",
+     "a": "1 Dose à 400 g (240 g abgetropft)",
+     "k": "schwarze-bohnen",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Mais",
+     "a": "1 Dose à 425 ml (285 g abgetropft)",
+     "k": "mais",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Paprika",
+     "a": "3 Stück (ca. 480 g)",
+     "k": "paprika",
+     "q": 3,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebel",
+     "a": "1 Stück (100 g)",
+     "k": "zwiebeln",
+     "q": 100,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Rote Zwiebel",
+     "a": "1 Stück (100 g)",
+     "k": "rote-zwiebeln",
+     "q": 100,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Tomaten",
+     "a": "3 Stück (300 g)",
+     "k": "tomaten",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Limetten",
+     "a": "2 Stück",
+     "k": "limette",
+     "q": 2,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Cheddar, gerieben",
+     "a": "150 g",
+     "k": "cheddar",
+     "q": 150,
+     "u": "g",
+     "h": "1 Beutel",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Schmand",
+     "a": "200 g",
+     "k": "schmand",
+     "q": 200,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Öl",
+     "a": "1 TL (5 g)",
+     "k": "oel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Koriander, frisch",
+     "a": "½ Bund",
+     "k": "koriander",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "2 TL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Paprika geräuchert",
+     "a": "2 TL",
+     "k": "paprika-geraeuchert"
+    },
+    {
+     "n": "Kreuzkümmel, gemahlen",
+     "a": "2 TL",
+     "k": "kreuzkuemmel"
+    },
+    {
+     "n": "Oregano",
+     "a": "1 TL",
+     "k": "oregano"
+    },
+    {
+     "n": "Knoblauchpulver",
+     "a": "1 TL",
+     "k": "knoblauchpulver"
+    },
+    {
+     "n": "Zwiebelgranulat",
+     "a": "1 TL",
+     "k": "zwiebelpulver"
+    },
+    {
+     "n": "Chiliflocken oder Cayenne",
+     "a": "½–1 TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "2 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Marinieren",
+     "d": "Hähnchen in 2-cm-Würfel schneiden, mit allen Gewürzen, dem Saft einer halben Limette und 1 TL Salz mischen."
+    },
+    {
+     "t": "Limettenreis",
+     "d": "240 g Reis waschen, mit 360 ml Wasser und einer Prise Salz aufkochen, zugedeckt 12 Minuten garen, 10 Minuten ruhen lassen. Saft einer halben Limette und optional Koriander unterheben."
+    },
+    {
+     "t": "Salsa",
+     "d": "Tomaten würfeln, rote Zwiebel fein würfeln und mit dem Saft einer halben Limette, Salz und Pfeffer mischen."
+    },
+    {
+     "t": "Fajita-Gemüse",
+     "d": "Paprika und gelbe Zwiebel in Streifen schneiden und in der großen Pfanne ohne Fett 6–8 Minuten kräftig anrösten, salzen und herausnehmen."
+    },
+    {
+     "t": "Hähnchen braten",
+     "d": "Öl in die Pfanne, Hähnchen in 2 Portionen je 3–4 Minuten braten, bis es durch ist."
+    },
+    {
+     "t": "Bohnen und Mais",
+     "d": "Bohnen und Mais abspülen, zum Hähnchen geben und 2 Minuten mit erwärmen."
+    },
+    {
+     "t": "Limetten-Schmand",
+     "d": "Schmand mit dem Saft der letzten halben Limette und einer Prise Salz glatt rühren."
+    },
+    {
+     "t": "Portionieren",
+     "d": "Reis, Hähnchen mit Bohnen und Mais und das Gemüse jeweils wiegen, durch 8 teilen und in die Boxen schichten. Je knapp 19 g Cheddar drüber. Salsa und Schmand (je 25 g) in kleinen Döschen dazu, dann bleiben sie frisch."
+    }
+   ],
+   "tips": [
+    "Statt schwarzer Bohnen gehen Kidneybohnen genauso.",
+    "Zum Aufwärmen Salsa und Schmand vorher herausnehmen und kalt dazu essen."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "800 g",
+     848.0,
+     184.0,
+     0.0,
+     12.0
+    ],
+    [
+     "Reis, roh",
+     "240 g",
+     840.0,
+     19.2,
+     184.8,
+     1.4
+    ],
+    [
+     "Schwarze Bohnen, abgetropft",
+     "240 g",
+     240.0,
+     18.0,
+     31.2,
+     1.4
+    ],
+    [
+     "Mais, abgetropft",
+     "285 g",
+     228.0,
+     7.1,
+     34.2,
+     3.7
+    ],
+    [
+     "Paprika",
+     "480 g",
+     134.4,
+     4.8,
+     21.6,
+     1.4
+    ],
+    [
+     "Zwiebeln",
+     "200 g",
+     70.0,
+     2.4,
+     12.0,
+     0.2
+    ],
+    [
+     "Tomaten",
+     "300 g",
+     60.0,
+     3.0,
+     9.0,
+     0.6
+    ],
+    [
+     "Limettensaft",
+     "60 g",
+     15.0,
+     0.2,
+     1.5,
+     0.1
+    ],
+    [
+     "Öl",
+     "5 g",
+     45.0,
+     0.0,
+     0.0,
+     5.0
+    ],
+    [
+     "Cheddar",
+     "150 g",
+     600.0,
+     37.5,
+     0.0,
+     49.5
+    ],
+    [
+     "Schmand",
+     "200 g",
+     480.0,
+     5.2,
+     7.0,
+     48.0
+    ],
+    [
+     "Gewürze",
+     "ca. 20 g",
+     64.0,
+     2.6,
+     6.0,
+     2.4
+    ]
+   ],
+   "total": [
+    3624.4,
+    284.0,
+    307.3,
+    125.7
+   ],
+   "m": {
+    "kcal": 453,
+    "p": 35.5,
+    "kh": 38.4,
+    "f": 15.7
+   }
+  },
+  {
+   "id": "gyros",
+   "name": "Hähnchen-Gyros mit Kritharaki & Tzatziki",
+   "short": "Gyros-Kritharaki",
+   "desc": "Scharf angebratenes Gyros mit Zwiebeln auf Tomaten-Kritharaki, Feta und Skyr-Tzatziki.",
+   "protein": "Hähnchen",
+   "base": "Nudeln",
+   "method": "Pfanne + Topf",
+   "time": 45,
+   "timeNote": "+ 30 Min. Marinieren",
+   "fridge": "4 Tage",
+   "freeze": "2 Monate, ohne Tzatziki",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "500 g",
+     "k": "haehnchenbrust",
+     "q": 500,
+     "u": "g",
+     "h": "1 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kritharaki",
+     "a": "320 g",
+     "k": "kritharaki",
+     "q": 320,
+     "u": "g",
+     "h": "aus 500-g-Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "3 Stück (300 g)",
+     "k": "zwiebeln",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Passierte Tomaten",
+     "a": "500 g",
+     "k": "passata",
+     "q": 500,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Tomatenmark",
+     "a": "70 g",
+     "k": "tomatenmark",
+     "q": 70,
+     "u": "g",
+     "h": "kleine Dose",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Skyr natur",
+     "a": "500 g",
+     "k": "skyr",
+     "q": 500,
+     "u": "g",
+     "h": "1 großer Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Salatgurke",
+     "a": "1 Stück (ca. 300 g)",
+     "k": "gurke",
+     "q": 1,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Feta",
+     "a": "200 g",
+     "k": "feta",
+     "q": 200,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Olivenöl",
+     "a": "60 g (davon 10 g fürs Tzatziki)",
+     "k": "olivenoel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Gemüsebrühe",
+     "a": "600 ml",
+     "k": "bruehe-gemuese",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Dill oder Minze, frisch",
+     "a": "fürs Tzatziki",
+     "k": "dill",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "2 TL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Oregano",
+     "a": "2 TL + 1 TL für die Kritharaki",
+     "k": "oregano"
+    },
+    {
+     "n": "Thymian",
+     "a": "1 TL",
+     "k": "thymian"
+    },
+    {
+     "n": "Kreuzkümmel, gemahlen",
+     "a": "1 TL",
+     "k": "kreuzkuemmel"
+    },
+    {
+     "n": "Knoblauchpulver",
+     "a": "1 TL",
+     "k": "knoblauchpulver"
+    },
+    {
+     "n": "Zwiebelgranulat",
+     "a": "1 TL",
+     "k": "zwiebelpulver"
+    },
+    {
+     "n": "Koriander, gemahlen",
+     "a": "½ TL",
+     "k": "koriander-gem"
+    },
+    {
+     "n": "Cayennepfeffer",
+     "a": "¼ TL",
+     "k": "cayenne"
+    },
+    {
+     "n": "Salz",
+     "a": "2 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Marinieren",
+     "d": "Hähnchen in dünne Streifen schneiden. Mit 30 g Olivenöl, allen Gyros-Gewürzen, 2 geriebenen Knoblauchzehen und 1 TL Salz mischen und mindestens 30 Minuten ziehen lassen. Zwiebeln in Streifen schneiden."
+    },
+    {
+     "t": "Tzatziki",
+     "d": "Gurke grob raspeln, mit ½ TL Salz 10 Minuten ziehen lassen und kräftig ausdrücken. Mit Skyr, 2 geriebenen Knoblauchzehen, 10 g Olivenöl, Pfeffer und optional Dill oder Minze verrühren. Kalt stellen."
+    },
+    {
+     "t": "Kritharaki",
+     "d": "Den leeren Topf wiegen. Tomatenmark darin 1 Minute anrösten, Passata und 600 ml Brühe dazu und aufkochen. Kritharaki einrühren und 10–12 Minuten unter häufigem Rühren köcheln, bis sie gar und sämig sind. Mit Salz und 1 TL Oregano abschmecken."
+    },
+    {
+     "t": "Gyros braten",
+     "d": "20 g Öl in der großen Pfanne sehr heiß werden lassen. Hähnchen in 2–3 Portionen scharf anbraten, bis es Röstränder hat. Die Zwiebeln mit der letzten Portion 3–4 Minuten mitbraten."
+    },
+    {
+     "t": "Portionieren",
+     "d": "Kritharaki wiegen und durch 8 teilen, Gyros ebenso darauf verteilen. Feta drüberbröseln (je 25 g). Tzatziki in 8 kleine Döschen (je ca. 100 g)."
+    }
+   ],
+   "tips": [
+    "Kritharaki sind griechische Nudeln in Reisform, du findest sie neben der Pasta. Orzo ist dasselbe."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "500 g",
+     530.0,
+     115.0,
+     0.0,
+     7.5
+    ],
+    [
+     "Zwiebeln",
+     "300 g",
+     105.0,
+     3.6,
+     18.0,
+     0.3
+    ],
+    [
+     "Olivenöl",
+     "60 g",
+     540.0,
+     0.0,
+     0.0,
+     60.0
+    ],
+    [
+     "Gyros-Gewürze",
+     "ca. 20 g",
+     64.0,
+     2.6,
+     6.0,
+     2.4
+    ],
+    [
+     "Kritharaki, roh",
+     "320 g",
+     1139.2,
+     40.0,
+     225.6,
+     5.8
+    ],
+    [
+     "Passierte Tomaten",
+     "500 g",
+     130.0,
+     6.5,
+     21.5,
+     1.0
+    ],
+    [
+     "Tomatenmark",
+     "70 g",
+     63.0,
+     3.1,
+     10.5,
+     0.3
+    ],
+    [
+     "Gemüsebrühe",
+     "600 ml",
+     24.0,
+     1.2,
+     2.4,
+     1.2
+    ],
+    [
+     "Skyr natur",
+     "500 g",
+     315.0,
+     55.0,
+     20.0,
+     1.0
+    ],
+    [
+     "Salatgurke",
+     "300 g",
+     39.0,
+     1.8,
+     6.0,
+     0.3
+    ],
+    [
+     "Knoblauch",
+     "16 g",
+     23.8,
+     1.0,
+     4.8,
+     0.1
+    ],
+    [
+     "Feta",
+     "200 g",
+     540.0,
+     34.0,
+     1.0,
+     44.0
+    ]
+   ],
+   "total": [
+    3513.0,
+    263.8,
+    315.8,
+    123.9
+   ],
+   "m": {
+    "kcal": 439,
+    "p": 33.0,
+    "kh": 39.5,
+    "f": 15.5
+   }
+  },
+  {
+   "id": "bolognese",
+   "name": "Spaghetti Bolognese",
+   "short": "Bolognese",
+   "desc": "Langsam geschmortes Ragù aus Rind und Pute mit Soffritto, Spaghetti und Parmesan.",
+   "protein": "Rind & Pute",
+   "base": "Nudeln",
+   "method": "Topf",
+   "time": 75,
+   "timeNote": "davon 45 Min. schmoren",
+   "fridge": "4 Tage",
+   "freeze": "3 Monate",
+   "items": [
+    {
+     "n": "Rinderhackfleisch (max. 20 % Fett)",
+     "a": "500 g",
+     "k": "rinderhack",
+     "q": 500,
+     "u": "g",
+     "h": "1 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Putenhackfleisch",
+     "a": "500 g",
+     "k": "putenhack",
+     "q": 500,
+     "u": "g",
+     "h": "1 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Spaghetti",
+     "a": "330 g",
+     "k": "spaghetti",
+     "q": 330,
+     "u": "g",
+     "h": "aus 500-g-Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "2 Stück (200 g)",
+     "k": "zwiebeln",
+     "q": 200,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Möhren",
+     "a": "2 Stück (200 g)",
+     "k": "moehren",
+     "q": 200,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Staudensellerie",
+     "a": "2 Stangen (150 g)",
+     "k": "staudensellerie",
+     "q": 2,
+     "u": "Stange",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Stückige Tomaten",
+     "a": "2 Dosen à 400 g",
+     "k": "tomaten-dose",
+     "q": 2,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Tomatenmark",
+     "a": "70 g",
+     "k": "tomatenmark",
+     "q": 70,
+     "u": "g",
+     "h": "kleine Dose",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Parmesan",
+     "a": "30 g",
+     "k": "parmesan",
+     "q": 30,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Rinderbrühe",
+     "a": "200 ml",
+     "k": "bruehe-rind",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Zucker",
+     "a": "1 TL (5 g)",
+     "k": "zucker",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Basilikum, frisch",
+     "a": "zum Servieren",
+     "k": "basilikum",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Oregano",
+     "a": "2 TL",
+     "k": "oregano"
+    },
+    {
+     "n": "Basilikum, getrocknet",
+     "a": "1 TL",
+     "k": "basilikum-getr"
+    },
+    {
+     "n": "Thymian",
+     "a": "1 TL",
+     "k": "thymian"
+    },
+    {
+     "n": "Lorbeerblätter",
+     "a": "2 Stück",
+     "k": "lorbeer"
+    },
+    {
+     "n": "Muskat",
+     "a": "1 Prise",
+     "k": "muskat"
+    },
+    {
+     "n": "Chiliflocken (optional)",
+     "a": "½ TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "2 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Vorbereiten",
+     "d": "Zwiebeln, Möhren und Sellerie sehr fein würfeln (oder im Zerkleinerer), Knoblauch hacken. Den leeren Topf wiegen."
+    },
+    {
+     "t": "Hack braten",
+     "d": "Rinderhack im großen Topf ohne Öl scharf krümelig braten, dann Putenhack dazu und alles braun braten."
+    },
+    {
+     "t": "Soffritto",
+     "d": "Gemüse dazugeben und 6–8 Minuten weich dünsten, Knoblauch 1 Minute mit."
+    },
+    {
+     "t": "Tomatenmark",
+     "d": "Tomatenmark 2 Minuten mitrösten."
+    },
+    {
+     "t": "Schmoren",
+     "d": "Tomaten, Brühe, Lorbeer, Oregano, Basilikum, Thymian und Zucker dazu. Zugedeckt mindestens 45 Minuten leise köcheln, gelegentlich umrühren. Länger schadet nicht. Mit Salz, Pfeffer und Muskat abschmecken."
+    },
+    {
+     "t": "Spaghetti",
+     "d": "Spaghetti in Salzwasser 2 Minuten kürzer kochen als angegeben, etwas Kochwasser aufheben, abgießen."
+    },
+    {
+     "t": "Mischen",
+     "d": "Lorbeer herausnehmen. Spaghetti mit dem Ragù und dem Parmesan mischen, mit etwas Kochwasser geschmeidig ziehen. Gemischt lässt es sich genau portionieren."
+    }
+   ],
+   "tips": [
+    "Das Ragù schmeckt am nächsten Tag noch runder. Du kannst es auch am Vorabend kochen und die Nudeln frisch dazu machen."
+   ],
+   "nut": [
+    [
+     "Rinderhackfleisch",
+     "500 g",
+     1175.0,
+     92.5,
+     0.0,
+     85.0
+    ],
+    [
+     "Putenhackfleisch",
+     "500 g",
+     625.0,
+     100.0,
+     0.0,
+     24.5
+    ],
+    [
+     "Spaghetti, roh",
+     "330 g",
+     1174.8,
+     41.2,
+     232.7,
+     5.9
+    ],
+    [
+     "Zwiebeln",
+     "200 g",
+     70.0,
+     2.4,
+     12.0,
+     0.2
+    ],
+    [
+     "Möhren",
+     "200 g",
+     72.0,
+     1.8,
+     14.0,
+     0.4
+    ],
+    [
+     "Staudensellerie",
+     "150 g",
+     24.0,
+     1.1,
+     3.3,
+     0.3
+    ],
+    [
+     "Knoblauch",
+     "16 g",
+     23.8,
+     1.0,
+     4.8,
+     0.1
+    ],
+    [
+     "Stückige Tomaten",
+     "800 g",
+     176.0,
+     8.0,
+     28.0,
+     1.6
+    ],
+    [
+     "Tomatenmark",
+     "70 g",
+     63.0,
+     3.1,
+     10.5,
+     0.3
+    ],
+    [
+     "Parmesan",
+     "30 g",
+     117.0,
+     9.9,
+     0.0,
+     8.4
+    ],
+    [
+     "Zucker",
+     "5 g",
+     20.0,
+     0.0,
+     5.0,
+     0.0
+    ],
+    [
+     "Gewürze",
+     "ca. 8 g",
+     25.6,
+     1.0,
+     2.4,
+     1.0
+    ]
+   ],
+   "total": [
+    3566.2,
+    262.0,
+    312.7,
+    127.7
+   ],
+   "m": {
+    "kcal": 446,
+    "p": 32.8,
+    "kh": 39.1,
+    "f": 16.0
+   }
+  },
+  {
+   "id": "lasagne",
+   "name": "Protein-Lasagne",
+   "short": "Lasagne",
+   "desc": "Rinder-Ragù mit Zucchini, cremige Quark-Béchamel und Mozzarella. Als Blech in 8 Stücke geschnitten.",
+   "protein": "Rind",
+   "base": "Nudeln",
+   "method": "Ofen",
+   "time": 90,
+   "timeNote": "davon 40 Min. backen",
+   "fridge": "4 Tage",
+   "freeze": "3 Monate",
+   "items": [
+    {
+     "n": "Rinderhackfleisch (max. 20 % Fett)",
+     "a": "500 g",
+     "k": "rinderhack",
+     "q": 500,
+     "u": "g",
+     "h": "1 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Lasagneplatten (ohne Vorkochen)",
+     "a": "250 g",
+     "k": "lasagne",
+     "q": 250,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "1–2 Stück (150 g)",
+     "k": "zwiebeln",
+     "q": 150,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Möhren",
+     "a": "1–2 Stück (150 g)",
+     "k": "moehren",
+     "q": 150,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zucchini",
+     "a": "1 Stück (ca. 300 g)",
+     "k": "zucchini",
+     "q": 1,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "3 Zehen",
+     "k": "knoblauch",
+     "q": 3,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Passierte Tomaten",
+     "a": "1 kg",
+     "k": "passata",
+     "q": 1000,
+     "u": "g",
+     "h": "2 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Tomatenmark",
+     "a": "70 g",
+     "k": "tomatenmark",
+     "q": 70,
+     "u": "g",
+     "h": "kleine Dose",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Magerquark",
+     "a": "500 g",
+     "k": "magerquark",
+     "q": 500,
+     "u": "g",
+     "h": "2 × 250 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Milch 1,5 %",
+     "a": "500 ml",
+     "k": "milch",
+     "q": 500,
+     "u": "ml",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Parmesan",
+     "a": "30 g",
+     "k": "parmesan",
+     "q": 30,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Mozzarella light",
+     "a": "125 g",
+     "k": "mozzarella-light",
+     "q": 125,
+     "u": "g",
+     "h": "1 Kugel",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Speisestärke",
+     "a": "15 g",
+     "k": "staerke",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    }
+   ],
+   "spices": [
+    {
+     "n": "Oregano",
+     "a": "2 TL",
+     "k": "oregano"
+    },
+    {
+     "n": "Basilikum, getrocknet",
+     "a": "1 TL",
+     "k": "basilikum-getr"
+    },
+    {
+     "n": "Thymian",
+     "a": "1 TL",
+     "k": "thymian"
+    },
+    {
+     "n": "Muskat",
+     "a": "frisch gerieben",
+     "k": "muskat"
+    },
+    {
+     "n": "Chiliflocken (optional)",
+     "a": "½ TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "2 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Ragù",
+     "d": "Zwiebeln und Möhren fein würfeln, Zucchini in 1-cm-Würfel, Knoblauch hacken. Hack im Topf ohne Öl krümelig braun braten. Zwiebeln und Möhren 5 Minuten mitbraten, Knoblauch und Tomatenmark 2 Minuten rösten. Passata, 200 ml Wasser, Kräuter, Salz und Pfeffer dazu und 15 Minuten köcheln, Zucchini die letzten 5 Minuten. Die Sauce darf ruhig flüssig sein, die Platten saugen."
+    },
+    {
+     "t": "Quark-Béchamel",
+     "d": "Milch mit der Stärke glatt rühren und unter Rühren aufkochen, bis sie andickt. Vom Herd nehmen, Magerquark und Parmesan einrühren und mit Salz, Pfeffer und Muskat würzen."
+    },
+    {
+     "t": "Schichten",
+     "d": "Ofen auf 180 °C Umluft vorheizen. Eine große Auflaufform (ca. 30 × 40 cm) leer wiegen. Etwas Ragù auf den Boden, dann abwechselnd Platten, Ragù und Béchamel in 3–4 Lagen. Oben Béchamel und zerzupfter Mozzarella."
+    },
+    {
+     "t": "Backen",
+     "d": "35–40 Minuten backen, bis die Oberfläche goldbraun ist und ein Messer leicht durch die Platten geht. 10 Minuten ruhen lassen."
+    },
+    {
+     "t": "Portionieren",
+     "d": "In 2 × 4 gleich große Stücke schneiden. Genauer: Form wiegen, Leergewicht abziehen, durch 8 teilen."
+    }
+   ],
+   "tips": [
+    "Für mehr Volumen passt eine Handvoll Babyspinat in die Ragù-Schicht, das ändert die Werte kaum."
+   ],
+   "nut": [
+    [
+     "Rinderhackfleisch",
+     "500 g",
+     1175.0,
+     92.5,
+     0.0,
+     85.0
+    ],
+    [
+     "Lasagneplatten, roh",
+     "250 g",
+     890.0,
+     31.2,
+     176.2,
+     4.5
+    ],
+    [
+     "Zwiebeln",
+     "150 g",
+     52.5,
+     1.8,
+     9.0,
+     0.1
+    ],
+    [
+     "Möhren",
+     "150 g",
+     54.0,
+     1.4,
+     10.5,
+     0.3
+    ],
+    [
+     "Zucchini",
+     "300 g",
+     57.0,
+     4.5,
+     6.6,
+     1.2
+    ],
+    [
+     "Knoblauch",
+     "12 g",
+     17.9,
+     0.8,
+     3.6,
+     0.1
+    ],
+    [
+     "Passierte Tomaten",
+     "1.000 g",
+     260.0,
+     13.0,
+     43.0,
+     2.0
+    ],
+    [
+     "Tomatenmark",
+     "70 g",
+     63.0,
+     3.1,
+     10.5,
+     0.3
+    ],
+    [
+     "Magerquark",
+     "500 g",
+     335.0,
+     60.0,
+     20.0,
+     1.0
+    ],
+    [
+     "Milch 1,5 %",
+     "500 ml",
+     235.0,
+     17.0,
+     24.0,
+     7.5
+    ],
+    [
+     "Speisestärke",
+     "15 g",
+     52.5,
+     0.0,
+     12.9,
+     0.0
+    ],
+    [
+     "Parmesan",
+     "30 g",
+     117.0,
+     9.9,
+     0.0,
+     8.4
+    ],
+    [
+     "Mozzarella light",
+     "125 g",
+     200.0,
+     23.8,
+     1.2,
+     11.2
+    ],
+    [
+     "Gewürze",
+     "ca. 8 g",
+     25.6,
+     1.0,
+     2.4,
+     1.0
+    ]
+   ],
+   "total": [
+    3534.5,
+    260.0,
+    319.9,
+    122.6
+   ],
+   "m": {
+    "kcal": 442,
+    "p": 32.5,
+    "kh": 40.0,
+    "f": 15.3
+   }
+  },
+  {
+   "id": "ofen-haehnchen",
+   "name": "Ofen-Hähnchen mit Kartoffeln & Kräuterquark",
+   "short": "Ofen-Hähnchen",
+   "desc": "Hähnchen, Kartoffeln, Paprika und Zucchini vom Blech mit Rosmarin, dazu kalter Kräuterquark.",
+   "protein": "Hähnchen",
+   "base": "Kartoffeln",
+   "method": "Ofen",
+   "time": 60,
+   "timeNote": "davon 45 Min. im Ofen",
+   "fridge": "4 Tage",
+   "freeze": "2 Monate, ohne Quark",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "400 g",
+     "k": "haehnchenbrust",
+     "q": 400,
+     "u": "g",
+     "h": "1 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Hähnchen-Oberkeulenfilet",
+     "a": "500 g",
+     "k": "haehnchenkeule",
+     "q": 500,
+     "u": "g",
+     "h": "1 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kartoffeln, festkochend",
+     "a": "1,5 kg",
+     "k": "kartoffeln",
+     "q": 1500,
+     "u": "g",
+     "h": "aus 2-kg-Beutel",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Paprika",
+     "a": "3 Stück (ca. 480 g)",
+     "k": "paprika",
+     "q": 3,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zucchini",
+     "a": "2 Stück (ca. 600 g)",
+     "k": "zucchini",
+     "q": 2,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Rote Zwiebeln",
+     "a": "3 Stück (300 g)",
+     "k": "rote-zwiebeln",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "1 Knolle (8 Zehen)",
+     "k": "knoblauch",
+     "q": 8,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Magerquark",
+     "a": "250 g",
+     "k": "magerquark",
+     "q": 250,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zitrone",
+     "a": "1 Stück",
+     "k": "zitrone",
+     "q": 1,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "TK-Kräuter",
+     "a": "2 EL",
+     "k": "tk-kraeuter",
+     "q": 1,
+     "u": "Pck",
+     "h": "oder frische Kräuter",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Olivenöl",
+     "a": "70 g",
+     "k": "olivenoel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "2 EL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Paprika geräuchert",
+     "a": "2 TL",
+     "k": "paprika-geraeuchert"
+    },
+    {
+     "n": "Rosmarin, getrocknet",
+     "a": "1 EL",
+     "k": "rosmarin"
+    },
+    {
+     "n": "Thymian",
+     "a": "1 TL",
+     "k": "thymian"
+    },
+    {
+     "n": "Oregano",
+     "a": "1 TL",
+     "k": "oregano"
+    },
+    {
+     "n": "Chiliflocken",
+     "a": "½ TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "2½ TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Ofen",
+     "d": "Ofen auf 220 °C Ober-/Unterhitze (200 °C Umluft) vorheizen. Zwei Bleche mit Backpapier belegen."
+    },
+    {
+     "t": "Kartoffeln vorbacken",
+     "d": "Kartoffeln gründlich waschen, mit Schale in 2-cm-Würfel schneiden. Mit 40 g Öl, 1 EL Paprika, dem Rosmarin und 1 TL Salz mischen, auf beide Bleche verteilen und 20 Minuten backen."
+    },
+    {
+     "t": "Hähnchen und Gemüse",
+     "d": "Hähnchen in 3-cm-Stücke schneiden, mit 20 g Öl, restlichem Paprika, Thymian, Oregano, Chili und 1 TL Salz mischen. Paprika, Zucchini und Zwiebeln grob schneiden, mit 10 g Öl und Salz mischen. Knoblauchzehen ungeschält andrücken, eine Zehe für den Quark aufheben."
+    },
+    {
+     "t": "Fertig backen",
+     "d": "Hähnchen, Gemüse und Knoblauch zu den Kartoffeln geben, alles wenden und 20–25 Minuten weiterbacken, bis das Hähnchen durch ist und die Kartoffeln goldbraun sind."
+    },
+    {
+     "t": "Kräuterquark",
+     "d": "Quark mit Kräutern, Saft einer halben Zitrone, der geriebenen Knoblauchzehe, Salz, Pfeffer und 2–3 EL Wasser glatt rühren. In 8 kleine Döschen (je ca. 32 g)."
+    },
+    {
+     "t": "Portionieren",
+     "d": "Alles vom Blech in eine große Schüssel, gut mischen, wiegen und durch 8 teilen. Gerösteten Knoblauch aus der Schale drücken und untermischen."
+    }
+   ],
+   "tips": [
+    "Nicht zu voll packen: Liegt alles übereinander, dämpft es statt zu rösten. Lieber auf zwei Bleche verteilen."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "400 g",
+     424.0,
+     92.0,
+     0.0,
+     6.0
+    ],
+    [
+     "Hähnchen-Oberkeulenfilet",
+     "500 g",
+     730.0,
+     93.5,
+     0.0,
+     39.5
+    ],
+    [
+     "Kartoffeln",
+     "1.500 g",
+     1080.0,
+     30.0,
+     232.5,
+     1.5
+    ],
+    [
+     "Paprika",
+     "480 g",
+     134.4,
+     4.8,
+     21.6,
+     1.4
+    ],
+    [
+     "Zucchini",
+     "600 g",
+     114.0,
+     9.0,
+     13.2,
+     2.4
+    ],
+    [
+     "Rote Zwiebeln",
+     "300 g",
+     105.0,
+     3.6,
+     18.0,
+     0.3
+    ],
+    [
+     "Olivenöl",
+     "70 g",
+     630.0,
+     0.0,
+     0.0,
+     70.0
+    ],
+    [
+     "Gewürze",
+     "ca. 20 g",
+     64.0,
+     2.6,
+     6.0,
+     2.4
+    ],
+    [
+     "Knoblauch",
+     "30 g",
+     44.7,
+     1.9,
+     9.0,
+     0.1
+    ],
+    [
+     "Magerquark",
+     "250 g",
+     167.5,
+     30.0,
+     10.0,
+     0.5
+    ],
+    [
+     "Zitronensaft",
+     "20 g",
+     5.0,
+     0.1,
+     0.5,
+     0.0
+    ]
+   ],
+   "total": [
+    3498.6,
+    267.5,
+    310.8,
+    124.1
+   ],
+   "m": {
+    "kcal": 437,
+    "p": 33.4,
+    "kh": 38.9,
+    "f": 15.5
+   }
+  },
+  {
+   "id": "erdnuss-nudeln",
+   "name": "Erdnuss-Nudelpfanne mit Hähnchen",
+   "short": "Erdnuss-Nudeln",
+   "desc": "Mie-Nudeln, Hähnchen und viel knackiges Gemüse in Erdnuss-Limetten-Sauce.",
+   "protein": "Hähnchen",
+   "base": "Nudeln",
+   "method": "Wok / Pfanne",
+   "time": 35,
+   "timeNote": "",
+   "fridge": "4 Tage",
+   "freeze": "2 Monate",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "800 g",
+     "k": "haehnchenbrust",
+     "q": 800,
+     "u": "g",
+     "h": "2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Mie-Nudeln",
+     "a": "250 g",
+     "k": "mie",
+     "q": 250,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Paprika",
+     "a": "3 Stück (ca. 480 g)",
+     "k": "paprika",
+     "q": 3,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Möhren",
+     "a": "3 Stück (300 g)",
+     "k": "moehren",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Spitzkohl",
+     "a": "400 g (ca. ½ Kopf)",
+     "k": "spitzkohl",
+     "q": 400,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Frühlingszwiebeln",
+     "a": "1 Bund",
+     "k": "fruehlingszwiebeln",
+     "q": 1,
+     "u": "Bund",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Erdnussbutter (creamy oder crunchy)",
+     "a": "140 g",
+     "k": "erdnussbutter",
+     "q": 140,
+     "u": "g",
+     "h": "Glas",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Limetten",
+     "a": "2 Stück",
+     "k": "limette",
+     "q": 2,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Ingwer",
+     "a": "20 g",
+     "k": "ingwer",
+     "q": 20,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Sojasauce",
+     "a": "100 ml",
+     "k": "sojasauce",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Honig",
+     "a": "40 g (2 EL)",
+     "k": "honig",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Öl, neutral",
+     "a": "30 g",
+     "k": "oel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Sriracha",
+     "a": "1–2 TL",
+     "k": "sriracha",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    }
+   ],
+   "spices": [
+    {
+     "n": "Chiliflocken (optional)",
+     "a": "nach Schärfe",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "für das Nudelwasser",
+     "k": "salz"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Sauce anrühren",
+     "d": "Erdnussbutter, Sojasauce, Honig, Limettensaft, geriebenen Knoblauch und Ingwer, Sriracha und 150 ml heißes Wasser glatt rühren. Sie soll dickflüssig sein."
+    },
+    {
+     "t": "Vorbereiten",
+     "d": "Hähnchen in Streifen schneiden. Paprika in Streifen, Möhren in feine Stifte, Spitzkohl in feine Streifen, Frühlingszwiebeln in Ringe. Den leeren Topf wiegen."
+    },
+    {
+     "t": "Nudeln",
+     "d": "Mie-Nudeln nach Packung kochen (meist 4 Minuten), abgießen und kurz kalt abschrecken, damit sie nicht weiter garen."
+    },
+    {
+     "t": "Hähnchen braten",
+     "d": "15 g Öl im Wok oder in der großen Pfanne stark erhitzen und das Hähnchen in 2 Portionen je 4 Minuten braten. Herausnehmen."
+    },
+    {
+     "t": "Gemüse",
+     "d": "Restliche 15 g Öl in die Pfanne, Möhren und Paprika 3 Minuten braten, Spitzkohl 2 Minuten mit. Das Gemüse soll knackig bleiben."
+    },
+    {
+     "t": "Alles zusammen",
+     "d": "Nudeln, Hähnchen und Sauce in den großen Topf geben und 2 Minuten schwenken. Frühlingszwiebeln unterheben und mit Sojasauce und Limette abschmecken."
+    }
+   ],
+   "tips": [
+    "Vor dem Aufwärmen 1–2 EL Wasser dazugeben, die Erdnusssauce dickt im Kühlschrank nach."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "800 g",
+     848.0,
+     184.0,
+     0.0,
+     12.0
+    ],
+    [
+     "Mie-Nudeln, roh",
+     "250 g",
+     905.0,
+     32.5,
+     175.0,
+     6.2
+    ],
+    [
+     "Paprika",
+     "480 g",
+     134.4,
+     4.8,
+     21.6,
+     1.4
+    ],
+    [
+     "Möhren",
+     "300 g",
+     108.0,
+     2.7,
+     21.0,
+     0.6
+    ],
+    [
+     "Spitzkohl",
+     "400 g",
+     100.0,
+     5.2,
+     16.0,
+     0.8
+    ],
+    [
+     "Frühlingszwiebeln",
+     "100 g",
+     30.0,
+     1.8,
+     4.5,
+     0.3
+    ],
+    [
+     "Erdnussbutter",
+     "140 g",
+     840.0,
+     35.0,
+     16.8,
+     70.0
+    ],
+    [
+     "Sojasauce",
+     "100 ml",
+     70.0,
+     9.0,
+     5.0,
+     0.0
+    ],
+    [
+     "Honig",
+     "40 g",
+     128.0,
+     0.2,
+     32.0,
+     0.0
+    ],
+    [
+     "Limettensaft",
+     "60 g",
+     15.0,
+     0.2,
+     1.5,
+     0.1
+    ],
+    [
+     "Knoblauch",
+     "16 g",
+     23.8,
+     1.0,
+     4.8,
+     0.1
+    ],
+    [
+     "Ingwer",
+     "20 g",
+     16.0,
+     0.4,
+     3.2,
+     0.2
+    ],
+    [
+     "Öl",
+     "30 g",
+     270.0,
+     0.0,
+     0.0,
+     30.0
+    ],
+    [
+     "Gewürze & Sriracha",
+     "ca. 3 g",
+     9.6,
+     0.4,
+     0.9,
+     0.4
+    ]
+   ],
+   "total": [
+    3497.8,
+    277.2,
+    302.3,
+    122.1
+   ],
+   "m": {
+    "kcal": 437,
+    "p": 34.6,
+    "kh": 37.8,
+    "f": 15.3
+   }
+  },
+  {
+   "id": "geschnetzeltes",
+   "name": "Puten-Geschnetzeltes mit Champignons & Reis",
+   "short": "Geschnetzeltes",
+   "desc": "Zarte Putenstreifen und kräftig gebratene Champignons in Rahmsauce mit Senf und Thymian.",
+   "protein": "Pute",
+   "base": "Reis",
+   "method": "Pfanne",
+   "time": 40,
+   "timeNote": "",
+   "fridge": "4 Tage",
+   "freeze": "2 Monate",
+   "items": [
+    {
+     "n": "Putenbrust, geschnetzelt",
+     "a": "800 g",
+     "k": "putenbrust",
+     "q": 800,
+     "u": "g",
+     "h": "2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Champignons",
+     "a": "800 g",
+     "k": "champignons",
+     "q": 800,
+     "u": "g",
+     "h": "2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "2 Stück (200 g)",
+     "k": "zwiebeln",
+     "q": 200,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "2 Zehen",
+     "k": "knoblauch",
+     "q": 2,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kochsahne 15 %",
+     "a": "400 g",
+     "k": "kochsahne",
+     "q": 400,
+     "u": "g",
+     "h": "2 Becher à 200 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Schmand",
+     "a": "200 g",
+     "k": "schmand",
+     "q": 200,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Basmatireis",
+     "a": "330 g",
+     "k": "reis",
+     "q": 330,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Hühner- oder Gemüsebrühe",
+     "a": "300 ml",
+     "k": "bruehe-huhn",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Senf, mittelscharf",
+     "a": "1 EL",
+     "k": "senf",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Speisestärke",
+     "a": "10 g",
+     "k": "staerke",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Öl, neutral",
+     "a": "10 g",
+     "k": "oel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Petersilie, frisch",
+     "a": "½ Bund",
+     "k": "petersilie",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "2 TL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Thymian",
+     "a": "1 TL",
+     "k": "thymian"
+    },
+    {
+     "n": "Muskat",
+     "a": "1 Prise",
+     "k": "muskat"
+    },
+    {
+     "n": "Salz",
+     "a": "2 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Reis",
+     "d": "330 g Basmati waschen, mit 500 ml Wasser und einer Prise Salz aufkochen, zugedeckt 12 Minuten auf kleinster Hitze garen und 10 Minuten ruhen lassen."
+    },
+    {
+     "t": "Vorbereiten",
+     "d": "Champignons in Scheiben, Zwiebeln in feine Würfel schneiden, Knoblauch hacken. Pute trocken tupfen und mit Paprika, Salz und Pfeffer würzen. Die leere Pfanne oder den Bräter wiegen."
+    },
+    {
+     "t": "Pute anbraten",
+     "d": "Öl in der großen Pfanne stark erhitzen und die Pute in 2 Portionen je 2–3 Minuten scharf anbraten. Herausnehmen, sie gart später fertig."
+    },
+    {
+     "t": "Champignons",
+     "d": "Champignons in die heiße Pfanne geben und 4 Minuten nicht rühren, damit sie bräunen statt Wasser zu ziehen. Dann Zwiebeln 3 Minuten und Knoblauch 1 Minute mitbraten."
+    },
+    {
+     "t": "Sauce",
+     "d": "Mit der Brühe ablöschen und den Bratensatz lösen. Kochsahne, Schmand, Senf und Thymian einrühren und aufkochen. Speisestärke in 3 EL Wasser verrühren und die Sauce damit binden."
+    },
+    {
+     "t": "Fertig garen",
+     "d": "Pute samt Saft zurückgeben und 3 Minuten ziehen lassen, nicht mehr kochen. Mit Salz, Pfeffer und Muskat abschmecken."
+    },
+    {
+     "t": "Mischen",
+     "d": "Reis unterheben, wiegen und portionieren. Petersilie erst beim Essen drüber."
+    }
+   ],
+   "tips": [
+    "Putenbrust wird schnell trocken. Lieber kurz und heiß anbraten und in der Sauce nur ziehen lassen."
+   ],
+   "nut": [
+    [
+     "Putenbrust",
+     "800 g",
+     840.0,
+     192.0,
+     0.0,
+     8.0
+    ],
+    [
+     "Champignons",
+     "800 g",
+     176.0,
+     24.0,
+     4.0,
+     2.4
+    ],
+    [
+     "Zwiebeln",
+     "200 g",
+     70.0,
+     2.4,
+     12.0,
+     0.2
+    ],
+    [
+     "Knoblauch",
+     "8 g",
+     11.9,
+     0.5,
+     2.4,
+     0.0
+    ],
+    [
+     "Kochsahne 15 %",
+     "400 g",
+     640.0,
+     11.2,
+     15.2,
+     60.0
+    ],
+    [
+     "Schmand",
+     "200 g",
+     480.0,
+     5.2,
+     7.0,
+     48.0
+    ],
+    [
+     "Brühe",
+     "300 ml",
+     12.0,
+     0.6,
+     1.2,
+     0.6
+    ],
+    [
+     "Senf",
+     "15 g",
+     13.5,
+     0.9,
+     0.8,
+     0.6
+    ],
+    [
+     "Speisestärke",
+     "10 g",
+     35.0,
+     0.0,
+     8.6,
+     0.0
+    ],
+    [
+     "Öl",
+     "10 g",
+     90.0,
+     0.0,
+     0.0,
+     10.0
+    ],
+    [
+     "Basmatireis, roh",
+     "330 g",
+     1155.0,
+     26.4,
+     254.1,
+     2.0
+    ],
+    [
+     "Gewürze",
+     "ca. 6 g",
+     19.2,
+     0.8,
+     1.8,
+     0.7
+    ]
+   ],
+   "total": [
+    3542.6,
+    264.0,
+    307.1,
+    132.5
+   ],
+   "m": {
+    "kcal": 443,
+    "p": 33.0,
+    "kh": 38.4,
+    "f": 16.6
+   }
+  },
+  {
+   "id": "balkan-pfanne",
+   "name": "Balkan-Hackpfanne mit Kartoffeln, Ajvar & Feta",
+   "short": "Balkan-Hackpfanne",
+   "desc": "Gewürztes Putenhack, angebratene Kartoffeln und Paprika, geschmort in Ajvar, mit Feta obendrauf.",
+   "protein": "Pute",
+   "base": "Kartoffeln",
+   "method": "Pfanne",
+   "time": 45,
+   "timeNote": "",
+   "fridge": "4 Tage",
+   "freeze": "2 Monate",
+   "items": [
+    {
+     "n": "Putenhackfleisch",
+     "a": "1 kg",
+     "k": "putenhack",
+     "q": 1000,
+     "u": "g",
+     "h": "2 × 500 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kartoffeln, festkochend",
+     "a": "1,45 kg",
+     "k": "kartoffeln",
+     "q": 1450,
+     "u": "g",
+     "h": "aus 2-kg-Beutel",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Paprika",
+     "a": "3 Stück (ca. 480 g)",
+     "k": "paprika",
+     "q": 3,
+     "u": "Stk",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebeln",
+     "a": "3 Stück (300 g)",
+     "k": "zwiebeln",
+     "q": 300,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Ajvar, mild",
+     "a": "1 Glas (350 g)",
+     "k": "ajvar",
+     "q": 1,
+     "u": "Glas",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Feta",
+     "a": "200 g",
+     "k": "feta",
+     "q": 200,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Öl, neutral",
+     "a": "10 g",
+     "k": "oel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Gemüsebrühe",
+     "a": "300 ml",
+     "k": "bruehe-gemuese",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Petersilie, frisch",
+     "a": "½ Bund",
+     "k": "petersilie",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Paprika edelsüß",
+     "a": "1 EL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Paprika geräuchert",
+     "a": "1 TL",
+     "k": "paprika-geraeuchert"
+    },
+    {
+     "n": "Kreuzkümmel, gemahlen",
+     "a": "1 TL",
+     "k": "kreuzkuemmel"
+    },
+    {
+     "n": "Oregano",
+     "a": "1 TL",
+     "k": "oregano"
+    },
+    {
+     "n": "Majoran",
+     "a": "1 TL",
+     "k": "majoran"
+    },
+    {
+     "n": "Chiliflocken",
+     "a": "½ TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Knoblauchpulver",
+     "a": "½ TL",
+     "k": "knoblauchpulver"
+    },
+    {
+     "n": "Salz",
+     "a": "2 TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Kartoffeln vorgaren",
+     "d": "Kartoffeln mit Schale in 1,5-cm-Würfel schneiden und 7–8 Minuten in Salzwasser vorkochen, sie sollen noch Biss haben. Abgießen und ausdampfen lassen."
+    },
+    {
+     "t": "Hack braten",
+     "d": "Öl im großen Bräter oder in der größten Pfanne erhitzen, Putenhack krümelig braun braten und mit Paprikapulver, Kreuzkümmel, Knoblauchpulver und 1 TL Salz würzen. Herausnehmen. Den leeren Topf vorher wiegen, falls du darin portionierst."
+    },
+    {
+     "t": "Gemüse",
+     "d": "Zwiebeln in Streifen und Paprika in Stücke schneiden, in der Pfanne 5 Minuten braten, Knoblauch 1 Minute mit."
+    },
+    {
+     "t": "Kartoffeln anbraten",
+     "d": "Kartoffeln dazugeben und 8–10 Minuten braten, bis die Ränder bräunen."
+    },
+    {
+     "t": "Schmoren",
+     "d": "Hack, Ajvar, Brühe, Oregano, Majoran und Chili dazu und 5 Minuten schmoren, bis alles sämig ist. Mit Salz und Pfeffer abschmecken."
+    },
+    {
+     "t": "Portionieren",
+     "d": "Wiegen und durch 8 teilen. Feta über jede Box bröseln (je 25 g), Petersilie erst beim Essen."
+    }
+   ],
+   "tips": [
+    "Ajvar gibt es mild und scharf. Mit scharfem Ajvar kannst du die Chiliflocken weglassen."
+   ],
+   "nut": [
+    [
+     "Putenhackfleisch",
+     "1.000 g",
+     1250.0,
+     200.0,
+     0.0,
+     49.0
+    ],
+    [
+     "Kartoffeln",
+     "1.450 g",
+     1044.0,
+     29.0,
+     224.8,
+     1.4
+    ],
+    [
+     "Paprika",
+     "480 g",
+     134.4,
+     4.8,
+     21.6,
+     1.4
+    ],
+    [
+     "Zwiebeln",
+     "300 g",
+     105.0,
+     3.6,
+     18.0,
+     0.3
+    ],
+    [
+     "Knoblauch",
+     "16 g",
+     23.8,
+     1.0,
+     4.8,
+     0.1
+    ],
+    [
+     "Ajvar",
+     "350 g",
+     315.0,
+     5.2,
+     31.5,
+     17.5
+    ],
+    [
+     "Gemüsebrühe",
+     "300 ml",
+     12.0,
+     0.6,
+     1.2,
+     0.6
+    ],
+    [
+     "Feta",
+     "200 g",
+     540.0,
+     34.0,
+     1.0,
+     44.0
+    ],
+    [
+     "Öl",
+     "10 g",
+     90.0,
+     0.0,
+     0.0,
+     10.0
+    ],
+    [
+     "Gewürze",
+     "ca. 15 g",
+     48.0,
+     1.9,
+     4.5,
+     1.8
+    ]
+   ],
+   "total": [
+    3562.2,
+    280.1,
+    307.4,
+    126.1
+   ],
+   "m": {
+    "kcal": 445,
+    "p": 35.0,
+    "kh": 38.4,
+    "f": 15.8
+   }
+  },
+  {
+   "id": "gnocchi",
+   "name": "Hähnchen-Gnocchi-Pfanne mit Tomate & Spinat",
+   "short": "Gnocchi-Pfanne",
+   "desc": "Knusprig gebratene Gnocchi, Hähnchen und Kirschtomaten in cremiger Tomatensauce mit Parmesan.",
+   "protein": "Hähnchen",
+   "base": "Gnocchi",
+   "method": "Pfanne",
+   "time": 35,
+   "timeNote": "",
+   "fridge": "3 Tage",
+   "freeze": "2 Monate",
+   "items": [
+    {
+     "n": "Hähnchenbrustfilet",
+     "a": "800 g",
+     "k": "haehnchenbrust",
+     "q": 800,
+     "u": "g",
+     "h": "2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Gnocchi (Kühlregal)",
+     "a": "800 g",
+     "k": "gnocchi",
+     "q": 800,
+     "u": "g",
+     "h": "2 × 400 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kirschtomaten",
+     "a": "500 g",
+     "k": "kirschtomaten",
+     "q": 500,
+     "u": "g",
+     "h": "2 Schalen à 250 g",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Babyspinat",
+     "a": "200 g",
+     "k": "spinat",
+     "q": 200,
+     "u": "g",
+     "h": "1 Beutel",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Zwiebel",
+     "a": "1 Stück (100 g)",
+     "k": "zwiebeln",
+     "q": 100,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Knoblauch",
+     "a": "4 Zehen",
+     "k": "knoblauch",
+     "q": 4,
+     "u": "Zehe",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Passierte Tomaten",
+     "a": "500 g",
+     "k": "passata",
+     "q": 500,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Frischkäse leicht",
+     "a": "200 g",
+     "k": "frischkaese",
+     "q": 200,
+     "u": "g",
+     "h": "1 Packung",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Kochsahne 15 %",
+     "a": "200 g",
+     "k": "kochsahne",
+     "q": 200,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Parmesan",
+     "a": "50 g",
+     "k": "parmesan",
+     "q": 50,
+     "u": "g",
+     "h": "",
+     "pantry": false,
+     "opt": false
+    },
+    {
+     "n": "Olivenöl",
+     "a": "35 g",
+     "k": "olivenoel",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Gemüsebrühe (Pulver)",
+     "a": "1 TL",
+     "k": "bruehe-gemuese",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": true,
+     "opt": false
+    },
+    {
+     "n": "Basilikum, frisch",
+     "a": "zum Servieren",
+     "k": "basilikum",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": true
+    }
+   ],
+   "spices": [
+    {
+     "n": "Italienische Kräuter",
+     "a": "2 TL",
+     "k": "ital-kraeuter"
+    },
+    {
+     "n": "Paprika edelsüß",
+     "a": "1 TL",
+     "k": "paprika-edelsuess"
+    },
+    {
+     "n": "Chiliflocken",
+     "a": "½ TL",
+     "k": "chiliflocken"
+    },
+    {
+     "n": "Salz",
+     "a": "1½ TL",
+     "k": "salz"
+    },
+    {
+     "n": "Pfeffer",
+     "a": "1 TL",
+     "k": "pfeffer"
+    }
+   ],
+   "steps": [
+    {
+     "t": "Gnocchi braten",
+     "d": "Gnocchi aus der Packung direkt mit 15 g Öl in der großen Pfanne 6–8 Minuten goldbraun braten, nicht kochen. Herausnehmen. Den großen Topf zum Mischen leer wiegen."
+    },
+    {
+     "t": "Hähnchen",
+     "d": "Hähnchen in Würfel schneiden, mit Paprika, Salz und Pfeffer würzen und mit 15 g Öl in 2 Portionen je 3 Minuten anbraten. Herausnehmen."
+    },
+    {
+     "t": "Tomaten",
+     "d": "Restliche 5 g Öl in die Pfanne, Zwiebel 3 Minuten, Knoblauch 1 Minute braten. Halbierte Kirschtomaten 3 Minuten mitbraten, bis sie leicht aufplatzen."
+    },
+    {
+     "t": "Sauce",
+     "d": "Passata, Kochsahne, Frischkäse, Brühpulver und Kräuter einrühren und 5 Minuten köcheln."
+    },
+    {
+     "t": "Spinat und Hähnchen",
+     "d": "Spinat handvollweise unterheben. Hähnchen zurückgeben und 4 Minuten ziehen lassen, bis es durch ist. Parmesan einrühren."
+    },
+    {
+     "t": "Mischen",
+     "d": "Alles mit den Gnocchi im großen Topf mischen, wiegen und portionieren."
+    }
+   ],
+   "tips": [
+    "Die Gnocchi werden in der Box weicher. Wer sie knusprig mag, lagert sie getrennt und brät sie beim Aufwärmen kurz an."
+   ],
+   "nut": [
+    [
+     "Hähnchenbrustfilet",
+     "800 g",
+     848.0,
+     184.0,
+     0.0,
+     12.0
+    ],
+    [
+     "Gnocchi",
+     "800 g",
+     1200.0,
+     28.8,
+     256.0,
+     4.0
+    ],
+    [
+     "Kirschtomaten",
+     "500 g",
+     100.0,
+     5.0,
+     15.0,
+     1.0
+    ],
+    [
+     "Babyspinat",
+     "200 g",
+     46.0,
+     5.6,
+     2.0,
+     0.8
+    ],
+    [
+     "Zwiebel",
+     "100 g",
+     35.0,
+     1.2,
+     6.0,
+     0.1
+    ],
+    [
+     "Knoblauch",
+     "16 g",
+     23.8,
+     1.0,
+     4.8,
+     0.1
+    ],
+    [
+     "Passierte Tomaten",
+     "500 g",
+     130.0,
+     6.5,
+     21.5,
+     1.0
+    ],
+    [
+     "Frischkäse leicht",
+     "200 g",
+     290.0,
+     14.0,
+     9.0,
+     22.0
+    ],
+    [
+     "Kochsahne 15 %",
+     "200 g",
+     320.0,
+     5.6,
+     7.6,
+     30.0
+    ],
+    [
+     "Parmesan",
+     "50 g",
+     195.0,
+     16.5,
+     0.0,
+     14.0
+    ],
+    [
+     "Olivenöl",
+     "35 g",
+     315.0,
+     0.0,
+     0.0,
+     35.0
+    ],
+    [
+     "Gewürze & Brühpulver",
+     "ca. 6 g",
+     19.2,
+     0.8,
+     1.8,
+     0.7
+    ]
+   ],
+   "total": [
+    3522.0,
+    269.0,
+    323.7,
+    120.7
+   ],
+   "m": {
+    "kcal": 440,
+    "p": 33.6,
+    "kh": 40.5,
+    "f": 15.1
+   }
+  }
+ ],
+ "katalog": {
+  "rinderhack": {
+   "n": "Rinderhackfleisch",
+   "c": "fleisch"
+  },
+  "putenhack": {
+   "n": "Putenhackfleisch",
+   "c": "fleisch"
+  },
+  "rindergulasch": {
+   "n": "Rindergulasch, mager",
+   "c": "fleisch"
+  },
+  "haehnchenbrust": {
+   "n": "Hähnchenbrustfilet",
+   "c": "fleisch"
+  },
+  "haehnchenkeule": {
+   "n": "Hähnchen-Oberkeulenfilet",
+   "c": "fleisch"
+  },
+  "putenbrust": {
+   "n": "Putenbrust, geschnetzelt",
+   "c": "fleisch"
+  },
+  "zwiebeln": {
+   "n": "Zwiebeln",
+   "c": "obst"
+  },
+  "rote-zwiebeln": {
+   "n": "Rote Zwiebeln",
+   "c": "obst"
+  },
+  "knoblauch": {
+   "n": "Knoblauch",
+   "c": "obst"
+  },
+  "ingwer": {
+   "n": "Ingwer",
+   "c": "obst"
+  },
+  "paprika": {
+   "n": "Paprika",
+   "c": "obst"
+  },
+  "zucchini": {
+   "n": "Zucchini",
+   "c": "obst"
+  },
+  "brokkoli": {
+   "n": "Brokkoli",
+   "c": "obst"
+  },
+  "moehren": {
+   "n": "Möhren",
+   "c": "obst"
+  },
+  "champignons": {
+   "n": "Champignons",
+   "c": "obst"
+  },
+  "spinat": {
+   "n": "Babyspinat",
+   "c": "obst"
+  },
+  "zuckerschoten": {
+   "n": "Zuckerschoten",
+   "c": "obst"
+  },
+  "fruehlingszwiebeln": {
+   "n": "Frühlingszwiebeln",
+   "c": "obst"
+  },
+  "spitzkohl": {
+   "n": "Spitzkohl",
+   "c": "obst"
+  },
+  "gurke": {
+   "n": "Salatgurke",
+   "c": "obst"
+  },
+  "tomaten": {
+   "n": "Tomaten",
+   "c": "obst"
+  },
+  "kirschtomaten": {
+   "n": "Kirschtomaten",
+   "c": "obst"
+  },
+  "kartoffeln": {
+   "n": "Kartoffeln, festkochend",
+   "c": "obst"
+  },
+  "suesskartoffel": {
+   "n": "Süßkartoffeln",
+   "c": "obst"
+  },
+  "staudensellerie": {
+   "n": "Staudensellerie",
+   "c": "obst"
+  },
+  "limette": {
+   "n": "Limetten",
+   "c": "obst"
+  },
+  "zitrone": {
+   "n": "Zitronen",
+   "c": "obst"
+  },
+  "koriander": {
+   "n": "Koriander, frisch",
+   "c": "obst"
+  },
+  "basilikum": {
+   "n": "Basilikum, frisch",
+   "c": "obst"
+  },
+  "petersilie": {
+   "n": "Petersilie, frisch",
+   "c": "obst"
+  },
+  "dill": {
+   "n": "Dill oder Minze, frisch",
+   "c": "obst"
+  },
+  "skyr": {
+   "n": "Skyr natur",
+   "c": "kuehl"
+  },
+  "magerquark": {
+   "n": "Magerquark",
+   "c": "kuehl"
+  },
+  "huettenkaese": {
+   "n": "Hüttenkäse",
+   "c": "kuehl"
+  },
+  "frischkaese": {
+   "n": "Frischkäse leicht",
+   "c": "kuehl"
+  },
+  "kochsahne": {
+   "n": "Kochsahne 15 %",
+   "c": "kuehl"
+  },
+  "schlagsahne": {
+   "n": "Schlagsahne 30 %",
+   "c": "kuehl"
+  },
+  "schmand": {
+   "n": "Schmand",
+   "c": "kuehl"
+  },
+  "milch": {
+   "n": "Milch 1,5 %",
+   "c": "kuehl"
+  },
+  "cheddar": {
+   "n": "Cheddar",
+   "c": "kuehl"
+  },
+  "mozzarella-light": {
+   "n": "Mozzarella light",
+   "c": "kuehl"
+  },
+  "parmesan": {
+   "n": "Parmesan",
+   "c": "kuehl"
+  },
+  "feta": {
+   "n": "Feta",
+   "c": "kuehl"
+  },
+  "gnocchi": {
+   "n": "Gnocchi",
+   "c": "kuehl"
+  },
+  "butter": {
+   "n": "Butter",
+   "c": "kuehl"
+  },
+  "tk-kraeuter": {
+   "n": "TK-Kräuter (8-Kräuter)",
+   "c": "tk"
+  },
+  "tomaten-dose": {
+   "n": "Stückige Tomaten, Dose à 400 g",
+   "c": "konserven"
+  },
+  "passata": {
+   "n": "Passierte Tomaten",
+   "c": "konserven"
+  },
+  "tomatenmark": {
+   "n": "Tomatenmark",
+   "c": "konserven"
+  },
+  "kidney": {
+   "n": "Kidneybohnen, Dose à 400 g",
+   "c": "konserven"
+  },
+  "schwarze-bohnen": {
+   "n": "Schwarze Bohnen, Dose à 400 g",
+   "c": "konserven"
+  },
+  "mais": {
+   "n": "Mais, Dose à 425 ml",
+   "c": "konserven"
+  },
+  "kokosmilch": {
+   "n": "Kokosmilch, Dose à 400 ml",
+   "c": "konserven"
+  },
+  "currypaste": {
+   "n": "Rote Currypaste",
+   "c": "konserven"
+  },
+  "ajvar": {
+   "n": "Ajvar, mild",
+   "c": "konserven"
+  },
+  "getr-tomaten": {
+   "n": "Getrocknete Tomaten in Öl",
+   "c": "konserven"
+  },
+  "erdnussbutter": {
+   "n": "Erdnussbutter",
+   "c": "konserven"
+  },
+  "reis": {
+   "n": "Basmati- oder Jasminreis",
+   "c": "trocken"
+  },
+  "penne": {
+   "n": "Penne",
+   "c": "trocken"
+  },
+  "spaghetti": {
+   "n": "Spaghetti",
+   "c": "trocken"
+  },
+  "hoernchen": {
+   "n": "Hörnchennudeln oder Makkaroni",
+   "c": "trocken"
+  },
+  "kritharaki": {
+   "n": "Kritharaki",
+   "c": "trocken"
+  },
+  "lasagne": {
+   "n": "Lasagneplatten (ohne Vorkochen)",
+   "c": "trocken"
+  },
+  "mie": {
+   "n": "Mie-Nudeln",
+   "c": "trocken"
+  },
+  "sesam": {
+   "n": "Sesam",
+   "c": "trocken"
+  },
+  "oel": {
+   "n": "Öl, neutral",
+   "c": "vorrat"
+  },
+  "olivenoel": {
+   "n": "Olivenöl",
+   "c": "vorrat"
+  },
+  "sesamoel": {
+   "n": "Sesamöl",
+   "c": "vorrat"
+  },
+  "butterschmalz": {
+   "n": "Butterschmalz",
+   "c": "vorrat"
+  },
+  "honig": {
+   "n": "Honig",
+   "c": "vorrat"
+  },
+  "zucker": {
+   "n": "Zucker",
+   "c": "vorrat"
+  },
+  "sojasauce": {
+   "n": "Sojasauce",
+   "c": "vorrat"
+  },
+  "staerke": {
+   "n": "Speisestärke",
+   "c": "vorrat"
+  },
+  "bruehe-rind": {
+   "n": "Rinderbrühe",
+   "c": "vorrat"
+  },
+  "bruehe-gemuese": {
+   "n": "Gemüsebrühe",
+   "c": "vorrat"
+  },
+  "bruehe-huhn": {
+   "n": "Hühnerbrühe",
+   "c": "vorrat"
+  },
+  "senf": {
+   "n": "Senf, mittelscharf",
+   "c": "vorrat"
+  },
+  "balsamico": {
+   "n": "Balsamico",
+   "c": "vorrat"
+  },
+  "essig": {
+   "n": "Reis- oder Apfelessig",
+   "c": "vorrat"
+  },
+  "kakao": {
+   "n": "Backkakao",
+   "c": "vorrat"
+  },
+  "sriracha": {
+   "n": "Sriracha",
+   "c": "vorrat"
+  },
+  "kreuzkuemmel": {
+   "n": "Kreuzkümmel, gemahlen",
+   "c": "vorrat"
+  },
+  "paprika-edelsuess": {
+   "n": "Paprikapulver edelsüß",
+   "c": "vorrat"
+  },
+  "paprika-geraeuchert": {
+   "n": "Paprikapulver geräuchert",
+   "c": "vorrat"
+  },
+  "paprika-rosenscharf": {
+   "n": "Paprikapulver rosenscharf",
+   "c": "vorrat"
+  },
+  "oregano": {
+   "n": "Oregano, getrocknet",
+   "c": "vorrat"
+  },
+  "chiliflocken": {
+   "n": "Chiliflocken",
+   "c": "vorrat"
+  },
+  "cayenne": {
+   "n": "Cayennepfeffer",
+   "c": "vorrat"
+  },
+  "zimt": {
+   "n": "Zimt",
+   "c": "vorrat"
+  },
+  "lorbeer": {
+   "n": "Lorbeerblätter",
+   "c": "vorrat"
+  },
+  "garam-masala": {
+   "n": "Garam Masala",
+   "c": "vorrat"
+  },
+  "kurkuma": {
+   "n": "Kurkuma",
+   "c": "vorrat"
+  },
+  "chilipulver": {
+   "n": "Chilipulver",
+   "c": "vorrat"
+  },
+  "kasuri-methi": {
+   "n": "Kasuri Methi (Bockshornkleeblätter)",
+   "c": "vorrat"
+  },
+  "kuemmel": {
+   "n": "Kümmel, gemahlen",
+   "c": "vorrat"
+  },
+  "majoran": {
+   "n": "Majoran, getrocknet",
+   "c": "vorrat"
+  },
+  "ital-kraeuter": {
+   "n": "Italienische Kräuter",
+   "c": "vorrat"
+  },
+  "knoblauchpulver": {
+   "n": "Knoblauchpulver",
+   "c": "vorrat"
+  },
+  "zwiebelpulver": {
+   "n": "Zwiebelgranulat",
+   "c": "vorrat"
+  },
+  "muskat": {
+   "n": "Muskatnuss",
+   "c": "vorrat"
+  },
+  "thymian": {
+   "n": "Thymian, getrocknet",
+   "c": "vorrat"
+  },
+  "rosmarin": {
+   "n": "Rosmarin, getrocknet",
+   "c": "vorrat"
+  },
+  "basilikum-getr": {
+   "n": "Basilikum, getrocknet",
+   "c": "vorrat"
+  },
+  "koriander-gem": {
+   "n": "Koriander, gemahlen",
+   "c": "vorrat"
+  },
+  "salz": {
+   "n": "Salz",
+   "c": "vorrat"
+  },
+  "pfeffer": {
+   "n": "Pfeffer",
+   "c": "vorrat"
+  },
+  "boxen": {
+   "n": "Meal-Prep-Boxen (8 Stück)",
+   "c": "sonstiges"
+  },
+  "haferflocken": {
+   "n": "Haferflocken",
+   "c": "trocken"
+  },
+  "erdnuss-crunch": {
+   "n": "Erdnuss-Crunch",
+   "c": "trocken"
+  },
+  "aepfel": {
+   "n": "Äpfel",
+   "c": "obst"
+  },
+  "whey-vanille": {
+   "n": "Whey Vanille",
+   "c": "sonstiges"
+  }
+ },
+ "extras": {
+  "fruehstueck": {
+   "id": "fruehstueck",
+   "short": "Frühstück",
+   "tage": 7,
+   "items": [
+    {
+     "k": "skyr",
+     "q": 987,
+     "u": "g",
+     "h": "7 × 141 g"
+    },
+    {
+     "k": "haferflocken",
+     "q": 189,
+     "u": "g",
+     "h": "7 × 27 g"
+    },
+    {
+     "k": "erdnuss-crunch",
+     "q": 175,
+     "u": "g",
+     "h": "7 × 25 g"
+    },
+    {
+     "k": "aepfel",
+     "q": 875,
+     "u": "g",
+     "h": "7 × 125 g"
+    },
+    {
+     "k": "whey-vanille",
+     "q": 63,
+     "u": "g",
+     "h": "7 × 9 g"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF1EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1412" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Meal-Prep-Rezepte für je 8 Boxen und eure gemeinsame Einkaufsliste.">
+<title>Boxenstopp</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="app" data-tab="rezepte">
+  <header class="top">
+    <div class="top-in">
+      <div class="brand"><span class="brand-name">Boxenstopp</span><span class="brand-tag">Meal Prep</span></div>
+      <span class="sync" id="sync" data-state="lokal"><span class="dot" aria-hidden="true"></span><span id="sync-text">Nur lokal</span></span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <main id="view-recipes" class="pane">
+      <section id="browse" aria-labelledby="r-title">
+        <div class="intro">
+          <span class="eyebrow" id="r-eyebrow">Rezepte · je 8 Boxen</span>
+          <h1 id="r-title">Was kommt diese Woche in die Boxen?</h1>
+          <p>Jedes Rezept ist auf 8 gleiche Boxen gerechnet, mit Packungsgrößen aus dem Supermarkt. Rezept öffnen, Zutaten auf die gemeinsame Liste setzen, einkaufen, kochen.</p>
+          <div class="target"><span>Ziel pro Box</span><b>443 kcal</b><b class="m-p">33 g P</b><b class="m-kh">39 g KH</b><b class="m-f">15,4 g F</b></div>
+        </div>
+        <div class="chips" id="chips" role="toolbar" aria-label="Rezepte filtern"></div>
+        <div class="grid" id="grid"><p class="empty">Rezepte werden geladen…</p></div>
+      </section>
+      <section id="detail" hidden></section>
+    </main>
+
+    <aside id="view-list" class="pane list-pane" aria-labelledby="l-title">
+      <div class="l-head"><h2 id="l-title">Einkaufsliste</h2><span class="l-count" id="l-count"></span></div>
+      <div class="zugang" id="zugang"></div>
+      <div class="forrow" id="forrow" hidden></div>
+      <form class="addform" id="addform" autocomplete="off">
+        <label class="sr" for="add-input">Eintrag hinzufügen</label>
+        <input id="add-input" type="text" maxlength="80" placeholder="Etwas hinzufügen, z. B. Bananen" enterkeyhint="done">
+        <button type="submit" id="add-btn" aria-label="Hinzufügen"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      </form>
+      <div class="quick">
+        <button type="button" class="quick-btn" id="quick-breakfast" data-act="fruehstueck" aria-pressed="false">Frühstück für 7 Tage</button>
+        <small>Skyr, Haferflocken, Erdnuss-Crunch, Äpfel und Vanille-Whey für 7 Frühstücke</small>
+      </div>
+      <div id="list-body"><p class="loading">Liste wird geladen…</p></div>
+      <div class="l-foot" id="l-foot"></div>
+      <p class="note" id="l-note" hidden></p>
+      <div class="teilen" id="teilen" hidden></div>
+    </aside>
+  </div>
+
+  <!-- Die Reiter stehen fest im HTML, damit die App auch mit einem Skript aus
+       einem älteren Zwischenspeicher eine Navigation hat – wie bei Freizeit. -->
+  <nav class="tabbar" aria-label="Bereiche">
+    <button type="button" class="tab" data-tab="rezepte" aria-current="page">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 10.5h15v7.5a2.5 2.5 0 0 1-2.5 2.5H7a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M3 8.2C3 7.5 3.5 7 4.2 7h15.6c.7 0 1.2.5 1.2 1.2v2.3H3z"/><path d="M9 4.5h6"/></svg>
+      <span>Rezepte</span>
+    </button>
+    <button type="button" class="tab" data-tab="einkauf">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M3.8 6.6l1.3 1.3L7.6 5.4M3.8 12.1l1.3 1.3 2.5-2.5M3.8 17.6l1.3 1.3 2.5-2.5"/></svg>
+      <span>Einkaufsliste</span><span class="badge" id="badge" hidden>0</span>
+    </button>
+  </nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
