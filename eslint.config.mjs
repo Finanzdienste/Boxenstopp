@@ -50,6 +50,8 @@ export default [
         createImageBitmap: 'readonly',
         Image: 'readonly',
         AbortController: 'readonly',
+        // Timer: Benachrichtigung am Ende.
+        Notification: 'readonly',
       },
     },
     rules: {

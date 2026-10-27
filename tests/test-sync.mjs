@@ -102,6 +102,15 @@ check(await bis(() => !!gh.liste()?.cooked?.chili), '„Heute gekocht“ steht i
 await a.click('.tab[data-tab="rezepte"]');
 check(await bis(async () => (await a.locator('[data-open="chili"] .pill', { hasText: 'Zuletzt gekocht' }).count()) === 1), 'Amy sieht beim Chili „Zuletzt gekocht“');
 
+// --- Notizen, für beide
+await t.fill('#notiz-feld', 'Weniger Chili!');
+await t.press('#notiz-feld', 'Enter');
+check(await bis(() => gh.liste()?.notizen?.chili?.length === 1), 'Tobis Notiz steht in GitHub');
+await a.click('[data-open="chili"]');
+check(await bis(async () => (await a.locator('#d-notizen .notiz-t').count()) === 1 && (await a.locator('#d-notizen .notiz-t').innerText()) === 'Weniger Chili!'), 'Amy sieht Tobis Notiz');
+check((await a.locator('#d-notizen .notiz-von').innerText()).startsWith('Tobi'), 'mit „Tobi“ dran');
+await a.click('[data-act="zurueck"]');
+
 // --- Daumen: einer für beide
 await t.click('[data-bewerten="hoch"]');
 check(await bis(() => gh.liste()?.bewertung?.chili?.wert === 'hoch'), 'Tobis Daumen hoch steht in GitHub');

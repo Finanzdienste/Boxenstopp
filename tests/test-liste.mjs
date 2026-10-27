@@ -7,7 +7,7 @@
  */
 import { pruefer } from './hilfe.mjs';
 import {
-  leer, anwenden, bereinigen, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl,
+  leer, anwenden, bereinigen, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opNotiz, opNotizWeg,
   opTeil, opTeilWeg, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opGekocht, opZusammen, opBewerten,
 } from '../js/liste.js';
 import { menge, ungefaehr, abteilung, esc, abweichung, tagKurz, heute } from '../js/format.js';
@@ -94,6 +94,16 @@ check(!bw.bewertung.chili && bw.bewertung.gyros.wert === 'runter', 'Daumen wiede
 const bwRoh = bereinigen({ bewertung: { chili: { wert: 'super' }, gyros: { wert: 'runter', by: 'Tobi', at: '2026-10-26T18:00:00Z' }, 'x/../y': { wert: 'hoch' } } });
 check(!bwRoh.bewertung.chili && bwRoh.bewertung.gyros.wert === 'runter' && Object.keys(bwRoh.bewertung).length === 1, 'bereinigen: nur hoch, mittel, runter und gültige Rezepte');
 check(JSON.stringify(bereinigen({ rev: 4, items: {} }).bewertung) === '{}', 'ältere Listen ohne Daumen: leere Bewertung');
+
+// --- Notizen
+const mitNotiz = anwenden(leer(), [opNotiz('chili', 'n-1', '  Weniger   Chili ', 'Amy'), opNotiz('chili', 'n-2', 'Kakao!', 'Tobi')]);
+check(mitNotiz.notizen.chili.length === 2 && mitNotiz.notizen.chili[0].text === 'Weniger   Chili' && mitNotiz.notizen.chili[0].by === 'Amy', 'Notizen hängen am Rezept, mit Namen');
+check(anwenden(mitNotiz, opNotiz('chili', 'n-1', 'Weniger Chili, wirklich', 'Amy')).notizen.chili.find((n) => n.id === 'n-1').text === 'Weniger Chili, wirklich', 'dieselbe id ersetzt den Text');
+check(!anwenden(mitNotiz, [opNotizWeg('chili', 'n-1'), opNotizWeg('chili', 'n-2')]).notizen.chili, 'ohne Notizen verschwindet das Rezept aus notizen');
+const viele = anwenden(leer(), Array.from({ length: 25 }, (_, i) => opNotiz('chili', `n-${i}`, `Notiz ${i}`, null, `2026-10-${String(1 + (i % 28)).padStart(2, '0')}T10:00:00.000Z`)));
+check(viele.notizen.chili.length === 20 && viele.notizen.chili.at(-1).text === 'Notiz 24', 'höchstens 20 Notizen, die ältesten fallen raus');
+const nRoh = bereinigen({ notizen: { chili: [{ id: 'n-1', text: ' ok ', by: 'Amy' }, { id: 'kaputt id', text: 'x' }, { id: 'n-3', text: '' }, 'quatsch'], 'x/../y': [{ id: 'n', text: 'x' }] } });
+check(nRoh.notizen.chili.length === 1 && nRoh.notizen.chili[0].text === 'ok' && Object.keys(nRoh.notizen).length === 1, 'bereinigen: nur gültige Notizen und Rezepte');
 
 // --- bereinigen: was aus GitHub kommt, kann alles sein
 const roh = { rev: 3, items: { 'ok-1': { name: '<b>Milch</b>', cat: 'kuehl', parts: { x: { q: 'viel' }, y: { t: '1 l', done: true } } }, 'kaputt/../x': { name: 'weg' }, 'leer-2': 5 }, cooked: { chili: { at: 'morgen' } } };

@@ -33,7 +33,13 @@ Jedes Rezept läuft in drei Abschnitten, jeder mit seiner Zeit:
 3. **Portionieren** – wiegen, durch 8, Boxen füllen, Döschen kalt stellen.
 
 Ein Schritt ist eine Handlung und eine Zeile zum Abhaken, rechts mit seinen
-Minuten. Der nächste offene Schritt ist markiert. Die Zeiten sind für ein
+Minuten. Der nächste offene Schritt ist markiert. **Die Minuten antippen
+startet einen Timer** (über die Wartezeit, wenn es eine gibt: „2 Min. + 22
+warten“ → 22), mehrere nebeneinander; sie laufen oben unter der Kopfzeile
+mit, überleben ein Neuladen und melden sich mit Ton, Vibration und
+Benachrichtigung (`js/timer.js`, nur auf dem Handy, das kocht). Unter den
+Daumen stehen **Notizen** zum Rezept („nächstes Mal weniger Chili“), für
+beide, in `liste.json` unter `notizen`. Die Zeiten sind für ein
 ruhiges Tempo zu Hause gerechnet, mit Waschen, Schälen und Abfall wegräumen
 (Normen in `NORM`, werkzeug/rezepte.py), und `js/zeiten.js` rechnet daraus
 Abschnitte und Gesamtzeit: Wartezeiten (`ruhe`, etwa Marinieren) laufen im
@@ -156,7 +162,8 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
  },
  "cooked": { "chili": { "at": "2026-10-26", "by": "Tobi" } },
  "bewertung": { "chili": { "wert": "hoch", "by": "Amy", "at": "2026-10-26T19:10:00.000Z" } },
- "ki": { "ki-mh9x2k1a7f": { "r": { "name": "Hähnchen-Reispfanne mit Feta", "portionen": 8, "zutaten": […], "ablauf": […], "…": "…" }, "by": "Amy", "at": "…" } }
+ "ki": { "ki-mh9x2k1a7f": { "r": { "name": "Hähnchen-Reispfanne mit Feta", "portionen": 8, "zutaten": […], "ablauf": […], "…": "…" }, "by": "Amy", "at": "…" } },
+ "notizen": { "chili": [{ "id": "n-mh9x…", "text": "Nächstes Mal weniger Chili", "by": "Amy", "at": "…" }] }
 }
 ```
 
@@ -218,6 +225,7 @@ neues Rezept muss dort nichts geändert werden.
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | die beiden Reiter |
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
 | `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“ |
+| `js/timer.js` | Küchentimer: starten, Leiste oben, Alarm, überlebt Neuladen |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
 | `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |

@@ -15,6 +15,8 @@ import { app, $, $$, ansicht, ansichtMerken, melde, zeigeReiter, istSchmal, lese
 import { esc, nf1, nfi, heute, tagKurz, abweichung } from './format.js';
 import { zeitVon, dauer } from './zeiten.js';
 import { zahlwort } from './ki-rezept.js';
+import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
+import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
 
 const SCHRITTE = 'boxenstopp.schritte.v2';
@@ -187,6 +189,15 @@ ${etikett(r)}
 ${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
 <div class="actions" id="d-actions"></div>
 <div class="bewertung" id="d-bewertung" role="group" aria-label="Wie war's?"></div>
+<section class="notizen" aria-labelledby="h-notizen">
+  <h3 id="h-notizen" class="sub-h">Notizen <small>für euch beide</small></h3>
+  <ul class="notiz-liste" id="d-notizen"></ul>
+  <form class="notiz-form" id="notiz-form" autocomplete="off">
+    <label class="sr" for="notiz-feld">Notiz</label>
+    <input id="notiz-feld" type="text" maxlength="300" placeholder="z. B. nächstes Mal weniger Chili" enterkeyhint="done">
+    <button type="submit" class="btn" id="notiz-btn" aria-label="Notiz speichern">${ic('plus')}</button>
+  </form>
+</section>
 
 <section class="sec" aria-labelledby="h-ing">
   <h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</small></h2>
@@ -236,14 +247,39 @@ ${r.tips && r.tips.length ? `<section class="sec" aria-labelledby="h-tips"><h2 i
 </details>`;
 }
 
+/*
+ * Der Timer eines Schritts läuft über die Wartezeit, wenn es eine gibt
+ * („2 Min. + 22 warten“ → 22), sonst über die Minuten des Schritts.
+ */
+export const timerMinuten = (s) => (s.ruhe ? s.ruhe : s.min);
+const timerLabel = (r, s) => `${r.short}: ${s.d.replace(/\s*→.*$/, '').slice(0, 44)}`;
+
+function timerKnopf(r, s, i) {
+  const t = timerFuer(r.id, i);
+  const ruhe = s.ruhe ? `<small>+${s.ruhe} warten</small>` : '';
+  if (t) return `<button type="button" class="step-min laeuft${t.fertig ? ' fertig' : ''}" data-timer="${i}" aria-label="Timer beenden">${timerText(t)}<small>${t.fertig ? 'fertig' : 'Timer'}</small></button>`;
+  return `<button type="button" class="step-min" data-timer="${i}" aria-label="Timer ${timerMinuten(s)} Minuten starten">${s.min} Min.${ruhe}</button>`;
+}
+
 function schrittHTML(r, s, i) {
   const liste = s.liste?.length ? `<span class="step-l">${s.liste.map((x) => `<span>${schrittText(x, r)}</span>`).join('')}</span>` : '';
-  const ruhe = s.ruhe ? `<small>+${s.ruhe} warten</small>` : '';
-  return `<li><button type="button" class="step${s.neben ? ' neben' : ''}" data-step="${i}" aria-pressed="false">
+  return `<li class="step-li${s.neben ? ' neben' : ''}" data-li="${i}"><button type="button" class="step${s.neben ? ' neben' : ''}" data-step="${i}" aria-pressed="false">
 <span class="step-n"><span class="sn">${i + 1}</span>${ic('check')}</span>
 <span class="step-b">${s.neben ? '<span class="step-k">währenddessen</span>' : ''}<span class="step-d">${schrittText(s.d, r)}</span>${liste}</span>
-<span class="step-min">${s.min} Min.${ruhe}</span>
-</button></li>`;
+</button>${timerKnopf(r, s, i)}</li>`;
+}
+
+/** Die Timer-Knöpfe im offenen Rezept nachzeichnen (jede Sekunde, von timer.js). */
+export function timerZeichnen() {
+  if (!aktuell) return;
+  const r = app.nachId[aktuell];
+  if (!r) return;
+  const alle = r.ablauf.flatMap((p) => p.schritte);
+  for (const b of $$('#detail .step-min')) {
+    const i = Number(b.dataset.timer);
+    const neu = timerKnopf(r, alle[i], i);
+    if (b.outerHTML !== neu) b.outerHTML = neu;
+  }
 }
 
 function zubereitungHTML(r) {
@@ -283,6 +319,7 @@ export function detailAktualisieren() {
   if (c && !heuteGekocht && tagKurz(c.at)) html += `<span class="cooked-note">Zuletzt gekocht am ${esc(tagKurz(c.at))}${c.by ? ` von ${esc(c.by)}` : ''}</span>`;
   $('#d-actions').innerHTML = html;
   $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
+  notizenZeichnen();
   if ($('#d-ki')) $('#d-ki').innerHTML = app.kiLeiste(r);
   for (const b of $$('#detail .tog')) {
     const z = zeilen[Number(b.dataset.tog)];
@@ -292,6 +329,20 @@ export function detailAktualisieren() {
     b.setAttribute('aria-label', `${z.n} ${drauf ? 'von der Einkaufsliste nehmen' : 'auf die Einkaufsliste setzen'}`);
     b.disabled = !app.listeDa;
   }
+}
+
+function notizenZeichnen() {
+  const el = $('#d-notizen');
+  if (!el) return;
+  const liste = app.stand.notizen?.[aktuell] || [];
+  el.innerHTML = liste.map((n) => {
+    const wer = n.by ? (n.by === app.name() ? 'du' : esc(n.by)) : '';
+    const wann = n.at && !Number.isNaN(Date.parse(n.at)) ? tagKurz(heute(new Date(n.at))) : '';
+    return `<li class="notiz"><span class="notiz-t">${esc(n.text)}</span><span class="notiz-von">${[wer, wann].filter(Boolean).join(', ')}</span><button type="button" class="x" data-notiz-weg="${esc(n.id)}" aria-label="Notiz löschen">${ic('plus', 'i-x')}</button></li>`;
+  }).join('');
+  el.hidden = !liste.length;
+  const btn = $('#notiz-btn');
+  if (btn) btn.disabled = !app.listeDa;
 }
 
 function bewertungHTML(rid) {
@@ -454,6 +505,27 @@ export function klickRezepte(el) {
     schritteZeichnen();
     return true;
   }
+  if ('timer' in d) {
+    const r = app.nachId[aktuell];
+    const i = Number(d.timer);
+    const s = r?.ablauf.flatMap((p) => p.schritte)[i];
+    if (!s) return true;
+    const t = timerFuer(aktuell, i);
+    if (t) { timerStoppen(t.id); melde('Timer beendet'); } else {
+      timerStarten({ rid: aktuell, schritt: i, minuten: timerMinuten(s), label: timerLabel(r, s) });
+      melde(`Timer läuft: ${timerMinuten(s)} Min.`);
+    }
+    timerZeichnen();
+    return true;
+  }
+  if (d.notizWeg) {
+    if (!aktuell) return true;
+    const n = (app.stand.notizen?.[aktuell] || []).find((x) => x.id === d.notizWeg);
+    app.kiVorAktion(aktuell);
+    app.aendern(opNotizWeg(aktuell, d.notizWeg));
+    if (n) melde('Notiz gelöscht', { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opNotiz(aktuell, n.id, n.text, n.by, n.at)) });
+    return true;
+  }
   switch (d.act) {
     case 'zurueck': schliesseRezept(); return true;
     case 'alle-dazu': app.kiVorAktion(aktuell); rezeptAufListe(aktuell); return true;
@@ -472,4 +544,25 @@ export function klickRezepte(el) {
 export function eingabeRezepte(ziel) {
   if (ziel.id === 'pot-empty') schreibe(TOPF, ziel.value);
   if (ziel.id === 'pot-empty' || ziel.id === 'pot-full') rechnerZeichnen();
+}
+
+/** true, wenn das Formular hierher gehörte. */
+export function absendenRezepte(ev) {
+  if (ev.target.id !== 'notiz-form') return false;
+  ev.preventDefault();
+  const feld = $('#notiz-feld');
+  const text = feld.value.trim().replace(/\s+/g, ' ').slice(0, 300);
+  if (!text || !aktuell) return true;
+  feld.value = '';
+  app.kiVorAktion(aktuell);
+  app.aendern(opNotiz(aktuell, `n-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, text, app.name()));
+  return true;
+}
+
+/** Vom Timer in der Leiste oben: zum Schritt springen. */
+export function zuSchritt(rid, i) {
+  if (!app.nachId[rid]) return;
+  if (aktuell !== rid) oeffneRezept(rid);
+  const li = $(`#detail .step-li[data-li="${i}"]`);
+  if (li) window.requestAnimationFrame(() => li.scrollIntoView({ block: 'center', behavior: 'smooth' }));
 }

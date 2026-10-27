@@ -167,7 +167,7 @@ export function zugangZeichnen() {
     const ausLink = !!formular.token;
     el.innerHTML = `<form class="zugang-form" id="z-form" novalidate>
 <p class="z-titel">Gemeinsame Liste einrichten</p>
-<p class="z-text">${ausLink ? 'Der Schlüssel aus dem Link ist schon eingetragen. Es fehlt nur noch dein Name.' : 'Den Schlüssel legst du einmal bei GitHub an, die Anleitung steht im README. Das zweite Handy bekommt ihn danach über einen Link aus der App.'}</p>
+<p class="z-text">${ausLink ? 'Der Schlüssel aus dem Link ist schon eingetragen. Es fehlt nur noch dein Name.' : '<b>Zweites Handy?</b> Dann brauchst du keinen eigenen Schlüssel: Lass dir vom ersten Handy den Link schicken (dort unter der Einkaufsliste „Link fürs zweite Handy kopieren“) und füg den ganzen Link hier ins Schlüsselfeld ein. <b>Erstes Handy?</b> Den Schlüssel legst du einmal bei GitHub an, die Anleitung steht im README.'}</p>
 <label for="z-name">Dein Name</label>
 <input id="z-name" type="text" maxlength="30" autocomplete="given-name" placeholder="z. B. Tobi" value="${esc(formular.name ?? app.zugang?.name ?? '')}">
 <label for="z-token">Schlüssel</label>

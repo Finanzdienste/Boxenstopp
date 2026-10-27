@@ -7,7 +7,8 @@
  *     items:     { <Schlüssel>: Eintrag },
  *     cooked:    { <Rezept-id>: { at: '2026-10-26', by: 'Tobi' } },
  *     bewertung: { <Rezept-id>: { wert: 'hoch' | 'mittel' | 'runter', by: 'Amy', at } },
- *     ki:        { <ki-…>: { r: Rezept aus der Resteverwertung, by, at } } }
+ *     ki:        { <ki-…>: { r: Rezept aus der Resteverwertung, by, at } },
+ *     notizen:   { <Rezept-id>: [{ id, text, by, at }, …] } }
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -36,7 +37,8 @@
 
 import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {} });
+const MAX_NOTIZEN = 20;
 export const DAUMEN = ['hoch', 'mittel', 'runter'];
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -140,6 +142,15 @@ export function bereinigen(roh) {
       if (SCHLUESSEL.test(rid) && istObj(c) && TAG.test(String(c.at))) s.cooked[rid] = { at: c.at, by: text(c.by, 40) };
     }
   }
+  if (istObj(roh.notizen)) {
+    for (const [rid, liste] of Object.entries(roh.notizen)) {
+      if (!SCHLUESSEL.test(rid) || !Array.isArray(liste)) continue;
+      const n = liste.filter((x) => istObj(x) && SCHLUESSEL.test(String(x.id)) && typeof x.text === 'string' && x.text.trim())
+        .map((x) => ({ id: x.id, text: x.text.trim().slice(0, 300), by: text(x.by, 40), at: text(x.at, 40) || '' }))
+        .slice(-MAX_NOTIZEN);
+      if (n.length) s.notizen[rid] = n;
+    }
+  }
   if (istObj(roh.ki)) {
     const ki = [];
     for (const [id, e] of Object.entries(roh.ki)) {
@@ -183,6 +194,9 @@ export const opZusammen = (items, ki = {}) => ({ typ: 'zusammen', items: klon(it
 /** Ein Rezept aus der Resteverwertung für beide behalten – oder wieder wegwerfen. */
 export const opKiBehalten = (id, r, by) => ({ typ: 'kiBehalten', id, r: klon(r), by: by || null, at: jetzt() });
 export const opKiWeg = (id) => ({ typ: 'kiWeg', id });
+/** Eine Notiz zu einem Rezept – für beide. Dieselbe id noch einmal ersetzt den Text (Rückgängig). */
+export const opNotiz = (rid, id, text, by, at) => ({ typ: 'notiz', rid, id, text: String(text).slice(0, 300), by: by || null, at: at || jetzt() });
+export const opNotizWeg = (rid, id) => ({ typ: 'notizWeg', rid, id });
 /** Daumen für ein Gericht setzen (wert null nimmt ihn weg) – gilt für beide. */
 export const opBewerten = (rid, wert, by) => ({ typ: 'bewerten', rid, wert: wert || null, by: by || null, at: jetzt() });
 
@@ -266,7 +280,24 @@ function aendere(s, op) {
     }
     case 'kiWeg':
       if (istObj(s.ki)) delete s.ki[op.id];
+      if (istObj(s.notizen)) delete s.notizen[op.id];
       return;
+    case 'notiz': {
+      if (!SCHLUESSEL.test(String(op.rid)) || !SCHLUESSEL.test(String(op.id)) || typeof op.text !== 'string' || !op.text.trim()) return;
+      if (!istObj(s.notizen)) s.notizen = {};
+      const liste = (s.notizen[op.rid] || []).filter((n) => n.id !== op.id);
+      liste.push({ id: op.id, text: op.text.trim().slice(0, 300), by: op.by || null, at: op.at || jetzt() });
+      liste.sort((a, b) => String(a.at).localeCompare(String(b.at)));
+      s.notizen[op.rid] = liste.slice(-MAX_NOTIZEN);
+      return;
+    }
+    case 'notizWeg': {
+      const liste = s.notizen?.[op.rid];
+      if (!Array.isArray(liste)) return;
+      const rest = liste.filter((n) => n.id !== op.id);
+      if (rest.length) s.notizen[op.rid] = rest; else delete s.notizen[op.rid];
+      return;
+    }
     default:
   }
 }

@@ -13,7 +13,8 @@ import { app, $, ansicht, zeigeReiter, melde, lese } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, API } from './speicher.js';
 import { opZusammen } from './liste.js';
 import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
-import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte } from './ansicht-rezepte.js';
+import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, absendenRezepte, timerZeichnen, zuSchritt } from './ansicht-rezepte.js';
+import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 
@@ -71,13 +72,15 @@ document.addEventListener('click', (ev) => {
   const el = ev.target.closest('button');
   if (!el || el.disabled) return;
   if (el.dataset.tab) { zeigeReiter(el.dataset.tab); return; }
+  if (klickTimer(el)) return;
+  if (el.dataset.timerZu) { zuSchritt(el.dataset.timerZu, Number(el.dataset.timerSchritt)); return; }
   if (klickListe(el)) return;
   if (klickKi(el)) return;
   klickRezepte(el);
 });
 document.addEventListener('input', (ev) => { if (!eingabeKi(ev.target)) eingabeRezepte(ev.target); });
 document.addEventListener('change', (ev) => aenderungKi(ev.target));
-document.addEventListener('submit', (ev) => { if (!absendenKi(ev)) absendenListe(ev); });
+document.addEventListener('submit', (ev) => { if (!absendenKi(ev) && !absendenRezepte(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */
 
@@ -107,6 +110,13 @@ async function start() {
   if (kiLink) speichereKi(kiLink);
   const ausLink = schluesselAusAdresse();
   kiStart();
+  timerAnmelden(() => {
+    const leiste = $('#timerleiste');
+    const html = leisteHTML();
+    if (leiste.innerHTML !== html) leiste.innerHTML = html;
+    leiste.hidden = !html;
+    timerZeichnen();
+  });
   filterZeichnen();
   rasterZeichnen();
   listeZeichnen();

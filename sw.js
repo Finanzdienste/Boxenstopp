@@ -21,7 +21,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = `boxenstopp-${VERSION}`;
 
 const SHELL = [
@@ -37,6 +37,7 @@ const SHELL = [
   './js/ki-rezept.js',
   './js/ki.js',
   './js/ansicht-ki.js',
+  './js/timer.js',
   './js/speicher.js',
   './js/zugang.js',
   './js/ansicht-rezepte.js',
