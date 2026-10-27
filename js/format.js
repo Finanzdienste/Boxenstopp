@@ -29,6 +29,22 @@ const EINHEIT = {
 /** 1275, 'g' → „1,275 kg“; 2, 'Dose' → „2 Dosen“. */
 export const menge = (q, u) => (EINHEIT[u] ? EINHEIT[u](q) : `${nfmax(q, 1)} ${u}`);
 
+/**
+ * Mengen in einen Schritt einsetzen: „{reis} Reis waschen“ → „280 g Reis
+ * waschen“. Die Platzhalter tragen den Schlüssel der Zutat; so passen die
+ * Schritte auch dann noch, wenn ein Rezept angepasst wurde. `weg` nennt
+ * Zutaten, die es nicht mehr gibt – ihr Platzhalter wird zum Namen.
+ */
+export function platzhalter(text, items = [], weg = {}) {
+  return String(text ?? '').replace(/\{([A-Za-z0-9_.-]{1,60})\}/g, (m, k) => {
+    const it = items.find((x) => x.k === k || x.id === k);
+    if (it && typeof it.q === 'number' && it.u) return menge(it.q, it.u);
+    if (it && typeof it.menge === 'number') return menge(it.menge, it.einheit || 'g');
+    if (weg[k]) return `(ohne ${weg[k]})`;
+    return m;
+  });
+}
+
 /** Grobe Stückzahl zu Grammangaben, damit man im Laden nicht rechnen muss. */
 const STUECK = {
   zwiebeln: ['g', 100, 'Stück', 'Stück'],

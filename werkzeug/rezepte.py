@@ -56,6 +56,8 @@ CAT = {
  'gurke': ('Salatgurke', 'obst'), 'tomaten': ('Tomaten', 'obst'), 'kirschtomaten': ('Kirschtomaten', 'obst'),
  'kartoffeln': ('Kartoffeln, festkochend', 'obst'), 'suesskartoffel': ('Süßkartoffeln', 'obst'),
  'staudensellerie': ('Staudensellerie', 'obst'), 'limette': ('Limetten', 'obst'), 'zitrone': ('Zitronen', 'obst'),
+ 'blumenkohl': ('Blumenkohl', 'obst'), 'bohnen-gruen': ('Grüne Bohnen', 'obst'), 'aubergine': ('Aubergine', 'obst'),
+ 'lauch': ('Lauch', 'obst'), 'kohlrabi': ('Kohlrabi', 'obst'), 'weisskohl': ('Weißkohl', 'obst'),
  'koriander': ('Koriander, frisch', 'obst'), 'basilikum': ('Basilikum, frisch', 'obst'), 'petersilie': ('Petersilie, frisch', 'obst'),
  'dill': ('Dill oder Minze, frisch', 'obst'),
  # Kühlregal & Käse
@@ -64,19 +66,25 @@ CAT = {
  'schmand': ('Schmand', 'kuehl'), 'milch': ('Milch 1,5 %', 'kuehl'), 'cheddar': ('Cheddar', 'kuehl'),
  'parmesan': ('Parmesan', 'kuehl'), 'feta': ('Feta', 'kuehl'),
  'gnocchi': ('Gnocchi', 'trocken'), 'butter': ('Butter', 'kuehl'),
+ 'mozzarella': ('Mozzarella', 'kuehl'), 'mozzarella-light': ('Mozzarella light', 'kuehl'), 'joghurt': ('Joghurt 1,5 %', 'kuehl'),
+ 'eier': ('Eier', 'kuehl'), 'tofu': ('Tofu natur', 'kuehl'),
  # Tiefkühl
- 'tk-kraeuter': ('TK-Kräuter (8-Kräuter)', 'tk'),
+ 'tk-kraeuter': ('TK-Kräuter (8-Kräuter)', 'tk'), 'erbsen': ('TK-Erbsen', 'tk'), 'tk-brokkoli': ('TK-Brokkoli', 'tk'),
+ 'tk-blumenkohl': ('TK-Blumenkohl', 'tk'), 'tk-bohnen': ('TK-Bohnen, grün', 'tk'), 'tk-spinat': ('TK-Blattspinat', 'tk'),
  # Konserven & Gläser – in der App unter „Trockenes“
  'tomaten-dose': ('Stückige Tomaten, Dose à 400 g', 'konserven'), 'passata': ('Passierte Tomaten', 'konserven'),
  'tomatenmark': ('Tomatenmark', 'konserven'), 'kidney': ('Kidneybohnen, Dose à 400 g', 'konserven'),
  'schwarze-bohnen': ('Schwarze Bohnen, Dose à 400 g', 'konserven'), 'mais': ('Mais, Dose à 425 ml', 'konserven'),
  'kokosmilch': ('Kokosmilch, Dose à 400 ml', 'konserven'), 'currypaste': ('Rote Currypaste, vegan', 'konserven'),
  'ajvar': ('Ajvar, mild', 'konserven'), 'getr-tomaten': ('Getrocknete Tomaten in Öl', 'konserven'),
- 'erdnussbutter': ('Erdnussbutter', 'konserven'),
+ 'erdnussbutter': ('Erdnussbutter', 'konserven'), 'kichererbsen': ('Kichererbsen, Dose à 400 g', 'konserven'),
+ 'linsen-dose': ('Linsen, Dose à 400 g', 'konserven'),
  # Nudeln, Reis & Co.
  'reis': ('Basmati- oder Jasminreis', 'trocken'), 'penne': ('Penne', 'trocken'), 'spaghetti': ('Spaghetti', 'trocken'),
  'hoernchen': ('Hörnchennudeln oder Makkaroni', 'trocken'), 'kritharaki': ('Kritharaki', 'trocken'),
  'lasagne': ('Lasagneplatten (ohne Vorkochen)', 'trocken'), 'mie': ('Mie-Nudeln', 'trocken'), 'sesam': ('Sesam', 'trocken'),
+ 'vollkornnudeln': ('Vollkornnudeln', 'trocken'), 'couscous': ('Couscous', 'trocken'), 'bulgur': ('Bulgur', 'trocken'),
+ 'linsen-rot': ('Rote Linsen', 'trocken'),
  # Vorrat (Öle, Saucen, Backzutaten) – in der App unter „Trockenes“
  'oel': ('Öl, neutral', 'vorrat'), 'olivenoel': ('Olivenöl', 'vorrat'), 'sesamoel': ('Sesamöl', 'vorrat'),
  'butterschmalz': ('Butterschmalz', 'vorrat'), 'honig': ('Honig', 'vorrat'), 'zucker': ('Zucker', 'vorrat'),
@@ -102,8 +110,54 @@ CAT = {
  'aepfel': ('Äpfel', 'obst'), 'whey-vanille': ('Whey Vanille', 'trocken'),
 }
 
-def I(name, amount, k=None, q=None, u=None, h='', pantry=False, opt=False, haus=False):
-    return {'n': name, 'a': amount, 'k': k, 'q': q, 'u': u, 'h': h, 'pantry': pantry, 'opt': opt, 'haus': haus}
+# ---------------------------------------------------------------- Nährwerte je Zutat
+# Schlüssel in naehrwerte.N, wo er anders heißt als im Katalog.
+NK = {
+ 'tomaten-dose': 'tomatendose', 'schwarze-bohnen': 'schwarzebohnen', 'staudensellerie': 'sellerie', 'getr-tomaten': 'getrtomaten',
+ 'rote-zwiebeln': 'zwiebeln', 'kirschtomaten': 'tomaten', 'olivenoel': 'oel', 'sesamoel': 'oel',
+ 'bruehe-rind': 'bruehe', 'bruehe-gemuese': 'bruehe', 'bruehe-huhn': 'bruehe',
+ 'penne': 'nudeln', 'spaghetti': 'nudeln', 'hoernchen': 'nudeln', 'kritharaki': 'nudeln', 'lasagne': 'nudeln', 'vollkornnudeln': 'vollkornnudeln',
+ 'zitrone': 'limette', 'mozzarella-light': 'mozzalight', 'eier': 'ei', 'tk-brokkoli': 'brokkoli', 'tk-blumenkohl': 'blumenkohl',
+ 'tk-bohnen': 'bohnengruen', 'bohnen-gruen': 'bohnengruen', 'tk-spinat': 'spinat', 'linsen-dose': 'linsendose', 'linsen-rot': 'linsenrot',
+ 'whey-vanille': 'whey', 'erdnuss-crunch': 'erdnusscrunch',
+}
+# Gramm je Einheit für alles, was nicht in Gramm gekauft wird (Dose: abgetropft).
+EINHEIT_G = {
+ 'kidney': ('Dose', 255), 'mais': ('Dose', 285), 'schwarze-bohnen': ('Dose', 240), 'tomaten-dose': ('Dose', 400), 'kokosmilch': ('Dose', 400),
+ 'kichererbsen': ('Dose', 240), 'linsen-dose': ('Dose', 240),
+ 'paprika': ('Stk', 160), 'zucchini': ('Stk', 300), 'gurke': ('Stk', 300), 'limette': ('Stk', 30), 'zitrone': ('Stk', 30), 'eier': ('Stk', 60),
+ 'aubergine': ('Stk', 300), 'kohlrabi': ('Stk', 250), 'blumenkohl': ('Stk', 800),
+ 'knoblauch': ('Zehe', 4), 'fruehlingszwiebeln': ('Bund', 100), 'staudensellerie': ('Stange', 75),
+ 'getr-tomaten': ('Glas', 150), 'currypaste': ('Glas', 70), 'ajvar': ('Glas', 350), 'tk-kraeuter': ('Pck', 0),
+}
+# Was die App beim Anpassen verschieben darf, um die Werte zu treffen (N-Schlüssel):
+# Proteine, Sättigungsbeilagen, Fette. Gemüse und Stückware bleiben, wie sie sind.
+ANPASSBAR = {
+ 'haehnchenbrust', 'haehnchenkeule', 'putenbrust', 'rinderhack', 'rinderhack-mager', 'rindergulasch', 'ei', 'tofu',
+ 'reis', 'nudeln', 'vollkornnudeln', 'mie', 'gnocchi', 'kartoffeln', 'suesskartoffel', 'couscous', 'bulgur', 'linsenrot', 'linsendose', 'kichererbsen', 'erbsen',
+ 'oel', 'butter', 'butterschmalz', 'cheddar', 'parmesan', 'feta', 'mozzarella', 'mozzalight', 'kochsahne', 'schlagsahne', 'schmand',
+ 'skyr', 'magerquark', 'frischkaese', 'joghurt', 'milch', 'erdnussbutter', 'honig', 'zucker', 'mehl', 'staerke', 'kokosmilch',
+}
+MENGE_RE = re.compile(r'(\d+(?:[.,]\d+)?)\s?(kg|g|ml|l)\b')
+
+def nk_von(k): return NK.get(k, k)
+
+def gramm_von(it):
+    """Gramm (bzw. ml) der Zutat, so wie sie in die Nährwerte eingeht."""
+    if it.get('g') is not None: return it['g'], it.get('gu') or ('ml' if it['u'] == 'ml' else 'g')
+    if isinstance(it['q'], (int, float)):
+        if it['u'] in ('g', 'ml'): return it['q'], it['u']
+        if it['k'] in EINHEIT_G: return it['q'] * EINHEIT_G[it['k']][1], 'ml' if it['k'] == 'kokosmilch' else 'g'
+    m = MENGE_RE.search(it['a'] or '')
+    if m:
+        z = float(m.group(1).replace('.', '').replace(',', '.')) if m.group(2) in ('g', 'ml') else float(m.group(1).replace(',', '.')) * 1000
+        return z, 'ml' if m.group(2) in ('ml', 'l') else 'g'
+    return 0, 'g'
+
+def I(name, amount, k=None, q=None, u=None, h='', pantry=False, opt=False, haus=False, g=None, fest=False):
+    """g: Gramm für die Nährwerte, wenn sie nicht aus q/u folgen (Kartoffeln geschält, halbe Zitrone).
+    fest: darf die App beim Anpassen nicht verschieben."""
+    return {'n': name, 'a': amount, 'k': k, 'q': q, 'u': u, 'h': h, 'pantry': pantry, 'opt': opt, 'haus': haus, 'g': g, 'fest': fest}
 
 # Haushalt: was ein Rezept an Verbrauchsmaterial braucht (Backpapier, Döschen …).
 # Steht unter „Extras“ und kommt nur auf die Liste, wenn man es antippt.
@@ -190,7 +244,7 @@ R.append(dict(
   I('Stückige Tomaten', '2 Dosen à 400 g', 'tomaten-dose', 2, 'Dose'),
   I('Tomatenmark', '70 g', 'tomatenmark', 70, 'g', 'kleine Dose'),
   I('Zwiebeln', '3 mittlere (300 g)', 'zwiebeln', 300, 'g'),
-  I('Paprika (rot, gelb, grün)', '3 Stück (ca. 450 g)', 'paprika', 3, 'Stk', '3er-Pack'),
+  I('Paprika (rot, gelb, grün)', '3 Stück (ca. 450 g)', 'paprika', 3, 'Stk', '3er-Pack', g=450),
   I('Knoblauch', '4 Zehen', 'knoblauch', 4, 'Zehe'),
   I('Süßkartoffel', '600 g (1 große oder 2 mittlere)', 'suesskartoffel', 600, 'g'),
   I('Limette', '1 Stück', 'limette', 1, 'Stk'),
@@ -238,10 +292,7 @@ R.append(dict(
  ],
  tips=['Mit Reis statt Süßkartoffel: 150 g Basmati (roh) separat kochen und auf die Boxen verteilen, die Werte bleiben fast gleich.',
        'Schärfer: 1 frische Chili fein gehackt mit in Schale 1.'],
- nutrows=[('Rinderhackfleisch','500 g','rinderhack',500),('Rinderhackfleisch mager','400 g','rinderhack-mager',400),
-   ('Kidneybohnen, abgetropft','510 g','kidney',510),('Mais, abgetropft','285 g','mais',285),('Stückige Tomaten','800 g','tomatendose',800),
-   ('Tomatenmark','70 g','tomatenmark',70),('Zwiebeln','300 g','zwiebeln',300),('Paprika','450 g','paprika',450),('Knoblauch','16 g','knoblauch',16),
-   ('Süßkartoffel','600 g','suesskartoffel',600),('Backkakao','10 g','kakao',10),('Limettensaft','30 g','limette',30),('Gewürze','ca. 35 g','gewuerze',35)],
+ pauschal=[('Gewürze', 35)],
 ))
 
 # ======================================================================= 2 Butter Chicken
@@ -321,11 +372,7 @@ R.append(dict(
        'Kasuri Methi bringt den typischen Restaurant-Geschmack. Gibt es im Asia-Laden oder online.',
        'Mit Kochsahne 15 % (400 g) statt Schlagsahne wird die Sauce leichter, dann 270 g Reis nehmen.',
        'Koriander erst beim Essen drüberstreuen.'],
- nut=[['Hähnchenbrustfilet','800 g',848,184.0,0,12.0],['Skyr natur','300 g',189,33.0,12.0,0.6],['Öl','10 g',90,0,0,10.0],
-      ['Butter','40 g',296,0.3,0.2,32.8],['Zwiebeln','300 g',105,3.6,18.0,0.3],['Knoblauch','24 g',36,1.5,7.2,0.1],
-      ['Ingwer','30 g',24,0.5,4.7,0.2],['Tomatenmark','70 g',63,3.2,10.5,0.4],['Passierte Tomaten','500 g',130,6.5,21.5,1.0],
-      ['Honig','10 g',32,0,8.0,0],['Schlagsahne 30 %','200 g',584,4.8,6.6,60.0],['Gewürze & Zitronensaft','ca. 26 g',94,3.6,8.2,3.5],
-      ['Basmatireis, roh','280 g',980,22.4,215.6,1.7]],
+ pauschal=[('Gewürze', 24)],
 ))
 
 # ======================================================================= 3 Gulasch
@@ -337,7 +384,7 @@ R.append(dict(
   I('Rindergulasch, mager (Keule oder Schulter)', '1 kg', 'rindergulasch', 1000, 'g', '2 × 500 g'),
   I('Zwiebeln', '1 kg', 'zwiebeln', 1000, 'g', '1 Netz'),
   I('Rote Paprika', '3 Stück (ca. 480 g)', 'paprika', 3, 'Stk'),
-  I('Kartoffeln, festkochend', '1.275 g geschält', 'kartoffeln', 1500, 'g', 'Beutel 1,5 kg'),
+  I('Kartoffeln, festkochend', '1.275 g geschält', 'kartoffeln', 1500, 'g', 'Beutel 1,5 kg', g=1275),
   I('Knoblauch', '6 Zehen', 'knoblauch', 6, 'Zehe'),
   I('Tomatenmark', '70 g', 'tomatenmark', 70, 'g', 'kleine Dose'),
   I('Butterschmalz', '65 g', 'butterschmalz', pantry=True),
@@ -394,9 +441,7 @@ R.append(dict(
  ],
  tips=['Beim Fleisch schwankt der Fettgehalt stark. Nimm Keule statt Nacken, das ist deutlich magerer.',
        'Die Zwiebeln gehen im Zerkleinerer in 5 Min. statt 20.'],
- nut=[['Rindergulasch, mager','1.000 g',1280,210.0,0,50.0],['Butterschmalz','65 g',584,0,0,64.9],['Zwiebeln','1.000 g',350,12.0,60.0,1.0],
-      ['Knoblauch','24 g',36,1.5,7.2,0.1],['Tomatenmark','70 g',63,3.2,10.5,0.4],['Rote Paprika','480 g',144,4.8,24.0,1.4],
-      ['Kartoffeln, geschält','1.275 g',918,25.5,197.6,1.3],['Rinderbrühe','750 ml',30,1.5,3.0,1.5],['Gewürze & Balsamico','ca. 50 g',126,5.1,9.8,4.3]],
+ pauschal=[('Gewürze & Balsamico', 50)],
 ))
 
 # ======================================================================= 4 Tomaten-Hähnchen-Pasta
@@ -462,10 +507,7 @@ R.append(dict(
  tips=['Frischkäse leicht nehmen (ca. 11 % Fett). Doppelrahmstufe bringt pro Portion rund 3,5 g Fett mehr.',
        'Frisches Basilikum erst beim Essen drüberzupfen.',
        'Vollkorn: 370 g Vollkorn-Penne und nur 12 g Öl, dann ca. 452 kcal bei gleichen Makros.'],
- nut=[['Hähnchenbrustfilet','700 g',742,161.0,0,10.5],['Penne, roh','320 g',1139,40.0,225.6,5.8],['Getr. Tomaten, abgetropft','150 g',323,7.5,22.5,21.0],
-      ['Öl aus dem Tomatenglas','16 g',144,0,0,16.0],['Passierte Tomaten','500 g',130,6.5,21.5,1.0],['Kochsahne 15 %','200 g',320,5.6,7.6,30.0],
-      ['Frischkäse leicht','200 g',290,14.0,9.0,22.0],['Parmesan','50 g',195,16.5,0,14.0],['Babyspinat','250 g',58,7.0,2.5,1.0],
-      ['Zwiebeln','200 g',70,2.4,12.0,0.2],['Knoblauch','20 g',30,1.3,6.0,0.1],['Gewürze & Brühpulver','ca. 19 g',54,2.2,5.1,1.6]],
+ pauschal=[('Öl aus dem Tomatenglas', 16, 'oel'), ('Gewürze & Brühpulver', 19)],
 ))
 
 # ======================================================================= 5 Mac & Cheese
@@ -482,7 +524,7 @@ R.append(dict(
   I('Knoblauch', '3 Zehen', 'knoblauch', 3, 'Zehe'),
   I('Butter', '25 g', 'butter', pantry=True),
   I('Weizenmehl', '35 g', 'mehl', pantry=True),
-  I('Senf, mittelscharf', '1 EL', 'senf', pantry=True),
+  I('Senf, mittelscharf', '1 EL (15 g)', 'senf', pantry=True),
   I('Öl, neutral', '10 g', 'oel', pantry=True),
  ],
  spices=[S('Paprika edelsüß','1 TL','paprika-edelsuess'), S('Paprika geräuchert','1 TL','paprika-geraeuchert'),
@@ -528,9 +570,7 @@ R.append(dict(
  tips=['Cheddar selbst reiben: Geriebener aus der Tüte hat Trennmittel und macht die Sauce schnell körnig.',
        'Knuspriges Topping: 40 g Panko trocken rösten, mit 30 g Parmesan mischen und erst beim Essen drüberstreuen. Pro Portion +33 kcal.',
        'Beim Aufwärmen 1–2 EL Milch dazu, dann wird es wieder cremig.'],
- nutrows=[('Makkaroni, roh','310 g','nudeln',310),('Hähnchenbrustfilet','500 g','haehnchenbrust',500),('Brokkoli','1.000 g','brokkoli',1000),
-   ('Milch 1,5 %','700 ml','milch',700),('Cheddar','200 g','cheddar',200),('Butter','25 g','butter',25),('Weizenmehl','35 g','mehl',35),
-   ('Öl','10 g','oel',10),('Knoblauch','12 g','knoblauch',12),('Senf','15 g','senf',15),('Gewürze','ca. 8 g','gewuerze',8)],
+ pauschal=[('Gewürze', 8)],
 ))
 
 # ======================================================================= 6 Teriyaki
@@ -590,10 +630,7 @@ R.append(dict(
   ]),
  ],
  tips=['Oberkeule bleibt beim Aufwärmen viel saftiger als Brust. Mit 1 kg Brust fehlen dir pro Portion ca. 6 g Fett, dann 2 EL Öl mehr nehmen.'],
- nutrows=[('Hähnchen-Oberkeulenfilet','1.000 g','haehnchenkeule',1000),('Basmatireis, roh','240 g','reis',240),('Brokkoli','1.000 g','brokkoli',1000),
-   ('Möhren','300 g','moehren',300),('Frühlingszwiebeln','100 g','fruehlingszwiebeln',100),('Sojasauce','120 ml','sojasauce',120),
-   ('Honig','50 g','honig',50),('Knoblauch','16 g','knoblauch',16),('Ingwer','30 g','ingwer',30),('Speisestärke','15 g','staerke',15),
-   ('Öl & Sesamöl','25 g','oel',25),('Sesam','30 g','sesam',30),('Gewürze','ca. 3 g','gewuerze',3)],
+ pauschal=[('Gewürze', 3)],
 ))
 
 # ======================================================================= 7 Thai-Curry
@@ -658,10 +695,7 @@ R.append(dict(
  tips=['Viele rote Currypasten (z. B. Mae Ploy) enthalten Garnelenpaste. Auf die Zutatenliste schauen – vegane gibt es im Asia-Laden und im Bio-Regal.',
        'Currypasten sind unterschiedlich scharf. Bei einer neuen Sorte erst nur 50 g in Schale 3 geben.',
        'Thai-Basilikum oder Koriander erst beim Essen drüberstreuen.'],
- nutrows=[('Hähnchenbrustfilet','1.000 g','haehnchenbrust',1000),('Kokosmilch','400 ml','kokosmilch',400),('Rote Currypaste','70 g','currypaste',70),
-   ('Paprika','480 g','paprika',480),('Zucchini','300 g','zucchini',300),('Zuckerschoten','200 g','zuckerschoten',200),('Zwiebel','100 g','zwiebeln',100),
-   ('Knoblauch','16 g','knoblauch',16),('Ingwer','20 g','ingwer',20),('Sojasauce','30 ml','sojasauce',30),('Zucker','10 g','zucker',10),
-   ('Limettensaft','30 g','limette',30),('Öl','20 g','oel',20),('Jasminreis, roh','290 g','reis',290)],
+ pauschal=[],
 ))
 
 # ======================================================================= 8 Burrito Bowl
@@ -731,9 +765,7 @@ R.append(dict(
  ],
  tips=['Statt schwarzer Bohnen gehen Kidneybohnen genauso.',
        'Zum Aufwärmen Salsa und Schmand vorher herausnehmen und kalt dazu essen.'],
- nutrows=[('Hähnchenbrustfilet','800 g','haehnchenbrust',800),('Reis, roh','240 g','reis',240),('Schwarze Bohnen, abgetropft','240 g','schwarzebohnen',240),
-   ('Mais, abgetropft','285 g','mais',285),('Paprika','480 g','paprika',480),('Zwiebeln','200 g','zwiebeln',200),('Tomaten','300 g','tomaten',300),
-   ('Limettensaft','60 g','limette',60),('Öl','5 g','oel',5),('Cheddar','150 g','cheddar',150),('Schmand','200 g','schmand',200),('Gewürze','ca. 20 g','gewuerze',20)],
+ pauschal=[('Gewürze', 20)],
 ))
 
 # ======================================================================= 9 Gyros
@@ -804,9 +836,7 @@ R.append(dict(
   ]),
  ],
  tips=['Kritharaki sind griechische Nudeln in Reisform, du findest sie neben der Pasta. Orzo ist dasselbe.'],
- nutrows=[('Hähnchenbrustfilet','500 g','haehnchenbrust',500),('Zwiebeln','300 g','zwiebeln',300),('Olivenöl','60 g','oel',60),('Gyros-Gewürze','ca. 20 g','gewuerze',20),
-   ('Kritharaki, roh','320 g','nudeln',320),('Passierte Tomaten','500 g','passata',500),('Tomatenmark','70 g','tomatenmark',70),('Gemüsebrühe','600 ml','bruehe',600),
-   ('Skyr natur','500 g','skyr',500),('Salatgurke','300 g','gurke',300),('Knoblauch','16 g','knoblauch',16),('Feta','200 g','feta',200)],
+ pauschal=[('Gyros-Gewürze', 20)],
 ))
 
 # ======================================================================= 10 Bolognese
@@ -872,10 +902,7 @@ R.append(dict(
  tips=['Das Ragù schmeckt am nächsten Tag noch runder. Du kannst es auch am Vorabend kochen und die Nudeln frisch dazu machen.',
        'Soffritto geht im Zerkleinerer in 5 Min.',
        'Frisches Basilikum erst beim Essen drüberzupfen.'],
- nutrows=[('Rinderhackfleisch','500 g','rinderhack',500),('Rinderhackfleisch mager','400 g','rinderhack-mager',400),('Spaghetti, roh','320 g','nudeln',320),
-   ('Zwiebeln','200 g','zwiebeln',200),('Möhren','200 g','moehren',200),('Staudensellerie','150 g','sellerie',150),('Knoblauch','16 g','knoblauch',16),
-   ('Stückige Tomaten','800 g','tomatendose',800),('Tomatenmark','70 g','tomatenmark',70),('Milch 1,5 %','100 ml','milch',100),
-   ('Parmesan','60 g','parmesan',60),('Zucker','5 g','zucker',5),('Gewürze','ca. 8 g','gewuerze',8)],
+ pauschal=[('Gewürze', 8)],
 ))
 
 # ======================================================================= 11 Lasagne
@@ -948,10 +975,7 @@ R.append(dict(
  ],
  tips=['Die Béchamel wird klumpenfrei, wenn die Milch kalt ist und in drei Portionen kommt.',
        'Für mehr Volumen passt eine Handvoll Babyspinat in die Ragù-Schicht, das ändert die Werte kaum.'],
- nutrows=[('Rinderhackfleisch mager','800 g','rinderhack-mager',800),('Öl','10 g','oel',10),('Lasagneplatten, roh','225 g','nudeln',225),
-   ('Zwiebeln','150 g','zwiebeln',150),('Möhren','150 g','moehren',150),('Zucchini','300 g','zucchini',300),('Knoblauch','12 g','knoblauch',12),
-   ('Passierte Tomaten','1.000 g','passata',1000),('Tomatenmark','70 g','tomatenmark',70),('Butter','50 g','butter',50),('Weizenmehl','50 g','mehl',50),
-   ('Milch 1,5 %','700 ml','milch',700),('Parmesan','50 g','parmesan',50),('Gewürze','ca. 8 g','gewuerze',8)],
+ pauschal=[('Gewürze', 8)],
 ))
 
 # ======================================================================= 12 Ofen-Hähnchen
@@ -968,7 +992,7 @@ R.append(dict(
   I('Rote Zwiebeln', '3 Stück (300 g)', 'rote-zwiebeln', 300, 'g'),
   I('Knoblauch', '1 Knolle (8 Zehen)', 'knoblauch', 8, 'Zehe'),
   I('Magerquark', '250 g', 'magerquark', 250, 'g', '1 Becher'),
-  I('Zitrone', '½ Stück', 'zitrone', 1, 'Stk'),
+  I('Zitrone', '½ Stück', 'zitrone', 1, 'Stk', g=20),
   I('TK-Kräuter', '2 EL', 'tk-kraeuter', 1, 'Pck', 'oder frische Kräuter'),
   I('Olivenöl', '70 g', 'olivenoel', pantry=True),
   H('Backpapier', '2 Blätter für zwei Bleche', 'backpapier'),
@@ -1018,9 +1042,7 @@ R.append(dict(
   ]),
  ],
  tips=['Nicht zu voll packen: Liegt alles übereinander, dämpft es statt zu rösten. Lieber auf zwei Bleche verteilen.'],
- nutrows=[('Hähnchenbrustfilet','400 g','haehnchenbrust',400),('Hähnchen-Oberkeulenfilet','500 g','haehnchenkeule',500),('Kartoffeln','1.500 g','kartoffeln',1500),
-   ('Paprika','480 g','paprika',480),('Zucchini','600 g','zucchini',600),('Rote Zwiebeln','300 g','zwiebeln',300),('Olivenöl','70 g','oel',70),
-   ('Gewürze','ca. 20 g','gewuerze',20),('Knoblauch','30 g','knoblauch',30),('Magerquark','250 g','magerquark',250),('Zitronensaft','20 g','limette',20)],
+ pauschal=[('Gewürze', 20)],
 ))
 
 # ======================================================================= 13 Erdnuss-Nudeln
@@ -1079,10 +1101,7 @@ R.append(dict(
  ],
  tips=['Vor dem Aufwärmen 1–2 EL Wasser dazugeben, die Erdnusssauce dickt im Kühlschrank nach.',
        'Mit einem Julienne-Schäler gehen die Möhrenstifte doppelt so schnell.'],
- nutrows=[('Hähnchenbrustfilet','800 g','haehnchenbrust',800),('Mie-Nudeln, roh','250 g','mie',250),('Paprika','480 g','paprika',480),
-   ('Möhren','300 g','moehren',300),('Spitzkohl','400 g','spitzkohl',400),('Frühlingszwiebeln','100 g','fruehlingszwiebeln',100),
-   ('Erdnussbutter','140 g','erdnussbutter',140),('Sojasauce','100 ml','sojasauce',100),('Honig','40 g','honig',40),('Limettensaft','60 g','limette',60),
-   ('Knoblauch','16 g','knoblauch',16),('Ingwer','20 g','ingwer',20),('Öl','30 g','oel',30),('Gewürze & Sriracha','ca. 3 g','gewuerze',3)],
+ pauschal=[('Gewürze & Sriracha', 3)],
 ))
 
 # ======================================================================= 14 Geschnetzeltes
@@ -1099,7 +1118,7 @@ R.append(dict(
   I('Schmand', '200 g', 'schmand', 200, 'g', '1 Becher'),
   I('Basmatireis', '330 g', 'reis', 330, 'g'),
   I('Hühner- oder Gemüsebrühe', '300 ml', 'bruehe-huhn', pantry=True),
-  I('Senf, mittelscharf', '1 EL', 'senf', pantry=True),
+  I('Senf, mittelscharf', '1 EL (15 g)', 'senf', pantry=True),
   I('Speisestärke', '10 g', 'staerke', pantry=True),
   I('Öl, neutral', '10 g', 'oel', pantry=True),
   I('Petersilie, frisch', '½ Bund', 'petersilie', opt=True),
@@ -1141,9 +1160,7 @@ R.append(dict(
  ],
  tips=['Putenbrust wird schnell trocken. Lieber kurz und heiß anbraten und in der Sauce nur ziehen lassen.',
        'Petersilie erst beim Essen drüberstreuen.'],
- nutrows=[('Putenbrust','800 g','putenbrust',800),('Champignons','800 g','champignons',800),('Zwiebeln','200 g','zwiebeln',200),('Knoblauch','8 g','knoblauch',8),
-   ('Kochsahne 15 %','400 g','kochsahne',400),('Schmand','200 g','schmand',200),('Brühe','300 ml','bruehe',300),('Senf','15 g','senf',15),
-   ('Speisestärke','10 g','staerke',10),('Öl','10 g','oel',10),('Basmatireis, roh','330 g','reis',330),('Gewürze','ca. 6 g','gewuerze',6)],
+ pauschal=[('Gewürze', 6)],
 ))
 
 # ======================================================================= 15 Balkan-Hackpfanne
@@ -1160,7 +1177,7 @@ R.append(dict(
   I('Ajvar, mild', '1 Glas (350 g)', 'ajvar', 1, 'Glas'),
   I('Feta', '200 g', 'feta', 200, 'g', '1 Packung'),
   I('Skyr natur', '250 g', 'skyr', 250, 'g', 'aus 500-g-Becher'),
-  I('Zitrone', '½ Stück', 'zitrone', 1, 'Stk'),
+  I('Zitrone', '½ Stück', 'zitrone', 1, 'Stk', g=15),
   I('Öl, neutral', '15 g', 'oel', pantry=True),
   I('Gemüsebrühe', '300 ml', 'bruehe-gemuese', pantry=True),
   I('Petersilie, frisch', '½ Bund', 'petersilie', opt=True),
@@ -1208,9 +1225,7 @@ R.append(dict(
  ],
  tips=['Ajvar gibt es mild und scharf. Mit scharfem Ajvar kannst du die Chiliflocken weglassen.',
        'Petersilie erst beim Essen drüberstreuen.'],
- nutrows=[('Rinderhackfleisch mager','800 g','rinderhack-mager',800),('Kartoffeln','1.450 g','kartoffeln',1450),('Paprika','480 g','paprika',480),
-   ('Zwiebeln','300 g','zwiebeln',300),('Knoblauch','20 g','knoblauch',20),('Ajvar','350 g','ajvar',350),('Gemüsebrühe','300 ml','bruehe',300),
-   ('Feta','200 g','feta',200),('Skyr natur','250 g','skyr',250),('Zitronensaft','15 g','limette',15),('Öl','15 g','oel',15),('Gewürze','ca. 15 g','gewuerze',15)],
+ pauschal=[('Gewürze', 15)],
 ))
 
 # ======================================================================= 16 Gnocchi
@@ -1270,10 +1285,7 @@ R.append(dict(
  ],
  tips=['Die Gnocchi werden in der Box weicher. Wer sie knusprig mag, lagert sie getrennt und brät sie beim Aufwärmen kurz an.',
        'Frisches Basilikum erst beim Essen drüberzupfen.'],
- nutrows=[('Hähnchenbrustfilet','800 g','haehnchenbrust',800),('Gnocchi','800 g','gnocchi',800),('Kirschtomaten','500 g','tomaten',500),
-   ('Babyspinat','200 g','spinat',200),('Zwiebel','100 g','zwiebeln',100),('Knoblauch','16 g','knoblauch',16),('Passierte Tomaten','500 g','passata',500),
-   ('Frischkäse leicht','200 g','frischkaese',200),('Kochsahne 15 %','200 g','kochsahne',200),('Parmesan','50 g','parmesan',50),('Olivenöl','35 g','oel',35),
-   ('Gewürze & Brühpulver','ca. 6 g','gewuerze',6)],
+ pauschal=[('Gewürze & Brühpulver', 6)],
 ))
 
 # ---------------------------------------------------------------- Ausgabe
@@ -1291,11 +1303,59 @@ EXTRAS = {
 
 PHASEN = ['Vorbereiten', 'Kochen', 'Portionieren']
 
-def nutrows(rows):
-    out=[]
-    for label, amount, key, g in rows:
-        v=N[key]; out.append([label, amount] + [round(x*g/100, 1) for x in v])
-    return out
+def menge_text(q, u):
+    """Wie menge() in js/format.js: 1500 g → „1,5 kg“, 700 ml → „700 ml“."""
+    if u == 'g' and q >= 1000: return f"{q / 1000:g}".replace('.', ',') + ' kg'
+    if u == 'ml' and q >= 1000: return f"{q / 1000:g}".replace('.', ',') + ' l'
+    return f"{int(q) if float(q).is_integer() else q} {u}"
+
+STOPP = {'oder', 'mit', 'max', 'fett', 'light', 'natur', 'leicht', 'kräftig', 'frisch', 'roh', 'ohne', 'mager', 'festkochend', 'gemahlen', 'getrocknet', 'edelsüß', 'kühlregal', 'stück', 'creamy', 'crunchy'}
+# Wortteile, die in den Schritten anders vorkommen als im Namen („Basmatireis“ → „Reis“, „Schlagsahne“ → „Sahne“).
+SYNONYM = [('reis', 'reis'), ('sahne', 'sahne'), ('mehl', 'mehl'), ('nudeln', 'nudel'), ('öl', 'öl'), ('hack', 'hack')]
+# Ein Adjektiv vorn im Namen muss im Schritt dabeistehen („Rote Zwiebeln“ ≠ „Zwiebeln“).
+ADJEKTIV = {'rote', 'gelbe', 'grüne', 'schwarze', 'weiße', 'getrocknete', 'passierte', 'stückige'}
+def staemme(name):
+    """(muss, kann): Wortstämme, die alle bzw. von denen einer neben der Menge stehen muss."""
+    n = name.lower()
+    woerter = [w.strip('.%') for w in re.split(r'[\s,()/-]+', n)]
+    muss = [w[:5] for w in woerter[:1] if w in ADJEKTIV]
+    kann = [w[:5] for w in woerter if len(w) >= 4 and w not in STOPP and w not in ADJEKTIV and not re.match(r'^\d', w)]
+    kann += [stamm for teil, stamm in SYNONYM if teil in n and stamm not in kann]
+    return muss, kann
+
+def platzhalter(text, it):
+    """Die Menge einer Zutat im Schritt („600 g Süßkartoffel“, „3 Zwiebeln (300 g)“) wird zu {schlüssel},
+    damit die App sie beim Anpassen neu einsetzen kann. Nur, wenn der Name der Zutat danebensteht."""
+    q, u = gramm_von(it)
+    if not q or it['u'] not in ('g', 'ml', None) or (it['u'] is None and not it['pantry']): return text
+    if isinstance(it['q'], (int, float)): q, u = it['q'], it['u']
+    m = menge_text(q, u)
+    muss, kann = staemme(it['n'])
+    if not kann: return text
+    aus = text
+    for match in list(re.finditer(re.escape(m) + r'(?![\w,.])', text))[::-1]:
+        davor = re.split(r'[\s,()/-]+', text[max(0, match.start() - 34):match.start()].lower())
+        danach = re.split(r'[\s,()/-]+', text[match.end():match.end() + 44].lower())
+        umfeld = [w for w in danach[:4] + davor[-3:] if w]
+        da = lambda s_: any(w.startswith(s_) for w in umfeld)
+        if all(da(s_) for s_ in muss) and any(da(s_) for s_ in kann):
+            aus = aus[:match.start()] + '{' + it['k'] + '}' + aus[match.end():]
+    return aus
+
+def naehrwert_zeilen(r):
+    """Die Tabelle: jede Zutat mit Gramm und Werten, dazu die Pauschalen (Gewürze …)."""
+    zeilen = []
+    for it in r['items']:
+        if it['opt'] or it['haus'] or not it['k']: continue
+        nk = nk_von(it['k'])
+        g, gu = gramm_von(it)
+        if not g or nk not in N: continue
+        v = N[nk]
+        zeilen.append([it['n'].split(' (')[0], menge_text(g, gu), *[round(x * g / 100, 1) for x in v]])
+    for label, g, *rest in r.get('pauschal', []):
+        v = N[rest[0] if rest else 'gewuerze']
+        zeilen.append([label, f'ca. {g} g', *[round(x * g / 100, 1) for x in v]])
+    return zeilen
 
 def phase_minuten(schritte):
     """Wie js/zeiten.js: Hauptschritte nacheinander, „neben“ in der Zeit des
@@ -1316,8 +1376,28 @@ SCHALE = re.compile(r'Schale (\d+)')
 
 out=[]
 for r in R:
-    if 'nutrows' in r:
-        r['nut'] = nutrows(r.pop('nutrows'))
+    # Nährwerte je Zutat, fürs Etikett und fürs Anpassen in der App
+    for it in r['items']:
+        nk = nk_von(it['k']) if it['k'] else None
+        g, gu = gramm_von(it)
+        it['g'] = g
+        it['gu'] = gu
+        it['pro100'] = dict(zip(('kcal', 'p', 'kh', 'f'), N[nk])) if nk in N and g and not it['opt'] and not it['haus'] else None
+        it['anpassbar'] = bool(it['pro100']) and nk in ANPASSBAR and not it['fest']
+        it['min'] = round(g * 0.5) if it['anpassbar'] else g
+        it['max'] = round(g * 1.6) if it['anpassbar'] else g
+        del it['fest']
+        if it['pantry'] and not isinstance(it['q'], (int, float)) and g:
+            it['q'], it['u'] = g, gu
+    r['nut'] = naehrwert_zeilen(r)
+    r['pauschal'] = [{'n': z[0], 'g': z[1], 'nk': z[2] if len(z) > 2 else 'gewuerze', 'pro100': dict(zip(('kcal', 'p', 'kh', 'f'), N[z[2] if len(z) > 2 else 'gewuerze']))} for z in r.get('pauschal', [])]
+    # Platzhalter: genauere Namen zuerst („Rote Zwiebeln“ vor „Zwiebeln“), jede Menge nur einmal.
+    for t_, schritte in r['ablauf']:
+        for s_ in schritte:
+            for it in sorted(r['items'], key=lambda x: (-len(staemme(x['n'])[0]), -len(x['n']))):
+                if it['k']:
+                    s_['d'] = platzhalter(s_['d'], it)
+                    if s_.get('liste'): s_['liste'] = [platzhalter(x, it) for x in s_['liste']]
     tot=[round(sum(row[i] for row in r['nut']),1) for i in range(2,6)]
     r['total']=tot
     r['m']={'kcal':round(tot[0]/8),'p':round(tot[1]/8,1),'kh':round(tot[2]/8,1),'f':round(tot[3]/8,1)}
@@ -1375,6 +1455,10 @@ daten = {
     'ziel': ZIEL,
     'rezepte': out,
     'katalog': {k: {'n': v[0], 'c': v[1]} for k, v in CAT.items()},
+    # Fürs Anpassen: Werte pro 100 g je Katalog-Schlüssel, Einheit und Gramm je Einheit
+    'naehrwerte': {k: {'pro100': dict(zip(('kcal', 'p', 'kh', 'f'), N[nk_von(k)])), 'u': EINHEIT_G.get(k, ('g',))[0], 'je': EINHEIT_G.get(k, ('g', 100))[1] if k in EINHEIT_G else 100,
+                       'anpassbar': nk_von(k) in ANPASSBAR}
+                   for k in CAT if nk_von(k) in N and CAT[k][1] not in ('gewuerz', 'haushalt')},
     'extras': EXTRAS,
 }
 ziel.write_text(json.dumps(daten, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')

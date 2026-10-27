@@ -11,6 +11,8 @@ export const app = {
   nachId: Object.create(null),
   /** Einheit je Katalog-Schlüssel, wie die festen Rezepte sie benutzen (g, Stk, Dose …). */
   einheiten: {},
+  /** Werte pro 100 g je Katalog-Schlüssel (daten/rezepte.json), fürs Anpassen. */
+  naehrwerte: {},
   katalog: {},
   extras: {},
   ziel: { kcal: 443, p: 33, kh: 39, f: 15.4 },
@@ -29,6 +31,8 @@ export const app = {
   kiLeiste: () => '',
   /** Vor allem, was andere sehen (Liste, Daumen, gekocht): einen KI-Vorschlag erst behalten. */
   kiVorAktion: () => {},
+  /** Den Anpassen-Editor schließen (ansicht-anpassen.js), wenn das Rezept wechselt. */
+  anpassenZu: () => {},
 };
 
 export const $ = (s, el = document) => el.querySelector(s);

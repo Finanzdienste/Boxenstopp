@@ -89,8 +89,8 @@ check(await page.getAttribute('[data-bewerten="runter"]', 'aria-pressed') === 't
 await page.click('[data-bewerten="runter"]');
 check((await text('.bew-von')).startsWith('Noch nicht bewertet'), 'nochmal tippen nimmt den Daumen weg');
 await page.click('[data-bewerten="hoch"]');
-check((await text('.label .c-kcal .v')).startsWith('434'), 'Etikett: 434 kcal pro Box');
-check((await text('.label .c-kcal .dlt')) === '−9', 'Etikett: 9 kcal unter dem Ziel');
+check((await text('.label .c-kcal .v')).startsWith('433'), 'Etikett: 433 kcal pro Box');
+check((await text('.label .c-kcal .dlt')) === '−10', 'Etikett: 10 kcal unter dem Ziel');
 await page.click('[data-act="alle-dazu"]');
 check(await bis(async () => (await badge()) === 10), `alles auf die Liste: 10 offen (${await badge()})`);
 check(await page.locator('.onlist').count() === 1, '„Alle 10 Zutaten stehen auf der Liste“');

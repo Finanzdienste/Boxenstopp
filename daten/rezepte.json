@@ -27,7 +27,18 @@
      "h": "1 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 235,
+      "p": 18.5,
+      "kh": 0,
+      "f": 17
+     },
+     "anpassbar": true,
+     "min": 250,
+     "max": 800
     },
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
@@ -38,7 +49,18 @@
      "h": "1 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 400,
+     "gu": "g",
+     "pro100": {
+      "kcal": 129,
+      "p": 21,
+      "kh": 0,
+      "f": 5
+     },
+     "anpassbar": true,
+     "min": 200,
+     "max": 640
     },
     {
      "n": "Kidneybohnen",
@@ -49,7 +71,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 510,
+     "gu": "g",
+     "pro100": {
+      "kcal": 95,
+      "p": 7.5,
+      "kh": 12,
+      "f": 0.6
+     },
+     "anpassbar": false,
+     "min": 510,
+     "max": 510
     },
     {
      "n": "Mais",
@@ -60,7 +93,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 285,
+     "gu": "g",
+     "pro100": {
+      "kcal": 80,
+      "p": 2.5,
+      "kh": 12,
+      "f": 1.3
+     },
+     "anpassbar": false,
+     "min": 285,
+     "max": 285
     },
     {
      "n": "Stückige Tomaten",
@@ -71,7 +115,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 22,
+      "p": 1,
+      "kh": 3.5,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 800,
+     "max": 800
     },
     {
      "n": "Tomatenmark",
@@ -82,7 +137,18 @@
      "h": "kleine Dose",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 4.5,
+      "kh": 15,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 70,
+     "max": 70
     },
     {
      "n": "Zwiebeln",
@@ -93,7 +159,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -104,7 +181,18 @@
      "h": "3er-Pack",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 450,
+     "gu": "g",
+     "pro100": {
+      "kcal": 28,
+      "p": 1,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 450,
+     "max": 450
     },
     {
      "n": "Knoblauch",
@@ -115,7 +203,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 16,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 16,
+     "max": 16
     },
     {
      "n": "Süßkartoffel",
@@ -126,7 +225,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 600,
+     "gu": "g",
+     "pro100": {
+      "kcal": 86,
+      "p": 1.6,
+      "kh": 20,
+      "f": 0.1
+     },
+     "anpassbar": true,
+     "min": 300,
+     "max": 960
     },
     {
      "n": "Limette",
@@ -137,29 +247,62 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 0.4,
+      "kh": 2.5,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 30,
+     "max": 30
     },
     {
      "n": "Backkakao",
      "a": "1 EL (10 g)",
      "k": "kakao",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 360,
+      "p": 22,
+      "kh": 10,
+      "f": 11
+     },
+     "anpassbar": false,
+     "min": 10.0,
+     "max": 10.0
     },
     {
      "n": "Rinderbrühe",
      "a": "2 Würfel für 400 ml",
      "k": "bruehe-rind",
-     "q": null,
-     "u": null,
+     "q": 400.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 400.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 4,
+      "p": 0.2,
+      "kh": 0.4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 400.0,
+     "max": 400.0
     }
    ],
    "spices": [
@@ -251,7 +394,7 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "3 Zwiebeln (300 g) schälen und fein würfeln → Schale 1",
+       "d": "3 Zwiebeln ({zwiebeln}) schälen und fein würfeln → Schale 1",
        "min": 9
       },
       {
@@ -263,11 +406,11 @@
        "min": 9
       },
       {
-       "d": "600 g Süßkartoffel schälen und in 1,5-cm-Würfel schneiden → Schale 3",
+       "d": "{suesskartoffel} Süßkartoffel schälen und in 1,5-cm-Würfel schneiden → Schale 3",
        "min": 8
       },
       {
-       "d": "70 g Tomatenmark abwiegen → Schale 2",
+       "d": "{tomatenmark} Tomatenmark abwiegen → Schale 2",
        "min": 1
       },
       {
@@ -281,7 +424,7 @@
         "1–2 TL Chiliflocken",
         "1 TL Cayennepfeffer",
         "½ TL Zimt",
-        "1 EL Backkakao (10 g)",
+        "1 EL Backkakao ({kakao})",
         "1 TL Salz",
         "1 TL Pfeffer"
        ]
@@ -312,7 +455,7 @@
      "t": "Kochen",
      "schritte": [
       {
-       "d": "Topf stark erhitzen, 500 g Rinderhack (20 %) ohne Öl hineingeben und 2 Min. liegen lassen",
+       "d": "Topf stark erhitzen, {rinderhack} Rinderhack (20 %) ohne Öl hineingeben und 2 Min. liegen lassen",
        "min": 3
       },
       {
@@ -320,7 +463,7 @@
        "min": 5
       },
       {
-       "d": "400 g mageres Rinderhack dazu und krümelig braten",
+       "d": "{rinderhack-mager} mageres Rinderhack dazu und krümelig braten",
        "min": 5
       },
       {
@@ -383,6 +526,19 @@
     "Mit Reis statt Süßkartoffel: 150 g Basmati (roh) separat kochen und auf die Boxen verteilen, die Werte bleiben fast gleich.",
     "Schärfer: 1 frische Chili fein gehackt mit in Schale 1."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 35,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Rinderhackfleisch",
@@ -401,7 +557,7 @@
      20.0
     ],
     [
-     "Kidneybohnen, abgetropft",
+     "Kidneybohnen",
      "510 g",
      484.5,
      38.2,
@@ -409,7 +565,7 @@
      3.1
     ],
     [
-     "Mais, abgetropft",
+     "Mais",
      "285 g",
      228.0,
      7.1,
@@ -465,6 +621,14 @@
      0.6
     ],
     [
+     "Limette",
+     "30 g",
+     7.5,
+     0.1,
+     0.8,
+     0.0
+    ],
+    [
      "Backkakao",
      "10 g",
      36.0,
@@ -473,12 +637,12 @@
      1.1
     ],
     [
-     "Limettensaft",
-     "30 g",
-     7.5,
-     0.1,
+     "Rinderbrühe",
+     "400 ml",
+     16.0,
      0.8,
-     0.0
+     1.6,
+     0.8
     ],
     [
      "Gewürze",
@@ -490,16 +654,16 @@
     ]
    ],
    "total": [
-    3568.8,
-    258.4,
-    309.2,
-    121.4
+    3584.8,
+    259.2,
+    310.8,
+    122.2
    ],
    "m": {
-    "kcal": 446,
-    "p": 32.3,
-    "kh": 38.6,
-    "f": 15.2
+    "kcal": 448,
+    "p": 32.4,
+    "kh": 38.9,
+    "f": 15.3
    },
    "zeit": {
     "phasen": [
@@ -531,7 +695,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Skyr natur",
@@ -542,7 +717,18 @@
      "h": "2 Becher à 150 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 63,
+      "p": 11,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 150,
+     "max": 480
     },
     {
      "n": "Schlagsahne 30 %",
@@ -553,7 +739,18 @@
      "h": "1 Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 292,
+      "p": 2.4,
+      "kh": 3.3,
+      "f": 30
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Passierte Tomaten",
@@ -564,7 +761,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 26,
+      "p": 1.3,
+      "kh": 4.3,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 500,
+     "max": 500
     },
     {
      "n": "Tomatenmark",
@@ -575,7 +783,18 @@
      "h": "kleine Dose",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 4.5,
+      "kh": 15,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 70,
+     "max": 70
     },
     {
      "n": "Zwiebeln",
@@ -586,7 +805,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Knoblauch",
@@ -597,7 +827,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 24,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 24,
+     "max": 24
     },
     {
      "n": "Ingwer",
@@ -608,7 +849,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30,
+     "gu": "g",
+     "pro100": {
+      "kcal": 80,
+      "p": 1.8,
+      "kh": 15.8,
+      "f": 0.8
+     },
+     "anpassbar": false,
+     "min": 30,
+     "max": 30
     },
     {
      "n": "Zitrone",
@@ -619,7 +871,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 0.4,
+      "kh": 2.5,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 30,
+     "max": 30
     },
     {
      "n": "Basmatireis",
@@ -630,40 +893,84 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 280,
+     "gu": "g",
+     "pro100": {
+      "kcal": 350,
+      "p": 8,
+      "kh": 77,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 140,
+     "max": 448
     },
     {
      "n": "Butter",
      "a": "40 g",
      "k": "butter",
-     "q": null,
-     "u": null,
+     "q": 40.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 40.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 741,
+      "p": 0.7,
+      "kh": 0.6,
+      "f": 82
+     },
+     "anpassbar": true,
+     "min": 20,
+     "max": 64
     },
     {
      "n": "Öl",
      "a": "10 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     },
     {
      "n": "Honig",
      "a": "1 TL (10 g)",
      "k": "honig",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 320,
+      "p": 0.4,
+      "kh": 80,
+      "f": 0
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     },
     {
      "n": "Koriander, frisch",
@@ -674,7 +981,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Backpapier",
@@ -685,7 +998,13 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": true
+     "haus": true,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -769,7 +1088,7 @@
        "min": 2
       },
       {
-       "d": "30 g Ingwer schälen, davon 10 g fein reiben → Schale 2",
+       "d": "{ingwer} Ingwer schälen, davon 10 g fein reiben → Schale 2",
        "min": 2
       },
       {
@@ -780,8 +1099,8 @@
        "d": "In Schale 2 dazugeben und verrühren:",
        "min": 3,
        "liste": [
-        "300 g Skyr",
-        "10 g Öl",
+        "{skyr} Skyr",
+        "{oel} Öl",
         "1 TL Garam Masala",
         "1 TL Kurkuma",
         "1 TL Paprika edelsüß",
@@ -791,7 +1110,7 @@
        ]
       },
       {
-       "d": "800 g Hähnchenbrust in 3-cm-Würfel schneiden → Schale 2 und mit der Marinade mischen. Abgedeckt kalt stellen, mind. 30 Min.",
+       "d": "{haehnchenbrust} Hähnchenbrust in 3-cm-Würfel schneiden → Schale 2 und mit der Marinade mischen. Abgedeckt kalt stellen, mind. 30 Min.",
        "min": 7,
        "ruhe": 30
       },
@@ -800,7 +1119,7 @@
        "min": 2
       },
       {
-       "d": "2 große Zwiebeln (300 g) schälen und fein würfeln → Schale 1",
+       "d": "2 große Zwiebeln ({zwiebeln}) schälen und fein würfeln → Schale 1",
        "min": 9
       },
       {
@@ -824,7 +1143,7 @@
        "d": "In Schale 4 abmessen:",
        "min": 3,
        "liste": [
-        "70 g Tomatenmark",
+        "{tomatenmark} Tomatenmark",
         "1 EL Garam Masala",
         "1 TL Kreuzkümmel",
         "2 TL Paprika edelsüß",
@@ -848,15 +1167,15 @@
        "min": 1
       },
       {
-       "d": "500 g passierte Tomaten öffnen",
+       "d": "{passata} passierte Tomaten öffnen",
        "min": 1
       },
       {
-       "d": "200 ml Wasser, 10 g Honig und 1 TL Salz im Messbecher verrühren",
+       "d": "200 ml Wasser, {honig} Honig und 1 TL Salz im Messbecher verrühren",
        "min": 2
       },
       {
-       "d": "280 g Reis im Sieb waschen, bis das Wasser klar ist, mit 420 ml Wasser und 1 Prise Salz in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 420 ml Wasser und 1 Prise Salz in den kleinen Topf",
        "min": 3
       }
      ]
@@ -893,7 +1212,7 @@
        "min": 2
       },
       {
-       "d": "Die passierten Tomaten (500 g) und den Messbecher einrühren",
+       "d": "Die passierten Tomaten ({passata}) und den Messbecher einrühren",
        "min": 1
       },
       {
@@ -920,7 +1239,7 @@
        "min": 5
       },
       {
-       "d": "200 g Sahne und Schale 5 einrühren, ab jetzt nicht mehr sprudelnd kochen",
+       "d": "{schlagsahne} Sahne und Schale 5 einrühren, ab jetzt nicht mehr sprudelnd kochen",
        "min": 1
       },
       {
@@ -961,43 +1280,64 @@
     "Mit Kochsahne 15 % (400 g) statt Schlagsahne wird die Sauce leichter, dann 270 g Reis nehmen.",
     "Koriander erst beim Essen drüberstreuen."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 24,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Hähnchenbrustfilet",
      "800 g",
-     848,
+     848.0,
      184.0,
-     0,
+     0.0,
      12.0
     ],
     [
      "Skyr natur",
      "300 g",
-     189,
+     189.0,
      33.0,
      12.0,
      0.6
     ],
     [
-     "Öl",
-     "10 g",
-     90,
-     0,
-     0,
-     10.0
+     "Schlagsahne 30 %",
+     "200 g",
+     584.0,
+     4.8,
+     6.6,
+     60.0
     ],
     [
-     "Butter",
-     "40 g",
-     296,
-     0.3,
-     0.2,
-     32.8
+     "Passierte Tomaten",
+     "500 g",
+     130.0,
+     6.5,
+     21.5,
+     1.0
+    ],
+    [
+     "Tomatenmark",
+     "70 g",
+     63.0,
+     3.1,
+     10.5,
+     0.3
     ],
     [
      "Zwiebeln",
      "300 g",
-     105,
+     105.0,
      3.6,
      18.0,
      0.3
@@ -1005,7 +1345,7 @@
     [
      "Knoblauch",
      "24 g",
-     36,
+     35.8,
      1.5,
      7.2,
      0.1
@@ -1013,71 +1353,71 @@
     [
      "Ingwer",
      "30 g",
-     24,
+     24.0,
      0.5,
      4.7,
      0.2
     ],
     [
-     "Tomatenmark",
-     "70 g",
-     63,
-     3.2,
-     10.5,
-     0.4
+     "Zitrone",
+     "30 g",
+     7.5,
+     0.1,
+     0.8,
+     0.0
     ],
     [
-     "Passierte Tomaten",
-     "500 g",
-     130,
-     6.5,
-     21.5,
-     1.0
+     "Basmatireis",
+     "280 g",
+     980.0,
+     22.4,
+     215.6,
+     1.7
+    ],
+    [
+     "Butter",
+     "40 g",
+     296.4,
+     0.3,
+     0.2,
+     32.8
+    ],
+    [
+     "Öl",
+     "10 g",
+     90.0,
+     0.0,
+     0.0,
+     10.0
     ],
     [
      "Honig",
      "10 g",
-     32,
-     0,
+     32.0,
+     0.0,
      8.0,
-     0
+     0.0
     ],
     [
-     "Schlagsahne 30 %",
-     "200 g",
-     584,
-     4.8,
-     6.6,
-     60.0
-    ],
-    [
-     "Gewürze & Zitronensaft",
-     "ca. 26 g",
-     94,
-     3.6,
-     8.2,
-     3.5
-    ],
-    [
-     "Basmatireis, roh",
-     "280 g",
-     980,
-     22.4,
-     215.6,
-     1.7
+     "Gewürze",
+     "ca. 24 g",
+     76.8,
+     3.1,
+     7.2,
+     2.9
     ]
    ],
    "total": [
-    3471,
-    263.4,
-    312.5,
-    122.6
+    3461.5,
+    262.9,
+    312.3,
+    121.9
    ],
    "m": {
-    "kcal": 434,
+    "kcal": 433,
     "p": 32.9,
-    "kh": 39.1,
-    "f": 15.3
+    "kh": 39.0,
+    "f": 15.2
    },
    "zeit": {
     "phasen": [
@@ -1109,7 +1449,18 @@
      "h": "2 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1000,
+     "gu": "g",
+     "pro100": {
+      "kcal": 128,
+      "p": 21,
+      "kh": 0,
+      "f": 5
+     },
+     "anpassbar": true,
+     "min": 500,
+     "max": 1600
     },
     {
      "n": "Zwiebeln",
@@ -1120,7 +1471,18 @@
      "h": "1 Netz",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1000,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 1000,
+     "max": 1000
     },
     {
      "n": "Rote Paprika",
@@ -1131,7 +1493,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 480,
+     "gu": "g",
+     "pro100": {
+      "kcal": 28,
+      "p": 1,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 480,
+     "max": 480
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -1142,7 +1515,18 @@
      "h": "Beutel 1,5 kg",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1275,
+     "gu": "g",
+     "pro100": {
+      "kcal": 72,
+      "p": 2,
+      "kh": 15.5,
+      "f": 0.1
+     },
+     "anpassbar": true,
+     "min": 638,
+     "max": 2040
     },
     {
      "n": "Knoblauch",
@@ -1153,7 +1537,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 24,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 24,
+     "max": 24
     },
     {
      "n": "Tomatenmark",
@@ -1164,29 +1559,62 @@
      "h": "kleine Dose",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 4.5,
+      "kh": 15,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 70,
+     "max": 70
     },
     {
      "n": "Butterschmalz",
      "a": "65 g",
      "k": "butterschmalz",
-     "q": null,
-     "u": null,
+     "q": 65.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 65.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 898,
+      "p": 0,
+      "kh": 0,
+      "f": 99.8
+     },
+     "anpassbar": true,
+     "min": 32,
+     "max": 104
     },
     {
      "n": "Rinderbrühe",
      "a": "750 ml",
      "k": "bruehe-rind",
-     "q": null,
-     "u": null,
+     "q": 750.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 750.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 4,
+      "p": 0.2,
+      "kh": 0.4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 750.0,
+     "max": 750.0
     },
     {
      "n": "Balsamico oder Rotweinessig",
@@ -1197,7 +1625,13 @@
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Zitrone (Abrieb)",
@@ -1208,7 +1642,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -1298,7 +1738,7 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "1 kg Zwiebeln schälen und in feine Streifen schneiden → Schale 2",
+       "d": "{zwiebeln} Zwiebeln schälen und in feine Streifen schneiden → Schale 2",
        "min": 20
       },
       {
@@ -1306,7 +1746,7 @@
        "min": 6
       },
       {
-       "d": "70 g Tomatenmark abwiegen → Schale 3",
+       "d": "{tomatenmark} Tomatenmark abwiegen → Schale 3",
        "min": 1
       },
       {
@@ -1322,7 +1762,7 @@
        ]
       },
       {
-       "d": "750 ml heiße Rinderbrühe anrühren → Messbecher, 2 Lorbeerblätter danebenlegen",
+       "d": "{bruehe-rind} heiße Rinderbrühe anrühren → Messbecher, 2 Lorbeerblätter danebenlegen",
        "min": 2
       },
       {
@@ -1338,7 +1778,7 @@
        "min": 1
       },
       {
-       "d": "1 kg Rindergulasch trocken tupfen, große Stücke auf 3–4 cm nachschneiden → Schale 1",
+       "d": "{rindergulasch} Rindergulasch trocken tupfen, große Stücke auf 3–4 cm nachschneiden → Schale 1",
        "min": 9
       },
       {
@@ -1391,7 +1831,7 @@
        "min": 90
       },
       {
-       "d": "1,5 kg Kartoffeln schälen, davon 1.275 g abwiegen",
+       "d": "{kartoffeln} Kartoffeln schälen, davon 1.275 g abwiegen",
        "min": 15,
        "neben": true
       },
@@ -1472,35 +1912,56 @@
     "Beim Fleisch schwankt der Fettgehalt stark. Nimm Keule statt Nacken, das ist deutlich magerer.",
     "Die Zwiebeln gehen im Zerkleinerer in 5 Min. statt 20."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze & Balsamico",
+     "g": 50,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Rindergulasch, mager",
-     "1.000 g",
-     1280,
+     "1 kg",
+     1280.0,
      210.0,
-     0,
+     0.0,
      50.0
     ],
     [
-     "Butterschmalz",
-     "65 g",
-     584,
-     0,
-     0,
-     64.9
-    ],
-    [
      "Zwiebeln",
-     "1.000 g",
-     350,
+     "1 kg",
+     350.0,
      12.0,
      60.0,
      1.0
     ],
     [
+     "Rote Paprika",
+     "480 g",
+     134.4,
+     4.8,
+     21.6,
+     1.4
+    ],
+    [
+     "Kartoffeln, festkochend",
+     "1,275 kg",
+     918.0,
+     25.5,
+     197.6,
+     1.3
+    ],
+    [
      "Knoblauch",
      "24 g",
-     36,
+     35.8,
      1.5,
      7.2,
      0.1
@@ -1508,31 +1969,23 @@
     [
      "Tomatenmark",
      "70 g",
-     63,
-     3.2,
+     63.0,
+     3.1,
      10.5,
-     0.4
+     0.3
     ],
     [
-     "Rote Paprika",
-     "480 g",
-     144,
-     4.8,
-     24.0,
-     1.4
-    ],
-    [
-     "Kartoffeln, geschält",
-     "1.275 g",
-     918,
-     25.5,
-     197.6,
-     1.3
+     "Butterschmalz",
+     "65 g",
+     583.7,
+     0.0,
+     0.0,
+     64.9
     ],
     [
      "Rinderbrühe",
      "750 ml",
-     30,
+     30.0,
      1.5,
      3.0,
      1.5
@@ -1540,23 +1993,23 @@
     [
      "Gewürze & Balsamico",
      "ca. 50 g",
-     126,
-     5.1,
-     9.8,
-     4.3
+     160.0,
+     6.5,
+     15.0,
+     6.0
     ]
    ],
    "total": [
-    3531,
-    263.6,
-    312.1,
-    124.9
+    3554.9,
+    264.9,
+    314.9,
+    126.5
    ],
    "m": {
-    "kcal": 441,
-    "p": 33.0,
-    "kh": 39.0,
-    "f": 15.6
+    "kcal": 444,
+    "p": 33.1,
+    "kh": 39.4,
+    "f": 15.8
    },
    "zeit": {
     "phasen": [
@@ -1588,7 +2041,18 @@
      "h": "Theke oder 2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 700,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 350,
+     "max": 1120
     },
     {
      "n": "Penne",
@@ -1599,7 +2063,18 @@
      "h": "aus 500-g-Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 320,
+     "gu": "g",
+     "pro100": {
+      "kcal": 356,
+      "p": 12.5,
+      "kh": 70.5,
+      "f": 1.8
+     },
+     "anpassbar": true,
+     "min": 160,
+     "max": 512
     },
     {
      "n": "Getrocknete Tomaten in Öl",
@@ -1610,7 +2085,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 150,
+     "gu": "g",
+     "pro100": {
+      "kcal": 215,
+      "p": 5,
+      "kh": 15,
+      "f": 14
+     },
+     "anpassbar": false,
+     "min": 150,
+     "max": 150
     },
     {
      "n": "Passierte Tomaten",
@@ -1621,7 +2107,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 26,
+      "p": 1.3,
+      "kh": 4.3,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 500,
+     "max": 500
     },
     {
      "n": "Kochsahne 15 %",
@@ -1632,7 +2129,18 @@
      "h": "1 Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 160,
+      "p": 2.8,
+      "kh": 3.8,
+      "f": 15
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Frischkäse leicht",
@@ -1643,7 +2151,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 145,
+      "p": 7,
+      "kh": 4.5,
+      "f": 11
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Parmesan",
@@ -1654,7 +2173,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 50,
+     "gu": "g",
+     "pro100": {
+      "kcal": 390,
+      "p": 33,
+      "kh": 0,
+      "f": 28
+     },
+     "anpassbar": true,
+     "min": 25,
+     "max": 80
     },
     {
      "n": "Babyspinat",
@@ -1665,7 +2195,18 @@
      "h": "2 × 125 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 250,
+     "gu": "g",
+     "pro100": {
+      "kcal": 23,
+      "p": 2.8,
+      "kh": 1,
+      "f": 0.4
+     },
+     "anpassbar": false,
+     "min": 250,
+     "max": 250
     },
     {
      "n": "Zwiebeln",
@@ -1676,7 +2217,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 200,
+     "max": 200
     },
     {
      "n": "Knoblauch",
@@ -1687,7 +2239,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 20,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 20,
+     "max": 20
     },
     {
      "n": "Gemüsebrühe (Pulver)",
@@ -1698,7 +2261,13 @@
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Basilikum, frisch",
@@ -1709,7 +2278,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -1795,7 +2370,7 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "2 Zwiebeln (200 g) schälen und fein würfeln → Schale 3",
+       "d": "2 Zwiebeln ({zwiebeln}) schälen und fein würfeln → Schale 3",
        "min": 6
       },
       {
@@ -1826,15 +2401,15 @@
        ]
       },
       {
-       "d": "500 g passierte Tomaten, 200 g Kochsahne und 1 TL Gemüsebrühe (Pulver) im Messbecher verrühren",
+       "d": "{passata} passierte Tomaten, {kochsahne} Kochsahne und 1 TL Gemüsebrühe (Pulver) im Messbecher verrühren",
        "min": 2
       },
       {
-       "d": "50 g Parmesan fein reiben → Schale 5, 200 g Frischkäse dazu",
+       "d": "{parmesan} Parmesan fein reiben → Schale 5, {frischkaese} Frischkäse dazu",
        "min": 2
       },
       {
-       "d": "320 g Penne abwiegen → Schale 2",
+       "d": "{penne} Penne abwiegen → Schale 2",
        "min": 1
       },
       {
@@ -1851,7 +2426,7 @@
        "min": 3
       },
       {
-       "d": "700 g Hähnchenbrust in 2–3-cm-Stücke schneiden → Schale 1 und mit den Gewürzen mischen",
+       "d": "{haehnchenbrust} Hähnchenbrust in 2–3-cm-Stücke schneiden → Schale 1 und mit den Gewürzen mischen",
        "min": 6
       },
       {
@@ -1899,7 +2474,7 @@
        "neben": true
       },
       {
-       "d": "250 g Babyspinat handvollweise unterheben",
+       "d": "{spinat} Babyspinat handvollweise unterheben",
        "min": 2
       },
       {
@@ -1947,43 +2522,59 @@
     "Frisches Basilikum erst beim Essen drüberzupfen.",
     "Vollkorn: 370 g Vollkorn-Penne und nur 12 g Öl, dann ca. 452 kcal bei gleichen Makros."
    ],
+   "pauschal": [
+    {
+     "n": "Öl aus dem Tomatenglas",
+     "g": 16,
+     "nk": "oel",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     }
+    },
+    {
+     "n": "Gewürze & Brühpulver",
+     "g": 19,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Hähnchenbrustfilet",
      "700 g",
-     742,
+     742.0,
      161.0,
-     0,
+     0.0,
      10.5
     ],
     [
-     "Penne, roh",
+     "Penne",
      "320 g",
-     1139,
+     1139.2,
      40.0,
      225.6,
      5.8
     ],
     [
-     "Getr. Tomaten, abgetropft",
+     "Getrocknete Tomaten in Öl",
      "150 g",
-     323,
+     322.5,
      7.5,
      22.5,
      21.0
     ],
     [
-     "Öl aus dem Tomatenglas",
-     "16 g",
-     144,
-     0,
-     0,
-     16.0
-    ],
-    [
      "Passierte Tomaten",
      "500 g",
-     130,
+     130.0,
      6.5,
      21.5,
      1.0
@@ -1991,7 +2582,7 @@
     [
      "Kochsahne 15 %",
      "200 g",
-     320,
+     320.0,
      5.6,
      7.6,
      30.0
@@ -1999,7 +2590,7 @@
     [
      "Frischkäse leicht",
      "200 g",
-     290,
+     290.0,
      14.0,
      9.0,
      22.0
@@ -2007,15 +2598,15 @@
     [
      "Parmesan",
      "50 g",
-     195,
+     195.0,
      16.5,
-     0,
+     0.0,
      14.0
     ],
     [
      "Babyspinat",
      "250 g",
-     58,
+     57.5,
      7.0,
      2.5,
      1.0
@@ -2023,7 +2614,7 @@
     [
      "Zwiebeln",
      "200 g",
-     70,
+     70.0,
      2.4,
      12.0,
      0.2
@@ -2031,31 +2622,39 @@
     [
      "Knoblauch",
      "20 g",
-     30,
+     29.8,
      1.3,
      6.0,
      0.1
     ],
     [
+     "Öl aus dem Tomatenglas",
+     "ca. 16 g",
+     144.0,
+     0.0,
+     0.0,
+     16.0
+    ],
+    [
      "Gewürze & Brühpulver",
      "ca. 19 g",
-     54,
-     2.2,
-     5.1,
-     1.6
+     60.8,
+     2.5,
+     5.7,
+     2.3
     ]
    ],
    "total": [
-    3495,
-    264.0,
-    311.8,
-    123.2
+    3500.8,
+    264.3,
+    312.4,
+    123.9
    ],
    "m": {
-    "kcal": 437,
+    "kcal": 438,
     "p": 33.0,
     "kh": 39.0,
-    "f": 15.4
+    "f": 15.5
    },
    "zeit": {
     "phasen": [
@@ -2087,7 +2686,18 @@
      "h": "aus 500-g-Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 310,
+     "gu": "g",
+     "pro100": {
+      "kcal": 356,
+      "p": 12.5,
+      "kh": 70.5,
+      "f": 1.8
+     },
+     "anpassbar": true,
+     "min": 155,
+     "max": 496
     },
     {
      "n": "Hähnchenbrustfilet",
@@ -2098,7 +2708,18 @@
      "h": "1 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 250,
+     "max": 800
     },
     {
      "n": "Brokkoli",
@@ -2109,7 +2730,18 @@
      "h": "2 Köpfe oder TK",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1000,
+     "gu": "g",
+     "pro100": {
+      "kcal": 34,
+      "p": 3,
+      "kh": 3,
+      "f": 0.4
+     },
+     "anpassbar": false,
+     "min": 1000,
+     "max": 1000
     },
     {
      "n": "Milch 1,5 %",
@@ -2120,7 +2752,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 700,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 47,
+      "p": 3.4,
+      "kh": 4.8,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 350,
+     "max": 1120
     },
     {
      "n": "Cheddar, kräftig (am Stück)",
@@ -2131,7 +2774,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 400,
+      "p": 25,
+      "kh": 0,
+      "f": 33
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Knoblauch",
@@ -2142,51 +2796,106 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 12,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 12,
+     "max": 12
     },
     {
      "n": "Butter",
      "a": "25 g",
      "k": "butter",
-     "q": null,
-     "u": null,
+     "q": 25.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 25.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 741,
+      "p": 0.7,
+      "kh": 0.6,
+      "f": 82
+     },
+     "anpassbar": true,
+     "min": 12,
+     "max": 40
     },
     {
      "n": "Weizenmehl",
      "a": "35 g",
      "k": "mehl",
-     "q": null,
-     "u": null,
+     "q": 35.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 35.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 348,
+      "p": 10,
+      "kh": 72,
+      "f": 1
+     },
+     "anpassbar": true,
+     "min": 18,
+     "max": 56
     },
     {
      "n": "Senf, mittelscharf",
-     "a": "1 EL",
+     "a": "1 EL (15 g)",
      "k": "senf",
-     "q": null,
-     "u": null,
+     "q": 15.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 15.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 6,
+      "kh": 5,
+      "f": 4
+     },
+     "anpassbar": false,
+     "min": 15.0,
+     "max": 15.0
     },
     {
      "n": "Öl, neutral",
      "a": "10 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     }
    ],
    "spices": [
@@ -2277,7 +2986,7 @@
        "min": 1
       },
       {
-       "d": "1 kg Brokkoli in kleine Röschen teilen, den Strunk schälen und würfeln → Schale 3",
+       "d": "{brokkoli} Brokkoli in kleine Röschen teilen, den Strunk schälen und würfeln → Schale 3",
        "min": 10
       },
       {
@@ -2285,19 +2994,19 @@
        "min": 3
       },
       {
-       "d": "35 g Mehl abwiegen → Schale 4",
+       "d": "{mehl} Mehl abwiegen → Schale 4",
        "min": 1
       },
       {
-       "d": "25 g Butter abwiegen → in den mittleren Topf",
+       "d": "{butter} Butter abwiegen → in den mittleren Topf",
        "min": 1
       },
       {
-       "d": "700 ml Milch abmessen → Messbecher",
+       "d": "{milch} Milch abmessen → Messbecher",
        "min": 1
       },
       {
-       "d": "200 g Cheddar fein reiben → Schale 5",
+       "d": "{cheddar} Cheddar fein reiben → Schale 5",
        "min": 4
       },
       {
@@ -2313,7 +3022,7 @@
        ]
       },
       {
-       "d": "310 g Makkaroni abwiegen → Schale 1",
+       "d": "{hoernchen} Makkaroni abwiegen → Schale 1",
        "min": 1
       },
       {
@@ -2322,7 +3031,7 @@
        "ruhe": 12
       },
       {
-       "d": "10 g Öl abwiegen → in die Pfanne",
+       "d": "{oel} Öl abwiegen → in die Pfanne",
        "min": 1
       },
       {
@@ -2330,7 +3039,7 @@
        "min": 2
       },
       {
-       "d": "500 g Hähnchenbrust in 2-cm-Würfel schneiden → Schale 2 und mit den Gewürzen mischen",
+       "d": "{haehnchenbrust} Hähnchenbrust in 2-cm-Würfel schneiden → Schale 2 und mit den Gewürzen mischen",
        "min": 5
       },
       {
@@ -2420,9 +3129,22 @@
     "Knuspriges Topping: 40 g Panko trocken rösten, mit 30 g Parmesan mischen und erst beim Essen drüberstreuen. Pro Portion +33 kcal.",
     "Beim Aufwärmen 1–2 EL Milch dazu, dann wird es wieder cremig."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 8,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
-     "Makkaroni, roh",
+     "Hörnchennudeln oder Makkaroni",
      "310 g",
      1103.6,
      38.8,
@@ -2439,7 +3161,7 @@
     ],
     [
      "Brokkoli",
-     "1.000 g",
+     "1 kg",
      340.0,
      30.0,
      30.0,
@@ -2454,12 +3176,20 @@
      10.5
     ],
     [
-     "Cheddar",
+     "Cheddar, kräftig",
      "200 g",
      800.0,
      50.0,
      0.0,
      66.0
+    ],
+    [
+     "Knoblauch",
+     "12 g",
+     17.9,
+     0.8,
+     3.6,
+     0.1
     ],
     [
      "Butter",
@@ -2478,28 +3208,20 @@
      0.3
     ],
     [
-     "Öl",
-     "10 g",
-     90.0,
-     0.0,
-     0.0,
-     10.0
-    ],
-    [
-     "Knoblauch",
-     "12 g",
-     17.9,
-     0.8,
-     3.6,
-     0.1
-    ],
-    [
-     "Senf",
+     "Senf, mittelscharf",
      "15 g",
      13.5,
      0.9,
      0.8,
      0.6
+    ],
+    [
+     "Öl, neutral",
+     "10 g",
+     90.0,
+     0.0,
+     0.0,
+     10.0
     ],
     [
      "Gewürze",
@@ -2552,7 +3274,18 @@
      "h": "2 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1000,
+     "gu": "g",
+     "pro100": {
+      "kcal": 146,
+      "p": 18.7,
+      "kh": 0,
+      "f": 7.9
+     },
+     "anpassbar": true,
+     "min": 500,
+     "max": 1600
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -2563,7 +3296,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 240,
+     "gu": "g",
+     "pro100": {
+      "kcal": 350,
+      "p": 8,
+      "kh": 77,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 120,
+     "max": 384
     },
     {
      "n": "Brokkoli",
@@ -2574,7 +3318,18 @@
      "h": "2 Köpfe",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1000,
+     "gu": "g",
+     "pro100": {
+      "kcal": 34,
+      "p": 3,
+      "kh": 3,
+      "f": 0.4
+     },
+     "anpassbar": false,
+     "min": 1000,
+     "max": 1000
     },
     {
      "n": "Möhren",
@@ -2585,7 +3340,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 36,
+      "p": 0.9,
+      "kh": 7,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Frühlingszwiebeln",
@@ -2596,7 +3362,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100,
+     "gu": "g",
+     "pro100": {
+      "kcal": 30,
+      "p": 1.8,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 100,
+     "max": 100
     },
     {
      "n": "Knoblauch",
@@ -2607,7 +3384,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 16,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 16,
+     "max": 16
     },
     {
      "n": "Ingwer",
@@ -2618,7 +3406,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30,
+     "gu": "g",
+     "pro100": {
+      "kcal": 80,
+      "p": 1.8,
+      "kh": 15.8,
+      "f": 0.8
+     },
+     "anpassbar": false,
+     "min": 30,
+     "max": 30
     },
     {
      "n": "Sesam",
@@ -2629,29 +3428,62 @@
      "h": "Tüte",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30,
+     "gu": "g",
+     "pro100": {
+      "kcal": 580,
+      "p": 18,
+      "kh": 10,
+      "f": 50
+     },
+     "anpassbar": false,
+     "min": 30,
+     "max": 30
     },
     {
      "n": "Sojasauce",
      "a": "120 ml",
      "k": "sojasauce",
-     "q": null,
-     "u": null,
+     "q": 120.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 120.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 70,
+      "p": 9,
+      "kh": 5,
+      "f": 0
+     },
+     "anpassbar": false,
+     "min": 120.0,
+     "max": 120.0
     },
     {
      "n": "Honig",
      "a": "50 g (2½ EL)",
      "k": "honig",
-     "q": null,
-     "u": null,
+     "q": 50.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 50.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 320,
+      "p": 0.4,
+      "kh": 80,
+      "f": 0
+     },
+     "anpassbar": true,
+     "min": 25,
+     "max": 80
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -2662,40 +3494,79 @@
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Speisestärke",
      "a": "15 g (1½ EL)",
      "k": "staerke",
-     "q": null,
-     "u": null,
+     "q": 15.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 15.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 350,
+      "p": 0.3,
+      "kh": 86,
+      "f": 0.1
+     },
+     "anpassbar": true,
+     "min": 8,
+     "max": 24
     },
     {
      "n": "Öl, neutral",
      "a": "15 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 15.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 15.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 8,
+     "max": 24
     },
     {
      "n": "Sesamöl",
      "a": "10 g",
      "k": "sesamoel",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     }
    ],
    "spices": [
@@ -2748,15 +3619,15 @@
        "min": 1
       },
       {
-       "d": "240 g Reis im Sieb waschen, bis das Wasser klar ist, mit 360 ml Wasser und 1 Prise Salz in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 360 ml Wasser und 1 Prise Salz in den kleinen Topf",
        "min": 3
       },
       {
-       "d": "1 kg Brokkoli in Röschen teilen, den Strunk schälen und würfeln → Schale 1",
+       "d": "{brokkoli} Brokkoli in Röschen teilen, den Strunk schälen und würfeln → Schale 1",
        "min": 10
       },
       {
-       "d": "3 Möhren (300 g) schälen und schräg in dünne Scheiben schneiden → Schale 1",
+       "d": "3 Möhren ({moehren}) schälen und schräg in dünne Scheiben schneiden → Schale 1",
        "min": 5
       },
       {
@@ -2768,28 +3639,28 @@
        "min": 4
       },
       {
-       "d": "30 g Ingwer schälen und fein reiben → Schale 3",
+       "d": "{ingwer} Ingwer schälen und fein reiben → Schale 3",
        "min": 3
       },
       {
        "d": "In Schale 3 dazu und glatt rühren:",
        "min": 4,
        "liste": [
-        "120 ml Sojasauce",
-        "50 g Honig",
+        "{sojasauce} Sojasauce",
+        "{honig} Honig",
         "2 EL Essig",
-        "15 g Speisestärke",
+        "{staerke} Speisestärke",
         "½–1 TL Chiliflocken",
-        "10 g Sesamöl",
+        "{sesamoel} Sesamöl",
         "150 ml Wasser"
        ]
       },
       {
-       "d": "30 g Sesam im trockenen Wok 2 Min. goldbraun rösten → Schale 4",
+       "d": "{sesam} Sesam im trockenen Wok 2 Min. goldbraun rösten → Schale 4",
        "min": 3
       },
       {
-       "d": "15 g Öl abwiegen und in den Wok geben",
+       "d": "{oel} Öl abwiegen und in den Wok geben",
        "min": 1
       },
       {
@@ -2798,7 +3669,7 @@
        "ruhe": 12
       },
       {
-       "d": "1 kg Hähnchen-Oberkeulenfilet in 3-cm-Stücke schneiden, grobes Fett wegschneiden → Schale 2",
+       "d": "{haehnchenkeule} Hähnchen-Oberkeulenfilet in 3-cm-Stücke schneiden, grobes Fett wegschneiden → Schale 2",
        "min": 9
       },
       {
@@ -2870,17 +3741,30 @@
    "tips": [
     "Oberkeule bleibt beim Aufwärmen viel saftiger als Brust. Mit 1 kg Brust fehlen dir pro Portion ca. 6 g Fett, dann 2 EL Öl mehr nehmen."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 3,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "1.000 g",
+     "1 kg",
      1460.0,
      187.0,
      0.0,
      79.0
     ],
     [
-     "Basmatireis, roh",
+     "Basmati- oder Jasminreis",
      "240 g",
      840.0,
      19.2,
@@ -2889,7 +3773,7 @@
     ],
     [
      "Brokkoli",
-     "1.000 g",
+     "1 kg",
      340.0,
      30.0,
      30.0,
@@ -2912,22 +3796,6 @@
      0.3
     ],
     [
-     "Sojasauce",
-     "120 ml",
-     84.0,
-     10.8,
-     6.0,
-     0.0
-    ],
-    [
-     "Honig",
-     "50 g",
-     160.0,
-     0.2,
-     40.0,
-     0.0
-    ],
-    [
      "Knoblauch",
      "16 g",
      23.8,
@@ -2944,6 +3812,30 @@
      0.2
     ],
     [
+     "Sesam",
+     "30 g",
+     174.0,
+     5.4,
+     3.0,
+     15.0
+    ],
+    [
+     "Sojasauce",
+     "120 ml",
+     84.0,
+     10.8,
+     6.0,
+     0.0
+    ],
+    [
+     "Honig",
+     "50 g",
+     160.0,
+     0.2,
+     40.0,
+     0.0
+    ],
+    [
      "Speisestärke",
      "15 g",
      52.5,
@@ -2952,20 +3844,20 @@
      0.0
     ],
     [
-     "Öl & Sesamöl",
-     "25 g",
-     225.0,
+     "Öl, neutral",
+     "15 g",
+     135.0,
      0.0,
      0.0,
-     25.0
+     15.0
     ],
     [
-     "Sesam",
-     "30 g",
-     174.0,
-     5.4,
-     3.0,
-     15.0
+     "Sesamöl",
+     "10 g",
+     90.0,
+     0.0,
+     0.0,
+     10.0
     ],
     [
      "Gewürze",
@@ -3018,7 +3910,18 @@
      "h": "2 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1000,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 500,
+     "max": 1600
     },
     {
      "n": "Kokosmilch (nicht light)",
@@ -3029,7 +3932,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 400,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 180,
+      "p": 1.6,
+      "kh": 3,
+      "f": 18
+     },
+     "anpassbar": true,
+     "min": 200,
+     "max": 640
     },
     {
      "n": "Rote Currypaste, vegan",
@@ -3040,7 +3954,18 @@
      "h": "ohne Garnelen – Zutaten prüfen",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70,
+     "gu": "g",
+     "pro100": {
+      "kcal": 150,
+      "p": 3,
+      "kh": 13,
+      "f": 9
+     },
+     "anpassbar": false,
+     "min": 70,
+     "max": 70
     },
     {
      "n": "Paprika",
@@ -3051,7 +3976,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 480,
+     "gu": "g",
+     "pro100": {
+      "kcal": 28,
+      "p": 1,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 480,
+     "max": 480
     },
     {
      "n": "Zucchini",
@@ -3062,7 +3998,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 19,
+      "p": 1.5,
+      "kh": 2.2,
+      "f": 0.4
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Zuckerschoten",
@@ -3073,7 +4020,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 42,
+      "p": 3,
+      "kh": 7,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 200,
+     "max": 200
     },
     {
      "n": "Zwiebel",
@@ -3084,7 +4042,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 100,
+     "max": 100
     },
     {
      "n": "Knoblauch",
@@ -3095,7 +4064,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 16,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 16,
+     "max": 16
     },
     {
      "n": "Ingwer",
@@ -3106,7 +4086,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 20,
+     "gu": "g",
+     "pro100": {
+      "kcal": 80,
+      "p": 1.8,
+      "kh": 15.8,
+      "f": 0.8
+     },
+     "anpassbar": false,
+     "min": 20,
+     "max": 20
     },
     {
      "n": "Limette",
@@ -3117,7 +4108,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 0.4,
+      "kh": 2.5,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 30,
+     "max": 30
     },
     {
      "n": "Jasminreis",
@@ -3128,40 +4130,84 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 290,
+     "gu": "g",
+     "pro100": {
+      "kcal": 350,
+      "p": 8,
+      "kh": 77,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 145,
+     "max": 464
     },
     {
      "n": "Sojasauce",
      "a": "2 EL (30 ml)",
      "k": "sojasauce",
-     "q": null,
-     "u": null,
+     "q": 30.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 70,
+      "p": 9,
+      "kh": 5,
+      "f": 0
+     },
+     "anpassbar": false,
+     "min": 30.0,
+     "max": 30.0
     },
     {
      "n": "Zucker",
      "a": "2 TL (10 g)",
      "k": "zucker",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 400,
+      "p": 0,
+      "kh": 100,
+      "f": 0
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     },
     {
      "n": "Öl, neutral",
      "a": "20 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 20.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 20.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 10,
+     "max": 32
     },
     {
      "n": "Thai-Basilikum oder Koriander",
@@ -3172,7 +4218,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -3232,11 +4284,11 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "290 g Reis im Sieb waschen, bis das Wasser klar ist, mit 435 ml Wasser in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 435 ml Wasser in den kleinen Topf",
        "min": 3
       },
       {
-       "d": "1 Zwiebel (100 g) schälen und in Streifen schneiden → Schale 2",
+       "d": "1 Zwiebel ({zwiebeln}) schälen und in Streifen schneiden → Schale 2",
        "min": 2
       },
       {
@@ -3244,7 +4296,7 @@
        "min": 4
       },
       {
-       "d": "20 g Ingwer schälen und fein hacken → Schale 3",
+       "d": "{ingwer} Ingwer schälen und fein hacken → Schale 3",
        "min": 3
       },
       {
@@ -3260,7 +4312,7 @@
        "min": 2
       },
       {
-       "d": "200 g Zuckerschoten waschen und schräg halbieren → Schale 5",
+       "d": "{zuckerschoten} Zuckerschoten waschen und schräg halbieren → Schale 5",
        "min": 3
       },
       {
@@ -3268,7 +4320,7 @@
        "min": 1
       },
       {
-       "d": "200 ml Wasser, 30 ml Sojasauce und 10 g Zucker im Messbecher verrühren",
+       "d": "200 ml Wasser, {sojasauce} Sojasauce und {zucker} Zucker im Messbecher verrühren",
        "min": 2
       },
       {
@@ -3276,7 +4328,7 @@
        "min": 1
       },
       {
-       "d": "20 g Öl abwiegen → Tasse",
+       "d": "{oel} Öl abwiegen → Tasse",
        "min": 1
       },
       {
@@ -3284,7 +4336,7 @@
        "min": 1
       },
       {
-       "d": "1 kg Hähnchenbrust in mundgerechte Stücke schneiden → Schale 1",
+       "d": "{haehnchenbrust} Hähnchenbrust in mundgerechte Stücke schneiden → Schale 1",
        "min": 9
       },
       {
@@ -3366,10 +4418,11 @@
     "Currypasten sind unterschiedlich scharf. Bei einer neuen Sorte erst nur 50 g in Schale 3 geben.",
     "Thai-Basilikum oder Koriander erst beim Essen drüberstreuen."
    ],
+   "pauschal": [],
    "nut": [
     [
      "Hähnchenbrustfilet",
-     "1.000 g",
+     "1 kg",
      1060.0,
      230.0,
      0.0,
@@ -3384,7 +4437,7 @@
      72.0
     ],
     [
-     "Rote Currypaste",
+     "Rote Currypaste, vegan",
      "70 g",
      105.0,
      2.1,
@@ -3440,6 +4493,22 @@
      0.2
     ],
     [
+     "Limette",
+     "30 g",
+     7.5,
+     0.1,
+     0.8,
+     0.0
+    ],
+    [
+     "Jasminreis",
+     "290 g",
+     1015.0,
+     23.2,
+     223.3,
+     1.7
+    ],
+    [
      "Sojasauce",
      "30 ml",
      21.0,
@@ -3456,28 +4525,12 @@
      0.0
     ],
     [
-     "Limettensaft",
-     "30 g",
-     7.5,
-     0.1,
-     0.8,
-     0.0
-    ],
-    [
-     "Öl",
+     "Öl, neutral",
      "20 g",
      180.0,
      0.0,
      0.0,
      20.0
-    ],
-    [
-     "Jasminreis, roh",
-     "290 g",
-     1015.0,
-     23.2,
-     223.3,
-     1.7
     ]
    ],
    "total": [
@@ -3522,7 +4575,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Langkorn- oder Basmatireis",
@@ -3533,7 +4597,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 240,
+     "gu": "g",
+     "pro100": {
+      "kcal": 350,
+      "p": 8,
+      "kh": 77,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 120,
+     "max": 384
     },
     {
      "n": "Schwarze Bohnen",
@@ -3544,7 +4619,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 240,
+     "gu": "g",
+     "pro100": {
+      "kcal": 100,
+      "p": 7.5,
+      "kh": 13,
+      "f": 0.6
+     },
+     "anpassbar": false,
+     "min": 240,
+     "max": 240
     },
     {
      "n": "Mais",
@@ -3555,7 +4641,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 285,
+     "gu": "g",
+     "pro100": {
+      "kcal": 80,
+      "p": 2.5,
+      "kh": 12,
+      "f": 1.3
+     },
+     "anpassbar": false,
+     "min": 285,
+     "max": 285
     },
     {
      "n": "Paprika",
@@ -3566,7 +4663,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 480,
+     "gu": "g",
+     "pro100": {
+      "kcal": 28,
+      "p": 1,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 480,
+     "max": 480
     },
     {
      "n": "Zwiebel",
@@ -3577,7 +4685,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 100,
+     "max": 100
     },
     {
      "n": "Rote Zwiebel",
@@ -3588,7 +4707,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 100,
+     "max": 100
     },
     {
      "n": "Tomaten",
@@ -3599,7 +4729,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 20,
+      "p": 1,
+      "kh": 3,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Limetten",
@@ -3610,7 +4751,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 60,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 0.4,
+      "kh": 2.5,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 60,
+     "max": 60
     },
     {
      "n": "Cheddar, gerieben",
@@ -3621,7 +4773,18 @@
      "h": "1 Beutel",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 150,
+     "gu": "g",
+     "pro100": {
+      "kcal": 400,
+      "p": 25,
+      "kh": 0,
+      "f": 33
+     },
+     "anpassbar": true,
+     "min": 75,
+     "max": 240
     },
     {
      "n": "Schmand",
@@ -3632,18 +4795,40 @@
      "h": "1 Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 240,
+      "p": 2.6,
+      "kh": 3.5,
+      "f": 24
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Öl",
      "a": "1 TL (5 g)",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 5.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 5.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 2,
+     "max": 8
     },
     {
      "n": "Koriander, frisch",
@@ -3654,7 +4839,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -3665,7 +4856,13 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": true
+     "haus": true,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -3760,15 +4957,15 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "240 g Reis im Sieb waschen, bis das Wasser klar ist, mit 360 ml Wasser und 1 Prise Salz in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 360 ml Wasser und 1 Prise Salz in den kleinen Topf",
        "min": 3
       },
       {
-       "d": "3 Tomaten (300 g) würfeln → Schale 5",
+       "d": "3 Tomaten ({tomaten}) würfeln → Schale 5",
        "min": 5
       },
       {
-       "d": "1 rote Zwiebel (100 g) schälen und fein würfeln → Schale 5",
+       "d": "1 rote Zwiebel ({rote-zwiebeln}) schälen und fein würfeln → Schale 5",
        "min": 3
       },
       {
@@ -3780,7 +4977,7 @@
        "min": 2
       },
       {
-       "d": "200 g Schmand → Schale 6, ½ Limette darüber auspressen, 1 Prise Salz dazu und glatt rühren",
+       "d": "{schmand} Schmand → Schale 6, ½ Limette darüber auspressen, 1 Prise Salz dazu und glatt rühren",
        "min": 2
       },
       {
@@ -3788,7 +4985,7 @@
        "min": 6
       },
       {
-       "d": "1 gelbe Zwiebel (100 g) schälen und in Streifen schneiden → Schale 1",
+       "d": "1 gelbe Zwiebel ({zwiebeln}) schälen und in Streifen schneiden → Schale 1",
        "min": 2
       },
       {
@@ -3804,7 +5001,7 @@
        "min": 6,
        "liste": [
         "Saft von ½ Limette",
-        "5 g Öl",
+        "{oel} Öl",
         "2 TL Paprika edelsüß",
         "2 TL Paprika geräuchert",
         "2 TL Kreuzkümmel",
@@ -3817,7 +5014,7 @@
        ]
       },
       {
-       "d": "800 g Hähnchenbrust in 2-cm-Würfel schneiden → Schale 2 und gut mit den Gewürzen mischen",
+       "d": "{haehnchenbrust} Hähnchenbrust in 2-cm-Würfel schneiden → Schale 2 und gut mit den Gewürzen mischen",
        "min": 7
       },
       {
@@ -3880,7 +5077,7 @@
        "min": 2
       },
       {
-       "d": "150 g Cheddar über die Boxen streuen, knapp 19 g pro Box",
+       "d": "{cheddar} Cheddar über die Boxen streuen, knapp 19 g pro Box",
        "min": 2
       },
       {
@@ -3906,6 +5103,19 @@
     "Statt schwarzer Bohnen gehen Kidneybohnen genauso.",
     "Zum Aufwärmen Salsa und Schmand vorher herausnehmen und kalt dazu essen."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 20,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Hähnchenbrustfilet",
@@ -3916,7 +5126,7 @@
      12.0
     ],
     [
-     "Reis, roh",
+     "Langkorn- oder Basmatireis",
      "240 g",
      840.0,
      19.2,
@@ -3924,7 +5134,7 @@
      1.4
     ],
     [
-     "Schwarze Bohnen, abgetropft",
+     "Schwarze Bohnen",
      "240 g",
      240.0,
      18.0,
@@ -3932,7 +5142,7 @@
      1.4
     ],
     [
-     "Mais, abgetropft",
+     "Mais",
      "285 g",
      228.0,
      7.1,
@@ -3948,12 +5158,20 @@
      1.4
     ],
     [
-     "Zwiebeln",
-     "200 g",
-     70.0,
-     2.4,
-     12.0,
-     0.2
+     "Zwiebel",
+     "100 g",
+     35.0,
+     1.2,
+     6.0,
+     0.1
+    ],
+    [
+     "Rote Zwiebel",
+     "100 g",
+     35.0,
+     1.2,
+     6.0,
+     0.1
     ],
     [
      "Tomaten",
@@ -3964,7 +5182,7 @@
      0.6
     ],
     [
-     "Limettensaft",
+     "Limetten",
      "60 g",
      15.0,
      0.2,
@@ -3972,15 +5190,7 @@
      0.1
     ],
     [
-     "Öl",
-     "5 g",
-     45.0,
-     0.0,
-     0.0,
-     5.0
-    ],
-    [
-     "Cheddar",
+     "Cheddar, gerieben",
      "150 g",
      600.0,
      37.5,
@@ -3994,6 +5204,14 @@
      5.2,
      7.0,
      48.0
+    ],
+    [
+     "Öl",
+     "5 g",
+     45.0,
+     0.0,
+     0.0,
+     5.0
     ],
     [
      "Gewürze",
@@ -4046,7 +5264,18 @@
      "h": "1 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 250,
+     "max": 800
     },
     {
      "n": "Kritharaki",
@@ -4057,7 +5286,18 @@
      "h": "aus 500-g-Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 320,
+     "gu": "g",
+     "pro100": {
+      "kcal": 356,
+      "p": 12.5,
+      "kh": 70.5,
+      "f": 1.8
+     },
+     "anpassbar": true,
+     "min": 160,
+     "max": 512
     },
     {
      "n": "Zwiebeln",
@@ -4068,7 +5308,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Passierte Tomaten",
@@ -4079,7 +5330,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 26,
+      "p": 1.3,
+      "kh": 4.3,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 500,
+     "max": 500
     },
     {
      "n": "Tomatenmark",
@@ -4090,7 +5352,18 @@
      "h": "kleine Dose",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 4.5,
+      "kh": 15,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 70,
+     "max": 70
     },
     {
      "n": "Skyr natur",
@@ -4101,7 +5374,18 @@
      "h": "1 großer Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 63,
+      "p": 11,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 250,
+     "max": 800
     },
     {
      "n": "Salatgurke",
@@ -4112,7 +5396,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 13,
+      "p": 0.6,
+      "kh": 2,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Knoblauch",
@@ -4123,7 +5418,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 16,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 16,
+     "max": 16
     },
     {
      "n": "Feta",
@@ -4134,29 +5440,62 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 270,
+      "p": 17,
+      "kh": 0.5,
+      "f": 22
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Olivenöl",
      "a": "60 g (davon 10 g fürs Tzatziki)",
      "k": "olivenoel",
-     "q": null,
-     "u": null,
+     "q": 60.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 60.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 30,
+     "max": 96
     },
     {
      "n": "Gemüsebrühe",
      "a": "600 ml",
      "k": "bruehe-gemuese",
-     "q": null,
-     "u": null,
+     "q": 600.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 600.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 4,
+      "p": 0.2,
+      "kh": 0.4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 600.0,
+     "max": 600.0
     },
     {
      "n": "Dill oder Minze, frisch",
@@ -4167,7 +5506,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -4178,7 +5523,13 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": true
+     "haus": true,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -4293,7 +5644,7 @@
        "min": 2
       },
       {
-       "d": "500 g Hähnchenbrust in dünne Streifen schneiden → Schale 3 und gut mischen. Abgedeckt kalt stellen, mind. 30 Min.",
+       "d": "{haehnchenbrust} Hähnchenbrust in dünne Streifen schneiden → Schale 3 und gut mischen. Abgedeckt kalt stellen, mind. 30 Min.",
        "min": 5,
        "ruhe": 30
       },
@@ -4311,19 +5662,19 @@
        "ruhe": 10
       },
       {
-       "d": "3 Zwiebeln (300 g) schälen und in Streifen schneiden → Schale 4",
+       "d": "3 Zwiebeln ({zwiebeln}) schälen und in Streifen schneiden → Schale 4",
        "min": 6
       },
       {
-       "d": "70 g Tomatenmark abwiegen → Schale 1, 1 TL Oregano und ½ TL Salz dazu",
+       "d": "{tomatenmark} Tomatenmark abwiegen → Schale 1, 1 TL Oregano und ½ TL Salz dazu",
        "min": 1
       },
       {
-       "d": "320 g Kritharaki abwiegen → Schale 2",
+       "d": "{kritharaki} Kritharaki abwiegen → Schale 2",
        "min": 1
       },
       {
-       "d": "600 ml heiße Gemüsebrühe anrühren → Messbecher",
+       "d": "{bruehe-gemuese} heiße Gemüsebrühe anrühren → Messbecher",
        "min": 2
       },
       {
@@ -4338,7 +5689,7 @@
        "d": "In Schale 5 dazu und verrühren, dann kalt stellen:",
        "min": 2,
        "liste": [
-        "500 g Skyr",
+        "{skyr} Skyr",
         "10 g Olivenöl",
         "1 TL Pfeffer",
         "1 Prise Salz",
@@ -4367,7 +5718,7 @@
        "min": 2
       },
       {
-       "d": "500 g passierte Tomaten und die Brühe dazu, aufkochen",
+       "d": "{passata} passierte Tomaten und die Brühe dazu, aufkochen",
        "min": 3
       },
       {
@@ -4412,7 +5763,7 @@
        "min": 3
       },
       {
-       "d": "200 g Feta über die Boxen bröseln, je 25 g",
+       "d": "{feta} Feta über die Boxen bröseln, je 25 g",
        "min": 2
       },
       {
@@ -4433,6 +5784,19 @@
    "tips": [
     "Kritharaki sind griechische Nudeln in Reisform, du findest sie neben der Pasta. Orzo ist dasselbe."
    ],
+   "pauschal": [
+    {
+     "n": "Gyros-Gewürze",
+     "g": 20,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Hähnchenbrustfilet",
@@ -4443,36 +5807,20 @@
      7.5
     ],
     [
+     "Kritharaki",
+     "320 g",
+     1139.2,
+     40.0,
+     225.6,
+     5.8
+    ],
+    [
      "Zwiebeln",
      "300 g",
      105.0,
      3.6,
      18.0,
      0.3
-    ],
-    [
-     "Olivenöl",
-     "60 g",
-     540.0,
-     0.0,
-     0.0,
-     60.0
-    ],
-    [
-     "Gyros-Gewürze",
-     "ca. 20 g",
-     64.0,
-     2.6,
-     6.0,
-     2.4
-    ],
-    [
-     "Kritharaki, roh",
-     "320 g",
-     1139.2,
-     40.0,
-     225.6,
-     5.8
     ],
     [
      "Passierte Tomaten",
@@ -4489,14 +5837,6 @@
      3.1,
      10.5,
      0.3
-    ],
-    [
-     "Gemüsebrühe",
-     "600 ml",
-     24.0,
-     1.2,
-     2.4,
-     1.2
     ],
     [
      "Skyr natur",
@@ -4529,6 +5869,30 @@
      34.0,
      1.0,
      44.0
+    ],
+    [
+     "Olivenöl",
+     "60 g",
+     540.0,
+     0.0,
+     0.0,
+     60.0
+    ],
+    [
+     "Gemüsebrühe",
+     "600 ml",
+     24.0,
+     1.2,
+     2.4,
+     1.2
+    ],
+    [
+     "Gyros-Gewürze",
+     "ca. 20 g",
+     64.0,
+     2.6,
+     6.0,
+     2.4
     ]
    ],
    "total": [
@@ -4573,7 +5937,18 @@
      "h": "1 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 235,
+      "p": 18.5,
+      "kh": 0,
+      "f": 17
+     },
+     "anpassbar": true,
+     "min": 250,
+     "max": 800
     },
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
@@ -4584,7 +5959,18 @@
      "h": "1 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 400,
+     "gu": "g",
+     "pro100": {
+      "kcal": 129,
+      "p": 21,
+      "kh": 0,
+      "f": 5
+     },
+     "anpassbar": true,
+     "min": 200,
+     "max": 640
     },
     {
      "n": "Spaghetti",
@@ -4595,7 +5981,18 @@
      "h": "aus 500-g-Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 320,
+     "gu": "g",
+     "pro100": {
+      "kcal": 356,
+      "p": 12.5,
+      "kh": 70.5,
+      "f": 1.8
+     },
+     "anpassbar": true,
+     "min": 160,
+     "max": 512
     },
     {
      "n": "Zwiebeln",
@@ -4606,7 +6003,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 200,
+     "max": 200
     },
     {
      "n": "Möhren",
@@ -4617,7 +6025,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 36,
+      "p": 0.9,
+      "kh": 7,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 200,
+     "max": 200
     },
     {
      "n": "Staudensellerie",
@@ -4628,7 +6047,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 150,
+     "gu": "g",
+     "pro100": {
+      "kcal": 16,
+      "p": 0.7,
+      "kh": 2.2,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 150,
+     "max": 150
     },
     {
      "n": "Knoblauch",
@@ -4639,7 +6069,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 16,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 16,
+     "max": 16
     },
     {
      "n": "Stückige Tomaten",
@@ -4650,7 +6091,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 22,
+      "p": 1,
+      "kh": 3.5,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 800,
+     "max": 800
     },
     {
      "n": "Tomatenmark",
@@ -4661,7 +6113,18 @@
      "h": "kleine Dose",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 4.5,
+      "kh": 15,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 70,
+     "max": 70
     },
     {
      "n": "Milch 1,5 %",
@@ -4672,7 +6135,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 47,
+      "p": 3.4,
+      "kh": 4.8,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 50,
+     "max": 160
     },
     {
      "n": "Parmesan",
@@ -4683,29 +6157,62 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 60,
+     "gu": "g",
+     "pro100": {
+      "kcal": 390,
+      "p": 33,
+      "kh": 0,
+      "f": 28
+     },
+     "anpassbar": true,
+     "min": 30,
+     "max": 96
     },
     {
      "n": "Rinderbrühe",
      "a": "200 ml",
      "k": "bruehe-rind",
-     "q": null,
-     "u": null,
+     "q": 200.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 4,
+      "p": 0.2,
+      "kh": 0.4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 200.0,
+     "max": 200.0
     },
     {
      "n": "Zucker",
      "a": "1 TL (5 g)",
      "k": "zucker",
-     "q": null,
-     "u": null,
+     "q": 5.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 5.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 400,
+      "p": 0,
+      "kh": 100,
+      "f": 0
+     },
+     "anpassbar": true,
+     "min": 2,
+     "max": 8
     },
     {
      "n": "Basilikum, frisch",
@@ -4716,7 +6223,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -4796,11 +6309,11 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "2 Zwiebeln (200 g) schälen und sehr fein würfeln → Schale 1",
+       "d": "2 Zwiebeln ({zwiebeln}) schälen und sehr fein würfeln → Schale 1",
        "min": 6
       },
       {
-       "d": "2 Möhren (200 g) schälen und sehr fein würfeln → Schale 1",
+       "d": "2 Möhren ({moehren}) schälen und sehr fein würfeln → Schale 1",
        "min": 6
       },
       {
@@ -4812,7 +6325,7 @@
        "min": 4
       },
       {
-       "d": "70 g Tomatenmark abwiegen → Schale 2",
+       "d": "{tomatenmark} Tomatenmark abwiegen → Schale 2",
        "min": 1
       },
       {
@@ -4833,19 +6346,19 @@
        "min": 1
       },
       {
-       "d": "200 ml heiße Rinderbrühe anrühren → Messbecher",
+       "d": "{bruehe-rind} heiße Rinderbrühe anrühren → Messbecher",
        "min": 2
       },
       {
-       "d": "100 ml Milch abmessen → Tasse",
+       "d": "{milch} Milch abmessen → Tasse",
        "min": 1
       },
       {
-       "d": "60 g Parmesan fein reiben → Schale 4, 1 Prise Muskat dazu",
+       "d": "{parmesan} Parmesan fein reiben → Schale 4, 1 Prise Muskat dazu",
        "min": 2
       },
       {
-       "d": "320 g Spaghetti abwiegen und neben den Herd legen",
+       "d": "{spaghetti} Spaghetti abwiegen und neben den Herd legen",
        "min": 1
       },
       {
@@ -4858,7 +6371,7 @@
      "t": "Kochen",
      "schritte": [
       {
-       "d": "Topf stark erhitzen, 500 g Rinderhack (20 %) ohne Öl hinein und 2 Min. liegen lassen",
+       "d": "Topf stark erhitzen, {rinderhack} Rinderhack (20 %) ohne Öl hinein und 2 Min. liegen lassen",
        "min": 3
       },
       {
@@ -4866,7 +6379,7 @@
        "min": 4
       },
       {
-       "d": "400 g mageres Rinderhack dazu und alles braun braten",
+       "d": "{rinderhack-mager} mageres Rinderhack dazu und alles braun braten",
        "min": 5
       },
       {
@@ -4878,7 +6391,7 @@
        "min": 2
       },
       {
-       "d": "Die Milch (100 ml) dazugießen und köcheln, bis sie fast verkocht ist – macht das Fleisch zart",
+       "d": "Die Milch ({milch}) dazugießen und köcheln, bis sie fast verkocht ist – macht das Fleisch zart",
        "min": 3
       },
       {
@@ -4943,6 +6456,19 @@
     "Soffritto geht im Zerkleinerer in 5 Min.",
     "Frisches Basilikum erst beim Essen drüberzupfen."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 8,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Rinderhackfleisch",
@@ -4961,7 +6487,7 @@
      20.0
     ],
     [
-     "Spaghetti, roh",
+     "Spaghetti",
      "320 g",
      1139.2,
      40.0,
@@ -5033,6 +6559,14 @@
      16.8
     ],
     [
+     "Rinderbrühe",
+     "200 ml",
+     8.0,
+     0.4,
+     0.8,
+     0.4
+    ],
+    [
      "Zucker",
      "5 g",
      20.0,
@@ -5050,16 +6584,16 @@
     ]
    ],
    "total": [
-    3585.6,
-    258.1,
-    310.4,
-    133.0
+    3593.6,
+    258.5,
+    311.2,
+    133.4
    ],
    "m": {
-    "kcal": 448,
+    "kcal": 449,
     "p": 32.3,
-    "kh": 38.8,
-    "f": 16.6
+    "kh": 38.9,
+    "f": 16.7
    },
    "zeit": {
     "phasen": [
@@ -5091,7 +6625,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 129,
+      "p": 21,
+      "kh": 0,
+      "f": 5
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Lasagneplatten (ohne Vorkochen)",
@@ -5102,7 +6647,18 @@
      "h": "aus 500-g-Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 225,
+     "gu": "g",
+     "pro100": {
+      "kcal": 356,
+      "p": 12.5,
+      "kh": 70.5,
+      "f": 1.8
+     },
+     "anpassbar": true,
+     "min": 112,
+     "max": 360
     },
     {
      "n": "Zwiebeln",
@@ -5113,7 +6669,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 150,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 150,
+     "max": 150
     },
     {
      "n": "Möhren",
@@ -5124,7 +6691,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 150,
+     "gu": "g",
+     "pro100": {
+      "kcal": 36,
+      "p": 0.9,
+      "kh": 7,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 150,
+     "max": 150
     },
     {
      "n": "Zucchini",
@@ -5135,7 +6713,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 19,
+      "p": 1.5,
+      "kh": 2.2,
+      "f": 0.4
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Knoblauch",
@@ -5146,7 +6735,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 12,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 12,
+     "max": 12
     },
     {
      "n": "Passierte Tomaten",
@@ -5157,7 +6757,18 @@
      "h": "2 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1000,
+     "gu": "g",
+     "pro100": {
+      "kcal": 26,
+      "p": 1.3,
+      "kh": 4.3,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 1000,
+     "max": 1000
     },
     {
      "n": "Tomatenmark",
@@ -5168,7 +6779,18 @@
      "h": "kleine Dose",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 4.5,
+      "kh": 15,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 70,
+     "max": 70
     },
     {
      "n": "Milch 1,5 %",
@@ -5179,7 +6801,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 700,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 47,
+      "p": 3.4,
+      "kh": 4.8,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 350,
+     "max": 1120
     },
     {
      "n": "Parmesan",
@@ -5190,51 +6823,106 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 50,
+     "gu": "g",
+     "pro100": {
+      "kcal": 390,
+      "p": 33,
+      "kh": 0,
+      "f": 28
+     },
+     "anpassbar": true,
+     "min": 25,
+     "max": 80
     },
     {
      "n": "Butter",
      "a": "50 g",
      "k": "butter",
-     "q": null,
-     "u": null,
+     "q": 50.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 50.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 741,
+      "p": 0.7,
+      "kh": 0.6,
+      "f": 82
+     },
+     "anpassbar": true,
+     "min": 25,
+     "max": 80
     },
     {
      "n": "Weizenmehl",
      "a": "50 g",
      "k": "mehl",
-     "q": null,
-     "u": null,
+     "q": 50.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 50.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 348,
+      "p": 10,
+      "kh": 72,
+      "f": 1
+     },
+     "anpassbar": true,
+     "min": 25,
+     "max": 80
     },
     {
      "n": "Öl, neutral",
      "a": "10 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     },
     {
      "n": "Rinderbrühe",
      "a": "200 ml",
      "k": "bruehe-rind",
-     "q": null,
-     "u": null,
+     "q": 200.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 4,
+      "p": 0.2,
+      "kh": 0.4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 200.0,
+     "max": 200.0
     }
    ],
    "spices": [
@@ -5320,11 +7008,11 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "150 g Zwiebeln schälen und fein würfeln → Schale 1",
+       "d": "{zwiebeln} Zwiebeln schälen und fein würfeln → Schale 1",
        "min": 5
       },
       {
-       "d": "150 g Möhren schälen und fein würfeln → Schale 1",
+       "d": "{moehren} Möhren schälen und fein würfeln → Schale 1",
        "min": 5
       },
       {
@@ -5336,7 +7024,7 @@
        "min": 3
       },
       {
-       "d": "70 g Tomatenmark abwiegen → Schale 2",
+       "d": "{tomatenmark} Tomatenmark abwiegen → Schale 2",
        "min": 1
       },
       {
@@ -5344,35 +7032,35 @@
        "min": 2
       },
       {
-       "d": "2 Packungen passierte Tomaten (1 kg) öffnen, 1 Lorbeerblatt danebenlegen",
+       "d": "2 Packungen passierte Tomaten ({passata}) öffnen, 1 Lorbeerblatt danebenlegen",
        "min": 1
       },
       {
-       "d": "200 ml heiße Rinderbrühe anrühren → Tasse, 1 TL Salz und ½ TL Pfeffer einrühren",
+       "d": "{bruehe-rind} heiße Rinderbrühe anrühren → Tasse, 1 TL Salz und ½ TL Pfeffer einrühren",
        "min": 2
       },
       {
-       "d": "10 g Öl abwiegen → in den großen Topf",
+       "d": "{oel} Öl abwiegen → in den großen Topf",
        "min": 1
       },
       {
-       "d": "50 g Butter abwiegen → in den kleinen Topf",
+       "d": "{butter} Butter abwiegen → in den kleinen Topf",
        "min": 1
       },
       {
-       "d": "50 g Mehl abwiegen → Schale 3, 1 TL Salz, ½ TL Pfeffer und 1 kräftige Prise Muskat dazu",
+       "d": "{mehl} Mehl abwiegen → Schale 3, 1 TL Salz, ½ TL Pfeffer und 1 kräftige Prise Muskat dazu",
        "min": 2
       },
       {
-       "d": "700 ml Milch abmessen → Messbecher",
+       "d": "{milch} Milch abmessen → Messbecher",
        "min": 1
       },
       {
-       "d": "50 g Parmesan fein reiben → Schale 4",
+       "d": "{parmesan} Parmesan fein reiben → Schale 4",
        "min": 2
       },
       {
-       "d": "225 g Lasagneplatten abwiegen",
+       "d": "{lasagne} Lasagneplatten abwiegen",
        "min": 1
       },
       {
@@ -5385,7 +7073,7 @@
      "t": "Kochen",
      "schritte": [
       {
-       "d": "Den großen Topf mit dem Öl stark erhitzen, 800 g mageres Rinderhack krümelig braun braten",
+       "d": "Den großen Topf mit dem Öl stark erhitzen, {rinderhack-mager} mageres Rinderhack krümelig braun braten",
        "min": 8
       },
       {
@@ -5477,6 +7165,19 @@
     "Die Béchamel wird klumpenfrei, wenn die Milch kalt ist und in drei Portionen kommt.",
     "Für mehr Volumen passt eine Handvoll Babyspinat in die Ragù-Schicht, das ändert die Werte kaum."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 8,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Rinderhackfleisch mager",
@@ -5487,15 +7188,7 @@
      40.0
     ],
     [
-     "Öl",
-     "10 g",
-     90.0,
-     0.0,
-     0.0,
-     10.0
-    ],
-    [
-     "Lasagneplatten, roh",
+     "Lasagneplatten",
      "225 g",
      801.0,
      28.1,
@@ -5536,7 +7229,7 @@
     ],
     [
      "Passierte Tomaten",
-     "1.000 g",
+     "1 kg",
      260.0,
      13.0,
      43.0,
@@ -5549,22 +7242,6 @@
      3.1,
      10.5,
      0.3
-    ],
-    [
-     "Butter",
-     "50 g",
-     370.5,
-     0.3,
-     0.3,
-     41.0
-    ],
-    [
-     "Weizenmehl",
-     "50 g",
-     174.0,
-     5.0,
-     36.0,
-     0.5
     ],
     [
      "Milch 1,5 %",
@@ -5583,6 +7260,38 @@
      14.0
     ],
     [
+     "Butter",
+     "50 g",
+     370.5,
+     0.3,
+     0.3,
+     41.0
+    ],
+    [
+     "Weizenmehl",
+     "50 g",
+     174.0,
+     5.0,
+     36.0,
+     0.5
+    ],
+    [
+     "Öl, neutral",
+     "10 g",
+     90.0,
+     0.0,
+     0.0,
+     10.0
+    ],
+    [
+     "Rinderbrühe",
+     "200 ml",
+     8.0,
+     0.4,
+     0.8,
+     0.4
+    ],
+    [
      "Gewürze",
      "ca. 8 g",
      25.6,
@@ -5592,16 +7301,16 @@
     ]
    ],
    "total": [
-    3521.5,
-    267.3,
-    314.1,
-    125.0
+    3529.5,
+    267.7,
+    314.9,
+    125.4
    ],
    "m": {
-    "kcal": 440,
-    "p": 33.4,
-    "kh": 39.3,
-    "f": 15.6
+    "kcal": 441,
+    "p": 33.5,
+    "kh": 39.4,
+    "f": 15.7
    },
    "zeit": {
     "phasen": [
@@ -5633,7 +7342,18 @@
      "h": "1 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 400,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 200,
+     "max": 640
     },
     {
      "n": "Hähnchen-Oberkeulenfilet",
@@ -5644,7 +7364,18 @@
      "h": "1 × 500 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 146,
+      "p": 18.7,
+      "kh": 0,
+      "f": 7.9
+     },
+     "anpassbar": true,
+     "min": 250,
+     "max": 800
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -5655,7 +7386,18 @@
      "h": "aus 2-kg-Beutel",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 72,
+      "p": 2,
+      "kh": 15.5,
+      "f": 0.1
+     },
+     "anpassbar": true,
+     "min": 750,
+     "max": 2400
     },
     {
      "n": "Paprika",
@@ -5666,7 +7408,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 480,
+     "gu": "g",
+     "pro100": {
+      "kcal": 28,
+      "p": 1,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 480,
+     "max": 480
     },
     {
      "n": "Zucchini",
@@ -5677,7 +7430,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 600,
+     "gu": "g",
+     "pro100": {
+      "kcal": 19,
+      "p": 1.5,
+      "kh": 2.2,
+      "f": 0.4
+     },
+     "anpassbar": false,
+     "min": 600,
+     "max": 600
     },
     {
      "n": "Rote Zwiebeln",
@@ -5688,7 +7452,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Knoblauch",
@@ -5699,7 +7474,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 32,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 32,
+     "max": 32
     },
     {
      "n": "Magerquark",
@@ -5710,7 +7496,18 @@
      "h": "1 Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 250,
+     "gu": "g",
+     "pro100": {
+      "kcal": 67,
+      "p": 12,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 125,
+     "max": 400
     },
     {
      "n": "Zitrone",
@@ -5721,7 +7518,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 20,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 0.4,
+      "kh": 2.5,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 20,
+     "max": 20
     },
     {
      "n": "TK-Kräuter",
@@ -5732,18 +7540,35 @@
      "h": "oder frische Kräuter",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Olivenöl",
      "a": "70 g",
      "k": "olivenoel",
-     "q": null,
-     "u": null,
+     "q": 70.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 70.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 35,
+     "max": 112
     },
     {
      "n": "Backpapier",
@@ -5754,7 +7579,13 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": true
+     "haus": true,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -5765,7 +7596,13 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": true
+     "haus": true,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -5851,7 +7688,7 @@
        "min": 1
       },
       {
-       "d": "1,5 kg Kartoffeln gründlich waschen und ungeschält in 2-cm-Würfel schneiden → Schale 1",
+       "d": "{kartoffeln} Kartoffeln gründlich waschen und ungeschält in 2-cm-Würfel schneiden → Schale 1",
        "min": 15
       },
       {
@@ -5873,7 +7710,7 @@
        ]
       },
       {
-       "d": "400 g Hähnchenbrust und 500 g Oberkeulenfilet in 3-cm-Stücke schneiden → Schale 2 und gut mischen",
+       "d": "{haehnchenbrust} Hähnchenbrust und {haehnchenkeule} Oberkeulenfilet in 3-cm-Stücke schneiden → Schale 2 und gut mischen",
        "min": 8
       },
       {
@@ -5908,7 +7745,7 @@
        "neben": true
       },
       {
-       "d": "3 rote Zwiebeln (300 g) schälen und in Spalten schneiden → Schale 3",
+       "d": "3 rote Zwiebeln ({rote-zwiebeln}) schälen und in Spalten schneiden → Schale 3",
        "min": 6,
        "neben": true
       },
@@ -5948,7 +7785,7 @@
        "min": 3,
        "neben": true,
        "liste": [
-        "250 g Magerquark",
+        "{magerquark} Magerquark",
         "2 EL TK-Kräuter",
         "Saft von ½ Zitrone",
         "½ TL Pfeffer",
@@ -5995,6 +7832,19 @@
    "tips": [
     "Nicht zu voll packen: Liegt alles übereinander, dämpft es statt zu rösten. Lieber auf zwei Bleche verteilen."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 20,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Hähnchenbrustfilet",
@@ -6013,8 +7863,8 @@
      39.5
     ],
     [
-     "Kartoffeln",
-     "1.500 g",
+     "Kartoffeln, festkochend",
+     "1,5 kg",
      1080.0,
      30.0,
      232.5,
@@ -6045,6 +7895,30 @@
      0.3
     ],
     [
+     "Knoblauch",
+     "32 g",
+     47.7,
+     2.0,
+     9.6,
+     0.2
+    ],
+    [
+     "Magerquark",
+     "250 g",
+     167.5,
+     30.0,
+     10.0,
+     0.5
+    ],
+    [
+     "Zitrone",
+     "20 g",
+     5.0,
+     0.1,
+     0.5,
+     0.0
+    ],
+    [
      "Olivenöl",
      "70 g",
      630.0,
@@ -6059,41 +7933,17 @@
      2.6,
      6.0,
      2.4
-    ],
-    [
-     "Knoblauch",
-     "30 g",
-     44.7,
-     1.9,
-     9.0,
-     0.1
-    ],
-    [
-     "Magerquark",
-     "250 g",
-     167.5,
-     30.0,
-     10.0,
-     0.5
-    ],
-    [
-     "Zitronensaft",
-     "20 g",
-     5.0,
-     0.1,
-     0.5,
-     0.0
     ]
    ],
    "total": [
-    3498.6,
-    267.5,
-    310.8,
-    124.1
+    3501.6,
+    267.6,
+    311.4,
+    124.2
    ],
    "m": {
-    "kcal": 437,
-    "p": 33.4,
+    "kcal": 438,
+    "p": 33.5,
     "kh": 38.9,
     "f": 15.5
    },
@@ -6127,7 +7977,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Mie-Nudeln",
@@ -6138,7 +7999,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 250,
+     "gu": "g",
+     "pro100": {
+      "kcal": 362,
+      "p": 13,
+      "kh": 70,
+      "f": 2.5
+     },
+     "anpassbar": true,
+     "min": 125,
+     "max": 400
     },
     {
      "n": "Paprika",
@@ -6149,7 +8021,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 480,
+     "gu": "g",
+     "pro100": {
+      "kcal": 28,
+      "p": 1,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 480,
+     "max": 480
     },
     {
      "n": "Möhren",
@@ -6160,7 +8043,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 36,
+      "p": 0.9,
+      "kh": 7,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Spitzkohl",
@@ -6171,7 +8065,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 400,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 1.3,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 400,
+     "max": 400
     },
     {
      "n": "Frühlingszwiebeln",
@@ -6182,7 +8087,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100,
+     "gu": "g",
+     "pro100": {
+      "kcal": 30,
+      "p": 1.8,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 100,
+     "max": 100
     },
     {
      "n": "Erdnussbutter (creamy oder crunchy)",
@@ -6193,7 +8109,18 @@
      "h": "Glas",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 140,
+     "gu": "g",
+     "pro100": {
+      "kcal": 600,
+      "p": 25,
+      "kh": 12,
+      "f": 50
+     },
+     "anpassbar": true,
+     "min": 70,
+     "max": 224
     },
     {
      "n": "Limetten",
@@ -6204,7 +8131,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 60,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 0.4,
+      "kh": 2.5,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 60,
+     "max": 60
     },
     {
      "n": "Knoblauch",
@@ -6215,7 +8153,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 16,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 16,
+     "max": 16
     },
     {
      "n": "Ingwer",
@@ -6226,40 +8175,84 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 20,
+     "gu": "g",
+     "pro100": {
+      "kcal": 80,
+      "p": 1.8,
+      "kh": 15.8,
+      "f": 0.8
+     },
+     "anpassbar": false,
+     "min": 20,
+     "max": 20
     },
     {
      "n": "Sojasauce",
      "a": "100 ml",
      "k": "sojasauce",
-     "q": null,
-     "u": null,
+     "q": 100.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 70,
+      "p": 9,
+      "kh": 5,
+      "f": 0
+     },
+     "anpassbar": false,
+     "min": 100.0,
+     "max": 100.0
     },
     {
      "n": "Honig",
      "a": "40 g (2 EL)",
      "k": "honig",
-     "q": null,
-     "u": null,
+     "q": 40.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 40.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 320,
+      "p": 0.4,
+      "kh": 80,
+      "f": 0
+     },
+     "anpassbar": true,
+     "min": 20,
+     "max": 64
     },
     {
      "n": "Öl, neutral",
      "a": "30 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 30.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 30.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 15,
+     "max": 48
     },
     {
      "n": "Sriracha",
@@ -6270,7 +8263,13 @@
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -6328,7 +8327,7 @@
        "min": 4
       },
       {
-       "d": "20 g Ingwer schälen und fein reiben → Schale 4",
+       "d": "{ingwer} Ingwer schälen und fein reiben → Schale 4",
        "min": 3
       },
       {
@@ -6339,9 +8338,9 @@
        "d": "In Schale 4 dazu und glatt rühren, bis es dickflüssig ist:",
        "min": 4,
        "liste": [
-        "140 g Erdnussbutter",
-        "100 ml Sojasauce",
-        "40 g Honig",
+        "{erdnussbutter} Erdnussbutter",
+        "{sojasauce} Sojasauce",
+        "{honig} Honig",
         "1–2 TL Sriracha",
         "wer mag: ½ TL Chiliflocken",
         "150 ml heißes Wasser"
@@ -6352,11 +8351,11 @@
        "min": 6
       },
       {
-       "d": "3 Möhren (300 g) schälen und in feine Stifte schneiden → Schale 2",
+       "d": "3 Möhren ({moehren}) schälen und in feine Stifte schneiden → Schale 2",
        "min": 9
       },
       {
-       "d": "400 g Spitzkohl in feine Streifen schneiden → Schale 3",
+       "d": "{spitzkohl} Spitzkohl in feine Streifen schneiden → Schale 3",
        "min": 5
       },
       {
@@ -6373,11 +8372,11 @@
        "ruhe": 10
       },
       {
-       "d": "30 g Öl abwiegen → Tasse",
+       "d": "{oel} Öl abwiegen → Tasse",
        "min": 1
       },
       {
-       "d": "800 g Hähnchenbrust in Streifen schneiden → Schale 1",
+       "d": "{haehnchenbrust} Hähnchenbrust in Streifen schneiden → Schale 1",
        "min": 7
       },
       {
@@ -6390,7 +8389,7 @@
      "t": "Kochen",
      "schritte": [
       {
-       "d": "250 g Mie-Nudeln nach Packung kochen, meist 4 Min.",
+       "d": "{mie} Mie-Nudeln nach Packung kochen, meist 4 Min.",
        "min": 4
       },
       {
@@ -6449,6 +8448,19 @@
     "Vor dem Aufwärmen 1–2 EL Wasser dazugeben, die Erdnusssauce dickt im Kühlschrank nach.",
     "Mit einem Julienne-Schäler gehen die Möhrenstifte doppelt so schnell."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze & Sriracha",
+     "g": 3,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Hähnchenbrustfilet",
@@ -6459,7 +8471,7 @@
      12.0
     ],
     [
-     "Mie-Nudeln, roh",
+     "Mie-Nudeln",
      "250 g",
      905.0,
      32.5,
@@ -6507,23 +8519,7 @@
      70.0
     ],
     [
-     "Sojasauce",
-     "100 ml",
-     70.0,
-     9.0,
-     5.0,
-     0.0
-    ],
-    [
-     "Honig",
-     "40 g",
-     128.0,
-     0.2,
-     32.0,
-     0.0
-    ],
-    [
-     "Limettensaft",
+     "Limetten",
      "60 g",
      15.0,
      0.2,
@@ -6547,7 +8543,23 @@
      0.2
     ],
     [
-     "Öl",
+     "Sojasauce",
+     "100 ml",
+     70.0,
+     9.0,
+     5.0,
+     0.0
+    ],
+    [
+     "Honig",
+     "40 g",
+     128.0,
+     0.2,
+     32.0,
+     0.0
+    ],
+    [
+     "Öl, neutral",
      "30 g",
      270.0,
      0.0,
@@ -6605,7 +8617,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 105,
+      "p": 24,
+      "kh": 0,
+      "f": 1.0
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Champignons",
@@ -6616,7 +8639,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 22,
+      "p": 3,
+      "kh": 0.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 800,
+     "max": 800
     },
     {
      "n": "Zwiebeln",
@@ -6627,7 +8661,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 200,
+     "max": 200
     },
     {
      "n": "Knoblauch",
@@ -6638,7 +8683,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 8,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 8,
+     "max": 8
     },
     {
      "n": "Kochsahne 15 %",
@@ -6649,7 +8705,18 @@
      "h": "2 Becher à 200 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 400,
+     "gu": "g",
+     "pro100": {
+      "kcal": 160,
+      "p": 2.8,
+      "kh": 3.8,
+      "f": 15
+     },
+     "anpassbar": true,
+     "min": 200,
+     "max": 640
     },
     {
      "n": "Schmand",
@@ -6660,7 +8727,18 @@
      "h": "1 Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 240,
+      "p": 2.6,
+      "kh": 3.5,
+      "f": 24
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Basmatireis",
@@ -6671,51 +8749,106 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 330,
+     "gu": "g",
+     "pro100": {
+      "kcal": 350,
+      "p": 8,
+      "kh": 77,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 165,
+     "max": 528
     },
     {
      "n": "Hühner- oder Gemüsebrühe",
      "a": "300 ml",
      "k": "bruehe-huhn",
-     "q": null,
-     "u": null,
+     "q": 300.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 4,
+      "p": 0.2,
+      "kh": 0.4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 300.0,
+     "max": 300.0
     },
     {
      "n": "Senf, mittelscharf",
-     "a": "1 EL",
+     "a": "1 EL (15 g)",
      "k": "senf",
-     "q": null,
-     "u": null,
+     "q": 15.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 15.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 6,
+      "kh": 5,
+      "f": 4
+     },
+     "anpassbar": false,
+     "min": 15.0,
+     "max": 15.0
     },
     {
      "n": "Speisestärke",
      "a": "10 g",
      "k": "staerke",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 350,
+      "p": 0.3,
+      "kh": 86,
+      "f": 0.1
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     },
     {
      "n": "Öl, neutral",
      "a": "10 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 10.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 10.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 5,
+     "max": 16
     },
     {
      "n": "Petersilie, frisch",
@@ -6726,7 +8859,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -6795,15 +8934,15 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "330 g Reis im Sieb waschen, bis das Wasser klar ist, mit 500 ml Wasser und 1 Prise Salz in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 500 ml Wasser und 1 Prise Salz in den kleinen Topf",
        "min": 3
       },
       {
-       "d": "800 g Champignons putzen und in Scheiben schneiden → Schale 2",
+       "d": "{champignons} Champignons putzen und in Scheiben schneiden → Schale 2",
        "min": 12
       },
       {
-       "d": "2 Zwiebeln (200 g) schälen und fein würfeln → Schale 3",
+       "d": "2 Zwiebeln ({zwiebeln}) schälen und fein würfeln → Schale 3",
        "min": 6
       },
       {
@@ -6814,8 +8953,8 @@
        "d": "In Schale 4 glatt rühren:",
        "min": 3,
        "liste": [
-        "400 g Kochsahne",
-        "200 g Schmand",
+        "{kochsahne} Kochsahne",
+        "{schmand} Schmand",
         "1 EL Senf",
         "1 TL Thymian",
         "1 TL Salz",
@@ -6824,7 +8963,7 @@
        ]
       },
       {
-       "d": "10 g Speisestärke mit 3 EL kaltem Wasser verrühren → Schale 5",
+       "d": "{staerke} Speisestärke mit 3 EL kaltem Wasser verrühren → Schale 5",
        "min": 1
       },
       {
@@ -6836,7 +8975,7 @@
        "min": 1
       },
       {
-       "d": "10 g Öl abwiegen → in den Bräter",
+       "d": "{oel} Öl abwiegen → in den Bräter",
        "min": 1
       },
       {
@@ -6844,7 +8983,7 @@
        "min": 2
       },
       {
-       "d": "800 g Putenbrust trocken tupfen → Schale 1 und mit den Gewürzen mischen",
+       "d": "{putenbrust} Putenbrust trocken tupfen → Schale 1 und mit den Gewürzen mischen",
        "min": 3
       },
       {
@@ -6925,9 +9064,22 @@
     "Putenbrust wird schnell trocken. Lieber kurz und heiß anbraten und in der Sauce nur ziehen lassen.",
     "Petersilie erst beim Essen drüberstreuen."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 6,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
-     "Putenbrust",
+     "Putenbrust, geschnetzelt",
      "800 g",
      840.0,
      192.0,
@@ -6975,7 +9127,15 @@
      48.0
     ],
     [
-     "Brühe",
+     "Basmatireis",
+     "330 g",
+     1155.0,
+     26.4,
+     254.1,
+     2.0
+    ],
+    [
+     "Hühner- oder Gemüsebrühe",
      "300 ml",
      12.0,
      0.6,
@@ -6983,7 +9143,7 @@
      0.6
     ],
     [
-     "Senf",
+     "Senf, mittelscharf",
      "15 g",
      13.5,
      0.9,
@@ -6999,20 +9159,12 @@
      0.0
     ],
     [
-     "Öl",
+     "Öl, neutral",
      "10 g",
      90.0,
      0.0,
      0.0,
      10.0
-    ],
-    [
-     "Basmatireis, roh",
-     "330 g",
-     1155.0,
-     26.4,
-     254.1,
-     2.0
     ],
     [
      "Gewürze",
@@ -7065,7 +9217,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 129,
+      "p": 21,
+      "kh": 0,
+      "f": 5
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -7076,7 +9239,18 @@
      "h": "aus 2-kg-Beutel",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 1450,
+     "gu": "g",
+     "pro100": {
+      "kcal": 72,
+      "p": 2,
+      "kh": 15.5,
+      "f": 0.1
+     },
+     "anpassbar": true,
+     "min": 725,
+     "max": 2320
     },
     {
      "n": "Paprika",
@@ -7087,7 +9261,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 480,
+     "gu": "g",
+     "pro100": {
+      "kcal": 28,
+      "p": 1,
+      "kh": 4.5,
+      "f": 0.3
+     },
+     "anpassbar": false,
+     "min": 480,
+     "max": 480
     },
     {
      "n": "Zwiebeln",
@@ -7098,7 +9283,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 300,
+     "max": 300
     },
     {
      "n": "Knoblauch",
@@ -7109,7 +9305,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 20,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 20,
+     "max": 20
     },
     {
      "n": "Ajvar, mild",
@@ -7120,7 +9327,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 350,
+     "gu": "g",
+     "pro100": {
+      "kcal": 90,
+      "p": 1.5,
+      "kh": 9,
+      "f": 5
+     },
+     "anpassbar": false,
+     "min": 350,
+     "max": 350
     },
     {
      "n": "Feta",
@@ -7131,7 +9349,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 270,
+      "p": 17,
+      "kh": 0.5,
+      "f": 22
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Skyr natur",
@@ -7142,7 +9371,18 @@
      "h": "aus 500-g-Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 250,
+     "gu": "g",
+     "pro100": {
+      "kcal": 63,
+      "p": 11,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 125,
+     "max": 400
     },
     {
      "n": "Zitrone",
@@ -7153,29 +9393,62 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 15,
+     "gu": "g",
+     "pro100": {
+      "kcal": 25,
+      "p": 0.4,
+      "kh": 2.5,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 15,
+     "max": 15
     },
     {
      "n": "Öl, neutral",
      "a": "15 g",
      "k": "oel",
-     "q": null,
-     "u": null,
+     "q": 15.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 15.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 8,
+     "max": 24
     },
     {
      "n": "Gemüsebrühe",
      "a": "300 ml",
      "k": "bruehe-gemuese",
-     "q": null,
-     "u": null,
+     "q": 300.0,
+     "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 300.0,
+     "gu": "ml",
+     "pro100": {
+      "kcal": 4,
+      "p": 0.2,
+      "kh": 0.4,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 300.0,
+     "max": 300.0
     },
     {
      "n": "Petersilie, frisch",
@@ -7186,7 +9459,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -7197,7 +9476,13 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": true
+     "haus": true,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -7286,11 +9571,11 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "1,45 kg Kartoffeln waschen und ungeschält in 1,5-cm-Würfel schneiden → Schale 1",
+       "d": "{kartoffeln} Kartoffeln waschen und ungeschält in 1,5-cm-Würfel schneiden → Schale 1",
        "min": 15
       },
       {
-       "d": "3 Zwiebeln (300 g) schälen und in Streifen schneiden → Schale 3",
+       "d": "3 Zwiebeln ({zwiebeln}) schälen und in Streifen schneiden → Schale 3",
        "min": 6
       },
       {
@@ -7314,7 +9599,7 @@
        "d": "In Schale 5 dazu und verrühren, dann kalt stellen:",
        "min": 2,
        "liste": [
-        "250 g Skyr",
+        "{skyr} Skyr",
         "Saft von ½ Zitrone",
         "½ TL Salz",
         "1 Prise Pfeffer"
@@ -7329,7 +9614,7 @@
        "min": 3,
        "liste": [
         "1 Glas Ajvar (350 g)",
-        "300 ml heiße Gemüsebrühe",
+        "{bruehe-gemuese} heiße Gemüsebrühe",
         "1 TL Oregano",
         "1 TL Majoran",
         "½ TL Chiliflocken",
@@ -7341,7 +9626,7 @@
        "min": 1
       },
       {
-       "d": "15 g Öl abwiegen → in den Bräter",
+       "d": "{oel} Öl abwiegen → in den Bräter",
        "min": 1
       }
      ]
@@ -7358,7 +9643,7 @@
        "min": 2
       },
       {
-       "d": "Den Bräter mit dem Öl stark erhitzen, 800 g mageres Rinderhack krümelig braun braten",
+       "d": "Den Bräter mit dem Öl stark erhitzen, {rinderhack-mager} mageres Rinderhack krümelig braun braten",
        "min": 8
       },
       {
@@ -7403,7 +9688,7 @@
        "min": 8
       },
       {
-       "d": "200 g Feta über die Boxen bröseln, je 25 g",
+       "d": "{feta} Feta über die Boxen bröseln, je 25 g",
        "min": 2
       },
       {
@@ -7425,6 +9710,19 @@
     "Ajvar gibt es mild und scharf. Mit scharfem Ajvar kannst du die Chiliflocken weglassen.",
     "Petersilie erst beim Essen drüberstreuen."
    ],
+   "pauschal": [
+    {
+     "n": "Gewürze",
+     "g": 15,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
+   ],
    "nut": [
     [
      "Rinderhackfleisch mager",
@@ -7435,8 +9733,8 @@
      40.0
     ],
     [
-     "Kartoffeln",
-     "1.450 g",
+     "Kartoffeln, festkochend",
+     "1,45 kg",
      1044.0,
      29.0,
      224.8,
@@ -7467,20 +9765,12 @@
      0.1
     ],
     [
-     "Ajvar",
+     "Ajvar, mild",
      "350 g",
      315.0,
      5.2,
      31.5,
      17.5
-    ],
-    [
-     "Gemüsebrühe",
-     "300 ml",
-     12.0,
-     0.6,
-     1.2,
-     0.6
     ],
     [
      "Feta",
@@ -7499,7 +9789,7 @@
      0.5
     ],
     [
-     "Zitronensaft",
+     "Zitrone",
      "15 g",
      3.8,
      0.1,
@@ -7507,12 +9797,20 @@
      0.0
     ],
     [
-     "Öl",
+     "Öl, neutral",
      "15 g",
      135.0,
      0.0,
      0.0,
      15.0
+    ],
+    [
+     "Gemüsebrühe",
+     "300 ml",
+     12.0,
+     0.6,
+     1.2,
+     0.6
     ],
     [
      "Gewürze",
@@ -7565,7 +9863,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 106,
+      "p": 23,
+      "kh": 0,
+      "f": 1.5
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Gnocchi (Kühlregal)",
@@ -7576,7 +9885,18 @@
      "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 800,
+     "gu": "g",
+     "pro100": {
+      "kcal": 150,
+      "p": 3.6,
+      "kh": 32,
+      "f": 0.5
+     },
+     "anpassbar": true,
+     "min": 400,
+     "max": 1280
     },
     {
      "n": "Kirschtomaten",
@@ -7587,7 +9907,18 @@
      "h": "2 Schalen à 250 g",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 20,
+      "p": 1,
+      "kh": 3,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 500,
+     "max": 500
     },
     {
      "n": "Babyspinat",
@@ -7598,7 +9929,18 @@
      "h": "1 Beutel",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 23,
+      "p": 2.8,
+      "kh": 1,
+      "f": 0.4
+     },
+     "anpassbar": false,
+     "min": 200,
+     "max": 200
     },
     {
      "n": "Zwiebel",
@@ -7609,7 +9951,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 100,
+     "gu": "g",
+     "pro100": {
+      "kcal": 35,
+      "p": 1.2,
+      "kh": 6,
+      "f": 0.1
+     },
+     "anpassbar": false,
+     "min": 100,
+     "max": 100
     },
     {
      "n": "Knoblauch",
@@ -7620,7 +9973,18 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 16,
+     "gu": "g",
+     "pro100": {
+      "kcal": 149,
+      "p": 6.4,
+      "kh": 30,
+      "f": 0.5
+     },
+     "anpassbar": false,
+     "min": 16,
+     "max": 16
     },
     {
      "n": "Passierte Tomaten",
@@ -7631,7 +9995,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 500,
+     "gu": "g",
+     "pro100": {
+      "kcal": 26,
+      "p": 1.3,
+      "kh": 4.3,
+      "f": 0.2
+     },
+     "anpassbar": false,
+     "min": 500,
+     "max": 500
     },
     {
      "n": "Frischkäse leicht",
@@ -7642,7 +10017,18 @@
      "h": "1 Packung",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 145,
+      "p": 7,
+      "kh": 4.5,
+      "f": 11
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Kochsahne 15 %",
@@ -7653,7 +10039,18 @@
      "h": "1 Becher",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 200,
+     "gu": "g",
+     "pro100": {
+      "kcal": 160,
+      "p": 2.8,
+      "kh": 3.8,
+      "f": 15
+     },
+     "anpassbar": true,
+     "min": 100,
+     "max": 320
     },
     {
      "n": "Parmesan",
@@ -7664,18 +10061,40 @@
      "h": "",
      "pantry": false,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 50,
+     "gu": "g",
+     "pro100": {
+      "kcal": 390,
+      "p": 33,
+      "kh": 0,
+      "f": 28
+     },
+     "anpassbar": true,
+     "min": 25,
+     "max": 80
     },
     {
      "n": "Olivenöl",
      "a": "35 g",
      "k": "olivenoel",
-     "q": null,
-     "u": null,
+     "q": 35.0,
+     "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 35.0,
+     "gu": "g",
+     "pro100": {
+      "kcal": 900,
+      "p": 0,
+      "kh": 0,
+      "f": 100
+     },
+     "anpassbar": true,
+     "min": 18,
+     "max": 56
     },
     {
      "n": "Gemüsebrühe (Pulver)",
@@ -7686,7 +10105,13 @@
      "h": "",
      "pantry": true,
      "opt": false,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     },
     {
      "n": "Basilikum, frisch",
@@ -7697,7 +10122,13 @@
      "h": "",
      "pantry": false,
      "opt": true,
-     "haus": false
+     "haus": false,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0
     }
    ],
    "spices": [
@@ -7762,7 +10193,7 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "1 Zwiebel (100 g) schälen und fein würfeln → Schale 2",
+       "d": "1 Zwiebel ({zwiebeln}) schälen und fein würfeln → Schale 2",
        "min": 3
       },
       {
@@ -7770,16 +10201,16 @@
        "min": 4
       },
       {
-       "d": "500 g Kirschtomaten waschen und halbieren → Schale 3",
+       "d": "{kirschtomaten} Kirschtomaten waschen und halbieren → Schale 3",
        "min": 5
       },
       {
        "d": "Im Messbecher glatt rühren:",
        "min": 3,
        "liste": [
-        "500 g passierte Tomaten",
-        "200 g Kochsahne",
-        "200 g Frischkäse",
+        "{passata} passierte Tomaten",
+        "{kochsahne} Kochsahne",
+        "{frischkaese} Frischkäse",
         "1 TL Gemüsebrühe (Pulver)",
         "2 TL italienische Kräuter",
         "½ TL Chiliflocken",
@@ -7788,11 +10219,11 @@
        ]
       },
       {
-       "d": "50 g Parmesan fein reiben → Schale 4",
+       "d": "{parmesan} Parmesan fein reiben → Schale 4",
        "min": 2
       },
       {
-       "d": "35 g Olivenöl abwiegen → Tasse",
+       "d": "{olivenoel} Olivenöl abwiegen → Tasse",
        "min": 1
       },
       {
@@ -7804,7 +10235,7 @@
        "min": 2
       },
       {
-       "d": "800 g Hähnchenbrust in Würfel schneiden → Schale 1 und mit den Gewürzen mischen",
+       "d": "{haehnchenbrust} Hähnchenbrust in Würfel schneiden → Schale 1 und mit den Gewürzen mischen",
        "min": 7
       },
       {
@@ -7849,7 +10280,7 @@
        "min": 5
       },
       {
-       "d": "200 g Babyspinat handvollweise unterheben",
+       "d": "{spinat} Babyspinat handvollweise unterheben",
        "min": 2
       },
       {
@@ -7891,6 +10322,19 @@
    "tips": [
     "Die Gnocchi werden in der Box weicher. Wer sie knusprig mag, lagert sie getrennt und brät sie beim Aufwärmen kurz an.",
     "Frisches Basilikum erst beim Essen drüberzupfen."
+   ],
+   "pauschal": [
+    {
+     "n": "Gewürze & Brühpulver",
+     "g": 6,
+     "nk": "gewuerze",
+     "pro100": {
+      "kcal": 320,
+      "p": 13,
+      "kh": 30,
+      "f": 12
+     }
+    }
    ],
    "nut": [
     [
@@ -8122,6 +10566,30 @@
    "n": "Zitronen",
    "c": "obst"
   },
+  "blumenkohl": {
+   "n": "Blumenkohl",
+   "c": "obst"
+  },
+  "bohnen-gruen": {
+   "n": "Grüne Bohnen",
+   "c": "obst"
+  },
+  "aubergine": {
+   "n": "Aubergine",
+   "c": "obst"
+  },
+  "lauch": {
+   "n": "Lauch",
+   "c": "obst"
+  },
+  "kohlrabi": {
+   "n": "Kohlrabi",
+   "c": "obst"
+  },
+  "weisskohl": {
+   "n": "Weißkohl",
+   "c": "obst"
+  },
   "koriander": {
    "n": "Koriander, frisch",
    "c": "obst"
@@ -8186,8 +10654,48 @@
    "n": "Butter",
    "c": "kuehl"
   },
+  "mozzarella": {
+   "n": "Mozzarella",
+   "c": "kuehl"
+  },
+  "mozzarella-light": {
+   "n": "Mozzarella light",
+   "c": "kuehl"
+  },
+  "joghurt": {
+   "n": "Joghurt 1,5 %",
+   "c": "kuehl"
+  },
+  "eier": {
+   "n": "Eier",
+   "c": "kuehl"
+  },
+  "tofu": {
+   "n": "Tofu natur",
+   "c": "kuehl"
+  },
   "tk-kraeuter": {
    "n": "TK-Kräuter (8-Kräuter)",
+   "c": "tk"
+  },
+  "erbsen": {
+   "n": "TK-Erbsen",
+   "c": "tk"
+  },
+  "tk-brokkoli": {
+   "n": "TK-Brokkoli",
+   "c": "tk"
+  },
+  "tk-blumenkohl": {
+   "n": "TK-Blumenkohl",
+   "c": "tk"
+  },
+  "tk-bohnen": {
+   "n": "TK-Bohnen, grün",
+   "c": "tk"
+  },
+  "tk-spinat": {
+   "n": "TK-Blattspinat",
    "c": "tk"
   },
   "tomaten-dose": {
@@ -8234,6 +10742,14 @@
    "n": "Erdnussbutter",
    "c": "konserven"
   },
+  "kichererbsen": {
+   "n": "Kichererbsen, Dose à 400 g",
+   "c": "konserven"
+  },
+  "linsen-dose": {
+   "n": "Linsen, Dose à 400 g",
+   "c": "konserven"
+  },
   "reis": {
    "n": "Basmati- oder Jasminreis",
    "c": "trocken"
@@ -8264,6 +10780,22 @@
   },
   "sesam": {
    "n": "Sesam",
+   "c": "trocken"
+  },
+  "vollkornnudeln": {
+   "n": "Vollkornnudeln",
+   "c": "trocken"
+  },
+  "couscous": {
+   "n": "Couscous",
+   "c": "trocken"
+  },
+  "bulgur": {
+   "n": "Bulgur",
+   "c": "trocken"
+  },
+  "linsen-rot": {
+   "n": "Rote Linsen",
    "c": "trocken"
   },
   "oel": {
@@ -8461,6 +10993,1086 @@
   "whey-vanille": {
    "n": "Whey Vanille",
    "c": "trocken"
+  }
+ },
+ "naehrwerte": {
+  "rinderhack": {
+   "pro100": {
+    "kcal": 235,
+    "p": 18.5,
+    "kh": 0,
+    "f": 17
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "rinderhack-mager": {
+   "pro100": {
+    "kcal": 129,
+    "p": 21,
+    "kh": 0,
+    "f": 5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "rindergulasch": {
+   "pro100": {
+    "kcal": 128,
+    "p": 21,
+    "kh": 0,
+    "f": 5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "haehnchenbrust": {
+   "pro100": {
+    "kcal": 106,
+    "p": 23,
+    "kh": 0,
+    "f": 1.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "haehnchenkeule": {
+   "pro100": {
+    "kcal": 146,
+    "p": 18.7,
+    "kh": 0,
+    "f": 7.9
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "putenbrust": {
+   "pro100": {
+    "kcal": 105,
+    "p": 24,
+    "kh": 0,
+    "f": 1.0
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "zwiebeln": {
+   "pro100": {
+    "kcal": 35,
+    "p": 1.2,
+    "kh": 6,
+    "f": 0.1
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "rote-zwiebeln": {
+   "pro100": {
+    "kcal": 35,
+    "p": 1.2,
+    "kh": 6,
+    "f": 0.1
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "knoblauch": {
+   "pro100": {
+    "kcal": 149,
+    "p": 6.4,
+    "kh": 30,
+    "f": 0.5
+   },
+   "u": "Zehe",
+   "je": 4,
+   "anpassbar": false
+  },
+  "ingwer": {
+   "pro100": {
+    "kcal": 80,
+    "p": 1.8,
+    "kh": 15.8,
+    "f": 0.8
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "paprika": {
+   "pro100": {
+    "kcal": 28,
+    "p": 1,
+    "kh": 4.5,
+    "f": 0.3
+   },
+   "u": "Stk",
+   "je": 160,
+   "anpassbar": false
+  },
+  "zucchini": {
+   "pro100": {
+    "kcal": 19,
+    "p": 1.5,
+    "kh": 2.2,
+    "f": 0.4
+   },
+   "u": "Stk",
+   "je": 300,
+   "anpassbar": false
+  },
+  "brokkoli": {
+   "pro100": {
+    "kcal": 34,
+    "p": 3,
+    "kh": 3,
+    "f": 0.4
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "moehren": {
+   "pro100": {
+    "kcal": 36,
+    "p": 0.9,
+    "kh": 7,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "champignons": {
+   "pro100": {
+    "kcal": 22,
+    "p": 3,
+    "kh": 0.5,
+    "f": 0.3
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "spinat": {
+   "pro100": {
+    "kcal": 23,
+    "p": 2.8,
+    "kh": 1,
+    "f": 0.4
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "zuckerschoten": {
+   "pro100": {
+    "kcal": 42,
+    "p": 3,
+    "kh": 7,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "fruehlingszwiebeln": {
+   "pro100": {
+    "kcal": 30,
+    "p": 1.8,
+    "kh": 4.5,
+    "f": 0.3
+   },
+   "u": "Bund",
+   "je": 100,
+   "anpassbar": false
+  },
+  "spitzkohl": {
+   "pro100": {
+    "kcal": 25,
+    "p": 1.3,
+    "kh": 4,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "gurke": {
+   "pro100": {
+    "kcal": 13,
+    "p": 0.6,
+    "kh": 2,
+    "f": 0.1
+   },
+   "u": "Stk",
+   "je": 300,
+   "anpassbar": false
+  },
+  "tomaten": {
+   "pro100": {
+    "kcal": 20,
+    "p": 1,
+    "kh": 3,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "kirschtomaten": {
+   "pro100": {
+    "kcal": 20,
+    "p": 1,
+    "kh": 3,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "kartoffeln": {
+   "pro100": {
+    "kcal": 72,
+    "p": 2,
+    "kh": 15.5,
+    "f": 0.1
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "suesskartoffel": {
+   "pro100": {
+    "kcal": 86,
+    "p": 1.6,
+    "kh": 20,
+    "f": 0.1
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "staudensellerie": {
+   "pro100": {
+    "kcal": 16,
+    "p": 0.7,
+    "kh": 2.2,
+    "f": 0.2
+   },
+   "u": "Stange",
+   "je": 75,
+   "anpassbar": false
+  },
+  "limette": {
+   "pro100": {
+    "kcal": 25,
+    "p": 0.4,
+    "kh": 2.5,
+    "f": 0.1
+   },
+   "u": "Stk",
+   "je": 30,
+   "anpassbar": false
+  },
+  "zitrone": {
+   "pro100": {
+    "kcal": 25,
+    "p": 0.4,
+    "kh": 2.5,
+    "f": 0.1
+   },
+   "u": "Stk",
+   "je": 30,
+   "anpassbar": false
+  },
+  "blumenkohl": {
+   "pro100": {
+    "kcal": 25,
+    "p": 2.5,
+    "kh": 2.3,
+    "f": 0.3
+   },
+   "u": "Stk",
+   "je": 800,
+   "anpassbar": false
+  },
+  "bohnen-gruen": {
+   "pro100": {
+    "kcal": 31,
+    "p": 1.8,
+    "kh": 5,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "aubergine": {
+   "pro100": {
+    "kcal": 24,
+    "p": 1,
+    "kh": 3,
+    "f": 0.2
+   },
+   "u": "Stk",
+   "je": 300,
+   "anpassbar": false
+  },
+  "lauch": {
+   "pro100": {
+    "kcal": 30,
+    "p": 2,
+    "kh": 3,
+    "f": 0.3
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "kohlrabi": {
+   "pro100": {
+    "kcal": 27,
+    "p": 2,
+    "kh": 3.7,
+    "f": 0.1
+   },
+   "u": "Stk",
+   "je": 250,
+   "anpassbar": false
+  },
+  "weisskohl": {
+   "pro100": {
+    "kcal": 25,
+    "p": 1.3,
+    "kh": 4,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "skyr": {
+   "pro100": {
+    "kcal": 63,
+    "p": 11,
+    "kh": 4,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "magerquark": {
+   "pro100": {
+    "kcal": 67,
+    "p": 12,
+    "kh": 4,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "frischkaese": {
+   "pro100": {
+    "kcal": 145,
+    "p": 7,
+    "kh": 4.5,
+    "f": 11
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "kochsahne": {
+   "pro100": {
+    "kcal": 160,
+    "p": 2.8,
+    "kh": 3.8,
+    "f": 15
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "schlagsahne": {
+   "pro100": {
+    "kcal": 292,
+    "p": 2.4,
+    "kh": 3.3,
+    "f": 30
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "schmand": {
+   "pro100": {
+    "kcal": 240,
+    "p": 2.6,
+    "kh": 3.5,
+    "f": 24
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "milch": {
+   "pro100": {
+    "kcal": 47,
+    "p": 3.4,
+    "kh": 4.8,
+    "f": 1.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "cheddar": {
+   "pro100": {
+    "kcal": 400,
+    "p": 25,
+    "kh": 0,
+    "f": 33
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "parmesan": {
+   "pro100": {
+    "kcal": 390,
+    "p": 33,
+    "kh": 0,
+    "f": 28
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "feta": {
+   "pro100": {
+    "kcal": 270,
+    "p": 17,
+    "kh": 0.5,
+    "f": 22
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "gnocchi": {
+   "pro100": {
+    "kcal": 150,
+    "p": 3.6,
+    "kh": 32,
+    "f": 0.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "butter": {
+   "pro100": {
+    "kcal": 741,
+    "p": 0.7,
+    "kh": 0.6,
+    "f": 82
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "mozzarella": {
+   "pro100": {
+    "kcal": 240,
+    "p": 18,
+    "kh": 1,
+    "f": 18
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "mozzarella-light": {
+   "pro100": {
+    "kcal": 160,
+    "p": 19,
+    "kh": 1,
+    "f": 9
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "joghurt": {
+   "pro100": {
+    "kcal": 50,
+    "p": 4,
+    "kh": 5,
+    "f": 1.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "eier": {
+   "pro100": {
+    "kcal": 145,
+    "p": 12.5,
+    "kh": 0.7,
+    "f": 10
+   },
+   "u": "Stk",
+   "je": 60,
+   "anpassbar": true
+  },
+  "tofu": {
+   "pro100": {
+    "kcal": 125,
+    "p": 13,
+    "kh": 1,
+    "f": 7
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "erbsen": {
+   "pro100": {
+    "kcal": 75,
+    "p": 5.5,
+    "kh": 10,
+    "f": 0.4
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "tk-brokkoli": {
+   "pro100": {
+    "kcal": 34,
+    "p": 3,
+    "kh": 3,
+    "f": 0.4
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "tk-blumenkohl": {
+   "pro100": {
+    "kcal": 25,
+    "p": 2.5,
+    "kh": 2.3,
+    "f": 0.3
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "tk-bohnen": {
+   "pro100": {
+    "kcal": 31,
+    "p": 1.8,
+    "kh": 5,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "tk-spinat": {
+   "pro100": {
+    "kcal": 23,
+    "p": 2.8,
+    "kh": 1,
+    "f": 0.4
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "tomaten-dose": {
+   "pro100": {
+    "kcal": 22,
+    "p": 1,
+    "kh": 3.5,
+    "f": 0.2
+   },
+   "u": "Dose",
+   "je": 400,
+   "anpassbar": false
+  },
+  "passata": {
+   "pro100": {
+    "kcal": 26,
+    "p": 1.3,
+    "kh": 4.3,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "tomatenmark": {
+   "pro100": {
+    "kcal": 90,
+    "p": 4.5,
+    "kh": 15,
+    "f": 0.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "kidney": {
+   "pro100": {
+    "kcal": 95,
+    "p": 7.5,
+    "kh": 12,
+    "f": 0.6
+   },
+   "u": "Dose",
+   "je": 255,
+   "anpassbar": false
+  },
+  "schwarze-bohnen": {
+   "pro100": {
+    "kcal": 100,
+    "p": 7.5,
+    "kh": 13,
+    "f": 0.6
+   },
+   "u": "Dose",
+   "je": 240,
+   "anpassbar": false
+  },
+  "mais": {
+   "pro100": {
+    "kcal": 80,
+    "p": 2.5,
+    "kh": 12,
+    "f": 1.3
+   },
+   "u": "Dose",
+   "je": 285,
+   "anpassbar": false
+  },
+  "kokosmilch": {
+   "pro100": {
+    "kcal": 180,
+    "p": 1.6,
+    "kh": 3,
+    "f": 18
+   },
+   "u": "Dose",
+   "je": 400,
+   "anpassbar": true
+  },
+  "currypaste": {
+   "pro100": {
+    "kcal": 150,
+    "p": 3,
+    "kh": 13,
+    "f": 9
+   },
+   "u": "Glas",
+   "je": 70,
+   "anpassbar": false
+  },
+  "ajvar": {
+   "pro100": {
+    "kcal": 90,
+    "p": 1.5,
+    "kh": 9,
+    "f": 5
+   },
+   "u": "Glas",
+   "je": 350,
+   "anpassbar": false
+  },
+  "getr-tomaten": {
+   "pro100": {
+    "kcal": 215,
+    "p": 5,
+    "kh": 15,
+    "f": 14
+   },
+   "u": "Glas",
+   "je": 150,
+   "anpassbar": false
+  },
+  "erdnussbutter": {
+   "pro100": {
+    "kcal": 600,
+    "p": 25,
+    "kh": 12,
+    "f": 50
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "kichererbsen": {
+   "pro100": {
+    "kcal": 120,
+    "p": 7,
+    "kh": 16,
+    "f": 2.5
+   },
+   "u": "Dose",
+   "je": 240,
+   "anpassbar": true
+  },
+  "linsen-dose": {
+   "pro100": {
+    "kcal": 95,
+    "p": 6.5,
+    "kh": 12,
+    "f": 0.6
+   },
+   "u": "Dose",
+   "je": 240,
+   "anpassbar": true
+  },
+  "reis": {
+   "pro100": {
+    "kcal": 350,
+    "p": 8,
+    "kh": 77,
+    "f": 0.6
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "penne": {
+   "pro100": {
+    "kcal": 356,
+    "p": 12.5,
+    "kh": 70.5,
+    "f": 1.8
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "spaghetti": {
+   "pro100": {
+    "kcal": 356,
+    "p": 12.5,
+    "kh": 70.5,
+    "f": 1.8
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "hoernchen": {
+   "pro100": {
+    "kcal": 356,
+    "p": 12.5,
+    "kh": 70.5,
+    "f": 1.8
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "kritharaki": {
+   "pro100": {
+    "kcal": 356,
+    "p": 12.5,
+    "kh": 70.5,
+    "f": 1.8
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "lasagne": {
+   "pro100": {
+    "kcal": 356,
+    "p": 12.5,
+    "kh": 70.5,
+    "f": 1.8
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "mie": {
+   "pro100": {
+    "kcal": 362,
+    "p": 13,
+    "kh": 70,
+    "f": 2.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "sesam": {
+   "pro100": {
+    "kcal": 580,
+    "p": 18,
+    "kh": 10,
+    "f": 50
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "vollkornnudeln": {
+   "pro100": {
+    "kcal": 340,
+    "p": 13,
+    "kh": 62,
+    "f": 2.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "couscous": {
+   "pro100": {
+    "kcal": 360,
+    "p": 12,
+    "kh": 72,
+    "f": 2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "bulgur": {
+   "pro100": {
+    "kcal": 350,
+    "p": 12,
+    "kh": 70,
+    "f": 1.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "linsen-rot": {
+   "pro100": {
+    "kcal": 340,
+    "p": 24,
+    "kh": 52,
+    "f": 2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "oel": {
+   "pro100": {
+    "kcal": 900,
+    "p": 0,
+    "kh": 0,
+    "f": 100
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "olivenoel": {
+   "pro100": {
+    "kcal": 900,
+    "p": 0,
+    "kh": 0,
+    "f": 100
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "sesamoel": {
+   "pro100": {
+    "kcal": 900,
+    "p": 0,
+    "kh": 0,
+    "f": 100
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "butterschmalz": {
+   "pro100": {
+    "kcal": 898,
+    "p": 0,
+    "kh": 0,
+    "f": 99.8
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "honig": {
+   "pro100": {
+    "kcal": 320,
+    "p": 0.4,
+    "kh": 80,
+    "f": 0
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "zucker": {
+   "pro100": {
+    "kcal": 400,
+    "p": 0,
+    "kh": 100,
+    "f": 0
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "mehl": {
+   "pro100": {
+    "kcal": 348,
+    "p": 10,
+    "kh": 72,
+    "f": 1
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "sojasauce": {
+   "pro100": {
+    "kcal": 70,
+    "p": 9,
+    "kh": 5,
+    "f": 0
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "staerke": {
+   "pro100": {
+    "kcal": 350,
+    "p": 0.3,
+    "kh": 86,
+    "f": 0.1
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
+  },
+  "senf": {
+   "pro100": {
+    "kcal": 90,
+    "p": 6,
+    "kh": 5,
+    "f": 4
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "balsamico": {
+   "pro100": {
+    "kcal": 100,
+    "p": 0.5,
+    "kh": 20,
+    "f": 0
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "essig": {
+   "pro100": {
+    "kcal": 20,
+    "p": 0,
+    "kh": 1,
+    "f": 0
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "kakao": {
+   "pro100": {
+    "kcal": 360,
+    "p": 22,
+    "kh": 10,
+    "f": 11
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "sriracha": {
+   "pro100": {
+    "kcal": 100,
+    "p": 2,
+    "kh": 20,
+    "f": 1
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "haferflocken": {
+   "pro100": {
+    "kcal": 370,
+    "p": 13,
+    "kh": 59,
+    "f": 7
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "erdnuss-crunch": {
+   "pro100": {
+    "kcal": 600,
+    "p": 25,
+    "kh": 12,
+    "f": 50
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "aepfel": {
+   "pro100": {
+    "kcal": 52,
+    "p": 0.3,
+    "kh": 12,
+    "f": 0.2
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
+  },
+  "whey-vanille": {
+   "pro100": {
+    "kcal": 380,
+    "p": 78,
+    "kh": 6,
+    "f": 5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
   }
  },
  "extras": {

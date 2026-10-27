@@ -16,7 +16,7 @@
  *
  * Ohne DOM, damit tests/test-ki.mjs alles direkt in Node prüft.
  */
-import { menge as mengeText } from './format.js';
+import { menge as mengeText, platzhalter } from './format.js';
 import { zeitVon } from './zeiten.js';
 
 export const PHASEN = ['Vorbereiten', 'Kochen', 'Portionieren'];
@@ -127,6 +127,7 @@ function schrittBereinigen(s) {
   const ruhe = ganz(s.ruhe, 0, 120, 0);
   if (ruhe) o.ruhe = ruhe;
   if (s.neben === true || s.nebenbei === true) o.neben = true;
+  if (s.neu === true) o.neu = true;
   const liste = Array.isArray(s.liste) ? s.liste.map((x) => txt(x, 80)).filter(Boolean).slice(0, 14) : [];
   if (liste.length) o.liste = liste;
   return o;
@@ -156,7 +157,7 @@ export function kiBereinigen(roh) {
     const p = istObj(z.pro100) ? z.pro100 : {};
     const lo = Math.min(zahl(z.min, 0, 5000, m), m);
     const hi = Math.max(zahl(z.max, 0, 5000, m), m);
-    zutaten.push({
+    const zut = {
       id,
       name: zname,
       menge: m,
@@ -171,7 +172,12 @@ export function kiBereinigen(roh) {
       abteilung: ABTEILUNGEN.includes(z.abteilung) ? z.abteilung : 'sonstiges',
       packung: txt(z.packung, 40),
       vorschlag: zahl(z.vorschlag, 0, 5000, m),
-    });
+    };
+    // Aus einem festen Rezept: wie es gekauft wird (2 Dosen, 3 Stück), solange die Menge unverändert ist.
+    if (istObj(z.kauf) && typeof z.kauf.q === 'number' && typeof z.kauf.u === 'string') zut.kauf = { q: zahl(z.kauf.q, 0, 5000, 0), u: z.kauf.u.slice(0, 12), h: txt(z.kauf.h, 80) };
+    if (z.neu === true) zut.neu = true;
+    if (z.pauschal === true) zut.pauschal = true;
+    zutaten.push(zut);
   }
   if (zutaten.length < 2) return fehl('Im Rezept stehen zu wenige Zutaten.');
 
@@ -209,6 +215,16 @@ export function kiBereinigen(roh) {
     tipps: (Array.isArray(roh.tipps) ? roh.tipps : []).map((t) => txt(t, 240)).filter(Boolean).slice(0, 6),
     hinweis: txt(roh.hinweis, 300),
   };
+  // Angepasste Rezepte: woher (die id des Ausgangsrezepts), und welche Zutaten weggelassen wurden.
+  if (/^[a-z0-9-]{1,60}$/.test(String(roh.herkunft || ''))) r.herkunft = roh.herkunft;
+  if (Array.isArray(roh.geaendert)) {
+    const g = roh.geaendert.map((x) => txt(x, 80)).filter(Boolean).slice(0, 12);
+    if (g.length) r.geaendert = g;
+  }
+  if (istObj(roh.weg)) {
+    const weg = Object.fromEntries(Object.entries(roh.weg).filter(([k, v]) => /^[A-Za-z0-9_.-]{1,60}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, txt(v, 60)]).slice(0, 20));
+    if (Object.keys(weg).length) r.weg = weg;
+  }
 
   const boese = [name, ...zutaten.map((z) => z.name), ...gewuerze.map((g) => g.name)].find((n) => VERBOTEN.test(ohneOhne(n)));
   if (boese) return fehl(`„${boese}“ steht drin – das esst ihr nicht.`, 'verboten');
@@ -302,23 +318,32 @@ const normGewuerz = (s) => String(s).toLowerCase().replace(/pulver/g, '').replac
  */
 export function alsRezept(k, { id, katalog = {}, einheiten = {}, von = null } = {}) {
   const P = k.portionen;
-  const nachId = Object.fromEntries(k.zutaten.map((z) => [z.id, z]));
-  const fuellen = (t) => t.replace(/\{([a-z0-9-]{1,40})\}/g, (m, zid) => (nachId[zid] ? mengeText(nachId[zid].menge, nachId[zid].einheit) : zid));
-  const items = k.zutaten.map((z) => {
-    const ausKatalog = z.katalog && katalog[z.katalog] && (!einheiten[z.katalog] || einheiten[z.katalog] === z.einheit);
+  const weg = k.weg || {};
+  const fuellen = (t) => platzhalter(t, k.zutaten, weg);
+  const items = k.zutaten.filter((z) => !z.pauschal).map((z) => {
+    // Wie gekauft wird (2 Dosen, 3 Stück) gilt, solange die Menge nicht verändert wurde.
+    const kauf = z.kauf && Math.abs(z.menge - z.vorschlag) < 0.5 ? z.kauf : null;
+    const q = kauf ? kauf.q : z.menge;
+    const u = kauf ? kauf.u : z.einheit;
+    const ausKatalog = z.katalog && katalog[z.katalog] && (!einheiten[z.katalog] || einheiten[z.katalog] === u);
     const key = ausKatalog ? z.katalog : `ki-${z.id}`;
     return {
       n: z.name,
-      a: `${mengeText(z.menge, z.einheit)}${z.stueck ? ` (${z.stueck})` : ''}`,
+      a: kauf ? `${mengeText(kauf.q, kauf.u)}${z.stueck ? ` (${z.stueck})` : ''}` : `${mengeText(z.menge, z.einheit)}${z.stueck && Math.abs(z.menge - z.vorschlag) < 0.5 ? ` (${z.stueck})` : ''}`,
       k: key,
-      q: z.menge,
-      u: z.einheit,
-      h: z.quelle === 'kaufen' ? z.packung : '',
+      q,
+      u,
+      h: z.quelle === 'kaufen' ? (kauf ? kauf.h : z.packung) : '',
       pantry: z.quelle === 'vorrat',
       opt: false,
       haus: false,
       da: z.quelle === 'vorhanden',
       ...(ausKatalog ? {} : { kat: { n: z.name, c: z.abteilung } }),
+      g: z.menge,
+      pro100: z.pro100,
+      anpassbar: z.anpassbar,
+      min: z.min,
+      max: z.max,
     };
   });
   const gewuerzKatalog = {};
@@ -329,7 +354,9 @@ export function alsRezept(k, { id, katalog = {}, einheiten = {}, von = null } = 
   });
   const nut = k.zutaten.map((z) => [z.name, mengeText(z.menge, z.einheit), ...['kcal', 'p', 'kh', 'f'].map((x) => rund1((z.pro100[x] * z.menge) / 100))]);
   const total = [2, 3, 4, 5].map((i) => rund1(nut.reduce((s, row) => s + row[i], 0)));
-  const ablauf = k.ablauf.map((p) => ({ t: p.t, schritte: p.schritte.map((s) => ({ ...s, d: fuellen(s.d), ...(s.liste ? { liste: s.liste.map(fuellen) } : {}) })) }));
+  const wegIds = Object.keys(weg);
+  const entfaellt = (s) => wegIds.some((id) => new RegExp(`\\{${id}\\}`).test(`${s.d} ${(s.liste || []).join(' ')}`));
+  const ablauf = k.ablauf.map((p) => ({ t: p.t, schritte: p.schritte.map((s) => ({ ...s, ...(entfaellt(s) ? { entfaellt: true } : {}), d: fuellen(s.d), ...(s.liste ? { liste: s.liste.map(fuellen) } : {}) })) }));
   const zeit = zeitVon({ ablauf });
   const aenderungen = k.zutaten
     .filter((z) => z.anpassbar && Math.abs(z.menge - z.vorschlag) >= 1)
@@ -356,6 +383,76 @@ export function alsRezept(k, { id, katalog = {}, einheiten = {}, von = null } = 
     total,
     m: { kcal: Math.round(total[0] / P), p: rund1(total[1] / P), kh: rund1(total[2] / P), f: rund1(total[3] / P) },
     portionen: P,
-    ki: { von, hinweis: k.hinweis, aenderungen },
+    ki: { von, hinweis: k.hinweis, aenderungen, herkunft: k.herkunft || null, weg, geaendert: k.geaendert || [] },
   };
+}
+
+/* -------------------------------------------- feste Rezepte anpassen */
+
+/**
+ * Ein festes Rezept aus daten/rezepte.json im KI-Format – damit „Anpassen“
+ * für beide Arten von Rezepten dieselbe Rechnung nimmt. Die Zutat-id ist der
+ * Katalog-Schlüssel, so passen die Platzhalter in den Schritten.
+ */
+export function festAlsKi(r, katalog = {}) {
+  const zutaten = [];
+  for (const it of r.items) {
+    if (!it.k || it.haus || it.opt || !it.pro100 || !it.g) continue;
+    const einheit = it.gu === 'ml' ? 'ml' : 'g';
+    const z = {
+      id: it.k,
+      name: it.n.replace(/\s*\(.*?\)\s*/g, ' ').trim(),
+      menge: it.g,
+      einheit,
+      stueck: it.u && !['g', 'ml'].includes(it.u) ? it.a.replace(/\s*\(.*?\)\s*/g, ' ').trim() : '',
+      min: it.min,
+      max: it.max,
+      anpassbar: !!it.anpassbar,
+      pro100: it.pro100,
+      quelle: it.pantry ? 'vorrat' : 'kaufen',
+      katalog: katalog[it.k] ? it.k : '',
+      abteilung: katalog[it.k]?.c || 'sonstiges',
+      packung: '', // der Packungshinweis gilt nur für die Menge, wie sie war – siehe kauf
+    };
+    if (typeof it.q === 'number' && it.u) z.kauf = { q: it.q, u: it.u, h: it.h || '' };
+    zutaten.push(z);
+  }
+  for (const pz of r.pauschal || []) {
+    zutaten.push({ id: `pauschal-${slug(pz.n) || 'gewuerze'}`, name: pz.n, menge: pz.g, einheit: 'g', stueck: '', min: pz.g, max: pz.g, anpassbar: false, pro100: pz.pro100, quelle: 'vorrat', katalog: '', abteilung: 'gewuerz', packung: '', pauschal: true });
+  }
+  return {
+    name: r.name,
+    kurz: r.short,
+    beschreibung: r.desc,
+    protein: r.protein,
+    basis: r.base,
+    methode: r.method,
+    kuehlschrank: r.fridge,
+    tiefkuehler: r.freeze,
+    portionen: r.portionen || 8,
+    zutaten,
+    gewuerze: r.spices.map((sp) => ({ name: sp.n, menge: sp.a })),
+    schalen: (r.schalen || []).map((sc) => ({ name: sc.name, groesse: sc.gr })),
+    geraete: r.geraete || [],
+    ablauf: r.ablauf,
+    tipps: r.tips || [],
+    hinweis: '',
+  };
+}
+
+/**
+ * Was sich beim Anpassen gegenüber dem Ausgangsrezept geändert hat, als
+ * kurze Zeilen für die Leiste: „Brokkoli 1 kg → 200 g“, „TK-Erbsen 300 g neu“,
+ * „Mais weggelassen“.
+ */
+export function aenderungenText(k, basis) {
+  const zeilen = [];
+  const vorher = Object.fromEntries((basis?.zutaten || []).map((z) => [z.id, z]));
+  for (const z of k.zutaten) {
+    const alt = vorher[z.id];
+    if (!alt) { if (!z.pauschal) zeilen.push(`${z.name} ${mengeText(z.menge, z.einheit)} neu`); continue; }
+    if (Math.abs(alt.menge - z.menge) >= 1) zeilen.push(`${z.name} ${mengeText(alt.menge, alt.einheit)} → ${mengeText(z.menge, z.einheit)}`);
+  }
+  for (const [id, name] of Object.entries(k.weg || {})) if (!k.zutaten.some((z) => z.id === id)) zeilen.push(`${name} weggelassen`);
+  return zeilen;
 }

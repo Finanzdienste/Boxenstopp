@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
 import { zeitVon, nebenZuLang } from '../js/zeiten.js';
+import { platzhalter } from '../js/format.js';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -158,16 +159,36 @@ check(rezepte.every((r) => Array.isArray(r.geraete) && r.geraete.length >= 2), '
 
 // Mise en place: was oben in Gramm steht, wird im Vorbereiten abgewogen –
 // außer es kommt als ganze Packung direkt in den Topf (Hack, Gnocchi, Spinat).
+// Die Mengen stehen als Platzhalter {schlüssel} in den Schritten; die App setzt sie ein.
 const fehlt = [];
 for (const r of rezepte) {
-  const schritte = alleSchritte(r).map(textVon).join(' ');
+  const schritte = alleSchritte(r).map((x) => platzhalter(textVon(x), r.items)).join(' ');
   for (const it of r.items) {
-    if (typeof it.q !== 'number' || it.u !== 'g') continue;
+    if (typeof it.q !== 'number' || it.u !== 'g' || it.pantry) continue;
     const g = it.q >= 1000 && it.q % 1000 === 0 ? [`${it.q / 1000} kg`, `${it.q} g`] : [`${it.q.toLocaleString('de-DE')} g`, `${(it.q / 1000).toLocaleString('de-DE')} kg`];
     if (!g.some((x) => schritte.includes(x))) fehlt.push(`${r.id}: ${it.n} ${it.q} g`);
   }
 }
 check(!fehlt.length, `jede Grammangabe der Einkaufszutaten steht auch in den Schritten${fehlt.length ? `: ${fehlt.slice(0, 8).join('; ')}` : ''}`);
+
+// Platzhalter: jeder zeigt auf eine Zutat des Rezepts, und die Hauptmengen stehen als Platzhalter da.
+const kaputtePlatzhalter = rezepte.flatMap((r) => alleSchritte(r).flatMap((x) => [...textVon(x).matchAll(/\{([^}]+)\}/g)].map((m) => m[1]).filter((k) => !r.items.some((it) => it.k === k)).map((k) => `${r.id}: {${k}}`)));
+check(!kaputtePlatzhalter.length, `jeder Platzhalter gehört zu einer Zutat des Rezepts${kaputtePlatzhalter.length ? `: ${kaputtePlatzhalter.slice(0, 5).join(', ')}` : ''}`);
+const ohnePlatzhalter = rezepte.flatMap((r) => r.items.filter((it) => it.k && !it.pantry && typeof it.q === 'number' && ['g', 'ml'].includes(it.u) && !/^(gnocchi)$/.test(it.k) && !alleSchritte(r).some((x) => textVon(x).includes(`{${it.k}}`))).map((it) => `${r.id}: ${it.n}`));
+check(!ohnePlatzhalter.length, `jede Einkaufszutat in Gramm steht als Platzhalter in den Schritten${ohnePlatzhalter.length ? ` – nicht: ${ohnePlatzhalter.join(', ')}` : ''}`);
+const anzahl = rezepte.reduce((n, r) => n + alleSchritte(r).filter((x) => /\{[a-z0-9-]+\}/.test(textVon(x))).length, 0);
+check(anzahl >= 100, `${anzahl} Schritte mit Platzhaltern`);
+
+// Fürs Anpassen: jede Zutat mit Gramm hat Werte pro 100 g, Proteine und Beilagen sind verschiebbar.
+const ohneWerte = rezepte.flatMap((r) => r.items.filter((it) => it.k && !it.opt && !it.haus && it.g > 0 && !it.pro100).map((it) => `${r.id}: ${it.n}`));
+check(!ohneWerte.length, `jede Zutat mit Gramm hat Werte pro 100 g${ohneWerte.length ? ` – nicht: ${ohneWerte.join(', ')}` : ''}`);
+check(rezepte.every((r) => r.items.some((it) => it.anpassbar) && r.items.every((it) => !it.anpassbar || (it.min < it.g && it.max > it.g))), 'jedes Rezept hat verschiebbare Zutaten mit einem Bereich um die Menge');
+check(rezepte.every((r) => Array.isArray(r.pauschal) && r.pauschal.every((pz) => pz.pro100 && pz.g > 0)), 'Pauschalen (Gewürze …) haben Gramm und Werte');
+const nw = daten.naehrwerte || {};
+check(Object.keys(nw).length >= 90 && nw.erbsen?.pro100.p === 5.5 && nw.paprika?.u === 'Stk' && nw.paprika.je === 160 && nw.kidney?.u === 'Dose' && nw.haehnchenbrust?.anpassbar === true && !nw.paprika.anpassbar, `Nährwerttabelle fürs Anpassen: ${Object.keys(nw).length} Zutaten mit Einheit und Gramm je Einheit`);
+check(Object.keys(nw).every((k) => katalog[k] && !['gewuerz', 'haushalt'].includes(katalog[k].c)), 'die Tabelle kennt nur echte Zutaten aus dem Katalog');
+const ohneTabelle = Object.entries(katalog).filter(([k, v]) => !['gewuerz', 'haushalt'].includes(v.c) && !nw[k] && !/koriander|basilikum|petersilie|dill|tk-kraeuter/.test(k)).map(([k]) => k);
+check(!ohneTabelle.length, `jede Zutat im Katalog hat Werte${ohneTabelle.length ? ` – nicht: ${ohneTabelle.join(', ')}` : ''}`);
 
 // Kein Fisch, kein Schwein, kein Putenhack – und kein körniger Hüttenkäse mehr.
 const alles = JSON.stringify(daten);

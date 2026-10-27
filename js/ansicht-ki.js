@@ -80,6 +80,12 @@ export function kiAbgleichen() {
 
 const istEntwurf = (rid) => !!entwurf && entwurf.id === rid;
 
+/** Das KI-Format eines Rezepts (gespeichert oder der Vorschlag) – für „Anpassen“. */
+export function kiQuelle(rid) {
+  if (app.stand.ki?.[rid]?.r) return app.stand.ki[rid].r;
+  return istEntwurf(rid) ? entwurf.r : null;
+}
+
 function behalten(rid, { still = false } = {}) {
   if (!istEntwurf(rid)) return;
   const e = entwurf;
@@ -120,15 +126,21 @@ function kiLeiste(r) {
   const wann = v.at && !Number.isNaN(Date.parse(v.at)) ? `, ${esc(tagKurz(heute(new Date(v.at))))}` : '';
   const z = app.ziel;
   const daneben = Math.abs(r.m.kcal - z.kcal) > 15 || Math.abs(r.m.p - z.p) > 2 || Math.abs(r.m.kh - z.kh) > 3 || Math.abs(r.m.f - z.f) > 2;
-  const anp = r.ki.aenderungen?.length
-    ? `<p class="ki-anp"><b>Auf eure Ziele gerechnet:</b> ${r.ki.aenderungen.map((a) => `${esc(a.name)} ${nfi(a.vorher)} → ${nfi(a.nachher)} ${esc(a.einheit)}`).join(' · ')}</p>` : '';
+  const anp = r.ki.geaendert?.length
+    ? `<p class="ki-anp"><b>Geändert:</b> ${r.ki.geaendert.map(esc).join(' · ')}</p>`
+    : r.ki.aenderungen?.length
+      ? `<p class="ki-anp"><b>Auf eure Ziele gerechnet:</b> ${r.ki.aenderungen.map((a) => `${esc(a.name)} ${nfi(a.vorher)} → ${nfi(a.nachher)} ${esc(a.einheit)}`).join(' · ')}</p>` : '';
   const warn = daneben ? `<p class="ki-warn">Mit diesen Zutaten trifft die Box das Ziel nicht ganz, siehe die Nährwerte oben.${r.ki.hinweis ? ` ${esc(r.ki.hinweis)}` : ''}</p>` : '';
   const hinweis = !daneben && r.ki.hinweis ? `<p class="ki-hinweis">${esc(r.ki.hinweis)}</p>` : '';
   const kosten = !gespeichert && typeof v.kosten === 'number' ? ` · ${esc(v.modell || 'KI')}, ${kostenText(v.kosten)}` : '';
+  const basis = r.ki.herkunft ? app.nachId[r.ki.herkunft] : null;
   const knoepfe = gespeichert
-    ? `<button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button><button type="button" class="btn btn-quiet" data-act="ki-loeschen">Löschen</button>`
+    ? `${r.ki.herkunft ? '' : '<button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button>'}<button type="button" class="btn btn-quiet" data-act="ki-loeschen">Löschen</button>`
     : `<button type="button" class="btn btn-primary" data-act="ki-behalten"${app.listeDa ? '' : ' disabled'}>Behalten</button><button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button><button type="button" class="btn btn-quiet" data-act="ki-verwerfen">Verwerfen</button>`;
-  return `<p class="ki-k"><b>Resteverwertung</b>${wer}${wann} · ${gespeichert ? 'für euch beide gespeichert' : 'noch nicht gespeichert'}${kosten}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>`;
+  const titel = r.ki.herkunft
+    ? `<b>Angepasst</b>${basis ? ` von <button type="button" class="linkbtn ki-basis" data-open="${esc(basis.id)}">${esc(basis.short)}</button>` : ''}`
+    : '<b>Resteverwertung</b>';
+  return `<p class="ki-k">${titel}${wer}${wann} · ${gespeichert ? 'für euch beide gespeichert' : 'noch nicht gespeichert'}${kosten}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>`;
 }
 
 /* ------------------------------------------------------ Ansicht */

@@ -435,6 +435,7 @@ a.btn{text-decoration:none;color:inherit}
 .ki-anp,.ki-hinweis,.ki-warn{margin-top:6px;font-size:13.5px;line-height:1.45}
 .ki-warn{color:var(--kh);font-weight:600}
 .ki-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+.ki-basis{min-height:0;padding:0;font-size:inherit}
 .ki-box,.ki-form{display:grid;gap:8px;margin-top:18px;padding:16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
 .ki-box h2{font-size:19px}
 .ki-box p,.ki-anleitung{font-size:14.5px;color:var(--muted)}
@@ -475,3 +476,39 @@ a.btn{text-decoration:none;color:inherit}
 .ki-liste{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
 .ki-liste-b{display:grid;gap:2px;width:100%;padding:10px 12px;text-align:left;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
 .ki-liste-b small{font-size:12.5px;color:var(--muted)}
+
+/* ---------------------------------------------------------------- Anpassen */
+.anpassen{margin-top:14px;padding:14px 14px 16px;border-radius:16px;background:var(--surface);border:1.5px solid var(--accent);box-shadow:var(--shadow)}
+.anpassen[hidden]{display:none}
+.anpassen h2{font-size:19px}
+.anpassen h2 small{font:500 13px/1.2 var(--f-body);color:var(--muted)}
+.anp-liste{list-style:none;margin:10px 0 0;padding:0;display:grid}
+.anp{display:grid;grid-template-columns:minmax(0,1fr) auto 36px 32px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.anp-name{display:grid;gap:1px;min-width:0;font-size:14.5px;font-weight:600;line-height:1.3}
+.anp-name small{font-size:12px;font-weight:500;color:var(--muted)}
+.anp-neu-k{color:var(--accent)!important;text-transform:uppercase;letter-spacing:.06em;font-size:10.5px!important;font-weight:700!important}
+.anp-menge{display:flex;align-items:center;gap:4px;height:40px;padding:0 8px 0 4px;border:1.5px solid var(--line-strong);border-radius:10px;background:var(--bg)}
+.anp-menge:focus-within{border-color:var(--accent)}
+.anp-menge input{width:64px;border:0;background:transparent;font:600 16px/1 var(--f-mono);color:var(--ink);text-align:right;outline:none;-moz-appearance:textfield}
+.anp-menge input::-webkit-outer-spin-button,.anp-menge input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.anp-menge span{font:500 13px/1 var(--f-mono);color:var(--muted)}
+.anp-lock{display:grid;place-items:center;width:36px;height:36px;padding:0;border-radius:10px;border:1.5px solid var(--line-strong);background:var(--surface);font-size:16px;color:var(--accent)}
+.anp-lock[aria-pressed="true"]{background:var(--surface-2);color:var(--muted)}
+.anp .x{margin-top:0;font:700 20px/1 var(--f-body)}
+.anp-weg{margin-top:8px;font-size:13.5px;color:var(--muted)}
+.anp-weg .linkbtn{min-height:0;padding:0;font-size:13.5px}
+.anp-neu{display:grid;grid-template-columns:minmax(0,1fr) 84px 46px;gap:8px;margin-top:12px}
+.anp-neu input{min-width:0;height:44px;padding:0 12px;border:1.5px solid var(--line-strong);border-radius:11px;background:var(--bg);font:400 15px/1 var(--f-body);color:var(--ink)}
+.anp-neu input:focus{outline:none;border-color:var(--accent)}
+.anp-neu .btn{min-height:44px;padding:0;font-size:22px}
+.anpassen .label-k{margin-top:14px}
+.anp-werte{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.anp-werte>div{display:grid;gap:2px;padding:8px 9px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2)}
+.anp-werte .k{font:600 10.5px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.anp-werte b{font:600 17px/1.1 var(--f-mono);font-variant-numeric:tabular-nums}
+.anp-werte small{font:500 11.5px/1 var(--f-mono);color:var(--muted)}
+.anp-werte .c-p b{color:var(--p)}.anp-werte .c-kh b{color:var(--kh)}.anp-werte .c-f b{color:var(--f)}
+.anp-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.step-li.entfaellt .step{opacity:.55}
+.step-li.entfaellt .step-d{text-decoration:line-through}
+.step-li.entfaellt .step-k,.step-li .step-k+.step-k{color:var(--danger)}

@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
-import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID } from '../js/ki-rezept.js';
+import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText } from '../js/ki-rezept.js';
 import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL } from '../js/ki.js';
 import { kiAus } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
@@ -67,6 +67,33 @@ check(R.items.filter((it) => it.da).length === 4 && R.items.filter((it) => it.pa
 check(R.spices.find((s) => s.n === 'Paprika edelsüß').k === 'paprika-edelsuess' && R.spices.find((s) => s.n === 'Sumach').k === 'ki-g-sumach', 'Gewürze: aus dem Katalog, wenn es sie dort gibt');
 check(R.m.kcal === Math.round(R.total[0] / 8) && JSON.stringify(R.zeit) === JSON.stringify(zeitVon(R)) && R.time === R.zeit.gesamt, `Nährwerte pro Box und Zeiten gerechnet (${R.m.kcal} kcal, ${R.zeit.gesamt} Min.)`);
 check(R.ki.aenderungen.length >= 1 && R.ki.aenderungen.every((a) => a.vorher !== a.nachher), `die App zeigt, welche Mengen sie verschoben hat (${R.ki.aenderungen.map((a) => `${a.name} ${a.vorher}→${a.nachher}`).join(', ')})`);
+
+// --- feste Rezepte anpassen: ins KI-Format, Zutat tauschen, nachrechnen, zurück ins App-Format
+const teriyaki = daten.rezepte.find((r) => r.id === 'teriyaki');
+const fk = kiBereinigen(festAlsKi(teriyaki, daten.katalog)).r;
+check(fk && fk.zutaten.length >= 12 && fk.zutaten.find((z) => z.id === 'haehnchenkeule')?.anpassbar && !fk.zutaten.find((z) => z.id === 'brokkoli').anpassbar && fk.zutaten.find((z) => z.id === 'knoblauch')?.kauf?.u === 'Zehe', 'festAlsKi: Zutaten mit Werten, Bereich, Kaufeinheit; Fleisch verschiebbar, Gemüse nicht');
+const boxFest = proBox(fk);
+check(Math.abs(boxFest.kcal - teriyaki.m.kcal) < 2 && Math.abs(boxFest.f - teriyaki.m.f) < 0.2, `im KI-Format kommt dieselbe Box heraus (${boxFest.kcal.toFixed(0)} kcal)`);
+const unver = alsRezept(fk, { id: 'ki-unver1', katalog: daten.katalog, einheiten });
+check(unver.items.find((it) => it.k === 'knoblauch')?.q === 4 && unver.items.find((it) => it.k === 'knoblauch').u === 'Zehe' && unver.items.find((it) => it.k === 'kidney') === undefined && !unver.items.some((it) => /pauschal/i.test(it.n)), 'unverändert zurück: Knoblauch bleibt „4 Zehen“, Pauschalen sind keine Zutaten');
+const var1 = JSON.parse(JSON.stringify(fk));
+const brok = var1.zutaten.find((z) => z.id === 'brokkoli');
+brok.menge = 200; brok.anpassbar = false; brok.min = 200;
+var1.zutaten.push({ id: 'erbsen', name: 'TK-Erbsen', menge: 400, einheit: 'g', min: 400, max: 400, anpassbar: false, pro100: daten.naehrwerte.erbsen.pro100, quelle: 'kaufen', katalog: 'erbsen', abteilung: 'tk', packung: '', vorschlag: 400, neu: true });
+var1.ablauf[0].schritte.push({ d: '{erbsen} TK-Erbsen abwiegen', min: 1 });
+var1.weg = { sesam: 'Sesam' };
+var1.zutaten = var1.zutaten.filter((z) => z.id !== 'sesam');
+const var2 = mengenAnpassen(kiBereinigen(var1).r, ZIEL);
+const boxVar = proBox(var2);
+check(Math.abs(boxVar.kcal - ZIEL.kcal) <= 8 && Math.abs(boxVar.p - ZIEL.p) <= 1 && Math.abs(boxVar.kh - ZIEL.kh) <= 1.5 && Math.abs(boxVar.f - ZIEL.f) <= 1, `200 g Brokkoli statt 1 kg, 400 g Erbsen dazu, Sesam weg – die Box trifft trotzdem: ${boxVar.kcal.toFixed(0)} / ${boxVar.p.toFixed(1)} / ${boxVar.kh.toFixed(1)} / ${boxVar.f.toFixed(1)}`);
+check(var2.zutaten.find((z) => z.id === 'brokkoli').menge === 200 && var2.zutaten.find((z) => z.id === 'erbsen').menge === 400, 'was man selbst gesetzt hat, bleibt');
+const aend = aenderungenText(var2, fk);
+check(aend.some((a) => a.startsWith('Brokkoli 1 kg → 200 g')) && aend.some((a) => a === 'TK-Erbsen 400 g neu') && aend.includes('Sesam weggelassen') && aend.some((a) => /Hähnchen-Oberkeulenfilet 1 kg → /.test(a)), `die Änderungen in Worten: ${aend.join(' · ')}`);
+const appVar = alsRezept(var2, { id: 'ki-var1', katalog: daten.katalog, einheiten, von: { by: 'Tobi' } });
+const sesamSchritt = appVar.ablauf.flatMap((p) => p.schritte).find((x) => /Sesam/.test(x.d));
+check(sesamSchritt?.entfaellt === true && /\(ohne Sesam\)/.test(sesamSchritt.d), 'der Sesam-Schritt entfällt und sagt das');
+check(appVar.ablauf[0].schritte.some((x) => x.d === '400 g TK-Erbsen abwiegen') && appVar.items.find((it) => it.k === 'brokkoli').q === 200 && appVar.items.find((it) => it.k === 'erbsen').kat === undefined && appVar.ki.weg.sesam === 'Sesam', 'Mengen in den Schritten, Erbsen über den Katalog auf die Liste, weg ist gemerkt');
+check(kiBereinigen({ ...var1, herkunft: 'teriyaki' }).r.herkunft === 'teriyaki' && kiBereinigen({ ...var1, herkunft: 'x y' }).r.herkunft === undefined && kiBereinigen({ ...var1, herkunft: 'teriyaki' }).r.basis === 'Reis', 'herkunft bleibt nur, wenn sie wie eine Rezept-id aussieht – die Beilage (basis) bleibt getrennt');
 
 // --- Anfrage
 const rumpf = anfrageBauen({ text: '1 Zucchini, Feta', wuensche: 'was Griechisches', fotos: ['AAAA', 'BBBB'], portionen: 4, dazukaufen: false, ziel: ZIEL, katalog: daten.katalog, mag: ['Butter Chicken mit Reis'], magNicht: ['Spaghetti Bolognese'], vermeiden: ['Feta-Reispfanne'] });
@@ -295,14 +322,40 @@ await t.click('#k-los');
 check(await bis(async () => (await t.locator('#k-fehler').innerText().catch(() => '')).includes('das esst ihr nicht')), 'Speck im Rezept: Hinweis statt Rezept');
 ki.z.antwort = ANTWORT;
 
-// --- löschen und rückgängig
+// --- Anpassen im Browser: Teriyaki mit 200 g Brokkoli und Erbsen
 await t.click('[data-act="reste-zu"]');
+await t.click('[data-filter="alle"]');
+await t.click('[data-open="teriyaki"]');
+await t.click('[data-act="anpassen"]');
+check(!(await t.locator('#d-anpassen').isHidden()) && (await t.locator('#d-anpassen .anp').count()) >= 12, 'Anpassen öffnet mit allen Zutaten');
+await t.fill('[data-anp-menge="brokkoli"]', '200');
+await t.dispatchEvent('[data-anp-menge="brokkoli"]', 'input');
+check((await t.getAttribute('[data-anp-lock="brokkoli"]', 'aria-pressed')) === 'true', 'angefasst = fest (Schloss zu)');
+await t.fill('#anp-such', 'TK-Erbsen');
+await t.fill('#anp-neu-menge', '400');
+await t.click('#anp-form button[type="submit"]');
+check(await t.locator('.anp[data-zid="erbsen"]').count() === 1 && (await t.locator('.anp[data-zid="erbsen"] .anp-neu-k').count()) === 1, 'TK-Erbsen stehen als neue Zutat drin');
+const werteVorher = await t.locator('#d-anpassen .anp-werte').innerText();
+await t.click('[data-act="anp-rechnen"]');
+const werteNachher = (await t.locator('#d-anpassen .anp-werte').innerText()).replace(/\s+/g, ' ');
+const kcalEd = Number(werteNachher.match(/KCAL (\d+)/)?.[1]);
+check(werteVorher !== werteNachher && Math.abs(kcalEd - 443) <= 8, `„Auf Ziel rechnen“ bringt die Box aufs Ziel (${werteNachher})`);
+check((await t.locator('#d-anpassen .ki-anp').innerText()).includes('Brokkoli 1 kg → 200 g') && (await t.locator('#d-anpassen .ki-anp').innerText()).includes('TK-Erbsen 400 g neu'), 'die Änderungen stehen in Worten da');
+await t.click('[data-act="anp-speichern"]');
+check(await bis(async () => (await t.locator('#d-title').innerText()) === 'Chicken Teriyaki Bowl (angepasst)'), 'Speichern öffnet das angepasste Rezept');
+check(await bis(() => Object.values(gh.liste()?.ki || {}).some((e) => e.r.herkunft === 'teriyaki')), 'und es liegt mit herkunft = teriyaki in GitHub, für beide');
+check((await t.locator('.ki-leiste').innerText()).includes('Angepasst von Teriyaki Bowl'), 'Leiste: „Angepasst von Teriyaki Bowl“');
+check((await t.$$eval('.step-d', (xs) => xs.map((x) => x.textContent))).some((x) => x.startsWith('200 g Brokkoli')) && (await t.locator('.step-li .step-k', { hasText: 'neu dazu' }).count()) === 1, 'Schritte mit den neuen Mengen und dem neuen Schritt für die Erbsen');
+await t.click('[data-act="zurueck"]');
+check(await t.locator('[data-filter="reste"] .n').innerText() === '2' && (await t.locator('.pill-ki', { hasText: 'Angepasst' }).count()) === 1, 'im Raster: 2 eigene Rezepte, eins davon „Angepasst“');
+
+// --- löschen und rückgängig
 await t.click('[data-filter="reste"]');
-await t.click('#grid .box');
+await t.click('[data-open="' + rid + '"]');
 await t.click('[data-act="ki-loeschen"]');
-check(await bis(() => !Object.keys(gh.liste()?.ki || {}).length && !Object.values(gh.liste().items).some((d) => d.parts?.[rid])), 'Löschen nimmt das Rezept und seine Zeilen auf der Liste weg');
+check(await bis(() => !gh.liste()?.ki?.[rid] && !Object.values(gh.liste().items).some((d) => d.parts?.[rid])), 'Löschen nimmt das Rezept und seine Zeilen auf der Liste weg');
 await t.click('#toast button');
-check(await bis(() => Object.keys(gh.liste()?.ki || {}).length === 1 && Object.values(gh.liste().items).filter((d) => d.parts?.[rid]).length === 4), 'Rückgängig bringt beides zurück');
+check(await bis(() => !!gh.liste()?.ki?.[rid] && Object.values(gh.liste().items).filter((d) => d.parts?.[rid]).length === 4), 'Rückgängig bringt beides zurück');
 
 check(await t.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'kein seitliches Scrollen');
 for (const h of [tobi, amy]) check(h.fehler.length === 0, `keine Fehler in der Konsole${h.fehler.length ? `: ${h.fehler.slice(0, 3).join(' | ')}` : ''}`);

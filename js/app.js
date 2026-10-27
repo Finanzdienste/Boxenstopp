@@ -17,6 +17,7 @@ import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesR
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
+import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 
 const apiBasis = () => lese('__api', null) || API;
 const takt = () => Number(lese('__takt', 0)) || 8000;
@@ -75,12 +76,13 @@ document.addEventListener('click', (ev) => {
   if (klickTimer(el)) return;
   if (el.dataset.timerZu) { zuSchritt(el.dataset.timerZu, Number(el.dataset.timerSchritt)); return; }
   if (klickListe(el)) return;
+  if (klickAnpassen(el)) return;
   if (klickKi(el)) return;
   klickRezepte(el);
 });
-document.addEventListener('input', (ev) => { if (!eingabeKi(ev.target)) eingabeRezepte(ev.target); });
+document.addEventListener('input', (ev) => { if (!eingabeAnpassen(ev.target) && !eingabeKi(ev.target)) eingabeRezepte(ev.target); });
 document.addEventListener('change', (ev) => aenderungKi(ev.target));
-document.addEventListener('submit', (ev) => { if (!absendenKi(ev) && !absendenRezepte(ev)) absendenListe(ev); });
+document.addEventListener('submit', (ev) => { if (!absendenAnpassen(ev) && !absendenKi(ev) && !absendenRezepte(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */
 
@@ -97,6 +99,7 @@ async function start() {
   app.rezepte = daten.rezepte;
   app.katalog = daten.katalog;
   app.extras = daten.extras || {};
+  app.naehrwerte = daten.naehrwerte || {};
   if (daten.ziel) app.ziel = daten.ziel;
   for (const r of app.rezepte) app.nachId[r.id] = r;
   // Welche Einheit ein Katalog-Schlüssel hat – damit die Resteverwertung nur
@@ -110,6 +113,7 @@ async function start() {
   if (kiLink) speichereKi(kiLink);
   const ausLink = schluesselAusAdresse();
   kiStart();
+  anpassenStart();
   timerAnmelden(() => {
     const leiste = $('#timerleiste');
     const html = leisteHTML();

@@ -12,7 +12,7 @@
  * Nummer und Inhalt, Mengen werden fett.
  */
 import { app, $, $$, ansicht, ansichtMerken, melde, zeigeReiter, istSchmal, lese, schreibe } from './kern.js';
-import { esc, nf1, nfi, heute, tagKurz, abweichung } from './format.js';
+import { esc, nf1, nfi, heute, tagKurz, abweichung, platzhalter } from './format.js';
 import { zeitVon, dauer } from './zeiten.js';
 import { zahlwort } from './ki-rezept.js';
 import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
@@ -37,7 +37,7 @@ export const FILTER = [
   ['kartoffel', 'Kartoffel & Co.', (r) => ['Kartoffeln', 'Süßkartoffel', 'Gnocchi'].includes(r.base)],
   ['schnell', 'Unter 1½ Std.', (r) => gesamtZeit(r) < SCHNELL],
   ['liste', 'Auf der Liste', (r) => rezeptStand(app.stand, r).drauf],
-  ['reste', 'Resteverwertung', (r) => !!r.ki],
+  ['reste', 'Eigene', (r) => !!r.ki],
 ];
 const alleRezepte = () => [...app.rezepte, ...app.kiRezepte.filter((r) => r.ki?.von?.gespeichert)];
 const boxen = (r) => r.portionen || 8;
@@ -83,7 +83,7 @@ function karte(r) {
   const tag = c ? tagKurz(c.at) : '';
   const b = app.stand.bewertung?.[r.id];
   const daumen = b ? `<span class="pill p-${b.wert}">${daumenIc(b.wert)}${DAUMEN_TEXT[b.wert]}</span>` : '';
-  const ki = r.ki ? `<span class="pill pill-ki">Resteverwertung${boxen(r) !== 8 ? ` · ${boxen(r)} Boxen` : ''}</span>` : '';
+  const ki = r.ki ? `<span class="pill pill-ki">${r.ki.herkunft ? 'Angepasst' : 'Resteverwertung'}${boxen(r) !== 8 ? ` · ${boxen(r)} Boxen` : ''}</span>` : '';
   return `<button type="button" class="box" data-open="${esc(r.id)}">
 <span class="tape">${esc(r.short)}</span><span class="box-time">${dauer(gesamtZeit(r))}</span>
 <span class="box-desc">${esc(r.desc)}</span>
@@ -143,7 +143,7 @@ export function schalenHervor(html, schalen = []) {
   });
 }
 const schaleSchild = (s) => `<span class="schale"><span class="vh">Schale </span><b>${s.n}</b>${esc(s.name)}</span>`;
-const schrittText = (t, r) => schalenHervor(mengenHervor(esc(t)), r.schalen);
+const schrittText = (t, r) => schalenHervor(mengenHervor(esc(platzhalter(t, r.items, r.weg))), r.schalen);
 
 const teilFuer = (z) => ((z.art === 'einkauf' || z.art === 'vorhanden') && typeof z.q === 'number' ? { q: z.q, u: z.u, h: z.h || '' } : { t: z.a });
 /** Name und Abteilung für eine neue Zeile auf der Liste: aus dem Katalog oder vom KI-Rezept. */
@@ -188,6 +188,7 @@ function detailHTML(r) {
 ${etikett(r)}
 ${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
 <div class="actions" id="d-actions"></div>
+<section class="anpassen" id="d-anpassen" aria-label="Rezept anpassen" hidden></section>
 <div class="bewertung" id="d-bewertung" role="group" aria-label="Wie war's?"></div>
 <section class="notizen" aria-labelledby="h-notizen">
   <h3 id="h-notizen" class="sub-h">Notizen <small>für euch beide</small></h3>
@@ -263,9 +264,9 @@ function timerKnopf(r, s, i) {
 
 function schrittHTML(r, s, i) {
   const liste = s.liste?.length ? `<span class="step-l">${s.liste.map((x) => `<span>${schrittText(x, r)}</span>`).join('')}</span>` : '';
-  return `<li class="step-li${s.neben ? ' neben' : ''}" data-li="${i}"><button type="button" class="step${s.neben ? ' neben' : ''}" data-step="${i}" aria-pressed="false">
+  return `<li class="step-li${s.neben ? ' neben' : ''}${s.entfaellt ? ' entfaellt' : ''}" data-li="${i}"><button type="button" class="step${s.neben ? ' neben' : ''}" data-step="${i}" aria-pressed="false">
 <span class="step-n"><span class="sn">${i + 1}</span>${ic('check')}</span>
-<span class="step-b">${s.neben ? '<span class="step-k">währenddessen</span>' : ''}<span class="step-d">${schrittText(s.d, r)}</span>${liste}</span>
+<span class="step-b">${s.neben ? '<span class="step-k">währenddessen</span>' : ''}${s.entfaellt ? '<span class="step-k">entfällt – Zutat weggelassen</span>' : ''}${s.neu ? '<span class="step-k">neu dazu</span>' : ''}<span class="step-d">${schrittText(s.d, r)}</span>${liste}</span>
 </button>${timerKnopf(r, s, i)}</li>`;
 }
 
@@ -316,6 +317,7 @@ export function detailAktualisieren() {
   html += heuteGekocht
     ? `<button type="button" class="btn btn-quiet" disabled>${ic('check')}Heute gekocht</button>`
     : `<button type="button" class="btn" data-act="gekocht"${gesperrt}>Heute gekocht</button>`;
+  if (r.ki || r.items.some((it) => it.pro100)) html += '<button type="button" class="btn" data-act="anpassen">Anpassen</button>';
   if (c && !heuteGekocht && tagKurz(c.at)) html += `<span class="cooked-note">Zuletzt gekocht am ${esc(tagKurz(c.at))}${c.by ? ` von ${esc(c.by)}` : ''}</span>`;
   $('#d-actions').innerHTML = html;
   $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
@@ -388,6 +390,7 @@ function rechnerZeichnen() {
 export function oeffneRezept(rid, { still = false } = {}) {
   const r = app.nachId[rid];
   if (!r) return;
+  app.anpassenZu();
   if (!aktuell) rasterScroll = window.scrollY;
   aktuell = rid;
   ansicht.rezept = rid;
@@ -409,6 +412,7 @@ export function oeffneRezept(rid, { still = false } = {}) {
 }
 
 export function schliesseRezept() {
+  app.anpassenZu();
   aktuell = null;
   ansicht.rezept = null;
   ansichtMerken();

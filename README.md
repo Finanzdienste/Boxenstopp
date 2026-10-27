@@ -74,6 +74,32 @@ einen Daumen gibt oder „Heute gekocht“ drückt, behält ihn automatisch. Auf
 die Liste kommt nur, was fehlt; Zutaten, die es im Katalog mit derselben
 Einheit gibt, teilen sich die Zeile mit den festen Rezepten.
 
+### Rezept anpassen
+
+Im Rezept „Anpassen“: Jede Zutat mit Menge, Schloss und ✕. Nur 200 g Brokkoli
+da statt 1 kg? Menge eintippen – was man anfasst, ist fest (🔒). TK-Erbsen
+dazu? Aus der Liste wählen, Gramm eintippen. „Auf Ziel rechnen“ schiebt die
+freien Zutaten (Fleisch, Reis, Öl, Käse …), bis die Box wieder bei
+443 / 33 / 39 / 15,4 liegt; die Werte stehen live darunter. „Speichern, für
+beide“ legt das Ergebnis als eigenes Rezept ab („… (angepasst)“, Filter
+„Eigene“, Leiste „Angepasst von …“ mit den Änderungen in Worten). Die
+Schritte bekommen die neuen Mengen, weggelassene Zutaten sind in ihren
+Schritten durchgestrichen, eine neue Zutat bekommt eine eigene Schale und
+einen Schritt im Vorbereiten.
+
+Dafür tragen die festen Rezepte je Zutat `pro100`, `g`, `anpassbar`, `min`
+und `max` (aus `werkzeug/naehrwerte.py`, Zuordnung `NK`, Gramm je Einheit
+`EINHEIT_G`, verschiebbare Zutaten `ANPASSBAR`), die Nährwerttabelle ist
+daraus gerechnet (plus `pauschal` für Gewürze und Brühpulver), und
+`daten/rezepte.json` hat unter `naehrwerte` die Werte aller Katalogzutaten –
+auch von denen, die in keinem Rezept vorkommen (Erbsen, Kichererbsen,
+Blumenkohl …). Die Mengen in den Schritten stehen als Platzhalter
+(`{brokkoli} Brokkoli in Röschen teilen`), `werkzeug/rezepte.py` setzt sie
+beim Erzeugen (`platzhalter()`, nur wenn der Name der Zutat danebensteht),
+die App beim Anzeigen (`platzhalter()` in `js/format.js`). `festAlsKi()`
+bringt ein festes Rezept ins KI-Format, dann rechnet dieselbe
+`mengenAnpassen()` wie für die Resteverwertung.
+
 ### Einrichten
 
 Die App ruft die KI direkt vom Handy aus auf (`js/ki.js`), mit einem
@@ -192,7 +218,12 @@ node tests/test-rezepte.mjs      # prüft Grenzen, Katalog und Einheiten
 Mengen in Supermarkt-Packungen denken (400 g Hähnchen, 500 g Hack, Dosen,
 Becher), 8 Portionen, ordentlich gewürzt. Jede Zutat der Einkaufsliste
 braucht einen Schlüssel im Katalog `CAT`, und ein Schlüssel hat in allen
-Rezepten dieselbe Einheit – sonst lassen sich Mengen nicht addieren.
+Rezepten dieselbe Einheit – sonst lassen sich Mengen nicht addieren. Die
+Nährwerte kommen je Zutat aus `naehrwerte.py` (Schlüssel wie im Katalog oder
+über `NK`); was nicht in Gramm gekauft wird, bekommt über `EINHEIT_G` Gramm
+je Dose, Stück, Zehe. Weicht die verwendete Menge ab (Kartoffeln geschält,
+halbe Zitrone), steht `g=` an der Zutat; Gewürze und Brühpulver sind
+`pauschal`. Eine neue Zutat braucht also `CAT` und `N`.
 
 Im Vorbereiten steht jede Zutat mit ihrer Menge („3 Zwiebeln (300 g) schälen
 und fein würfeln → Schale 1“); beim Kochen wird nichts mehr abgewogen,
@@ -229,6 +260,7 @@ neues Rezept muss dort nichts geändert werden.
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
 | `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |
+| `js/ansicht-anpassen.js` | Rezept anpassen: Mengen, Zutaten tauschen, auf Ziel rechnen, als eigenes Rezept speichern |
 | `sw.js` | Offline-Betrieb; `VERSION` hochzählen, wenn sich eine Datei aus `SHELL` ändert |
 
 ## Tests

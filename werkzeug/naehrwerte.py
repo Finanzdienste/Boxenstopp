@@ -25,7 +25,12 @@ N = {
  'sesam':(580,18,10,50), 'cashews':(600,20,26,46), 'erdnussbutter':(600,25,12,50),
  'honig':(320,0.4,80,0), 'zucker':(400,0,100,0), 'mehl':(348,10,72,1), 'sojasauce':(70,9,5,0), 'staerke':(350,0.3,86,0.1),
  'bruehe':(4,0.2,0.4,0.2), 'senf':(90,6,5,4), 'limette':(25,0.4,2.5,0.1), 'gewuerze':(320,13,30,12),
- 'kakao':(360,22,10,11), 'getrtomaten':(215,5,15,14), 'balsamico':(100,0.5,20,0),
+ 'kakao':(360,22,10,11), 'getrtomaten':(215,5,15,14), 'balsamico':(100,0.5,20,0), 'essig':(20,0,1,0), 'sriracha':(100,2,20,1),
+ # fürs Anpassen in der App (Zutat tauschen)
+ 'blumenkohl':(25,2.5,2.3,0.3), 'bohnengruen':(31,1.8,5,0.2), 'aubergine':(24,1,3,0.2), 'lauch':(30,2,3,0.3), 'kohlrabi':(27,2,3.7,0.1),
+ 'weisskohl':(25,1.3,4,0.2), 'kichererbsen':(120,7,16,2.5), 'linsendose':(95,6.5,12,0.6), 'linsenrot':(340,24,52,2), 'tofu':(125,13,1,7),
+ 'couscous':(360,12,72,2), 'bulgur':(350,12,70,1.5), 'vollkornnudeln':(340,13,62,2.5), 'joghurt':(50,4,5,1.5),
+ 'haferflocken':(370,13,59,7), 'aepfel':(52,0.3,12,0.2), 'whey':(380,78,6,5), 'erdnusscrunch':(600,25,12,50),
 }
 T = (443,33,39,15.4)
 def tot(rows):
