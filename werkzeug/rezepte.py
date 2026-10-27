@@ -40,6 +40,7 @@ import json, pathlib, re, sys
 HIER = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HIER))
 from naehrwerte import N, T as ZIELWERTE
+from preise import PREISE, GEWUERZ_JE_G, STAND as PREIS_STAND
 
 ZIEL = {'kcal': ZIELWERTE[0], 'p': ZIELWERTE[1], 'kh': ZIELWERTE[2], 'f': ZIELWERTE[3]}
 # ---------------------------------------------------------------- Katalog (Einkaufsliste)
@@ -152,6 +153,25 @@ ANPASSBAR = {
 MENGE_RE = re.compile(r'(\d+(?:[.,]\d+)?)\s?(kg|g|ml|l)\b')
 
 def nk_von(k): return NK.get(k, k)
+
+def preis_je_g(k):
+    """Euro je Gramm (bzw. ml) aus preise.py; Stückware über EINHEIT_G. None, wenn es nicht geht."""
+    if k not in PREISE: return None
+    eur, menge, u = PREISE[k]
+    if u in ('g', 'ml'): return eur / menge
+    if k in EINHEIT_G and EINHEIT_G[k][0] == u and EINHEIT_G[k][1]: return eur / menge / EINHEIT_G[k][1]
+    return None
+
+def kosten_von(it):
+    """Was die verwendete Menge dieser Zutat kostet – None, wenn unbekannt."""
+    if not it['k'] or it['opt'] or it['haus']: return None
+    g, _ = gramm_von(it)
+    je = preis_je_g(it['k'])
+    if je is not None and g: return g * je
+    if it['k'] in PREISE and isinstance(it['q'], (int, float)) and PREISE[it['k']][2] == it['u']:
+        eur, menge, _ = PREISE[it['k']]
+        return eur / menge * it['q']
+    return None
 
 def gramm_von(it):
     """Gramm (bzw. ml) der Zutat, so wie sie in die Nährwerte eingeht."""
@@ -3502,6 +3522,16 @@ for r in R:
         if it['pantry'] and not isinstance(it['q'], (int, float)) and g:
             it['q'], it['u'] = g, gu
     r['nut'] = naehrwert_zeilen(r)
+    # Kosten: verwendete Mengen zu Richtpreisen, Gewürze pauschal nach Gramm
+    summe = 0.0
+    for it in r['items']:
+        eur = kosten_von(it)
+        it['eur'] = round(eur, 2) if eur is not None else None
+        if it['k'] and not it['opt'] and not it['haus'] and not it['pantry'] and eur is None and it['k'] in CAT and CAT[it['k']][1] not in ('gewuerz', 'haushalt'):
+            raise SystemExit(f"{r['id']}: kein Preis für {it['k']}")
+        summe += eur or 0
+    summe += sum(z[1] for z in r.get('pauschal', [])) * GEWUERZ_JE_G
+    r['kosten'] = {'gesamt': round(summe, 2), 'box': round(summe / 8, 2)}
     r['pauschal'] = [{'n': z[0], 'g': z[1], 'nk': z[2] if len(z) > 2 else 'gewuerze', 'pro100': dict(zip(('kcal', 'p', 'kh', 'f'), N[z[2] if len(z) > 2 else 'gewuerze']))} for z in r.get('pauschal', [])]
     # Platzhalter: genauere Namen zuerst („Rote Zwiebeln“ vor „Zwiebeln“), jede Menge nur einmal.
     for t_, schritte in r['ablauf']:
@@ -3555,11 +3585,11 @@ for e in EXTRAS.values():
     for it in e['items']:
         if it['k'] not in CAT: raise SystemExit('Schlüssel fehlt im Katalog: '+it['k'])
 
-print(f"{'Rezept':16s} {'kcal':>4s} {'P':>5s} {'KH':>5s} {'F':>5s}   {'Zeit':>12s}   Schalen")
+print(f"{'Rezept':20s} {'kcal':>4s} {'P':>5s} {'KH':>5s} {'F':>5s}   {'Zeit':>12s}   Schalen   €/Box")
 for r in out:
     z = r['zeit']
-    print(f"{r['id']:16s} {r['m']['kcal']:4d} {r['m']['p']:5.1f} {r['m']['kh']:5.1f} {r['m']['f']:5.1f}   "
-          f"{'+'.join(map(str, z['phasen'])):>8s}={z['gesamt']:3d}   {len(r['schalen'])}")
+    print(f"{r['id']:20s} {r['m']['kcal']:4d} {r['m']['p']:5.1f} {r['m']['kh']:5.1f} {r['m']['f']:5.1f}   "
+          f"{'+'.join(map(str, z['phasen'])):>8s}={z['gesamt']:3d}   {len(r['schalen'])}   {r['kosten']['box']:5.2f}")
 
 ziel = HIER.parent / 'daten' / 'rezepte.json'
 daten = {
@@ -3572,6 +3602,10 @@ daten = {
                        'anpassbar': nk_von(k) in ANPASSBAR}
                    for k in CAT if nk_von(k) in N and CAT[k][1] not in ('gewuerz', 'haushalt')},
     'extras': EXTRAS,
+    # Richtpreise fürs Summieren auf der Liste: Euro je Gramm/ml je Katalog-Schlüssel, dazu die Packung
+    'preise': {k: {'je_g': round(preis_je_g(k), 6), 'eur': PREISE[k][0], 'menge': PREISE[k][1], 'u': PREISE[k][2]}
+               for k in CAT if preis_je_g(k) is not None},
+    'preise_stand': PREIS_STAND,
 }
 ziel.write_text(json.dumps(daten, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
 print(f'{len(out)} Rezepte → {ziel.relative_to(HIER.parent)}')

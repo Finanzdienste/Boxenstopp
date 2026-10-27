@@ -45,6 +45,18 @@ ruhiges Tempo zu Hause gerechnet, mit Waschen, Schälen und Abfall wegräumen
 Abschnitte und Gesamtzeit: Wartezeiten (`ruhe`, etwa Marinieren) laufen im
 Hintergrund weiter, „währenddessen“ kostet keine zusätzliche Zeit.
 
+### Kosten
+
+Jedes Rezept zeigt, was es ungefähr kostet – auf der Karte pro Box, im
+Rezept gesamt und pro Box, auf der Einkaufsliste die Summe aller Einträge.
+Grundlage sind **Richtpreise** je Katalogzutat (`werkzeug/preise.py`:
+Discounter-Niveau, Stand im Kopf der Datei; Fleisch an Aldi-Preisen
+geeicht), gerechnet auf die **verwendete Menge**, nicht auf ganze Packungen,
+Gewürze pauschal nach Gramm. `werkzeug/rezepte.py` schreibt sie je Rezept
+(`kosten`) und je Zutat (`eur`) nach `daten/rezepte.json`, dazu `preise`
+(Euro je Gramm je Schlüssel) für die Liste und für Rezepte aus der
+Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
+
 ### Belohnung
 
 Ist Vorbereiten oder Kochen komplett abgehakt, kommt unten ein Satz („Mise
@@ -272,6 +284,8 @@ neues Rezept muss dort nichts geändert werden.
 | `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“ |
 | `js/timer.js` | Küchentimer: starten, Leiste oben, Alarm, überlebt Neuladen |
 | `js/lob.js` | Belohnung: Sprüche, Tierquellen, Vorladen, Overlay mit Konfetti |
+| `js/kosten.js` | Richtpreise auf Mengen: Liste, eigene Rezepte, Euro-Format |
+| `werkzeug/preise.py` | Richtpreise je Katalogschlüssel (Packung, Menge, Einheit) |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
 | `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |

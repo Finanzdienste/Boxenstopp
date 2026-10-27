@@ -9,6 +9,7 @@
  */
 import { app, $, melde } from './kern.js';
 import { lobKlein } from './lob.js';
+import { euro, kostenListe } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
 import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren } from './liste.js';
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
@@ -75,7 +76,8 @@ export function listeZeichnen() {
     }
   }
   body.innerHTML = html;
-  $('#l-count').textContent = eintraege.length ? `${offen} offen${fertig.length ? ` · ${fertig.length} erledigt` : ''}` : '';
+  const ko = kostenListe(app.stand, app);
+  $('#l-count').textContent = eintraege.length ? `${offen} offen${fertig.length ? ` · ${fertig.length} erledigt` : ''}${ko.gesamt > 0 ? ` · ≈ ${euro(ko.gesamt)}` : ''}` : '';
   $('#kopieren').hidden = !offen;
   if (!offen) $('#kopie-feld').hidden = true;
   fussZeichnen(fertig.length);

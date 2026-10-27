@@ -17,6 +17,7 @@ import { zeitVon, dauer } from './zeiten.js';
 import { zahlwort } from './ki-rezept.js';
 import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
 import { lobPruefen, lobGross, tierVorladen } from './lob.js';
+import { euro, kostenRezept } from './kosten.js';
 import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
 
@@ -93,10 +94,12 @@ function karte(r) {
   const b = app.stand.bewertung?.[r.id];
   const daumen = b ? `<span class="pill p-${b.wert}">${daumenIc(b.wert)}${DAUMEN_TEXT[b.wert]}</span>` : '';
   const ki = r.ki ? `<span class="pill pill-ki">${r.ki.herkunft ? 'Angepasst' : 'Resteverwertung'}${boxen(r) !== 8 ? ` · ${boxen(r)} Boxen` : ''}</span>` : '';
+  const ko = kostenRezept(r, app);
+  const preis = ko.box > 0 ? `<span class="box-cost">≈ ${esc(euro(ko.box))}/Box</span>` : '';
   return `<button type="button" class="box" data-open="${esc(r.id)}">
 <span class="tape">${esc(r.short)}</span><span class="box-time">${dauer(gesamtZeit(r))}</span>
 <span class="box-desc">${esc(r.desc)}</span>
-<span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}</span>
+<span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}${preis}</span>
 <span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
 <span class="box-foot">${ki}${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
 </button>`;
@@ -185,6 +188,8 @@ function detailHTML(r) {
     return idx.length ? `<h3 class="sub-h">${titel}</h3><ul class="ings">${idx.map(([z, i]) => zutatZeile(z, i)).join('')}</ul>` : '';
   };
   const fakten = [`ca. ${dauer(gesamtZeit(r))}`, esc(r.method), `Kühlschrank ${esc(r.fridge)}`, `Tiefkühler ${esc(r.freeze)}`];
+  const ko = kostenRezept(r, app);
+  if (ko.box > 0) fakten.push(`<span class="pill-cost">≈ ${esc(euro(ko.box))} pro Box${ko.luecken ? ' (mind.)' : ''}</span>`);
   const t = r.total;
   return `<button type="button" class="back" data-act="zurueck">${ic('back')}Alle Rezepte</button>
 <div class="d-head">
@@ -212,6 +217,7 @@ ${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
 <section class="sec" aria-labelledby="h-ing">
   <h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</small></h2>
   <p class="sec-lead">Mit + setzt du einzelne Zutaten auf die Liste, mit ✓ nimmst du sie wieder runter.</p>
+  ${ko.gesamt > 0 ? `<p class="kosten" id="d-kosten">Kostet ≈ <b>${esc(euro(ko.gesamt))}</b> für ${boxen(r)} Boxen, also ≈ ${esc(euro(ko.box))} pro Box${ko.luecken ? ` – mindestens, ${ko.luecken} Zutat${ko.luecken > 1 ? 'en' : ''} ohne Richtpreis` : ''}. <small>Richtpreise Discounter, ${esc(app.preiseStand || 'Stand unbekannt')}; verwendete Mengen, nicht ganze Packungen.</small></p>` : ''}
   ${gruppe('einkauf', 'Einkaufen')}
   ${gruppe('vorhanden', 'Ist schon da')}
   ${gruppe('vorrat', 'Aus dem Vorrat')}

@@ -58,6 +58,15 @@ const unvollstaendig = rezepte.filter((r) => !(r.name && r.short && r.desc && r.
 check(!unvollstaendig.length, `jedes Rezept hat Name, Kurzname, Beschreibung, Lagerung, Einkaufszutaten und Vorbereiten → Kochen → Portionieren${unvollstaendig.length ? `: ${unvollstaendig.map((r) => r.id).join(', ')}` : ''}`);
 check(rezepte.every((r) => !('steps' in r) && !('timeNote' in r)), 'keine alten Schritte mehr (steps, timeNote)');
 check(rezepte.every((r) => r.short.length <= 22), 'Kurznamen passen aufs Kreppband (höchstens 22 Zeichen)');
+// --- Kosten: Richtpreise für alles, was man kauft; pro Box zwischen 1 und 4 €
+const ohnePreis = Object.keys(katalog).filter((k) => !['gewuerz', 'haushalt'].includes(katalog[k].c) && !daten.preise?.[k] && !/^(koriander|basilikum|petersilie|dill|tk-kraeuter)$/.test(k));
+check(!ohnePreis.length && daten.preise_stand, `jede Einkaufszutat hat einen Richtpreis (Stand ${daten.preise_stand})${ohnePreis.length ? ` – fehlt: ${ohnePreis.join(', ')}` : ''}`);
+const kostenFalsch = rezepte.filter((r) => !(r.kosten && r.kosten.box >= 1 && r.kosten.box <= 4 && Math.abs(r.kosten.gesamt / 8 - r.kosten.box) < 0.01));
+check(!kostenFalsch.length, `jedes Rezept kostet pro Box zwischen 1 und 4 € (${Math.min(...rezepte.map((r) => r.kosten.box)).toFixed(2)}–${Math.max(...rezepte.map((r) => r.kosten.box)).toFixed(2)} €)${kostenFalsch.length ? `: ${kostenFalsch.map((r) => r.id).join(', ')}` : ''}`);
+const zutatenKosten = rezepte.flatMap((r) => r.items.filter((it) => it.k && !it.opt && !it.haus && !it.pantry && typeof it.eur !== 'number').map((it) => `${r.id}: ${it.n}`));
+check(!zutatenKosten.length, `jede Einkaufszutat hat ihre Kosten dabei${zutatenKosten.length ? `: ${zutatenKosten.slice(0, 5).join('; ')}` : ''}`);
+const chili = rezepte.find((r) => r.id === 'chili');
+check(Math.abs(chili.items.reduce((a, it) => a + (it.eur || 0), 0) + 35 * 0.012 - chili.kosten.gesamt) < 0.05, 'Chili: Zutaten plus Gewürzpauschale ergeben die Gesamtkosten');
 
 const gewuerzeFalsch = [...new Set(rezepte.flatMap((r) => r.spices.map((x) => x.k)))].filter((k) => katalog[k].c !== 'gewuerz');
 check(!gewuerzeFalsch.length, `jedes Gewürz steht im Katalog unter Gewürze${gewuerzeFalsch.length ? `: ${gewuerzeFalsch.join(', ')}` : ''}`);

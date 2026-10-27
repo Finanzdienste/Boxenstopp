@@ -12,6 +12,7 @@ import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, an
 import { kiAus } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
+import { euro, kostenMenge, kostenRezept, kostenListe } from '../js/kosten.js';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -67,6 +68,18 @@ check(R.items.filter((it) => it.da).length === 4 && R.items.filter((it) => it.pa
 check(R.spices.find((s) => s.n === 'Paprika edelsüß').k === 'paprika-edelsuess' && R.spices.find((s) => s.n === 'Sumach').k === 'ki-g-sumach', 'Gewürze: aus dem Katalog, wenn es sie dort gibt');
 check(R.m.kcal === Math.round(R.total[0] / 8) && JSON.stringify(R.zeit) === JSON.stringify(zeitVon(R)) && R.time === R.zeit.gesamt, `Nährwerte pro Box und Zeiten gerechnet (${R.m.kcal} kcal, ${R.zeit.gesamt} Min.)`);
 check(R.ki.aenderungen.length >= 1 && R.ki.aenderungen.every((a) => a.vorher !== a.nachher), `die App zeigt, welche Mengen sie verschoben hat (${R.ki.aenderungen.map((a) => `${a.name} ${a.vorher}→${a.nachher}`).join(', ')})`);
+
+// --- Kosten: Richtpreise auf Mengen, eigene Rezepte, die Liste
+const preisDaten = { preise: daten.preise, naehrwerte: daten.naehrwerte };
+check(euro(2.3) === '2,30 €' && euro(18.4) === '18 €' && euro(NaN) === '', 'euro(): unter 10 € mit Cent, darüber gerundet');
+check(Math.abs(kostenMenge('reis', 500, 'g', preisDaten) - 2.29 / 2) < 0.001 && Math.abs(kostenMenge('paprika', 3, 'Stk', preisDaten) - 2.49) < 0.001 && kostenMenge('ki-zucchini', 1, 'Stk', preisDaten) === null, 'kostenMenge: Gramm, Stückware über die Einheit, unbekannt → null');
+const kiKosten = kostenRezept(R, preisDaten);
+check(kiKosten.gesamt > 5 && kiKosten.luecken >= 1 && Math.abs(kiKosten.box - kiKosten.gesamt / 8) < 0.001, `Resteverwertung: Kosten aus den Katalogzutaten, Lücken gezählt (≈ ${euro(kiKosten.gesamt)}, ${kiKosten.luecken} ohne Preis)`);
+check(kostenRezept(teriyakiFest(), preisDaten).box === daten.rezepte.find((r) => r.id === 'teriyaki').kosten.box, 'feste Rezepte bringen ihre Kosten mit');
+const standKosten = { items: { reis: { name: 'Reis', parts: { a: { q: 500, u: 'g' }, b: { q: 500, u: 'g', done: true } } }, 'c-1': { name: 'Eigenes', custom: true, checked: false } } };
+const lk = kostenListe(standKosten, preisDaten);
+check(Math.abs(lk.gesamt - 2.29) < 0.001 && Math.abs(lk.offen - 2.29 / 2) < 0.001, 'Liste: Summe aller Einträge und der offenen, eigene Einträge ohne Preis');
+function teriyakiFest() { return daten.rezepte.find((r) => r.id === 'teriyaki'); }
 
 // --- feste Rezepte anpassen: ins KI-Format, Zutat tauschen, nachrechnen, zurück ins App-Format
 const teriyaki = daten.rezepte.find((r) => r.id === 'teriyaki');

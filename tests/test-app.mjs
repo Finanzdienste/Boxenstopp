@@ -93,6 +93,9 @@ check(await bis(async () => (await page.locator('#d-notizen .notiz').count()) ==
 await page.click('#toast button');
 check(await bis(async () => (await page.locator('#d-notizen .notiz').count()) === 1), 'rückgängig: Notiz wieder da');
 check((await page.locator('.facts .pill').first().textContent()) === 'ca. 1 Std. 40 Min.', `im Kopf steht die ehrliche Zeit (${await page.locator('.facts .pill').first().textContent()})`);
+check(/^≈ 1,\d\d € pro Box$/.test(await page.locator('.facts .pill-cost').textContent()), `und was eine Box kostet (${await page.locator('.facts .pill-cost').textContent()})`);
+check(/Kostet ≈ \d+(,\d\d)? € für 8 Boxen/.test(await text('#d-kosten')) && (await text('#d-kosten')).includes('Richtpreise Discounter'), 'bei den Zutaten: Gesamtkosten mit Hinweis auf Richtpreise');
+check(/≈ \d,\d\d €\/Box/.test(await page.locator('[data-open="chili"] .box-cost').textContent()), 'auf der Karte: Kosten pro Box');
 check(await page.locator('.sub-h', { hasText: 'Extras' }).count() === 1, 'Backpapier steht unter Extras');
 check((await text('.bew-von')).startsWith('Noch nicht bewertet'), 'Daumen: noch nicht bewertet');
 await page.click('[data-bewerten="hoch"]');
@@ -127,6 +130,7 @@ await page.click('[data-act="alle-dazu"]');
 await page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await zeile('Basmati- oder Jasminreis').count()) === 1), 'Reis steht einmal auf der Liste');
 check((await zeile('Basmati- oder Jasminreis').locator('.item-qty').innerText()).startsWith('520 g'), 'Reis aus beiden Rezepten: 520 g');
+check(/≈ \d+(,\d\d)? €/.test(await text('#l-count')), `die Liste summiert die Richtpreise (${await text('#l-count')})`);
 check((await zeile('Knoblauch').locator('.item-qty').innerText()).replace(/\s+/g, ' ') === '10 Zehen ≈ 1 Knolle', 'Knoblauch: 10 Zehen, etwa 1 Knolle');
 check((await zeile('Öl, neutral').innerText()).includes('Butter Chicken: 10 g'), 'Öl mit Text statt Menge');
 check(await page.locator('#forrow .forchip').count() === 2, '„Für“: Butter Chicken und Teriyaki Bowl');

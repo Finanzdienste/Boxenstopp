@@ -38,7 +38,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 5.79
     },
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
@@ -60,7 +61,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 5.49
     },
     {
      "n": "Kidneybohnen",
@@ -82,7 +84,8 @@
      },
      "anpassbar": false,
      "min": 510,
-     "max": 510
+     "max": 510,
+     "eur": 1.38
     },
     {
      "n": "Mais",
@@ -104,7 +107,8 @@
      },
      "anpassbar": false,
      "min": 285,
-     "max": 285
+     "max": 285,
+     "eur": 0.79
     },
     {
      "n": "Stückige Tomaten",
@@ -126,7 +130,8 @@
      },
      "anpassbar": false,
      "min": 800,
-     "max": 800
+     "max": 800,
+     "eur": 1.38
     },
     {
      "n": "Tomatenmark",
@@ -148,7 +153,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Zwiebeln",
@@ -170,7 +176,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.39
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -192,7 +199,8 @@
      },
      "anpassbar": false,
      "min": 450,
-     "max": 450
+     "max": 450,
+     "eur": 2.33
     },
     {
      "n": "Knoblauch",
@@ -214,7 +222,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Süßkartoffel",
@@ -236,7 +245,8 @@
      },
      "anpassbar": true,
      "min": 300,
-     "max": 960
+     "max": 960,
+     "eur": 1.37
     },
     {
      "n": "Limette",
@@ -258,7 +268,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Backkakao",
@@ -280,7 +291,8 @@
      },
      "anpassbar": false,
      "min": 10.0,
-     "max": 10.0
+     "max": 10.0,
+     "eur": 0.08
     },
     {
      "n": "Rinderbrühe",
@@ -302,7 +314,8 @@
      },
      "anpassbar": false,
      "min": 400.0,
-     "max": 400.0
+     "max": 400.0,
+     "eur": 0.14
     }
    ],
    "spices": [
@@ -653,6 +666,10 @@
      4.2
     ]
    ],
+   "kosten": {
+    "gesamt": 20.36,
+    "box": 2.54
+   },
    "total": [
     3584.8,
     259.2,
@@ -706,7 +723,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Skyr natur",
@@ -728,7 +746,8 @@
      },
      "anpassbar": true,
      "min": 150,
-     "max": 480
+     "max": 480,
+     "eur": 0.77
     },
     {
      "n": "Schlagsahne 30 %",
@@ -750,7 +769,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.99
     },
     {
      "n": "Passierte Tomaten",
@@ -772,7 +792,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 0.69
     },
     {
      "n": "Tomatenmark",
@@ -794,7 +815,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Zwiebeln",
@@ -816,7 +838,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.39
     },
     {
      "n": "Knoblauch",
@@ -838,7 +861,8 @@
      },
      "anpassbar": false,
      "min": 24,
-     "max": 24
+     "max": 24,
+     "eur": 0.24
     },
     {
      "n": "Ingwer",
@@ -860,7 +884,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.1
     },
     {
      "n": "Zitrone",
@@ -882,7 +907,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Basmatireis",
@@ -904,7 +930,8 @@
      },
      "anpassbar": true,
      "min": 140,
-     "max": 448
+     "max": 448,
+     "eur": 0.64
     },
     {
      "n": "Butter",
@@ -926,7 +953,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.35
     },
     {
      "n": "Öl",
@@ -948,7 +976,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Honig",
@@ -970,7 +999,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.08
     },
     {
      "n": "Koriander, frisch",
@@ -987,7 +1017,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Backpapier",
@@ -1004,7 +1035,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -1407,6 +1439,10 @@
      2.9
     ]
    ],
+   "kosten": {
+    "gesamt": 14.25,
+    "box": 1.78
+   },
    "total": [
     3461.5,
     262.9,
@@ -1460,7 +1496,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 12.98
     },
     {
      "n": "Zwiebeln",
@@ -1482,7 +1519,8 @@
      },
      "anpassbar": false,
      "min": 1000,
-     "max": 1000
+     "max": 1000,
+     "eur": 1.29
     },
     {
      "n": "Rote Paprika",
@@ -1504,7 +1542,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -1526,7 +1565,8 @@
      },
      "anpassbar": true,
      "min": 638,
-     "max": 2040
+     "max": 2040,
+     "eur": 1.27
     },
     {
      "n": "Knoblauch",
@@ -1548,7 +1588,8 @@
      },
      "anpassbar": false,
      "min": 24,
-     "max": 24
+     "max": 24,
+     "eur": 0.24
     },
     {
      "n": "Tomatenmark",
@@ -1570,7 +1611,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Butterschmalz",
@@ -1592,7 +1634,8 @@
      },
      "anpassbar": true,
      "min": 32,
-     "max": 104
+     "max": 104,
+     "eur": 0.65
     },
     {
      "n": "Rinderbrühe",
@@ -1614,7 +1657,8 @@
      },
      "anpassbar": false,
      "min": 750.0,
-     "max": 750.0
+     "max": 750.0,
+     "eur": 0.26
     },
     {
      "n": "Balsamico oder Rotweinessig",
@@ -1631,7 +1675,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Zitrone (Abrieb)",
@@ -1648,7 +1693,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -1999,6 +2045,10 @@
      6.0
     ]
    ],
+   "kosten": {
+    "gesamt": 20.02,
+    "box": 2.5
+   },
    "total": [
     3554.9,
     264.9,
@@ -2052,7 +2102,8 @@
      },
      "anpassbar": true,
      "min": 350,
-     "max": 1120
+     "max": 1120,
+     "eur": 7.92
     },
     {
      "n": "Penne",
@@ -2074,7 +2125,8 @@
      },
      "anpassbar": true,
      "min": 160,
-     "max": 512
+     "max": 512,
+     "eur": 0.63
     },
     {
      "n": "Getrocknete Tomaten in Öl",
@@ -2096,7 +2148,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 2.29
     },
     {
      "n": "Passierte Tomaten",
@@ -2118,7 +2171,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 0.69
     },
     {
      "n": "Kochsahne 15 %",
@@ -2140,7 +2194,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.79
     },
     {
      "n": "Frischkäse leicht",
@@ -2162,7 +2217,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 1.19
     },
     {
      "n": "Parmesan",
@@ -2184,7 +2240,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 1.0
     },
     {
      "n": "Babyspinat",
@@ -2206,7 +2263,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 2.58
     },
     {
      "n": "Zwiebeln",
@@ -2228,7 +2286,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -2250,7 +2309,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.2
     },
     {
      "n": "Gemüsebrühe (Pulver)",
@@ -2267,7 +2327,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Basilikum, frisch",
@@ -2284,7 +2345,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -2644,6 +2706,10 @@
      2.3
     ]
    ],
+   "kosten": {
+    "gesamt": 17.97,
+    "box": 2.25
+   },
    "total": [
     3500.8,
     264.3,
@@ -2697,7 +2763,8 @@
      },
      "anpassbar": true,
      "min": 155,
-     "max": 496
+     "max": 496,
+     "eur": 0.61
     },
     {
      "n": "Hähnchenbrustfilet",
@@ -2719,7 +2786,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 5.66
     },
     {
      "n": "Brokkoli",
@@ -2741,7 +2809,8 @@
      },
      "anpassbar": false,
      "min": 1000,
-     "max": 1000
+     "max": 1000,
+     "eur": 2.38
     },
     {
      "n": "Milch 1,5 %",
@@ -2763,7 +2832,8 @@
      },
      "anpassbar": true,
      "min": 350,
-     "max": 1120
+     "max": 1120,
+     "eur": 0.76
     },
     {
      "n": "Cheddar, kräftig (am Stück)",
@@ -2785,7 +2855,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 2.19
     },
     {
      "n": "Knoblauch",
@@ -2807,7 +2878,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Butter",
@@ -2829,7 +2901,8 @@
      },
      "anpassbar": true,
      "min": 12,
-     "max": 40
+     "max": 40,
+     "eur": 0.22
     },
     {
      "n": "Weizenmehl",
@@ -2851,7 +2924,8 @@
      },
      "anpassbar": true,
      "min": 18,
-     "max": 56
+     "max": 56,
+     "eur": 0.02
     },
     {
      "n": "Senf, mittelscharf",
@@ -2873,7 +2947,8 @@
      },
      "anpassbar": false,
      "min": 15.0,
-     "max": 15.0
+     "max": 15.0,
+     "eur": 0.05
     },
     {
      "n": "Öl, neutral",
@@ -2895,7 +2970,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     }
    ],
    "spices": [
@@ -3232,6 +3308,10 @@
      1.0
     ]
    ],
+   "kosten": {
+    "gesamt": 12.14,
+    "box": 1.52
+   },
    "total": [
     3556.6,
     264.0,
@@ -3285,7 +3365,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 9.15
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -3307,7 +3388,8 @@
      },
      "anpassbar": true,
      "min": 120,
-     "max": 384
+     "max": 384,
+     "eur": 0.55
     },
     {
      "n": "Brokkoli",
@@ -3329,7 +3411,8 @@
      },
      "anpassbar": false,
      "min": 1000,
-     "max": 1000
+     "max": 1000,
+     "eur": 2.38
     },
     {
      "n": "Möhren",
@@ -3351,7 +3434,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.3
     },
     {
      "n": "Frühlingszwiebeln",
@@ -3373,7 +3457,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.99
     },
     {
      "n": "Knoblauch",
@@ -3395,7 +3480,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -3417,7 +3503,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.1
     },
     {
      "n": "Sesam",
@@ -3439,7 +3526,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Sojasauce",
@@ -3461,7 +3549,8 @@
      },
      "anpassbar": false,
      "min": 120.0,
-     "max": 120.0
+     "max": 120.0,
+     "eur": 0.95
     },
     {
      "n": "Honig",
@@ -3483,7 +3572,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 0.4
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -3500,7 +3590,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Speisestärke",
@@ -3522,7 +3613,8 @@
      },
      "anpassbar": true,
      "min": 8,
-     "max": 24
+     "max": 24,
+     "eur": 0.04
     },
     {
      "n": "Öl, neutral",
@@ -3544,7 +3636,8 @@
      },
      "anpassbar": true,
      "min": 8,
-     "max": 24
+     "max": 24,
+     "eur": 0.04
     },
     {
      "n": "Sesamöl",
@@ -3566,7 +3659,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.12
     }
    ],
    "spices": [
@@ -3868,6 +3962,10 @@
      0.4
     ]
    ],
+   "kosten": {
+    "gesamt": 15.6,
+    "box": 1.95
+   },
    "total": [
     3530.9,
     259.0,
@@ -3921,7 +4019,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 11.32
     },
     {
      "n": "Kokosmilch (nicht light)",
@@ -3943,7 +4042,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.19
     },
     {
      "n": "Rote Currypaste, vegan",
@@ -3965,7 +4065,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 1.49
     },
     {
      "n": "Paprika",
@@ -3987,7 +4088,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Zucchini",
@@ -4009,7 +4111,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Zuckerschoten",
@@ -4031,7 +4134,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 1.99
     },
     {
      "n": "Zwiebel",
@@ -4053,7 +4157,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.13
     },
     {
      "n": "Knoblauch",
@@ -4075,7 +4180,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -4097,7 +4203,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Limette",
@@ -4119,7 +4226,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Jasminreis",
@@ -4141,7 +4249,8 @@
      },
      "anpassbar": true,
      "min": 145,
-     "max": 464
+     "max": 464,
+     "eur": 0.66
     },
     {
      "n": "Sojasauce",
@@ -4163,7 +4272,8 @@
      },
      "anpassbar": false,
      "min": 30.0,
-     "max": 30.0
+     "max": 30.0,
+     "eur": 0.24
     },
     {
      "n": "Zucker",
@@ -4185,7 +4295,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.01
     },
     {
      "n": "Öl, neutral",
@@ -4207,7 +4318,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Thai-Basilikum oder Koriander",
@@ -4224,7 +4336,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -4533,6 +4646,10 @@
      20.0
     ]
    ],
+   "kosten": {
+    "gesamt": 20.98,
+    "box": 2.62
+   },
    "total": [
     3498.7,
     282.4,
@@ -4586,7 +4703,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Langkorn- oder Basmatireis",
@@ -4608,7 +4726,8 @@
      },
      "anpassbar": true,
      "min": 120,
-     "max": 384
+     "max": 384,
+     "eur": 0.55
     },
     {
      "n": "Schwarze Bohnen",
@@ -4630,7 +4749,8 @@
      },
      "anpassbar": false,
      "min": 240,
-     "max": 240
+     "max": 240,
+     "eur": 0.89
     },
     {
      "n": "Mais",
@@ -4652,7 +4772,8 @@
      },
      "anpassbar": false,
      "min": 285,
-     "max": 285
+     "max": 285,
+     "eur": 0.79
     },
     {
      "n": "Paprika",
@@ -4674,7 +4795,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Zwiebel",
@@ -4696,7 +4818,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.13
     },
     {
      "n": "Rote Zwiebel",
@@ -4718,7 +4841,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.15
     },
     {
      "n": "Tomaten",
@@ -4740,7 +4864,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.75
     },
     {
      "n": "Limetten",
@@ -4762,7 +4887,8 @@
      },
      "anpassbar": false,
      "min": 60,
-     "max": 60
+     "max": 60,
+     "eur": 0.78
     },
     {
      "n": "Cheddar, gerieben",
@@ -4784,7 +4910,8 @@
      },
      "anpassbar": true,
      "min": 75,
-     "max": 240
+     "max": 240,
+     "eur": 1.64
     },
     {
      "n": "Schmand",
@@ -4806,7 +4933,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.79
     },
     {
      "n": "Öl",
@@ -4828,7 +4956,8 @@
      },
      "anpassbar": true,
      "min": 2,
-     "max": 8
+     "max": 8,
+     "eur": 0.01
     },
     {
      "n": "Koriander, frisch",
@@ -4845,7 +4974,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -4862,7 +4992,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -5222,6 +5353,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 18.26,
+    "box": 2.28
+   },
    "total": [
     3624.4,
     284.0,
@@ -5275,7 +5410,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 5.66
     },
     {
      "n": "Kritharaki",
@@ -5297,7 +5433,8 @@
      },
      "anpassbar": true,
      "min": 160,
-     "max": 512
+     "max": 512,
+     "eur": 0.95
     },
     {
      "n": "Zwiebeln",
@@ -5319,7 +5456,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.39
     },
     {
      "n": "Passierte Tomaten",
@@ -5341,7 +5479,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 0.69
     },
     {
      "n": "Tomatenmark",
@@ -5363,7 +5502,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Skyr natur",
@@ -5385,7 +5525,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 1.29
     },
     {
      "n": "Salatgurke",
@@ -5407,7 +5548,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Knoblauch",
@@ -5429,7 +5571,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Feta",
@@ -5451,7 +5594,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 1.85
     },
     {
      "n": "Olivenöl",
@@ -5473,7 +5617,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.56
     },
     {
      "n": "Gemüsebrühe",
@@ -5495,7 +5640,8 @@
      },
      "anpassbar": false,
      "min": 600.0,
-     "max": 600.0
+     "max": 600.0,
+     "eur": 0.21
     },
     {
      "n": "Dill oder Minze, frisch",
@@ -5512,7 +5658,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -5529,7 +5676,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -5895,6 +6043,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 13.03,
+    "box": 1.63
+   },
    "total": [
     3513.0,
     263.8,
@@ -5948,7 +6100,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 5.79
     },
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
@@ -5970,7 +6123,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 5.49
     },
     {
      "n": "Spaghetti",
@@ -5992,7 +6146,8 @@
      },
      "anpassbar": true,
      "min": 160,
-     "max": 512
+     "max": 512,
+     "eur": 0.63
     },
     {
      "n": "Zwiebeln",
@@ -6014,7 +6169,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Möhren",
@@ -6036,7 +6192,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.2
     },
     {
      "n": "Staudensellerie",
@@ -6058,7 +6215,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.37
     },
     {
      "n": "Knoblauch",
@@ -6080,7 +6238,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Stückige Tomaten",
@@ -6102,7 +6261,8 @@
      },
      "anpassbar": false,
      "min": 800,
-     "max": 800
+     "max": 800,
+     "eur": 1.38
     },
     {
      "n": "Tomatenmark",
@@ -6124,7 +6284,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Milch 1,5 %",
@@ -6146,7 +6307,8 @@
      },
      "anpassbar": true,
      "min": 50,
-     "max": 160
+     "max": 160,
+     "eur": 0.11
     },
     {
      "n": "Parmesan",
@@ -6168,7 +6330,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 1.19
     },
     {
      "n": "Rinderbrühe",
@@ -6190,7 +6353,8 @@
      },
      "anpassbar": false,
      "min": 200.0,
-     "max": 200.0
+     "max": 200.0,
+     "eur": 0.07
     },
     {
      "n": "Zucker",
@@ -6212,7 +6376,8 @@
      },
      "anpassbar": true,
      "min": 2,
-     "max": 8
+     "max": 8,
+     "eur": 0.0
     },
     {
      "n": "Basilikum, frisch",
@@ -6229,7 +6394,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -6583,6 +6749,10 @@
      1.0
     ]
    ],
+   "kosten": {
+    "gesamt": 16.0,
+    "box": 2.0
+   },
    "total": [
     3593.6,
     258.5,
@@ -6636,7 +6806,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Lasagneplatten (ohne Vorkochen)",
@@ -6658,7 +6829,8 @@
      },
      "anpassbar": true,
      "min": 112,
-     "max": 360
+     "max": 360,
+     "eur": 0.58
     },
     {
      "n": "Zwiebeln",
@@ -6680,7 +6852,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.19
     },
     {
      "n": "Möhren",
@@ -6702,7 +6875,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.15
     },
     {
      "n": "Zucchini",
@@ -6724,7 +6898,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Knoblauch",
@@ -6746,7 +6921,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Passierte Tomaten",
@@ -6768,7 +6944,8 @@
      },
      "anpassbar": false,
      "min": 1000,
-     "max": 1000
+     "max": 1000,
+     "eur": 1.38
     },
     {
      "n": "Tomatenmark",
@@ -6790,7 +6967,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Milch 1,5 %",
@@ -6812,7 +6990,8 @@
      },
      "anpassbar": true,
      "min": 350,
-     "max": 1120
+     "max": 1120,
+     "eur": 0.76
     },
     {
      "n": "Parmesan",
@@ -6834,7 +7013,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 1.0
     },
     {
      "n": "Butter",
@@ -6856,7 +7036,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 0.44
     },
     {
      "n": "Weizenmehl",
@@ -6878,7 +7059,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 0.03
     },
     {
      "n": "Öl, neutral",
@@ -6900,7 +7082,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Rinderbrühe",
@@ -6922,7 +7105,8 @@
      },
      "anpassbar": false,
      "min": 200.0,
-     "max": 200.0
+     "max": 200.0,
+     "eur": 0.07
     }
    ],
    "spices": [
@@ -7300,6 +7484,10 @@
      1.0
     ]
    ],
+   "kosten": {
+    "gesamt": 16.85,
+    "box": 2.11
+   },
    "total": [
     3529.5,
     267.7,
@@ -7353,7 +7541,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 4.53
     },
     {
      "n": "Hähnchen-Oberkeulenfilet",
@@ -7375,7 +7564,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 4.58
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -7397,7 +7587,8 @@
      },
      "anpassbar": true,
      "min": 750,
-     "max": 2400
+     "max": 2400,
+     "eur": 1.49
     },
     {
      "n": "Paprika",
@@ -7419,7 +7610,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Zucchini",
@@ -7441,7 +7633,8 @@
      },
      "anpassbar": false,
      "min": 600,
-     "max": 600
+     "max": 600,
+     "eur": 1.58
     },
     {
      "n": "Rote Zwiebeln",
@@ -7463,7 +7656,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.45
     },
     {
      "n": "Knoblauch",
@@ -7485,7 +7679,8 @@
      },
      "anpassbar": false,
      "min": 32,
-     "max": 32
+     "max": 32,
+     "eur": 0.32
     },
     {
      "n": "Magerquark",
@@ -7507,7 +7702,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.49
     },
     {
      "n": "Zitrone",
@@ -7529,7 +7725,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.26
     },
     {
      "n": "TK-Kräuter",
@@ -7546,7 +7743,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": 0.99
     },
     {
      "n": "Olivenöl",
@@ -7568,7 +7766,8 @@
      },
      "anpassbar": true,
      "min": 35,
-     "max": 112
+     "max": 112,
+     "eur": 0.65
     },
     {
      "n": "Backpapier",
@@ -7585,7 +7784,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -7602,7 +7802,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -7935,6 +8136,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 18.07,
+    "box": 2.26
+   },
    "total": [
     3501.6,
     267.6,
@@ -7988,7 +8193,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Mie-Nudeln",
@@ -8010,7 +8216,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 1.29
     },
     {
      "n": "Paprika",
@@ -8032,7 +8239,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Möhren",
@@ -8054,7 +8262,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.3
     },
     {
      "n": "Spitzkohl",
@@ -8076,7 +8285,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 0.6
     },
     {
      "n": "Frühlingszwiebeln",
@@ -8098,7 +8308,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.99
     },
     {
      "n": "Erdnussbutter (creamy oder crunchy)",
@@ -8120,7 +8331,8 @@
      },
      "anpassbar": true,
      "min": 70,
-     "max": 224
+     "max": 224,
+     "eur": 1.0
     },
     {
      "n": "Limetten",
@@ -8142,7 +8354,8 @@
      },
      "anpassbar": false,
      "min": 60,
-     "max": 60
+     "max": 60,
+     "eur": 0.78
     },
     {
      "n": "Knoblauch",
@@ -8164,7 +8377,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -8186,7 +8400,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Sojasauce",
@@ -8208,7 +8423,8 @@
      },
      "anpassbar": false,
      "min": 100.0,
-     "max": 100.0
+     "max": 100.0,
+     "eur": 0.79
     },
     {
      "n": "Honig",
@@ -8230,7 +8446,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.32
     },
     {
      "n": "Öl, neutral",
@@ -8252,7 +8469,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.07
     },
     {
      "n": "Sriracha",
@@ -8269,7 +8487,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -8575,6 +8794,10 @@
      0.4
     ]
    ],
+   "kosten": {
+    "gesamt": 17.94,
+    "box": 2.24
+   },
    "total": [
     3497.8,
     277.2,
@@ -8628,7 +8851,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 8.99
     },
     {
      "n": "Champignons",
@@ -8650,7 +8874,8 @@
      },
      "anpassbar": false,
      "min": 800,
-     "max": 800
+     "max": 800,
+     "eur": 3.38
     },
     {
      "n": "Zwiebeln",
@@ -8672,7 +8897,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -8694,7 +8920,8 @@
      },
      "anpassbar": false,
      "min": 8,
-     "max": 8
+     "max": 8,
+     "eur": 0.08
     },
     {
      "n": "Kochsahne 15 %",
@@ -8716,7 +8943,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.58
     },
     {
      "n": "Schmand",
@@ -8738,7 +8966,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.79
     },
     {
      "n": "Basmatireis",
@@ -8760,7 +8989,8 @@
      },
      "anpassbar": true,
      "min": 165,
-     "max": 528
+     "max": 528,
+     "eur": 0.76
     },
     {
      "n": "Hühner- oder Gemüsebrühe",
@@ -8782,7 +9012,8 @@
      },
      "anpassbar": false,
      "min": 300.0,
-     "max": 300.0
+     "max": 300.0,
+     "eur": 0.1
     },
     {
      "n": "Senf, mittelscharf",
@@ -8804,7 +9035,8 @@
      },
      "anpassbar": false,
      "min": 15.0,
-     "max": 15.0
+     "max": 15.0,
+     "eur": 0.05
     },
     {
      "n": "Speisestärke",
@@ -8826,7 +9058,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Öl, neutral",
@@ -8848,7 +9081,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Petersilie, frisch",
@@ -8865,7 +9099,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -9175,6 +9410,10 @@
      0.7
     ]
    ],
+   "kosten": {
+    "gesamt": 16.11,
+    "box": 2.01
+   },
    "total": [
     3542.6,
     264.0,
@@ -9228,7 +9467,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -9250,7 +9490,8 @@
      },
      "anpassbar": true,
      "min": 725,
-     "max": 2320
+     "max": 2320,
+     "eur": 1.44
     },
     {
      "n": "Paprika",
@@ -9272,7 +9513,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Zwiebeln",
@@ -9294,7 +9536,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.39
     },
     {
      "n": "Knoblauch",
@@ -9316,7 +9559,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.2
     },
     {
      "n": "Ajvar, mild",
@@ -9338,7 +9582,8 @@
      },
      "anpassbar": false,
      "min": 350,
-     "max": 350
+     "max": 350,
+     "eur": 1.99
     },
     {
      "n": "Feta",
@@ -9360,7 +9605,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 1.85
     },
     {
      "n": "Skyr natur",
@@ -9382,7 +9628,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.65
     },
     {
      "n": "Zitrone",
@@ -9404,7 +9651,8 @@
      },
      "anpassbar": false,
      "min": 15,
-     "max": 15
+     "max": 15,
+     "eur": 0.2
     },
     {
      "n": "Öl, neutral",
@@ -9426,7 +9674,8 @@
      },
      "anpassbar": true,
      "min": 8,
-     "max": 24
+     "max": 24,
+     "eur": 0.04
     },
     {
      "n": "Gemüsebrühe",
@@ -9448,7 +9697,8 @@
      },
      "anpassbar": false,
      "min": 300.0,
-     "max": 300.0
+     "max": 300.0,
+     "eur": 0.1
     },
     {
      "n": "Petersilie, frisch",
@@ -9465,7 +9715,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -9482,7 +9733,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -9821,6 +10073,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 20.51,
+    "box": 2.56
+   },
    "total": [
     3556.5,
     276.0,
@@ -9874,7 +10130,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Gnocchi (Kühlregal)",
@@ -9896,7 +10153,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 2.38
     },
     {
      "n": "Kirschtomaten",
@@ -9918,7 +10176,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 1.99
     },
     {
      "n": "Babyspinat",
@@ -9940,7 +10199,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 2.06
     },
     {
      "n": "Zwiebel",
@@ -9962,7 +10222,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.13
     },
     {
      "n": "Knoblauch",
@@ -9984,7 +10245,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Passierte Tomaten",
@@ -10006,7 +10268,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 0.69
     },
     {
      "n": "Frischkäse leicht",
@@ -10028,7 +10291,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 1.19
     },
     {
      "n": "Kochsahne 15 %",
@@ -10050,7 +10314,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.79
     },
     {
      "n": "Parmesan",
@@ -10072,7 +10337,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 1.0
     },
     {
      "n": "Olivenöl",
@@ -10094,7 +10360,8 @@
      },
      "anpassbar": true,
      "min": 18,
-     "max": 56
+     "max": 56,
+     "eur": 0.33
     },
     {
      "n": "Gemüsebrühe (Pulver)",
@@ -10111,7 +10378,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Basilikum, frisch",
@@ -10128,7 +10396,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -10434,6 +10703,10 @@
      0.7
     ]
    ],
+   "kosten": {
+    "gesamt": 19.84,
+    "box": 2.48
+   },
    "total": [
     3522.0,
     269.0,
@@ -10487,7 +10760,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 11.32
     },
     {
      "n": "Süßkartoffel",
@@ -10509,7 +10783,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 1.15
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -10531,7 +10806,8 @@
      },
      "anpassbar": true,
      "min": 110,
-     "max": 352
+     "max": 352,
+     "eur": 0.5
     },
     {
      "n": "Kokosmilch",
@@ -10553,7 +10829,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.19
     },
     {
      "n": "Babyspinat",
@@ -10575,7 +10852,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 2.58
     },
     {
      "n": "Zwiebeln",
@@ -10597,7 +10875,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -10619,7 +10898,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -10641,7 +10921,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Limette",
@@ -10663,7 +10944,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Öl, neutral",
@@ -10685,7 +10967,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.07
     },
     {
      "n": "Hühnerbrühe",
@@ -10707,7 +10990,8 @@
      },
      "anpassbar": false,
      "min": 300.0,
-     "max": 300.0
+     "max": 300.0,
+     "eur": 0.1
     }
    ],
    "spices": [
@@ -11035,6 +11319,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 18.03,
+    "box": 2.25
+   },
    "total": [
     3500.8,
     276.1,
@@ -11088,7 +11376,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 9.15
     },
     {
      "n": "Bulgur",
@@ -11110,7 +11399,8 @@
      },
      "anpassbar": true,
      "min": 180,
-     "max": 576
+     "max": 576,
+     "eur": 0.93
     },
     {
      "n": "Tomaten",
@@ -11132,7 +11422,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 1.0
     },
     {
      "n": "Salatgurke",
@@ -11154,7 +11445,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Rote Zwiebeln",
@@ -11176,7 +11468,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.15
     },
     {
      "n": "Knoblauch",
@@ -11198,7 +11491,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Zitrone",
@@ -11220,7 +11514,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Skyr natur",
@@ -11242,7 +11537,8 @@
      },
      "anpassbar": true,
      "min": 150,
-     "max": 480
+     "max": 480,
+     "eur": 0.77
     },
     {
      "n": "Joghurt 1,5 %",
@@ -11264,7 +11560,8 @@
      },
      "anpassbar": true,
      "min": 75,
-     "max": 240
+     "max": 240,
+     "eur": 0.3
     },
     {
      "n": "Olivenöl",
@@ -11286,7 +11583,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.28
     },
     {
      "n": "Gemüsebrühe",
@@ -11308,7 +11606,8 @@
      },
      "anpassbar": false,
      "min": 600.0,
-     "max": 600.0
+     "max": 600.0,
+     "eur": 0.21
     },
     {
      "n": "Petersilie, frisch",
@@ -11325,7 +11624,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Backpapier",
@@ -11342,7 +11642,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -11359,7 +11660,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -11723,6 +12025,10 @@
      3.0
     ]
    ],
+   "kosten": {
+    "gesamt": 14.38,
+    "box": 1.8
+   },
    "total": [
     3537.4,
     281.5,
@@ -11776,7 +12082,8 @@
      },
      "anpassbar": true,
      "min": 600,
-     "max": 1920
+     "max": 1920,
+     "eur": 10.98
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -11798,7 +12105,8 @@
      },
      "anpassbar": true,
      "min": 135,
-     "max": 432
+     "max": 432,
+     "eur": 0.62
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -11820,7 +12128,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Staudensellerie",
@@ -11842,7 +12151,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.37
     },
     {
      "n": "Zwiebeln",
@@ -11864,7 +12174,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -11886,7 +12197,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Stückige Tomaten",
@@ -11908,7 +12220,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 0.69
     },
     {
      "n": "Kidneybohnen",
@@ -11930,7 +12243,8 @@
      },
      "anpassbar": false,
      "min": 255,
-     "max": 255
+     "max": 255,
+     "eur": 0.69
     },
     {
      "n": "Tomatenmark",
@@ -11952,7 +12266,8 @@
      },
      "anpassbar": false,
      "min": 35,
-     "max": 35
+     "max": 35,
+     "eur": 0.12
     },
     {
      "n": "Öl, neutral",
@@ -11974,7 +12289,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Hühnerbrühe",
@@ -11996,7 +12312,8 @@
      },
      "anpassbar": false,
      "min": 700.0,
-     "max": 700.0
+     "max": 700.0,
+     "eur": 0.24
     }
    ],
    "spices": [
@@ -12329,6 +12646,10 @@
      3.0
     ]
    ],
+   "kosten": {
+    "gesamt": 16.97,
+    "box": 2.12
+   },
    "total": [
     3598.9,
     284.6,
@@ -12382,7 +12703,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 10.19
     },
     {
      "n": "Basmatireis",
@@ -12404,7 +12726,8 @@
      },
      "anpassbar": true,
      "min": 130,
-     "max": 416
+     "max": 416,
+     "eur": 0.6
     },
     {
      "n": "TK-Erbsen",
@@ -12426,7 +12749,8 @@
      },
      "anpassbar": true,
      "min": 150,
-     "max": 480
+     "max": 480,
+     "eur": 0.79
     },
     {
      "n": "Möhren",
@@ -12448,7 +12772,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.3
     },
     {
      "n": "Champignons",
@@ -12470,7 +12795,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 1.69
     },
     {
      "n": "Zwiebeln",
@@ -12492,7 +12818,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.19
     },
     {
      "n": "Kochsahne 15 %",
@@ -12514,7 +12841,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.99
     },
     {
      "n": "Zitrone",
@@ -12536,7 +12864,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Butter",
@@ -12558,7 +12887,8 @@
      },
      "anpassbar": true,
      "min": 40,
-     "max": 128
+     "max": 128,
+     "eur": 0.7
     },
     {
      "n": "Weizenmehl",
@@ -12580,7 +12910,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.03
     },
     {
      "n": "Hühnerbrühe",
@@ -12602,7 +12933,8 @@
      },
      "anpassbar": false,
      "min": 800.0,
-     "max": 800.0
+     "max": 800.0,
+     "eur": 0.28
     },
     {
      "n": "Petersilie, frisch",
@@ -12619,7 +12951,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -12934,6 +13267,10 @@
      1.2
     ]
    ],
+   "kosten": {
+    "gesamt": 16.26,
+    "box": 2.03
+   },
    "total": [
     3541.0,
     275.4,
@@ -12987,7 +13324,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -13009,7 +13347,8 @@
      },
      "anpassbar": true,
      "min": 140,
-     "max": 448
+     "max": 448,
+     "eur": 0.64
     },
     {
      "n": "Erdnüsse, geröstet, ungesalzen",
@@ -13031,7 +13370,8 @@
      },
      "anpassbar": true,
      "min": 70,
-     "max": 224
+     "max": 224,
+     "eur": 1.04
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -13053,7 +13393,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Zucchini",
@@ -13075,7 +13416,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Frühlingszwiebeln",
@@ -13097,7 +13439,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.99
     },
     {
      "n": "Knoblauch",
@@ -13119,7 +13462,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -13141,7 +13485,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Sojasauce",
@@ -13163,7 +13508,8 @@
      },
      "anpassbar": false,
      "min": 90.0,
-     "max": 90.0
+     "max": 90.0,
+     "eur": 0.71
     },
     {
      "n": "Honig",
@@ -13185,7 +13531,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.24
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -13202,7 +13549,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Speisestärke",
@@ -13224,7 +13572,8 @@
      },
      "anpassbar": true,
      "min": 8,
-     "max": 24
+     "max": 24,
+     "eur": 0.04
     },
     {
      "n": "Öl, neutral",
@@ -13246,7 +13595,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.1
     }
    ],
    "spices": [
@@ -13554,6 +13904,10 @@
      0.6
     ]
    ],
+   "kosten": {
+    "gesamt": 16.39,
+    "box": 2.05
+   },
    "total": [
     3530.7,
     264.2,
@@ -13607,7 +13961,8 @@
      },
      "anpassbar": true,
      "min": 300,
-     "max": 960
+     "max": 960,
+     "eur": 5.49
     },
     {
      "n": "Hähnchenbrustfilet",
@@ -13629,7 +13984,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 4.53
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -13651,7 +14007,8 @@
      },
      "anpassbar": true,
      "min": 800,
-     "max": 2560
+     "max": 2560,
+     "eur": 1.59
     },
     {
      "n": "Brokkoli",
@@ -13673,7 +14030,8 @@
      },
      "anpassbar": false,
      "min": 800,
-     "max": 800
+     "max": 800,
+     "eur": 1.9
     },
     {
      "n": "Knoblauch",
@@ -13695,7 +14053,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Zitrone",
@@ -13717,7 +14076,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.26
     },
     {
      "n": "Senf, mittelscharf",
@@ -13739,7 +14099,8 @@
      },
      "anpassbar": false,
      "min": 60.0,
-     "max": 60.0
+     "max": 60.0,
+     "eur": 0.19
     },
     {
      "n": "Honig",
@@ -13761,7 +14122,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.32
     },
     {
      "n": "Olivenöl",
@@ -13783,7 +14145,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.56
     },
     {
      "n": "Backpapier",
@@ -13800,7 +14163,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -14085,6 +14449,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 15.14,
+    "box": 1.89
+   },
    "total": [
     3516.9,
     266.8,
@@ -14138,7 +14506,8 @@
      },
      "anpassbar": true,
      "min": 350,
-     "max": 1120
+     "max": 1120,
+     "eur": 7.92
     },
     {
      "n": "Penne",
@@ -14160,7 +14529,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 0.79
     },
     {
      "n": "Pesto Genovese",
@@ -14182,7 +14552,8 @@
      },
      "anpassbar": true,
      "min": 60,
-     "max": 192
+     "max": 192,
+     "eur": 0.88
     },
     {
      "n": "Mozzarella light",
@@ -14204,7 +14575,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 1.78
     },
     {
      "n": "Kirschtomaten",
@@ -14226,7 +14598,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 1.99
     },
     {
      "n": "Babyspinat",
@@ -14248,7 +14621,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 1.03
     },
     {
      "n": "Zitrone",
@@ -14270,7 +14644,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.26
     },
     {
      "n": "Olivenöl",
@@ -14292,7 +14667,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.28
     },
     {
      "n": "Basilikum, frisch",
@@ -14309,7 +14685,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -14569,6 +14946,10 @@
      0.6
     ]
    ],
+   "kosten": {
+    "gesamt": 14.99,
+    "box": 1.87
+   },
    "total": [
     3520.0,
     271.9,
@@ -14622,7 +15003,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -14644,7 +15026,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.46
     },
     {
      "n": "Cashewkerne",
@@ -14666,7 +15049,8 @@
      },
      "anpassbar": true,
      "min": 80,
-     "max": 256
+     "max": 256,
+     "eur": 2.39
     },
     {
      "n": "Sweet-Chili-Sauce",
@@ -14688,7 +15072,8 @@
      },
      "anpassbar": true,
      "min": 60,
-     "max": 192
+     "max": 192,
+     "eur": 0.77
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -14710,7 +15095,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Brokkoli",
@@ -14732,7 +15118,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 1.19
     },
     {
      "n": "Möhren",
@@ -14754,7 +15141,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.2
     },
     {
      "n": "Knoblauch",
@@ -14776,7 +15164,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Ingwer",
@@ -14798,7 +15187,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Limette",
@@ -14820,7 +15210,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Sojasauce",
@@ -14842,7 +15233,8 @@
      },
      "anpassbar": false,
      "min": 60.0,
-     "max": 60.0
+     "max": 60.0,
+     "eur": 0.48
     },
     {
      "n": "Öl, neutral",
@@ -14864,7 +15256,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.07
     }
    ],
    "spices": [
@@ -15165,6 +15558,10 @@
      0.6
     ]
    ],
+   "kosten": {
+    "gesamt": 17.74,
+    "box": 2.22
+   },
    "total": [
     3493.8,
     261.6,
@@ -15218,7 +15615,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Couscous",
@@ -15240,7 +15638,8 @@
      },
      "anpassbar": true,
      "min": 180,
-     "max": 576
+     "max": 576,
+     "eur": 1.07
     },
     {
      "n": "Feta",
@@ -15262,7 +15661,8 @@
      },
      "anpassbar": true,
      "min": 75,
-     "max": 240
+     "max": 240,
+     "eur": 1.39
     },
     {
      "n": "Zucchini",
@@ -15284,7 +15684,8 @@
      },
      "anpassbar": false,
      "min": 600,
-     "max": 600
+     "max": 600,
+     "eur": 1.58
     },
     {
      "n": "Paprika",
@@ -15306,7 +15707,8 @@
      },
      "anpassbar": false,
      "min": 320,
-     "max": 320
+     "max": 320,
+     "eur": 1.66
     },
     {
      "n": "Rote Zwiebeln",
@@ -15328,7 +15730,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.3
     },
     {
      "n": "Knoblauch",
@@ -15350,7 +15753,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Zitrone",
@@ -15372,7 +15776,8 @@
      },
      "anpassbar": false,
      "min": 40,
-     "max": 40
+     "max": 40,
+     "eur": 0.52
     },
     {
      "n": "Schwarze Oliven, entsteint",
@@ -15394,7 +15799,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.46
     },
     {
      "n": "Olivenöl",
@@ -15416,7 +15822,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.56
     },
     {
      "n": "Gemüsebrühe",
@@ -15438,7 +15845,8 @@
      },
      "anpassbar": false,
      "min": 450.0,
-     "max": 450.0
+     "max": 450.0,
+     "eur": 0.16
     },
     {
      "n": "Petersilie, frisch",
@@ -15455,7 +15863,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Backpapier",
@@ -15472,7 +15881,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -15799,6 +16209,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 17.08,
+    "box": 2.14
+   },
    "total": [
     3552.4,
     271.9,
@@ -15852,7 +16266,8 @@
      },
      "anpassbar": true,
      "min": 600,
-     "max": 1920
+     "max": 1920,
+     "eur": 10.98
     },
     {
      "n": "Basmatireis",
@@ -15874,7 +16289,8 @@
      },
      "anpassbar": true,
      "min": 150,
-     "max": 480
+     "max": 480,
+     "eur": 0.69
     },
     {
      "n": "Zwiebeln",
@@ -15896,7 +16312,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.39
     },
     {
      "n": "Tomaten",
@@ -15918,7 +16335,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.75
     },
     {
      "n": "Joghurt 1,5 %",
@@ -15940,7 +16358,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.4
     },
     {
      "n": "TK-Erbsen",
@@ -15962,7 +16381,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.53
     },
     {
      "n": "Knoblauch",
@@ -15984,7 +16404,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -16006,7 +16427,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Zitrone",
@@ -16028,7 +16450,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.26
     },
     {
      "n": "Öl, neutral",
@@ -16050,7 +16473,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Butter",
@@ -16072,7 +16496,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.09
     },
     {
      "n": "Koriander, frisch",
@@ -16089,7 +16514,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -16434,6 +16860,10 @@
      3.0
     ]
    ],
+   "kosten": {
+    "gesamt": 14.63,
+    "box": 1.83
+   },
    "total": [
     3505.9,
     278.8,
@@ -16487,7 +16917,8 @@
      },
      "anpassbar": true,
      "min": 300,
-     "max": 960
+     "max": 960,
+     "eur": 6.79
     },
     {
      "n": "Weizentortillas",
@@ -16509,7 +16940,8 @@
      },
      "anpassbar": true,
      "min": 160,
-     "max": 512
+     "max": 512,
+     "eur": 1.29
     },
     {
      "n": "Mais",
@@ -16531,7 +16963,8 @@
      },
      "anpassbar": false,
      "min": 570,
-     "max": 570
+     "max": 570,
+     "eur": 1.58
     },
     {
      "n": "Schwarze Bohnen",
@@ -16553,7 +16986,8 @@
      },
      "anpassbar": false,
      "min": 240,
-     "max": 240
+     "max": 240,
+     "eur": 0.89
     },
     {
      "n": "Cheddar",
@@ -16575,7 +17009,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 2.19
     },
     {
      "n": "Paprika",
@@ -16597,7 +17032,8 @@
      },
      "anpassbar": false,
      "min": 320,
-     "max": 320
+     "max": 320,
+     "eur": 1.66
     },
     {
      "n": "Zwiebeln",
@@ -16619,7 +17055,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.19
     },
     {
      "n": "Knoblauch",
@@ -16641,7 +17078,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Passierte Tomaten",
@@ -16663,7 +17101,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 0.69
     },
     {
      "n": "Tomatenmark",
@@ -16685,7 +17124,8 @@
      },
      "anpassbar": false,
      "min": 35,
-     "max": 35
+     "max": 35,
+     "eur": 0.12
     },
     {
      "n": "Öl, neutral",
@@ -16707,7 +17147,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Koriander, frisch",
@@ -16724,7 +17165,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -17059,6 +17501,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 15.79,
+    "box": 1.97
+   },
    "total": [
     3599.5,
     262.3,
@@ -17112,7 +17558,8 @@
      },
      "anpassbar": true,
      "min": 600,
-     "max": 1920
+     "max": 1920,
+     "eur": 10.98
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -17134,7 +17581,8 @@
      },
      "anpassbar": true,
      "min": 140,
-     "max": 448
+     "max": 448,
+     "eur": 0.64
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -17156,7 +17604,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Zwiebeln",
@@ -17178,7 +17627,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.39
     },
     {
      "n": "Knoblauch",
@@ -17200,7 +17650,8 @@
      },
      "anpassbar": false,
      "min": 8,
-     "max": 8
+     "max": 8,
+     "eur": 0.08
     },
     {
      "n": "Ketchup",
@@ -17222,7 +17673,8 @@
      },
      "anpassbar": true,
      "min": 75,
-     "max": 240
+     "max": 240,
+     "eur": 0.39
     },
     {
      "n": "Tomatenmark",
@@ -17244,7 +17696,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Öl, neutral",
@@ -17266,7 +17719,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Zucker",
@@ -17288,7 +17742,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.01
     },
     {
      "n": "Hühnerbrühe",
@@ -17310,7 +17765,8 @@
      },
      "anpassbar": false,
      "min": 400.0,
-     "max": 400.0
+     "max": 400.0,
+     "eur": 0.14
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -17327,7 +17783,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -17640,6 +18097,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 15.65,
+    "box": 1.96
+   },
    "total": [
     3496.3,
     263.7,
@@ -17693,7 +18154,8 @@
      },
      "anpassbar": true,
      "min": 300,
-     "max": 960
+     "max": 960,
+     "eur": 5.49
     },
     {
      "n": "Hähnchenbrustfilet",
@@ -17715,7 +18177,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 4.53
     },
     {
      "n": "Bandnudeln",
@@ -17737,7 +18200,8 @@
      },
      "anpassbar": true,
      "min": 170,
-     "max": 544
+     "max": 544,
+     "eur": 0.81
     },
     {
      "n": "Rote Paprika",
@@ -17759,7 +18223,8 @@
      },
      "anpassbar": false,
      "min": 640,
-     "max": 640
+     "max": 640,
+     "eur": 3.32
     },
     {
      "n": "Zwiebeln",
@@ -17781,7 +18246,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -17803,7 +18269,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Tomatenmark",
@@ -17825,7 +18292,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Schmand",
@@ -17847,7 +18315,8 @@
      },
      "anpassbar": true,
      "min": 75,
-     "max": 240
+     "max": 240,
+     "eur": 0.59
     },
     {
      "n": "Öl, neutral",
@@ -17869,7 +18338,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Speisestärke",
@@ -17891,7 +18361,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Hühnerbrühe",
@@ -17913,7 +18384,8 @@
      },
      "anpassbar": false,
      "min": 500.0,
-     "max": 500.0
+     "max": 500.0,
+     "eur": 0.17
     }
    ],
    "spices": [
@@ -18254,6 +18726,10 @@
      3.0
     ]
    ],
+   "kosten": {
+    "gesamt": 15.91,
+    "box": 1.99
+   },
    "total": [
     3515.5,
     267.5,
@@ -18307,7 +18783,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 9.15
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -18329,7 +18806,8 @@
      },
      "anpassbar": true,
      "min": 170,
-     "max": 544
+     "max": 544,
+     "eur": 0.78
     },
     {
      "n": "Eier",
@@ -18351,7 +18829,8 @@
      },
      "anpassbar": true,
      "min": 90,
-     "max": 288
+     "max": 288,
+     "eur": 0.75
     },
     {
      "n": "TK-Erbsen",
@@ -18373,7 +18852,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.66
     },
     {
      "n": "Möhren",
@@ -18395,7 +18875,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.2
     },
     {
      "n": "Frühlingszwiebeln",
@@ -18417,7 +18898,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.99
     },
     {
      "n": "Knoblauch",
@@ -18439,7 +18921,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Ingwer",
@@ -18461,7 +18944,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Sojasauce",
@@ -18483,7 +18967,8 @@
      },
      "anpassbar": false,
      "min": 90.0,
-     "max": 90.0
+     "max": 90.0,
+     "eur": 0.71
     },
     {
      "n": "Öl, neutral",
@@ -18505,7 +18990,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Sesamöl",
@@ -18527,7 +19013,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.12
     }
    ],
    "spices": [
@@ -18828,6 +19315,10 @@
      0.6
     ]
    ],
+   "kosten": {
+    "gesamt": 13.63,
+    "box": 1.7
+   },
    "total": [
     3493.4,
     264.1,
@@ -18881,7 +19372,8 @@
      },
      "anpassbar": true,
      "min": 300,
-     "max": 960
+     "max": 960,
+     "eur": 5.49
     },
     {
      "n": "Hähnchenbrustfilet",
@@ -18903,7 +19395,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 4.53
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -18925,7 +19418,8 @@
      },
      "anpassbar": true,
      "min": 700,
-     "max": 2240
+     "max": 2240,
+     "eur": 1.39
     },
     {
      "n": "Lauch",
@@ -18947,7 +19441,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 2.98
     },
     {
      "n": "Möhren",
@@ -18969,7 +19464,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 0.4
     },
     {
      "n": "Staudensellerie",
@@ -18991,7 +19487,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.37
     },
     {
      "n": "Zwiebeln",
@@ -19013,7 +19510,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.19
     },
     {
      "n": "Knoblauch",
@@ -19035,7 +19533,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "TK-Erbsen",
@@ -19057,7 +19556,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.53
     },
     {
      "n": "Kochsahne 15 %",
@@ -19079,7 +19579,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.79
     },
     {
      "n": "Öl, neutral",
@@ -19101,7 +19602,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.07
     },
     {
      "n": "Hühnerbrühe",
@@ -19123,7 +19625,8 @@
      },
      "anpassbar": false,
      "min": 1500.0,
-     "max": 1500.0
+     "max": 1500.0,
+     "eur": 0.53
     },
     {
      "n": "Petersilie, frisch",
@@ -19140,7 +19643,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -19479,6 +19983,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 17.57,
+    "box": 2.2
+   },
    "total": [
     3544.4,
     271.0,
@@ -19532,7 +20040,8 @@
      },
      "anpassbar": true,
      "min": 350,
-     "max": 1120
+     "max": 1120,
+     "eur": 7.92
     },
     {
      "n": "Spaghetti",
@@ -19554,7 +20063,8 @@
      },
      "anpassbar": true,
      "min": 190,
-     "max": 608
+     "max": 608,
+     "eur": 0.75
     },
     {
      "n": "Brokkoli",
@@ -19576,7 +20086,8 @@
      },
      "anpassbar": false,
      "min": 800,
-     "max": 800
+     "max": 800,
+     "eur": 1.9
     },
     {
      "n": "Kochsahne 15 %",
@@ -19598,7 +20109,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.99
     },
     {
      "n": "Parmesan",
@@ -19620,7 +20132,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 1.19
     },
     {
      "n": "Zitronen",
@@ -19642,7 +20155,8 @@
      },
      "anpassbar": false,
      "min": 60,
-     "max": 60
+     "max": 60,
+     "eur": 0.78
     },
     {
      "n": "Zwiebeln",
@@ -19664,7 +20178,8 @@
      },
      "anpassbar": false,
      "min": 100,
-     "max": 100
+     "max": 100,
+     "eur": 0.13
     },
     {
      "n": "Knoblauch",
@@ -19686,7 +20201,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Olivenöl",
@@ -19708,7 +20224,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.28
     },
     {
      "n": "Butter",
@@ -19730,7 +20247,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.18
     },
     {
      "n": "Gemüsebrühe",
@@ -19752,7 +20270,8 @@
      },
      "anpassbar": false,
      "min": 300.0,
-     "max": 300.0
+     "max": 300.0,
+     "eur": 0.1
     },
     {
      "n": "Basilikum, frisch",
@@ -19769,7 +20288,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -20072,6 +20592,10 @@
      1.2
     ]
    ],
+   "kosten": {
+    "gesamt": 14.47,
+    "box": 1.81
+   },
    "total": [
     3530.9,
     263.5,
@@ -20125,7 +20649,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Basmatireis",
@@ -20147,7 +20672,8 @@
      },
      "anpassbar": true,
      "min": 120,
-     "max": 384
+     "max": 384,
+     "eur": 0.55
     },
     {
      "n": "Kichererbsen",
@@ -20169,7 +20695,8 @@
      },
      "anpassbar": true,
      "min": 240,
-     "max": 768
+     "max": 768,
+     "eur": 1.38
     },
     {
      "n": "Kokosmilch",
@@ -20191,7 +20718,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.19
     },
     {
      "n": "Stückige Tomaten",
@@ -20213,7 +20741,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 0.69
     },
     {
      "n": "Babyspinat",
@@ -20235,7 +20764,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 2.58
     },
     {
      "n": "Zwiebeln",
@@ -20257,7 +20787,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -20279,7 +20810,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -20301,7 +20833,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Limette",
@@ -20323,7 +20856,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Öl, neutral",
@@ -20345,7 +20879,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Koriander, frisch",
@@ -20362,7 +20897,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -20696,6 +21232,10 @@
      3.0
     ]
    ],
+   "kosten": {
+    "gesamt": 16.67,
+    "box": 2.08
+   },
    "total": [
     3506.8,
     261.3,
@@ -20749,7 +21289,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Süßkartoffeln",
@@ -20771,7 +21312,8 @@
      },
      "anpassbar": true,
      "min": 650,
-     "max": 2080
+     "max": 2080,
+     "eur": 2.98
     },
     {
      "n": "Feta",
@@ -20793,7 +21335,8 @@
      },
      "anpassbar": true,
      "min": 150,
-     "max": 480
+     "max": 480,
+     "eur": 2.78
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -20815,7 +21358,8 @@
      },
      "anpassbar": false,
      "min": 480,
-     "max": 480
+     "max": 480,
+     "eur": 2.49
     },
     {
      "n": "Rote Zwiebeln",
@@ -20837,7 +21381,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.3
     },
     {
      "n": "Babyspinat",
@@ -20859,7 +21404,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 1.55
     },
     {
      "n": "Knoblauch",
@@ -20881,7 +21427,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Zitrone",
@@ -20903,7 +21450,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.26
     },
     {
      "n": "Olivenöl",
@@ -20925,7 +21473,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.37
     },
     {
      "n": "Backpapier",
@@ -20942,7 +21491,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -21240,6 +21790,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 20.14,
+    "box": 2.52
+   },
    "total": [
     3461.8,
     270.7,
@@ -21293,7 +21847,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 16.85
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -21315,7 +21870,8 @@
      },
      "anpassbar": true,
      "min": 140,
-     "max": 448
+     "max": 448,
+     "eur": 0.64
     },
     {
      "n": "Brokkoli",
@@ -21337,7 +21893,8 @@
      },
      "anpassbar": false,
      "min": 900,
-     "max": 900
+     "max": 900,
+     "eur": 2.14
     },
     {
      "n": "Cashewkerne",
@@ -21359,7 +21916,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.9
     },
     {
      "n": "Sesam",
@@ -21381,7 +21939,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -21403,7 +21962,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -21425,7 +21985,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Sojasauce",
@@ -21447,7 +22008,8 @@
      },
      "anpassbar": false,
      "min": 90.0,
-     "max": 90.0
+     "max": 90.0,
+     "eur": 0.71
     },
     {
      "n": "Honig",
@@ -21469,7 +22031,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.24
     },
     {
      "n": "Speisestärke",
@@ -21491,7 +22054,8 @@
      },
      "anpassbar": true,
      "min": 8,
-     "max": 24
+     "max": 24,
+     "eur": 0.04
     },
     {
      "n": "Öl, neutral",
@@ -21513,7 +22077,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.1
     },
     {
      "n": "Sesamöl",
@@ -21535,7 +22100,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.12
     },
     {
      "n": "Rinderbrühe",
@@ -21557,7 +22123,8 @@
      },
      "anpassbar": false,
      "min": 200.0,
-     "max": 200.0
+     "max": 200.0,
+     "eur": 0.07
     }
    ],
    "spices": [
@@ -21871,6 +22438,10 @@
      0.6
     ]
    ],
+   "kosten": {
+    "gesamt": 22.36,
+    "box": 2.79
+   },
    "total": [
     3576.3,
     269.2,
@@ -21924,7 +22495,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 12.35
     },
     {
      "n": "Kartoffeln, mehligkochend",
@@ -21946,7 +22518,8 @@
      },
      "anpassbar": true,
      "min": 600,
-     "max": 1920
+     "max": 1920,
+     "eur": 1.2
     },
     {
      "n": "TK-Erbsen",
@@ -21968,7 +22541,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.06
     },
     {
      "n": "Zwiebeln",
@@ -21990,7 +22564,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.19
     },
     {
      "n": "Eier",
@@ -22012,7 +22587,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.25
     },
     {
      "n": "Semmelbrösel",
@@ -22034,7 +22610,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.12
     },
     {
      "n": "Milch 1,5 %",
@@ -22056,7 +22633,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.27
     },
     {
      "n": "Kochsahne 15 %",
@@ -22078,7 +22656,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.79
     },
     {
      "n": "Butter",
@@ -22100,7 +22679,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.35
     },
     {
      "n": "Speisestärke",
@@ -22122,7 +22702,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Rinderbrühe",
@@ -22144,7 +22725,8 @@
      },
      "anpassbar": false,
      "min": 500.0,
-     "max": 500.0
+     "max": 500.0,
+     "eur": 0.17
     },
     {
      "n": "Sojasauce",
@@ -22161,7 +22743,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -22481,6 +23064,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 16.96,
+    "box": 2.12
+   },
    "total": [
     3517.4,
     268.8,
@@ -22534,7 +23121,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 12.35
     },
     {
      "n": "Kartoffeln, mehligkochend",
@@ -22556,7 +23144,8 @@
      },
      "anpassbar": true,
      "min": 750,
-     "max": 2400
+     "max": 2400,
+     "eur": 1.49
     },
     {
      "n": "Cheddar",
@@ -22578,7 +23167,8 @@
      },
      "anpassbar": true,
      "min": 50,
-     "max": 160
+     "max": 160,
+     "eur": 1.09
     },
     {
      "n": "Möhren",
@@ -22600,7 +23190,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.3
     },
     {
      "n": "Staudensellerie",
@@ -22622,7 +23213,8 @@
      },
      "anpassbar": false,
      "min": 75,
-     "max": 75
+     "max": 75,
+     "eur": 0.19
     },
     {
      "n": "Zwiebeln",
@@ -22644,7 +23236,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -22666,7 +23259,8 @@
      },
      "anpassbar": false,
      "min": 8,
-     "max": 8
+     "max": 8,
+     "eur": 0.08
     },
     {
      "n": "TK-Erbsen",
@@ -22688,7 +23282,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.66
     },
     {
      "n": "Tomatenmark",
@@ -22710,7 +23305,8 @@
      },
      "anpassbar": false,
      "min": 35,
-     "max": 35
+     "max": 35,
+     "eur": 0.12
     },
     {
      "n": "Milch 1,5 %",
@@ -22732,7 +23328,8 @@
      },
      "anpassbar": true,
      "min": 75,
-     "max": 240
+     "max": 240,
+     "eur": 0.16
     },
     {
      "n": "Butter",
@@ -22754,7 +23351,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.18
     },
     {
      "n": "Öl, neutral",
@@ -22776,7 +23374,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Rinderbrühe",
@@ -22798,7 +23397,8 @@
      },
      "anpassbar": false,
      "min": 400.0,
-     "max": 400.0
+     "max": 400.0,
+     "eur": 0.14
     },
     {
      "n": "Sojasauce",
@@ -22815,7 +23415,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Weizenmehl",
@@ -22837,7 +23438,8 @@
      },
      "anpassbar": true,
      "min": 8,
-     "max": 24
+     "max": 24,
+     "eur": 0.01
     }
    ],
    "spices": [
@@ -23193,6 +23795,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 17.26,
+    "box": 2.16
+   },
    "total": [
     3576.8,
     274.9,
@@ -23246,7 +23852,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 12.35
     },
     {
      "n": "Aubergine",
@@ -23268,7 +23875,8 @@
      },
      "anpassbar": false,
      "min": 900,
-     "max": 900
+     "max": 900,
+     "eur": 2.97
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -23290,7 +23898,8 @@
      },
      "anpassbar": true,
      "min": 600,
-     "max": 1920
+     "max": 1920,
+     "eur": 1.2
     },
     {
      "n": "Stückige Tomaten",
@@ -23312,7 +23921,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 0.69
     },
     {
      "n": "Tomatenmark",
@@ -23334,7 +23944,8 @@
      },
      "anpassbar": false,
      "min": 35,
-     "max": 35
+     "max": 35,
+     "eur": 0.12
     },
     {
      "n": "Zwiebeln",
@@ -23356,7 +23967,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -23378,7 +23990,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Milch 1,5 %",
@@ -23400,7 +24013,8 @@
      },
      "anpassbar": true,
      "min": 250,
-     "max": 800
+     "max": 800,
+     "eur": 0.55
     },
     {
      "n": "Parmesan",
@@ -23422,7 +24036,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.6
     },
     {
      "n": "Weizenmehl",
@@ -23444,7 +24059,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.03
     },
     {
      "n": "Butter",
@@ -23466,7 +24082,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.18
     },
     {
      "n": "Olivenöl",
@@ -23488,7 +24105,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.37
     },
     {
      "n": "Backpapier",
@@ -23505,7 +24123,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -23860,6 +24479,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 19.6,
+    "box": 2.45
+   },
    "total": [
     3495.8,
     263.7,
@@ -23913,7 +24536,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -23935,7 +24559,8 @@
      },
      "anpassbar": true,
      "min": 120,
-     "max": 384
+     "max": 384,
+     "eur": 0.55
     },
     {
      "n": "Cheddar",
@@ -23957,7 +24582,8 @@
      },
      "anpassbar": true,
      "min": 70,
-     "max": 224
+     "max": 224,
+     "eur": 1.53
     },
     {
      "n": "Paprika",
@@ -23979,7 +24605,8 @@
      },
      "anpassbar": false,
      "min": 320,
-     "max": 320
+     "max": 320,
+     "eur": 1.66
     },
     {
      "n": "Mais",
@@ -24001,7 +24628,8 @@
      },
      "anpassbar": false,
      "min": 285,
-     "max": 285
+     "max": 285,
+     "eur": 0.79
     },
     {
      "n": "Kidneybohnen",
@@ -24023,7 +24651,8 @@
      },
      "anpassbar": false,
      "min": 255,
-     "max": 255
+     "max": 255,
+     "eur": 0.69
     },
     {
      "n": "Passierte Tomaten",
@@ -24045,7 +24674,8 @@
      },
      "anpassbar": false,
      "min": 500,
-     "max": 500
+     "max": 500,
+     "eur": 0.69
     },
     {
      "n": "Tomatenmark",
@@ -24067,7 +24697,8 @@
      },
      "anpassbar": false,
      "min": 35,
-     "max": 35
+     "max": 35,
+     "eur": 0.12
     },
     {
      "n": "Zwiebeln",
@@ -24089,7 +24720,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -24111,7 +24743,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Öl, neutral",
@@ -24133,7 +24766,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Rinderbrühe",
@@ -24155,7 +24789,8 @@
      },
      "anpassbar": false,
      "min": 500.0,
-     "max": 500.0
+     "max": 500.0,
+     "eur": 0.17
     },
     {
      "n": "Koriander, frisch",
@@ -24172,7 +24807,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -24499,6 +25135,10 @@
      3.0
     ]
    ],
+   "kosten": {
+    "gesamt": 17.92,
+    "box": 2.24
+   },
    "total": [
     3521.2,
     267.1,
@@ -24552,7 +25192,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 12.35
     },
     {
      "n": "Spaghetti",
@@ -24574,7 +25215,8 @@
      },
      "anpassbar": true,
      "min": 150,
-     "max": 480
+     "max": 480,
+     "eur": 0.59
     },
     {
      "n": "Passierte Tomaten",
@@ -24596,7 +25238,8 @@
      },
      "anpassbar": false,
      "min": 1000,
-     "max": 1000
+     "max": 1000,
+     "eur": 1.38
     },
     {
      "n": "Parmesan",
@@ -24618,7 +25261,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 1.0
     },
     {
      "n": "Zwiebeln",
@@ -24640,7 +25284,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -24662,7 +25307,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Eier",
@@ -24684,7 +25330,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.25
     },
     {
      "n": "Semmelbrösel",
@@ -24706,7 +25353,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.08
     },
     {
      "n": "Olivenöl",
@@ -24728,7 +25376,8 @@
      },
      "anpassbar": true,
      "min": 25,
-     "max": 80
+     "max": 80,
+     "eur": 0.47
     },
     {
      "n": "Zucker",
@@ -24750,7 +25399,8 @@
      },
      "anpassbar": true,
      "min": 2,
-     "max": 8
+     "max": 8,
+     "eur": 0.0
     },
     {
      "n": "Basilikum, frisch",
@@ -24767,7 +25417,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -25087,6 +25738,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 16.72,
+    "box": 2.09
+   },
    "total": [
     3526.8,
     273.6,
@@ -25140,7 +25795,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 13.73
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -25162,7 +25818,8 @@
      },
      "anpassbar": true,
      "min": 700,
-     "max": 2240
+     "max": 2240,
+     "eur": 1.39
     },
     {
      "n": "Weißkohl",
@@ -25184,7 +25841,8 @@
      },
      "anpassbar": false,
      "min": 1000,
-     "max": 1000
+     "max": 1000,
+     "eur": 1.29
     },
     {
      "n": "Möhren",
@@ -25206,7 +25864,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 0.25
     },
     {
      "n": "Zwiebeln",
@@ -25228,7 +25887,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -25250,7 +25910,8 @@
      },
      "anpassbar": false,
      "min": 8,
-     "max": 8
+     "max": 8,
+     "eur": 0.08
     },
     {
      "n": "Tomatenmark",
@@ -25272,7 +25933,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 0.24
     },
     {
      "n": "Schmand",
@@ -25294,7 +25956,8 @@
      },
      "anpassbar": true,
      "min": 75,
-     "max": 240
+     "max": 240,
+     "eur": 0.59
     },
     {
      "n": "Öl, neutral",
@@ -25316,7 +25979,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.07
     },
     {
      "n": "Rinderbrühe",
@@ -25338,7 +26002,8 @@
      },
      "anpassbar": false,
      "min": 500.0,
-     "max": 500.0
+     "max": 500.0,
+     "eur": 0.17
     }
    ],
    "spices": [
@@ -25625,6 +26290,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 18.26,
+    "box": 2.28
+   },
    "total": [
     3480.9,
     266.0,
@@ -25678,7 +26347,8 @@
      },
      "anpassbar": true,
      "min": 500,
-     "max": 1600
+     "max": 1600,
+     "eur": 13.73
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -25700,7 +26370,8 @@
      },
      "anpassbar": true,
      "min": 700,
-     "max": 2240
+     "max": 2240,
+     "eur": 1.39
     },
     {
      "n": "Joghurt 1,5 %",
@@ -25722,7 +26393,8 @@
      },
      "anpassbar": true,
      "min": 150,
-     "max": 480
+     "max": 480,
+     "eur": 0.59
     },
     {
      "n": "Salatgurke",
@@ -25744,7 +26416,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Gewürzgurken",
@@ -25766,7 +26439,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.54
     },
     {
      "n": "Zwiebeln",
@@ -25788,7 +26462,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 0.32
     },
     {
      "n": "Eier",
@@ -25810,7 +26485,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.25
     },
     {
      "n": "Semmelbrösel",
@@ -25832,7 +26508,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.12
     },
     {
      "n": "Senf, mittelscharf",
@@ -25854,7 +26531,8 @@
      },
      "anpassbar": false,
      "min": 30.0,
-     "max": 30.0
+     "max": 30.0,
+     "eur": 0.09
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -25876,7 +26554,8 @@
      },
      "anpassbar": false,
      "min": 20.0,
-     "max": 20.0
+     "max": 20.0,
+     "eur": 0.04
     },
     {
      "n": "Öl, neutral",
@@ -25898,7 +26577,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.15
     },
     {
      "n": "Gemüsebrühe (Pulver)",
@@ -25915,7 +26595,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Dill oder Minze, frisch",
@@ -25932,7 +26613,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -25949,7 +26631,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -26236,6 +26919,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 18.19,
+    "box": 2.27
+   },
    "total": [
     3541.5,
     274.7,
@@ -26289,7 +26976,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Kritharaki",
@@ -26311,7 +26999,8 @@
      },
      "anpassbar": true,
      "min": 180,
-     "max": 576
+     "max": 576,
+     "eur": 1.07
     },
     {
      "n": "Feta",
@@ -26333,7 +27022,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 1.85
     },
     {
      "n": "Stückige Tomaten",
@@ -26355,7 +27045,8 @@
      },
      "anpassbar": false,
      "min": 800,
-     "max": 800
+     "max": 800,
+     "eur": 1.38
     },
     {
      "n": "Zucchini",
@@ -26377,7 +27068,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Zwiebeln",
@@ -26399,7 +27091,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -26421,7 +27114,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Tomatenmark",
@@ -26443,7 +27137,8 @@
      },
      "anpassbar": false,
      "min": 35,
-     "max": 35
+     "max": 35,
+     "eur": 0.12
     },
     {
      "n": "Olivenöl",
@@ -26465,7 +27160,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.28
     },
     {
      "n": "Rinderbrühe",
@@ -26487,7 +27183,8 @@
      },
      "anpassbar": false,
      "min": 800.0,
-     "max": 800.0
+     "max": 800.0,
+     "eur": 0.28
     }
    ],
    "spices": [
@@ -26774,6 +27471,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 17.31,
+    "box": 2.16
+   },
    "total": [
     3556.0,
     267.8,
@@ -26827,7 +27528,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Bulgur",
@@ -26849,7 +27551,8 @@
      },
      "anpassbar": true,
      "min": 120,
-     "max": 384
+     "max": 384,
+     "eur": 0.62
     },
     {
      "n": "Kichererbsen",
@@ -26871,7 +27574,8 @@
      },
      "anpassbar": true,
      "min": 240,
-     "max": 768
+     "max": 768,
+     "eur": 1.38
     },
     {
      "n": "Feta",
@@ -26893,7 +27597,8 @@
      },
      "anpassbar": true,
      "min": 50,
-     "max": 160
+     "max": 160,
+     "eur": 0.93
     },
     {
      "n": "Paprika",
@@ -26915,7 +27620,8 @@
      },
      "anpassbar": false,
      "min": 320,
-     "max": 320
+     "max": 320,
+     "eur": 1.66
     },
     {
      "n": "Zucchini",
@@ -26937,7 +27643,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.79
     },
     {
      "n": "Stückige Tomaten",
@@ -26959,7 +27666,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 0.69
     },
     {
      "n": "Zwiebeln",
@@ -26981,7 +27689,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -27003,7 +27712,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Joghurt 1,5 %",
@@ -27025,7 +27735,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.4
     },
     {
      "n": "Olivenöl",
@@ -27047,7 +27758,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.37
     },
     {
      "n": "Gemüsebrühe",
@@ -27069,7 +27781,8 @@
      },
      "anpassbar": false,
      "min": 400.0,
-     "max": 400.0
+     "max": 400.0,
+     "eur": 0.14
     },
     {
      "n": "Petersilie, frisch",
@@ -27086,7 +27799,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -27103,7 +27817,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -27425,6 +28140,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 18.57,
+    "box": 2.32
+   },
    "total": [
     3580.5,
     273.7,
@@ -27478,7 +28197,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 16.85
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -27500,7 +28220,8 @@
      },
      "anpassbar": true,
      "min": 800,
-     "max": 2560
+     "max": 2560,
+     "eur": 1.59
     },
     {
      "n": "Kokosmilch light",
@@ -27522,7 +28243,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.19
     },
     {
      "n": "Rote Currypaste",
@@ -27544,7 +28266,8 @@
      },
      "anpassbar": false,
      "min": 70,
-     "max": 70
+     "max": 70,
+     "eur": 1.49
     },
     {
      "n": "Erdnüsse, geröstet, ungesalzen",
@@ -27566,7 +28289,8 @@
      },
      "anpassbar": true,
      "min": 40,
-     "max": 128
+     "max": 128,
+     "eur": 0.6
     },
     {
      "n": "TK-Bohnen, grün",
@@ -27588,7 +28312,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.99
     },
     {
      "n": "Zwiebeln",
@@ -27610,7 +28335,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 0.32
     },
     {
      "n": "Limette",
@@ -27632,7 +28358,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Öl, neutral",
@@ -27654,7 +28381,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Zucker",
@@ -27676,7 +28404,8 @@
      },
      "anpassbar": true,
      "min": 5,
-     "max": 16
+     "max": 16,
+     "eur": 0.01
     },
     {
      "n": "Rinderbrühe",
@@ -27698,7 +28427,8 @@
      },
      "anpassbar": false,
      "min": 500.0,
-     "max": 500.0
+     "max": 500.0,
+     "eur": 0.17
     },
     {
      "n": "Sojasauce",
@@ -27715,7 +28445,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -28036,6 +28767,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 23.88,
+    "box": 2.98
+   },
    "total": [
     3556.0,
     263.3,
@@ -28089,7 +28824,8 @@
      },
      "anpassbar": true,
      "min": 450,
-     "max": 1440
+     "max": 1440,
+     "eur": 10.11
     },
     {
      "n": "Basmati- oder Jasminreis",
@@ -28111,7 +28847,8 @@
      },
      "anpassbar": true,
      "min": 130,
-     "max": 416
+     "max": 416,
+     "eur": 0.6
     },
     {
      "n": "Ananas in Saft",
@@ -28133,7 +28870,8 @@
      },
      "anpassbar": false,
      "min": 340,
-     "max": 340
+     "max": 340,
+     "eur": 1.29
     },
     {
      "n": "Kokosmilch",
@@ -28155,7 +28893,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.19
     },
     {
      "n": "Paprika",
@@ -28177,7 +28916,8 @@
      },
      "anpassbar": false,
      "min": 320,
-     "max": 320
+     "max": 320,
+     "eur": 1.66
     },
     {
      "n": "TK-Erbsen",
@@ -28199,7 +28939,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.53
     },
     {
      "n": "Zwiebeln",
@@ -28221,7 +28962,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.19
     },
     {
      "n": "Knoblauch",
@@ -28243,7 +28985,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Ingwer",
@@ -28265,7 +29008,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Öl, neutral",
@@ -28287,7 +29031,8 @@
      },
      "anpassbar": true,
      "min": 20,
-     "max": 64
+     "max": 64,
+     "eur": 0.1
     },
     {
      "n": "Hühnerbrühe",
@@ -28309,7 +29054,8 @@
      },
      "anpassbar": false,
      "min": 200.0,
-     "max": 200.0
+     "max": 200.0,
+     "eur": 0.07
     },
     {
      "n": "Sojasauce",
@@ -28326,7 +29072,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -28647,6 +29394,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 16.17,
+    "box": 2.02
+   },
    "total": [
     3537.0,
     264.8,
@@ -28700,7 +29451,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 8.99
     },
     {
      "n": "Basmatireis",
@@ -28722,7 +29474,8 @@
      },
      "anpassbar": true,
      "min": 120,
-     "max": 384
+     "max": 384,
+     "eur": 0.55
     },
     {
      "n": "Kichererbsen",
@@ -28744,7 +29497,8 @@
      },
      "anpassbar": true,
      "min": 120,
-     "max": 384
+     "max": 384,
+     "eur": 0.69
     },
     {
      "n": "Mandeln, gehobelt",
@@ -28766,7 +29520,8 @@
      },
      "anpassbar": true,
      "min": 40,
-     "max": 128
+     "max": 128,
+     "eur": 1.03
     },
     {
      "n": "Rosinen",
@@ -28788,7 +29543,8 @@
      },
      "anpassbar": false,
      "min": 40,
-     "max": 40
+     "max": 40,
+     "eur": 0.21
     },
     {
      "n": "Zwiebeln",
@@ -28810,7 +29566,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.39
     },
     {
      "n": "Möhren",
@@ -28832,7 +29589,8 @@
      },
      "anpassbar": false,
      "min": 300,
-     "max": 300
+     "max": 300,
+     "eur": 0.3
     },
     {
      "n": "Knoblauch",
@@ -28854,7 +29612,8 @@
      },
      "anpassbar": false,
      "min": 12,
-     "max": 12
+     "max": 12,
+     "eur": 0.12
     },
     {
      "n": "Zitrone",
@@ -28876,7 +29635,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.26
     },
     {
      "n": "Joghurt 1,5 %",
@@ -28898,7 +29658,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.4
     },
     {
      "n": "Öl, neutral",
@@ -28920,7 +29681,8 @@
      },
      "anpassbar": true,
      "min": 30,
-     "max": 96
+     "max": 96,
+     "eur": 0.15
     },
     {
      "n": "Hühnerbrühe",
@@ -28942,7 +29704,8 @@
      },
      "anpassbar": false,
      "min": 600.0,
-     "max": 600.0
+     "max": 600.0,
+     "eur": 0.21
     },
     {
      "n": "Petersilie, frisch",
@@ -28959,7 +29722,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -28976,7 +29740,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -29312,6 +30077,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 13.53,
+    "box": 1.69
+   },
    "total": [
     3531.9,
     264.8,
@@ -29365,7 +30134,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 9.05
     },
     {
      "n": "Rote Linsen",
@@ -29387,7 +30157,8 @@
      },
      "anpassbar": true,
      "min": 80,
-     "max": 256
+     "max": 256,
+     "eur": 0.57
     },
     {
      "n": "Basmatireis",
@@ -29409,7 +30180,8 @@
      },
      "anpassbar": true,
      "min": 110,
-     "max": 352
+     "max": 352,
+     "eur": 0.5
     },
     {
      "n": "Kokosmilch",
@@ -29431,7 +30203,8 @@
      },
      "anpassbar": true,
      "min": 200,
-     "max": 640
+     "max": 640,
+     "eur": 1.19
     },
     {
      "n": "Stückige Tomaten",
@@ -29453,7 +30226,8 @@
      },
      "anpassbar": false,
      "min": 400,
-     "max": 400
+     "max": 400,
+     "eur": 0.69
     },
     {
      "n": "Babyspinat",
@@ -29475,7 +30249,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 2.58
     },
     {
      "n": "Zwiebeln",
@@ -29497,7 +30272,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Knoblauch",
@@ -29519,7 +30295,8 @@
      },
      "anpassbar": false,
      "min": 16,
-     "max": 16
+     "max": 16,
+     "eur": 0.16
     },
     {
      "n": "Ingwer",
@@ -29541,7 +30318,8 @@
      },
      "anpassbar": false,
      "min": 20,
-     "max": 20
+     "max": 20,
+     "eur": 0.07
     },
     {
      "n": "Limette",
@@ -29563,7 +30341,8 @@
      },
      "anpassbar": false,
      "min": 30,
-     "max": 30
+     "max": 30,
+     "eur": 0.39
     },
     {
      "n": "Öl, neutral",
@@ -29585,7 +30364,8 @@
      },
      "anpassbar": true,
      "min": 15,
-     "max": 48
+     "max": 48,
+     "eur": 0.07
     },
     {
      "n": "Gemüsebrühe",
@@ -29607,7 +30387,8 @@
      },
      "anpassbar": false,
      "min": 600.0,
-     "max": 600.0
+     "max": 600.0,
+     "eur": 0.21
     },
     {
      "n": "Koriander, frisch",
@@ -29624,7 +30405,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -29971,6 +30753,10 @@
      3.0
     ]
    ],
+   "kosten": {
+    "gesamt": 16.05,
+    "box": 2.01
+   },
    "total": [
     3518.8,
     265.7,
@@ -30024,7 +30810,8 @@
      },
      "anpassbar": true,
      "min": 400,
-     "max": 1280
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -30046,7 +30833,8 @@
      },
      "anpassbar": true,
      "min": 800,
-     "max": 2560
+     "max": 2560,
+     "eur": 1.59
     },
     {
      "n": "Cheddar",
@@ -30068,7 +30856,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 2.19
     },
     {
      "n": "Zwiebeln",
@@ -30090,7 +30879,8 @@
      },
      "anpassbar": false,
      "min": 250,
-     "max": 250
+     "max": 250,
+     "eur": 0.32
     },
     {
      "n": "Gewürzgurken",
@@ -30112,7 +30902,8 @@
      },
      "anpassbar": false,
      "min": 150,
-     "max": 150
+     "max": 150,
+     "eur": 0.54
     },
     {
      "n": "Ketchup",
@@ -30134,7 +30925,8 @@
      },
      "anpassbar": true,
      "min": 50,
-     "max": 160
+     "max": 160,
+     "eur": 0.26
     },
     {
      "n": "Tomatenmark",
@@ -30156,7 +30948,8 @@
      },
      "anpassbar": false,
      "min": 35,
-     "max": 35
+     "max": 35,
+     "eur": 0.12
     },
     {
      "n": "Senf, mittelscharf",
@@ -30178,7 +30971,8 @@
      },
      "anpassbar": false,
      "min": 20.0,
-     "max": 20.0
+     "max": 20.0,
+     "eur": 0.06
     },
     {
      "n": "Öl, neutral",
@@ -30200,7 +30994,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Rinderbrühe",
@@ -30222,7 +31017,8 @@
      },
      "anpassbar": false,
      "min": 400.0,
-     "max": 400.0
+     "max": 400.0,
+     "eur": 0.14
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -30239,7 +31035,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Backpapier",
@@ -30256,7 +31053,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -30560,6 +31358,10 @@
      1.8
     ]
    ],
+   "kosten": {
+    "gesamt": 16.44,
+    "box": 2.05
+   },
    "total": [
     3510.0,
     261.0,
@@ -30613,7 +31415,8 @@
      },
      "anpassbar": true,
      "min": 600,
-     "max": 1920
+     "max": 1920,
+     "eur": 10.98
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -30635,7 +31438,8 @@
      },
      "anpassbar": true,
      "min": 600,
-     "max": 1920
+     "max": 1920,
+     "eur": 1.2
     },
     {
      "n": "BBQ-Sauce",
@@ -30657,7 +31461,8 @@
      },
      "anpassbar": true,
      "min": 125,
-     "max": 400
+     "max": 400,
+     "eur": 0.74
     },
     {
      "n": "Weißkohl",
@@ -30679,7 +31484,8 @@
      },
      "anpassbar": false,
      "min": 600,
-     "max": 600
+     "max": 600,
+     "eur": 0.77
     },
     {
      "n": "Möhren",
@@ -30701,7 +31507,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.2
     },
     {
      "n": "Zwiebeln",
@@ -30723,7 +31530,8 @@
      },
      "anpassbar": false,
      "min": 200,
-     "max": 200
+     "max": 200,
+     "eur": 0.26
     },
     {
      "n": "Joghurt 1,5 %",
@@ -30745,7 +31553,8 @@
      },
      "anpassbar": true,
      "min": 100,
-     "max": 320
+     "max": 320,
+     "eur": 0.4
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -30767,7 +31576,8 @@
      },
      "anpassbar": false,
      "min": 20.0,
-     "max": 20.0
+     "max": 20.0,
+     "eur": 0.04
     },
     {
      "n": "Öl, neutral",
@@ -30789,7 +31599,8 @@
      },
      "anpassbar": true,
      "min": 10,
-     "max": 32
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Hühnerbrühe",
@@ -30811,7 +31622,8 @@
      },
      "anpassbar": false,
      "min": 300.0,
-     "max": 300.0
+     "max": 300.0,
+     "eur": 0.1
     },
     {
      "n": "Senf, mittelscharf",
@@ -30828,7 +31640,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Backpapier",
@@ -30845,7 +31658,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     },
     {
      "n": "Kleine Döschen mit Deckel",
@@ -30862,7 +31676,8 @@
      "pro100": null,
      "anpassbar": false,
      "min": 0,
-     "max": 0
+     "max": 0,
+     "eur": null
     }
    ],
    "spices": [
@@ -31190,6 +32005,10 @@
      2.4
     ]
    ],
+   "kosten": {
+    "gesamt": 14.98,
+    "box": 1.87
+   },
    "total": [
     3568.0,
     274.1,
@@ -33133,5 +33952,710 @@
     }
    ]
   }
- }
+ },
+ "preise": {
+  "rinderhack": {
+   "je_g": 0.01158,
+   "eur": 5.79,
+   "menge": 500,
+   "u": "g"
+  },
+  "rinderhack-mager": {
+   "je_g": 0.013725,
+   "eur": 5.49,
+   "menge": 400,
+   "u": "g"
+  },
+  "rindergulasch": {
+   "je_g": 0.01298,
+   "eur": 6.49,
+   "menge": 500,
+   "u": "g"
+  },
+  "haehnchenbrust": {
+   "je_g": 0.011317,
+   "eur": 6.79,
+   "menge": 600,
+   "u": "g"
+  },
+  "haehnchenkeule": {
+   "je_g": 0.00915,
+   "eur": 5.49,
+   "menge": 600,
+   "u": "g"
+  },
+  "putenbrust": {
+   "je_g": 0.011238,
+   "eur": 8.99,
+   "menge": 800,
+   "u": "g"
+  },
+  "rinderhuefte": {
+   "je_g": 0.018725,
+   "eur": 7.49,
+   "menge": 400,
+   "u": "g"
+  },
+  "zwiebeln": {
+   "je_g": 0.00129,
+   "eur": 1.29,
+   "menge": 1000,
+   "u": "g"
+  },
+  "rote-zwiebeln": {
+   "je_g": 0.00149,
+   "eur": 1.49,
+   "menge": 1000,
+   "u": "g"
+  },
+  "knoblauch": {
+   "je_g": 0.009917,
+   "eur": 1.19,
+   "menge": 30,
+   "u": "Zehe"
+  },
+  "ingwer": {
+   "je_g": 0.00345,
+   "eur": 0.69,
+   "menge": 200,
+   "u": "g"
+  },
+  "paprika": {
+   "je_g": 0.005188,
+   "eur": 2.49,
+   "menge": 3,
+   "u": "Stk"
+  },
+  "zucchini": {
+   "je_g": 0.002633,
+   "eur": 0.79,
+   "menge": 1,
+   "u": "Stk"
+  },
+  "brokkoli": {
+   "je_g": 0.00238,
+   "eur": 1.19,
+   "menge": 500,
+   "u": "g"
+  },
+  "moehren": {
+   "je_g": 0.00099,
+   "eur": 0.99,
+   "menge": 1000,
+   "u": "g"
+  },
+  "champignons": {
+   "je_g": 0.004225,
+   "eur": 1.69,
+   "menge": 400,
+   "u": "g"
+  },
+  "spinat": {
+   "je_g": 0.01032,
+   "eur": 1.29,
+   "menge": 125,
+   "u": "g"
+  },
+  "zuckerschoten": {
+   "je_g": 0.00995,
+   "eur": 1.99,
+   "menge": 200,
+   "u": "g"
+  },
+  "fruehlingszwiebeln": {
+   "je_g": 0.0099,
+   "eur": 0.99,
+   "menge": 1,
+   "u": "Bund"
+  },
+  "spitzkohl": {
+   "je_g": 0.00149,
+   "eur": 1.49,
+   "menge": 1000,
+   "u": "g"
+  },
+  "gurke": {
+   "je_g": 0.002633,
+   "eur": 0.79,
+   "menge": 1,
+   "u": "Stk"
+  },
+  "tomaten": {
+   "je_g": 0.00249,
+   "eur": 2.49,
+   "menge": 1000,
+   "u": "g"
+  },
+  "kirschtomaten": {
+   "je_g": 0.00398,
+   "eur": 1.99,
+   "menge": 500,
+   "u": "g"
+  },
+  "kartoffeln": {
+   "je_g": 0.000996,
+   "eur": 2.49,
+   "menge": 2500,
+   "u": "g"
+  },
+  "suesskartoffel": {
+   "je_g": 0.00229,
+   "eur": 2.29,
+   "menge": 1000,
+   "u": "g"
+  },
+  "staudensellerie": {
+   "je_g": 0.002483,
+   "eur": 1.49,
+   "menge": 8,
+   "u": "Stange"
+  },
+  "limette": {
+   "je_g": 0.013,
+   "eur": 0.39,
+   "menge": 1,
+   "u": "Stk"
+  },
+  "zitrone": {
+   "je_g": 0.013,
+   "eur": 0.39,
+   "menge": 1,
+   "u": "Stk"
+  },
+  "blumenkohl": {
+   "je_g": 0.002488,
+   "eur": 1.99,
+   "menge": 1,
+   "u": "Stk"
+  },
+  "bohnen-gruen": {
+   "je_g": 0.00498,
+   "eur": 2.49,
+   "menge": 500,
+   "u": "g"
+  },
+  "aubergine": {
+   "je_g": 0.0033,
+   "eur": 0.99,
+   "menge": 1,
+   "u": "Stk"
+  },
+  "lauch": {
+   "je_g": 0.00596,
+   "eur": 1.49,
+   "menge": 1,
+   "u": "Stange"
+  },
+  "kohlrabi": {
+   "je_g": 0.00276,
+   "eur": 0.69,
+   "menge": 1,
+   "u": "Stk"
+  },
+  "weisskohl": {
+   "je_g": 0.00129,
+   "eur": 1.29,
+   "menge": 1000,
+   "u": "g"
+  },
+  "skyr": {
+   "je_g": 0.00258,
+   "eur": 1.29,
+   "menge": 500,
+   "u": "g"
+  },
+  "magerquark": {
+   "je_g": 0.00198,
+   "eur": 0.99,
+   "menge": 500,
+   "u": "g"
+  },
+  "frischkaese": {
+   "je_g": 0.00595,
+   "eur": 1.19,
+   "menge": 200,
+   "u": "g"
+  },
+  "kochsahne": {
+   "je_g": 0.00395,
+   "eur": 0.79,
+   "menge": 200,
+   "u": "g"
+  },
+  "schlagsahne": {
+   "je_g": 0.00495,
+   "eur": 0.99,
+   "menge": 200,
+   "u": "g"
+  },
+  "schmand": {
+   "je_g": 0.00395,
+   "eur": 0.79,
+   "menge": 200,
+   "u": "g"
+  },
+  "milch": {
+   "je_g": 0.00109,
+   "eur": 1.09,
+   "menge": 1000,
+   "u": "ml"
+  },
+  "cheddar": {
+   "je_g": 0.01095,
+   "eur": 2.19,
+   "menge": 200,
+   "u": "g"
+  },
+  "parmesan": {
+   "je_g": 0.0199,
+   "eur": 1.99,
+   "menge": 100,
+   "u": "g"
+  },
+  "feta": {
+   "je_g": 0.009267,
+   "eur": 1.39,
+   "menge": 150,
+   "u": "g"
+  },
+  "gnocchi": {
+   "je_g": 0.00298,
+   "eur": 1.49,
+   "menge": 500,
+   "u": "g"
+  },
+  "butter": {
+   "je_g": 0.00876,
+   "eur": 2.19,
+   "menge": 250,
+   "u": "g"
+  },
+  "mozzarella": {
+   "je_g": 0.00712,
+   "eur": 0.89,
+   "menge": 125,
+   "u": "g"
+  },
+  "mozzarella-light": {
+   "je_g": 0.00712,
+   "eur": 0.89,
+   "menge": 125,
+   "u": "g"
+  },
+  "joghurt": {
+   "je_g": 0.00198,
+   "eur": 0.99,
+   "menge": 500,
+   "u": "g"
+  },
+  "eier": {
+   "je_g": 0.00415,
+   "eur": 2.49,
+   "menge": 10,
+   "u": "Stk"
+  },
+  "tofu": {
+   "je_g": 0.003725,
+   "eur": 1.49,
+   "menge": 400,
+   "u": "g"
+  },
+  "erbsen": {
+   "je_g": 0.002644,
+   "eur": 1.19,
+   "menge": 450,
+   "u": "g"
+  },
+  "tk-brokkoli": {
+   "je_g": 0.001587,
+   "eur": 1.19,
+   "menge": 750,
+   "u": "g"
+  },
+  "tk-blumenkohl": {
+   "je_g": 0.001587,
+   "eur": 1.19,
+   "menge": 750,
+   "u": "g"
+  },
+  "tk-bohnen": {
+   "je_g": 0.003311,
+   "eur": 1.49,
+   "menge": 450,
+   "u": "g"
+  },
+  "tk-spinat": {
+   "je_g": 0.002867,
+   "eur": 1.29,
+   "menge": 450,
+   "u": "g"
+  },
+  "tomaten-dose": {
+   "je_g": 0.001725,
+   "eur": 0.69,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "passata": {
+   "je_g": 0.00138,
+   "eur": 0.69,
+   "menge": 500,
+   "u": "g"
+  },
+  "tomatenmark": {
+   "je_g": 0.00345,
+   "eur": 0.69,
+   "menge": 200,
+   "u": "g"
+  },
+  "kidney": {
+   "je_g": 0.002706,
+   "eur": 0.69,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "schwarze-bohnen": {
+   "je_g": 0.003708,
+   "eur": 0.89,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "mais": {
+   "je_g": 0.002772,
+   "eur": 0.79,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "kokosmilch": {
+   "je_g": 0.002975,
+   "eur": 1.19,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "kokosmilch-light": {
+   "je_g": 0.002975,
+   "eur": 1.19,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "currypaste": {
+   "je_g": 0.021286,
+   "eur": 1.49,
+   "menge": 1,
+   "u": "Glas"
+  },
+  "ajvar": {
+   "je_g": 0.005686,
+   "eur": 1.99,
+   "menge": 1,
+   "u": "Glas"
+  },
+  "getr-tomaten": {
+   "je_g": 0.015267,
+   "eur": 2.29,
+   "menge": 1,
+   "u": "Glas"
+  },
+  "erdnussbutter": {
+   "je_g": 0.007114,
+   "eur": 2.49,
+   "menge": 350,
+   "u": "g"
+  },
+  "kichererbsen": {
+   "je_g": 0.002875,
+   "eur": 0.69,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "linsen-dose": {
+   "je_g": 0.003292,
+   "eur": 0.79,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "pesto": {
+   "je_g": 0.007316,
+   "eur": 1.39,
+   "menge": 190,
+   "u": "g"
+  },
+  "ananas-dose": {
+   "je_g": 0.003794,
+   "eur": 1.29,
+   "menge": 1,
+   "u": "Dose"
+  },
+  "gewuerzgurken": {
+   "je_g": 0.003583,
+   "eur": 1.29,
+   "menge": 360,
+   "u": "g"
+  },
+  "oliven": {
+   "je_g": 0.007588,
+   "eur": 1.29,
+   "menge": 170,
+   "u": "g"
+  },
+  "reis": {
+   "je_g": 0.00229,
+   "eur": 2.29,
+   "menge": 1000,
+   "u": "g"
+  },
+  "penne": {
+   "je_g": 0.00198,
+   "eur": 0.99,
+   "menge": 500,
+   "u": "g"
+  },
+  "spaghetti": {
+   "je_g": 0.00198,
+   "eur": 0.99,
+   "menge": 500,
+   "u": "g"
+  },
+  "hoernchen": {
+   "je_g": 0.00198,
+   "eur": 0.99,
+   "menge": 500,
+   "u": "g"
+  },
+  "kritharaki": {
+   "je_g": 0.00298,
+   "eur": 1.49,
+   "menge": 500,
+   "u": "g"
+  },
+  "lasagne": {
+   "je_g": 0.00258,
+   "eur": 1.29,
+   "menge": 500,
+   "u": "g"
+  },
+  "mie": {
+   "je_g": 0.00516,
+   "eur": 1.29,
+   "menge": 250,
+   "u": "g"
+  },
+  "sesam": {
+   "je_g": 0.0129,
+   "eur": 1.29,
+   "menge": 100,
+   "u": "g"
+  },
+  "vollkornnudeln": {
+   "je_g": 0.00258,
+   "eur": 1.29,
+   "menge": 500,
+   "u": "g"
+  },
+  "couscous": {
+   "je_g": 0.00298,
+   "eur": 1.49,
+   "menge": 500,
+   "u": "g"
+  },
+  "bulgur": {
+   "je_g": 0.00258,
+   "eur": 1.29,
+   "menge": 500,
+   "u": "g"
+  },
+  "linsen-rot": {
+   "je_g": 0.00358,
+   "eur": 1.79,
+   "menge": 500,
+   "u": "g"
+  },
+  "bandnudeln": {
+   "je_g": 0.00238,
+   "eur": 1.19,
+   "menge": 500,
+   "u": "g"
+  },
+  "tortillas": {
+   "je_g": 0.004031,
+   "eur": 1.29,
+   "menge": 1,
+   "u": "Pck"
+  },
+  "erdnuesse": {
+   "je_g": 0.00745,
+   "eur": 1.49,
+   "menge": 200,
+   "u": "g"
+  },
+  "semmelbroesel": {
+   "je_g": 0.001975,
+   "eur": 0.79,
+   "menge": 400,
+   "u": "g"
+  },
+  "mandeln": {
+   "je_g": 0.0129,
+   "eur": 1.29,
+   "menge": 100,
+   "u": "g"
+  },
+  "rosinen": {
+   "je_g": 0.00516,
+   "eur": 1.29,
+   "menge": 250,
+   "u": "g"
+  },
+  "cashews": {
+   "je_g": 0.01495,
+   "eur": 2.99,
+   "menge": 200,
+   "u": "g"
+  },
+  "oel": {
+   "je_g": 0.00249,
+   "eur": 2.49,
+   "menge": 1000,
+   "u": "g"
+  },
+  "olivenoel": {
+   "je_g": 0.00932,
+   "eur": 6.99,
+   "menge": 750,
+   "u": "g"
+  },
+  "sesamoel": {
+   "je_g": 0.01196,
+   "eur": 2.99,
+   "menge": 250,
+   "u": "g"
+  },
+  "butterschmalz": {
+   "je_g": 0.00996,
+   "eur": 2.49,
+   "menge": 250,
+   "u": "g"
+  },
+  "honig": {
+   "je_g": 0.00798,
+   "eur": 3.99,
+   "menge": 500,
+   "u": "g"
+  },
+  "zucker": {
+   "je_g": 0.00099,
+   "eur": 0.99,
+   "menge": 1000,
+   "u": "g"
+  },
+  "mehl": {
+   "je_g": 0.00069,
+   "eur": 0.69,
+   "menge": 1000,
+   "u": "g"
+  },
+  "sojasauce": {
+   "je_g": 0.007933,
+   "eur": 1.19,
+   "menge": 150,
+   "u": "ml"
+  },
+  "staerke": {
+   "je_g": 0.002475,
+   "eur": 0.99,
+   "menge": 400,
+   "u": "g"
+  },
+  "bruehe-rind": {
+   "je_g": 0.00035,
+   "eur": 0.35,
+   "menge": 1000,
+   "u": "ml"
+  },
+  "sweetchili": {
+   "je_g": 0.00645,
+   "eur": 1.29,
+   "menge": 200,
+   "u": "g"
+  },
+  "bbq-sauce": {
+   "je_g": 0.00298,
+   "eur": 1.49,
+   "menge": 500,
+   "u": "g"
+  },
+  "ketchup": {
+   "je_g": 0.00258,
+   "eur": 1.29,
+   "menge": 500,
+   "u": "g"
+  },
+  "bruehe-gemuese": {
+   "je_g": 0.00035,
+   "eur": 0.35,
+   "menge": 1000,
+   "u": "ml"
+  },
+  "bruehe-huhn": {
+   "je_g": 0.00035,
+   "eur": 0.35,
+   "menge": 1000,
+   "u": "ml"
+  },
+  "senf": {
+   "je_g": 0.00316,
+   "eur": 0.79,
+   "menge": 250,
+   "u": "g"
+  },
+  "balsamico": {
+   "je_g": 0.00398,
+   "eur": 1.99,
+   "menge": 500,
+   "u": "ml"
+  },
+  "essig": {
+   "je_g": 0.00198,
+   "eur": 0.99,
+   "menge": 500,
+   "u": "ml"
+  },
+  "kakao": {
+   "je_g": 0.00796,
+   "eur": 1.99,
+   "menge": 250,
+   "u": "g"
+  },
+  "sriracha": {
+   "je_g": 0.00995,
+   "eur": 1.99,
+   "menge": 200,
+   "u": "ml"
+  },
+  "haferflocken": {
+   "je_g": 0.00138,
+   "eur": 0.69,
+   "menge": 500,
+   "u": "g"
+  },
+  "erdnuss-crunch": {
+   "je_g": 0.00995,
+   "eur": 1.99,
+   "menge": 200,
+   "u": "g"
+  },
+  "aepfel": {
+   "je_g": 0.00229,
+   "eur": 2.29,
+   "menge": 1000,
+   "u": "g"
+  },
+  "whey-vanille": {
+   "je_g": 0.01999,
+   "eur": 19.99,
+   "menge": 1000,
+   "u": "g"
+  }
+ },
+ "preise_stand": "Okt. 2026"
 }

@@ -102,6 +102,8 @@ async function start() {
   app.katalog = daten.katalog;
   app.extras = daten.extras || {};
   app.naehrwerte = daten.naehrwerte || {};
+  app.preise = daten.preise || {};
+  app.preiseStand = daten.preise_stand || '';
   if (daten.ziel) app.ziel = daten.ziel;
   for (const r of app.rezepte) app.nachId[r.id] = r;
   // Welche Einheit ein Katalog-Schlüssel hat – damit die Resteverwertung nur

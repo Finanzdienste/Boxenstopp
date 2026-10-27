@@ -13,6 +13,8 @@ export const app = {
   einheiten: {},
   /** Werte pro 100 g je Katalog-Schlüssel (daten/rezepte.json), fürs Anpassen. */
   naehrwerte: {},
+  preise: {},
+  preiseStand: '',
   katalog: {},
   extras: {},
   ziel: { kcal: 443, p: 33, kh: 39, f: 15.4 },
