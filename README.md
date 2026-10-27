@@ -43,7 +43,7 @@ Hintergrund weiter, „währenddessen“ kostet keine zusätzliche Zeit.
 
 Oben im Reiter Rezepte: aufschreiben oder fotografieren, was im Kühlschrank
 und im Vorrat liegt (bis zu 4 Fotos), Portionen wählen (2, 4, 6 oder 8),
-sagen, ob dazugekauft werden darf, und Wünsche. Claude macht daraus **ein**
+sagen, ob dazugekauft werden darf, und Wünsche. Die KI macht daraus **ein**
 Rezept im selben Format wie alle anderen – Mise en place mit Schalen, ein
 Schritt pro Zeile, Minuten – und mit denselben Regeln: kein Fisch, kein
 Schwein, kein Putenhack, kein Hüttenkäse in warmen Saucen, ordentlich
@@ -51,7 +51,7 @@ gewürzt. Was ihr mit Daumen hoch oder runter bewertet habt, geht als
 Geschmackshinweis mit.
 
 **Damit die Werte wirklich stimmen**, rechnet die App selbst
-(`js/ki-rezept.js`): Claude liefert zu jeder Zutat die Nährwerte pro 100 g und
+(`js/ki-rezept.js`): Die KI liefert zu jeder Zutat die Nährwerte pro 100 g und
 für Fleisch, Reis, Nudeln, Öl, Käse usw. einen Bereich (min–max, bei
 Vorhandenem höchstens, was da ist). Die App verschiebt diese Mengen, bis eine
 Box möglichst genau auf 443 kcal / 33 g P / 39 g KH / 15,4 g F kommt
@@ -70,22 +70,25 @@ Einheit gibt, teilen sich die Zeile mit den festen Rezepten.
 
 ### Einrichten
 
-Die App ruft die Messages-API von Anthropic direkt vom Handy auf
-(`js/ki.js`, Modell `claude-sonnet-5-5`, Antwort als Werkzeug
-`rezept_ausgeben`, gestreamt). Dafür braucht es einen **API-Schlüssel** – der
-ist getrennt von einem Claude-Abo und wird pro Anfrage abgerechnet, ein Rezept
-kostet ein paar Cent (die Leiste zeigt die Kosten der Anfrage):
+Die App ruft die KI direkt vom Handy aus auf (`js/ki.js`), mit einem
+API-Schlüssel, den der Anfang des Schlüssels einem Anbieter zuordnet:
 
-1. Auf [console.anthropic.com](https://console.anthropic.com/) anmelden,
-   unter Billing Guthaben aufladen, am besten ein Monatslimit setzen.
-2. API Keys → Create Key.
-3. In der App: Resteverwertung → Schlüssel einfügen → Speichern.
+| Schlüssel | Anbieter, Modell | Kosten | Antwort |
+| --- | --- | --- | --- |
+| `AIza…` | Google, `gemini-3.8-flash` (streamGenerateContent) | kostenlos, ohne Kreditkarte; dafür darf Google die Anfragen zum Verbessern seiner Produkte nutzen | JSON mit `responseSchema` |
+| `sk-ant-…` | Anthropic, `claude-sonnet-5-5` (Messages-API) | ein paar Cent pro Rezept, Guthaben nötig | Werkzeug `rezept_ausgeben` |
+
+Der normale Weg ist Google: auf
+[aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem
+Google-Konto anmelden, „Create API key“, den Schlüssel in der App unter
+Resteverwertung einfügen. Beide Antworten werden gestreamt, die Leiste zeigt
+Modell und Kosten der Anfrage.
 
 Der Schlüssel steht nur im localStorage (`boxenstopp.ki.v1`), nirgends im Code
 oder im Repo. Aufs zweite Handy kommt er mit dem Link unter der Einkaufsliste
-(`…#zugang=<GitHub>&ki=<Anthropic>`) oder mit „Link fürs zweite Handy
-kopieren“ im Einrichten. Fotos werden vorher auf 1280 px verkleinert und
-gehen nur mit der einen Anfrage an Anthropic, gespeichert werden sie nicht.
+(`…#zugang=<GitHub>&ki=<KI>`) oder mit „Link fürs zweite Handy kopieren“ im
+Einrichten. Fotos werden vorher auf 1280 px verkleinert und gehen nur mit der
+einen Anfrage an den Anbieter, gespeichert werden sie nicht.
 
 ## Die gemeinsame Liste
 
@@ -215,7 +218,7 @@ neues Rezept muss dort nichts geändert werden.
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | die beiden Reiter |
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
 | `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“ |
-| `js/ki.js` | Resteverwertung: Auftrag an Claude, Anfrage, Antwortstrom lesen, Fehler |
+| `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
 | `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |
 | `sw.js` | Offline-Betrieb; `VERSION` hochzählen, wenn sich eine Datei aus `SHELL` ändert |
@@ -233,7 +236,7 @@ npm run lint
 (Einrichten, Link, Abhaken beim anderen, gleichzeitiges Schreiben, veraltete
 Antwort, offline, falscher Schlüssel, Trennen). `test-ki.mjs` prüft die
 Resteverwertung erst ohne Browser (Antwort bereinigen, verbotene Zutaten,
-Mengen aufs Ziel, Anfrage, Antwortstrom, Fehler) und dann mit einer
-nachgebauten Anthropic-API und zwei Handys – Beispielantwort in
+Mengen aufs Ziel, Anfragen und Antwortströme beider Anbieter, Fehler) und
+dann mit einer nachgebauten Gemini-API und zwei Handys – Beispielantwort in
 `tests/daten/ki-antwort.json`. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

@@ -48,12 +48,13 @@ export function schluesselAusAdresse() {
 }
 
 /*
- * Der Schlüssel für die Resteverwertung: ein API-Schlüssel von Anthropic
- * (sk-ant-…), ebenfalls nur hier im localStorage. Er reist im selben Link
- * mit: …/#zugang=<GitHub>&ki=<Anthropic> – oder allein als …/#ki=<Anthropic>.
+ * Der Schlüssel für die Resteverwertung: ein API-Schlüssel von Google
+ * (AIza…, kostenlos) oder von Anthropic (sk-ant-…), ebenfalls nur hier im
+ * localStorage. Er reist im selben Link mit: …/#zugang=<GitHub>&ki=<KI> –
+ * oder allein als …/#ki=<KI>. Welcher Anbieter es ist, sieht ki.js am Anfang.
  */
 const KI = 'boxenstopp.ki.v1';
-const KI_MUSTER = /^sk-ant-[A-Za-z0-9_-]{20,250}$/;
+const KI_MUSTER = /^(?:sk-ant-[A-Za-z0-9_-]{20,250}|AIza[A-Za-z0-9_-]{30,80})$/;
 
 export function ladeKi() {
   try {

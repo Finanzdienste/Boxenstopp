@@ -232,7 +232,7 @@ ${r.tips && r.tips.length ? `<section class="sec" aria-labelledby="h-tips"><h2 i
       <tr><td>Pro Box (÷ ${boxen(r)})</td><td></td><td>${r.m.kcal}</td><td>${nf1(r.m.p)}</td><td>${nf1(r.m.kh)}</td><td>${nf1(r.m.f)}</td></tr>
     </tfoot>
   </table></div>
-  <p class="fine">${r.ki ? 'Gerechnet mit den Werten pro 100 g, die Claude angegeben hat; die Mengen hat die App auf eure Ziele gerechnet. Gewürze sind vernachlässigt.' : 'Gerechnet mit typischen Packungswerten pro 100 g. Gewürze, Brühe und Zitrussaft sind pauschal enthalten oder vernachlässigbar.'}</p>
+  <p class="fine">${r.ki ? 'Gerechnet mit den Werten pro 100 g, die die KI angegeben hat; die Mengen hat die App auf eure Ziele gerechnet. Gewürze sind vernachlässigt.' : 'Gerechnet mit typischen Packungswerten pro 100 g. Gewürze, Brühe und Zitrussaft sind pauschal enthalten oder vernachlässigbar.'}</p>
 </details>`;
 }
 

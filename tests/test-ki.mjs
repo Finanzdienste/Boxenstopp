@@ -8,7 +8,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID } from '../js/ki-rezept.js';
-import { anfrageBauen, kiAnfragen, kostenCent, MODELL } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, geminiSchema, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL } from '../js/ki.js';
+import { kiAus } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
 
@@ -21,6 +22,16 @@ for (const r of daten.rezepte) for (const it of r.items) if (it.k && typeof it.q
 const klon = (x) => JSON.parse(JSON.stringify(x));
 
 /* ================================================================ ohne Browser */
+
+const SCHEMA_PROBE = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', description: 'x' },
+    quelle: { type: 'string', enum: ['a', 'b'] },
+    zutaten: { type: 'array', items: { type: 'object', properties: { min: { type: 'integer', minimum: 1, maximum: 9 } }, required: ['min'] } },
+  },
+  required: ['name'],
+};
 
 // --- bereinigen
 const { r: k0, fehler: f0 } = kiBereinigen({ ...ANTWORT, portionen: 8 });
@@ -77,6 +88,17 @@ check(/Kein Fisch/.test(sys) && /Kein Schweinefleisch/.test(sys) && /kein Putenh
 check(sys.includes('443 kcal') && sys.includes('33 g Protein') && /Mise en place/.test(sys) && /Schale 2/.test(sys) && /\{id\}/.test(sys) && /nichts dazugekauft/.test(sys), 'Ziel, Mise en place, Schalen, Platzhalter und „nichts dazukaufen“ stehen im Auftrag');
 check(sys.includes('haehnchenbrust=Hähnchenbrustfilet') && !sys.includes('backpapier='), 'der Katalog geht mit (ohne Haushalt)');
 
+// --- Gemini: Schlüssel, Rumpf, Schema
+check(anbieterVon('AIzaSyD-TEST0000000000000000000000000000') === 'gemini' && anbieterVon('sk-ant-api03-x_y') === 'anthropic' && anbieterVon('quatsch') === '', 'der Anfang des Schlüssels sagt, wer dran ist: AIza → Google, sk-ant- → Anthropic');
+check(kiAus('AIzaSyD-TEST0000000000000000000000000000') && kiAus('sk-ant-api03-TESTTESTTESTTESTTESTTEST_abc') && !kiAus('AIza-kurz') && kiAus('https://x.y/#zugang=abc&ki=AIzaSyD-TEST0000000000000000000000000000'), 'beide Schlüsselformen werden erkannt, auch aus dem Link');
+const gs = geminiSchema(SCHEMA_PROBE);
+check(gs.type === 'OBJECT' && gs.properties.zutaten.type === 'ARRAY' && gs.properties.zutaten.items.properties.min.type === 'INTEGER' && !('minimum' in gs.properties.zutaten.items.properties.min) && gs.properties.quelle.enum.length === 2 && gs.required.includes('name'), 'Gemini-Schema: Typen groß, enum, items, required – ohne minimum/maximum');
+const rg = anfrageBauenGemini({ text: 'Feta', wuensche: '', fotos: ['AAAA'], portionen: 6, dazukaufen: true, ziel: ZIEL, katalog: daten.katalog });
+check(rg.generationConfig.responseMimeType === 'application/json' && rg.generationConfig.responseSchema.type === 'OBJECT' && rg.contents[0].parts[0].inlineData?.mimeType === 'image/jpeg' && /Portionen: 6/.test(rg.contents[0].parts[1].text), 'Gemini-Anfrage: JSON nach Schema, Foto als inlineData, Text dahinter');
+check(/als JSON genau nach dem vorgegebenen Schema/.test(rg.systemInstruction.parts[0].text) && !/rezept_ausgeben/.test(rg.systemInstruction.parts[0].text) && /Kein Fisch/.test(rg.systemInstruction.parts[0].text), 'Gemini bekommt dieselben Regeln, nur ohne Werkzeug');
+check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).generationConfig && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).tool_choice, 'rumpfFuer wählt nach Anbieter');
+check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') > 0 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null, 'Gemini (3.8 Flash) kostet nichts, Claude ein paar Cent');
+
 // --- Strom lesen (mit nachgebautem fetch)
 const STROM = (json, { stopp = 'tool_use', stueck = 150 } = {}) => {
   const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
@@ -107,6 +129,32 @@ check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'overlo
 check(await fehlerArt(() => new Response(STROM(JSON.stringify(ANTWORT).slice(0, 500), { stopp: 'max_tokens' }), { status: 200 })) === 'zulang', 'abgeschnittene Antwort: zu lang');
 check(await fehlerArt(() => { throw new TypeError('Failed to fetch'); }) === 'netz', 'ohne Netz: Verbindung prüfen');
 
+// --- Gemini-Strom lesen
+const GEMINI_STROM = (json, { stopp = 'STOP', stueck = 400 } = {}) => {
+  let s = '';
+  for (let i = 0; i === 0 || i < json.length; i += stueck) {
+    const letzter = i + stueck >= json.length;
+    const ev = { candidates: [{ content: { parts: [{ text: json.slice(i, i + stueck) }], role: 'model' }, ...(letzter ? { finishReason: stopp } : {}), index: 0 }], usageMetadata: { promptTokenCount: 2500, candidatesTokenCount: letzter ? 3800 : 100, thoughtsTokenCount: 600 }, modelVersion: 'gemini-3.8-flash' };
+    s += `data: ${JSON.stringify(ev)}\r\n\r\n`;
+  }
+  return s;
+};
+const GKEY = 'AIzaSyD-TEST0000000000000000000000000000';
+let gFortschritt = 0;
+const gGelesen = await mitFetch(() => new Response(GEMINI_STROM(JSON.stringify(ANTWORT)), { status: 200, headers: { 'content-type': 'text/event-stream' } }),
+  () => kiAnfragen(rg, { schluessel: GKEY, beiFortschritt: (p) => { gFortschritt = p.zeichen; } }));
+check(gGelesen.eingabe.name === ANTWORT.name && gGelesen.anbieter === 'gemini' && gGelesen.usage.ein === 2500 && gGelesen.usage.aus === 4400 && gFortschritt > 1000, 'Gemini-Strom: Rezept, Tokens (mit Denken), Fortschritt');
+const gKopf = mitFetch.letzte.opt.headers;
+check(gKopf['x-goog-api-key'] === GKEY && !('x-api-key' in gKopf) && /streamGenerateContent\?alt=sse$/.test(mitFetch.letzte.url) && !('stream' in JSON.parse(mitFetch.letzte.opt.body)), 'Gemini-Anfrage: eigener Kopf, SSE-Adresse, kein stream-Feld');
+const gFehler = async (antwort) => { try { await mitFetch(antwort, () => kiAnfragen(rg, { schluessel: GKEY })); return 'kein Fehler'; } catch (e) { return `${e.art}|${e.message}`; } };
+check((await gFehler(() => new Response(JSON.stringify({ error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT' } }), { status: 400 }))).startsWith('schluessel|Google lehnt'), 'Gemini 400 „API key not valid“: Google lehnt den Schlüssel ab');
+check((await gFehler(() => new Response(JSON.stringify([{ error: { code: 429, message: 'Quota exceeded', status: 'RESOURCE_EXHAUSTED' } }]), { status: 429 }))).startsWith('grenze|Das Gratis-Kontingent'), 'Gemini 429 (auch als Liste): Gratis-Kontingent');
+check((await gFehler(() => new Response(JSON.stringify({ error: { code: 503, message: 'The model is overloaded', status: 'UNAVAILABLE' } }), { status: 503 }))).startsWith('ueberlastet|Gemini'), 'Gemini 503: überlastet');
+check((await gFehler(() => new Response(GEMINI_STROM(JSON.stringify(ANTWORT).slice(0, 300), { stopp: 'MAX_TOKENS' }), { status: 200 }))).startsWith('zulang'), 'Gemini MAX_TOKENS: zu lang');
+check((await gFehler(() => new Response(GEMINI_STROM('', { stopp: 'SAFETY' }), { status: 200 }))).startsWith('sicherheit'), 'Gemini SAFETY: verständlicher Hinweis');
+const umzaeunt = await mitFetch(() => new Response(GEMINI_STROM(`\`\`\`json\n${JSON.stringify(ANTWORT)}\n\`\`\``), { status: 200 }), () => kiAnfragen(rg, { schluessel: GKEY }));
+check(umzaeunt.eingabe.name === ANTWORT.name, 'JSON in ```-Zaun wird trotzdem gelesen');
+
 // --- in liste.json, für beide
 const behalten = anwenden(leer(), opKiBehalten('ki-abcd1234', k1, 'Amy'));
 check(behalten.ki['ki-abcd1234']?.r.name === ANTWORT.name && behalten.ki['ki-abcd1234'].by === 'Amy', 'Behalten legt das Rezept unter ki ab');
@@ -124,28 +172,29 @@ check(Object.keys(zus.ki).length === 2, 'Einrichten der gemeinsamen Liste nimmt 
 /* ================================================================ im Browser */
 
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGM4UaEBRwzEcQBTUhaBGaoOzwAAAABJRU5ErkJggg==', 'base64');
-const KI_SCHLUESSEL = 'sk-ant-api03-TESTTESTTESTTESTTESTTESTTEST_abc';
+const KI_SCHLUESSEL = GKEY;
 
-function anthropicAttrappe() {
+/** Nachgebaute Gemini-API (streamGenerateContent) – der normale Weg in der App. */
+function geminiAttrappe() {
   const z = { anfragen: [], art: 'ok', verzoegerung: 0, antwort: ANTWORT };
   async function route(r) {
     const req = r.request();
     const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
     if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
-    z.anfragen.push({ kopf: req.headers(), rumpf: JSON.parse(req.postData() || '{}') });
+    z.anfragen.push({ url: req.url(), kopf: req.headers(), rumpf: JSON.parse(req.postData() || '{}') });
     if (z.verzoegerung) await new Promise((f) => { setTimeout(f, z.verzoegerung); });
-    if (z.art === 'schluessel') return r.fulfill({ status: 401, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ error: { type: 'authentication_error', message: 'invalid x-api-key' } }) });
-    if (z.art === 'ueberlastet') return r.fulfill({ status: 529, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ error: { type: 'overloaded_error', message: 'Overloaded' } }) });
-    return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: STROM(JSON.stringify(z.antwort)) });
+    if (z.art === 'schluessel') return r.fulfill({ status: 400, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT' } }) });
+    if (z.art === 'ueberlastet') return r.fulfill({ status: 503, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ error: { code: 503, message: 'The model is overloaded.', status: 'UNAVAILABLE' } }) });
+    return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: GEMINI_STROM(JSON.stringify(z.antwort)) });
   }
   return { z, route };
 }
 
 const browser = await starteBrowser();
 const gh = githubAttrappe();
-const ki = anthropicAttrappe();
+const ki = geminiAttrappe();
 const tobi = await handy(browser, { attrappe: gh });
-await tobi.ctx.route('https://api.anthropic.com/**', ki.route);
+await tobi.ctx.route('https://generativelanguage.googleapis.com/**', ki.route);
 const t = tobi.page;
 
 // gemeinsame Liste einrichten
@@ -162,16 +211,17 @@ await t.click('.reste-karte');
 check(!(await t.locator('#reste').isHidden()) && await t.locator('#k-schluessel').count() === 1, 'Resteverwertung öffnet – ohne Schlüssel zuerst das Einrichten');
 await t.fill('#k-schluessel', 'falsch');
 await t.click('#k-schluessel-form button[type="submit"]');
-check((await t.locator('#k-schluessel-fehler').innerText()).includes('sk-ant-'), 'falscher Schlüssel: Hinweis, wie er aussieht');
+check((await t.locator('#k-schluessel-fehler').innerText()).includes('AIza'), 'falscher Schlüssel: Hinweis, wie er aussieht');
 await t.fill('#k-schluessel', KI_SCHLUESSEL);
 await t.click('#k-schluessel-form button[type="submit"]');
 check(await t.locator('#k-form').count() === 1, 'mit Schlüssel: das Formular');
-check(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel.startsWith('sk-ant-')), 'der KI-Schlüssel liegt im Speicher dieses Handys');
+check(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel.startsWith('AIza')), 'der KI-Schlüssel liegt im Speicher dieses Handys');
+check((await t.locator('#k-form .fine').first().innerText()).includes('kostenlos'), 'mit Google-Schlüssel: „kostenlos“');
 
 // --- ohne Eingabe geht nichts
 await t.click('#k-los');
 check((await t.locator('#k-fehler').innerText()).includes('Schreib auf'), 'ohne Text und Foto: Hinweis statt Anfrage');
-check(ki.z.anfragen.length === 0, 'und keine Anfrage an Anthropic');
+check(ki.z.anfragen.length === 0, 'und keine Anfrage an Google');
 
 // --- Text, Foto, Portionen
 await t.fill('#k-text', '500 g Hähnchen, 1 Zucchini, Feta, Reis');
@@ -183,10 +233,11 @@ await t.click('#k-los');
 check(await bis(async () => (await t.locator('#d-title').count()) === 1 && (await t.locator('#d-title').innerText()) === ANTWORT.name, 10000), 'Claudes Rezept öffnet als Vorschlag');
 
 const anfrage = ki.z.anfragen[0];
-check(anfrage?.kopf['x-api-key'] === KI_SCHLUESSEL && anfrage.kopf['anthropic-dangerous-direct-browser-access'] === 'true', 'die Anfrage hat den Schlüssel und die Browser-Freigabe');
-const teile = anfrage.rumpf.messages[0].content;
-check(teile[0].type === 'image' && teile[0].source.data.length > 50 && /Portionen: 8/.test(teile.at(-1).text) && /Mediterranes/.test(teile.at(-1).text), 'mit Foto (als JPEG), Portionen und Wunsch');
-check((await t.locator('.ki-leiste').innerText()).includes('noch nicht gespeichert'), 'Leiste: noch nicht gespeichert');
+check(anfrage?.kopf['x-goog-api-key'] === KI_SCHLUESSEL && /gemini-3\.8-flash:streamGenerateContent\?alt=sse/.test(anfrage.url), 'die Anfrage geht mit dem Schlüssel an Gemini 3.8 Flash');
+const teile = anfrage.rumpf.contents[0].parts;
+check(teile[0].inlineData?.mimeType === 'image/jpeg' && teile[0].inlineData.data.length > 50 && /Portionen: 8/.test(teile.at(-1).text) && /Mediterranes/.test(teile.at(-1).text), 'mit Foto (als JPEG), Portionen und Wunsch');
+check(anfrage.rumpf.generationConfig.responseSchema.type === 'OBJECT', 'und dem Schema für die Antwort');
+check((await t.locator('.ki-leiste').innerText()).includes('noch nicht gespeichert') && (await t.locator('.ki-leiste').innerText()).includes('gemini-3.8-flash, kostenlos'), 'Leiste: noch nicht gespeichert, Gemini, kostenlos');
 check((await t.locator('.ki-anp').innerText()).includes('Auf eure Ziele gerechnet'), 'Leiste: welche Mengen die App angepasst hat');
 const kcal = Number((await t.locator('.label .c-kcal .v').innerText()).replace(/\D/g, ''));
 check(Math.abs(kcal - 443) <= 10, `das Etikett zeigt eine Box nahe am Ziel (${kcal} kcal)`);
@@ -218,11 +269,11 @@ await t.click('.tab[data-tab="rezepte"]');
 const einladung = `${APP_URL}#zugang=${encodeURIComponent(SCHLUESSEL)}&ki=${encodeURIComponent(KI_SCHLUESSEL)}`;
 await t.click('.tab[data-tab="einkauf"]');
 const linkFeld = await t.evaluate(() => document.querySelector('#z-linkfeld')?.value || '');
-check(linkFeld.includes('&ki=sk-ant-'), 'der Link fürs zweite Handy enthält jetzt auch den KI-Schlüssel');
+check(linkFeld.includes('&ki=AIza'), 'der Link fürs zweite Handy enthält jetzt auch den KI-Schlüssel');
 await t.click('.tab[data-tab="rezepte"]');
 const amy = await handy(browser, { attrappe: gh, adresse: einladung });
 const a = amy.page;
-check(await a.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel?.startsWith('sk-ant-')), 'Amy: der KI-Schlüssel kommt über den Link');
+check(await a.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel?.startsWith('AIza')), 'Amy: der KI-Schlüssel kommt über den Link');
 await a.fill('#z-name', 'Amy');
 await a.click('#z-los');
 await bis(async () => (await a.locator('#sync-text').innerText()) === 'Geteilt');
@@ -236,8 +287,8 @@ check((await a.locator('.ki-leiste').innerText()).includes('von Tobi'), 'mit „
 // --- Fehler
 ki.z.art = 'ueberlastet';
 await t.click('[data-act="ki-neu"]');
-check(await bis(async () => (await t.locator('#k-fehler').count()) === 1 && (await t.locator('#k-fehler').innerText()).includes('überlastet')), 'Claude überlastet: Hinweis, nochmal versuchen');
-check(ki.z.anfragen.at(-1).rumpf.messages[0].content.at(-1).text.includes('Bitte nicht noch einmal'), 'ein neuer Vorschlag soll ein anderes Gericht sein');
+check(await bis(async () => (await t.locator('#k-fehler').count()) === 1 && (await t.locator('#k-fehler').innerText()).includes('überlastet')), 'Gemini überlastet: Hinweis, nochmal versuchen');
+check(ki.z.anfragen.at(-1).rumpf.contents[0].parts.at(-1).text.includes('Bitte nicht noch einmal'), 'ein neuer Vorschlag soll ein anderes Gericht sein');
 ki.z.art = 'schluessel';
 await t.click('#k-los');
 check(await bis(async () => (await t.locator('#k-schluessel-fehler').count()) === 1 && (await t.locator('#k-schluessel-fehler').innerText()).includes('lehnt den Schlüssel ab')), 'Schlüssel abgelehnt: zurück zum Einrichten');

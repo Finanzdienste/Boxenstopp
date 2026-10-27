@@ -1,10 +1,10 @@
 /*
- * Reiter „Rezepte“, Teil Resteverwertung: Was ist noch da? → Claude macht ein
+ * Reiter „Rezepte“, Teil Resteverwertung: Was ist noch da? → die KI macht ein
  * Rezept → die App rechnet es auf eure Ziele → behalten, einkaufen, kochen.
  *
  *   1. #reste zeigt das Formular: Text, Fotos, Portionen, Dazukaufen,
  *      Wünsche. Ohne KI-Schlüssel zuerst das Einrichten.
- *   2. „Rezept machen“ schickt alles an Claude (ki.js) und zeigt, wie weit
+ *   2. „Rezept machen“ schickt alles an Gemini oder Claude (ki.js) und zeigt, wie weit
  *      die Antwort ist. Abbrechen geht jederzeit.
  *   3. Die Antwort wird geprüft und gerechnet (ki-rezept.js) und als
  *      Vorschlag in der normalen Rezeptansicht geöffnet, mit einer Leiste
@@ -15,12 +15,12 @@
  *      anderen Handy etwas auf der Liste, das es nicht kennt.
  *
  * Formular und Vorschlag überleben ein Neuladen (localStorage), die Fotos
- * nicht – sie sind nur für die eine Anfrage da und gehen nur an Anthropic.
+ * nicht – sie sind nur für die eine Anfrage da und gehen nur an den KI-Anbieter.
  */
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { esc, tagKurz, heute, nfi } from './format.js';
 import { kiBereinigen, mengenAnpassen, alsRezept, MAX_GESPEICHERT } from './ki-rezept.js';
-import { anfrageBauen, kiAnfragen, kostenCent, KI_API, KI_FEHLER } from './ki.js';
+import { rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, KI_FEHLER } from './ki.js';
 import { ladeKi, speichereKi, loescheKi, kiAus, einladungsLink } from './zugang.js';
 import { opKiBehalten, opKiWeg, opTeil, opTeilWeg } from './liste.js';
 import { oeffneRezept, schliesseRezept, offenesRezept, rasterZeichnen, ic } from './ansicht-rezepte.js';
@@ -111,7 +111,7 @@ function loeschen(rid) {
 
 /* --------------------------------------------- Leiste im Rezept */
 
-const kostenText = (c) => (c < 1 ? 'unter 1 Cent' : `ca. ${Math.round(c)} Cent`);
+const kostenText = (c) => (c === 0 ? 'kostenlos' : c < 1 ? 'unter 1 Cent' : `ca. ${Math.round(c)} Cent`);
 
 function kiLeiste(r) {
   const v = r.ki?.von || {};
@@ -124,7 +124,7 @@ function kiLeiste(r) {
     ? `<p class="ki-anp"><b>Auf eure Ziele gerechnet:</b> ${r.ki.aenderungen.map((a) => `${esc(a.name)} ${nfi(a.vorher)} → ${nfi(a.nachher)} ${esc(a.einheit)}`).join(' · ')}</p>` : '';
   const warn = daneben ? `<p class="ki-warn">Mit diesen Zutaten trifft die Box das Ziel nicht ganz, siehe die Nährwerte oben.${r.ki.hinweis ? ` ${esc(r.ki.hinweis)}` : ''}</p>` : '';
   const hinweis = !daneben && r.ki.hinweis ? `<p class="ki-hinweis">${esc(r.ki.hinweis)}</p>` : '';
-  const kosten = !gespeichert && v.kosten ? ` · Anfrage ${kostenText(v.kosten)}` : '';
+  const kosten = !gespeichert && typeof v.kosten === 'number' ? ` · ${esc(v.modell || 'KI')}, ${kostenText(v.kosten)}` : '';
   const knoepfe = gespeichert
     ? `<button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button><button type="button" class="btn btn-quiet" data-act="ki-loeschen">Löschen</button>`
     : `<button type="button" class="btn btn-primary" data-act="ki-behalten"${app.listeDa ? '' : ' disabled'}>Behalten</button><button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button><button type="button" class="btn btn-quiet" data-act="ki-verwerfen">Verwerfen</button>`;
@@ -160,19 +160,22 @@ function karteZeichnen() {
 
 function einrichtenHTML(schluessel) {
   const link = schluessel ? einladungsLink(app.zugang?.token || '', schluessel) : '';
+  const da = anbieterVon(schluessel);
   return `<form class="ki-box" id="k-schluessel-form" novalidate>
 <h2>Resteverwertung einrichten</h2>
-<p>Die App fragt Claude über die API von Anthropic. Dafür brauchst du einmal einen API-Schlüssel. Der läuft getrennt von einem Claude-Abo, abgerechnet wird pro Anfrage – ein Rezept kostet ein paar Cent.</p>
+<p>Die App fragt Googles Gemini direkt vom Handy aus. Das ist kostenlos, ohne Kreditkarte – du brauchst nur einmal einen API-Schlüssel von Google:</p>
 <ol class="ki-anleitung">
-<li>Auf <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a> anmelden, unter <b>Billing</b> etwas Guthaben aufladen und am besten ein Monatslimit setzen.</li>
-<li>Unter <b>API Keys</b> → <b>Create Key</b> einen Schlüssel anlegen, z. B. „Boxenstopp“.</li>
-<li>Den Schlüssel (beginnt mit sk-ant-) hier einfügen.</li>
+<li>Auf <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> mit deinem Google-Konto anmelden.</li>
+<li><b>Create API key</b> (bei der Frage nach dem Projekt: ein neues anlegen lassen).</li>
+<li>Den Schlüssel (beginnt mit AIza) hier einfügen.</li>
 </ol>
 <label for="k-schluessel">API-Schlüssel</label>
-<input id="k-schluessel" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-… oder der Link vom anderen Handy">
+<input id="k-schluessel" type="password" autocomplete="off" spellcheck="false" placeholder="AIza… oder der Link vom anderen Handy">
 <p class="zugang-fehler" id="k-schluessel-fehler"${fehler && einrichten ? '' : ' hidden'}>${esc(einrichten ? fehler || '' : '')}</p>
 <div class="zugang-btns"><button type="submit" class="btn btn-primary">Speichern</button>${schluessel ? '<button type="button" class="btn btn-quiet" data-act="k-einrichten-zu">Abbrechen</button><button type="button" class="btn btn-quiet" data-act="k-schluessel-weg">Schlüssel entfernen</button>' : ''}</div>
-<p class="fine">Der Schlüssel bleibt nur auf diesem Handy. Aufs zweite Handy kommt er mit dem Link unter der Einkaufsliste${schluessel ? ' oder mit diesem: <button type="button" class="linkbtn" data-act="k-link">Link fürs zweite Handy kopieren</button>' : ''}.</p>
+${da ? `<p class="fine">Eingetragen ist ein Schlüssel von ${esc(ANBIETER[da].name)} (${esc(ANBIETER[da].modell)}).</p>` : ''}
+<p class="fine">Gratis heißt bei Google: Was ihr schickt (Fotos, Zutaten), darf Google zum Verbessern seiner Produkte nutzen. Schick also nichts Privates mit aufs Foto. Der Schlüssel bleibt nur auf diesem Handy. Aufs zweite Handy kommt er mit dem Link unter der Einkaufsliste${schluessel ? ' oder mit diesem: <button type="button" class="linkbtn" data-act="k-link">Link fürs zweite Handy kopieren</button>' : ''}.</p>
+<p class="fine">Wer lieber Claude nimmt: Ein Anthropic-Schlüssel (sk-ant-…, console.anthropic.com, kostet ein paar Cent pro Rezept) geht hier genauso.</p>
 ${link ? `<input class="z-linkfeld" id="k-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>` : ''}
 </form>`;
 }
@@ -197,14 +200,14 @@ function formularHTML() {
 <input id="k-wunsch" type="text" maxlength="200" placeholder="z. B. was Asiatisches, ohne Ofen, mit Reis" value="${esc(eingabe.wuensche)}">
 <p class="zugang-fehler" id="k-fehler"${fehler ? '' : ' hidden'}>${esc(fehler || '')}</p>
 <button type="submit" class="btn btn-primary k-los" id="k-los">Rezept machen</button>
-<p class="fine">Dauert etwa eine Minute und kostet ein paar Cent. Fotos und Text gehen nur an Anthropic. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
+<p class="fine">Dauert etwa eine Minute${anbieterVon(ladeKi()) === 'gemini' ? ' und ist kostenlos. Fotos und Text gehen nur an Google' : ' und kostet ein paar Cent. Fotos und Text gehen nur an Anthropic'}. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
 </form>`;
 }
 
 function laufHTML() {
   return `<div class="ki-lauf" role="status" aria-live="polite">
 <div class="ki-topf" aria-hidden="true"><span></span><span></span><span></span></div>
-<p class="ki-lauf-t">Claude kocht …</p>
+<p class="ki-lauf-t">${anbieterVon(ladeKi()) === 'gemini' ? 'Gemini' : 'Claude'} kocht …</p>
 <p class="ki-lauf-d" id="k-lauf-d">${laufText()}</p>
 <button type="button" class="btn btn-quiet" data-act="k-abbrechen">Abbrechen</button>
 </div>`;
@@ -243,7 +246,7 @@ export function resteZeichnen() {
   const schluessel = ladeKi();
   const kopf = `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
 <div class="d-head"><span class="tape">Resteverwertung</span><h1 id="k-titel">Was ist noch da?</h1>
-<p class="d-desc">Schreib auf oder fotografier, was im Kühlschrank und im Vorrat liegt. Claude macht daraus ein Rezept für eure Boxen, und die App rechnet die Mengen auf ${app.ziel.kcal} kcal, ${String(app.ziel.p).replace('.', ',')} g P, ${String(app.ziel.kh).replace('.', ',')} g KH und ${String(app.ziel.f).replace('.', ',')} g F pro Box.</p></div>`;
+<p class="d-desc">Schreib auf oder fotografier, was im Kühlschrank und im Vorrat liegt. Die KI macht daraus ein Rezept für eure Boxen, und die App rechnet die Mengen auf ${app.ziel.kcal} kcal, ${String(app.ziel.p).replace('.', ',')} g P, ${String(app.ziel.kh).replace('.', ',')} g KH und ${String(app.ziel.f).replace('.', ',')} g F pro Box.</p></div>`;
   let rumpf;
   if (!schluessel || einrichten) rumpf = einrichtenHTML(schluessel);
   else if (lauf) rumpf = laufHTML();
@@ -336,7 +339,8 @@ async function rezeptMachen() {
   lauf.timer = setInterval(laufZeichnen, 1000);
   resteZeichnen();
   const meinLauf = lauf;
-  // Bildschirm an, solange Claude schreibt – ein schlafendes Handy reißt den Strom ab.
+  const anbieter = anbieterVon(schluessel) || 'anthropic';
+  // Bildschirm an, solange die KI schreibt – ein schlafendes Handy reißt den Strom ab.
   try { meinLauf.wach = await navigator.wakeLock?.request('screen'); } catch { /* dann eben ohne */ }
   const fertig = () => {
     clearInterval(meinLauf.timer);
@@ -344,7 +348,7 @@ async function rezeptMachen() {
     lauf = null;
   };
   try {
-    const rumpf = anfrageBauen({
+    const rumpf = rumpfFuer(anbieter, {
       text,
       wuensche: eingabe.wuensche,
       fotos: fotos.map((f) => f.b64),
@@ -358,14 +362,14 @@ async function rezeptMachen() {
     });
     const { eingabe: roh, usage } = await kiAnfragen(rumpf, {
       schluessel,
-      api: lese('__kiapi', null) || KI_API,
+      api: lese('__kiapi', null) || '',
       signal: meinLauf.controller.signal,
       beiFortschritt: (f) => { meinLauf.zeichen = f.zeichen; meinLauf.schritte = f.schritte; laufZeichnen(); },
     });
     const { r, fehler: f, art } = kiBereinigen({ ...roh, portionen: eingabe.portionen });
     if (!r) throw Object.assign(new Error(f), { art });
     const id = `ki-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-    entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), kosten: kostenCent(usage) } };
+    entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), kosten: kostenCent(usage, anbieter), modell: ANBIETER[anbieter].modell } };
     entwurfMerken();
     kiAbgleichen();
     fertig();
@@ -455,7 +459,7 @@ export function absendenKi(ev) {
     ev.preventDefault();
     const s = kiAus($('#k-schluessel').value);
     if (!s) {
-      fehler = 'Das sieht nicht nach einem Schlüssel aus. Er beginnt mit sk-ant-.';
+      fehler = 'Das sieht nicht nach einem Schlüssel aus. Er beginnt mit AIza (Google) oder sk-ant- (Anthropic).';
       const f = $('#k-schluessel-fehler');
       if (f) { f.textContent = fehler; f.hidden = false; }
       return true;

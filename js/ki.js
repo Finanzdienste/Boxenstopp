@@ -1,35 +1,54 @@
 /*
- * Resteverwertung, der Gesprächsteil: die Anfrage an Claude und das Lesen der
- * Antwort.
+ * Resteverwertung, der Gesprächsteil: die Anfrage an die KI und das Lesen der
+ * Antwort – direkt vom Handy aus, mit dem eigenen Schlüssel (zugang.js, nur
+ * im localStorage). Zwei Anbieter, der Schlüssel entscheidet:
  *
- * Die App ruft die Messages-API von Anthropic direkt vom Handy aus auf, mit
- * dem eigenen API-Schlüssel (zugang.js, nur im localStorage). Dafür gibt es
- * den Kopf „anthropic-dangerous-direct-browser-access“: Er erlaubt Aufrufe aus
- * dem Browser, wenn – wie hier – jeder seinen eigenen Schlüssel mitbringt.
+ *   AIza…     Google, Gemini-API (gemini-3.8-flash). Kostenlos ohne
+ *             Kreditkarte; dafür darf Google die Anfragen zum Verbessern
+ *             seiner Produkte nutzen. Das ist der normale Weg.
+ *   sk-ant-…  Anthropic, Messages-API (claude-sonnet-5-5), ein paar Cent pro
+ *             Rezept. Der Kopf „anthropic-dangerous-direct-browser-access“
+ *             erlaubt den Aufruf aus dem Browser, wenn – wie hier – jeder
+ *             seinen eigenen Schlüssel mitbringt.
  *
- * Claude muss das Werkzeug „rezept_ausgeben“ benutzen (tool_choice). Dessen
- * Eingabe ist das Rezept als JSON nach SCHEMA (ki-rezept.js), Stück für Stück
- * gestreamt – so sieht man, dass etwas passiert, und eine lange Antwort reißt
- * nicht ab. Fotos gehen als JPEG mit, vorher auf höchstens 1280 px verkleinert
- * (ansicht-ki.js).
+ * Beide liefern das Rezept als JSON nach SCHEMA (ki-rezept.js): Gemini als
+ * JSON-Antwort mit responseSchema, Claude als Eingabe des Werkzeugs
+ * „rezept_ausgeben“ (tool_choice). Beides Stück für Stück gestreamt – so sieht
+ * man, dass etwas passiert, und eine lange Antwort reißt nicht ab. Fotos gehen
+ * als JPEG mit, vorher auf höchstens 1280 px verkleinert (ansicht-ki.js).
  *
- * anfrageBauen() ist ohne Netz und ohne DOM, tests/test-ki.mjs prüft daran,
- * dass alle Regeln mitgehen.
+ * anfrageBauen() und rumpfFuer() sind ohne Netz und ohne DOM, tests/test-ki.mjs
+ * prüft daran, dass alle Regeln mitgehen.
  */
 import { SCHEMA } from './ki-rezept.js';
 
-export const KI_API = 'https://api.anthropic.com/v1/messages';
-export const MODELL = 'claude-sonnet-5-5';
-/** Preise in US-Dollar pro Million Tokens (Sonnet 5.5) – für die Kosten-Anzeige. */
-const PREIS = { ein: 2, aus: 10 };
+export const ANBIETER = {
+  gemini: {
+    name: 'Google',
+    modell: 'gemini-3.8-flash',
+    api: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse',
+    preis: null, // kostenlos
+  },
+  anthropic: {
+    name: 'Anthropic',
+    modell: 'claude-sonnet-5-5',
+    api: 'https://api.anthropic.com/v1/messages',
+    preis: { ein: 2, aus: 10 }, // US-Dollar pro Million Tokens (Sonnet 5.5)
+  },
+};
+/** Welcher Anbieter zu einem Schlüssel gehört – oder '' für keinen. */
+export const anbieterVon = (schluessel) => (/^AIza/.test(String(schluessel || '')) ? 'gemini' : /^sk-ant-/.test(String(schluessel || '')) ? 'anthropic' : '');
+export const KI_API = ANBIETER.anthropic.api;
+export const MODELL = ANBIETER.anthropic.modell;
 const WERKZEUG = 'rezept_ausgeben';
 
-export function systemText({ portionen, ziel, dazukaufen, katalog }) {
+export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'anthropic' }) {
   const kat = Object.entries(katalog || {})
     .filter(([, v]) => v.c !== 'haushalt')
     .map(([k, v]) => `${k}=${v.n}`)
     .join('; ');
-  return `Du bist der Meal-Prep-Koch von Tobi und Amy. Aus dem, was bei ihnen noch im Kühlschrank und im Vorrat ist, machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es mit dem Werkzeug ${WERKZEUG} aus.
+  const ausgabe = anbieter === 'gemini' ? 'als JSON genau nach dem vorgegebenen Schema' : `mit dem Werkzeug ${WERKZEUG}`;
+  return `Du bist der Meal-Prep-Koch von Tobi und Amy. Aus dem, was bei ihnen noch im Kühlschrank und im Vorrat ist, machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus.
 
 Ziel pro Box: ${ziel.kcal} kcal, ${ziel.p} g Protein, ${ziel.kh} g Kohlenhydrate, ${ziel.f} g Fett. Die App rechnet die Nährwerte selbst aus deinen Werten pro 100 g nach und verschiebt die Mengen der Zutaten mit anpassbar: true zwischen min und max, bis jede Box das Ziel trifft. Plane das Gericht so, dass das mit sinnvollen Mengen aufgeht: genug mageres Protein, eine Sättigungsbeilage, Fett vor allem aus Öl, Käse oder Sahne.
 
@@ -63,7 +82,7 @@ Zubereitung, genau so, wie die App sie zeigt:
 - ruhe: Wartezeit, die danach im Hintergrund weiterläuft (Marinieren, Ofen vorheizen, Wasser aufkochen etwa 12, Reis quellen). nebenbei: true für einen Schritt, der in der Wartezeit des Schritts davor passiert (Reis aufsetzen, während die Sauce köchelt).
 - portionieren: Topf mit dem Essen wiegen und im Rechner bei „Mit Essen“ eintragen, die Boxen füllen, Döschen gleich mit Deckel kalt stellen, zum Schluss „Offen abkühlen lassen, höchstens 1–2 Std., dann Deckel drauf und kalt stellen“.
 
-Antworte nur mit dem Werkzeug, alles auf Deutsch.`;
+${anbieter === 'gemini' ? 'Antworte nur mit dem JSON, ohne Text davor oder danach' : 'Antworte nur mit dem Werkzeug'}, alles auf Deutsch.`;
 }
 
 export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, mag = [], magNicht = [], vermeiden = [] }) {
@@ -79,28 +98,73 @@ export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, m
   return zeilen.join('\n');
 }
 
-/** Der Rumpf der Anfrage an /v1/messages (ohne stream – das setzt kiAnfragen). */
+/** Der Rumpf der Anfrage an Anthropics /v1/messages (ohne stream – das setzt kiAnfragen). */
 export function anfrageBauen(e) {
   const inhalt = (e.fotos || []).map((b64) => ({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } }));
   inhalt.push({ type: 'text', text: nutzerText({ ...e, fotos: (e.fotos || []).length }) });
   return {
     model: MODELL,
     max_tokens: 16000,
-    system: systemText(e),
+    system: systemText({ ...e, anbieter: 'anthropic' }),
     tools: [{ name: WERKZEUG, description: 'Gibt das fertige Rezept an die App.', input_schema: SCHEMA }],
     tool_choice: { type: 'tool', name: WERKZEUG },
     messages: [{ role: 'user', content: inhalt }],
   };
 }
 
+/*
+ * Geminis responseSchema ist eine OpenAPI-Teilmenge: Typen in Großbuchstaben,
+ * nur type, description, enum, items, properties, required. Alles andere
+ * (minimum, maximum) prüft ki-rezept.js ohnehin selbst.
+ */
+export function geminiSchema(s) {
+  if (Array.isArray(s)) return s.map(geminiSchema);
+  if (!s || typeof s !== 'object') return s;
+  const o = {};
+  if (s.type) o.type = String(s.type).toUpperCase();
+  if (s.description) o.description = s.description;
+  if (s.enum) o.enum = s.enum;
+  if (s.items) o.items = geminiSchema(s.items);
+  if (s.properties) o.properties = Object.fromEntries(Object.entries(s.properties).map(([k, v]) => [k, geminiSchema(v)]));
+  if (s.required) o.required = s.required;
+  return o;
+}
+
+/** Der Rumpf der Anfrage an Geminis streamGenerateContent. */
+export function anfrageBauenGemini(e) {
+  const parts = (e.fotos || []).map((b64) => ({ inlineData: { mimeType: 'image/jpeg', data: b64 } }));
+  parts.push({ text: nutzerText({ ...e, fotos: (e.fotos || []).length }) });
+  return {
+    systemInstruction: { parts: [{ text: systemText({ ...e, anbieter: 'gemini' }) }] },
+    contents: [{ role: 'user', parts }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: geminiSchema(SCHEMA),
+      maxOutputTokens: 16000,
+    },
+  };
+}
+
+/** Der passende Rumpf für den Anbieter des Schlüssels. */
+export const rumpfFuer = (anbieter, e) => (anbieter === 'gemini' ? anfrageBauenGemini(e) : anfrageBauen(e));
+
 /* ------------------------------------------------------------- Fehler */
 
 export const KI_FEHLER = {
-  schluessel: 'Anthropic lehnt den Schlüssel ab. Prüf ihn unter console.anthropic.com → API Keys und trag ihn neu ein.',
-  guthaben: 'Auf dem Anthropic-Konto ist kein Guthaben. In der Console unter Billing aufladen, dann nochmal.',
-  grenze: 'Gerade zu viele Anfragen. In einer Minute nochmal versuchen.',
-  ueberlastet: 'Claude ist gerade überlastet. Gleich nochmal versuchen.',
-  netz: 'Keine Verbindung zu Anthropic. Prüf das Internet und versuch es nochmal.',
+  gemini: {
+    schluessel: 'Google lehnt den Schlüssel ab. Prüf ihn unter aistudio.google.com → API keys und trag ihn neu ein.',
+    grenze: 'Das Gratis-Kontingent bei Google ist für heute aufgebraucht oder gerade zu viele Anfragen. In einer Minute nochmal – spätestens morgen ab 9 Uhr geht es wieder.',
+    ueberlastet: 'Gemini ist gerade überlastet. Gleich nochmal versuchen.',
+    netz: 'Keine Verbindung zu Google. Prüf das Internet und versuch es nochmal.',
+    sicherheit: 'Gemini wollte zu diesem Foto oder Text kein Rezept machen. Versuch es mit einer Liste statt Foto.',
+  },
+  anthropic: {
+    schluessel: 'Anthropic lehnt den Schlüssel ab. Prüf ihn unter console.anthropic.com → API Keys und trag ihn neu ein.',
+    guthaben: 'Auf dem Anthropic-Konto ist kein Guthaben. In der Console unter Billing aufladen, dann nochmal.',
+    grenze: 'Gerade zu viele Anfragen. In einer Minute nochmal versuchen.',
+    ueberlastet: 'Claude ist gerade überlastet. Gleich nochmal versuchen.',
+    netz: 'Keine Verbindung zu Anthropic. Prüf das Internet und versuch es nochmal.',
+  },
   zulang: 'Die Antwort wurde zu lang und ist abgebrochen. Nochmal versuchen, vielleicht mit weniger Zutaten.',
   zugross: 'Die Fotos sind zu groß. Nimm weniger Fotos.',
   modell: 'Das KI-Modell ist gerade nicht verfügbar.',
@@ -108,16 +172,16 @@ export const KI_FEHLER = {
   abbruch: 'Abgebrochen.',
 };
 
-export function kiFehler(art, detail = '') {
-  const e = new Error(KI_FEHLER[art] || KI_FEHLER.antwort);
+export function kiFehler(art, detail = '', anbieter = 'anthropic') {
+  const e = new Error(KI_FEHLER[anbieter]?.[art] || KI_FEHLER[art] || KI_FEHLER.antwort);
   e.art = art;
   e.detail = String(detail || '').slice(0, 300);
   return e;
 }
 
 function artVonStatus(status, info) {
-  const text = `${info?.error?.type || ''} ${info?.error?.message || ''}`;
-  if (status === 401 || status === 403) return 'schluessel';
+  const text = `${info?.error?.type || ''} ${info?.error?.status || ''} ${info?.error?.message || ''}`;
+  if (status === 401 || status === 403 || /API key not valid|API_KEY_INVALID/i.test(text)) return 'schluessel';
   if (/credit|balance|billing|guthaben/i.test(text)) return 'guthaben';
   if (status === 413) return 'zugross';
   if (status === 404 || (status === 400 && /model/i.test(text))) return 'modell';
@@ -126,50 +190,70 @@ function artVonStatus(status, info) {
   return 'antwort';
 }
 
-/** Ungefähre Kosten einer Anfrage in Cent (US-Dollar ≈ Euro). */
-export const kostenCent = (usage) => ((usage.ein || 0) * PREIS.ein + (usage.aus || 0) * PREIS.aus) / 1e4;
+/** Ungefähre Kosten einer Anfrage in Cent (US-Dollar ≈ Euro); 0 bei Gemini. */
+export function kostenCent(usage, anbieter = 'anthropic') {
+  const preis = ANBIETER[anbieter]?.preis;
+  if (!preis) return 0;
+  return ((usage.ein || 0) * preis.ein + (usage.aus || 0) * preis.aus) / 1e4;
+}
 
 /*
  * Die Anfrage abschicken und den Strom lesen (server-sent events). Gibt
- * { eingabe, usage } zurück: eingabe ist das JSON aus dem Werkzeug.
+ * { eingabe, usage, anbieter } zurück: eingabe ist das Rezept als JSON.
  * beiFortschritt({ zeichen, schritte }) meldet, wie weit die Antwort ist.
+ * Der Anbieter ergibt sich aus dem Schlüssel; `api` übersteuert die Adresse
+ * (für die Tests).
  */
-export async function kiAnfragen(rumpf, { schluessel, api = KI_API, signal, beiFortschritt = () => {} }) {
+export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiFortschritt = () => {} }) {
+  const anbieter = anbieterVon(schluessel) || 'anthropic';
+  const gemini = anbieter === 'gemini';
+  const fehler = (art, detail) => kiFehler(art, detail, anbieter);
   let res;
   try {
-    res = await fetch(api, {
+    res = await fetch(api || ANBIETER[anbieter].api, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': schluessel,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({ ...rumpf, stream: true }),
+      headers: gemini
+        ? { 'content-type': 'application/json', 'x-goog-api-key': schluessel }
+        : { 'content-type': 'application/json', 'x-api-key': schluessel, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify(gemini ? rumpf : { ...rumpf, stream: true }),
       signal,
     });
   } catch (e) {
-    throw kiFehler(e?.name === 'AbortError' ? 'abbruch' : 'netz', e?.message);
+    throw fehler(e?.name === 'AbortError' ? 'abbruch' : 'netz', e?.message);
   }
   if (!res.ok) {
     let info = null;
     try { info = await res.json(); } catch { /* kein JSON */ }
-    throw kiFehler(artVonStatus(res.status, info), info?.error?.message || `HTTP ${res.status}`);
+    if (Array.isArray(info)) info = info[0]; // Gemini schickt Fehler im Strom als Liste
+    throw fehler(artVonStatus(res.status, info), info?.error?.message || `HTTP ${res.status}`);
   }
-  if (!res.body?.getReader) throw kiFehler('antwort', 'kein Datenstrom');
+  if (!res.body?.getReader) throw fehler('antwort', 'kein Datenstrom');
 
   const leser = res.body.getReader();
   const dekoder = new TextDecoder();
   const usage = { ein: 0, aus: 0 };
   let puffer = '';
   let json = '';
-  let werkzeug = false;
+  let werkzeug = gemini;
   let stopp = null;
+  const fortschritt = () => beiFortschritt({ zeichen: json.length, schritte: (json.match(/"min"\s*:/g) || []).length });
+  const verarbeiteGemini = (ev) => {
+    if (ev.error) throw fehler(artVonStatus(Number(ev.error.code) || 500, ev), ev.error.message);
+    const k = ev.candidates?.[0];
+    for (const p of k?.content?.parts || []) if (typeof p.text === 'string' && !p.thought) json += p.text;
+    if (k?.finishReason && k.finishReason !== 'STOP') stopp = k.finishReason;
+    if (ev.usageMetadata) {
+      usage.ein = Number(ev.usageMetadata.promptTokenCount) || usage.ein;
+      usage.aus = (Number(ev.usageMetadata.candidatesTokenCount) || 0) + (Number(ev.usageMetadata.thoughtsTokenCount) || 0) || usage.aus;
+    }
+    fortschritt();
+  };
   const verarbeite = (block) => {
     const daten = block.split('\n').filter((z) => z.startsWith('data:')).map((z) => z.slice(5).trimStart()).join('\n');
     if (!daten) return;
     let ev;
     try { ev = JSON.parse(daten); } catch { return; }
+    if (gemini) { verarbeiteGemini(ev); return; }
     switch (ev.type) {
       case 'message_start':
         usage.ein = Number(ev.message?.usage?.input_tokens) || 0;
@@ -180,7 +264,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = KI_API, signal, beiF
       case 'content_block_delta':
         if (ev.delta?.type === 'input_json_delta') {
           json += ev.delta.partial_json || '';
-          beiFortschritt({ zeichen: json.length, schritte: (json.match(/"min"\s*:/g) || []).length });
+          fortschritt();
         }
         return;
       case 'message_delta':
@@ -188,13 +272,13 @@ export async function kiAnfragen(rumpf, { schluessel, api = KI_API, signal, beiF
         usage.aus = Number(ev.usage?.output_tokens) || usage.aus;
         return;
       case 'error':
-        throw kiFehler(/overloaded/i.test(ev.error?.type || '') ? 'ueberlastet' : 'antwort', ev.error?.message);
+        throw fehler(/overloaded/i.test(ev.error?.type || '') ? 'ueberlastet' : 'antwort', ev.error?.message);
       default:
     }
   };
   for (;;) {
     let stueck;
-    try { stueck = await leser.read(); } catch (e) { throw kiFehler(e?.name === 'AbortError' ? 'abbruch' : 'netz', e?.message); }
+    try { stueck = await leser.read(); } catch (e) { throw fehler(e?.name === 'AbortError' ? 'abbruch' : 'netz', e?.message); }
     if (stueck.done) break;
     puffer += dekoder.decode(stueck.value, { stream: true }).replace(/\r\n/g, '\n');
     for (let i = puffer.indexOf('\n\n'); i >= 0; i = puffer.indexOf('\n\n')) {
@@ -203,11 +287,14 @@ export async function kiAnfragen(rumpf, { schluessel, api = KI_API, signal, beiF
     }
   }
   if (puffer.trim()) verarbeite(puffer);
-  if (stopp === 'max_tokens') throw kiFehler('zulang');
-  if (!werkzeug || !json) throw kiFehler('antwort', 'kein Werkzeug in der Antwort');
+  if (stopp === 'max_tokens' || stopp === 'MAX_TOKENS') throw fehler('zulang');
+  if (gemini && stopp && /SAFETY|PROHIBITED|BLOCKLIST|RECITATION|IMAGE_SAFETY/.test(stopp)) throw fehler('sicherheit', stopp);
+  if (!werkzeug || !json.trim()) throw fehler('antwort', 'keine Antwort');
+  // Zur Sicherheit: Gemini packt JSON hin und wieder in ```json … ```.
+  const roh = json.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
   try {
-    return { eingabe: JSON.parse(json), usage };
+    return { eingabe: JSON.parse(roh), usage, anbieter };
   } catch {
-    throw kiFehler('antwort', 'JSON kaputt');
+    throw fehler('antwort', 'JSON kaputt');
   }
 }
