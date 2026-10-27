@@ -21,7 +21,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `boxenstopp-${VERSION}`;
 
 const SHELL = [
@@ -33,6 +33,7 @@ const SHELL = [
   './js/format.js',
   './js/liste.js',
   './js/bereiche.js',
+  './js/zeiten.js',
   './js/speicher.js',
   './js/zugang.js',
   './js/ansicht-rezepte.js',

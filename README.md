@@ -11,11 +11,33 @@ Zwei Reiter:
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 16 Rezepte als Boxen mit Kreppband, Filter (Hähnchen, Rind, Pute, Veggie, Reis, Nudeln, Kartoffel & Co., bis 45 Min., auf der Liste). Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, Schritte zum Abhaken – jede Menge steht direkt im Schritt und ist hervorgehoben („800 g Hähnchenbrust in Würfel schneiden“), damit man nicht nach oben scrollen muss –, „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Rezepte** | 16 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., unter 1½ Std., auf der Liste). Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
-15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal.
+15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein Schwein,
+kein Putenhack.
+
+### Zubereitung
+
+Jedes Rezept läuft in drei Abschnitten, jeder mit seiner Zeit:
+
+1. **Vorbereiten** – alles schneiden, abwiegen und abmessen, bevor der Herd
+   angeht. Es landet in nummerierten Schalen („→ Schale 2“); oben steht, welche
+   Schalen (klein, mittel, groß) und Töpfe bereitstehen sollen. Fleisch kommt
+   zuletzt aufs Brett, danach wird abgewaschen.
+2. **Kochen** – nur noch „Schale 2 dazu“. Die Schale erscheint im Schritt als
+   Schild mit Nummer und Inhalt. Was in einer langen Wartezeit nebenbei geht
+   (Reis, Kartoffeln schälen, während das Gulasch schmort), steht eingerückt
+   als „währenddessen“ darunter.
+3. **Portionieren** – wiegen, durch 8, Boxen füllen, Döschen kalt stellen.
+
+Ein Schritt ist eine Handlung und eine Zeile zum Abhaken, rechts mit seinen
+Minuten. Der nächste offene Schritt ist markiert. Die Zeiten sind für ein
+ruhiges Tempo zu Hause gerechnet, mit Waschen, Schälen und Abfall wegräumen
+(Normen in `NORM`, werkzeug/rezepte.py), und `js/zeiten.js` rechnet daraus
+Abschnitte und Gesamtzeit: Wartezeiten (`ruhe`, etwa Marinieren) laufen im
+Hintergrund weiter, „währenddessen“ kostet keine zusätzliche Zeit.
 
 ## Die gemeinsame Liste
 
@@ -110,9 +132,15 @@ Becher), 8 Portionen, ordentlich gewürzt. Jede Zutat der Einkaufsliste
 braucht einen Schlüssel im Katalog `CAT`, und ein Schlüssel hat in allen
 Rezepten dieselbe Einheit – sonst lassen sich Mengen nicht addieren.
 
-In den Schritten steht jede Zutat mit ihrer Menge („500 g Putenhack dazugeben“,
-„die Zwiebeln (300 g)“); der Test prüft das für alle Grammangaben. Die App
-hebt Mengen mit Einheit automatisch hervor. Verbrauchsmaterial (Backpapier,
+Im Vorbereiten steht jede Zutat mit ihrer Menge („3 Zwiebeln (300 g) schälen
+und fein würfeln → Schale 1“); beim Kochen wird nichts mehr abgewogen,
+abgemessen oder ausgepresst – außer eine Zutat geht als ganze Packung in den
+Topf („500 g Rinderhack“). tests/test-rezepte.mjs prüft das, dazu: jede Schale
+wird gefüllt, bevor sie gebraucht wird, die Nummern folgen der Reihenfolge
+beim Kochen, jedes Gewürz kommt in den Schritten vor, „währenddessen“ passt
+in die Zeit daneben, und die Zeiten aus Python und `js/zeiten.js` stimmen
+überein. Das Skript selbst bricht ab, wenn eine Schale fehlt oder nie
+gebraucht wird. Die App hebt Mengen mit Einheit automatisch hervor. Verbrauchsmaterial (Backpapier,
 Döschen, Spieße) kommt mit `H(...)` ins Rezept und steht dann unter
 „Extras“. Die Abteilung im Katalog entscheidet den Bereich der Liste:
 `obst` → Frisches, `fleisch`/`kuehl` → Tierisches,
@@ -134,6 +162,7 @@ neues Rezept muss dort nichts geändert werden.
 | `js/zugang.js` | Schlüssel und Name, Einladungslink |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | die beiden Reiter |
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
+| `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“ |
 | `sw.js` | Offline-Betrieb; `VERSION` hochzählen, wenn sich eine Datei aus `SHELL` ändert |
 
 ## Tests

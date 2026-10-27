@@ -4,11 +4,15 @@
  * Erzeugt werden sie mit werkzeug/rezepte.py. Hier steht, was jedes Rezept
  * erfüllen muss: 8 Boxen nahe am Ziel, jede Zutat mit Schlüssel aus dem
  * Katalog, eine Einheit pro Schlüssel (sonst lassen sich Mengen aus zwei
- * Rezepten nicht addieren) und eine Nährwertrechnung, die aufgeht.
+ * Rezepten nicht addieren), eine Nährwertrechnung, die aufgeht – und eine
+ * Zubereitung als Mise en place: erst alles in nummerierte Schalen, dann
+ * kochen; ein Schritt pro Zeile, jede Schale gefüllt, bevor sie gebraucht
+ * wird, Zeiten, die zusammenpassen.
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
+import { zeitVon, nebenZuLang } from '../js/zeiten.js';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -46,19 +50,117 @@ check(!ohneSchluessel.length, `jede Zutat und jedes Gewürz hat einen Katalogsch
 const gemischt = Object.entries(einheiten).filter(([, u]) => u.size > 1).map(([k, u]) => `${k} (${[...u].join('/')})`);
 check(!gemischt.length, `eine Einheit pro Schlüssel${gemischt.length ? `: ${gemischt.join(', ')}` : ''}`);
 
-const unvollstaendig = rezepte.filter((r) => !(r.name && r.short && r.desc && r.time > 0 && r.fridge && r.freeze && r.steps.length >= 4 && r.steps.every((s) => s.t && s.d) && r.items.some((it) => typeof it.q === 'number' && !it.pantry && !it.opt)));
-check(!unvollstaendig.length, `jedes Rezept hat Name, Kurzname, Beschreibung, Zeit, Lagerung, Schritte und Einkaufszutaten${unvollstaendig.length ? `: ${unvollstaendig.map((r) => r.id).join(', ')}` : ''}`);
+const PHASEN = ['Vorbereiten', 'Kochen', 'Portionieren'];
+const unvollstaendig = rezepte.filter((r) => !(r.name && r.short && r.desc && r.fridge && r.freeze && r.method
+  && Array.isArray(r.ablauf) && r.ablauf.map((p) => p.t).join() === PHASEN.join() && r.ablauf.every((p) => p.schritte.length >= 2)
+  && r.items.some((it) => typeof it.q === 'number' && !it.pantry && !it.opt)));
+check(!unvollstaendig.length, `jedes Rezept hat Name, Kurzname, Beschreibung, Lagerung, Einkaufszutaten und Vorbereiten → Kochen → Portionieren${unvollstaendig.length ? `: ${unvollstaendig.map((r) => r.id).join(', ')}` : ''}`);
+check(rezepte.every((r) => !('steps' in r) && !('timeNote' in r)), 'keine alten Schritte mehr (steps, timeNote)');
 check(rezepte.every((r) => r.short.length <= 22), 'Kurznamen passen aufs Kreppband (höchstens 22 Zeichen)');
 
 const gewuerzeFalsch = [...new Set(rezepte.flatMap((r) => r.spices.map((x) => x.k)))].filter((k) => katalog[k].c !== 'gewuerz');
 check(!gewuerzeFalsch.length, `jedes Gewürz steht im Katalog unter Gewürze${gewuerzeFalsch.length ? `: ${gewuerzeFalsch.join(', ')}` : ''}`);
 const haus = rezepte.flatMap((r) => r.items.filter((it) => it.haus));
 check(haus.length >= 4 && haus.every((it) => katalog[it.k].c === 'haushalt' && typeof it.q !== 'number'), `Haushalt (Backpapier, Döschen): ${haus.length} Zeilen, alle unter Extras, nur zum Antippen`);
-// Jede Menge, die oben bei den Zutaten steht, taucht auch in einem Schritt auf –
-// zumindest die Zahl (mit Einheit, wenn es Gramm sind).
+// --- Zubereitung
+const alleSchritte = (r) => r.ablauf.flatMap((p) => p.schritte);
+const textVon = (s) => [s.d, ...(s.liste || [])].join(' · ');
+
+const zuLang = rezepte.flatMap((r) => alleSchritte(r).filter((s) => s.d.length > 140 || (s.liste || []).some((x) => x.length > 60)).map((s) => `${r.id}: ${s.d.slice(0, 40)}…`));
+check(!zuLang.length, `ein Schritt ist eine Zeile: höchstens 140 Zeichen, Listenpunkte höchstens 60${zuLang.length ? ` – zu lang: ${zuLang.slice(0, 3).join('; ')}` : ''}`);
+const ohneZeit = rezepte.flatMap((r) => alleSchritte(r).filter((s) => !Number.isInteger(s.min) || s.min < 1 || s.min > 120 || (s.ruhe !== undefined && !(Number.isInteger(s.ruhe) && s.ruhe > 0 && s.ruhe <= 60))).map((s) => `${r.id}: ${s.d.slice(0, 40)}`));
+check(!ohneZeit.length, `jeder Schritt hat ganze Minuten (1–120), Wartezeiten bis 60 Min.${ohneZeit.length ? `: ${ohneZeit.slice(0, 3).join('; ')}` : ''}`);
+const zeitFalsch = rezepte.filter((r) => JSON.stringify(zeitVon(r)) !== JSON.stringify(r.zeit) || r.time !== r.zeit.gesamt);
+check(!zeitFalsch.length, `die Zeiten aus werkzeug/rezepte.py stimmen mit js/zeiten.js überein${zeitFalsch.length ? `: ${zeitFalsch.map((r) => `${r.id} ${JSON.stringify(r.zeit)} ≠ ${JSON.stringify(zeitVon(r))}`).join('; ')}` : ''}`);
+const nebenFalsch = rezepte.flatMap((r) => nebenZuLang(r).map((f) => `${r.id} (${r.ablauf[f.phase].t}, Schritt ${f.schritt + 1}: ${f.braucht} > ${f.hat} Min.)`));
+check(!nebenFalsch.length, `was „währenddessen“ passiert, passt in die Zeit daneben${nebenFalsch.length ? `: ${nebenFalsch.join('; ')}` : ''}`);
+const zeiten = rezepte.map((r) => r.zeit.gesamt);
+check(Math.min(...zeiten) >= 60 && Math.max(...zeiten) <= 240, `ehrliche Gesamtzeiten zwischen 1 und 4 Std. (${Math.min(...zeiten)}–${Math.max(...zeiten)} Min.)`);
+// Vorbereiten heißt: schneiden, abwiegen, abmessen – Zwiebeln brauchen ihre Zeit.
+const zwiebelnZuSchnell = rezepte.flatMap((r) => r.ablauf[0].schritte.filter((s) => /^(\d+) (?:große |gelbe |rote )?Zwiebeln? \((\d+) g\) schälen und fein würfeln/.test(s.d) && s.min < 2.5 * Number(s.d.match(/\((\d+) g\)/)[1]) / 100).map((s) => `${r.id}: ${s.d.slice(0, 40)} (${s.min} Min.)`));
+check(!zwiebelnZuSchnell.length, `fein gewürfelte Zwiebeln: mindestens 2,5 Min. pro 100 g${zwiebelnZuSchnell.length ? `: ${zwiebelnZuSchnell.join('; ')}` : ''}`);
+
+// Schalen: nummeriert, jede gefüllt, bevor sie gebraucht wird, und jede gebraucht.
+const schalenFehler = [];
+for (const r of rezepte) {
+  const n = r.schalen?.length || 0;
+  if (!n || n > 6 || r.schalen.some((s, i) => s.n !== i + 1 || !s.name || s.name.length > 26 || !['klein', 'mittel', 'groß'].includes(s.gr))) {
+    schalenFehler.push(`${r.id}: 1 bis 6 Schalen, nummeriert, mit Namen und Größe`);
+    continue;
+  }
+  const gefuellt = new Set();
+  const gebraucht = new Set();
+  for (const s of alleSchritte(r)) {
+    const t = textVon(s);
+    for (const m of t.matchAll(/(?:→|in|In) Schale (\d+)/g)) gefuellt.add(Number(m[1]));
+    for (const m of t.matchAll(/Schale (\d+)/g)) {
+      const nr = Number(m[1]);
+      if (nr < 1 || nr > n) schalenFehler.push(`${r.id}: Schale ${nr} gibt es nicht`);
+      if (/(?:→ |in |In )$/.test(t.slice(Math.max(0, m.index - 3), m.index))) continue;
+      if (!gefuellt.has(nr)) schalenFehler.push(`${r.id}: Schale ${nr} wird gebraucht, bevor etwas drin ist`);
+      gebraucht.add(nr);
+    }
+  }
+  const nie = r.schalen.filter((s) => !gebraucht.has(s.n)).map((s) => s.n);
+  if (nie.length) schalenFehler.push(`${r.id}: Schale ${nie.join(', ')} wird nie gebraucht`);
+  if (!alleSchritte(r).some((s) => /leer wiegen|Tara/.test(s.d))) schalenFehler.push(`${r.id}: nichts wird leer gewogen – ohne das geht das Portionieren nicht genau`);
+}
+check(!schalenFehler.length, `Schalen: jede wird gefüllt, bevor sie gebraucht wird, und jede wird gebraucht${schalenFehler.length ? ` – ${schalenFehler.slice(0, 4).join('; ')}` : ''}`);
+// Die Nummern folgen der Reihenfolge, in der die Schalen beim Kochen gebraucht werden.
+const reihenfolge = rezepte.flatMap((r) => {
+  const reihe = [];
+  for (const s of r.ablauf.slice(1).flatMap((p) => p.schritte)) {
+    const t = textVon(s);
+    for (const m of t.matchAll(/Schale (\d+)/g)) {
+      if (/(?:→ |in |In )$/.test(t.slice(Math.max(0, m.index - 3), m.index))) continue;
+      if (!reihe.includes(Number(m[1]))) reihe.push(Number(m[1]));
+    }
+  }
+  return reihe.some((n, i) => i && n < reihe[i - 1]) ? [`${r.id}: ${reihe.join(' → ')}`] : [];
+});
+check(!reihenfolge.length, `Schale 1 kommt beim Kochen zuerst dran, dann 2, dann 3 …${reihenfolge.length ? ` – nicht bei ${reihenfolge.join('; ')}` : ''}`);
+
+// Mise en place: Beim Kochen wird nichts mehr abgewogen oder abgemessen. Mengen
+// stehen dort nur, wenn eine Zutat als Ganzes (ganze Packung) in den Topf geht;
+// ausgenommen sind „währenddessen“-Schritte in langen Wartezeiten und
+// Koch- oder Nudelwasser, das man aus dem Topf schöpft.
+const MESS = /(?<![\w.,])(\d+(?:[.,]\d+)?|½|¼|¾)\s?(kg|g|ml|l|EL|TL)(?![\wäöüß])/g;
+const imKochen = [];
+for (const r of rezepte) {
+  const ganz = new Set(r.items.filter((it) => typeof it.q === 'number' && ['g', 'ml'].includes(it.u)).flatMap((it) => [`${it.q} ${it.u}`, `${it.q.toLocaleString('de-DE')} ${it.u}`, it.q % 1000 === 0 ? `${it.q / 1000} ${it.u === 'g' ? 'kg' : 'l'}` : '']));
+  for (const s of r.ablauf[1].schritte) {
+    if (s.neben) continue;
+    for (const m of textVon(s).matchAll(MESS)) {
+      const nach = textVon(s).slice(m.index + m[0].length, m.index + m[0].length + 24);
+      const vor = textVon(s).slice(Math.max(0, m.index - 24), m.index);
+      if (ganz.has(`${m[1]} ${m[2]}`)) continue;
+      if (/Kochwasser|Nudelwasser/.test(nach + vor)) continue;
+      imKochen.push(`${r.id}: „${m[0]}“ in „${s.d.slice(0, 50)}…“`);
+    }
+    if (/Saft von|auspressen|abwiegen|abmessen/.test(s.d)) imKochen.push(`${r.id}: „${s.d.slice(0, 50)}…“`);
+  }
+}
+check(!imKochen.length, `beim Kochen wird nichts mehr abgewogen, abgemessen oder ausgepresst – das passiert alles vorher${imKochen.length ? `: ${imKochen.slice(0, 5).join('; ')}` : ''}`);
+
+// Jedes Gewürz und jede Zutat aus dem Vorrat kommt in den Schritten auch vor.
+const stamm = (n) => n.replace(/\(.*?\)/g, '').split(/,| oder /)[0].trim().toLowerCase();
+const ungenutzt = rezepte.flatMap((r) => {
+  const text = alleSchritte(r).map(textVon).join(' ').toLowerCase().replace(/lorbeerblatt|lorbeerblätter/g, 'lorbeer');
+  const namen = [...r.spices.map((x) => x.n), ...r.items.filter((it) => it.pantry).map((it) => it.n)];
+  return namen.filter((n) => {
+    const st = stamm(n).replace(/lorbeerblatt|lorbeerblätter/g, 'lorbeer').replace(/^(?:basmati|jasmin)reis$/, 'reis');
+    const kurz = { 'rinderbrühe': 'brüh', 'gemüsebrühe': 'brüh', 'hühner-': 'brüh', 'backkakao': 'kakao', 'weizenmehl': 'mehl', 'öl, neutral': 'öl', 'reis-': 'essig' }[st] || st;
+    return !text.includes(kurz.replace(/^öl$/, ' öl'));
+  }).map((n) => `${r.id}: ${n}`);
+});
+check(!ungenutzt.length, `jedes Gewürz und jede Vorratszutat kommt in den Schritten vor${ungenutzt.length ? `: ${ungenutzt.slice(0, 8).join('; ')}` : ''}`);
+check(rezepte.every((r) => Array.isArray(r.geraete) && r.geraete.length >= 2), 'jedes Rezept sagt, welche Töpfe und Geräte bereitstehen sollen');
+
+// Mise en place: was oben in Gramm steht, wird im Vorbereiten abgewogen –
+// außer es kommt als ganze Packung direkt in den Topf (Hack, Gnocchi, Spinat).
 const fehlt = [];
 for (const r of rezepte) {
-  const schritte = r.steps.map((x) => x.d).join(' ');
+  const schritte = alleSchritte(r).map(textVon).join(' ');
   for (const it of r.items) {
     if (typeof it.q !== 'number' || it.u !== 'g') continue;
     const g = it.q >= 1000 && it.q % 1000 === 0 ? [`${it.q / 1000} kg`, `${it.q} g`] : [`${it.q.toLocaleString('de-DE')} g`, `${(it.q / 1000).toLocaleString('de-DE')} kg`];
@@ -66,6 +168,13 @@ for (const r of rezepte) {
   }
 }
 check(!fehlt.length, `jede Grammangabe der Einkaufszutaten steht auch in den Schritten${fehlt.length ? `: ${fehlt.slice(0, 8).join('; ')}` : ''}`);
+
+// Kein Fisch, kein Schwein, kein Putenhack – und kein körniger Hüttenkäse mehr.
+const alles = JSON.stringify(daten);
+check(!/putenhack|huettenkaese|hüttenkäse/i.test(alles), 'kein Putenhack und kein Hüttenkäse, weder in Rezepten noch im Katalog');
+const verboten = /schwein|speck|schinken|bacon|salami|chorizo|pancetta|guanciale|fisch|lachs|thunfisch|garnele|shrimp|sardelle|anchovi/i;
+const tabu = rezepte.flatMap((r) => [...r.items.map((it) => it.n), ...r.spices.map((x) => x.n), r.name, r.desc].filter((t) => verboten.test(t)).map((t) => `${r.id}: ${t}`));
+check(!tabu.length, `kein Schwein und kein Fisch${tabu.length ? `: ${tabu.join('; ')}` : ''}`);
 
 const f = extras?.fruehstueck;
 check(f && f.items.length === 5 && f.items.every((it) => katalog[it.k] && it.q > 0 && it.u === 'g'), 'Frühstück für 7 Tage: fünf Zutaten aus dem Katalog');

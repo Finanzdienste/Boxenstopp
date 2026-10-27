@@ -5,13 +5,23 @@
  * (auch vom anderen Handy), zeichnet detailAktualisieren() nur Knöpfe und
  * Haken neu – der Portionsrechner und die Kochschritte behalten, was man
  * gerade eingetippt oder abgehakt hat.
+ *
+ * Die Zubereitung ist eine Mise en place (werkzeug/rezepte.py): erst alles
+ * in nummerierte Schalen vorbereiten, dann kochen, dann portionieren. Ein
+ * Schritt ist eine Zeile zum Abhaken; „Schale 2“ im Text wird zum Schild mit
+ * Nummer und Inhalt, Mengen werden fett.
  */
 import { app, $, $$, ansicht, ansichtMerken, melde, zeigeReiter, istSchmal, lese, schreibe } from './kern.js';
 import { esc, nf1, nfi, heute, tagKurz, abweichung } from './format.js';
+import { zeitVon, dauer } from './zeiten.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
 
-const SCHRITTE = 'boxenstopp.schritte.v1';
+const SCHRITTE = 'boxenstopp.schritte.v2';
 const TOPF = 'boxenstopp.topf.v1';
+
+/** Darunter gilt ein Rezept als schnell – mit ehrlichen Zeiten ist keins unter einer Stunde. */
+const SCHNELL = 90;
+const gesamtZeit = (r) => (r.zeit || (r.zeit = zeitVon(r))).gesamt;
 
 export const FILTER = [
   ['alle', 'Alle', () => true],
@@ -19,11 +29,10 @@ export const FILTER = [
   ['haehnchen', 'Hähnchen', (r) => r.protein.includes('Hähnchen')],
   ['rind', 'Rind', (r) => r.protein.includes('Rind')],
   ['pute', 'Pute', (r) => r.protein.includes('Pute')],
-  ['veggie', 'Veggie', (r) => r.protein === 'Vegetarisch'],
   ['reis', 'Reis', (r) => r.base === 'Reis'],
   ['nudeln', 'Nudeln', (r) => r.base === 'Nudeln'],
   ['kartoffel', 'Kartoffel & Co.', (r) => ['Kartoffeln', 'Süßkartoffel', 'Gnocchi'].includes(r.base)],
-  ['schnell', 'Bis 45 Min.', (r) => r.time <= 45],
+  ['schnell', 'Unter 1½ Std.', (r) => gesamtZeit(r) < SCHNELL],
   ['liste', 'Auf der Liste', (r) => rezeptStand(app.stand, r).drauf],
 ];
 
@@ -69,7 +78,7 @@ function karte(r) {
   const b = app.stand.bewertung?.[r.id];
   const daumen = b ? `<span class="pill p-${b.wert}">${daumenIc(b.wert)}${DAUMEN_TEXT[b.wert]}</span>` : '';
   return `<button type="button" class="box" data-open="${esc(r.id)}">
-<span class="tape">${esc(r.short)}</span><span class="box-time">${r.time} Min.</span>
+<span class="tape">${esc(r.short)}</span><span class="box-time">${dauer(gesamtZeit(r))}</span>
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}</span>
 <span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
@@ -108,8 +117,22 @@ function zeilenVon(r) {
  * „3 Paprika“), damit man beim Kochen nicht nach oben zu den Zutaten muss.
  * Läuft auf bereits entschärftem Text, fügt nur <b> ein.
  */
-const MENGE = new RegExp(String.raw`(?<![\w.,])(?:\d+(?:[.,]\d+)?[½¼¾]?|[½¼¾])(?:\s?[–-]\s?\d+(?:[.,]\d+)?[½¼¾]?)?\s(?:gehäufte\s|große\s|rote\s|gelbe\s)?(?:kg|g|ml|l|EL|TL|Prise|Zehen?|Knoblauchzehen?|Dosen?|Glas|Bund|Stangen?|Stück|Lorbeerblätter|Brühwürfeln|Blatt|Blätter|Zwiebeln?|Paprika|Möhren|Tomaten|Zucchini|Limetten?|Zitronen?|Salatgurke)(?![\wäöüß])`, 'g');
+const MENGE = new RegExp(String.raw`(?<![\w.,])(?:\d+(?:[.,]\d+)?[½¼¾]?|[½¼¾])(?:\s?[–-]\s?\d+(?:[.,]\d+)?[½¼¾]?)?\s(?:gehäufte\s|große\s|rote\s|gelbe\s)?(?:kg|g|ml|l|EL|TL|Prise|Zehen?|Knoblauchzehen?|Dosen?|Glas|Bund|Stangen?|Stück|Lorbeerblätter|Brühwürfeln?|Blatt|Blätter|Zwiebeln?|Paprika|Möhren|Tomaten|Zucchini|Limetten?|Zitronen?|Salatgurke)(?![\wäöüß])`, 'g');
 export const mengenHervor = (html) => html.replace(MENGE, (m) => `<b class="mg">${m}</b>`);
+
+/*
+ * „Schale 2“ wird zum Schild mit Nummer und Inhalt: [2 Gewürze]. So sieht
+ * man beim Kochen, welche Schale gemeint ist, ohne nach oben zu scrollen.
+ */
+const SCHALE = /Schale (\d+)/g;
+export function schalenHervor(html, schalen = []) {
+  return html.replace(SCHALE, (m, n) => {
+    const s = schalen.find((x) => x.n === Number(n));
+    return s ? schaleSchild(s) : m;
+  });
+}
+const schaleSchild = (s) => `<span class="schale"><span class="vh">Schale </span><b>${s.n}</b>${esc(s.name)}</span>`;
+const schrittText = (t, r) => schalenHervor(mengenHervor(esc(t)), r.schalen);
 
 const teilFuer = (z) => (z.art === 'einkauf' ? { q: z.q, u: z.u, h: z.h || '' } : { t: z.a });
 
@@ -139,7 +162,7 @@ function detailHTML(r) {
     const idx = zeilen.map((z, i) => [z, i]).filter(([z]) => z.art === art);
     return idx.length ? `<h3 class="sub-h">${titel}</h3><ul class="ings">${idx.map(([z, i]) => zutatZeile(z, i)).join('')}</ul>` : '';
   };
-  const fakten = [`${r.time} Min.${r.timeNote ? ` (${esc(r.timeNote)})` : ''}`, esc(r.method), `Kühlschrank ${esc(r.fridge)}`, `Tiefkühler ${esc(r.freeze)}`];
+  const fakten = [`ca. ${dauer(gesamtZeit(r))}`, esc(r.method), `Kühlschrank ${esc(r.fridge)}`, `Tiefkühler ${esc(r.freeze)}`];
   const t = r.total;
   return `<button type="button" class="back" data-act="zurueck">${ic('back')}Alle Rezepte</button>
 <div class="d-head">
@@ -163,14 +186,7 @@ ${etikett(r)}
   ${gruppe('haushalt', 'Extras')}
 </section>
 
-<section class="sec" aria-labelledby="h-steps">
-  <h2 id="h-steps">Zubereitung <small>${r.steps.length} Schritte</small></h2>
-  <div class="steps-tools">
-    <button type="button" class="switch" id="wake" role="switch" aria-checked="false" data-act="wach" hidden><span class="sw" aria-hidden="true"></span>Bildschirm anlassen</button>
-    <button type="button" class="linkbtn" id="reset-steps" data-act="schritte-zurueck" hidden>Haken zurücksetzen</button>
-  </div>
-  <ol class="steps">${r.steps.map((s, i) => `<li><button type="button" class="step" data-step="${i}" aria-pressed="false"><span class="step-n"><span class="sn">${i + 1}</span>${ic('check')}</span><span><span class="step-t">${esc(s.t)}</span><span class="step-d">${mengenHervor(esc(s.d))}</span></span></button></li>`).join('')}</ol>
-</section>
+${zubereitungHTML(r)}
 
 <section class="sec" aria-labelledby="h-calc">
   <h2 id="h-calc">Portionieren</h2>
@@ -205,6 +221,35 @@ ${r.tips && r.tips.length ? `<section class="sec" aria-labelledby="h-tips"><h2 i
   </table></div>
   <p class="fine">Gerechnet mit typischen Packungswerten pro 100 g. Gewürze, Brühe und Zitrussaft sind pauschal enthalten oder vernachlässigbar.</p>
 </details>`;
+}
+
+function schrittHTML(r, s, i) {
+  const liste = s.liste?.length ? `<span class="step-l">${s.liste.map((x) => `<span>${schrittText(x, r)}</span>`).join('')}</span>` : '';
+  const ruhe = s.ruhe ? `<small>+${s.ruhe} warten</small>` : '';
+  return `<li><button type="button" class="step${s.neben ? ' neben' : ''}" data-step="${i}" aria-pressed="false">
+<span class="step-n"><span class="sn">${i + 1}</span>${ic('check')}</span>
+<span class="step-b">${s.neben ? '<span class="step-k">währenddessen</span>' : ''}<span class="step-d">${schrittText(s.d, r)}</span>${liste}</span>
+<span class="step-min">${s.min} Min.${ruhe}</span>
+</button></li>`;
+}
+
+function zubereitungHTML(r) {
+  const zeit = r.zeit || (r.zeit = zeitVon(r));
+  let i = 0;
+  const phasen = r.ablauf.map((p, pi) => `<h3 class="phase"><span class="phase-n">${pi + 1}</span><span class="phase-name">${esc(p.t)}</span><span class="phase-t">ca. ${dauer(zeit.phasen[pi])}</span></h3>
+<ol class="steps">${p.schritte.map((s) => schrittHTML(r, s, i++)).join('')}</ol>`).join('');
+  const schalen = (r.schalen || []).map((s) => `<li>${schaleSchild(s)}<span class="schale-gr">${esc(s.gr || '')}</span></li>`).join('');
+  return `<section class="sec" aria-labelledby="h-steps">
+  <h2 id="h-steps">Zubereitung <small>ca. ${dauer(zeit.gesamt)}</small></h2>
+  <div class="zeiten">${r.ablauf.map((p, pi) => `<div><span class="k">${esc(p.t)}</span><b>${dauer(zeit.phasen[pi])}</b></div>`).join('')}</div>
+  <p class="sec-lead">Zeiten für normales Tempo zu Hause, mit Waschen, Schälen und Abfall wegräumen.</p>
+  ${schalen ? `<div class="mise"><h3 class="sub-h">Stell dir bereit</h3><ul class="schalen">${schalen}</ul>${r.geraete?.length ? `<p class="geraete"><b>Außerdem:</b> ${r.geraete.map(esc).join(', ')}, Waage</p>` : ''}</div>` : ''}
+  <div class="steps-tools">
+    <button type="button" class="switch" id="wake" role="switch" aria-checked="false" data-act="wach" hidden><span class="sw" aria-hidden="true"></span>Bildschirm anlassen</button>
+    <button type="button" class="linkbtn" id="reset-steps" data-act="schritte-zurueck" hidden>Haken zurücksetzen</button>
+  </div>
+  ${phasen}
+</section>`;
 }
 
 export function detailAktualisieren() {
@@ -248,7 +293,14 @@ function bewertungHTML(rid) {
 
 function schritteZeichnen() {
   const s = new Set(schritte[aktuell] || []);
-  for (const b of $$('#detail .step')) b.setAttribute('aria-pressed', String(s.has(Number(b.dataset.step))));
+  let jetzt = true;
+  for (const b of $$('#detail .step')) {
+    const fertig = s.has(Number(b.dataset.step));
+    b.setAttribute('aria-pressed', String(fertig));
+    // Der erste offene Schritt ist „dran“ – beim Kochen sieht man sofort, wo man ist.
+    b.classList.toggle('jetzt', !fertig && jetzt && s.size > 0);
+    if (!fertig) jetzt = false;
+  }
   const rb = $('#reset-steps');
   if (rb) rb.hidden = !s.size;
 }
