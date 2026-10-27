@@ -1,0 +1,10 @@
+{
+  "angebote": [
+    { "laden": "Lidl", "name": "Hähnchen-Oberkeulenfilet", "preis": 4.99, "menge": 600, "einheit": "g", "bis": "2099-12-31", "katalog": "haehnchenkeule" },
+    { "laden": "Lidl", "name": "Brokkoli", "preis": 0.89, "menge": 500, "einheit": "g", "bis": "2099-12-31", "katalog": "brokkoli" },
+    { "laden": "Lidl", "name": "Kokosmilch", "preis": 0.89, "menge": 1, "einheit": "Dose", "bis": "2099-12-31", "katalog": "kokosmilch" },
+    { "laden": "Lidl", "name": "Gummibärchen", "preis": 0.99, "menge": 200, "einheit": "g", "bis": "2099-12-31", "katalog": "" },
+    { "laden": "Lidl", "name": "Brokkoli", "preis": 0.89, "menge": 500, "einheit": "g", "bis": "2099-12-31", "katalog": "brokkoli" },
+    { "laden": "Lidl", "name": "Ohne Preis", "preis": 0, "menge": 1, "einheit": "Stk" }
+  ]
+}

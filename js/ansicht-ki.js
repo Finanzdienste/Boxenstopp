@@ -42,6 +42,8 @@ const eingabe = {
   portionen: PORTIONEN.includes(gemerkt.portionen) ? gemerkt.portionen : 8,
   dazukaufen: gemerkt.dazukaufen !== false,
   vermeiden: Array.isArray(gemerkt.vermeiden) ? gemerkt.vermeiden.filter((x) => typeof x === 'string').slice(-5) : [],
+  // 'reste' (was da ist) oder 'angebote' (aus den Angeboten der Woche, ansicht-angebote.js)
+  modus: gemerkt.modus === 'angebote' ? 'angebote' : 'reste',
 };
 const eingabeMerken = () => schreibe(EINGABE, eingabe);
 
@@ -134,12 +136,13 @@ function kiLeiste(r) {
   const hinweis = !daneben && r.ki.hinweis ? `<p class="ki-hinweis">${esc(r.ki.hinweis)}</p>` : '';
   const kosten = !gespeichert && typeof v.kosten === 'number' ? ` · ${esc(v.modell || 'KI')}, ${kostenText(v.kosten)}` : '';
   const basis = r.ki.herkunft ? app.nachId[r.ki.herkunft] : null;
+  const quelle = v.modus === 'angebote' ? 'Aus den Angeboten' : 'Resteverwertung';
   const knoepfe = gespeichert
     ? `${r.ki.herkunft ? '' : '<button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button>'}<button type="button" class="btn btn-quiet" data-act="ki-loeschen">Löschen</button>`
     : `<button type="button" class="btn btn-primary" data-act="ki-behalten"${app.listeDa ? '' : ' disabled'}>Behalten</button><button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button><button type="button" class="btn btn-quiet" data-act="ki-verwerfen">Verwerfen</button>`;
   const titel = r.ki.herkunft
     ? `<b>Angepasst</b>${basis ? ` von <button type="button" class="linkbtn ki-basis" data-open="${esc(basis.id)}">${esc(basis.short)}</button>` : ''}`
-    : '<b>Resteverwertung</b>';
+    : `<b>${quelle}</b>`;
   return `<p class="ki-k">${titel}${wer}${wann} · ${gespeichert ? 'für euch beide gespeichert' : 'noch nicht gespeichert'}${kosten}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>`;
 }
 
@@ -199,8 +202,8 @@ function fotosHTML() {
 function formularHTML() {
   const voll = fotos.length >= MAX_FOTOS;
   return `<form class="ki-form" id="k-form" novalidate>
-<label for="k-text">Im Kühlschrank und Vorrat</label>
-<textarea id="k-text" rows="5" maxlength="2000" placeholder="z. B. 500 g Hähnchenbrust, 1 Zucchini, halbe Packung Basmati, Feta, 3 Eier, Frühlingszwiebeln, Kokosmilch">${esc(eingabe.text)}</textarea>
+<label for="k-text">${eingabe.modus === 'angebote' ? 'Im Angebot' : 'Im Kühlschrank und Vorrat'}</label>
+<textarea id="k-text" rows="5" maxlength="2000" placeholder="${eingabe.modus === 'angebote' ? 'z. B. Aldi: Hähnchenbrustfilet 1 kg 7,49 €; Paprika 500 g 1,29 €' : 'z. B. 500 g Hähnchenbrust, 1 Zucchini, halbe Packung Basmati, Feta, 3 Eier, Frühlingszwiebeln, Kokosmilch'}">${esc(eingabe.text)}</textarea>
 <div class="k-fotos">
 <label class="btn${voll ? ' is-aus' : ''}" for="k-kamera">${KAMERA}Foto machen</label><input class="vh" id="k-kamera" type="file" accept="image/*" capture="environment"${voll ? ' disabled' : ''}>
 <label class="btn${voll ? ' is-aus' : ''}" for="k-bilder">${BILD}Bild wählen</label><input class="vh" id="k-bilder" type="file" accept="image/*" multiple${voll ? ' disabled' : ''}>
@@ -256,9 +259,14 @@ export function resteZeichnen() {
   const el = $('#reste');
   if (!el || el.hidden) return;
   const schluessel = ladeKi();
-  const kopf = `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
+  const ziele = `${app.ziel.kcal} kcal, ${String(app.ziel.p).replace('.', ',')} g P, ${String(app.ziel.kh).replace('.', ',')} g KH und ${String(app.ziel.f).replace('.', ',')} g F pro Box`;
+  const kopf = eingabe.modus === 'angebote'
+    ? `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
+<div class="d-head"><span class="tape">Angebote</span><h1 id="k-titel">Rezept aus den Angeboten</h1>
+<p class="d-desc">Die KI macht aus den Angeboten der Woche ein Rezept für eure Boxen, und die App rechnet die Mengen auf ${ziele}. <button type="button" class="linkbtn" data-act="k-modus-reste">Lieber Resteverwertung</button></p></div>`
+    : `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
 <div class="d-head"><span class="tape">Resteverwertung</span><h1 id="k-titel">Was ist noch da?</h1>
-<p class="d-desc">Schreib auf oder fotografier, was im Kühlschrank und im Vorrat liegt. Die KI macht daraus ein Rezept für eure Boxen, und die App rechnet die Mengen auf ${app.ziel.kcal} kcal, ${String(app.ziel.p).replace('.', ',')} g P, ${String(app.ziel.kh).replace('.', ',')} g KH und ${String(app.ziel.f).replace('.', ',')} g F pro Box.</p></div>`;
+<p class="d-desc">Schreib auf oder fotografier, was im Kühlschrank und im Vorrat liegt. Die KI macht daraus ein Rezept für eure Boxen, und die App rechnet die Mengen auf ${ziele}.</p></div>`;
   let rumpf;
   if (!schluessel || einrichten) rumpf = einrichtenHTML(schluessel);
   else if (lauf) rumpf = laufHTML();
@@ -291,7 +299,7 @@ async function bildLaden(datei) {
 }
 
 /** Auf höchstens 1280 px verkleinern und als JPEG – das spart Zeit und Geld. */
-async function fotoVorbereiten(datei) {
+export async function fotoVorbereiten(datei) {
   const bild = await bildLaden(datei);
   const b = bild.width || bild.naturalWidth;
   const h = bild.height || bild.naturalHeight;
@@ -341,7 +349,7 @@ async function rezeptMachen() {
   if (lauf) return;
   const text = eingabe.text.trim();
   if (!text && !fotos.length) {
-    fehler = 'Schreib auf, was da ist, oder mach ein Foto.';
+    fehler = eingabe.modus === 'angebote' ? 'Es stehen keine Angebote drin.' : 'Schreib auf, was da ist, oder mach ein Foto.';
     resteZeichnen();
     $('#k-text')?.focus();
     return;
@@ -371,6 +379,7 @@ async function rezeptMachen() {
       mag: namenMitDaumen('hoch'),
       magNicht: namenMitDaumen('runter'),
       vermeiden: eingabe.vermeiden,
+      modus: eingabe.modus,
     });
     const { eingabe: roh, usage } = await kiAnfragen(rumpf, {
       schluessel,
@@ -381,7 +390,7 @@ async function rezeptMachen() {
     const { r, fehler: f, art } = kiBereinigen({ ...roh, portionen: eingabe.portionen });
     if (!r) throw Object.assign(new Error(f), { art });
     const id = `ki-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-    entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), kosten: kostenCent(usage, anbieter), modell: ANBIETER[anbieter].modell } };
+    entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), kosten: kostenCent(usage, anbieter), modell: ANBIETER[anbieter].modell, modus: eingabe.modus } };
     entwurfMerken();
     kiAbgleichen();
     fertig();
@@ -419,7 +428,8 @@ export function klickKi(el) {
   if (d.fotoWeg !== undefined) { fotoWeg(Number(d.fotoWeg)); return true; }
   const rid = offenesRezept();
   switch (d.act) {
-    case 'reste': oeffneReste(); return true;
+    case 'reste': if (eingabe.modus !== 'reste') { eingabe.modus = 'reste'; eingabe.text = ''; eingabeMerken(); } oeffneReste(); return true;
+    case 'k-modus-reste': eingabe.modus = 'reste'; eingabe.text = ''; fehler = null; eingabeMerken(); resteZeichnen(); return true;
     case 'reste-zu': schliesseReste(); return true;
     case 'k-abbrechen': lauf?.controller.abort(); return true;
     case 'k-einrichten': einrichten = true; fehler = null; resteZeichnen(); $('#k-schluessel')?.focus(); return true;
@@ -484,6 +494,31 @@ export function absendenKi(ev) {
     return true;
   }
   return false;
+}
+
+/**
+ * Von ansicht-angebote.js: ein Rezept aus den Angeboten der Woche. Der Text
+ * (eine Zeile je Laden) kommt ins Formular, der Lauf startet sofort; der
+ * Vorschlag öffnet sich wie bei der Resteverwertung, mit „Neuer Vorschlag“
+ * für den nächsten.
+ */
+export function resteMitAngeboten(text, { wuensche = '' } = {}) {
+  eingabe.modus = 'angebote';
+  eingabe.text = String(text || '').slice(0, 2000);
+  eingabe.dazukaufen = true;
+  eingabe.portionen = 8;
+  if (wuensche) eingabe.wuensche = String(wuensche).slice(0, 200);
+  eingabeMerken();
+  oeffneReste();
+  rezeptMachen();
+}
+
+/** Von anderswo (Angebote): die Resteverwertung mit dem Einrichten öffnen. */
+export function oeffneEinrichten() {
+  einrichten = true;
+  fehler = null;
+  oeffneReste();
+  $('#k-schluessel')?.focus();
 }
 
 /** Beim Start: Haken setzen, Vorschlag anmelden, #reste öffnen. */

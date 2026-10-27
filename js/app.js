@@ -19,6 +19,7 @@ import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMi
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
+import { angeboteZeichnen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
 
 const apiBasis = () => lese('__api', null) || API;
 const takt = () => Number(lese('__takt', 0)) || 8000;
@@ -29,6 +30,8 @@ function beiAenderung(stand) {
   kiAbgleichen();
   listeZeichnen();
   zahlZeichnen();
+  angeboteZeichnen();
+  angeboteZahl();
   // Ein Rezept aus der Resteverwertung kann auf dem anderen Handy gelöscht worden sein.
   if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
   if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
@@ -78,13 +81,14 @@ document.addEventListener('click', (ev) => {
   if (klickTimer(el)) return;
   if (el.dataset.timerZu) { zuSchritt(el.dataset.timerZu, Number(el.dataset.timerSchritt)); return; }
   if (klickListe(el)) return;
+  if (klickAngebote(el)) return;
   if (klickAnpassen(el)) return;
   if (klickKi(el)) return;
   klickRezepte(el);
 });
-document.addEventListener('input', (ev) => { if (!eingabeAnpassen(ev.target) && !eingabeKi(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => aenderungKi(ev.target));
-document.addEventListener('submit', (ev) => { if (!absendenAnpassen(ev) && !absendenKi(ev) && !absendenRezepte(ev)) absendenListe(ev); });
+document.addEventListener('input', (ev) => { if (!eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
+document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('submit', (ev) => { if (!absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenRezepte(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */
 
@@ -129,8 +133,10 @@ async function start() {
   filterZeichnen();
   rasterZeichnen();
   listeZeichnen();
+  angeboteZeichnen();
 
   if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
+  if (hash === 'angebote') ansicht.tab = 'angebote';
   zeigeReiter(ansicht.tab, true);
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
   if (hash === 'reste' || (kiLink && !ausLink)) kiStart({ oeffnen: true });

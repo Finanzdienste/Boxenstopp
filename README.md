@@ -57,6 +57,28 @@ Gewürze pauschal nach Gramm. `werkzeug/rezepte.py` schreibt sie je Rezept
 (Euro je Gramm je Schlüssel) für die Liste und für Rezepte aus der
 Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
 
+### Angebote der Woche
+
+Dritter Reiter (auf dem Handy unten, am Rechner über die Karte bei den
+Rezepten). Einen offiziellen, kostenlosen Datenfeed mit den Angeboten von
+Aldi, Lidl, Rewe und Kaufland gibt es nicht – die Prospektseiten wollen
+nicht automatisch abgegrast werden, und die inoffiziellen Schnittstellen
+brauchen Schlüssel aus deren Webseiten. Deshalb kommen die Angebote so rein:
+**Prospektseite fotografieren oder Screenshot aus der Supermarkt-App**, die
+KI (derselbe Schlüssel wie bei der Resteverwertung) liest Laden, Produkt,
+Preis, Packung und Gültigkeit aus (`js/angebote.js`: eigenes Schema,
+Katalog-Schlüssel je Angebot) – oder **eine getippte Zeile je Angebot**
+(„Aldi Hähnchenbrustfilet 1 kg 7,49“), die liest die App selbst, ohne KI.
+Die Angebote liegen in `liste.json` unter `angebote` (für beide, mit Name
+und Datum), abgelaufene verschwinden von selbst.
+
+Darunter **„Passt zu euren Rezepten“**: die Rezepte, deren Zutaten im
+Angebot sind, mit der Ersparnis pro Box gegen die Richtpreise, antippen
+öffnet das Rezept. Und **„Neues Rezept aus den Angeboten“**: die
+Resteverwertung im Modus „angebote“ – die KI baut ein Rezept um die
+Angebote herum (alles zu kaufen, nichts „vorhanden“), die App rechnet es
+auf die Ziele, „Neuer Vorschlag“ bringt das nächste.
+
 ### Belohnung
 
 Ist Vorbereiten oder Kochen komplett abgehakt, kommt unten ein Satz („Mise
@@ -215,7 +237,8 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
  "cooked": { "chili": { "at": "2026-10-26", "by": "Tobi" } },
  "bewertung": { "chili": { "wert": "hoch", "by": "Amy", "at": "2026-10-26T19:10:00.000Z" } },
  "ki": { "ki-mh9x2k1a7f": { "r": { "name": "Hähnchen-Reispfanne mit Feta", "portionen": 8, "zutaten": […], "ablauf": […], "…": "…" }, "by": "Amy", "at": "…" } },
- "notizen": { "chili": [{ "id": "n-mh9x…", "text": "Nächstes Mal weniger Chili", "by": "Amy", "at": "…" }] }
+ "notizen": { "chili": [{ "id": "n-mh9x…", "text": "Nächstes Mal weniger Chili", "by": "Amy", "at": "…" }] },
+ "angebote": { "stand": "…", "von": "Tobi", "eintraege": [{ "id": "a-mh9x…", "laden": "Aldi", "name": "Hähnchenbrustfilet", "preis": 7.49, "menge": 1, "einheit": "kg", "bis": "2026-11-01", "k": "haehnchenbrust" }] }
 }
 ```
 
@@ -228,8 +251,9 @@ Einrichten. `bewertung` hat pro Gericht einen Daumen (`hoch`, `mittel`,
 `runter`) – wer zuletzt drückt, überschreibt ihn für beide. Unter `ki` liegen
 die behaltenen Rezepte aus der Resteverwertung im KI-Format (ki-rezept.js);
 ihre Zutaten stehen auf der Liste unter dem Katalog-Schlüssel oder als
-`ki-<zutat>`. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles,
-was nicht passt.
+`ki-<zutat>`. `angebote` sind die Angebote der Woche (höchstens 120), `k`
+ist der Katalog-Schlüssel der Zutat, wenn es eine ist. Von Hand bearbeiten
+geht, die App bereinigt beim Lesen alles, was nicht passt.
 
 ## Rezepte ändern
 
@@ -285,6 +309,8 @@ neues Rezept muss dort nichts geändert werden.
 | `js/timer.js` | Küchentimer: starten, Leiste oben, Alarm, überlebt Neuladen |
 | `js/lob.js` | Belohnung: Sprüche, Tierquellen, Vorladen, Overlay mit Konfetti |
 | `js/kosten.js` | Richtpreise auf Mengen: Liste, eigene Rezepte, Euro-Format |
+| `js/angebote.js` | Angebote: Zeilen lesen, Schlüssel raten, Treffer und Ersparnis, Anfrage an die KI – ohne DOM |
+| `js/ansicht-angebote.js` | Reiter Angebote: Fotos, Eingabe, Liste, passende Rezepte, Rezept daraus |
 | `werkzeug/preise.py` | Richtpreise je Katalogschlüssel (Packung, Menge, Einheit) |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |

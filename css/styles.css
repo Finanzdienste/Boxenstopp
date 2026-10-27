@@ -101,8 +101,15 @@ p{margin:0}
   .tabbar{display:none!important}
 }
 @media (max-width:979.98px){
-  #app[data-tab="einkauf"] #view-recipes{display:none}
-  #app[data-tab="rezepte"] #view-list{display:none}
+  #app[data-tab="einkauf"] #view-recipes,#app[data-tab="einkauf"] #view-angebote{display:none}
+  #app[data-tab="rezepte"] #view-list,#app[data-tab="rezepte"] #view-angebote{display:none}
+  #app[data-tab="angebote"] #view-list,#app[data-tab="angebote"] #view-recipes{display:none}
+}
+@media (min-width:980px){
+  #app[data-tab="angebote"] #view-recipes{display:none}
+  #app:not([data-tab="angebote"]) #view-angebote{display:none}
+  #view-recipes,#view-angebote{grid-column:1;grid-row:1}
+  #view-list{grid-column:2;grid-row:1}
 }
 
 /* recipes: intro + filters */
@@ -343,6 +350,23 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .note{margin-top:18px;padding:12px 14px;border-radius:12px;background:var(--surface-2);font-size:13.5px;color:var(--muted)}
 .note[data-tone="warn"]{color:var(--ink);border:1.5px solid var(--danger);background:transparent}
 
+/* Angebote */
+.angebote-pane{display:grid;gap:14px;align-content:start}
+.nur-breit{display:none}
+@media (min-width:980px){.nur-breit{display:inline-flex}}
+.angebote-karte{margin-top:10px}
+.a-lead{margin:0;color:var(--muted);font-size:15px}
+.a-lesen .k-fotos{margin-top:0}
+.a-form textarea{min-height:84px}
+.a-item{grid-template-columns:minmax(0,1fr) auto 32px}
+.a-grp .item-sub span{display:inline-block;margin-right:8px}
+.a-ohne{color:var(--muted)}
+.a-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.a-passt .ki-liste{margin-bottom:12px}
+.a-ki{display:grid;gap:8px;padding:14px;border-radius:16px;background:var(--surface-2)}
+.a-ki .fine{margin:0}
+.angebote-kopf{display:flex;align-items:center;gap:10px}
+
 /* Kosten */
 .box-cost{margin-left:auto;font:500 12px/1 var(--f-mono);color:var(--ink);white-space:nowrap}
 .pill-cost{font-weight:700}
@@ -375,7 +399,7 @@ body.lob-offen{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.lob-tier,.lob-karte,.lob,.lob-emoji{animation:none}.lob-konfetti{display:none}}
 
 /* tab bar + toast */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:var(--tabbar-h);border:0;background:none;font-weight:700;font-size:12.5px;color:var(--muted)}
 .tab .ic{width:24px;height:24px}
 .tab[aria-current]{color:var(--accent)}

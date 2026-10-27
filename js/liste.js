@@ -36,8 +36,9 @@
  */
 
 import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
+import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, angebote: { stand: '', von: null, eintraege: [] } });
 const MAX_NOTIZEN = 20;
 export const DAUMEN = ['hoch', 'mittel', 'runter'];
 
@@ -161,6 +162,9 @@ export function bereinigen(roh) {
     ki.sort((a, b) => b[1].at.localeCompare(a[1].at));
     s.ki = Object.fromEntries(ki.slice(0, MAX_GESPEICHERT));
   }
+  if (istObj(roh.angebote)) {
+    s.angebote = { stand: text(roh.angebote.stand, 40) || '', von: text(roh.angebote.von, 40) || null, eintraege: angeboteBereinigen(roh.angebote.eintraege) };
+  }
   return s;
 }
 
@@ -197,6 +201,10 @@ export const opKiWeg = (id) => ({ typ: 'kiWeg', id });
 /** Eine Notiz zu einem Rezept – für beide. Dieselbe id noch einmal ersetzt den Text (Rückgängig). */
 export const opNotiz = (rid, id, text, by, at) => ({ typ: 'notiz', rid, id, text: String(text).slice(0, 300), by: by || null, at: at || jetzt() });
 export const opNotizWeg = (rid, id) => ({ typ: 'notizWeg', rid, id });
+// Angebote der Woche: ersetzen, dazulegen, eins weg, alle weg
+export const opAngebote = (eintraege, by, at) => ({ typ: 'angebote', eintraege, by: by || null, at: at || jetzt() });
+export const opAngeboteDazu = (eintraege, by, at) => ({ typ: 'angeboteDazu', eintraege, by: by || null, at: at || jetzt() });
+export const opAngebotWeg = (id) => ({ typ: 'angebotWeg', id });
 /** Daumen für ein Gericht setzen (wert null nimmt ihn weg) – gilt für beide. */
 export const opBewerten = (rid, wert, by) => ({ typ: 'bewerten', rid, wert: wert || null, by: by || null, at: jetzt() });
 
@@ -296,6 +304,19 @@ function aendere(s, op) {
       if (!Array.isArray(liste)) return;
       const rest = liste.filter((n) => n.id !== op.id);
       if (rest.length) s.notizen[op.rid] = rest; else delete s.notizen[op.rid];
+      return;
+    }
+    case 'angebote':
+      s.angebote = { stand: op.at || jetzt(), von: op.by || null, eintraege: angeboteBereinigen(op.eintraege) };
+      return;
+    case 'angeboteDazu': {
+      const alt = s.angebote?.eintraege || [];
+      s.angebote = { stand: op.at || jetzt(), von: op.by || null, eintraege: angeboteBereinigen([...alt, ...(Array.isArray(op.eintraege) ? op.eintraege : [])]).slice(-MAX_ANGEBOTE) };
+      return;
+    }
+    case 'angebotWeg': {
+      if (!istObj(s.angebote)) return;
+      s.angebote.eintraege = (s.angebote.eintraege || []).filter((a) => a.id !== op.id);
       return;
     }
     default:

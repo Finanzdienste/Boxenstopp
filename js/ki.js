@@ -44,13 +44,17 @@ export const KI_API = ANBIETER.anthropic.api;
 export const MODELL = ANBIETER.anthropic.modell;
 const WERKZEUG = 'rezept_ausgeben';
 
-export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'anthropic' }) {
+export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'anthropic', modus = 'reste' }) {
   const kat = Object.entries(katalog || {})
     .filter(([, v]) => v.c !== 'haushalt')
     .map(([k, v]) => `${k}=${v.n}`)
     .join('; ');
   const ausgabe = anbieter === 'gemini' ? 'als JSON genau nach dem vorgegebenen Schema' : `mit dem Werkzeug ${WERKZEUG}`;
-  return `Du bist der Meal-Prep-Koch von Tobi und Amy. Aus dem, was bei ihnen noch im Kühlschrank und im Vorrat ist, machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus.
+  const angebote = modus === 'angebote';
+  const auftrag = angebote
+    ? `Aus den Angeboten der Woche bei ihren Supermärkten machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus. Die Hauptzutaten (Protein, Sättigungsbeilage, Gemüse) sollen möglichst aus den Angeboten kommen; sie sind alle zu kaufen (quelle: kaufen), nichts davon ist schon da. Was fehlt, kommt normal dazu.`
+    : `Aus dem, was bei ihnen noch im Kühlschrank und im Vorrat ist, machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus.`;
+  return `Du bist der Meal-Prep-Koch von Tobi und Amy. ${auftrag}
 
 Ziel pro Box: ${ziel.kcal} kcal, ${ziel.p} g Protein, ${ziel.kh} g Kohlenhydrate, ${ziel.f} g Fett. Die App rechnet die Nährwerte selbst aus deinen Werten pro 100 g nach und verschiebt die Mengen der Zutaten mit anpassbar: true zwischen min und max, bis jede Box das Ziel trifft. Plane das Gericht so, dass das mit sinnvollen Mengen aufgeht: genug mageres Protein, eine Sättigungsbeilage, Fett vor allem aus Öl, Käse oder Sahne.
 
@@ -59,9 +63,11 @@ Feste Regeln:
 - Kein Schweinefleisch in jeder Form (Speck, Schinken, Salami, Chorizo, Wurst, gemischtes Hack, Gelatine) und kein Putenhack. Hähnchen, Putenbrust, Rind, Eier, Hülsenfrüchte und Milchprodukte sind gut.
 - Kein Hüttenkäse und kein Quark oder Skyr in warmen Saucen – die werden körnig. Quark und Skyr nur kalt (Dip, Marinade).
 - Richtig lecker und ordentlich gewürzt, so dass man es gern vier Tage hintereinander isst. Lieber ein bewährtes Gericht gut gemacht als ein wildes Experiment.
-- Was da ist, zuerst verbrauchen, vor allem Frisches. ${dazukaufen
-    ? 'Was fehlt, darf dazugekauft werden – so wenig wie nötig und in Supermarkt-Packungen.'
-    : 'Es wird nichts dazugekauft: nur, was da ist, plus Öl, Salz, Pfeffer, Gewürze, Brühe, Mehl, Zucker und Senf aus dem Vorrat. Geht das Ziel damit nicht auf, sag es in hinweis.'}
+- ${angebote
+    ? 'Nutze so viele Angebote wie sinnvoll, aber kein Gericht erzwingen: lieber drei Angebote in einem stimmigen Rezept als sechs in einem seltsamen. In hinweis sagst du kurz, welche Angebote drin sind.'
+    : `Was da ist, zuerst verbrauchen, vor allem Frisches. ${dazukaufen
+      ? 'Was fehlt, darf dazugekauft werden – so wenig wie nötig und in Supermarkt-Packungen.'
+      : 'Es wird nichts dazugekauft: nur, was da ist, plus Öl, Salz, Pfeffer, Gewürze, Brühe, Mehl, Zucker und Senf aus dem Vorrat. Geht das Ziel damit nicht auf, sag es in hinweis.'}`}
 - Meal-Prep-tauglich: hält 3–4 Tage im Kühlschrank und lässt sich aufwärmen. Frisches, Dips und Toppings kommen in Döschen.
 
 Zutaten:
@@ -87,9 +93,9 @@ Zubereitung, genau so, wie die App sie zeigt:
 ${anbieter === 'gemini' ? 'Antworte nur mit dem JSON, ohne Text davor oder danach' : 'Antworte nur mit dem Werkzeug'}, alles auf Deutsch.`;
 }
 
-export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, mag = [], magNicht = [], vermeiden = [] }) {
+export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, mag = [], magNicht = [], vermeiden = [], modus = 'reste' }) {
   const zeilen = [
-    'Das ist noch da:',
+    modus === 'angebote' ? 'Das ist diese Woche im Angebot:' : 'Das ist noch da:',
     String(text || '').trim() || '(steht nur auf den Fotos)',
   ];
   if (fotos) zeilen.push('', `${fotos === 1 ? 'Auf dem Foto ist' : `Auf den ${fotos} Fotos ist`}, was im Kühlschrank und im Vorrat liegt.`);
@@ -253,7 +259,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
         usage.ein = Number(ev.message?.usage?.input_tokens) || 0;
         return;
       case 'content_block_start':
-        if (ev.content_block?.type === 'tool_use' && ev.content_block.name === WERKZEUG) werkzeug = true;
+        if (ev.content_block?.type === 'tool_use') werkzeug = true;
         return;
       case 'content_block_delta':
         if (ev.delta?.type === 'input_json_delta') {

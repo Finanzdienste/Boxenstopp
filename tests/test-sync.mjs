@@ -137,7 +137,7 @@ const vorherAnzahl = Object.keys(gh.liste().items).length;
 await a.click('[data-act="z-trennen"]');
 await a.click('[data-act="z-trennen-ja"]');
 check(await bis(async () => (await status(a)) === 'Nur lokal'), 'Amy getrennt: „Nur lokal“');
-check(await bis(async () => (await a.locator('.empty-state').count()) === 1), 'getrennt: auf Amys Handy ist die Liste leer');
+check(await bis(async () => (await a.locator('#list-body .empty-state').count()) === 1), 'getrennt: auf Amys Handy ist die Liste leer');
 check(Object.keys(gh.liste().items).length === vorherAnzahl, 'die Liste in GitHub bleibt, wie sie war');
 await a.reload({ waitUntil: 'load' });
 check((await status(a)) === 'Nur lokal', 'auch nach dem Neuladen getrennt');

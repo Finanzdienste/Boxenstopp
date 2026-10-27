@@ -234,7 +234,7 @@ await page.click('.tab[data-tab="einkauf"]');
 await page.click('[data-act="leeren"]');
 check(await page.locator('.confirm').count() === 1, 'Liste leeren fragt nach');
 await page.click('[data-act="leeren-ja"]');
-check(await bis(async () => (await page.locator('.empty-state').count()) === 1), 'Liste leer');
+check(await bis(async () => (await page.locator('#list-body .empty-state').count()) === 1), 'Liste leer');
 
 // --- Layout
 check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'kein seitliches Scrollen auf dem Handy');

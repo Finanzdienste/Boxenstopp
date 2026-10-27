@@ -53,7 +53,7 @@ export const schreibe = (k, v) => {
 const ANSICHT = 'boxenstopp.ansicht.v1';
 const gemerkt = lese(ANSICHT, {}) || {};
 export const ansicht = {
-  tab: gemerkt.tab === 'einkauf' ? 'einkauf' : 'rezepte',
+  tab: ['einkauf', 'angebote'].includes(gemerkt.tab) ? gemerkt.tab : 'rezepte',
   filter: typeof gemerkt.filter === 'string' ? gemerkt.filter : 'alle',
   rezept: typeof gemerkt.rezept === 'string' ? gemerkt.rezept : null,
 };
@@ -86,10 +86,10 @@ export function meldungWeg() { $('#toast').classList.remove('show'); meldungArt 
 
 /* ---------------------------------------------------------------- Reiter */
 
-const scrollPos = { rezepte: 0, einkauf: 0 };
+const scrollPos = { rezepte: 0, einkauf: 0, angebote: 0 };
 export function zeigeReiter(t, scrollBehalten = false) {
   if (istSchmal()) scrollPos[ansicht.tab] = window.scrollY;
-  ansicht.tab = t === 'einkauf' ? 'einkauf' : 'rezepte';
+  ansicht.tab = t === 'einkauf' ? 'einkauf' : t === 'angebote' ? 'angebote' : 'rezepte';
   $('#app').dataset.tab = ansicht.tab;
   if (ansicht.tab === 'einkauf' && meldungArt === 'zur-liste') meldungWeg();
   for (const b of $$('.tab')) {

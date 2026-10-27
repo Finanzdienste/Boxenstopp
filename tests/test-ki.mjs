@@ -206,7 +206,7 @@ const KI_SCHLUESSEL = GKEY;
 
 /** Nachgebaute Gemini-API (streamGenerateContent) – der normale Weg in der App. */
 function geminiAttrappe() {
-  const z = { anfragen: [], art: 'ok', verzoegerung: 0, antwort: ANTWORT };
+  const z = { anfragen: [], art: 'ok', verzoegerung: 0, antwort: ANTWORT, angebote: JSON.parse(readFileSync(path.join(ROOT, 'tests', 'daten', 'ki-angebote.json'), 'utf8')) };
   async function route(r) {
     const req = r.request();
     const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
@@ -215,7 +215,9 @@ function geminiAttrappe() {
     if (z.verzoegerung) await new Promise((f) => { setTimeout(f, z.verzoegerung); });
     if (z.art === 'schluessel') return r.fulfill({ status: 400, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT' } }) });
     if (z.art === 'ueberlastet') return r.fulfill({ status: 503, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ error: { code: 503, message: 'The model is overloaded.', status: 'UNAVAILABLE' } }) });
-    return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: GEMINI_STROM(JSON.stringify(z.antwort)) });
+    const rumpf = z.anfragen.at(-1).rumpf;
+    const antwort = rumpf.response_format?.schema?.title === 'angebote' ? z.angebote : z.antwort;
+    return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: GEMINI_STROM(JSON.stringify(antwort)) });
   }
   return { z, route };
 }
@@ -361,6 +363,61 @@ check((await t.locator('.ki-leiste').innerText()).includes('Angepasst von Teriya
 check((await t.$$eval('.step-d', (xs) => xs.map((x) => x.textContent))).some((x) => x.startsWith('200 g Brokkoli')) && (await t.locator('.step-li .step-k', { hasText: 'neu dazu' }).count()) === 1, 'Schritte mit den neuen Mengen und dem neuen Schritt für die Erbsen');
 await t.click('[data-act="zurueck"]');
 check(await t.locator('[data-filter="reste"] .n').innerText() === '2' && (await t.locator('.pill-ki', { hasText: 'Angepasst' }).count()) === 1, 'im Raster: 2 eigene Rezepte, eins davon „Angepasst“');
+
+// --- Angebote der Woche: tippen, fotografieren, Treffer, Rezept daraus, das andere Handy
+await t.click('.tab[data-tab="angebote"]');
+check(await t.locator('#a-form').count() === 1 && (await t.locator('#a-liste .empty-state').count()) === 1, 'Reiter Angebote: Formular, noch keine Angebote');
+await t.fill('#a-text', 'Aldi Hähnchenbrustfilet 1 kg 7,49\nAldi Paprika 500 g 1,29\nLidl: Gummibärchen 200 g 0,99\nQuatsch ohne Preis');
+await t.click('#a-los');
+check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 3), 'drei getippte Zeilen eingetragen, die vierte nicht');
+check((await t.locator('#a-badge').innerText()) === '3' && (await t.locator('#a-count').innerText()) === '3 drin', 'Zahl am Reiter und oben');
+check((await t.locator('.a-grp[data-laden="Aldi"] .item-sub').first().innerText()).includes('→ Hähnchenbrustfilet') && (await t.locator('.a-grp[data-laden="Lidl"] .a-ohne').count()) === 1, 'Aldi-Hähnchen ist eine Rezeptzutat, Gummibärchen nicht');
+check(await bis(() => (gh.liste()?.angebote?.eintraege || []).length === 3), 'die Angebote stehen in GitHub');
+check((await t.locator('#a-passt-liste li').count()) >= 5 && (await t.locator('#a-passt-liste li').first().innerText()).includes('im Angebot') && /spart ≈ \d,\d\d €\/Box/.test(await t.locator('#a-passt-liste li').first().innerText()), `„Passt zu euren Rezepten“ mit Ersparnis (${(await t.locator('#a-passt-liste li').first().innerText()).replace(/\s+/g, ' ').slice(0, 70)})`);
+await t.click('#a-passt-liste li:first-child button');
+check(await bis(async () => (await t.locator('#detail').isVisible()) && (await t.evaluate(() => document.querySelector('#app').dataset.tab)) === 'rezepte'), 'antippen öffnet das Rezept im Reiter Rezepte');
+await t.click('[data-act="zurueck"]');
+await t.click('.tab[data-tab="angebote"]');
+// Fotos: die KI liest sie aus
+await t.setInputFiles('#a-bilder', { name: 'prospekt.png', mimeType: 'image/png', buffer: PNG });
+check(await bis(async () => (await t.locator('#a-vorschau img').count()) === 1) && (await t.locator('#a-los').innerText()) === 'Angebote auslesen', 'mit Bild heißt der Knopf „Angebote auslesen“');
+const anfragenVorher = ki.z.anfragen.length;
+await t.click('#a-los');
+check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 6), 'die KI liest drei neue Angebote aus dem Bild (Doppeltes und ohne Preis fallen weg)');
+const aAnfrage = ki.z.anfragen.at(-1).rumpf;
+check(ki.z.anfragen.length === anfragenVorher + 1 && aAnfrage.response_format.schema.title === 'angebote' && aAnfrage.input[0].type === 'image' && /Prospekt/.test(aAnfrage.system_instruction), 'eine Anfrage mit Bild und dem Angebote-Schema');
+check((await t.locator('.a-grp[data-laden="Lidl"] .item').count()) === 4 && (await t.locator('.a-grp[data-laden="Lidl"] h3').innerText()).includes('bis'), 'Lidl: vier Angebote mit Gültigkeit');
+check(await t.locator('#a-vorschau img').count() === 0 && (await t.inputValue('#a-text')) === '', 'danach sind Bild und Text weg');
+// das andere Handy
+await a.click('.tab[data-tab="angebote"]');
+check(await bis(async () => (await a.locator('#a-liste .a-item').count()) === 6), 'Amy sieht dieselben sechs Angebote');
+check((await a.locator('#a-liste .a-foot .fine').innerText()).includes('von Tobi'), 'mit „von Tobi“');
+// eins weg und zurück
+await t.click('.a-grp[data-laden="Lidl"] [data-a-weg]');
+check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 5), 'ein Angebot entfernt');
+await t.click('#toast button');
+check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 6), 'Rückgängig bringt es zurück');
+// ein Rezept aus den Angeboten
+const anfragenVorVorschlag = ki.z.anfragen.length;
+await t.click('[data-act="a-vorschlag"]');
+check(await bis(async () => (await t.locator('#reste').isVisible()) && (await t.locator('#k-titel').innerText()) === 'Rezept aus den Angeboten'), 'der Knopf wechselt zur KI im Modus „Angebote“');
+check(await bis(() => ki.z.anfragen.length > anfragenVorVorschlag), 'und schickt die Anfrage los');
+const rezeptAnfrage = ki.z.anfragen.at(-1).rumpf;
+check(/Angeboten der Woche/.test(rezeptAnfrage.system_instruction) && rezeptAnfrage.input.at(-1).text.includes('Das ist diese Woche im Angebot:') && rezeptAnfrage.input.at(-1).text.includes('Aldi: Hähnchenbrustfilet 1 kg 7,49 €'), 'die Anfrage enthält die Angebote je Laden');
+check(await bis(async () => (await t.locator('.ki-leiste').count()) === 1 && (await t.locator('.ki-leiste').innerText()).includes('Aus den Angeboten')), 'der Vorschlag öffnet sich mit „Aus den Angeboten“');
+await t.click('[data-act="ki-verwerfen"]');
+check(await bis(async () => (await t.locator('#k-titel').innerText()) === 'Rezept aus den Angeboten') && (await t.inputValue('#k-text')).includes('Lidl:'), 'Verwerfen: zurück ins Formular, die Angebote stehen noch drin');
+await t.click('[data-act="k-modus-reste"]');
+check((await t.locator('#k-titel').innerText()) === 'Was ist noch da?' && (await t.inputValue('#k-text')) === '', '„Lieber Resteverwertung“: zurück zum normalen Formular');
+// alle löschen mit Rückfrage
+await t.click('.tab[data-tab="angebote"]');
+await t.click('[data-act="a-leeren"]');
+await t.click('[data-act="a-leeren-ja"]');
+check(await bis(async () => (await t.locator('#a-liste .empty-state').count()) === 1) && (await t.locator('#a-badge').isHidden()), 'Alle löschen: leer, Zahl weg');
+await t.click('#toast button');
+check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 6), 'Rückgängig: alle wieder da');
+await t.click('.tab[data-tab="rezepte"]');
+await t.click('[data-act="reste-zu"]');
 
 // --- löschen und rückgängig
 await t.click('[data-filter="reste"]');
