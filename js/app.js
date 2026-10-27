@@ -12,9 +12,10 @@
 import { app, $, ansicht, zeigeReiter, melde, lese } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, API } from './speicher.js';
 import { opZusammen } from './liste.js';
-import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse } from './zugang.js';
-import { filterZeichnen, rasterZeichnen, oeffneRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte } from './ansicht-rezepte.js';
+import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
+import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte } from './ansicht-rezepte.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe } from './ansicht-liste.js';
+import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 
 const apiBasis = () => lese('__api', null) || API;
 const takt = () => Number(lese('__takt', 0)) || 8000;
@@ -22,9 +23,12 @@ const takt = () => Number(lese('__takt', 0)) || 8000;
 function beiAenderung(stand) {
   app.stand = stand;
   app.listeDa = true;
+  kiAbgleichen();
   listeZeichnen();
   zahlZeichnen();
-  if (offenesRezept()) detailAktualisieren(); else rasterZeichnen();
+  // Ein Rezept aus der Resteverwertung kann auf dem anderen Handy gelöscht worden sein.
+  if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
+  if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
 }
 function beiStatus(s) {
   app.status = s;
@@ -41,11 +45,11 @@ app.verbinden = async (token, name) => {
   const ergebnis = await pruefeSchluessel(token, { api: apiBasis() });
   if (ergebnis !== 'ok') return ergebnis;
   // Was bisher nur auf diesem Handy stand, kommt mit in die gemeinsame Liste.
-  const bisher = app.zugang ? null : lokalerStand().items;
+  const bisher = app.zugang ? null : lokalerStand();
   app.zugang = { token, name };
   speichereZugang(app.zugang);
   nimmSpeicher(github({ token, name, api: apiBasis(), takt: takt() }));
-  if (bisher && Object.keys(bisher).length) app.aendern(opZusammen(bisher));
+  if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length)) app.aendern(opZusammen(bisher.items, bisher.ki));
   lokalLoeschen();
   statusZeichnen();
   return 'ok';
@@ -68,10 +72,12 @@ document.addEventListener('click', (ev) => {
   if (!el || el.disabled) return;
   if (el.dataset.tab) { zeigeReiter(el.dataset.tab); return; }
   if (klickListe(el)) return;
+  if (klickKi(el)) return;
   klickRezepte(el);
 });
-document.addEventListener('input', (ev) => eingabeRezepte(ev.target));
-document.addEventListener('submit', (ev) => absendenListe(ev));
+document.addEventListener('input', (ev) => { if (!eingabeKi(ev.target)) eingabeRezepte(ev.target); });
+document.addEventListener('change', (ev) => aenderungKi(ev.target));
+document.addEventListener('submit', (ev) => { if (!absendenKi(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */
 
@@ -90,18 +96,27 @@ async function start() {
   app.extras = daten.extras || {};
   if (daten.ziel) app.ziel = daten.ziel;
   for (const r of app.rezepte) app.nachId[r.id] = r;
+  // Welche Einheit ein Katalog-Schlüssel hat – damit die Resteverwertung nur
+  // dann eine Zeile mit einem festen Rezept teilt, wenn sich Mengen addieren lassen.
+  for (const r of app.rezepte) for (const it of r.items) if (it.k && typeof it.q === 'number') app.einheiten[it.k] = it.u;
   $('#r-eyebrow').textContent = `${app.rezepte.length} Rezepte · je 8 Boxen`;
 
+  let hash = '';
+  try { hash = decodeURIComponent((location.hash || '').slice(1)); } catch { /* kaputte Adresse */ }
+  const kiLink = kiAusAdresse();
+  if (kiLink) speichereKi(kiLink);
+  const ausLink = schluesselAusAdresse();
+  kiStart();
   filterZeichnen();
   rasterZeichnen();
   listeZeichnen();
 
-  const hash = decodeURIComponent((location.hash || '').slice(1));
-  const ausLink = schluesselAusAdresse();
   if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
   zeigeReiter(ansicht.tab, true);
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
-  if (rezept) oeffneRezept(rezept, { still: true });
+  if (hash === 'reste' || (kiLink && !ausLink)) kiStart({ oeffnen: true });
+  else if (rezept) oeffneRezept(rezept, { still: true });
+  if (kiLink) melde('KI-Schlüssel übernommen – die Resteverwertung ist bereit.');
 
   app.zugang = ladeZugang();
   if (app.zugang) nimmSpeicher(github({ ...app.zugang, api: apiBasis(), takt: takt() }));

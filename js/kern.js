@@ -6,7 +6,11 @@ import { leer } from './liste.js';
 
 export const app = {
   rezepte: [],
+  /** Rezepte aus der Resteverwertung (behaltene und der aktuelle Vorschlag), siehe ansicht-ki.js. */
+  kiRezepte: [],
   nachId: Object.create(null),
+  /** Einheit je Katalog-Schlüssel, wie die festen Rezepte sie benutzen (g, Stk, Dose …). */
+  einheiten: {},
   katalog: {},
   extras: {},
   ziel: { kcal: 443, p: 33, kh: 39, f: 15.4 },
@@ -17,10 +21,14 @@ export const app = {
   status: { zustand: 'lokal', offen: 0, zuletzt: null },
   name() { return this.zugang?.name || ''; },
   aendern(op) { if (this.speicher) this.speicher.aendern(op); },
-  // Werden in app.js gesetzt.
+  // Werden in app.js bzw. ansicht-ki.js gesetzt.
   verbinden: async () => 'netz',
   trennen: () => {},
   zeichnen: () => {},
+  /** HTML der KI-Leiste im Rezept (Behalten, neuer Vorschlag …). */
+  kiLeiste: () => '',
+  /** Vor allem, was andere sehen (Liste, Daumen, gekocht): einen KI-Vorschlag erst behalten. */
+  kiVorAktion: () => {},
 };
 
 export const $ = (s, el = document) => el.querySelector(s);

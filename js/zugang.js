@@ -34,16 +34,55 @@ export function loescheZugang() {
 export function schluesselAus(text) {
   const t = String(text || '').trim();
   const m = /[#&]zugang=([^&\s]+)/.exec(t);
-  const roh = m ? decodeURIComponent(m[1]) : t;
+  let roh = t;
+  if (m) { try { roh = decodeURIComponent(m[1]); } catch { roh = ''; } }
   return /^[A-Za-z0-9_]{20,255}$/.test(roh) ? roh : '';
 }
 
 /** Steht ein Schlüssel in der Adresse? Dann herausnehmen und zurückgeben. */
 export function schluesselAusAdresse() {
-  if (!/[#&]zugang=/.test(location.hash)) return '';
-  const s = schluesselAus(location.hash);
+  if (!/[#&](?:zugang|ki)=/.test(location.hash)) return '';
+  const s = /[#&]zugang=/.test(location.hash) ? schluesselAus(location.hash) : '';
   try { history.replaceState(null, '', location.pathname + location.search); } catch { /* egal */ }
   return s;
 }
 
-export const einladungsLink = (token) => `${location.origin}${location.pathname.replace(/index\.html$/, '')}#zugang=${encodeURIComponent(token)}`;
+/*
+ * Der Schlüssel für die Resteverwertung: ein API-Schlüssel von Anthropic
+ * (sk-ant-…), ebenfalls nur hier im localStorage. Er reist im selben Link
+ * mit: …/#zugang=<GitHub>&ki=<Anthropic> – oder allein als …/#ki=<Anthropic>.
+ */
+const KI = 'boxenstopp.ki.v1';
+const KI_MUSTER = /^sk-ant-[A-Za-z0-9_-]{20,250}$/;
+
+export function ladeKi() {
+  try {
+    const k = JSON.parse(localStorage.getItem(KI) || 'null');
+    return k && typeof k.schluessel === 'string' && KI_MUSTER.test(k.schluessel) ? k.schluessel : '';
+  } catch { return ''; }
+}
+export function speichereKi(schluessel) {
+  try { localStorage.setItem(KI, JSON.stringify({ schluessel })); return true; } catch { return false; }
+}
+export function loescheKi() {
+  try { localStorage.removeItem(KI); } catch { /* egal */ }
+}
+
+/** KI-Schlüssel aus einem eingefügten Text: der Schlüssel selbst oder ein Link mit ki=. */
+export function kiAus(text) {
+  const t = String(text || '').trim();
+  const m = /[#&]ki=([^&\s]+)/.exec(t);
+  let roh = t;
+  if (m) { try { roh = decodeURIComponent(m[1]); } catch { roh = ''; } }
+  return KI_MUSTER.test(roh) ? roh : '';
+}
+
+/** Steht ein KI-Schlüssel in der Adresse? Zurückgeben – herausgenommen wird er mit schluesselAusAdresse(). */
+export const kiAusAdresse = () => kiAus(location.hash);
+
+export function einladungsLink(token, ki = '') {
+  const teile = [];
+  if (token) teile.push(`zugang=${encodeURIComponent(token)}`);
+  if (ki) teile.push(`ki=${encodeURIComponent(ki)}`);
+  return `${location.origin}${location.pathname.replace(/index\.html$/, '')}#${teile.join('&')}`;
+}

@@ -45,6 +45,11 @@ export default [
         TextDecoder: 'readonly',
         btoa: 'readonly',
         atob: 'readonly',
+        // Resteverwertung: Fotos verkleinern, Anfrage abbrechen.
+        FileReader: 'readonly',
+        createImageBitmap: 'readonly',
+        Image: 'readonly',
+        AbortController: 'readonly',
       },
     },
     rules: {

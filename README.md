@@ -39,6 +39,54 @@ ruhiges Tempo zu Hause gerechnet, mit Waschen, Schälen und Abfall wegräumen
 Abschnitte und Gesamtzeit: Wartezeiten (`ruhe`, etwa Marinieren) laufen im
 Hintergrund weiter, „währenddessen“ kostet keine zusätzliche Zeit.
 
+## Resteverwertung
+
+Oben im Reiter Rezepte: aufschreiben oder fotografieren, was im Kühlschrank
+und im Vorrat liegt (bis zu 4 Fotos), Portionen wählen (2, 4, 6 oder 8),
+sagen, ob dazugekauft werden darf, und Wünsche. Claude macht daraus **ein**
+Rezept im selben Format wie alle anderen – Mise en place mit Schalen, ein
+Schritt pro Zeile, Minuten – und mit denselben Regeln: kein Fisch, kein
+Schwein, kein Putenhack, kein Hüttenkäse in warmen Saucen, ordentlich
+gewürzt. Was ihr mit Daumen hoch oder runter bewertet habt, geht als
+Geschmackshinweis mit.
+
+**Damit die Werte wirklich stimmen**, rechnet die App selbst
+(`js/ki-rezept.js`): Claude liefert zu jeder Zutat die Nährwerte pro 100 g und
+für Fleisch, Reis, Nudeln, Öl, Käse usw. einen Bereich (min–max, bei
+Vorhandenem höchstens, was da ist). Die App verschiebt diese Mengen, bis eine
+Box möglichst genau auf 443 kcal / 33 g P / 39 g KH / 15,4 g F kommt
+(kleinste gewichtete Abweichung, Fett zählt 1,5-fach), rundet auf schöne
+Mengen und setzt sie in die Schritte ein – Claude schreibt Mengen dort als
+Platzhalter `{reis}`. Die Leiste über dem Rezept zeigt, was verschoben wurde
+(„Basmatireis 250 → 280 g“), und warnt, wenn das Ziel mit dem, was da ist,
+nicht erreichbar ist.
+
+Ein Vorschlag steht erst nur auf diesem Handy. **Behalten** legt ihn in
+`liste.json` unter `ki` ab, dann sehen ihn beide (Filter „Resteverwertung“,
+höchstens 12, das älteste fällt raus). Wer etwas davon auf die Liste setzt,
+einen Daumen gibt oder „Heute gekocht“ drückt, behält ihn automatisch. Auf
+die Liste kommt nur, was fehlt; Zutaten, die es im Katalog mit derselben
+Einheit gibt, teilen sich die Zeile mit den festen Rezepten.
+
+### Einrichten
+
+Die App ruft die Messages-API von Anthropic direkt vom Handy auf
+(`js/ki.js`, Modell `claude-sonnet-5-5`, Antwort als Werkzeug
+`rezept_ausgeben`, gestreamt). Dafür braucht es einen **API-Schlüssel** – der
+ist getrennt von einem Claude-Abo und wird pro Anfrage abgerechnet, ein Rezept
+kostet ein paar Cent (die Leiste zeigt die Kosten der Anfrage):
+
+1. Auf [console.anthropic.com](https://console.anthropic.com/) anmelden,
+   unter Billing Guthaben aufladen, am besten ein Monatslimit setzen.
+2. API Keys → Create Key.
+3. In der App: Resteverwertung → Schlüssel einfügen → Speichern.
+
+Der Schlüssel steht nur im localStorage (`boxenstopp.ki.v1`), nirgends im Code
+oder im Repo. Aufs zweite Handy kommt er mit dem Link unter der Einkaufsliste
+(`…#zugang=<GitHub>&ki=<Anthropic>`) oder mit „Link fürs zweite Handy
+kopieren“ im Einrichten. Fotos werden vorher auf 1280 px verkleinert und
+gehen nur mit der einen Anfrage an Anthropic, gespeichert werden sie nicht.
+
 ## Die gemeinsame Liste
 
 GitHub Pages kann Dateien nur ausliefern, nicht speichern. Die Liste liegt
@@ -104,7 +152,8 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
   "c-mh8k2x1abcd": { "name": "Bananen", "cat": "obst", "parts": {}, "custom": true, "checked": false, "by": null, "at": "…", "added": "…" }
  },
  "cooked": { "chili": { "at": "2026-10-26", "by": "Tobi" } },
- "bewertung": { "chili": { "wert": "hoch", "by": "Amy", "at": "2026-10-26T19:10:00.000Z" } }
+ "bewertung": { "chili": { "wert": "hoch", "by": "Amy", "at": "2026-10-26T19:10:00.000Z" } },
+ "ki": { "ki-mh9x2k1a7f": { "r": { "name": "Hähnchen-Reispfanne mit Feta", "portionen": 8, "zutaten": […], "ablauf": […], "…": "…" }, "by": "Amy", "at": "…" } }
 }
 ```
 
@@ -114,8 +163,11 @@ entweder eine Menge (`q`, `u`, Packungshinweis `h`) oder einen Text (`t`,
 z. B. „2 EL“ bei Vorrat und Gewürzen). Erledigt ist eine Zeile, wenn alle
 Teile `done` sind (eigene Einträge: `checked`). `by` ist der Name aus dem
 Einrichten. `bewertung` hat pro Gericht einen Daumen (`hoch`, `mittel`,
-`runter`) – wer zuletzt drückt, überschreibt ihn für beide. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
-nicht passt.
+`runter`) – wer zuletzt drückt, überschreibt ihn für beide. Unter `ki` liegen
+die behaltenen Rezepte aus der Resteverwertung im KI-Format (ki-rezept.js);
+ihre Zutaten stehen auf der Liste unter dem Katalog-Schlüssel oder als
+`ki-<zutat>`. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles,
+was nicht passt.
 
 ## Rezepte ändern
 
@@ -163,6 +215,9 @@ neues Rezept muss dort nichts geändert werden.
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | die beiden Reiter |
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
 | `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“ |
+| `js/ki.js` | Resteverwertung: Auftrag an Claude, Anfrage, Antwortstrom lesen, Fehler |
+| `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
+| `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |
 | `sw.js` | Offline-Betrieb; `VERSION` hochzählen, wenn sich eine Datei aus `SHELL` ändert |
 
 ## Tests
@@ -176,5 +231,9 @@ npm run lint
 
 `test-sync.mjs` spielt zwei Handys gegen eine nachgebaute GitHub-API durch
 (Einrichten, Link, Abhaken beim anderen, gleichzeitiges Schreiben, veraltete
-Antwort, offline, falscher Schlüssel, Trennen). Der Workflow „Prüfung“ lässt
+Antwort, offline, falscher Schlüssel, Trennen). `test-ki.mjs` prüft die
+Resteverwertung erst ohne Browser (Antwort bereinigen, verbotene Zutaten,
+Mengen aufs Ziel, Anfrage, Antwortstrom, Fehler) und dann mit einer
+nachgebauten Anthropic-API und zwei Handys – Beispielantwort in
+`tests/daten/ki-antwort.json`. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

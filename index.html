@@ -31,10 +31,16 @@
           <p>Jedes Rezept ist auf 8 gleiche Boxen gerechnet, mit Packungsgrößen aus dem Supermarkt. Rezept öffnen, Zutaten auf die gemeinsame Liste setzen, einkaufen, kochen.</p>
           <div class="target"><span>Ziel pro Box</span><b>443 kcal</b><b class="m-p">33 g P</b><b class="m-kh">39 g KH</b><b class="m-f">15,4 g F</b></div>
         </div>
+        <button type="button" class="reste-karte" data-act="reste">
+          <span class="reste-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 10h14M8.5 6v1.5M8.5 13.5v3"/></svg></span>
+          <span class="reste-txt"><b>Resteverwertung</b><span>Was ist noch da? Foto oder Liste – Claude macht ein Rezept, das eure Ziele trifft.</span><small id="reste-letzter" hidden></small></span>
+          <svg class="ic reste-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
         <div class="chips" id="chips" role="toolbar" aria-label="Rezepte filtern"></div>
         <div class="grid" id="grid"><p class="empty">Rezepte werden geladen…</p></div>
       </section>
       <section id="detail" hidden></section>
+      <section id="reste" aria-labelledby="k-titel" hidden></section>
     </main>
 
     <aside id="view-list" class="pane list-pane" aria-labelledby="l-title">

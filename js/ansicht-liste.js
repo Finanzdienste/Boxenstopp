@@ -11,7 +11,7 @@ import { app, $, melde } from './kern.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
 import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren } from './liste.js';
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
-import { einladungsLink, schluesselAus } from './zugang.js';
+import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
 import { nachBereichen, alsText } from './bereiche.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
@@ -151,12 +151,13 @@ function teilenZeichnen(zuletzt) {
     el.innerHTML = `<div class="confirm" role="group" aria-label="Trennen"><span>Dieses Handy von der gemeinsamen Liste trennen? Die Liste bleibt in GitHub.${offen ? ` ${offen} ${offen === 1 ? 'Änderung ist' : 'Änderungen sind'} noch nicht gespeichert und gehen verloren.` : ''}</span><div class="confirm-btns"><button type="button" class="btn btn-danger" data-act="z-trennen-ja">Ja, trennen</button><button type="button" class="btn btn-quiet" data-act="z-trennen-nein">Abbrechen</button></div></div>`;
     return;
   }
-  const link = einladungsLink(app.zugang.token);
+  const ki = ladeKi();
+  const link = einladungsLink(app.zugang.token, ki);
   const wa = `https://wa.me/?text=${encodeURIComponent(`Unsere Einkaufsliste in Boxenstopp: ${link}`)}`;
   el.innerHTML = `<p><b>Gemeinsame Liste</b>${wer}${wann}</p>
 <div class="zugang-btns"><button type="button" class="btn" data-act="z-link">Link fürs zweite Handy kopieren</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a><button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
 <input class="z-linkfeld" id="z-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>
-<p class="fine">Wer den Link hat, kann eure Liste ändern. Schick ihn nur an die Person, mit der du die Liste teilst.</p>`;
+<p class="fine">Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.</p>`;
 }
 
 export function zugangZeichnen() {
@@ -202,8 +203,10 @@ async function formularAbschicken() {
   const los = $('#z-los');
   los.disabled = true;
   los.textContent = 'Prüfe…';
+  const ki = kiAus($('#z-token').value);
   const ergebnis = await app.verbinden(token, name);
   if (ergebnis === 'ok') {
+    if (ki) speichereKi(ki);
     formular = null;
     zugangZeichnen();
     melde(`Verbunden. Ihr teilt jetzt eine Liste, ${name}.`);
@@ -261,7 +264,7 @@ export function klickListe(el) {
     case 'z-oeffnen': formular = { token: '', name: null, fehler: '' }; zugangZeichnen(); $('#z-name')?.focus(); return true;
     case 'z-abbrechen': formular = null; zugangZeichnen(); return true;
     case 'z-link': {
-      const link = einladungsLink(app.zugang.token);
+      const link = einladungsLink(app.zugang.token, ladeKi());
       const feld = $('#z-linkfeld');
       const zeigen = () => { if (feld) { feld.hidden = false; feld.select(); } melde('Kopieren klappt hier nicht. Der Link steht jetzt im Feld darunter.'); };
       try {

@@ -14,6 +14,7 @@
 import { app, $, $$, ansicht, ansichtMerken, melde, zeigeReiter, istSchmal, lese, schreibe } from './kern.js';
 import { esc, nf1, nfi, heute, tagKurz, abweichung } from './format.js';
 import { zeitVon, dauer } from './zeiten.js';
+import { zahlwort } from './ki-rezept.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
 
 const SCHRITTE = 'boxenstopp.schritte.v2';
@@ -34,7 +35,10 @@ export const FILTER = [
   ['kartoffel', 'Kartoffel & Co.', (r) => ['Kartoffeln', 'Süßkartoffel', 'Gnocchi'].includes(r.base)],
   ['schnell', 'Unter 1½ Std.', (r) => gesamtZeit(r) < SCHNELL],
   ['liste', 'Auf der Liste', (r) => rezeptStand(app.stand, r).drauf],
+  ['reste', 'Resteverwertung', (r) => !!r.ki],
 ];
+const alleRezepte = () => [...app.rezepte, ...app.kiRezepte.filter((r) => r.ki?.von?.gespeichert)];
+const boxen = (r) => r.portionen || 8;
 
 const PFADE = {
   plus: '<path d="M12 5v14M5 12h14"/>',
@@ -77,25 +81,29 @@ function karte(r) {
   const tag = c ? tagKurz(c.at) : '';
   const b = app.stand.bewertung?.[r.id];
   const daumen = b ? `<span class="pill p-${b.wert}">${daumenIc(b.wert)}${DAUMEN_TEXT[b.wert]}</span>` : '';
+  const ki = r.ki ? `<span class="pill pill-ki">Resteverwertung${boxen(r) !== 8 ? ` · ${boxen(r)} Boxen` : ''}</span>` : '';
   return `<button type="button" class="box" data-open="${esc(r.id)}">
 <span class="tape">${esc(r.short)}</span><span class="box-time">${dauer(gesamtZeit(r))}</span>
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}</span>
 <span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
-<span class="box-foot">${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
+<span class="box-foot">${ki}${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
 </button>`;
 }
 
 export function rasterZeichnen() {
   if (!FILTER.some((f) => f[0] === ansicht.filter)) ansicht.filter = 'alle';
   const f = FILTER.find((x) => x[0] === ansicht.filter);
-  const liste = app.rezepte.filter(f[2]);
-  $('#grid').innerHTML = liste.length ? liste.map(karte).join('') : '<p class="empty">Gerade steht kein Rezept auf der Einkaufsliste.</p>';
+  const alle = alleRezepte();
+  const liste = alle.filter(f[2]);
+  $('#grid').innerHTML = liste.length ? liste.map(karte).join('') : `<p class="empty">${ansicht.filter === 'liste' ? 'Gerade steht kein Rezept auf der Einkaufsliste.' : 'Hier ist gerade nichts.'}</p>`;
   for (const b of $$('[data-filter]')) {
     const fx = FILTER.find((x) => x[0] === b.dataset.filter);
     b.setAttribute('aria-pressed', String(b.dataset.filter === ansicht.filter));
     const n = b.querySelector('.n');
-    if (n && fx) n.textContent = String(app.rezepte.filter(fx[2]).length);
+    const zahl = fx ? alle.filter(fx[2]).length : 0;
+    if (n && fx) n.textContent = String(zahl);
+    if (fx?.[0] === 'reste') b.hidden = !zahl && ansicht.filter !== 'reste';
   }
 }
 
@@ -105,11 +113,12 @@ function zeilenVon(r) {
   const z = [];
   const art = (it) => {
     if (it.haus) return 'haushalt';
+    if (it.da) return 'vorhanden';
     if (typeof it.q === 'number' && !it.pantry && !it.opt) return 'einkauf';
     return it.opt ? 'optional' : 'vorrat';
   };
   for (const it of r.items) z.push({ ...it, art: art(it) });
-  for (const s of r.spices) z.push({ n: s.n, a: s.a, k: s.k, h: '', art: 'gewuerz' });
+  for (const s of r.spices) z.push({ n: s.n, a: s.a, k: s.k, h: '', kat: s.kat, art: 'gewuerz' });
   return z;
 }
 /*
@@ -134,7 +143,9 @@ export function schalenHervor(html, schalen = []) {
 const schaleSchild = (s) => `<span class="schale"><span class="vh">Schale </span><b>${s.n}</b>${esc(s.name)}</span>`;
 const schrittText = (t, r) => schalenHervor(mengenHervor(esc(t)), r.schalen);
 
-const teilFuer = (z) => (z.art === 'einkauf' ? { q: z.q, u: z.u, h: z.h || '' } : { t: z.a });
+const teilFuer = (z) => ((z.art === 'einkauf' || z.art === 'vorhanden') && typeof z.q === 'number' ? { q: z.q, u: z.u, h: z.h || '' } : { t: z.a });
+/** Name und Abteilung für eine neue Zeile auf der Liste: aus dem Katalog oder vom KI-Rezept. */
+const katFuer = (z) => z.kat || app.katalog[z.k];
 
 function etikett(r) {
   const ziel = app.ziel;
@@ -166,20 +177,22 @@ function detailHTML(r) {
   const t = r.total;
   return `<button type="button" class="back" data-act="zurueck">${ic('back')}Alle Rezepte</button>
 <div class="d-head">
-  <span class="tape">${esc(r.short)} · 8×</span>
+  <span class="tape">${esc(r.short)} · ${boxen(r)}×</span>
   <h1 id="d-title">${esc(r.name)}</h1>
   <p class="d-desc">${esc(r.desc)}</p>
   <div class="facts">${fakten.map((f) => `<span class="pill">${f}</span>`).join('')}</div>
 </div>
-<span class="label-k">Pro Box, eine von acht</span>
+<span class="label-k">Pro Box, eine von ${zahlwort(boxen(r))}</span>
 ${etikett(r)}
+${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
 <div class="actions" id="d-actions"></div>
 <div class="bewertung" id="d-bewertung" role="group" aria-label="Wie war's?"></div>
 
 <section class="sec" aria-labelledby="h-ing">
-  <h2 id="h-ing">Zutaten <small>für 8 Boxen</small></h2>
+  <h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</small></h2>
   <p class="sec-lead">Mit + setzt du einzelne Zutaten auf die Liste, mit ✓ nimmst du sie wieder runter.</p>
   ${gruppe('einkauf', 'Einkaufen')}
+  ${gruppe('vorhanden', 'Ist schon da')}
   ${gruppe('vorrat', 'Aus dem Vorrat')}
   ${gruppe('optional', 'Optional')}
   ${gruppe('gewuerz', 'Gewürze')}
@@ -190,7 +203,7 @@ ${zubereitungHTML(r)}
 
 <section class="sec" aria-labelledby="h-calc">
   <h2 id="h-calc">Portionieren</h2>
-  <p class="sec-lead">Topf oder Schüssel leer wiegen, dann mit dem fertigen Essen. Die Differenz geht durch 8.</p>
+  <p class="sec-lead">Topf oder Schüssel leer wiegen, dann mit dem fertigen Essen. Die Differenz geht durch ${boxen(r)}.</p>
   <div class="calc">
     <div class="field"><label for="pot-empty">Gefäß leer</label><div class="inp"><input id="pot-empty" type="number" inputmode="numeric" min="0" step="1" placeholder="2150"><span>g</span></div></div>
     <div class="field"><label for="pot-full">Mit Essen</label><div class="inp"><input id="pot-full" type="number" inputmode="numeric" min="0" step="1" placeholder="5450"><span>g</span></div></div>
@@ -210,16 +223,16 @@ ${zubereitungHTML(r)}
 ${r.tips && r.tips.length ? `<section class="sec" aria-labelledby="h-tips"><h2 id="h-tips">Tipps</h2><ul class="tips">${r.tips.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>` : ''}
 
 <details class="nut">
-  <summary>Nährwertrechnung für alle 8 Boxen</summary>
+  <summary>Nährwertrechnung für alle ${boxen(r)} Boxen</summary>
   <div class="table-wrap"><table>
     <thead><tr><th>Zutat</th><th>Menge</th><th>kcal</th><th>P</th><th>KH</th><th>F</th></tr></thead>
     <tbody>${r.nut.map((n) => `<tr><td>${esc(n[0])}</td><td>${esc(n[1])}</td><td>${nfi(n[2])}</td><td>${nf1(n[3])}</td><td>${nf1(n[4])}</td><td>${nf1(n[5])}</td></tr>`).join('')}</tbody>
     <tfoot>
       <tr><td>Gesamt</td><td></td><td>${nfi(t[0])}</td><td>${nf1(t[1])}</td><td>${nf1(t[2])}</td><td>${nf1(t[3])}</td></tr>
-      <tr><td>Pro Box (÷ 8)</td><td></td><td>${r.m.kcal}</td><td>${nf1(r.m.p)}</td><td>${nf1(r.m.kh)}</td><td>${nf1(r.m.f)}</td></tr>
+      <tr><td>Pro Box (÷ ${boxen(r)})</td><td></td><td>${r.m.kcal}</td><td>${nf1(r.m.p)}</td><td>${nf1(r.m.kh)}</td><td>${nf1(r.m.f)}</td></tr>
     </tfoot>
   </table></div>
-  <p class="fine">Gerechnet mit typischen Packungswerten pro 100 g. Gewürze, Brühe und Zitrussaft sind pauschal enthalten oder vernachlässigbar.</p>
+  <p class="fine">${r.ki ? 'Gerechnet mit den Werten pro 100 g, die Claude angegeben hat; die Mengen hat die App auf eure Ziele gerechnet. Gewürze sind vernachlässigt.' : 'Gerechnet mit typischen Packungswerten pro 100 g. Gewürze, Brühe und Zitrussaft sind pauschal enthalten oder vernachlässigbar.'}</p>
 </details>`;
 }
 
@@ -258,7 +271,8 @@ export function detailAktualisieren() {
   const st = rezeptStand(app.stand, r);
   const gesperrt = app.listeDa ? '' : ' disabled';
   let html = '';
-  if (!st.drauf) html += `<button type="button" class="btn btn-primary" data-act="alle-dazu"${gesperrt}>${ic('list')}Alles auf die Einkaufsliste<span class="btn-n">${st.gesamt}</span></button>`;
+  if (!st.gesamt) html += `<span class="onlist">${ic('check')}Alles da – nichts einzukaufen</span>`;
+  else if (!st.drauf) html += `<button type="button" class="btn btn-primary" data-act="alle-dazu"${gesperrt}>${ic('list')}Alles auf die Einkaufsliste<span class="btn-n">${st.gesamt}</span></button>`;
   else if (!st.komplett) html += `<button type="button" class="btn btn-primary" data-act="alle-dazu"${gesperrt}>Fehlende ergänzen<span class="btn-n">${st.gesamt - st.n}</span></button><button type="button" class="btn" data-act="alle-weg"${gesperrt}>Von der Liste nehmen</button>`;
   else html += `<span class="onlist">${ic('check')}Alle ${st.gesamt} Zutaten stehen auf der Liste</span><button type="button" class="btn" data-act="alle-weg"${gesperrt}>Von der Liste nehmen</button>`;
   const c = app.stand.cooked[aktuell];
@@ -269,6 +283,7 @@ export function detailAktualisieren() {
   if (c && !heuteGekocht && tagKurz(c.at)) html += `<span class="cooked-note">Zuletzt gekocht am ${esc(tagKurz(c.at))}${c.by ? ` von ${esc(c.by)}` : ''}</span>`;
   $('#d-actions').innerHTML = html;
   $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
+  if ($('#d-ki')) $('#d-ki').innerHTML = app.kiLeiste(r);
   for (const b of $$('#detail .tog')) {
     const z = zeilen[Number(b.dataset.tog)];
     if (!z) continue;
@@ -312,7 +327,8 @@ function rechnerZeichnen() {
   if (!out) return;
   if (Number.isFinite(leerG) && Number.isFinite(vollG) && vollG > leerG) {
     const essen = vollG - leerG;
-    out.innerHTML = `<b>${nfi(essen / 8)} g</b><small>${nfi(essen)} g gesamt</small>`;
+    const n = aktuell && app.nachId[aktuell] ? boxen(app.nachId[aktuell]) : 8;
+    out.innerHTML = `<b>${nfi(essen / n)} g</b><small>${nfi(essen)} g gesamt</small>`;
   } else {
     out.innerHTML = '<b>– g</b><small>beide Gewichte eintragen</small>';
   }
@@ -326,6 +342,7 @@ export function oeffneRezept(rid, { still = false } = {}) {
   ansicht.rezept = rid;
   ansichtMerken();
   $('#browse').hidden = true;
+  if ($('#reste')) $('#reste').hidden = true;
   const el = $('#detail');
   el.innerHTML = detailHTML(r);
   el.hidden = false;
@@ -360,7 +377,7 @@ export function rezeptAufListe(rid) {
   if (!r) return;
   const fehlen = einkaufsZutaten(r).filter((it) => !hatTeil(app.stand, it.k, rid));
   if (!fehlen.length) return;
-  app.aendern(fehlen.map((it) => opTeil(it.k, rid, { q: it.q, u: it.u, h: it.h || '' }, app.katalog[it.k])));
+  app.aendern(fehlen.map((it) => opTeil(it.k, rid, { q: it.q, u: it.u, h: it.h || '' }, it.kat || app.katalog[it.k])));
   const kurz = r.short || rid;
   melde(`${kurz}: ${fehlen.length} ${fehlen.length === 1 ? 'Zutat' : 'Zutaten'} auf der Liste`,
     istSchmal() && ansicht.tab !== 'einkauf' ? { knopf: 'Zur Liste', art: 'zur-liste', beiKnopf: () => zeigeReiter('einkauf') } : {});
@@ -374,7 +391,7 @@ export function rezeptVonListe(rid) {
   app.aendern(vorher.map(([k]) => opTeilWeg(k, rid)));
   melde(`${r?.short || rid} von der Liste genommen`, {
     knopf: 'Rückgängig',
-    beiKnopf: () => app.aendern(vorher.map(([k, p]) => opTeil(k, rid, p, app.katalog[k]))),
+    beiKnopf: () => app.aendern(vorher.map(([k, p]) => opTeil(k, rid, p, r?.items?.find((it) => it.k === k)?.kat || app.katalog[k]))),
   });
 }
 
@@ -414,12 +431,14 @@ export function klickRezepte(el) {
   if ('tog' in d) {
     const z = zeilen[Number(d.tog)];
     if (!z || !aktuell) return true;
+    app.kiVorAktion(aktuell);
     if (hatTeil(app.stand, z.k, aktuell)) app.aendern(opTeilWeg(z.k, aktuell));
-    else app.aendern(opTeil(z.k, aktuell, teilFuer(z), app.katalog[z.k]));
+    else app.aendern(opTeil(z.k, aktuell, teilFuer(z), katFuer(z)));
     return true;
   }
   if (d.bewerten) {
     if (!aktuell) return true;
+    app.kiVorAktion(aktuell);
     const vorher = app.stand.bewertung?.[aktuell]?.wert;
     const neu = vorher === d.bewerten ? null : d.bewerten;
     app.aendern(opBewerten(aktuell, neu, app.name()));
@@ -437,9 +456,10 @@ export function klickRezepte(el) {
   }
   switch (d.act) {
     case 'zurueck': schliesseRezept(); return true;
-    case 'alle-dazu': rezeptAufListe(aktuell); return true;
+    case 'alle-dazu': app.kiVorAktion(aktuell); rezeptAufListe(aktuell); return true;
     case 'alle-weg': rezeptVonListe(aktuell); return true;
     case 'gekocht':
+      app.kiVorAktion(aktuell);
       app.aendern(opGekocht(aktuell, heute(), app.name()));
       melde('Eingetragen: heute gekocht');
       return true;

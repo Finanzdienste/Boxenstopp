@@ -6,10 +6,13 @@
  *   { version: 1, rev: 12,
  *     items:     { <Schlüssel>: Eintrag },
  *     cooked:    { <Rezept-id>: { at: '2026-10-26', by: 'Tobi' } },
- *     bewertung: { <Rezept-id>: { wert: 'hoch' | 'mittel' | 'runter', by: 'Amy', at } } }
+ *     bewertung: { <Rezept-id>: { wert: 'hoch' | 'mittel' | 'runter', by: 'Amy', at } },
+ *     ki:        { <ki-…>: { r: Rezept aus der Resteverwertung, by, at } } }
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
- * zuletzt gedrückt hat, steht dabei.
+ * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
+ * Resteverwertung, die jemand behalten hat (ki-rezept.js, höchstens 12) –
+ * so sieht das andere Handy sie auch.
  *
  * Ein Eintrag:
  *
@@ -31,7 +34,9 @@
  * dazugelegt hat, offen bleibt.
  */
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {} });
+import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
+
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {} });
 export const DAUMEN = ['hoch', 'mittel', 'runter'];
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -57,7 +62,7 @@ export function erledigt(d) {
 export const hatTeil = (stand, k, rid) => istObj(stand.items[k]?.parts?.[rid]);
 
 /** Was „Alles auf die Einkaufsliste“ einträgt: Zutaten mit Menge, ohne Vorrat und Optionales. */
-export const einkaufsZutaten = (r) => (r.items || []).filter((it) => it.k && typeof it.q === 'number' && !it.pantry && !it.opt);
+export const einkaufsZutaten = (r) => (r.items || []).filter((it) => it.k && typeof it.q === 'number' && !it.pantry && !it.opt && !it.da);
 
 /** Wie viele der Einkaufszutaten eines Rezepts auf der Liste stehen. */
 export function rezeptStand(stand, r) {
@@ -135,6 +140,16 @@ export function bereinigen(roh) {
       if (SCHLUESSEL.test(rid) && istObj(c) && TAG.test(String(c.at))) s.cooked[rid] = { at: c.at, by: text(c.by, 40) };
     }
   }
+  if (istObj(roh.ki)) {
+    const ki = [];
+    for (const [id, e] of Object.entries(roh.ki)) {
+      if (!KI_ID.test(id) || !istObj(e)) continue;
+      const { r } = kiBereinigen(e.r);
+      if (r) ki.push([id, { r, by: text(e.by, 40), at: text(e.at, 40) || '' }]);
+    }
+    ki.sort((a, b) => b[1].at.localeCompare(a[1].at));
+    s.ki = Object.fromEntries(ki.slice(0, MAX_GESPEICHERT));
+  }
   return s;
 }
 
@@ -163,8 +178,11 @@ export function opEigener(id, name, cat) {
 export const opErledigteWeg = () => ({ typ: 'erledigteWeg' });
 export const opLeeren = () => ({ typ: 'leeren' });
 export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || null });
-/** Einträge von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
-export const opZusammen = (items) => ({ typ: 'zusammen', items: klon(items) });
+/** Einträge (und behaltene KI-Rezepte) von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
+export const opZusammen = (items, ki = {}) => ({ typ: 'zusammen', items: klon(items), ki: klon(ki || {}) });
+/** Ein Rezept aus der Resteverwertung für beide behalten – oder wieder wegwerfen. */
+export const opKiBehalten = (id, r, by) => ({ typ: 'kiBehalten', id, r: klon(r), by: by || null, at: jetzt() });
+export const opKiWeg = (id) => ({ typ: 'kiWeg', id });
 /** Daumen für ein Gericht setzen (wert null nimmt ihn weg) – gilt für beide. */
 export const opBewerten = (rid, wert, by) => ({ typ: 'bewerten', rid, wert: wert || null, by: by || null, at: jetzt() });
 
@@ -230,6 +248,24 @@ function aendere(s, op) {
         if (!da) { s.items[k] = klon(e); continue; }
         for (const [rid, p] of teileVon(e)) if (!istObj(da.parts?.[rid])) { da.parts = da.parts || {}; da.parts[rid] = klon(p); }
       }
+      if (istObj(op.ki)) {
+        if (!istObj(s.ki)) s.ki = {};
+        for (const [id, e] of Object.entries(op.ki)) if (KI_ID.test(id) && istObj(e) && !s.ki[id]) s.ki[id] = klon(e);
+      }
+      return;
+    case 'kiBehalten': {
+      if (!KI_ID.test(String(op.id))) return;
+      const { r } = kiBereinigen(op.r);
+      if (!r) return;
+      if (!istObj(s.ki)) s.ki = {};
+      s.ki[op.id] = { r, by: op.by || null, at: op.at };
+      // Höchstens MAX_GESPEICHERT: das älteste fällt raus.
+      const alle = Object.entries(s.ki).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)));
+      s.ki = Object.fromEntries(alle.slice(0, MAX_GESPEICHERT));
+      return;
+    }
+    case 'kiWeg':
+      if (istObj(s.ki)) delete s.ki[op.id];
       return;
     default:
   }
