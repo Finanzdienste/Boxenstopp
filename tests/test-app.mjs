@@ -6,11 +6,12 @@
  * Erledigtes weg, Frühstück, Portionsrechner – und nach dem Neuladen ist
  * alles noch da.
  */
-import { pruefer, starteBrowser, handy, bis } from './hilfe.mjs';
+import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS } from './hilfe.mjs';
 
 const { check, ende } = pruefer();
 const browser = await starteBrowser();
-const { page, fehler } = await handy(browser);
+const tiere = tierAttrappe();
+const { ctx, page, fehler } = await handy(browser, { tiere });
 
 const text = (sel) => page.locator(sel).innerText();
 const zeile = (name) => page.locator('#list-body .item', { has: page.locator('.item-name', { hasText: new RegExp(`^${name}$`) }) });
@@ -176,6 +177,54 @@ await page.reload({ waitUntil: 'load' });
 await page.waitForFunction(() => document.querySelectorAll('#list-body .item').length > 0);
 check(await page.locator('#list-body .item').count() === anzahl, `nach dem Neuladen: dieselben ${anzahl} Einträge`);
 check(await page.evaluate(() => document.querySelector('#app').dataset.tab) === 'einkauf', 'nach dem Neuladen: wieder die Einkaufsliste');
+
+// --- Belohnung: Phase fertig → ein Satz, alles fertig → ein Tier mit Spruch
+await page.click('.tab[data-tab="rezepte"]');
+if (await page.locator('[data-act="zurueck"]').count()) await page.click('[data-act="zurueck"]');
+await page.click('[data-open="gnocchi"]');
+await page.waitForSelector('#detail .step');
+check(await bis(async () => tiere.zaehler.bilder >= 1, 4000), 'sobald ein Rezept offen ist, wird ein Tier vorgeladen');
+const phasen = await page.evaluate(async () => (await (await fetch('daten/rezepte.json')).json()).rezepte.find((r) => r.id === 'gnocchi').ablauf.map((p) => p.schritte.length));
+for (let i = 0; i < phasen[0]; i++) await page.locator('#detail .step').nth(i).click();
+const toast = () => page.evaluate(() => { const t = document.querySelector('#toast'); return t.classList.contains('show') ? { art: t.dataset.art, text: t.textContent } : null; });
+check(await bis(async () => (await toast())?.art === 'lob'), `Vorbereiten komplett: ein Lob unten (${((await toast())?.text || '').slice(0, 40)}…)`);
+check(await page.locator('#lob').isHidden(), 'aber noch kein Tier');
+const alle = phasen.reduce((a, b) => a + b, 0);
+for (let i = phasen[0]; i < alle; i++) await page.locator('#detail .step').nth(i).click();
+check(await bis(async () => await page.locator('#lob:not([hidden]) .lob-karte').count() === 1, 6000), 'letztes Häkchen: die Belohnung kommt');
+const tier1 = await page.getAttribute('#lob .lob-tier', 'data-lob-tier');
+check(!!tier1 && await page.locator('#lob .lob-medium').evaluate((m) => m.naturalWidth > 0), `ein echtes Tierbild läuft rein (${tier1})`);
+check((await page.locator('#lob-titel').innerText()).length > 10 && (await page.locator('#lob .lob-eyebrow').textContent()).includes('Gnocchi'), `mit Spruch: „${await page.locator('#lob-titel').innerText()}“`);
+check(await page.locator('#lob .lob-konfetti i').count() > 30, 'und Konfetti');
+await page.click('[data-lob="noch"]');
+check(await bis(async () => (await page.getAttribute('#lob .lob-tier', 'data-lob-tier')) !== tier1, 8000), `„Noch ein Tier“: ein anderes (${await page.getAttribute('#lob .lob-tier', 'data-lob-tier')})`);
+await page.click('[data-lob="zu"]');
+check(await page.locator('#lob').isHidden() && (await page.evaluate(() => document.body.classList.contains('lob-offen'))) === false, '„Danke!“ macht zu');
+await page.click('[data-act="gekocht"]');
+check(await bis(async () => ((await toast())?.text || '').startsWith('Eingetragen')) && await page.locator('#lob').isHidden(), '„Heute gekocht“ direkt danach: kein zweites Tier fürs selbe Rezept, nur die Meldung');
+// Sprüche wiederholen sich nicht gleich wieder
+const sprueche = await page.evaluate(async () => {
+  const { spruch, SPRUECHE } = await import('./js/lob.js');
+  const g = { sprueche: [], tiere: [], rezepte: {}, phasen: {}, klein: [] };
+  const aus = Array.from({ length: 20 }, () => spruch('Amy', g));
+  return { n: new Set(aus).size, gesamt: SPRUECHE.length, mitName: aus.filter((t) => t.includes('Amy')).length, ohneKlammer: aus.every((t) => !t.includes('{')) };
+});
+check(sprueche.n === 20 && sprueche.gesamt >= 50 && sprueche.ohneKlammer, `20 Sprüche am Stück, keiner doppelt (aus ${sprueche.gesamt}), Name eingesetzt`);
+// Ohne Netz: ein gemaltes Tier
+await ctx.unroute(TIER_HOSTS);
+await ctx.route(TIER_HOSTS, (r) => r.abort('blockedbyclient'));
+await page.reload({ waitUntil: 'load' });
+await page.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0 || document.querySelector('#detail:not([hidden])'));
+if (await page.locator('[data-act="zurueck"]').count()) await page.click('[data-act="zurueck"]');
+await page.click('[data-open="teriyaki"]');
+await page.waitForSelector('#detail .step');
+const n2 = await page.locator('#detail .step').count();
+for (let i = 0; i < n2; i++) await page.locator('#detail .step').nth(i).click();
+check(await bis(async () => await page.locator('#lob:not([hidden]) .lob-offline .lob-emoji').count() === 1, 12000), `ohne Netz kommt ein gemaltes Tier (${await page.getAttribute('#lob .lob-tier', 'data-lob-tier')})`);
+await page.keyboard.press('Escape');
+check(await page.locator('#lob').isHidden(), 'Escape macht zu');
+await page.click('[data-act="zurueck"]');
+await page.click('.tab[data-tab="einkauf"]');
 
 // --- Liste leeren mit Rückfrage
 await page.click('[data-act="leeren"]');

@@ -18,6 +18,7 @@ import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
+import { lobStart, klickLob } from './lob.js';
 
 const apiBasis = () => lese('__api', null) || API;
 const takt = () => Number(lese('__takt', 0)) || 8000;
@@ -73,6 +74,7 @@ document.addEventListener('click', (ev) => {
   const el = ev.target.closest('button');
   if (!el || el.disabled) return;
   if (el.dataset.tab) { zeigeReiter(el.dataset.tab); return; }
+  if (klickLob(el)) return;
   if (klickTimer(el)) return;
   if (el.dataset.timerZu) { zuSchritt(el.dataset.timerZu, Number(el.dataset.timerSchritt)); return; }
   if (klickListe(el)) return;
@@ -114,6 +116,7 @@ async function start() {
   const ausLink = schluesselAusAdresse();
   kiStart();
   anpassenStart();
+  lobStart();
   timerAnmelden(() => {
     const leiste = $('#timerleiste');
     const html = leisteHTML();

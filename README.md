@@ -45,6 +45,20 @@ ruhiges Tempo zu Hause gerechnet, mit Waschen, Schälen und Abfall wegräumen
 Abschnitte und Gesamtzeit: Wartezeiten (`ruhe`, etwa Marinieren) laufen im
 Hintergrund weiter, „währenddessen“ kostet keine zusätzliche Zeit.
 
+### Belohnung
+
+Ist Vorbereiten oder Kochen komplett abgehakt, kommt unten ein Satz („Mise
+en place steht – ab jetzt wird's entspannt“), ebenso beim letzten Haken auf
+der Einkaufsliste. **Fällt das letzte Häkchen eines Rezepts** (oder „Heute
+gekocht“), läuft ein Tier auf den Bildschirm: ein echtes Foto oder ein kurzer
+Clip aus freien Quellen ohne Schlüssel (random.dog – auch Videos –, dog.ceo,
+thecatapi, cataas, randomfox, bunnies.io, capy.lol), dazu Konfetti,
+Vibration, ein kurzes Klingeln und ein Spruch aus rund 55 (`js/lob.js`).
+Tier und Spruch wechseln: Was zuletzt dran war, merkt sich das Handy, dasselbe
+Rezept wird frühestens nach 8 Stunden wieder belohnt. „Noch ein Tier“ holt
+das nächste. Das Tier wird vorgeladen, sobald ein Rezept offen ist; ohne
+Netz kommt ein gemaltes. Im Datensparmodus gibt es nur Fotos, keine Clips.
+
 ## Resteverwertung
 
 Oben im Reiter Rezepte: aufschreiben oder fotografieren, was im Kühlschrank
@@ -257,6 +271,7 @@ neues Rezept muss dort nichts geändert werden.
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
 | `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“ |
 | `js/timer.js` | Küchentimer: starten, Leiste oben, Alarm, überlebt Neuladen |
+| `js/lob.js` | Belohnung: Sprüche, Tierquellen, Vorladen, Overlay mit Konfetti |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
 | `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |

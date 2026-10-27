@@ -8,6 +8,7 @@
  * nicht an – sonst wäre beim Tippen plötzlich der Text weg.
  */
 import { app, $, melde } from './kern.js';
+import { lobKlein } from './lob.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
 import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren } from './liste.js';
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
@@ -223,7 +224,11 @@ export function klickListe(el) {
   const d = el.dataset;
   if (d.check) {
     const e = app.stand.items[d.check];
-    if (e) app.aendern(opHaken(app.stand, d.check, !erledigt(e), app.name()));
+    if (!e) return true;
+    const wirdFertig = !erledigt(e);
+    app.aendern(opHaken(app.stand, d.check, wirdFertig, app.name()));
+    // Das letzte Häkchen auf der Liste: ein Satz dafür.
+    if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x))) lobKlein('einkauf');
     return true;
   }
   if (d.del) {

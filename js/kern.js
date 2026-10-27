@@ -64,6 +64,7 @@ let meldungArt = '';
 export function melde(text, { knopf, beiKnopf, art = '' } = {}) {
   const el = $('#toast');
   meldungArt = art;
+  el.dataset.art = art || '';
   el.textContent = '';
   const span = document.createElement('span');
   span.textContent = text;

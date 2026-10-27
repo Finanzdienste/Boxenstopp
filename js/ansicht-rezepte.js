@@ -16,6 +16,7 @@ import { esc, nf1, nfi, heute, tagKurz, abweichung, platzhalter } from './format
 import { zeitVon, dauer } from './zeiten.js';
 import { zahlwort } from './ki-rezept.js';
 import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
+import { lobPruefen, lobGross, tierVorladen } from './lob.js';
 import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
 
@@ -417,6 +418,8 @@ export function oeffneRezept(rid, { still = false } = {}) {
   schritteZeichnen();
   rechnerZeichnen();
   if (!still) { zeigeReiter('rezepte', true); window.scrollTo(0, 0); }
+  // Das Tier für den Schluss schon mal holen, dann ist es da, wenn das letzte Häkchen fällt.
+  tierVorladen();
 }
 
 export function schliesseRezept() {
@@ -510,11 +513,14 @@ export function klickRezepte(el) {
   }
   if ('step' in d) {
     const i = Number(d.step);
-    const s = new Set(schritte[aktuell] || []);
+    const vorher = new Set(schritte[aktuell] || []);
+    const s = new Set(vorher);
     if (s.has(i)) s.delete(i); else s.add(i);
     schritte[aktuell] = [...s];
     schreibe(SCHRITTE, schritte);
     schritteZeichnen();
+    // Phase fertig? Alles fertig? Dann gibt es Lob – und zum Schluss ein Tier.
+    lobPruefen(app.nachId[aktuell], s, vorher, { name: app.name() });
     return true;
   }
   if ('timer' in d) {
@@ -545,7 +551,7 @@ export function klickRezepte(el) {
     case 'gekocht':
       app.kiVorAktion(aktuell);
       app.aendern(opGekocht(aktuell, heute(), app.name()));
-      melde('Eingetragen: heute gekocht');
+      lobGross({ rezept: app.nachId[aktuell], name: app.name(), grund: 'gekocht' }).then((da) => { if (!da) melde('Eingetragen: heute gekocht'); });
       return true;
     case 'schritte-zurueck': schritte[aktuell] = []; schreibe(SCHRITTE, schritte); schritteZeichnen(); return true;
     case 'wach': setzeWach(!wachSperre); return true;

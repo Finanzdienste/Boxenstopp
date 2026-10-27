@@ -98,6 +98,8 @@ check(await bis(async () => (await status(a)) === 'Geteilt'), 'und Amy ist wiede
 // --- gekocht, auch beim anderen
 await t.click('.tab[data-tab="rezepte"]');
 await t.click('[data-act="gekocht"]');
+check(await bis(async () => (await t.locator('#lob:not([hidden]) .lob-karte').count()) === 1, 8000), '„Heute gekocht“: Tobi bekommt die Belohnung');
+await t.click('[data-lob="zu"]');
 check(await bis(() => !!gh.liste()?.cooked?.chili), '„Heute gekocht“ steht in GitHub');
 await a.click('.tab[data-tab="rezepte"]');
 check(await bis(async () => (await a.locator('[data-open="chili"] .pill', { hasText: 'Zuletzt gekocht' }).count()) === 1), 'Amy sieht beim Chili „Zuletzt gekocht“');

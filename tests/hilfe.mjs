@@ -14,6 +14,7 @@
  *     „vom Netz nehmen“.
  */
 import { chromium } from 'playwright';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -106,10 +107,34 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
  * Ein „Handy“: eigener Browser-Kontext mit leerem Speicher. `attrappe` hängt
  * die GitHub-Attrappe davor; `takt` ist der Abgleich in ms (in der App sonst 8 s).
  */
-export async function handy(browser, { attrappe = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true } = {}) {
+/** Die Tierquellen der Belohnung (js/lob.js) – in den Tests nie das echte Netz. */
+export const TIER_HOSTS = /random\.dog|dog\.ceo|thecatapi|cataas|randomfox|bunnies|capy\.lol|bilder\.test/;
+
+/**
+ * Eine Attrappe für die Tierquellen: jede Antwort zeigt auf ein Bild unter
+ * https://bilder.test/, und das Bild ist das App-Icon. `zaehler` zählt die Abrufe.
+ */
+export function tierAttrappe() {
+  const png = readFileSync(path.join(ROOT, 'icon-512.png'));
+  const z = { json: 0, bilder: 0 };
+  const antwort = { url: 'https://bilder.test/tier.jpg', message: 'https://bilder.test/tier.jpg', status: 'success', image: 'https://bilder.test/tier.jpg', data: { url: 'https://bilder.test/tier.jpg' }, media: { mp4: 'https://bilder.test/tier.jpg' } };
+  return {
+    zaehler: z,
+    route: (route) => {
+      if (/bilder\.test/.test(route.request().url())) { z.bilder++; return route.fulfill({ status: 200, contentType: 'image/png', body: png }); }
+      z.json++;
+      const url = route.request().url();
+      const body = /thecatapi/.test(url) ? [antwort] : antwort;
+      return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
+    },
+  };
+}
+
+export async function handy(browser, { attrappe = null, tiere = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true } = {}) {
   const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow' });
   if (attrappe) await ctx.route('https://api.github.com/**', attrappe.route);
   else await ctx.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
+  await ctx.route(TIER_HOSTS, tiere ? tiere.route : (r) => r.abort('blockedbyclient'));
   const page = await ctx.newPage();
   const fehler = [];
   page.on('pageerror', (e) => fehler.push(`PAGEERROR: ${e.message}`));

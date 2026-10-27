@@ -343,6 +343,31 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .note{margin-top:18px;padding:12px 14px;border-radius:12px;background:var(--surface-2);font-size:13.5px;color:var(--muted)}
 .note[data-tone="warn"]{color:var(--ink);border:1.5px solid var(--danger);background:transparent}
 
+/* Belohnung: Tier läuft rein, Konfetti fällt */
+.lob{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:20px;background:rgba(10,16,13,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:lob-ein .25s ease-out}
+.lob[hidden]{display:none}
+body.lob-offen{overflow:hidden}
+.lob-karte{position:relative;z-index:2;width:min(440px,100%);padding:22px 20px 18px;border-radius:22px;background:var(--surface);color:var(--ink);box-shadow:0 30px 60px -20px rgba(0,0,0,.6);text-align:center;animation:lob-karte .45s cubic-bezier(.2,.9,.3,1.2)}
+.lob-tier{position:relative;margin:0 auto 16px;width:min(300px,78vw);aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--surface-2);box-shadow:0 14px 30px -14px rgba(0,0,0,.5);animation:lob-rein .9s cubic-bezier(.22,1.3,.36,1) both}
+.lob-tier .lob-medium{display:block;width:100%;height:100%;object-fit:cover}
+.lob-tier .tape{position:absolute;left:12px;bottom:12px;font-size:18px;transform:rotate(-2.5deg)}
+.lob-emoji{display:grid;place-items:center;width:100%;height:100%;font-size:140px;line-height:1;animation:lob-hops 1.1s ease-in-out .9s infinite alternate}
+.lob-eyebrow{margin:0 0 6px;font:600 12px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lob-karte h2{margin:0 0 8px;font-size:clamp(22px,6vw,28px);line-height:1.15;letter-spacing:-.01em}
+.lob-satz{margin:0 0 16px;color:var(--muted);font-size:15px}
+.lob-satz small{display:block;font-size:12px;margin-top:2px}
+.lob-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.lob-btns .btn{min-width:130px}
+.lob-konfetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.lob-konfetti i{position:absolute;top:-20px;display:block;border-radius:2px;opacity:.95;animation-name:lob-fall;animation-timing-function:linear;animation-iteration-count:1;animation-fill-mode:forwards}
+@keyframes lob-fall{0%{transform:translateY(-20px) rotate(0deg)}100%{transform:translateY(110vh) rotate(720deg);opacity:.6}}
+@keyframes lob-rein{0%{transform:translateX(-140%) rotate(-10deg)}70%{transform:translateX(6%) rotate(2deg)}100%{transform:none}}
+@keyframes lob-karte{0%{opacity:0;transform:translateY(24px) scale(.96)}100%{opacity:1;transform:none}}
+@keyframes lob-ein{from{opacity:0}to{opacity:1}}
+@keyframes lob-hops{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-14px) rotate(4deg)}}
+.toast[data-art="lob"]{background:#2F6B4F;color:#F1F5F3}
+@media (prefers-reduced-motion:reduce){.lob-tier,.lob-karte,.lob,.lob-emoji{animation:none}.lob-konfetti{display:none}}
+
 /* tab bar + toast */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:var(--tabbar-h);border:0;background:none;font-weight:700;font-size:12.5px;color:var(--muted)}
