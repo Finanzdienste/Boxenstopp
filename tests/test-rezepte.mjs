@@ -20,7 +20,7 @@ const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 
 const { rezepte, katalog, ziel, extras } = daten;
 const ABT = ['obst', 'fleisch', 'kuehl', 'tk', 'konserven', 'trocken', 'vorrat', 'gewuerz', 'haushalt'];
 
-check(daten.version === 1 && Array.isArray(rezepte) && rezepte.length >= 16, `${rezepte.length} Rezepte`);
+check(daten.version === 1 && Array.isArray(rezepte) && rezepte.length === 50, `${rezepte.length} Rezepte`);
 check(ziel.kcal === 443 && ziel.p === 33 && ziel.kh === 39 && ziel.f === 15.4, 'Ziel pro Box: 443 kcal, 33 P, 39 KH, 15,4 F');
 const ids = rezepte.map((r) => r.id);
 check(new Set(ids).size === ids.length && ids.every((id) => /^[a-z0-9-]+$/.test(id)), 'jede Rezept-id einmal, klein mit Bindestrichen');

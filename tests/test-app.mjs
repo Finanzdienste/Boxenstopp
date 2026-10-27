@@ -17,19 +17,32 @@ const zeile = (name) => page.locator('#list-body .item', { has: page.locator('.i
 const badge = async () => ((await page.locator('#badge').isHidden()) ? 0 : Number(await page.locator('#badge').innerText()));
 
 // --- Rezepte
-check(await page.locator('#grid .box').count() === 16, '16 Rezeptboxen');
-check((await page.locator('#r-eyebrow').textContent()).startsWith('16 Rezepte'), 'Überschrift zählt die Rezepte');
+check(await page.locator('#grid .box').count() === 50, '50 Rezeptboxen');
+check((await page.locator('#r-eyebrow').textContent()).startsWith('50 Rezepte'), 'Überschrift zählt die Rezepte');
 check((await text('#sync-text')) === 'Nur lokal', 'ohne Schlüssel: „Nur lokal“');
 await page.click('[data-filter="haehnchen"]');
-check(await page.locator('#grid .box').count() === 10, 'Filter Hähnchen: 10');
+check(await page.locator('#grid .box').count() === 30, 'Filter Hähnchen: 30');
 await page.click('[data-filter="rind"]');
-check(await page.locator('#grid .box').count() === 5, 'Filter Rind: 5 (Putenhack ist raus)');
+check(await page.locator('#grid .box').count() === 17, 'Filter Rind: 17 (Putenhack ist raus)');
+await page.click('[data-filter="bulgur"]');
+check(await page.locator('#grid .box').count() === 4, 'Filter Bulgur & Co.: 4 (Bulgur, Couscous, Tortillas)');
 check(await page.locator('[data-filter="veggie"]').count() === 0, 'kein Veggie-Filter mehr – Mac & Cheese hat jetzt Hähnchen');
 await page.click('[data-filter="schnell"]');
 const schnell = await page.$$eval('#grid .box .box-time', (xs) => xs.map((x) => x.textContent));
 const minuten = (t) => { const m = t.match(/^(?:(\d+) Std\.)? ?(?:(\d+) Min\.)?$/); return m ? Number(m[1] || 0) * 60 + Number(m[2] || 0) : NaN; };
 check(schnell.length >= 5 && schnell.every((t) => minuten(t) < 90), `Filter „Unter 1½ Std.“: ${schnell.join(', ')}`);
 await page.click('[data-filter="alle"]');
+// Suche: Name, Zutat, Gericht – mit Umlauten egal wie geschrieben
+await page.fill('#suche', 'kichererbsen');
+check(await page.locator('#grid .box').count() === 3, `Suche „kichererbsen“ findet 3 (${await page.locator('#grid .box').count()})`);
+await page.fill('#suche', 'Hähnchen ofen');
+const ofen = await page.$$eval('#grid .box .tape', (xs) => xs.map((x) => x.textContent));
+check(ofen.length >= 4 && ofen.length < 50 && ofen.includes('Ofen-Hähnchen'), `Suche „Hähnchen ofen“ (${ofen.length}, beide Wörter müssen passen)`);
+await page.fill('#suche', 'gibtsnicht');
+check((await page.locator('#grid .empty').textContent()).includes('Nichts gefunden'), 'Suche ohne Treffer sagt es');
+await page.fill('#suche', '');
+check(await page.locator('#grid .box').count() === 50, 'Suche leer: wieder alle 50');
+check((await page.locator('[data-filter="haehnchen"] .n').textContent()) === '30', 'Chip-Zahlen folgen der Suche');
 check((await page.locator('[data-open="gulasch"] .box-time').textContent()) === '3 Std. 40 Min.', `Gulasch ehrlich: 3 Std. 40 Min. (${await page.locator('[data-open="gulasch"] .box-time').textContent()})`);
 
 await page.click('[data-open="butter-chicken"]');

@@ -21,7 +21,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v9';
+const VERSION = 'v10';
 const CACHE = `boxenstopp-${VERSION}`;
 
 const SHELL = [

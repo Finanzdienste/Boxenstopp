@@ -31,6 +31,11 @@ N = {
  'weisskohl':(25,1.3,4,0.2), 'kichererbsen':(120,7,16,2.5), 'linsendose':(95,6.5,12,0.6), 'linsenrot':(340,24,52,2), 'tofu':(125,13,1,7),
  'couscous':(360,12,72,2), 'bulgur':(350,12,70,1.5), 'vollkornnudeln':(340,13,62,2.5), 'joghurt':(50,4,5,1.5),
  'haferflocken':(370,13,59,7), 'aepfel':(52,0.3,12,0.2), 'whey':(380,78,6,5), 'erdnusscrunch':(600,25,12,50),
+ # Rezepte 17–50
+ 'rinderhuefte':(121,21.5,0,3.6), 'pesto':(450,4,8,45), 'sweetchili':(200,0.5,48,0.5), 'erdnuesse':(610,26,12,50),
+ 'tortillas':(310,8,50,8), 'ananas':(60,0.4,13,0.1), 'semmelbroesel':(360,12,72,2), 'bbq':(120,1,28,0.5),
+ 'gewuerzgurken':(30,1,5,0.2), 'ketchup':(100,1,23,0.2), 'oliven':(150,1,1,15), 'mandeln':(600,21,6,52),
+ 'mais-tk':(80,2.5,12,1.3), 'lauch':(30,2,3,0.3), 'rosinen':(300,2.5,70,0.5),
 }
 T = (443,33,39,15.4)
 def tot(rows):

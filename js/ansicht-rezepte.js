@@ -35,11 +35,19 @@ export const FILTER = [
   ['reis', 'Reis', (r) => r.base === 'Reis'],
   ['nudeln', 'Nudeln', (r) => r.base === 'Nudeln'],
   ['kartoffel', 'Kartoffel & Co.', (r) => ['Kartoffeln', 'Süßkartoffel', 'Gnocchi'].includes(r.base)],
+  ['bulgur', 'Bulgur & Co.', (r) => ['Bulgur', 'Couscous', 'Tortillas'].includes(r.base)],
   ['schnell', 'Unter 1½ Std.', (r) => gesamtZeit(r) < SCHNELL],
   ['liste', 'Auf der Liste', (r) => rezeptStand(app.stand, r).drauf],
   ['reste', 'Eigene', (r) => !!r.ki],
 ];
 const alleRezepte = () => [...app.rezepte, ...app.kiRezepte.filter((r) => r.ki?.von?.gespeichert)];
+/* Suche: Name, Beschreibung, Zutaten – „curry“, „kichererbsen“, „ofen“. Wird nicht gemerkt. */
+let suche = '';
+const normal = (t) => String(t || '').toLowerCase().replace(/ß/g, 'ss').replace(/[äöü]/g, (c) => ({ ä: 'ae', ö: 'oe', ü: 'ue' })[c]);
+export function suchtext(r) {
+  return normal([r.name, r.short, r.desc, r.protein, r.base, r.method, ...(r.items || []).map((it) => it.n)].join(' '));
+}
+const passtSuche = (r) => !suche || suche.split(/\s+/).every((w) => suchtext(r).includes(w));
 const boxen = (r) => r.portionen || 8;
 
 const PFADE = {
@@ -97,13 +105,13 @@ export function rasterZeichnen() {
   if (!FILTER.some((f) => f[0] === ansicht.filter)) ansicht.filter = 'alle';
   const f = FILTER.find((x) => x[0] === ansicht.filter);
   const alle = alleRezepte();
-  const liste = alle.filter(f[2]);
-  $('#grid').innerHTML = liste.length ? liste.map(karte).join('') : `<p class="empty">${ansicht.filter === 'liste' ? 'Gerade steht kein Rezept auf der Einkaufsliste.' : 'Hier ist gerade nichts.'}</p>`;
+  const liste = alle.filter(f[2]).filter(passtSuche);
+  $('#grid').innerHTML = liste.length ? liste.map(karte).join('') : `<p class="empty">${suche ? `Nichts gefunden für „${esc(suche)}“.` : ansicht.filter === 'liste' ? 'Gerade steht kein Rezept auf der Einkaufsliste.' : 'Hier ist gerade nichts.'}</p>`;
   for (const b of $$('[data-filter]')) {
     const fx = FILTER.find((x) => x[0] === b.dataset.filter);
     b.setAttribute('aria-pressed', String(b.dataset.filter === ansicht.filter));
     const n = b.querySelector('.n');
-    const zahl = fx ? alle.filter(fx[2]).length : 0;
+    const zahl = fx ? alle.filter(fx[2]).filter(passtSuche).length : 0;
     if (n && fx) n.textContent = String(zahl);
     if (fx?.[0] === 'reste') b.hidden = !zahl && ansicht.filter !== 'reste';
   }
@@ -546,6 +554,7 @@ export function klickRezepte(el) {
 }
 
 export function eingabeRezepte(ziel) {
+  if (ziel.id === 'suche') { suche = normal(ziel.value.trim()); rasterZeichnen(); return; }
   if (ziel.id === 'pot-empty') schreibe(TOPF, ziel.value);
   if (ziel.id === 'pot-empty' || ziel.id === 'pot-full') rechnerZeichnen();
 }
