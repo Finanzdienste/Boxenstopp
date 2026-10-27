@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, geminiSchema, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL } from '../js/ki.js';
 import { kiAus } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
@@ -23,15 +23,6 @@ const klon = (x) => JSON.parse(JSON.stringify(x));
 
 /* ================================================================ ohne Browser */
 
-const SCHEMA_PROBE = {
-  type: 'object',
-  properties: {
-    name: { type: 'string', description: 'x' },
-    quelle: { type: 'string', enum: ['a', 'b'] },
-    zutaten: { type: 'array', items: { type: 'object', properties: { min: { type: 'integer', minimum: 1, maximum: 9 } }, required: ['min'] } },
-  },
-  required: ['name'],
-};
 
 // --- bereinigen
 const { r: k0, fehler: f0 } = kiBereinigen({ ...ANTWORT, portionen: 8 });
@@ -89,14 +80,14 @@ check(sys.includes('443 kcal') && sys.includes('33 g Protein') && /Mise en place
 check(sys.includes('haehnchenbrust=Hähnchenbrustfilet') && !sys.includes('backpapier='), 'der Katalog geht mit (ohne Haushalt)');
 
 // --- Gemini: Schlüssel, Rumpf, Schema
-check(anbieterVon('AIzaSyD-TEST0000000000000000000000000000') === 'gemini' && anbieterVon('sk-ant-api03-x_y') === 'anthropic' && anbieterVon('quatsch') === '', 'der Anfang des Schlüssels sagt, wer dran ist: AIza → Google, sk-ant- → Anthropic');
-check(kiAus('AIzaSyD-TEST0000000000000000000000000000') && kiAus('sk-ant-api03-TESTTESTTESTTESTTESTTEST_abc') && !kiAus('AIza-kurz') && kiAus('https://x.y/#zugang=abc&ki=AIzaSyD-TEST0000000000000000000000000000'), 'beide Schlüsselformen werden erkannt, auch aus dem Link');
-const gs = geminiSchema(SCHEMA_PROBE);
-check(gs.type === 'OBJECT' && gs.properties.zutaten.type === 'ARRAY' && gs.properties.zutaten.items.properties.min.type === 'INTEGER' && !('minimum' in gs.properties.zutaten.items.properties.min) && gs.properties.quelle.enum.length === 2 && gs.required.includes('name'), 'Gemini-Schema: Typen groß, enum, items, required – ohne minimum/maximum');
+const GKEY = 'AQ.Ab8TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST00';
+check(anbieterVon(GKEY) === 'gemini' && anbieterVon('AIzaSyD-TEST0000000000000000000000000000') === 'gemini' && anbieterVon('sk-ant-api03-x_y') === 'anthropic' && anbieterVon('quatsch') === '', 'der Anfang des Schlüssels sagt, wer dran ist: AQ. oder AIza → Google, sk-ant- → Anthropic');
+check(kiAus(GKEY) && kiAus('AIzaSyD-TEST0000000000000000000000000000') && kiAus('sk-ant-api03-TESTTESTTESTTESTTESTTEST_abc') && !kiAus('AQ.kurz') && !kiAus('AIza-kurz') && kiAus(`https://x.y/#zugang=abc&ki=${encodeURIComponent(GKEY)}`) === GKEY, 'alle Schlüsselformen werden erkannt, auch aus dem Link');
 const rg = anfrageBauenGemini({ text: 'Feta', wuensche: '', fotos: ['AAAA'], portionen: 6, dazukaufen: true, ziel: ZIEL, katalog: daten.katalog });
-check(rg.generationConfig.responseMimeType === 'application/json' && rg.generationConfig.responseSchema.type === 'OBJECT' && rg.contents[0].parts[0].inlineData?.mimeType === 'image/jpeg' && /Portionen: 6/.test(rg.contents[0].parts[1].text), 'Gemini-Anfrage: JSON nach Schema, Foto als inlineData, Text dahinter');
-check(/als JSON genau nach dem vorgegebenen Schema/.test(rg.systemInstruction.parts[0].text) && !/rezept_ausgeben/.test(rg.systemInstruction.parts[0].text) && /Kein Fisch/.test(rg.systemInstruction.parts[0].text), 'Gemini bekommt dieselben Regeln, nur ohne Werkzeug');
-check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).generationConfig && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).tool_choice, 'rumpfFuer wählt nach Anbieter');
+check(rg.model === 'gemini-3.8-flash' && rg.response_format?.mime_type === 'application/json' && rg.response_format.schema?.required?.includes('zutaten') && rg.stream === true && rg.store === false, 'Gemini-Anfrage (Interactions-API): Modell, JSON nach Schema, gestreamt, nicht gespeichert');
+check(rg.input[0].type === 'image' && rg.input[0].mime_type === 'image/jpeg' && rg.input[0].data === 'AAAA' && rg.input[1].type === 'text' && /Portionen: 6/.test(rg.input[1].text), 'Foto als Bild-Teil, Text dahinter');
+check(/als JSON genau nach dem vorgegebenen Schema/.test(rg.system_instruction) && !/rezept_ausgeben/.test(rg.system_instruction) && /Kein Fisch/.test(rg.system_instruction), 'Gemini bekommt dieselben Regeln, nur ohne Werkzeug');
+check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).response_format && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).tool_choice, 'rumpfFuer wählt nach Anbieter');
 check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') > 0 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null, 'Gemini (3.8 Flash) kostet nichts, Claude ein paar Cent');
 
 // --- Strom lesen (mit nachgebautem fetch)
@@ -129,29 +120,28 @@ check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'overlo
 check(await fehlerArt(() => new Response(STROM(JSON.stringify(ANTWORT).slice(0, 500), { stopp: 'max_tokens' }), { status: 200 })) === 'zulang', 'abgeschnittene Antwort: zu lang');
 check(await fehlerArt(() => { throw new TypeError('Failed to fetch'); }) === 'netz', 'ohne Netz: Verbindung prüfen');
 
-// --- Gemini-Strom lesen
-const GEMINI_STROM = (json, { stopp = 'STOP', stueck = 400 } = {}) => {
-  let s = '';
-  for (let i = 0; i === 0 || i < json.length; i += stueck) {
-    const letzter = i + stueck >= json.length;
-    const ev = { candidates: [{ content: { parts: [{ text: json.slice(i, i + stueck) }], role: 'model' }, ...(letzter ? { finishReason: stopp } : {}), index: 0 }], usageMetadata: { promptTokenCount: 2500, candidatesTokenCount: letzter ? 3800 : 100, thoughtsTokenCount: 600 }, modelVersion: 'gemini-3.8-flash' };
-    s += `data: ${JSON.stringify(ev)}\r\n\r\n`;
-  }
+// --- Gemini-Strom lesen (Interactions-API: step.delta, interaction.completed)
+const GEMINI_STROM = (json, { status = 'completed', stueck = 400 } = {}) => {
+  const ev = (o) => `event: ${o.event_type}\r\ndata: ${JSON.stringify(o)}\r\n\r\n`;
+  let s = ev({ event_type: 'interaction.created', interaction: { id: 'ia_1', status: 'in_progress' } });
+  for (let i = 0; i < json.length; i += stueck) s += ev({ event_type: 'step.delta', index: 0, delta: { type: 'text', text: json.slice(i, i + stueck) } });
+  s += ev({ event_type: 'interaction.completed', interaction: { id: 'ia_1', status, usage: { total_input_tokens: 2500, total_output_tokens: 3800, total_thought_tokens: 600, total_tokens: 6900 }, ...(status === 'failed' ? { error: { message: 'Blocked by safety filters' } } : {}) } });
   return s;
 };
-const GKEY = 'AIzaSyD-TEST0000000000000000000000000000';
 let gFortschritt = 0;
 const gGelesen = await mitFetch(() => new Response(GEMINI_STROM(JSON.stringify(ANTWORT)), { status: 200, headers: { 'content-type': 'text/event-stream' } }),
   () => kiAnfragen(rg, { schluessel: GKEY, beiFortschritt: (p) => { gFortschritt = p.zeichen; } }));
 check(gGelesen.eingabe.name === ANTWORT.name && gGelesen.anbieter === 'gemini' && gGelesen.usage.ein === 2500 && gGelesen.usage.aus === 4400 && gFortschritt > 1000, 'Gemini-Strom: Rezept, Tokens (mit Denken), Fortschritt');
 const gKopf = mitFetch.letzte.opt.headers;
-check(gKopf['x-goog-api-key'] === GKEY && !('x-api-key' in gKopf) && /streamGenerateContent\?alt=sse$/.test(mitFetch.letzte.url) && !('stream' in JSON.parse(mitFetch.letzte.opt.body)), 'Gemini-Anfrage: eigener Kopf, SSE-Adresse, kein stream-Feld');
+check(gKopf['x-goog-api-key'] === GKEY && !('x-api-key' in gKopf) && /\/v1beta\/interactions\?alt=sse$/.test(mitFetch.letzte.url) && JSON.parse(mitFetch.letzte.opt.body).stream === true, 'Gemini-Anfrage: eigener Kopf, Interactions-Adresse mit SSE');
 const gFehler = async (antwort) => { try { await mitFetch(antwort, () => kiAnfragen(rg, { schluessel: GKEY })); return 'kein Fehler'; } catch (e) { return `${e.art}|${e.message}`; } };
 check((await gFehler(() => new Response(JSON.stringify({ error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT' } }), { status: 400 }))).startsWith('schluessel|Google lehnt'), 'Gemini 400 „API key not valid“: Google lehnt den Schlüssel ab');
 check((await gFehler(() => new Response(JSON.stringify([{ error: { code: 429, message: 'Quota exceeded', status: 'RESOURCE_EXHAUSTED' } }]), { status: 429 }))).startsWith('grenze|Das Gratis-Kontingent'), 'Gemini 429 (auch als Liste): Gratis-Kontingent');
 check((await gFehler(() => new Response(JSON.stringify({ error: { code: 503, message: 'The model is overloaded', status: 'UNAVAILABLE' } }), { status: 503 }))).startsWith('ueberlastet|Gemini'), 'Gemini 503: überlastet');
-check((await gFehler(() => new Response(GEMINI_STROM(JSON.stringify(ANTWORT).slice(0, 300), { stopp: 'MAX_TOKENS' }), { status: 200 }))).startsWith('zulang'), 'Gemini MAX_TOKENS: zu lang');
-check((await gFehler(() => new Response(GEMINI_STROM('', { stopp: 'SAFETY' }), { status: 200 }))).startsWith('sicherheit'), 'Gemini SAFETY: verständlicher Hinweis');
+check((await gFehler(() => new Response(GEMINI_STROM(JSON.stringify(ANTWORT).slice(0, 300), { status: 'incomplete' }), { status: 200 }))).startsWith('zulang'), 'Gemini „incomplete“: zu lang');
+check((await gFehler(() => new Response(GEMINI_STROM('', { status: 'failed' }), { status: 200 }))).startsWith('sicherheit'), 'Gemini „failed“ wegen Sicherheitsfilter: verständlicher Hinweis');
+const ohneStrom = `event: interaction.completed\r\ndata: ${JSON.stringify({ event_type: 'interaction.completed', interaction: { status: 'completed', steps: [{ type: 'model_output', content: [{ type: 'text', text: JSON.stringify(ANTWORT) }] }], usage: { total_input_tokens: 1, total_output_tokens: 2 } } })}\r\n\r\n`;
+check((await mitFetch(() => new Response(ohneStrom, { status: 200 }), () => kiAnfragen(rg, { schluessel: GKEY }))).eingabe.name === ANTWORT.name, 'kommt der Text erst am Ende in steps, wird er auch gelesen');
 const umzaeunt = await mitFetch(() => new Response(GEMINI_STROM(`\`\`\`json\n${JSON.stringify(ANTWORT)}\n\`\`\``), { status: 200 }), () => kiAnfragen(rg, { schluessel: GKEY }));
 check(umzaeunt.eingabe.name === ANTWORT.name, 'JSON in ```-Zaun wird trotzdem gelesen');
 
@@ -211,11 +201,11 @@ await t.click('.reste-karte');
 check(!(await t.locator('#reste').isHidden()) && await t.locator('#k-schluessel').count() === 1, 'Resteverwertung öffnet – ohne Schlüssel zuerst das Einrichten');
 await t.fill('#k-schluessel', 'falsch');
 await t.click('#k-schluessel-form button[type="submit"]');
-check((await t.locator('#k-schluessel-fehler').innerText()).includes('AIza'), 'falscher Schlüssel: Hinweis, wie er aussieht');
+check((await t.locator('#k-schluessel-fehler').innerText()).includes('AQ.'), 'falscher Schlüssel: Hinweis, wie er aussieht');
 await t.fill('#k-schluessel', KI_SCHLUESSEL);
 await t.click('#k-schluessel-form button[type="submit"]');
 check(await t.locator('#k-form').count() === 1, 'mit Schlüssel: das Formular');
-check(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel.startsWith('AIza')), 'der KI-Schlüssel liegt im Speicher dieses Handys');
+check(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel.startsWith('AQ.')), 'der KI-Schlüssel liegt im Speicher dieses Handys');
 check((await t.locator('#k-form .fine').first().innerText()).includes('kostenlos'), 'mit Google-Schlüssel: „kostenlos“');
 
 // --- ohne Eingabe geht nichts
@@ -233,10 +223,10 @@ await t.click('#k-los');
 check(await bis(async () => (await t.locator('#d-title').count()) === 1 && (await t.locator('#d-title').innerText()) === ANTWORT.name, 10000), 'Claudes Rezept öffnet als Vorschlag');
 
 const anfrage = ki.z.anfragen[0];
-check(anfrage?.kopf['x-goog-api-key'] === KI_SCHLUESSEL && /gemini-3\.8-flash:streamGenerateContent\?alt=sse/.test(anfrage.url), 'die Anfrage geht mit dem Schlüssel an Gemini 3.8 Flash');
-const teile = anfrage.rumpf.contents[0].parts;
-check(teile[0].inlineData?.mimeType === 'image/jpeg' && teile[0].inlineData.data.length > 50 && /Portionen: 8/.test(teile.at(-1).text) && /Mediterranes/.test(teile.at(-1).text), 'mit Foto (als JPEG), Portionen und Wunsch');
-check(anfrage.rumpf.generationConfig.responseSchema.type === 'OBJECT', 'und dem Schema für die Antwort');
+check(anfrage?.kopf['x-goog-api-key'] === KI_SCHLUESSEL && /\/v1beta\/interactions\?alt=sse/.test(anfrage.url) && anfrage.rumpf.model === 'gemini-3.8-flash', 'die Anfrage geht mit dem Schlüssel an Gemini 3.8 Flash (Interactions-API)');
+const teile = anfrage.rumpf.input;
+check(teile[0].type === 'image' && teile[0].mime_type === 'image/jpeg' && teile[0].data.length > 50 && /Portionen: 8/.test(teile.at(-1).text) && /Mediterranes/.test(teile.at(-1).text), 'mit Foto (als JPEG), Portionen und Wunsch');
+check(anfrage.rumpf.response_format?.schema?.type === 'object', 'und dem Schema für die Antwort');
 check((await t.locator('.ki-leiste').innerText()).includes('noch nicht gespeichert') && (await t.locator('.ki-leiste').innerText()).includes('gemini-3.8-flash, kostenlos'), 'Leiste: noch nicht gespeichert, Gemini, kostenlos');
 check((await t.locator('.ki-anp').innerText()).includes('Auf eure Ziele gerechnet'), 'Leiste: welche Mengen die App angepasst hat');
 const kcal = Number((await t.locator('.label .c-kcal .v').innerText()).replace(/\D/g, ''));
@@ -269,11 +259,11 @@ await t.click('.tab[data-tab="rezepte"]');
 const einladung = `${APP_URL}#zugang=${encodeURIComponent(SCHLUESSEL)}&ki=${encodeURIComponent(KI_SCHLUESSEL)}`;
 await t.click('.tab[data-tab="einkauf"]');
 const linkFeld = await t.evaluate(() => document.querySelector('#z-linkfeld')?.value || '');
-check(linkFeld.includes('&ki=AIza'), 'der Link fürs zweite Handy enthält jetzt auch den KI-Schlüssel');
+check(linkFeld.includes('&ki=AQ.'), 'der Link fürs zweite Handy enthält jetzt auch den KI-Schlüssel');
 await t.click('.tab[data-tab="rezepte"]');
 const amy = await handy(browser, { attrappe: gh, adresse: einladung });
 const a = amy.page;
-check(await a.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel?.startsWith('AIza')), 'Amy: der KI-Schlüssel kommt über den Link');
+check(await a.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel?.startsWith('AQ.')), 'Amy: der KI-Schlüssel kommt über den Link');
 await a.fill('#z-name', 'Amy');
 await a.click('#z-los');
 await bis(async () => (await a.locator('#sync-text').innerText()) === 'Geteilt');
@@ -288,7 +278,7 @@ check((await a.locator('.ki-leiste').innerText()).includes('von Tobi'), 'mit „
 ki.z.art = 'ueberlastet';
 await t.click('[data-act="ki-neu"]');
 check(await bis(async () => (await t.locator('#k-fehler').count()) === 1 && (await t.locator('#k-fehler').innerText()).includes('überlastet')), 'Gemini überlastet: Hinweis, nochmal versuchen');
-check(ki.z.anfragen.at(-1).rumpf.contents[0].parts.at(-1).text.includes('Bitte nicht noch einmal'), 'ein neuer Vorschlag soll ein anderes Gericht sein');
+check(ki.z.anfragen.at(-1).rumpf.input.at(-1).text.includes('Bitte nicht noch einmal'), 'ein neuer Vorschlag soll ein anderes Gericht sein');
 ki.z.art = 'schluessel';
 await t.click('#k-los');
 check(await bis(async () => (await t.locator('#k-schluessel-fehler').count()) === 1 && (await t.locator('#k-schluessel-fehler').innerText()).includes('lehnt den Schlüssel ab')), 'Schlüssel abgelehnt: zurück zum Einrichten');

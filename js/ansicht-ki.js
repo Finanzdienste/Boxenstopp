@@ -167,10 +167,10 @@ function einrichtenHTML(schluessel) {
 <ol class="ki-anleitung">
 <li>Auf <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> mit deinem Google-Konto anmelden.</li>
 <li><b>Create API key</b> (bei der Frage nach dem Projekt: ein neues anlegen lassen).</li>
-<li>Den Schlüssel (beginnt mit AIza) hier einfügen.</li>
+<li>Den Schlüssel (beginnt mit AQ.) hier einfügen.</li>
 </ol>
 <label for="k-schluessel">API-Schlüssel</label>
-<input id="k-schluessel" type="password" autocomplete="off" spellcheck="false" placeholder="AIza… oder der Link vom anderen Handy">
+<input id="k-schluessel" type="password" autocomplete="off" spellcheck="false" placeholder="AQ.… oder der Link vom anderen Handy">
 <p class="zugang-fehler" id="k-schluessel-fehler"${fehler && einrichten ? '' : ' hidden'}>${esc(einrichten ? fehler || '' : '')}</p>
 <div class="zugang-btns"><button type="submit" class="btn btn-primary">Speichern</button>${schluessel ? '<button type="button" class="btn btn-quiet" data-act="k-einrichten-zu">Abbrechen</button><button type="button" class="btn btn-quiet" data-act="k-schluessel-weg">Schlüssel entfernen</button>' : ''}</div>
 ${da ? `<p class="fine">Eingetragen ist ein Schlüssel von ${esc(ANBIETER[da].name)} (${esc(ANBIETER[da].modell)}).</p>` : ''}
@@ -459,7 +459,7 @@ export function absendenKi(ev) {
     ev.preventDefault();
     const s = kiAus($('#k-schluessel').value);
     if (!s) {
-      fehler = 'Das sieht nicht nach einem Schlüssel aus. Er beginnt mit AIza (Google) oder sk-ant- (Anthropic).';
+      fehler = 'Das sieht nicht nach einem Schlüssel aus. Er beginnt mit AQ. oder AIza (Google) oder sk-ant- (Anthropic).';
       const f = $('#k-schluessel-fehler');
       if (f) { f.textContent = fehler; f.hidden = false; }
       return true;

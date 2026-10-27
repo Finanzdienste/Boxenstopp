@@ -3,16 +3,18 @@
  * Antwort – direkt vom Handy aus, mit dem eigenen Schlüssel (zugang.js, nur
  * im localStorage). Zwei Anbieter, der Schlüssel entscheidet:
  *
- *   AIza…     Google, Gemini-API (gemini-3.8-flash). Kostenlos ohne
- *             Kreditkarte; dafür darf Google die Anfragen zum Verbessern
- *             seiner Produkte nutzen. Das ist der normale Weg.
+ *   AQ.… oder AIza…  Google, Gemini-API (gemini-3.8-flash) über die
+ *             Interactions-API. Kostenlos ohne Kreditkarte; dafür darf Google
+ *             die Anfragen zum Verbessern seiner Produkte nutzen. Das ist der
+ *             normale Weg. AI Studio gibt seit Mai 2026 nur noch Schlüssel
+ *             mit „AQ.“ aus (Auth Keys); die älteren „AIza“ gehen weiter.
  *   sk-ant-…  Anthropic, Messages-API (claude-sonnet-5-5), ein paar Cent pro
  *             Rezept. Der Kopf „anthropic-dangerous-direct-browser-access“
  *             erlaubt den Aufruf aus dem Browser, wenn – wie hier – jeder
  *             seinen eigenen Schlüssel mitbringt.
  *
  * Beide liefern das Rezept als JSON nach SCHEMA (ki-rezept.js): Gemini als
- * JSON-Antwort mit responseSchema, Claude als Eingabe des Werkzeugs
+ * JSON-Antwort mit response_format, Claude als Eingabe des Werkzeugs
  * „rezept_ausgeben“ (tool_choice). Beides Stück für Stück gestreamt – so sieht
  * man, dass etwas passiert, und eine lange Antwort reißt nicht ab. Fotos gehen
  * als JPEG mit, vorher auf höchstens 1280 px verkleinert (ansicht-ki.js).
@@ -26,7 +28,7 @@ export const ANBIETER = {
   gemini: {
     name: 'Google',
     modell: 'gemini-3.8-flash',
-    api: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse',
+    api: 'https://generativelanguage.googleapis.com/v1beta/interactions?alt=sse',
     preis: null, // kostenlos
   },
   anthropic: {
@@ -37,7 +39,7 @@ export const ANBIETER = {
   },
 };
 /** Welcher Anbieter zu einem Schlüssel gehört – oder '' für keinen. */
-export const anbieterVon = (schluessel) => (/^AIza/.test(String(schluessel || '')) ? 'gemini' : /^sk-ant-/.test(String(schluessel || '')) ? 'anthropic' : '');
+export const anbieterVon = (schluessel) => (/^(?:AQ\.|AIza)/.test(String(schluessel || '')) ? 'gemini' : /^sk-ant-/.test(String(schluessel || '')) ? 'anthropic' : '');
 export const KI_API = ANBIETER.anthropic.api;
 export const MODELL = ANBIETER.anthropic.modell;
 const WERKZEUG = 'rezept_ausgeben';
@@ -113,35 +115,20 @@ export function anfrageBauen(e) {
 }
 
 /*
- * Geminis responseSchema ist eine OpenAPI-Teilmenge: Typen in Großbuchstaben,
- * nur type, description, enum, items, properties, required. Alles andere
- * (minimum, maximum) prüft ki-rezept.js ohnehin selbst.
+ * Der Rumpf der Anfrage an Geminis Interactions-API (POST /v1beta/interactions).
+ * store: false – Google soll die Anfrage nicht als Gesprächsverlauf aufheben.
  */
-export function geminiSchema(s) {
-  if (Array.isArray(s)) return s.map(geminiSchema);
-  if (!s || typeof s !== 'object') return s;
-  const o = {};
-  if (s.type) o.type = String(s.type).toUpperCase();
-  if (s.description) o.description = s.description;
-  if (s.enum) o.enum = s.enum;
-  if (s.items) o.items = geminiSchema(s.items);
-  if (s.properties) o.properties = Object.fromEntries(Object.entries(s.properties).map(([k, v]) => [k, geminiSchema(v)]));
-  if (s.required) o.required = s.required;
-  return o;
-}
-
-/** Der Rumpf der Anfrage an Geminis streamGenerateContent. */
 export function anfrageBauenGemini(e) {
-  const parts = (e.fotos || []).map((b64) => ({ inlineData: { mimeType: 'image/jpeg', data: b64 } }));
-  parts.push({ text: nutzerText({ ...e, fotos: (e.fotos || []).length }) });
+  const input = (e.fotos || []).map((b64) => ({ type: 'image', data: b64, mime_type: 'image/jpeg' }));
+  input.push({ type: 'text', text: nutzerText({ ...e, fotos: (e.fotos || []).length }) });
   return {
-    systemInstruction: { parts: [{ text: systemText({ ...e, anbieter: 'gemini' }) }] },
-    contents: [{ role: 'user', parts }],
-    generationConfig: {
-      responseMimeType: 'application/json',
-      responseSchema: geminiSchema(SCHEMA),
-      maxOutputTokens: 16000,
-    },
+    model: ANBIETER.gemini.modell,
+    system_instruction: systemText({ ...e, anbieter: 'gemini' }),
+    input,
+    response_format: { type: 'text', mime_type: 'application/json', schema: SCHEMA },
+    generation_config: { max_output_tokens: 16000 },
+    store: false,
+    stream: true,
   };
 }
 
@@ -237,16 +224,23 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   let werkzeug = gemini;
   let stopp = null;
   const fortschritt = () => beiFortschritt({ zeichen: json.length, schritte: (json.match(/"min"\s*:/g) || []).length });
+  // Interactions-API: step.delta mit Text, zum Schluss interaction.completed mit Status und Verbrauch.
   const verarbeiteGemini = (ev) => {
-    if (ev.error) throw fehler(artVonStatus(Number(ev.error.code) || 500, ev), ev.error.message);
-    const k = ev.candidates?.[0];
-    for (const p of k?.content?.parts || []) if (typeof p.text === 'string' && !p.thought) json += p.text;
-    if (k?.finishReason && k.finishReason !== 'STOP') stopp = k.finishReason;
-    if (ev.usageMetadata) {
-      usage.ein = Number(ev.usageMetadata.promptTokenCount) || usage.ein;
-      usage.aus = (Number(ev.usageMetadata.candidatesTokenCount) || 0) + (Number(ev.usageMetadata.thoughtsTokenCount) || 0) || usage.aus;
+    if (ev.event_type === 'error' || ev.error) throw fehler(artVonStatus(Number(ev.error?.code) || 500, ev), ev.error?.message);
+    if (ev.event_type === 'step.delta') {
+      if (ev.delta?.type === 'text' && typeof ev.delta.text === 'string') { json += ev.delta.text; fortschritt(); }
+      return;
     }
-    fortschritt();
+    const ia = ev.interaction || ev;
+    if (ia.usage) {
+      usage.ein = Number(ia.usage.total_input_tokens) || usage.ein;
+      usage.aus = (Number(ia.usage.total_output_tokens) || 0) + (Number(ia.usage.total_thought_tokens) || 0) || usage.aus;
+    }
+    if (ia.status && !['in_progress', 'completed'].includes(ia.status)) stopp = ia.status === 'incomplete' ? 'MAX_TOKENS' : `${ia.status} ${ia.error?.message || ia.incomplete_details?.reason || ''}`.trim();
+    // Falls der Text nicht gestreamt, sondern nur am Ende geliefert wurde:
+    if (!json && Array.isArray(ia.steps)) {
+      for (const st of ia.steps) if (st.type === 'model_output') for (const c of st.content || []) if (c.type === 'text' && typeof c.text === 'string') json += c.text;
+    }
   };
   const verarbeite = (block) => {
     const daten = block.split('\n').filter((z) => z.startsWith('data:')).map((z) => z.slice(5).trimStart()).join('\n');
@@ -288,7 +282,8 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   }
   if (puffer.trim()) verarbeite(puffer);
   if (stopp === 'max_tokens' || stopp === 'MAX_TOKENS') throw fehler('zulang');
-  if (gemini && stopp && /SAFETY|PROHIBITED|BLOCKLIST|RECITATION|IMAGE_SAFETY/.test(stopp)) throw fehler('sicherheit', stopp);
+  if (gemini && stopp && /safety|prohibited|blocklist|recitation|block/i.test(stopp)) throw fehler('sicherheit', stopp);
+  if (gemini && stopp) throw fehler('antwort', stopp);
   if (!werkzeug || !json.trim()) throw fehler('antwort', 'keine Antwort');
   // Zur Sicherheit: Gemini packt JSON hin und wieder in ```json … ```.
   const roh = json.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');

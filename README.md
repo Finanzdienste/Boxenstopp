@@ -75,7 +75,7 @@ API-Schlüssel, den der Anfang des Schlüssels einem Anbieter zuordnet:
 
 | Schlüssel | Anbieter, Modell | Kosten | Antwort |
 | --- | --- | --- | --- |
-| `AIza…` | Google, `gemini-3.8-flash` (streamGenerateContent) | kostenlos, ohne Kreditkarte; dafür darf Google die Anfragen zum Verbessern seiner Produkte nutzen | JSON mit `responseSchema` |
+| `AQ.…` (älter: `AIza…`) | Google, `gemini-3.8-flash` über die Interactions-API (`/v1beta/interactions`, `store: false`) | kostenlos, ohne Kreditkarte; dafür darf Google die Anfragen zum Verbessern seiner Produkte nutzen | JSON mit `response_format` und Schema |
 | `sk-ant-…` | Anthropic, `claude-sonnet-5-5` (Messages-API) | ein paar Cent pro Rezept, Guthaben nötig | Werkzeug `rezept_ausgeben` |
 
 Der normale Weg ist Google: auf
