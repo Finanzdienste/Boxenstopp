@@ -218,7 +218,14 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     let info = null;
     try { info = await res.json(); } catch { /* kein JSON */ }
     if (Array.isArray(info)) info = info[0]; // Gemini schickt Fehler im Strom als Liste
-    throw fehler(artVonStatus(res.status, info), info?.error?.message || `HTTP ${res.status}`);
+    const text = info?.error?.message || `HTTP ${res.status}`;
+    // Kennt das Modell die Denkstufe nicht: einmal ohne sie
+    if (gemini && res.status === 400 && /thinking/i.test(text) && rumpf.generation_config?.thinking_level) {
+      const ohne = { ...rumpf.generation_config };
+      delete ohne.thinking_level;
+      return kiAnfragen({ ...rumpf, generation_config: ohne }, { schluessel, api, signal, beiFortschritt });
+    }
+    throw fehler(artVonStatus(res.status, info), text);
   }
   if (!res.body?.getReader) throw fehler('antwort', 'kein Datenstrom');
 
@@ -229,6 +236,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   let json = '';
   let werkzeug = gemini;
   let stopp = null;
+  let grund = '';
   const fortschritt = () => beiFortschritt({ zeichen: json.length, schritte: (json.match(/"min"\s*:/g) || []).length });
   // Interactions-API: step.delta mit Text, zum Schluss interaction.completed mit Status und Verbrauch.
   const verarbeiteGemini = (ev) => {
@@ -242,7 +250,10 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       usage.ein = Number(ia.usage.total_input_tokens) || usage.ein;
       usage.aus = (Number(ia.usage.total_output_tokens) || 0) + (Number(ia.usage.total_thought_tokens) || 0) || usage.aus;
     }
-    if (ia.status && !['in_progress', 'completed'].includes(ia.status)) stopp = ia.status === 'incomplete' ? 'MAX_TOKENS' : `${ia.status} ${ia.error?.message || ia.incomplete_details?.reason || ''}`.trim();
+    if (ia.status && !['in_progress', 'completed'].includes(ia.status)) {
+      stopp = ia.status === 'incomplete' ? 'MAX_TOKENS' : `${ia.status} ${ia.error?.message || ia.incomplete_details?.reason || ''}`.trim();
+      grund = ia.incomplete_details?.reason || ia.error?.message || '';
+    }
     // Falls der Text nicht gestreamt, sondern nur am Ende geliefert wurde:
     if (!json && Array.isArray(ia.steps)) {
       for (const st of ia.steps) if (st.type === 'model_output') for (const c of st.content || []) if (c.type === 'text' && typeof c.text === 'string') json += c.text;
@@ -287,7 +298,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     }
   }
   if (puffer.trim()) verarbeite(puffer);
-  if (stopp === 'max_tokens' || stopp === 'MAX_TOKENS') throw fehler('zulang');
+  if (stopp === 'max_tokens' || stopp === 'MAX_TOKENS') throw fehler('zulang', grund || `${json.length} Zeichen`);
   if (gemini && stopp && /safety|prohibited|blocklist|recitation|block/i.test(stopp)) throw fehler('sicherheit', stopp);
   if (gemini && stopp) throw fehler('antwort', stopp);
   if (!werkzeug || !json.trim()) throw fehler('antwort', 'keine Antwort');

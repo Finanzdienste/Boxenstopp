@@ -71,7 +71,7 @@ ehrlicher Kennung, zweimal die Woche:
 | Aldi (Nord) | `aldi-nord.de/angebote.html` | alle Artikel der Woche als eingebettetes JSON: Preis, Packung, Grundpreis, gültig bis |
 | Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit) |
 | Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe |
-| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini liest die Seiten – dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus |
+| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), vier je Anfrage, zu lange Antworten halbieren den Stapel – dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus |
 
 Rewe, Netto und Edeka sperren automatische Abrufe (403 bzw. eine
 Scherzantwort) – das steht auch in der App. Getränke, Süßes, Drogerie,

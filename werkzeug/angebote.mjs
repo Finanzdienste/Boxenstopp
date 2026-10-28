@@ -16,9 +16,10 @@
  *             HTML, nach Warengruppen, mit Gültigkeit je Gruppe. Bundesweit.
  *   Penny     www.penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe> – JSON.
  *   Lidl      Der Aktionsprospekt (lidl.de/l/prospekte) liegt als Seitenbilder
- *             vor, ohne Text. Die Bilder liest Gemini aus – dafür braucht der
- *             Lauf den Schlüssel in GEMINI_KEY (bei GitHub als Secret). Ohne
- *             Schlüssel fällt Lidl aus, der Rest läuft.
+ *             vor, ohne Text. Die Lebensmittel-Seiten (lidlSeitenWahl) liest
+ *             Gemini aus, vier je Anfrage – dafür braucht der Lauf den
+ *             Schlüssel in GEMINI_KEY (bei GitHub als Secret). Ohne Schlüssel
+ *             fällt Lidl aus, der Rest läuft.
  *
  *   Rewe, Netto und Edeka sperren automatische Abrufe (403 bzw. eine
  *   Scherzantwort) – die bleiben draußen, das steht auch in der App.
@@ -206,8 +207,10 @@ async function penny() {
 
 /* ------------------------------------------------------------- Lidl */
 
-const LIDL_SEITEN = 40; // Lebensmittel stehen vorn im Prospekt, hinten kommt Non-Food
-const LIDL_JE_ANFRAGE = 6;
+const LIDL_JE_ANFRAGE = 4; // Seiten je Anfrage; wird die Antwort zu lang, halbiert sich der Stapel
+const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
+const LIDL_ZEIT = 18 * 60e3; // danach nichts mehr anfragen (der Lauf darf 30 Minuten)
+const pause = (ms) => new Promise((r) => { setTimeout(r, ms); });
 
 /** Die Aktionsprospekte auf lidl.de/l/prospekte mit ihren Daten. */
 export function lidlProspekte(html) {
@@ -218,6 +221,54 @@ export function lidlProspekte(html) {
   return [...aus.values()].sort((a, b) => a.von.localeCompare(b.von));
 }
 
+/*
+ * Welche Prospektseiten sich zu lesen lohnen. Der Prospekt hat gut 70 Seiten,
+ * mehr als die Hälfte ist Werkzeug, Kleidung, Möbel, Spielzeug, Reisen. Die
+ * Seitendaten verraten es: Lebensmittel tragen Links zu rezepte.lidl.de,
+ * Non-Food und Wein tragen Onlineshop-Produkte, Reise- und Aktionsseiten nur
+ * Aktionslinks. Seiten ganz ohne Links (Frische, Kühlregal) bleiben drin.
+ * Kommt dabei zu wenig heraus (anderer Aufbau), die ersten Seiten.
+ */
+export function lidlSeitenWahl(pages, max = LIDL_SEITEN_MAX) {
+  const alle = (pages || []).filter((s) => s.image);
+  const lohnt = (s) => !(s.links || []).length || (s.links || []).some((l) => l.displayType === 'recipe');
+  let wahl = alle.filter(lohnt);
+  if (wahl.length < 12) wahl = alle;
+  return wahl.slice(0, max);
+}
+
+/*
+ * Einen Stapel Seiten ({ number, b64 }) von Gemini lesen lassen. Bricht die
+ * Antwort ab, weil sie zu lang wird, liest es den Stapel in zwei Hälften; beim
+ * Kontingent (grenze) wartet es eine gute Minute und versucht es noch einmal.
+ * anfragen(rumpf) ist austauschbar (Tests), melde(text) bekommt den Verlauf.
+ */
+export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () => {} }) {
+  const bereich = `Seiten ${stapel[0].number}–${stapel.at(-1).number}`;
+  const rumpf = rumpfAngebote('gemini', { fotos: stapel.map((s) => s.b64), text: `Lidl Aktionsprospekt, gültig ${von} bis ${bis}, ${bereich}. Laden: Lidl.`, katalog: KATALOG, modell: { gemini: ANBIETER.gemini.modell, anthropic: ANBIETER.anthropic.modell } });
+  const start = Date.now();
+  let antwort;
+  try {
+    try {
+      antwort = await anfragen(rumpf);
+    } catch (e) {
+      if (e?.art !== 'grenze') throw e;
+      await pause(65000);
+      antwort = await anfragen(rumpf);
+    }
+  } catch (e) {
+    if (e?.art === 'zulang' && stapel.length > 1) {
+      melde(`${bereich}: Antwort zu lang, halbiert`);
+      const mitte = Math.ceil(stapel.length / 2);
+      return [...await lidlStapelLesen(stapel.slice(0, mitte), { von, bis, anfragen, melde }), ...await lidlStapelLesen(stapel.slice(mitte), { von, bis, anfragen, melde })];
+    }
+    throw e;
+  }
+  const roh = Array.isArray(antwort?.eingabe?.angebote) ? antwort.eingabe.angebote : [];
+  melde(`${bereich}: ${roh.length} gelesen, ${antwort?.usage?.ein || '?'}/${antwort?.usage?.aus || '?'} Tokens, ${Math.round((Date.now() - start) / 1000)} s`);
+  return roh;
+}
+
 async function lidl() {
   if (!GEMINI_KEY) return { angebote: [], hinweis: 'ohne GEMINI_KEY nicht gelesen', ok: false };
   const html = await hole('https://www.lidl.de/c/online-prospekte/s10005610');
@@ -226,32 +277,47 @@ async function lidl() {
   // Der laufende Prospekt und, ab Freitag, auch der nächste
   const passende = alle.filter((p) => p.bis >= h && (p.von <= h || new Date().getUTCDay() >= 5 || new Date().getUTCDay() === 0)).slice(0, 2);
   if (!passende.length) throw new Error('kein laufender Aktionsprospekt gefunden');
+  const anfragen = (rumpf) => kiAnfragen(rumpf, { schluessel: GEMINI_KEY });
+  const melde = (s) => console.log(`  Lidl ${s}`);
+  const start = Date.now();
   const angebote = [];
+  const nichtLesbar = [];
+  let gelesen = 0;
+  let letzter = null;
+  let zeitUm = false;
   for (const p of passende) {
     const f = (await hole(`https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=${p.id}&region_id=0&region_code=0`, { json: true })).flyer;
-    const seiten = (f?.pages || []).filter((s) => s.image).slice(0, LIDL_SEITEN);
+    const seiten = lidlSeitenWahl(f?.pages);
+    melde(`${p.id}: ${seiten.length} von ${(f?.pages || []).length} Seiten lesen`);
     const bis = (f?.offerEndDate || f?.endDate || p.bis).slice(0, 10);
     const von = (f?.offerStartDate || f?.startDate || p.von).slice(0, 10);
     for (let i = 0; i < seiten.length; i += LIDL_JE_ANFRAGE) {
-      const stapel = seiten.slice(i, i + LIDL_JE_ANFRAGE);
-      const fotos = [];
-      for (const s of stapel) fotos.push((await hole(s.image, { bin: true })).toString('base64'));
-      const rumpf = rumpfAngebote('gemini', { fotos, text: `Lidl Aktionsprospekt, gültig ${von} bis ${bis}, Seiten ${stapel[0].number}–${stapel.at(-1).number}. Laden: Lidl.`, katalog: KATALOG, modell: { gemini: ANBIETER.gemini.modell, anthropic: ANBIETER.anthropic.modell } });
-      let antwort;
+      if (Date.now() - start > LIDL_ZEIT) { zeitUm = true; break; }
+      const stapel = [];
+      for (const s of seiten.slice(i, i + LIDL_JE_ANFRAGE)) stapel.push({ number: s.number, b64: (await hole(s.image, { bin: true })).toString('base64') });
       try {
-        antwort = await kiAnfragen(rumpf, { schluessel: GEMINI_KEY });
+        for (const a of angeboteBereinigen(await lidlStapelLesen(stapel, { von, bis, anfragen, melde }), KATALOG)) {
+          if (!istZumKochen(a.name)) continue;
+          angebote.push({ ...a, id: stabileId('Lidl', a.name, a.preis), laden: 'Lidl', von, bis: a.bis || bis, k: a.k || schluesselRaten(a.name, KATALOG) });
+        }
+        gelesen += stapel.length;
       } catch (e) {
-        if (e?.art === 'grenze') { await new Promise((r) => { setTimeout(r, 65000); }); antwort = await kiAnfragen(rumpf, { schluessel: GEMINI_KEY }); } else throw e;
-      }
-      for (const a of angeboteBereinigen(antwort.eingabe?.angebote, KATALOG)) {
-        if (!istZumKochen(a.name)) continue;
-        angebote.push({ ...a, id: stabileId('Lidl', a.name, a.preis), laden: 'Lidl', von, bis: a.bis || bis, k: a.k || schluesselRaten(a.name, KATALOG) });
+        if (e?.art === 'schluessel') throw e; // falscher Schlüssel: weitere Anfragen sind sinnlos
+        letzter = e;
+        nichtLesbar.push(`${stapel[0].number}–${stapel.at(-1).number}`);
+        melde(`Seiten ${stapel[0].number}–${stapel.at(-1).number} übersprungen: ${e?.message || e}`);
       }
       // Gratis-Kontingent: nicht zu schnell hintereinander
-      await new Promise((r) => { setTimeout(r, 7000); });
+      await pause(7000);
     }
+    if (zeitUm) break;
   }
-  return { angebote, hinweis: `aus dem Aktionsprospekt gelesen (${passende.map((p) => `${p.von.slice(8)}.${p.von.slice(5, 7)}.–${p.bis.slice(8)}.${p.bis.slice(5, 7)}.`).join(', ')}), Lesefehler möglich` };
+  if (!gelesen) throw new Error(letzter ? `keine Seite lesbar (${String(letzter.message || letzter).slice(0, 60)})` : 'keine Seiten im Prospekt');
+  const teile = [`aus dem Aktionsprospekt gelesen (${passende.map((p) => `${p.von.slice(8)}.${p.von.slice(5, 7)}.–${p.bis.slice(8)}.${p.bis.slice(5, 7)}.`).join(', ')})`];
+  if (nichtLesbar.length) teile.push(`Seiten ${nichtLesbar.join(', ')} nicht lesbar`);
+  if (zeitUm) teile.push('Zeit um, Rest nicht gelesen');
+  teile.push('Lesefehler möglich');
+  return { angebote, hinweis: teile.join(', ') };
 }
 
 /* ------------------------------------------------------------ Ablauf */

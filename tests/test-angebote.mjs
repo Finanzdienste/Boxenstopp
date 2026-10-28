@@ -9,7 +9,7 @@ import { pruefer, ROOT } from './hilfe.mjs';
 import { zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE } from '../js/angebote.js';
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg } from '../js/liste.js';
 import { systemText, nutzerText } from '../js/ki.js';
-import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, kalenderwoche } from '../werkzeug/angebote.mjs';
+import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, kalenderwoche } from '../werkzeug/angebote.mjs';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -107,5 +107,46 @@ check(kalenderwoche(bezug) === '2026-44' && kalenderwoche(new Date('2027-01-01T1
 
 const lp = lidlProspekte(fix('lidl-prospekte.html'));
 check(lp.length === 2 && lp[0].von === '2026-10-26' && lp[0].bis === '2026-10-31' && lp[1].von === '2026-11-02' && lp[0].id.startsWith('aktionsprospekt-26-10-2026'), `Lidl: Prospekte mit Datum aus der Übersicht, doppelte einmal (${lp.map((p) => p.id).join(', ')})`);
+
+// --- Lidl: welche Seiten gelesen werden, wie ein Stapel gelesen wird
+const seite = (number, ...arten) => ({ number, image: `https://bild/${number}.jpg`, links: arten.map((displayType) => ({ displayType })) });
+const prospekt = [
+  ...Array.from({ length: 14 }, (_, i) => seite(i + 1, 'recipe', 'standard')), // Lebensmittel
+  seite(15), seite(16), // Frische ohne Links
+  seite(17, 'product', 'product'), seite(18, 'standard'), seite(19, 'product', 'recipe'), seite(20, 'product'), // Werkzeug, Reise, Käse neben Wein, Buch
+];
+const wahl = lidlSeitenWahl(prospekt).map((s) => s.number);
+check(wahl.length === 17 && !wahl.includes(17) && !wahl.includes(18) && wahl.includes(19) && !wahl.includes(20) && wahl.includes(15), `Lidl: Seiten mit Rezept-Link oder ohne Links, Onlineshop- und Reiseseiten nicht (${wahl.join(',')})`);
+check(lidlSeitenWahl(prospekt, 10).length === 10 && lidlSeitenWahl(prospekt.map((s) => seite(s.number, 'product'))).length === 20 && lidlSeitenWahl(prospekt.map((s) => ({ ...s, image: '' }))).length === 0, 'Lidl: Obergrenze; erkennt es zu wenig, die ersten Seiten; ohne Bild nichts');
+
+const stapel = Array.from({ length: 4 }, (_, i) => ({ number: i + 1, b64: 'x' }));
+const anfragenMock = (zuViel) => {
+  const ruempfe = [];
+  const anfragen = async (rumpf) => {
+    ruempfe.push(rumpf);
+    const n = rumpf.input.filter((t) => t.type === 'image').length;
+    if (n > zuViel) { const e = new Error('zu lang'); e.art = 'zulang'; throw e; }
+    return { eingabe: { angebote: Array.from({ length: n }, (_, i) => ({ laden: 'Lidl', name: `Ware ${ruempfe.length}-${i}`, preis: 1 + i })) }, usage: { ein: 100, aus: 50 } };
+  };
+  return { anfragen, ruempfe };
+};
+{
+  const { anfragen, ruempfe } = anfragenMock(2);
+  const meldungen = [];
+  const roh = await lidlStapelLesen(stapel, { von: '2026-10-26', bis: '2026-10-31', anfragen, melde: (s) => meldungen.push(s) });
+  check(roh.length === 4 && ruempfe.length === 3 && meldungen.some((m) => /Seiten 1–4: Antwort zu lang, halbiert/.test(m)) && meldungen.some((m) => /Seiten 3–4: 2 gelesen, 100\/50 Tokens/.test(m)), `Lidl: zu lange Antwort → Stapel halbiert, alle 4 Seiten in 2 Anfragen gelesen (${ruempfe.length} Anfragen)`);
+  const r = ruempfe[0];
+  check(r.generation_config.thinking_level === 'low' && r.generation_config.max_output_tokens >= 32000 && /Seiten 1–4/.test(r.input.at(-1).text) && r.response_format.schema.title === 'angebote', 'Lidl: Anfrage mit wenig Nachdenken, großer Ausgabegrenze, Seitenbereich im Text');
+}
+{
+  const { anfragen, ruempfe } = anfragenMock(0);
+  let fehler = null;
+  try { await lidlStapelLesen(stapel.slice(0, 1), { von: '', bis: '', anfragen }); } catch (e) { fehler = e; }
+  check(fehler?.art === 'zulang' && ruempfe.length === 1, 'Lidl: eine einzelne Seite zu lang → Fehler nach oben, nicht endlos halbieren');
+  const kaputt = async () => { const e = new Error('Google lehnt den Schlüssel ab'); e.art = 'schluessel'; throw e; };
+  fehler = null;
+  try { await lidlStapelLesen(stapel, { von: '', bis: '', anfragen: kaputt }); } catch (e) { fehler = e; }
+  check(fehler?.art === 'schluessel', 'Lidl: falscher Schlüssel kommt als Fehler durch');
+}
 
 ende();

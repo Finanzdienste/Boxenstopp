@@ -425,7 +425,8 @@ export function rumpfAngebote(anbieter, { fotos = [], text = '', katalog = {}, m
       system_instruction: systemTextAngebote({ katalog, anbieter }),
       input,
       response_format: { type: 'text', mime_type: 'application/json', schema: ANGEBOTE_SCHEMA },
-      generation_config: { max_output_tokens: 12000 },
+      // Auslesen braucht kein langes Nachdenken – und die Denk-Tokens zählen mit in die Ausgabegrenze
+      generation_config: { max_output_tokens: 32000, thinking_level: 'low' },
       store: false,
       stream: true,
     };
