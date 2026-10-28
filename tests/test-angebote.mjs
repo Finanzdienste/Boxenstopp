@@ -4,12 +4,13 @@
  * Ersparnis gegen die Richtpreise, der Text für die KI, die Anfragen.
  */
 import { readFileSync } from 'node:fs';
+import { createServer } from 'node:http';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
 import { zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE } from '../js/angebote.js';
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg } from '../js/liste.js';
 import { systemText, nutzerText } from '../js/ki.js';
-import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, kalenderwoche } from '../werkzeug/angebote.mjs';
+import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, kalenderwoche } from '../werkzeug/angebote.mjs';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -124,9 +125,9 @@ const anfragenMock = (zuViel) => {
   const ruempfe = [];
   const anfragen = async (rumpf) => {
     ruempfe.push(rumpf);
-    const n = rumpf.input.filter((t) => t.type === 'image').length;
+    const n = rumpf.contents[0].parts.filter((t) => t.inline_data).length;
     if (n > zuViel) { const e = new Error('zu lang'); e.art = 'zulang'; throw e; }
-    return { eingabe: { angebote: Array.from({ length: n }, (_, i) => ({ laden: 'Lidl', name: `Ware ${ruempfe.length}-${i}`, preis: 1 + i })) }, usage: { ein: 100, aus: 50 } };
+    return { eingabe: { angebote: Array.from({ length: n }, (_, i) => ({ laden: 'Lidl', name: `Ware ${ruempfe.length}-${i}`, preis: 1 + i })) }, usage: { ein: 100, aus: 50, denken: 7 } };
   };
   return { anfragen, ruempfe };
 };
@@ -134,9 +135,10 @@ const anfragenMock = (zuViel) => {
   const { anfragen, ruempfe } = anfragenMock(2);
   const meldungen = [];
   const roh = await lidlStapelLesen(stapel, { von: '2026-10-26', bis: '2026-10-31', anfragen, melde: (s) => meldungen.push(s) });
-  check(roh.length === 4 && ruempfe.length === 3 && meldungen.some((m) => /Seiten 1–4: Antwort zu lang, halbiert/.test(m)) && meldungen.some((m) => /Seiten 3–4: 2 gelesen, 100\/50 Tokens/.test(m)), `Lidl: zu lange Antwort → Stapel halbiert, alle 4 Seiten in 2 Anfragen gelesen (${ruempfe.length} Anfragen)`);
+  check(roh.length === 4 && ruempfe.length === 3 && meldungen.some((m) => /Seiten 1–4: Antwort zu lang, halbiert/.test(m)) && meldungen.some((m) => /Seiten 3–4: 2 gelesen, 100\/50\+7 Tokens/.test(m)), `Lidl: zu lange Antwort → Stapel halbiert, alle 4 Seiten in 2 Anfragen gelesen (${ruempfe.length} Anfragen)`);
   const r = ruempfe[0];
-  check(r.generation_config.thinking_level === 'low' && r.generation_config.max_output_tokens >= 32000 && /Seiten 1–4/.test(r.input.at(-1).text) && r.response_format.schema.title === 'angebote', 'Lidl: Anfrage mit wenig Nachdenken, großer Ausgabegrenze, Seitenbereich im Text');
+  const g = r.generationConfig;
+  check(g.thinkingConfig.thinkingLevel === 'LOW' && g.maxOutputTokens >= 32000 && g.temperature === undefined && g.responseMimeType === 'application/json' && g.responseSchema.title === 'angebote' && /Seiten 1–4/.test(r.contents[0].parts.at(-1).text) && /kein Schwein/.test(r.system_instruction.parts[0].text) && r.contents[0].parts[0].inline_data.mime_type === 'image/jpeg', 'Lidl: generateContent-Anfrage mit wenig Nachdenken, großer Ausgabegrenze, JSON-Schema, Seitenbereich im Text');
 }
 {
   const { anfragen, ruempfe } = anfragenMock(0);
@@ -147,6 +149,60 @@ const anfragenMock = (zuViel) => {
   fehler = null;
   try { await lidlStapelLesen(stapel, { von: '', bis: '', anfragen: kaputt }); } catch (e) { fehler = e; }
   check(fehler?.art === 'schluessel', 'Lidl: falscher Schlüssel kommt als Fehler durch');
+}
+
+// --- geminiAnfragen gegen einen Mock von generateContent
+{
+  const antworten = [];
+  const anfragen = [];
+  const server = createServer((req, res) => {
+    let body = '';
+    req.on('data', (d) => { body += d; });
+    req.on('end', () => {
+      anfragen.push({ url: req.url, key: req.headers['x-goog-api-key'], rumpf: JSON.parse(body) });
+      const [status, antwort] = antworten.shift() || [200, {}];
+      res.writeHead(status, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(antwort));
+    });
+  });
+  await new Promise((r) => { server.listen(0, '127.0.0.1', r); });
+  const api = `http://127.0.0.1:${server.address().port}/models`;
+  const rumpf = geminiRumpf({ fotos: ['abc'], text: 'Lidl', katalog });
+  const gut = (text, extra = {}) => ({ candidates: [{ content: { parts: [{ text }] }, finishReason: 'STOP', ...extra }], usageMetadata: { promptTokenCount: 1200, candidatesTokenCount: 300, thoughtsTokenCount: 40 } });
+  const lauf = async () => { try { return await geminiAnfragen(rumpf, { schluessel: 'AQ.test', api, timeout: 3000 }); } catch (e) { return e; } };
+
+  antworten.push([200, gut('{"angebote":[{"laden":"Lidl","name":"Hähnchenbrustfilet","preis":7.49}]}')]);
+  let a = await lauf();
+  check(a.eingabe?.angebote?.[0]?.name === 'Hähnchenbrustfilet' && a.usage.ein === 1200 && a.usage.aus === 300 && a.usage.denken === 40 && a.grund === 'STOP' && anfragen[0].url === `/models/gemini-3.8-flash:generateContent` && anfragen[0].key === 'AQ.test' && anfragen[0].rumpf.generationConfig.thinkingConfig.thinkingLevel === 'LOW', 'generateContent: Antwort, Tokens, Modell im Pfad, Schlüssel im Kopf');
+  antworten.push([200, gut('```json\n{"angebote":[]}\n```')]);
+  a = await lauf();
+  check(Array.isArray(a.eingabe?.angebote) && a.eingabe.angebote.length === 0, 'generateContent: ```json``` drumherum wird abgestreift');
+  antworten.push([200, gut('{"angebote":[{"laden":"Lidl","na', { finishReason: 'MAX_TOKENS' })]);
+  a = await lauf();
+  check(a.art === 'zulang' && /300\+40 Tokens/.test(a.detail), `generateContent: MAX_TOKENS → zulang mit Lage (${a.detail})`);
+  antworten.push([200, gut('{"angebote":[{"laden":')]);
+  a = await lauf();
+  check(a.art === 'antwort' && /JSON kaputt/.test(a.detail), 'generateContent: abgeschnittenes JSON → antwort/JSON kaputt');
+  antworten.push([200, { candidates: [{ content: { parts: [] }, finishReason: 'SAFETY' }] }]);
+  a = await lauf();
+  check(a.art === 'sicherheit', 'generateContent: SAFETY → sicherheit');
+  antworten.push([400, { error: { code: 400, message: 'thinking_level is not supported for this model', status: 'INVALID_ARGUMENT' } }]);
+  antworten.push([200, gut('{"angebote":[]}')]);
+  const vorher = anfragen.length;
+  a = await lauf();
+  check(a.eingabe && anfragen.length === vorher + 2 && anfragen[vorher].rumpf.generationConfig.thinkingConfig && !anfragen[vorher + 1].rumpf.generationConfig.thinkingConfig && anfragen[vorher + 1].rumpf.generationConfig.maxOutputTokens === 32000, 'generateContent: kennt das Modell die Denkstufe nicht → einmal ohne sie');
+  antworten.push([429, { error: { code: 429, message: 'Resource has been exhausted', status: 'RESOURCE_EXHAUSTED' } }]);
+  a = await lauf();
+  check(a.art === 'grenze', 'generateContent: 429 → grenze');
+  antworten.push([400, { error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT' } }]);
+  a = await lauf();
+  check(a.art === 'schluessel', 'generateContent: ungültiger Schlüssel → schluessel');
+  antworten.push([503, { error: { code: 503, message: 'The model is overloaded. Please try again later.', status: 'UNAVAILABLE' } }]);
+  a = await lauf();
+  check(a.art === 'ueberlastet', 'generateContent: 503 → ueberlastet');
+  server.close();
+  const weg = await (async () => { try { return await geminiAnfragen(rumpf, { schluessel: 'AQ.test', api: 'http://127.0.0.1:9/models', timeout: 3000 }); } catch (e) { return e; } })();
+  check(weg.art === 'netz', 'generateContent: nicht erreichbar → netz');
 }
 
 ende();

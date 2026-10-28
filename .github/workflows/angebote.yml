@@ -1,5 +1,7 @@
 # Montags und donnerstags früh: die Angebote der Woche holen (werkzeug/angebote.mjs)
-# und daten/angebote.json einchecken. Von Hand: Actions → Angebote → Run workflow.
+# und daten/angebote.json einchecken. Von Hand: Actions → Angebote → Run workflow –
+# dort lassen sich die Quellen einschränken und Lidl auf ein paar Seiten begrenzen
+# (Probelauf, dauert dann nur Minuten).
 #
 # Lidl braucht einen Gemini-Schlüssel (Prospektseiten sind Bilder): als Secret
 # GEMINI_KEY unter Settings → Secrets and variables → Actions anlegen. Ohne ihn
@@ -10,6 +12,15 @@ on:
   schedule:
     - cron: '23 4 * * 1,4'   # 05:23 bzw. 06:23 Berlin, Montag und Donnerstag
   workflow_dispatch:
+    inputs:
+      quellen:
+        description: 'Nur diese Quellen, z. B. „lidl“ oder „aldi penny“ – leer: alle'
+        required: false
+        default: ''
+      lidl_seiten:
+        description: 'Probelauf: höchstens so viele Lidl-Seiten lesen – leer: alle Lebensmittel-Seiten'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -32,7 +43,9 @@ jobs:
       - name: Angebote holen
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
-        run: node werkzeug/angebote.mjs
+          LIDL_MAX: ${{ inputs.lidl_seiten }}
+          QUELLEN: ${{ inputs.quellen }}
+        run: node werkzeug/angebote.mjs $QUELLEN
 
       - name: Einchecken
         run: |

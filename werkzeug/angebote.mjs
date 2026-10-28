@@ -32,8 +32,8 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { angeboteBereinigen, schluesselRaten, mengeAus, istTabu, stabileId, rumpfAngebote } from '../js/angebote.js';
-import { kiAnfragen, ANBIETER } from '../js/ki.js';
+import { angeboteBereinigen, schluesselRaten, mengeAus, istTabu, stabileId, systemTextAngebote, nutzerTextAngebote, ANGEBOTE_SCHEMA } from '../js/angebote.js';
+import { ANBIETER, kiFehler, artVonStatus } from '../js/ki.js';
 
 const HIER = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HIER, '..');
@@ -41,6 +41,7 @@ const ZIEL = path.join(ROOT, 'daten', 'angebote.json');
 const UA = 'Boxenstopp-Angebote/1.0 (+https://github.com/Finanzdienste/Boxenstopp)';
 const KATALOG = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8')).katalog;
 const GEMINI_KEY = process.env.GEMINI_KEY || '';
+const LIDL_MAX = Number(process.env.LIDL_MAX) || 0; // Probelauf: höchstens so viele Lidl-Seiten
 const nur = process.argv.slice(2).map((s) => s.toLowerCase());
 const will = (q) => !nur.length || nur.includes(q);
 
@@ -210,7 +211,75 @@ async function penny() {
 const LIDL_JE_ANFRAGE = 4; // Seiten je Anfrage; wird die Antwort zu lang, halbiert sich der Stapel
 const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
 const LIDL_ZEIT = 18 * 60e3; // danach nichts mehr anfragen (der Lauf darf 30 Minuten)
+const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_ZEIT = 240000; // je Anfrage
 const pause = (ms) => new Promise((r) => { setTimeout(r, ms); });
+
+/*
+ * Der Rumpf für Geminis models/<modell>:generateContent – ohne Streaming,
+ * die Antwort als JSON nach ANGEBOTE_SCHEMA. Auslesen braucht kein langes
+ * Nachdenken (thinkingLevel LOW); die Temperatur bleibt auf Googles Vorgabe,
+ * niedrigere Werte lassen Gemini 3 eher in Schleifen laufen.
+ */
+export function geminiRumpf({ fotos = [], text = '', katalog = {} }) {
+  return {
+    system_instruction: { parts: [{ text: systemTextAngebote({ katalog, anbieter: 'gemini' }) }] },
+    contents: [{ role: 'user', parts: [...fotos.map((data) => ({ inline_data: { mime_type: 'image/jpeg', data } })), { text: nutzerTextAngebote({ text, fotos: fotos.length }) }] }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: ANGEBOTE_SCHEMA,
+      maxOutputTokens: 32000,
+      thinkingConfig: { thinkingLevel: 'LOW' },
+    },
+  };
+}
+
+/*
+ * Die Anfrage an Gemini schicken. Gibt { eingabe, usage, dauer, grund }
+ * zurück und wirft Fehler mit .art wie ki.js (schluessel, grenze,
+ * ueberlastet, zulang, sicherheit, antwort, netz) – lidlStapelLesen richtet
+ * sich danach. Kennt das Modell die Denkstufe nicht, einmal ohne sie.
+ */
+export async function geminiAnfragen(rumpf, { schluessel, modell = ANBIETER.gemini.modell, api = GEMINI_API, timeout = GEMINI_ZEIT } = {}) {
+  const start = Date.now();
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), timeout);
+  let res;
+  let text = '';
+  try {
+    res = await fetch(`${api}/${modell}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': schluessel }, body: JSON.stringify(rumpf), signal: ac.signal });
+    text = await res.text();
+  } catch (e) {
+    throw kiFehler('netz', e?.name === 'AbortError' ? `keine Antwort nach ${Math.round(timeout / 1000)} s` : e?.message, 'gemini');
+  } finally { clearTimeout(t); }
+  let info = null;
+  try { info = JSON.parse(text); } catch { /* kein JSON */ }
+  if (Array.isArray(info)) info = info[0];
+  if (!res.ok) {
+    const meldung = info?.error?.message || `HTTP ${res.status}`;
+    if (res.status === 400 && /thinking/i.test(meldung) && rumpf.generationConfig?.thinkingConfig) {
+      const ohne = { ...rumpf.generationConfig };
+      delete ohne.thinkingConfig;
+      return geminiAnfragen({ ...rumpf, generationConfig: ohne }, { schluessel, modell, api, timeout });
+    }
+    throw kiFehler(artVonStatus(res.status, info), meldung, 'gemini');
+  }
+  const kandidat = info?.candidates?.[0];
+  const grund = kandidat?.finishReason || info?.promptFeedback?.blockReason || '';
+  const u = info?.usageMetadata || {};
+  const usage = { ein: u.promptTokenCount || 0, aus: u.candidatesTokenCount || 0, denken: u.thoughtsTokenCount || 0 };
+  const dauer = Date.now() - start;
+  const lage = `${usage.ein}/${usage.aus}+${usage.denken} Tokens, ${Math.round(dauer / 1000)} s`;
+  if (grund === 'MAX_TOKENS') throw kiFehler('zulang', lage, 'gemini');
+  if (/SAFETY|RECITATION|BLOCKLIST|PROHIBITED|SPII/i.test(grund)) throw kiFehler('sicherheit', grund, 'gemini');
+  const roh = (kandidat?.content?.parts || []).filter((p) => typeof p.text === 'string' && !p.thought).map((p) => p.text).join('').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  if (!roh) throw kiFehler('antwort', `keine Antwort (${grund || 'ohne finishReason'}, ${lage})`, 'gemini');
+  try {
+    return { eingabe: JSON.parse(roh), usage, dauer, grund };
+  } catch {
+    throw kiFehler('antwort', `JSON kaputt (${grund}, ${roh.length} Zeichen, ${lage})`, 'gemini');
+  }
+}
 
 /** Die Aktionsprospekte auf lidl.de/l/prospekte mit ihren Daten. */
 export function lidlProspekte(html) {
@@ -245,7 +314,7 @@ export function lidlSeitenWahl(pages, max = LIDL_SEITEN_MAX) {
  */
 export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () => {} }) {
   const bereich = `Seiten ${stapel[0].number}–${stapel.at(-1).number}`;
-  const rumpf = rumpfAngebote('gemini', { fotos: stapel.map((s) => s.b64), text: `Lidl Aktionsprospekt, gültig ${von} bis ${bis}, ${bereich}. Laden: Lidl.`, katalog: KATALOG, modell: { gemini: ANBIETER.gemini.modell, anthropic: ANBIETER.anthropic.modell } });
+  const rumpf = geminiRumpf({ fotos: stapel.map((s) => s.b64), text: `Lidl Aktionsprospekt, gültig ${von} bis ${bis}, ${bereich}. Laden: Lidl.`, katalog: KATALOG });
   const start = Date.now();
   let antwort;
   try {
@@ -265,7 +334,8 @@ export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () =
     throw e;
   }
   const roh = Array.isArray(antwort?.eingabe?.angebote) ? antwort.eingabe.angebote : [];
-  melde(`${bereich}: ${roh.length} gelesen, ${antwort?.usage?.ein || '?'}/${antwort?.usage?.aus || '?'} Tokens, ${Math.round((Date.now() - start) / 1000)} s`);
+  const u = antwort?.usage || {};
+  melde(`${bereich}: ${roh.length} gelesen, ${u.ein || '?'}/${u.aus || '?'}${u.denken ? `+${u.denken}` : ''} Tokens, ${Math.round((Date.now() - start) / 1000)} s`);
   return roh;
 }
 
@@ -277,7 +347,7 @@ async function lidl() {
   // Der laufende Prospekt und, ab Freitag, auch der nächste
   const passende = alle.filter((p) => p.bis >= h && (p.von <= h || new Date().getUTCDay() >= 5 || new Date().getUTCDay() === 0)).slice(0, 2);
   if (!passende.length) throw new Error('kein laufender Aktionsprospekt gefunden');
-  const anfragen = (rumpf) => kiAnfragen(rumpf, { schluessel: GEMINI_KEY });
+  const anfragen = (rumpf) => geminiAnfragen(rumpf, { schluessel: GEMINI_KEY });
   const melde = (s) => console.log(`  Lidl ${s}`);
   const start = Date.now();
   const angebote = [];
@@ -287,7 +357,7 @@ async function lidl() {
   let zeitUm = false;
   for (const p of passende) {
     const f = (await hole(`https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=${p.id}&region_id=0&region_code=0`, { json: true })).flyer;
-    const seiten = lidlSeitenWahl(f?.pages);
+    const seiten = lidlSeitenWahl(f?.pages, LIDL_MAX || LIDL_SEITEN_MAX);
     melde(`${p.id}: ${seiten.length} von ${(f?.pages || []).length} Seiten lesen`);
     const bis = (f?.offerEndDate || f?.endDate || p.bis).slice(0, 10);
     const von = (f?.offerStartDate || f?.startDate || p.von).slice(0, 10);
@@ -305,7 +375,7 @@ async function lidl() {
         if (e?.art === 'schluessel') throw e; // falscher Schlüssel: weitere Anfragen sind sinnlos
         letzter = e;
         nichtLesbar.push(`${stapel[0].number}–${stapel.at(-1).number}`);
-        melde(`Seiten ${stapel[0].number}–${stapel.at(-1).number} übersprungen: ${e?.message || e}`);
+        melde(`Seiten ${stapel[0].number}–${stapel.at(-1).number} übersprungen: ${e?.message || e}${e?.detail ? ` [${e.detail}]` : ''}`);
       }
       // Gratis-Kontingent: nicht zu schnell hintereinander
       await pause(7000);

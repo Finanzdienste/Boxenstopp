@@ -172,7 +172,7 @@ export function kiFehler(art, detail = '', anbieter = 'anthropic') {
   return e;
 }
 
-function artVonStatus(status, info) {
+export function artVonStatus(status, info) {
   const text = `${info?.error?.type || ''} ${info?.error?.status || ''} ${info?.error?.message || ''}`;
   if (status === 401 || status === 403 || /API key not valid|API_KEY_INVALID/i.test(text)) return 'schluessel';
   if (/credit|balance|billing|guthaben/i.test(text)) return 'guthaben';
