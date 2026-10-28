@@ -172,9 +172,9 @@ const anfragenMock = (zuViel) => {
     return { rufe, meldungen, ergebnis, fehler, f };
   };
   let l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ok'] });
-  check(l.ergebnis[0]?.modell === 'a' && l.rufe.join() === 'a,a,a,a' && !l.meldungen.length, 'Ausweichen: zweimal überlastet, dritter Versuch klappt, Modell bleibt');
+  check(l.ergebnis[0]?.modell === 'a' && l.rufe.join() === 'a,a,a,a' && !l.meldungen.some((m) => /weiter mit/.test(m)) && /a überlastet, 0 s warten/.test(l.meldungen[0]), 'Ausweichen: zweimal überlastet, dritter Versuch klappt, Modell bleibt');
   l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ueberlastet'] });
-  check(l.ergebnis[0]?.modell === 'b' && l.ergebnis[1]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && /a überlastet, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: dreimal überlastet → nächstes Modell, auch für die folgende Anfrage');
+  check(l.ergebnis[0]?.modell === 'b' && l.ergebnis[1]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && l.meldungen.some((m) => /a überlastet, weiter mit b/.test(m)), 'Ausweichen: dreimal überlastet → nächstes Modell, auch für die folgende Anfrage');
   l = await laufe({ a: ['modell'], b: ['modell'] });
   check(l.ergebnis[0]?.modell === 'c' && l.rufe.join() === 'a,b,c,c' && /a gibt es nicht/.test(l.meldungen[0]) && l.f.modell() === 'c', 'Ausweichen: unbekanntes Modell fällt aus der Kette, sofort das nächste');
   l = await laufe({ a: ['zeit', 'zeit'], b: ['modell'], c: ['zeit'] }, 1);
@@ -188,9 +188,9 @@ const anfragenMock = (zuViel) => {
   l = await laufe({ a: ['schluessel'] });
   check(l.fehler?.art === 'schluessel' && l.rufe.join() === 'a', 'Ausweichen: andere Fehler sofort nach oben');
   l = await laufe({ a: ['grenze', 'ok'] });
-  check(l.ergebnis[0]?.modell === 'a' && l.rufe.join() === 'a,a,a' && !l.meldungen.length, 'Ausweichen: Kontingent → warten und dasselbe Modell nochmal');
+  check(l.ergebnis[0]?.modell === 'a' && l.rufe.join() === 'a,a,a' && l.meldungen.length === 1 && /a am Kontingent .*0 s warten/.test(l.meldungen[0]), 'Ausweichen: Kontingent → warten und dasselbe Modell nochmal');
   l = await laufe({ a: ['grenze', 'grenze', 'grenze'] });
-  check(l.ergebnis[0]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && l.meldungen[0] === 'a am Kontingent, weiter mit b', 'Ausweichen: Kontingent bleibt → nächstes Modell (das Kontingent gilt je Modell)');
+  check(l.ergebnis[0]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && l.meldungen.at(-1) === 'a am Kontingent, weiter mit b', 'Ausweichen: Kontingent bleibt → nächstes Modell (das Kontingent gilt je Modell)');
   l = await laufe({ a: ['zeit'] });
   check(l.ergebnis[0]?.modell === 'b' && l.rufe.join() === 'a,b,b' && /a antwortet nicht, weiter mit b/.test(l.meldungen[0]) && l.f.modell() === 'b', 'Ausweichen: Zeitablauf → ohne Wiederholung das nächste Modell; modell() nennt es');
 }

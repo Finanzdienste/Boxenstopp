@@ -71,7 +71,7 @@ ehrlicher Kennung, zweimal die Woche:
 | Aldi (Nord) | `aldi-nord.de/angebote.html` | alle Artikel der Woche als eingebettetes JSON: Preis, Packung, Grundpreis, gültig bis |
 | Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit) |
 | Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe |
-| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), vier je Anfrage, zu lange Antworten halbieren den Stapel – dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus |
+| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini (`generateContent`) liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Im Gratis-Kontingent hängt mal das eine, mal das andere Modell: Nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, steht in `daten/angebote.json` und kommt beim nächsten Lauf zuerst dran; hängende Stapel bekommen einen zweiten Durchgang. Dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` |
 
 Rewe, Netto und Edeka sperren automatische Abrufe (403 bzw. eine
 Scherzantwort) – das steht auch in der App. Getränke, Süßes, Drogerie,
