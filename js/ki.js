@@ -51,7 +51,10 @@ export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'a
     .join('; ');
   const ausgabe = anbieter === 'gemini' ? 'als JSON genau nach dem vorgegebenen Schema' : `mit dem Werkzeug ${WERKZEUG}`;
   const angebote = modus === 'angebote';
-  const auftrag = angebote
+  const aendern = modus === 'aendern';
+  const auftrag = aendern
+    ? `Du änderst ein bestehendes Rezept so, wie Tobi oder Amy es sich wünschen, und gibst das ganze geänderte Rezept für ${portionen} gleiche Boxen ${ausgabe} aus. Ändere nur, was der Wunsch verlangt, und was dafür nötig ist: Zutaten, Schritte, Schalen, Zeiten, Name und Beschreibung, wenn sie nicht mehr stimmen. Alles andere bleibt genau so – dieselben Zutaten mit derselben id, Menge, min, max, anpassbar und pro100, dieselben Schritte im selben Wortlaut. Neue Zutaten bekommen eine neue id, weggefallene verschwinden auch aus den Schritten. Lässt sich der Wunsch nicht erfüllen, ohne gegen die Regeln unten zu verstoßen, änderst du so wenig wie möglich und sagst es in hinweis.`
+    : angebote
     ? `Aus den Angeboten der Woche bei ihren Supermärkten machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus. Die Hauptzutaten (Protein, Sättigungsbeilage, Gemüse) sollen möglichst aus den Angeboten kommen; sie sind alle zu kaufen (quelle: kaufen), nichts davon ist schon da. Was fehlt, kommt normal dazu.`
     : `Aus dem, was bei ihnen noch im Kühlschrank und im Vorrat ist, machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus.`;
   return `Du bist der Meal-Prep-Koch von Tobi und Amy. ${auftrag}
@@ -63,7 +66,9 @@ Feste Regeln:
 - Kein Schweinefleisch in jeder Form (Speck, Schinken, Salami, Chorizo, Wurst, gemischtes Hack, Gelatine) und kein Putenhack. Hähnchen, Putenbrust, Rind, Eier, Hülsenfrüchte und Milchprodukte sind gut.
 - Kein Hüttenkäse und kein Quark oder Skyr in warmen Saucen – die werden körnig. Quark und Skyr nur kalt (Dip, Marinade).
 - Richtig lecker und ordentlich gewürzt, so dass man es gern vier Tage hintereinander isst. Lieber ein bewährtes Gericht gut gemacht als ein wildes Experiment.
-- ${angebote
+- ${aendern
+    ? 'Was der Wunsch neu braucht, wird gekauft (quelle: kaufen, Packungsgröße in packung) – so wenig wie nötig und in Supermarkt-Packungen. Ersetzt eine fertige Zutat mehrere (fertige Sauce statt selbst gemacht), fallen die alten mit ihren Schritten weg. In hinweis sagst du in einem Satz, was du geändert hast.'
+    : angebote
     ? 'Nutze so viele Angebote wie sinnvoll, aber kein Gericht erzwingen: lieber drei Angebote in einem stimmigen Rezept als sechs in einem seltsamen. In hinweis sagst du kurz, welche Angebote drin sind.'
     : `Was da ist, zuerst verbrauchen, vor allem Frisches. ${dazukaufen
       ? 'Was fehlt, darf dazugekauft werden – so wenig wie nötig und in Supermarkt-Packungen.'
@@ -93,7 +98,9 @@ Zubereitung, genau so, wie die App sie zeigt:
 ${anbieter === 'gemini' ? 'Antworte nur mit dem JSON, ohne Text davor oder danach' : 'Antworte nur mit dem Werkzeug'}, alles auf Deutsch.`;
 }
 
-export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, mag = [], magNicht = [], vermeiden = [], modus = 'reste' }) {
+export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, mag = [], magNicht = [], vermeiden = [], modus = 'reste', rezept = null, wunsch = '' }) {
+  // Ändern: das Rezept, wie es jetzt ist, im Format der Antwort – und was anders sein soll
+  if (modus === 'aendern') return ['Das Rezept, wie es jetzt ist (JSON im Format deiner Antwort):', JSON.stringify(rezept), '', `Was anders sein soll: ${String(wunsch || '').trim()}`].join('\n');
   const zeilen = [
     modus === 'angebote' ? 'Das ist diese Woche im Angebot:' : 'Das ist noch da:',
     String(text || '').trim() || '(steht nur auf den Fotos)',

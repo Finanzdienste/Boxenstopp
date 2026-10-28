@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
-import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText } from '../js/ki-rezept.js';
+import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen } from '../js/ki-rezept.js';
 import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL } from '../js/ki.js';
 import { kiAus } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
@@ -129,6 +129,39 @@ check(rg.input[0].type === 'image' && rg.input[0].mime_type === 'image/jpeg' && 
 check(/als JSON genau nach dem vorgegebenen Schema/.test(rg.system_instruction) && !/rezept_ausgeben/.test(rg.system_instruction) && /Kein Fisch/.test(rg.system_instruction), 'Gemini bekommt dieselben Regeln, nur ohne Werkzeug');
 check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).response_format && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).tool_choice, 'rumpfFuer wählt nach Anbieter');
 check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') > 0 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null, 'Gemini (3.8 Flash) kostet nichts, Claude ein paar Cent');
+
+// --- Rezept mit der KI ändern: Vorlage, Anfrage, ans Original anschließen, wieder aufs Ziel
+const terK = kiBereinigen(festAlsKi(daten.rezepte.find((r) => r.id === 'teriyaki'), daten.katalog)).r;
+const terOhne = terK.zutaten.filter((z) => !z.pauschal);
+const vorlage = alsVorlage(terK);
+const rund = kiBereinigen({ ...vorlage, portionen: 8 }).r;
+check(rund && rund.zutaten.length === terOhne.length && rund.zutaten.every((z, i) => z.id === terOhne[i].id && Math.abs(z.menge - terOhne[i].menge) < 0.1 && z.anpassbar === terOhne[i].anpassbar) && rund.ablauf.every((p, i) => p.schritte.map((x) => x.d).join('|') === terK.ablauf[i].schritte.map((x) => x.d).join('|')), 'Vorlage zum Ändern: im Format der Antwort, ohne Verlust (Zutaten, Mengen, Schritte)');
+check(!JSON.stringify(vorlage).includes('"kauf"') && !JSON.stringify(vorlage).includes('pauschal') && vorlage.vorbereiten.some((x) => x.text.includes('{reis}')), 'ohne Interna (kauf, pauschal), die Platzhalter bleiben');
+const WUNSCH = 'fertige Teriyaki-Sauce statt selbst gemacht';
+const ra = anfrageBauenGemini({ modus: 'aendern', rezept: vorlage, wunsch: WUNSCH, portionen: 8, ziel: ZIEL, katalog: daten.katalog });
+const raText = ra.input.at(-1).text;
+check(/änderst ein bestehendes Rezept/.test(ra.system_instruction) && /Kein Fisch/.test(ra.system_instruction) && /Kein Schweinefleisch/.test(ra.system_instruction) && /443 kcal/.test(ra.system_instruction) && /Platzhalter/.test(ra.system_instruction), 'Ändern: der Auftrag, mit allen Regeln und dem Ziel');
+check(raText.endsWith(`Was anders sein soll: ${WUNSCH}`) && JSON.parse(raText.split('\n')[1]).zutaten.length === vorlage.zutaten.length && raText.includes('"id":"sojasauce"') && ra.input.length === 1, 'Ändern: das Rezept als JSON und der Wunsch, kein Foto');
+const rc = anfrageBauen({ modus: 'aendern', rezept: vorlage, wunsch: WUNSCH, portionen: 8, ziel: ZIEL, katalog: daten.katalog });
+check(/änderst ein bestehendes Rezept/.test(rc.system) && rc.tool_choice.name === 'rezept_ausgeben' && rc.messages[0].content.at(-1).text.includes(WUNSCH), 'Ändern geht auch mit Claude');
+// So antwortet die KI im Test: fertige Sauce statt Soja, Honig, Stärke und Sesamöl
+const TERIYAKI_FERTIGSAUCE = (() => {
+  const v = klon(vorlage);
+  v.zutaten = v.zutaten.filter((z) => !['sojasauce', 'honig', 'staerke', 'sesamoel'].includes(z.id));
+  v.zutaten.push({ id: 'teriyaki-sauce', name: 'Teriyaki-Sauce (fertig)', menge: 250, einheit: 'ml', stueck: '1 Flasche', min: 250, max: 250, anpassbar: false, pro100: { kcal: 117, p: 3.5, kh: 24, f: 0.3 }, quelle: 'kaufen', katalog: '', abteilung: 'vorrat', packung: '250-ml-Flasche' });
+  v.vorbereiten = v.vorbereiten.map((x) => (x.text.startsWith('In Schale 3 dazu') ? { text: '{teriyaki-sauce} Teriyaki-Sauce und ½–1 TL Chiliflocken in Schale 3 geben', min: 1 } : x));
+  v.hinweis = 'Fertige Teriyaki-Sauce statt selbst gemacht – Soja, Honig, Stärke und Sesamöl fallen weg.';
+  return v;
+})();
+const neuK = kiBereinigen({ ...TERIYAKI_FERTIGSAUCE, portionen: 8 }).r;
+const angeschlossen = aenderungUebernehmen(neuK, terK);
+check(angeschlossen.zutaten.find((z) => z.id === 'teriyaki-sauce')?.neu === true && Object.keys(angeschlossen.weg).sort().join() === 'honig,sesamoel,sojasauce,staerke' && angeschlossen.zutaten.some((z) => z.pauschal) && angeschlossen.zutaten.find((z) => z.id === 'fruehlingszwiebeln').kauf?.u === 'Bund', 'ans Original angeschlossen: Sauce neu, vier weggelassen, Gewürze pauschal und „1 Bund“ bleiben');
+const aufZiel = mengenAnpassen(angeschlossen, ZIEL);
+const boxZiel = proBox(aufZiel);
+check(Math.abs(boxZiel.kcal - ZIEL.kcal) <= 5 && Math.abs(boxZiel.p - ZIEL.p) <= 0.5 && Math.abs(boxZiel.kh - ZIEL.kh) <= 0.5 && Math.abs(boxZiel.f - ZIEL.f) <= 0.5, `und wieder auf Ziel: ${Math.round(boxZiel.kcal)} kcal, ${boxZiel.p.toFixed(1)} P, ${boxZiel.kh.toFixed(1)} KH, ${boxZiel.f.toFixed(1)} F`);
+check(aenderungenText(aufZiel, terK).includes('Teriyaki-Sauce (fertig) 250 ml neu') && aenderungenText(aufZiel, terK).includes('Sojasauce weggelassen'), 'die Änderungen in Worten');
+const alsApp = alsRezept(aufZiel, { id: 'ki-test1234', katalog: daten.katalog, einheiten });
+check(alsApp.ablauf[0].schritte.some((x) => x.d === '250 ml Teriyaki-Sauce und ½–1 TL Chiliflocken in Schale 3 geben') && !alsApp.ablauf.some((p) => p.schritte.some((x) => x.entfaellt)), 'die Schritte mit echten Mengen, nichts „entfällt“');
 
 // --- Strom lesen (mit nachgebautem fetch)
 const STROM = (json, { stopp = 'tool_use', stueck = 150 } = {}) => {
@@ -365,6 +398,34 @@ await t.click('[data-act="zurueck"]');
 check(await t.locator('[data-filter="reste"] .n').innerText() === '2' && (await t.locator('.pill-ki', { hasText: 'Angepasst' }).count()) === 1, 'im Raster: 2 eigene Rezepte, eins davon „Angepasst“');
 const ersatz = await t.$$eval('[data-open^="ki-"] .box-foto-ersatz', (es) => es.map((e) => [...e.querySelectorAll('img')].map((i) => i.getAttribute('src').split('/').pop())));
 check(ersatz.length === 2 && ersatz.every((l) => l.length >= 1 && l.length <= 3 && new Set(l).size === l.length && l.every((n) => n.endsWith('.svg'))), `KI-Rezepte ohne Foto: Ersatzbild aus bis zu drei Zutaten-Bildchen (${ersatz.map((l) => l.join('+')).join(' | ')})`);
+
+// --- Mit KI ändern: Teriyaki mit fertiger Sauce – die App rechnet danach wieder aufs Ziel
+await t.click('[data-open="teriyaki"]');
+await t.click('[data-act="anpassen-ki"]');
+check(!(await t.locator('#d-anpassen').isHidden()) && await bis(async () => t.evaluate(() => document.activeElement?.id === 'anp-ki-text')), '„Mit KI ändern“ öffnet das Anpassen, der Cursor steht im Wunschfeld');
+const vorKi = ki.z.anfragen.length;
+await t.click('#anp-ki-los');
+check((await t.locator('#anp-ki-fehler').innerText()).includes('Schreib, was anders sein soll') && ki.z.anfragen.length === vorKi, 'ohne Wunsch: Hinweis, keine Anfrage');
+ki.z.antwort = { ...TERIYAKI_FERTIGSAUCE, zutaten: [...TERIYAKI_FERTIGSAUCE.zutaten, { ...TERIYAKI_FERTIGSAUCE.zutaten[0], id: 'fischsauce', name: 'Fischsauce' }] };
+await t.fill('#anp-ki-text', 'mit Fischsauce');
+await t.click('#anp-ki-los');
+check(await bis(async () => (await t.locator('#anp-ki-fehler').isVisible()) && (await t.locator('#anp-ki-fehler').innerText()).includes('Fischsauce')) && (await t.locator('#d-anpassen .ki-anp').count()) === 0, 'verbotene Zutat von der KI: Fehler, nichts übernommen');
+ki.z.antwort = TERIYAKI_FERTIGSAUCE;
+await t.fill('#anp-ki-text', WUNSCH);
+await t.click('#anp-ki-los');
+check(await bis(async () => (await t.locator('#d-anpassen .ki-anp').count()) === 1 && (await t.locator('#d-anpassen .ki-anp').innerText()).includes('Teriyaki-Sauce (fertig) 250 ml neu')), 'die KI hat geändert: fertige Sauce neu');
+const kiAnfrage = ki.z.anfragen.at(-1).rumpf;
+check(ki.z.anfragen.length === vorKi + 2 && /änderst ein bestehendes Rezept/.test(kiAnfrage.system_instruction) && kiAnfrage.input.at(-1).text.endsWith(`Was anders sein soll: ${WUNSCH}`) && kiAnfrage.input.at(-1).text.includes('"id":"sojasauce"'), 'die Anfrage: das Rezept, wie es steht, und der Wunsch');
+const anpText = await t.locator('#d-anpassen .ki-anp').innerText();
+check(['Sojasauce weggelassen', 'Honig weggelassen', 'Speisestärke weggelassen', 'Sesamöl weggelassen'].every((x) => anpText.includes(x)), `weggelassen, was die Sauce ersetzt (${anpText.replace(/\s+/g, ' ').slice(0, 170)})`);
+const kiWerte = (await t.locator('#d-anpassen .anp-werte').innerText()).replace(/\s+/g, ' ');
+check(Math.abs(Number(kiWerte.match(/KCAL (\d+)/)?.[1]) - 443) <= 5, `und wieder auf Ziel gerechnet (${kiWerte})`);
+check((await t.locator('.anp-ki-hinweis').innerText()).includes('Fertige Teriyaki-Sauce statt selbst gemacht'), 'der Hinweis der KI steht da');
+await t.click('[data-act="anp-speichern"]');
+check(await bis(async () => (await t.locator('#d-title').innerText()) === 'Chicken Teriyaki Bowl (angepasst)' && (await t.$$eval('.step-d', (xs) => xs.map((x) => x.textContent))).some((x) => x.startsWith('250 ml Teriyaki-Sauce und ½–1 TL Chiliflocken in Schale 3'))), 'gespeichert: die Schritte mit der fertigen Sauce');
+check(await bis(() => Object.values(gh.liste()?.ki || {}).some((e) => e.r.herkunft === 'teriyaki' && e.r.zutaten.some((z) => z.id === 'teriyaki-sauce'))), 'und in GitHub, für beide');
+ki.z.antwort = ANTWORT;
+await t.click('[data-act="zurueck"]');
 
 // --- Angebote der Woche: tippen, fotografieren, Treffer, Rezept daraus, das andere Handy
 await t.click('.tab[data-tab="angebote"]');

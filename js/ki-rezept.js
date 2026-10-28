@@ -440,6 +440,76 @@ export function festAlsKi(r, katalog = {}) {
   };
 }
 
+/* ------------------------------------------- mit der KI ändern */
+
+/**
+ * Ein Rezept im KI-Format so, wie die KI es zum Ändern bekommt: genau im
+ * Format ihrer Antwort (SCHEMA), ohne das, was nur die App braucht (kauf,
+ * vorschlag, die pauschalen Gewürze). Die Schritte behalten ihre Platzhalter.
+ */
+export function alsVorlage(k) {
+  const schritt = (s) => ({ text: s.d, min: s.min, ...(s.ruhe ? { ruhe: s.ruhe } : {}), ...(s.neben ? { nebenbei: true } : {}), ...(s.liste?.length ? { liste: s.liste } : {}) });
+  return {
+    name: k.name,
+    kurz: k.kurz,
+    beschreibung: k.beschreibung,
+    protein: k.protein,
+    basis: k.basis,
+    methode: k.methode,
+    kuehlschrank: k.kuehlschrank,
+    tiefkuehler: k.tiefkuehler,
+    zutaten: k.zutaten.filter((z) => !z.pauschal).map((z) => ({
+      id: z.id,
+      name: z.name,
+      menge: Math.round(z.menge * 10) / 10,
+      einheit: z.einheit,
+      ...(z.stueck ? { stueck: z.stueck } : {}),
+      min: z.min,
+      max: z.max,
+      anpassbar: z.anpassbar,
+      pro100: z.pro100,
+      quelle: z.quelle,
+      katalog: z.katalog || '',
+      abteilung: ABTEILUNGEN.includes(z.abteilung) ? z.abteilung : 'vorrat',
+      ...(z.packung ? { packung: z.packung } : {}),
+    })),
+    gewuerze: k.gewuerze,
+    schalen: k.schalen.map((s) => ({ name: s.name, groesse: s.gr || s.groesse || 'mittel' })),
+    geraete: k.geraete,
+    vorbereiten: (k.ablauf[0]?.schritte || []).map(schritt),
+    kochen: (k.ablauf[1]?.schritte || []).map(schritt),
+    portionieren: (k.ablauf[2]?.schritte || []).map(schritt),
+    tipps: k.tipps,
+  };
+}
+
+/**
+ * Was die KI geändert zurückgibt (bereinigt), an das Ausgangsrezept
+ * anschließen – immer gegen das Original gerechnet, auch nach mehreren
+ * Änderungen: Zutaten, die es dort nicht gab, sind neu; die es dort gab und
+ * jetzt nicht mehr, stehen in weg; was unverändert ist, wird gekauft wie
+ * vorher (kauf: 2 Dosen statt 800 g). Die pauschalen Gewürze bleiben, die
+ * Portionen auch. Danach rechnet mengenAnpassen() auf die Ziele.
+ */
+export function aenderungUebernehmen(neu, basis) {
+  const k = klon(neu);
+  const alt = Object.fromEntries(basis.zutaten.map((z) => [z.id, z]));
+  for (const z of k.zutaten) {
+    const a = alt[z.id];
+    z.vorschlag = z.menge;
+    delete z.neu;
+    delete z.kauf;
+    if (!a) { z.neu = true; continue; }
+    if (a.kauf && Math.abs(a.menge - z.menge) < 0.5) z.kauf = klon(a.kauf);
+  }
+  const da = new Set(k.zutaten.map((z) => z.id));
+  for (const z of basis.zutaten) if (z.pauschal && !da.has(z.id)) k.zutaten.push(klon(z));
+  const weg = Object.fromEntries(basis.zutaten.filter((z) => !z.pauschal && !da.has(z.id)).map((z) => [z.id, z.name]));
+  if (Object.keys(weg).length) k.weg = weg; else delete k.weg;
+  k.portionen = basis.portionen;
+  return k;
+}
+
 /**
  * Was sich beim Anpassen gegenüber dem Ausgangsrezept geändert hat, als
  * kurze Zeilen für die Leiste: „Brokkoli 1 kg → 200 g“, „TK-Erbsen 300 g neu“,

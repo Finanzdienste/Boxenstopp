@@ -10,15 +10,26 @@
  * 33 P / 39 KH / 15,4 F liegt. Speichern legt das Ergebnis als eigenes
  * Rezept für beide ab (liste.json unter ki, mit basis = das Original), die
  * Schritte bekommen die neuen Mengen, weggelassene Zutaten sind markiert.
+ *
+ * Oben „Mit KI ändern“: Man schreibt, was anders sein soll („fertige
+ * Teriyaki-Sauce statt selbst gemacht“), die KI bekommt das Rezept, wie es
+ * gerade steht (alsVorlage, im Format ihrer Antwort), und gibt es geändert
+ * zurück – nur das Verlangte, der Rest bleibt. Die App prüft es wie jedes
+ * KI-Rezept (kein Fisch, kein Schwein …), schließt es ans Original an
+ * (aenderungUebernehmen: neu, weggelassen) und rechnet die Mengen wieder auf
+ * die Ziele. Danach steht es im Editor wie jede andere Änderung: ansehen,
+ * nachbessern, speichern.
  */
-import { app, $, melde } from './kern.js';
+import { app, $, melde, lese } from './kern.js';
 import { esc, nf1, nfi, abweichung } from './format.js';
-import { kiBereinigen, mengenAnpassen, festAlsKi, proBox, aenderungenText } from './ki-rezept.js';
+import { kiBereinigen, mengenAnpassen, festAlsKi, proBox, aenderungenText, alsVorlage, aenderungUebernehmen } from './ki-rezept.js';
 import { opKiBehalten } from './liste.js';
 import { oeffneRezept, offenesRezept } from './ansicht-rezepte.js';
-import { kiQuelle } from './ansicht-ki.js';
+import { kiQuelle, oeffneEinrichten } from './ansicht-ki.js';
+import { rumpfFuer, kiAnfragen, anbieterVon, KI_FEHLER } from './ki.js';
+import { ladeKi } from './zugang.js';
 
-let zustand = null; // { rid, basis, k, gerechnet }
+let zustand = null; // { rid, basis, k, gerechnet, ki: { wunsch, lauf, fehler, hinweis } }
 const klon = (x) => JSON.parse(JSON.stringify(x));
 
 export const anpassenOffen = () => !!zustand;
@@ -32,19 +43,25 @@ function quelle(r) {
   return kiBereinigen(festAlsKi(r, app.katalog)).r;
 }
 
-export function oeffneAnpassen(rid) {
+export function oeffneAnpassen(rid, { mitKi = false } = {}) {
   const r = app.nachId[rid];
   const el = $('#d-anpassen');
   if (!r || !el) return;
-  const k = quelle(r);
-  if (!k) { melde('Dieses Rezept lässt sich nicht anpassen.'); return; }
-  zustand = { rid, basis: klon(k), k, gerechnet: false };
+  if (zustand?.rid !== rid) {
+    const k = quelle(r);
+    if (!k) { melde('Dieses Rezept lässt sich nicht anpassen.'); return; }
+    zustand = { rid, basis: klon(k), k, gerechnet: false, ki: { wunsch: '', lauf: null, fehler: null, hinweis: '' } };
+  }
   zeichnen();
   el.hidden = false;
-  window.requestAnimationFrame(() => el.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+  window.requestAnimationFrame(() => {
+    el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    if (mitKi) $('#anp-ki-text')?.focus({ preventScroll: true });
+  });
 }
 
 export function schliesseAnpassen() {
+  zustand?.ki.lauf?.controller.abort();
   zustand = null;
   const el = $('#d-anpassen');
   if (el) { el.hidden = true; el.innerHTML = ''; }
@@ -57,6 +74,70 @@ function werteHTML(k) {
   const z = app.ziel;
   const zellen = [['kcal', 'kcal', box.kcal, z.kcal, true], ['p', 'Protein', box.p, z.p, false], ['kh', 'KH', box.kh, z.kh, false], ['f', 'Fett', box.f, z.f, false]];
   return `<div class="anp-werte">${zellen.map(([c, name, v, t, ganz]) => `<div class="c-${c}"><span class="k">${name}</span><b>${ganz ? nfi(v) : nf1(v)}</b><small>${abweichung(v, t, ganz)}</small></div>`).join('')}</div>`;
+}
+
+/** „Mit KI ändern“: Wunsch eintippen – oder, während die KI schreibt, der Fortschritt. */
+function kiHTML() {
+  const { ki } = zustand;
+  const schluessel = ladeKi();
+  const wer = anbieterVon(schluessel) === 'gemini' ? 'Gemini' : 'Claude';
+  if (ki.lauf) {
+    return `<div class="ki-lauf anp-ki-lauf" role="status" aria-live="polite"><div class="ki-topf" aria-hidden="true"><span></span><span></span><span></span></div>
+<p class="ki-lauf-t">${wer} ändert das Rezept …</p><p class="ki-lauf-d" id="anp-ki-d">${kiLaufText()}</p>
+<button type="button" class="btn btn-quiet" data-act="anp-ki-abbrechen">Abbrechen</button></div>`;
+  }
+  return `<form class="anp-ki" id="anp-ki-form" novalidate>
+<label for="anp-ki-text"><b>Mit KI ändern</b><small>Die KI baut das Rezept um, die App rechnet die Mengen danach wieder auf eure Ziele.</small></label>
+<textarea id="anp-ki-text" rows="2" maxlength="300" placeholder="z. B. fertige Teriyaki-Sauce statt selbst gemacht">${esc(ki.wunsch)}</textarea>
+<p class="zugang-fehler" id="anp-ki-fehler"${ki.fehler ? '' : ' hidden'}>${esc(ki.fehler || '')}</p>
+${schluessel
+    ? `<div class="anp-ki-f"><button type="submit" class="btn btn-primary" id="anp-ki-los">Ändern lassen</button><span class="fine">${anbieterVon(schluessel) === 'gemini' ? 'Kostenlos, geht nur an Google' : 'Ein paar Cent, geht nur an Anthropic'}. Dauert etwa eine Minute.</span></div>`
+    : '<p class="fine">Dafür braucht die App den KI-Schlüssel aus der Resteverwertung. <button type="button" class="linkbtn" data-act="anp-ki-einrichten">Jetzt einrichten</button></p>'}
+</form>${ki.hinweis ? `<p class="ki-hinweis anp-ki-hinweis"><b>Die KI:</b> ${esc(ki.hinweis)}</p>` : ''}`;
+}
+
+function kiLaufText() {
+  const l = zustand?.ki.lauf;
+  if (!l) return '';
+  const s = Math.round((Date.now() - l.start) / 1000);
+  return l.zeichen ? `Schreibt das geänderte Rezept · ${s} s` : `Liest das Rezept · ${s} s`;
+}
+
+async function kiAendern() {
+  if (!zustand || zustand.ki.lauf) return;
+  const schluessel = ladeKi();
+  if (!schluessel) { zeichnen(); return; }
+  const wunsch = String(zustand.ki.wunsch || '').trim();
+  if (!wunsch) { zustand.ki.fehler = 'Schreib, was anders sein soll.'; zeichnen(); $('#anp-ki-text')?.focus(); return; }
+  const mein = zustand;
+  const lauf = { controller: new AbortController(), start: Date.now(), zeichen: 0, timer: null };
+  mein.ki = { ...mein.ki, lauf, fehler: null };
+  lauf.timer = setInterval(() => { const el = $('#anp-ki-d'); if (el && zustand === mein) el.textContent = kiLaufText(); }, 1000);
+  zeichnen();
+  const anbieter = anbieterVon(schluessel) || 'anthropic';
+  try {
+    const rumpf = rumpfFuer(anbieter, { modus: 'aendern', rezept: alsVorlage(mein.k), wunsch, portionen: mein.k.portionen, ziel: app.ziel, katalog: app.katalog });
+    const { eingabe: roh } = await kiAnfragen(rumpf, {
+      schluessel,
+      api: lese('__kiapi', null) || '',
+      signal: lauf.controller.signal,
+      beiFortschritt: (f) => { lauf.zeichen = f.zeichen; },
+    });
+    const { r, fehler, art } = kiBereinigen({ ...roh, portionen: mein.k.portionen });
+    if (!r) throw Object.assign(new Error(fehler), { art });
+    if (zustand !== mein) return;
+    // Ans Original anschließen (neu, weggelassen), dann wieder aufs Ziel
+    mein.k = mengenAnpassen(aenderungUebernehmen(r, mein.basis), app.ziel);
+    mein.gerechnet = true;
+    mein.ki = { wunsch: '', lauf: null, fehler: null, hinweis: r.hinweis || '' };
+    const box = proBox(mein.k);
+    melde(`Geändert und auf Ziel gerechnet: ${nfi(box.kcal)} kcal, ${nf1(box.p)} P, ${nf1(box.kh)} KH, ${nf1(box.f)} F pro Box`);
+  } catch (e) {
+    if (zustand === mein) mein.ki = { ...mein.ki, lauf: null, fehler: e?.art === 'abbruch' ? null : (e?.message || KI_FEHLER.antwort) };
+  } finally {
+    clearInterval(lauf.timer);
+    if (zustand === mein) { if (mein.ki.lauf === lauf) mein.ki.lauf = null; zeichnen(); }
+  }
 }
 
 function zeileHTML(z) {
@@ -78,7 +159,8 @@ function zeichnen() {
   const weg = Object.entries(k.weg || {});
   const aend = aenderungenText(k, basis);
   el.innerHTML = `<h2>Rezept anpassen <small>die Box bleibt auf Ziel</small></h2>
-<p class="sec-lead">Mengen ändern oder Zutaten weglassen, neue dazu. Was du anfasst, bleibt so (🔒). Den Rest schiebt die App mit „Auf Ziel rechnen“, bis die Werte wieder passen.</p>
+${kiHTML()}
+<p class="sec-lead">Oder selbst: Mengen ändern oder Zutaten weglassen, neue dazu. Was du anfasst, bleibt so (🔒). Den Rest schiebt die App mit „Auf Ziel rechnen“, bis die Werte wieder passen.</p>
 <ul class="anp-liste">${zutaten.map(zeileHTML).join('')}</ul>
 ${weg.length ? `<p class="anp-weg">Weggelassen: ${weg.map(([id, name]) => `<button type="button" class="linkbtn" data-anp-zurueck="${esc(id)}">${esc(name)} zurück</button>`).join(' · ')}</p>` : ''}
 <form class="anp-neu" id="anp-form" autocomplete="off">
@@ -208,6 +290,7 @@ function speichern() {
 export function klickAnpassen(el) {
   const d = el.dataset;
   if (d.act === 'anpassen') { if (offenesRezept()) oeffneAnpassen(offenesRezept()); return true; }
+  if (d.act === 'anpassen-ki') { if (offenesRezept()) oeffneAnpassen(offenesRezept(), { mitKi: true }); return true; }
   if (!zustand) return false;
   if (d.anpLock) {
     const z = zutat(d.anpLock);
@@ -220,17 +303,25 @@ export function klickAnpassen(el) {
     case 'anp-rechnen': rechnen(); return true;
     case 'anp-speichern': speichern(); return true;
     case 'anp-zu': schliesseAnpassen(); return true;
+    case 'anp-ki-abbrechen': zustand.ki.lauf?.controller.abort(); return true;
+    case 'anp-ki-einrichten': oeffneEinrichten(); return true;
     default: return false;
   }
 }
 
 export function eingabeAnpassen(t) {
+  if (zustand && t.id === 'anp-ki-text') {
+    zustand.ki.wunsch = t.value.slice(0, 300);
+    if (zustand.ki.fehler) { zustand.ki.fehler = null; const f = $('#anp-ki-fehler'); if (f) f.hidden = true; }
+    return true;
+  }
   if (!zustand || !t.dataset?.anpMenge) return false;
   mengeSetzen(t.dataset.anpMenge, t.value);
   return true;
 }
 
 export function absendenAnpassen(ev) {
+  if (ev.target.id === 'anp-ki-form') { ev.preventDefault(); kiAendern(); return true; }
   if (ev.target.id !== 'anp-form') return false;
   ev.preventDefault();
   dazu($('#anp-such').value, $('#anp-neu-menge').value);

@@ -62,6 +62,7 @@ const PFADE = {
   pin: '<path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"/>',
   runter: '<path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5"/>',
   weiter: '<path d="M9 5l7 7-7 7"/>',
+  ki: '<path d="M11 3.5l1.9 5.1 5.1 1.9-5.1 1.9L11 17.5l-1.9-5.1-5.1-1.9 5.1-1.9z"/><path d="M18.5 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
 };
 /*
  * Daumen: ein gemeinsamer pro Gericht (liste.js). Hoch und runter sind
@@ -382,7 +383,7 @@ export function detailAktualisieren() {
     : `<button type="button" class="btn" data-act="gekocht"${gesperrt}>Heute gekocht</button>`;
   const pin = app.stand.gepinnt?.[aktuell];
   html += `<button type="button" class="btn${pin ? ' is-pin' : ''}" data-act="anpinnen" aria-pressed="${!!pin}"${gesperrt}>${ic('pin')}${pin ? 'Angepinnt' : 'Anpinnen'}</button>`;
-  if (r.ki || r.items.some((it) => it.pro100)) html += '<button type="button" class="btn" data-act="anpassen">Anpassen</button>';
+  if (r.ki || r.items.some((it) => it.pro100)) html += `<button type="button" class="btn" data-act="anpassen-ki">${ic('ki')}Mit KI ändern</button><button type="button" class="btn" data-act="anpassen">Anpassen</button>`;
   if (c && !heuteGekocht && tagKurz(c.at)) html += `<span class="cooked-note">Zuletzt gekocht am ${esc(tagKurz(c.at))}${c.by ? ` von ${esc(c.by)}` : ''}</span>`;
   $('#d-actions').innerHTML = html;
   const laeuft = $('#d-laeuft');

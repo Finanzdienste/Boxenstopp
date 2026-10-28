@@ -269,6 +269,23 @@ die App beim Anzeigen (`platzhalter()` in `js/format.js`). `festAlsKi()`
 bringt ein festes Rezept ins KI-Format, dann rechnet dieselbe
 `mengenAnpassen()` wie für die Resteverwertung.
 
+**Mit KI ändern** (im Rezept neben „Anpassen“, oben im Anpassen): hinschreiben,
+was anders sein soll – „fertige Teriyaki-Sauce statt selbst gemacht“, „ohne
+Ofen“, „mit Reis statt Nudeln“. Die KI (derselbe Schlüssel wie bei der
+Resteverwertung) bekommt das Rezept, wie es gerade steht, im Format ihrer
+Antwort (`alsVorlage()` in `js/ki-rezept.js`; Auftrag im Modus `aendern` in
+`js/ki.js`): Sie ändert nur, was verlangt ist, und lässt alles andere mit
+denselben ids, Mengen und Schritten stehen. Die App prüft die Antwort wie jedes
+KI-Rezept (kein Fisch, kein Schwein, kein Putenhack, kein Hüttenkäse),
+schließt sie ans Original an (`aenderungUebernehmen()`: neue Zutaten „neu“,
+verschwundene „weggelassen“, mit „zurück“ wiederzuholen) und rechnet die
+Mengen wieder auf die Ziele – im Beispiel 441 kcal / 33,0 P / 39,2 KH /
+15,5 F mit 40 g mehr Hähnchen und 4 g mehr Öl. Genauer geht es nicht, weil
+die vier Werte nicht alle zugleich aufs Gramm passen und die Mengen auf
+5 g oder 10 g gerundet werden. Danach steht alles im Editor wie jede andere
+Änderung: ansehen, nachbessern, noch einen Wunsch hinterher, „Speichern, für
+beide“.
+
 ### Einrichten
 
 Die App ruft die KI direkt vom Handy aus auf (`js/ki.js`), mit einem

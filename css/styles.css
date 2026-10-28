@@ -443,6 +443,17 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .a-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
 .a-passt .ki-liste{margin-bottom:12px}
 .a-stand{display:grid;gap:6px;align-content:start}
+/* Rezept mit der KI ändern (oben im Anpassen) */
+.anp-ki{display:grid;gap:8px;margin:12px 0 6px;padding:12px 14px 14px;border-radius:14px;border:1.5px solid var(--accent);background:var(--accent-soft)}
+.anp-ki label{display:grid;gap:3px}
+.anp-ki label b{font-size:16px}
+.anp-ki label small{font-size:13px;line-height:1.35;color:var(--muted);font-weight:500}
+.anp-ki textarea{width:100%;min-height:66px;padding:10px 12px;border:1.5px solid var(--line-strong);border-radius:11px;background:var(--surface);color:var(--ink);font:400 16px/1.4 var(--f-body);resize:vertical}
+.anp-ki textarea:focus{outline:none;border-color:var(--accent)}
+.anp-ki-f{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.anp-ki-f .fine{margin:0}
+.anp-ki-hinweis{margin:6px 0 4px;font-size:14px}
+.anp-ki-lauf{margin:12px 0 6px}
 .a-quellen{display:flex;flex-wrap:wrap;gap:6px}
 .a-quelle{font:600 12px/1 var(--f-mono);padding:6px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink)}
 .a-quelle-aus{color:var(--muted);background:transparent;border:1px dashed var(--line)}
