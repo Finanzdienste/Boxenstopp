@@ -3591,6 +3591,15 @@ for r in out:
     print(f"{r['id']:20s} {r['m']['kcal']:4d} {r['m']['p']:5.1f} {r['m']['kh']:5.1f} {r['m']['f']:5.1f}   "
           f"{'+'.join(map(str, z['phasen'])):>8s}={z['gesamt']:3d}   {len(r['schalen'])}   {r['kosten']['box']:5.2f}")
 
+# Rezeptfotos (werkzeug/bilder.mjs): wenn es eins gibt, mit Prüfsumme in der
+# Adresse – ein neues Foto bekommt so auch eine neue Adresse und der Zwischenspeicher
+# der App lädt es frisch.
+import hashlib
+for r in out:
+    foto = HIER.parent / 'bilder' / 'rezepte' / f"{r['id']}.webp"
+    if foto.exists():
+        r['bild'] = f"bilder/rezepte/{r['id']}.webp?v={hashlib.sha1(foto.read_bytes()).hexdigest()[:8]}"
+
 ziel = HIER.parent / 'daten' / 'rezepte.json'
 daten = {
     'version': 1,

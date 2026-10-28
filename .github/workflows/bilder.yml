@@ -1,0 +1,66 @@
+# Rezeptfotos mit KI (werkzeug/bilder.mjs): Cloudflare Workers AI, FLUX.1
+# [schnell], im Gratis-Kontingent. Braucht die Secrets CF_ACCOUNT_ID und
+# CF_API_TOKEN (Settings → Secrets and variables → Actions).
+#
+# Läuft, wenn sich daten/rezepte.json ändert (neue Rezepte bekommen ihr Foto),
+# und von Hand: Actions → Rezeptfotos → Run workflow – leer lassen für alle
+# ohne Foto, oder Rezept-ids eintragen (mit Leerzeichen), um die neu zu machen.
+name: Rezeptfotos
+
+on:
+  push:
+    branches: [main]
+    paths: ['daten/rezepte.json']
+  workflow_dispatch:
+    inputs:
+      rezepte:
+        description: 'Nur diese Rezepte (ids mit Leerzeichen), auch wenn sie schon ein Foto haben – leer: alle ohne Foto'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bilder
+  cancel-in-progress: false
+
+jobs:
+  fotos:
+    name: Rezeptfotos machen
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: sharp für WebP
+        run: npm install --no-save --no-package-lock sharp@0.35.5
+
+      - name: Fotos machen
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          REZEPTE: ${{ inputs.rezepte }}
+        run: node werkzeug/bilder.mjs $REZEPTE
+
+      - name: Fotos in daten/rezepte.json eintragen
+        run: python3 werkzeug/rezepte.py > /dev/null
+
+      - name: Einchecken
+        run: |
+          git config user.name "Boxenstopp-Bot"
+          git config user.email "boxenstopp-bot@users.noreply.github.com"
+          git add bilder/rezepte daten/rezepte.json
+          if git diff --cached --quiet; then
+            echo "Keine Änderung."
+            exit 0
+          fi
+          NEU=$(git diff --cached --name-only -- bilder/rezepte | wc -l)
+          git commit -m "Rezeptfotos: ${NEU} neu oder erneuert"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
