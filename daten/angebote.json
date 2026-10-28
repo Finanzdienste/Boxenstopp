@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T09:59:24.078Z",
+ "stand": "2026-10-28T10:04:53.771Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
@@ -16,9 +16,9 @@
   },
   {
    "laden": "Lidl",
-   "ok": true,
+   "ok": false,
    "anzahl": 7,
-   "hinweis": "aus dem Aktionsprospekt gelesen (26.10.–31.10.), Seiten 1–4, 5–12, 13–16, 21–25 nicht lesbar, Zeit um, Rest nicht gelesen, Lesefehler möglich",
+   "hinweis": "heute nicht erreichbar (keine Seite lesbar (Gemini ist gerade überlastet. Gleich nochmal versuchen.))",
    "stand": "2026-10-28T09:59:19.703Z"
   },
   {
