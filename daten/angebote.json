@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T10:15:39.204Z",
+ "stand": "2026-10-28T10:24:37.928Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
@@ -16,10 +16,10 @@
   },
   {
    "laden": "Lidl",
-   "ok": false,
-   "anzahl": 7,
-   "hinweis": "heute nicht erreichbar (keine Seite lesbar (Keine Verbindung zu Google. Prüf das Internet und versuch es)",
-   "stand": "2026-10-28T09:59:19.703Z"
+   "ok": true,
+   "anzahl": 15,
+   "hinweis": "aus dem Aktionsprospekt gelesen (26.10.–31.10.), Lesefehler möglich",
+   "stand": "2026-10-28T10:24:37.921Z"
   },
   {
    "laden": "Kaufland",
@@ -578,54 +578,54 @@
    "k": "butter"
   },
   {
-   "id": "a-0v2fj77",
+   "id": "a-04r8fxz",
    "laden": "Lidl",
-   "name": "Frau Antje Beste Butter",
-   "preis": 1.49,
-   "menge": 250,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": "butter"
-  },
-  {
-   "id": "a-13jtfrm",
-   "laden": "Lidl",
-   "name": "Heinz Tomaten Ketchup",
-   "preis": 3.49,
-   "menge": 1170,
-   "einheit": "ml",
-   "bis": "2026-10-31",
-   "k": "tomaten"
-  },
-  {
-   "id": "a-0mz6n84",
-   "laden": "Lidl",
-   "name": "Kerrygold Irische Käsescheiben Cheddar",
+   "name": "Dulano Delikatess Puten-/ Hähnchenbrust XXL",
    "preis": 1.59,
    "menge": 120,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "cheddar"
+   "k": "haehnchenbrust"
   },
   {
-   "id": "a-0j8oc7e",
+   "id": "a-1jlkwgl",
    "laden": "Lidl",
-   "name": "Maribel Bio Blütenhonig",
+   "name": "Frisches Hähnchen-Geschnetzeltes",
+   "preis": 3.79,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "haehnchenbrust"
+  },
+  {
+   "id": "a-057w1x1",
+   "laden": "Lidl",
+   "name": "Süßkartoffeln, lose",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "suesskartoffel"
+  },
+  {
+   "id": "a-0da7chp",
+   "laden": "Lidl",
+   "name": "XXL Deutsche Möhren",
+   "preis": 1.69,
+   "menge": 3,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "moehren"
+  },
+  {
+   "id": "a-1chp1ry",
+   "laden": "Lidl",
+   "name": "XXL Rote Äpfel Gala",
    "preis": 2.99,
-   "menge": 500,
-   "einheit": "g",
+   "menge": 2.5,
+   "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "honig"
-  },
-  {
-   "id": "a-1ul7l0g",
-   "laden": "Lidl",
-   "name": "Patros Weißkäse",
-   "preis": 2.22,
-   "menge": 200,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": "feta"
+   "k": "aepfel"
   },
   {
    "id": "a-19v6i56",
@@ -3368,22 +3368,102 @@
    "k": ""
   },
   {
-   "id": "a-0iel8cy",
+   "id": "a-1syaygy",
    "laden": "Lidl",
-   "name": "Freshona Obst XXL Beeren",
-   "preis": 3.79,
+   "name": "Barbarie Entenbrustfilet",
+   "preis": 3.98,
+   "menge": 295,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-08bev5q",
+   "laden": "Lidl",
+   "name": "Deutscher Wirsing, lose",
+   "preis": 1.19,
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
    "k": ""
   },
   {
-   "id": "a-01l7arb",
+   "id": "a-032fmgy",
    "laden": "Lidl",
-   "name": "Heinz Mayonnaise Das Original",
-   "preis": 3.49,
-   "menge": 800,
-   "einheit": "ml",
+   "name": "Dunkle Pflaumen",
+   "preis": 1.75,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1alnpkt",
+   "laden": "Lidl",
+   "name": "Eisbergsalat",
+   "preis": 0.89,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1djoiuh",
+   "laden": "Lidl",
+   "name": "Frische Kalbs-Leber",
+   "preis": 5.79,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1xvq2ga",
+   "laden": "Lidl",
+   "name": "Hähnchen-Knusperchen Cordon Bleu Art",
+   "preis": 5.79,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1mhdilo",
+   "laden": "Lidl",
+   "name": "Mandarinen/ Clementinen",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1j7ocod",
+   "laden": "Lidl",
+   "name": "Mango",
+   "preis": 1.11,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-032jauj",
+   "laden": "Lidl",
+   "name": "Milbona Kondensmilch XXL",
+   "preis": 0.79,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-05s6jen",
+   "laden": "Lidl",
+   "name": "Vemondo Veganes Hack",
+   "preis": 1.79,
+   "menge": 200,
+   "einheit": "g",
    "bis": "2026-10-31",
    "k": ""
   },
