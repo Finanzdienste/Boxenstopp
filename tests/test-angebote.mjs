@@ -165,7 +165,7 @@ const anfragenMock = (zuViel) => {
       if (was !== 'ok') throw fehlerMit(was);
       return { eingabe: { angebote: [] } };
     };
-    const f = mitAusweichen({ schluessel: 'k', modelle: ['a', 'b', 'c'], warten: [1, 1], anfragen, melde: (m) => meldungen.push(m) });
+    const f = mitAusweichen({ schluessel: 'k', modelle: ['a', 'b', 'c'], warten: [1, 1], grenzeWarten: 1, anfragen, melde: (m) => meldungen.push(m) });
     const ergebnis = [];
     let fehler = null;
     try { for (let n = 0; n < male; n++) ergebnis.push(await f({})); } catch (e) { fehler = e; }
@@ -187,6 +187,10 @@ const anfragenMock = (zuViel) => {
   check(l.rufe.join() === 'a,b,c,c,a,b', 'Ausweichen: beim zweiten Mal reihum weiter (c, a, b)');
   l = await laufe({ a: ['schluessel'] });
   check(l.fehler?.art === 'schluessel' && l.rufe.join() === 'a', 'Ausweichen: andere Fehler sofort nach oben');
+  l = await laufe({ a: ['grenze', 'ok'] });
+  check(l.ergebnis[0]?.modell === 'a' && l.rufe.join() === 'a,a,a' && !l.meldungen.length, 'Ausweichen: Kontingent → warten und dasselbe Modell nochmal');
+  l = await laufe({ a: ['grenze', 'grenze', 'grenze'] });
+  check(l.ergebnis[0]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && l.meldungen[0] === 'a am Kontingent, weiter mit b', 'Ausweichen: Kontingent bleibt → nächstes Modell (das Kontingent gilt je Modell)');
   l = await laufe({ a: ['zeit'] });
   check(l.ergebnis[0]?.modell === 'b' && l.rufe.join() === 'a,b,b' && /a antwortet nicht, weiter mit b/.test(l.meldungen[0]) && l.f.modell() === 'b', 'Ausweichen: Zeitablauf → ohne Wiederholung das nächste Modell; modell() nennt es');
 }
@@ -231,9 +235,9 @@ const anfragenMock = (zuViel) => {
   const vorher = anfragen.length;
   a = await lauf();
   check(a.eingabe && anfragen.length === vorher + 2 && anfragen[vorher].rumpf.generationConfig.thinkingConfig && !anfragen[vorher + 1].rumpf.generationConfig.thinkingConfig && anfragen[vorher + 1].rumpf.generationConfig.maxOutputTokens === 32000, 'generateContent: kennt das Modell die Denkstufe nicht → einmal ohne sie');
-  antworten.push([429, { error: { code: 429, message: 'Resource has been exhausted', status: 'RESOURCE_EXHAUSTED' } }]);
+  antworten.push([429, { error: { code: 429, message: 'You exceeded your current quota, please check your plan and billing details.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests', status: 'RESOURCE_EXHAUSTED', details: [{ '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [{ quotaMetric: 'generativelanguage.googleapis.com/generate_content_free_tier_requests', quotaId: 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', quotaValue: '5' }] }, { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '28s' }] } }]);
   a = await lauf();
-  check(a.art === 'grenze', 'generateContent: 429 → grenze');
+  check(a.art === 'grenze' && a.wartezeit === 28000 && /GenerateRequestsPerMinutePerProjectPerModel-FreeTier=5 · warten 28s/.test(a.detail) && !/\n/.test(a.detail), `generateContent: 429 mit „billing“ im Text → grenze, Grenze und Wartezeit im Detail (${a.detail})`);
   antworten.push([400, { error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT' } }]);
   a = await lauf();
   check(a.art === 'schluessel', 'generateContent: ungültiger Schlüssel → schluessel');

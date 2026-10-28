@@ -208,7 +208,8 @@ async function penny() {
 
 /* ------------------------------------------------------------- Lidl */
 
-const LIDL_JE_ANFRAGE = 4; // Seiten je Anfrage; wird die Antwort zu lang, halbiert sich der Stapel
+const LIDL_JE_ANFRAGE = 6; // Seiten je Anfrage; wird die Antwort zu lang, halbiert sich der Stapel
+const LIDL_PAUSE = 15000; // zwischen zwei Anfragen – das Gratis-Kontingent zählt Anfragen je Minute
 const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
 const LIDL_ZEIT = 18 * 60e3; // danach nichts mehr anfragen (der Lauf darf 30 Minuten)
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -232,14 +233,15 @@ export async function geminiModelle(schluessel, api = GEMINI_API) {
 
 /*
  * geminiAnfragen mit Ausweichen: bei Überlastung (503) bis zu drei Versuche
- * mit Pause, dann – wie bei Zeitablauf sofort – das nächste Modell aus der
- * Kette, nach dem letzten wieder das erste, bis jedes einmal dran war. Ein
- * Modell, das es nicht (mehr) gibt, fällt aus der Kette. Das Modell, das
- * geantwortet hat, bleibt für die folgenden Anfragen und steht in der
- * Antwort (modell). anfragen(rumpf, opt) ist austauschbar (Tests), warten
- * die Pausen.
+ * mit Pause, beim Kontingent (429) zwei mit der Wartezeit, die Google nennt
+ * (sonst 65 s), dann – wie bei Zeitablauf sofort – das nächste Modell aus
+ * der Kette, nach dem letzten wieder das erste, bis jedes einmal dran war
+ * (das Kontingent gilt je Modell). Ein Modell, das es nicht (mehr) gibt,
+ * fällt aus der Kette. Das Modell, das geantwortet hat, bleibt für die
+ * folgenden Anfragen und steht in der Antwort (modell). anfragen(rumpf, opt)
+ * ist austauschbar (Tests), warten die Pausen, grenzeWarten die beim Kontingent.
  */
-export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = GEMINI_WARTEN, anfragen = geminiAnfragen, melde = () => {} }) {
+export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = GEMINI_WARTEN, grenzeWarten = 65000, anfragen = geminiAnfragen, melde = () => {} }) {
   const kette = [...modelle];
   let i = 0;
   const f = async (rumpf) => {
@@ -259,11 +261,12 @@ export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = G
           continue;
         }
         if (e?.art === 'ueberlastet' && !e.zeitablauf && versuch < warten.length) { await pause(warten[versuch]); continue; }
-        if (e?.art === 'ueberlastet' && wechsel < kette.length - 1) {
+        if (e?.art === 'grenze' && versuch < 2) { await pause(e.wartezeit || grenzeWarten); continue; }
+        if ((e?.art === 'ueberlastet' || e?.art === 'grenze') && wechsel < kette.length - 1) {
           i = (i + 1) % kette.length;
           wechsel++;
           versuch = -1;
-          melde(`${modell} ${e.zeitablauf ? 'antwortet nicht' : 'überlastet'}, weiter mit ${kette[i]}`);
+          melde(`${modell} ${e.art === 'grenze' ? 'am Kontingent' : e.zeitablauf ? 'antwortet nicht' : 'überlastet'}, weiter mit ${kette[i]}`);
           continue;
         }
         throw e;
@@ -327,7 +330,13 @@ export async function geminiAnfragen(rumpf, { schluessel, modell = ANBIETER.gemi
       delete ohne.thinkingConfig;
       return geminiAnfragen({ ...rumpf, generationConfig: ohne }, { schluessel, modell, api, timeout });
     }
-    throw kiFehler(artVonStatus(res.status, info), meldung, 'gemini');
+    // Beim Kontingent sagt Google, welche Grenze (quotaId) und wie lange warten (retryDelay)
+    const details = Array.isArray(info?.error?.details) ? info.error.details : [];
+    const grenzen = details.flatMap((d) => d.violations || []).map((v) => `${v.quotaId || v.quotaMetric || '?'}${v.quotaValue ? `=${v.quotaValue}` : ''}`);
+    const warte = details.map((d) => d.retryDelay).find(Boolean);
+    const f = kiFehler(artVonStatus(res.status, info), `${meldung.split('\n')[0].slice(0, 160)}${grenzen.length ? ` · ${grenzen.join(', ')}` : ''}${warte ? ` · warten ${warte}` : ''}`, 'gemini');
+    if (warte) f.wartezeit = Math.min(Math.ceil(parseFloat(warte) || 0) * 1000, 120000);
+    throw f;
   }
   const kandidat = info?.candidates?.[0];
   const grund = kandidat?.finishReason || info?.promptFeedback?.blockReason || '';
@@ -373,9 +382,9 @@ export function lidlSeitenWahl(pages, max = LIDL_SEITEN_MAX) {
 
 /*
  * Einen Stapel Seiten ({ number, b64 }) von Gemini lesen lassen. Bricht die
- * Antwort ab, weil sie zu lang wird, liest es den Stapel in zwei Hälften; beim
- * Kontingent (grenze) wartet es eine gute Minute und versucht es noch einmal.
- * anfragen(rumpf) ist austauschbar (Tests), melde(text) bekommt den Verlauf.
+ * Antwort ab, weil sie zu lang wird, liest es den Stapel in zwei Hälften.
+ * anfragen(rumpf) ist austauschbar (Tests; sonst mitAusweichen), melde(text)
+ * bekommt den Verlauf.
  */
 export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () => {} }) {
   const bereich = `Seiten ${stapel[0].number}–${stapel.at(-1).number}`;
@@ -383,13 +392,7 @@ export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () =
   const start = Date.now();
   let antwort;
   try {
-    try {
-      antwort = await anfragen(rumpf);
-    } catch (e) {
-      if (e?.art !== 'grenze') throw e;
-      await pause(65000);
-      antwort = await anfragen(rumpf);
-    }
+    antwort = await anfragen(rumpf);
   } catch (e) {
     if (e?.art === 'zulang' && stapel.length > 1) {
       melde(`${bereich}: Antwort zu lang, halbiert`);
@@ -444,7 +447,7 @@ async function lidl(alt) {
       return false;
     } finally {
       // Gratis-Kontingent: nicht zu schnell hintereinander
-      await pause(7000);
+      await pause(LIDL_PAUSE);
     }
   };
   let uebrig = [];

@@ -168,13 +168,14 @@ export const KI_FEHLER = {
 export function kiFehler(art, detail = '', anbieter = 'anthropic') {
   const e = new Error(KI_FEHLER[anbieter]?.[art] || KI_FEHLER[art] || KI_FEHLER.antwort);
   e.art = art;
-  e.detail = String(detail || '').slice(0, 300);
+  e.detail = String(detail || '').slice(0, 500);
   return e;
 }
 
 export function artVonStatus(status, info) {
   const text = `${info?.error?.type || ''} ${info?.error?.status || ''} ${info?.error?.message || ''}`;
   if (status === 401 || status === 403 || /API key not valid|API_KEY_INVALID/i.test(text)) return 'schluessel';
+  if (status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(text)) return 'grenze'; // vor „billing“: Googles Kontingent-Text nennt den Tarif
   if (/credit|balance|billing|guthaben/i.test(text)) return 'guthaben';
   if (status === 413) return 'zugross';
   if (status === 404 || (status === 400 && /model/i.test(text))) return 'modell';
