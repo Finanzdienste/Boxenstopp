@@ -60,7 +60,11 @@ Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
 ### Angebote der Woche
 
 Dritter Reiter (auf dem Handy unten, am Rechner über die Karte bei den
-Rezepten). **Die App holt die Angebote selbst:** montags und donnerstags
+Rezepten). Oben steht „Wo gehst du hin?“: Mit einem Laden gewählt (Aldi,
+Lidl, Kaufland, Penny – und jeder, für den eigene Angebote eingetragen
+sind) zeigt der Reiter nur dessen Angebote, und auch „Passt zu euren
+Rezepten“ und das neue Rezept der KI rechnen nur mit denen; die Wahl bleibt
+auf dem jeweiligen Handy (localStorage). **Die App holt die Angebote selbst:** montags und donnerstags
 früh läuft bei GitHub `werkzeug/angebote.mjs` (`.github/workflows/angebote.yml`)
 und schreibt `daten/angebote.json`, die App lädt die Datei beim Start und
 merkt sie sich fürs Offline-Lesen. Quellen – nur öffentliche Seiten, mit

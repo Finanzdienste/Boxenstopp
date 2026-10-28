@@ -430,8 +430,30 @@ await t.click('[data-act="a-leeren-ja"]');
 check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 0) && (await t.locator('#a-badge').innerText()) === '7', 'Alle eigenen löschen: leer, am Reiter bleiben die 7 automatischen');
 await t.click('#toast button');
 check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 6), 'Rückgängig: alle wieder da');
+// --- der Laden, zu dem man geht
+check((await t.locator('.a-laeden-chips .chip').count()) === 5 && (await t.locator('[data-a-laden=""][aria-pressed="true"] .n').innerText()) === '13' && (await t.locator('[data-a-laden="Aldi"] .n').innerText()) === '5' && (await t.locator('[data-a-laden="Lidl"] .n').innerText()) === '4', 'oben die Läden: Alle 13, Aldi 5 (3 Zutaten + 2 eigene), Lidl 4 (eigene), Kaufland, Penny');
+await t.click('[data-a-laden="Aldi"]');
+check((await t.locator('#a-title').innerText()) === 'Angebote bei Aldi' && (await t.locator('#a-count').innerText()) === '5 für euch' && (await t.locator('#a-auto .a-grp').count()) === 1 && (await t.locator('#a-auto .a-grp').getAttribute('data-laden')) === 'Aldi' && (await t.locator('#a-auto .a-item').count()) === 3 && (await t.locator('#a-liste .a-item').count()) === 2, 'Aldi gewählt: nur Aldi – 3 automatische Zutaten, 2 eigene');
+const passtAldi = (await t.locator('#a-passt-liste li small').allInnerTexts()).join(' | ');
+check((await t.locator('.a-passt .sub-h').innerText()).includes('mit den Angeboten von Aldi') && (await t.locator('#a-passt-liste li').count()) >= 1 && /Hähnchenbrust|Rinderhack|Zucchini|Paprika/.test(passtAldi) && !/Gulasch|Kartoffeln|Cashew|Gnocchi/.test(passtAldi), `„Passt zu euren Rezepten“ rechnet nur mit Aldi – kein Gulasch von Penny, keine Kartoffeln von Kaufland (${passtAldi.slice(0, 80)})`);
+const anfragenVorAldi = ki.z.anfragen.length;
+await t.click('[data-act="a-vorschlag"]');
+check(await bis(() => ki.z.anfragen.length > anfragenVorAldi), 'Rezept aus den Angeboten – mit Laden gewählt');
+const aldiText = ki.z.anfragen.at(-1).rumpf.input.at(-1).text;
+check(aldiText.includes('Aldi: Hähnchenbrustfilet 1 kg 7,49 €') && !aldiText.includes('Rinder-Gulasch') && !aldiText.includes('Kaufland') && !aldiText.includes('Lidl'), 'die KI bekommt nur die Aldi-Angebote');
+await t.click('[data-act="ki-verwerfen"]');
+await t.click('[data-act="k-modus-reste"]');
+await t.click('.tab[data-tab="angebote"]');
+await t.click('[data-a-laden="Lidl"]');
+check((await t.locator('#a-auto .a-leer').innerText()).includes('Von Lidl ist diese Woche nichts da – der Abruf hat nicht geklappt') && (await t.locator('#a-liste .a-item').count()) === 4 && (await t.locator('.a-passt').count()) === 1, 'Lidl gewählt: automatisch nichts (Abruf fehlgeschlagen), die 4 eigenen Lidl-Angebote, passende Rezepte dazu');
+await t.reload({ waitUntil: 'load' });
+await t.waitForFunction(() => document.querySelector('.tab[data-tab="angebote"]'));
+await t.click('.tab[data-tab="angebote"]');
+check(await bis(async () => (await t.locator('[data-a-laden="Lidl"][aria-pressed="true"]').count()) === 1) && (await t.locator('#a-title').innerText()) === 'Angebote bei Lidl', 'die Wahl bleibt auf diesem Handy (nach Neuladen noch Lidl)');
+check(await bis(async () => (await a.locator('[data-a-laden=""][aria-pressed="true"]').count()) === 1), 'Amys Handy hat seine eigene Wahl (Alle)');
+await t.click('[data-a-laden=""]');
+check((await t.locator('#a-title').innerText()) === 'Angebote der Woche' && (await t.locator('#a-auto .a-grp').count()) === 3 && (await t.locator('#a-liste .a-item').count()) === 6, '„Alle“: wieder alle Läden');
 await t.click('.tab[data-tab="rezepte"]');
-await t.click('[data-act="reste-zu"]');
 
 // --- löschen und rückgängig
 await t.click('[data-filter="reste"]');

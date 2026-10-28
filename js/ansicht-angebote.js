@@ -14,6 +14,10 @@
  *      Ersparnis pro Box gegen die Richtpreise) – und ein Knopf, der die KI
  *      ein neues Rezept aus den Angeboten machen lässt (Resteverwertung im
  *      Modus „angebote“, mit „Neuer Vorschlag“ für den nächsten).
+ *
+ * Oben steht, zu welchem Laden man geht: Mit einem Laden gewählt zeigt der
+ * Reiter nur dessen Angebote, und auch die passenden Rezepte und das neue
+ * Rezept der KI rechnen nur mit denen. Die Wahl bleibt auf diesem Handy.
  */
 import { app, $, melde, zeigeReiter, lese, schreibe } from './kern.js';
 import { esc, tagKurz, heute } from './format.js';
@@ -32,6 +36,7 @@ const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
 
 const AUTO = 'boxenstopp.angebote.auto.v1';
+const LADEN = 'boxenstopp.angebote.laden.v1';
 
 let fotos = []; // { url, b64 }
 let text = '';
@@ -41,6 +46,7 @@ let leerenFragen = false;
 let nurZutaten = true; // die automatischen Angebote: nur Rezeptzutaten oder alles
 let eigeneOffen = false; // der Abschnitt „Eigene Angebote dazu“ ist aufgeklappt
 let suche = '';
+let laden = String(lese(LADEN, '') || ''); // der Laden, zu dem man geht – '' für alle
 
 /** Die automatisch geholten Angebote (daten/angebote.json), zuletzt gesehen auch ohne Netz. */
 let auto = (() => { const a = lese(AUTO, null); return a && Array.isArray(a.angebote) ? a : null; })();
@@ -49,8 +55,16 @@ const automatisch = () => aktuelle(auto?.angebote || []);
 const eigene = () => (app.listeDa ? aktuelle(app.stand.angebote?.eintraege || []) : []);
 /** Alles, was gerade gilt – eigene zuerst, damit sie bei gleichem Namen gewinnen. */
 const eintraege = () => [...eigene(), ...automatisch()];
-/** Was am Reiter steht: Angebote, die eine Rezeptzutat sind, plus die eigenen. */
+/** Nur die Angebote des gewählten Ladens – oder alle, wenn keiner gewählt ist. */
+const imLaden = (liste) => (laden ? liste.filter((a) => a.laden === laden) : liste);
+/** Die vier Läden, die die App selbst abruft – die stehen immer zur Wahl, auch wenn gerade nichts da ist. */
+const QUELLEN = ['Aldi', 'Lidl', 'Kaufland', 'Penny'];
+/** Die Läden zur Wahl: die vier Quellen, dazu alle mit eigenen Angeboten und der gewählte, in fester Reihenfolge. */
+const laedenDa = () => { const da = new Set([...QUELLEN, ...eintraege().map((a) => a.laden), laden].filter(Boolean)); return [...LAEDEN.filter((l) => da.has(l)), ...[...da].filter((l) => !LAEDEN.includes(l)).sort((a, b) => a.localeCompare(b, 'de'))]; };
+/** Was am Reiter steht: Angebote, die eine Rezeptzutat sind, plus die eigenen – über alle Läden. */
 export const angeboteAnzahl = () => eigene().length + automatisch().filter((a) => a.k).length;
+/** Dasselbe für einen Laden. */
+const anzahlIn = (l) => eigene().filter((a) => a.laden === l).length + automatisch().filter((a) => a.laden === l && a.k).length;
 
 /** Von app.js nach dem Laden von daten/angebote.json. */
 export function angeboteAutoSetzen(daten) {
@@ -119,7 +133,7 @@ function gruppenHTML(liste, { eigen = false } = {}) {
 /** Die automatisch geholten Angebote: Stand, Quellen, Filter, Liste. */
 function autoHTML() {
   if (!auto) return '<div class="empty-state"><p class="es-t">Die Angebote der Woche sind noch nicht geladen.</p><p>Die App holt sie montags und donnerstags von Aldi, Lidl, Kaufland und Penny. Gleich nochmal öffnen – oder unten eigene eintragen.</p></div>';
-  const alle = automatisch();
+  const alle = imLaden(automatisch());
   const zutaten = alle.filter((a) => a.k);
   const gezeigt = (nurZutaten ? zutaten : alle).filter(passtSuche);
   const wann = auto.stand && !Number.isNaN(Date.parse(auto.stand)) ? tagKurz(heute(new Date(auto.stand))) : '';
@@ -131,13 +145,13 @@ function autoHTML() {
   return `<div class="a-stand"><span class="fine">${auto.woche ? `KW ${esc(auto.woche.slice(5))}` : ''}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}</div>
 <div class="a-filter"><div class="chips a-chips"><button type="button" class="chip" data-a-filter="zutaten" aria-pressed="${nurZutaten}">Rezeptzutaten<span class="n">${zutaten.length}</span></button><button type="button" class="chip" data-a-filter="alle" aria-pressed="${!nurZutaten}">Alle Lebensmittel<span class="n">${alle.length}</span></button></div>
 <div class="suche a-suche"><input id="a-suche" type="search" placeholder="Angebote durchsuchen" aria-label="Angebote durchsuchen" autocomplete="off" value="${esc(suche)}"></div></div>
-${gezeigt.length ? gruppenHTML(gezeigt) : `<p class="fine a-leer">${suche ? `Nichts gefunden für „${esc(suche)}“.` : alle.length ? 'Diese Woche ist keine Rezeptzutat im Angebot.' : 'Diese Woche kam nichts an – die Quellen waren nicht erreichbar.'}</p>`}`;
+${gezeigt.length ? gruppenHTML(gezeigt) : `<p class="fine a-leer">${suche ? `Nichts gefunden für „${esc(suche)}“.` : alle.length ? `Diese Woche ist ${laden ? `bei ${esc(laden)} ` : ''}keine Rezeptzutat im Angebot.` : laden ? `Von ${esc(laden)} ist diese Woche nichts da${(auto.quellen || []).some((q) => q.laden === laden && q.ok === false) ? ' – der Abruf hat nicht geklappt' : ''}.` : 'Diese Woche kam nichts an – die Quellen waren nicht erreichbar.'}</p>`}`;
 }
 
 /** Die eigenen Angebote (liste.json): Liste mit Löschen. */
 function eigeneHTML() {
-  const liste = eigene();
-  if (!liste.length) return '';
+  const liste = imLaden(eigene());
+  if (!liste.length) return eigene().length ? `<p class="fine">Eigene Angebote gibt es nur für ${esc([...new Set(eigene().map((a) => a.laden))].join(', '))}.</p>` : '';
   const st = app.stand.angebote || {};
   const wer = st.von ? `von ${st.von === app.name() ? 'dir' : esc(st.von)}` : '';
   const wann = st.stand && !Number.isNaN(Date.parse(st.stand)) ? esc(tagKurz(heute(new Date(st.stand)))) : '';
@@ -148,7 +162,7 @@ function eigeneHTML() {
 }
 
 function passtHTML() {
-  const liste = eintraege();
+  const liste = imLaden(eintraege());
   if (!liste.length) return '';
   const top = topRezepte(app.rezepte, liste, app);
   const karten = top.map(({ r, treffer, ersparnisBox }) => {
@@ -157,19 +171,26 @@ function passtHTML() {
     return `<li><button type="button" class="ki-liste-b a-passt-b" data-a-open="${esc(r.id)}"><b>${esc(r.name)}</b><small>${treffer.length === 1 ? 'Im Angebot' : `${treffer.length} im Angebot`}: ${was}${spart}</small></button></li>`;
   }).join('');
   const mitKatalog = liste.filter((a) => a.k).length;
-  return `<section class="a-passt"><h3 class="sub-h">Passt zu euren Rezepten</h3>
+  return `<section class="a-passt"><h3 class="sub-h">Passt zu euren Rezepten${laden ? ` <small>mit den Angeboten von ${esc(laden)}</small>` : ''}</h3>
 ${top.length ? `<ul class="ki-liste" id="a-passt-liste">${karten}</ul>` : `<p class="fine">${mitKatalog ? 'Kein Rezept nutzt diese Angebote.' : 'Keins der Angebote ist eine Rezeptzutat.'}</p>`}
 <div class="a-ki"><button type="button" class="btn btn-primary" data-act="a-vorschlag">Neues Rezept aus den Angeboten</button><p class="fine">Die KI baut ein Rezept um die Angebote herum, die App rechnet es auf eure Ziele. Mit „Neuer Vorschlag“ gibt es dann das nächste.</p></div>
 </section>`;
 }
 
+function laedenHTML() {
+  const da = laedenDa();
+  const chip = (l, name, n) => `<button type="button" class="chip" data-a-laden="${esc(l)}" aria-pressed="${laden === l}">${esc(name)}${n ? `<span class="n">${n}</span>` : ''}</button>`;
+  return `<div class="a-laeden"><span class="fine">Wo gehst du hin?</span><div class="chips a-laeden-chips" role="group" aria-label="Laden">${chip('', 'Alle', angeboteAnzahl())}${da.map((l) => chip(l, l, anzahlIn(l))).join('')}</div></div>`;
+}
+
 export function angeboteZeichnen() {
   const el = $('#view-angebote');
   if (!el) return;
-  const n = angeboteAnzahl();
+  const n = laden ? anzahlIn(laden) : angeboteAnzahl();
   el.innerHTML = `<button type="button" class="back nur-breit" data-act="angebote-zu">${ZURUECK}Alle Rezepte</button>
-<div class="l-head"><h2 id="a-title">Angebote der Woche</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
-<p class="a-lead">Was ist diese Woche bei Aldi, Lidl, Kaufland und Penny günstig? Die App holt es montags und donnerstags selbst. Darunter steht, welche Rezepte davon profitieren.</p>
+<div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
+${laedenHTML()}
+<p class="a-lead">${laden ? `Nur, was diese Woche bei ${esc(laden)} günstig ist – und welche Rezepte davon profitieren.` : 'Was ist diese Woche bei Aldi, Lidl, Kaufland und Penny günstig? Die App holt es montags und donnerstags selbst. Darunter steht, welche Rezepte davon profitieren.'}</p>
 <div id="a-auto">${autoHTML()}</div>
 ${passtHTML()}
 <details class="a-eigene"${eigeneOffen || eigene().length || fotos.length || text ? ' open' : ''}><summary>Eigene Angebote dazu <small>Foto, Screenshot oder getippt</small></summary>
@@ -291,6 +312,7 @@ export function klickAngebote(el) {
   }
   if (d.aOpen) { zeigeReiter('rezepte'); oeffneRezept(d.aOpen); return true; }
   if (d.aFilter) { nurZutaten = d.aFilter === 'zutaten'; angeboteZeichnen(); return true; }
+  if (d.aLaden !== undefined) { laden = d.aLaden; schreibe(LADEN, laden); angeboteZeichnen(); return true; }
   switch (d.act) {
     case 'angebote': zeigeReiter('angebote'); window.scrollTo(0, 0); return true;
     case 'angebote-zu': zeigeReiter('rezepte'); return true;
@@ -306,8 +328,8 @@ export function klickAngebote(el) {
       return true;
     }
     case 'a-vorschlag': {
-      // Eigene zuerst, dann die Rezeptzutaten aus dem automatischen Abruf – höchstens 60 Zeilen
-      const liste = [...eigene(), ...automatisch().filter((a) => a.k)].slice(0, 60);
+      // Eigene zuerst, dann die Rezeptzutaten aus dem automatischen Abruf – nur der gewählte Laden, höchstens 60 Zeilen
+      const liste = imLaden([...eigene(), ...automatisch().filter((a) => a.k)]).slice(0, 60);
       if (!liste.length) return true;
       zeigeReiter('rezepte');
       resteMitAngeboten(angeboteText(liste));
