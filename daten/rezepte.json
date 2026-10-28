@@ -690,7 +690,8 @@
     ],
     "gesamt": 115
    },
-   "time": 115
+   "time": 115,
+   "bild": "bilder/rezepte/chili.webp?v=5b490859"
   },
   {
    "id": "butter-chicken",
@@ -4670,7 +4671,8 @@
     ],
     "gesamt": 75
    },
-   "time": 75
+   "time": 75,
+   "bild": "bilder/rezepte/thai-curry.webp?v=82124943"
   },
   {
    "id": "burrito-bowl",
@@ -23088,7 +23090,8 @@
     ],
     "gesamt": 105
    },
-   "time": 105
+   "time": 105,
+   "bild": "bilder/rezepte/koettbullar.webp?v=4192f725"
   },
   {
    "id": "cottage-pie",
