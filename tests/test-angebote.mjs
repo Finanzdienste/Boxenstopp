@@ -152,10 +152,10 @@ const anfragenMock = (zuViel) => {
   check(fehler?.art === 'schluessel', 'Lidl: falscher Schlüssel kommt als Fehler durch');
 }
 
-// --- Ausweichen: Überlastung mit Pausen wiederholen, dann das nächste Modell
+// --- Ausweichen: Überlastung mit Pausen wiederholen, dann das nächste Modell, reihum
 {
   const fehlerMit = (art) => { const e = new Error(art); e.art = art; return e; };
-  const laufe = async (plan) => {
+  const laufe = async (plan, male = 2) => {
     const rufe = [];
     const meldungen = [];
     const anfragen = async (rumpf, { modell }) => {
@@ -163,28 +163,32 @@ const anfragenMock = (zuViel) => {
       const was = plan[modell]?.shift() || 'ok';
       if (was === 'zeit') { const e = fehlerMit('ueberlastet'); e.zeitablauf = true; throw e; }
       if (was !== 'ok') throw fehlerMit(was);
-      return { eingabe: { angebote: [] }, modell };
+      return { eingabe: { angebote: [] } };
     };
     const f = mitAusweichen({ schluessel: 'k', modelle: ['a', 'b', 'c'], warten: [1, 1], anfragen, melde: (m) => meldungen.push(m) });
-    let ergebnis = null;
+    const ergebnis = [];
     let fehler = null;
-    try { ergebnis = await f({}); ergebnis = [ergebnis, await f({})]; } catch (e) { fehler = e; }
-    return { rufe, meldungen, ergebnis, fehler };
+    try { for (let n = 0; n < male; n++) ergebnis.push(await f({})); } catch (e) { fehler = e; }
+    return { rufe, meldungen, ergebnis, fehler, f };
   };
   let l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ok'] });
-  check(l.ergebnis?.[0]?.modell === 'a' && l.rufe.join() === 'a,a,a,a' && !l.meldungen.length, 'Ausweichen: zweimal überlastet, dritter Versuch klappt, Modell bleibt');
+  check(l.ergebnis[0]?.modell === 'a' && l.rufe.join() === 'a,a,a,a' && !l.meldungen.length, 'Ausweichen: zweimal überlastet, dritter Versuch klappt, Modell bleibt');
   l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ueberlastet'] });
-  check(l.ergebnis?.[0]?.modell === 'b' && l.ergebnis?.[1]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && /a überlastet, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: dreimal überlastet → nächstes Modell, auch für die folgende Anfrage');
+  check(l.ergebnis[0]?.modell === 'b' && l.ergebnis[1]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && /a überlastet, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: dreimal überlastet → nächstes Modell, auch für die folgende Anfrage');
   l = await laufe({ a: ['modell'], b: ['modell'] });
-  check(l.ergebnis?.[0]?.modell === 'c' && l.rufe.join() === 'a,b,c,c' && /a gibt es nicht, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: unbekanntes Modell → sofort das nächste');
-  l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ueberlastet'], b: ['modell'], c: ['ueberlastet', 'ueberlastet', 'ueberlastet'] });
-  check(l.fehler?.art === 'ueberlastet' && l.rufe.join() === 'a,a,a,b,c,c,c', 'Ausweichen: alle Modelle durch → Fehler');
+  check(l.ergebnis[0]?.modell === 'c' && l.rufe.join() === 'a,b,c,c' && /a gibt es nicht/.test(l.meldungen[0]) && l.f.modell() === 'c', 'Ausweichen: unbekanntes Modell fällt aus der Kette, sofort das nächste');
+  l = await laufe({ a: ['zeit', 'zeit'], b: ['modell'], c: ['zeit'] }, 1);
+  check(l.fehler?.art === 'ueberlastet' && l.rufe.join() === 'a,b,c' && l.meldungen.join('|') === 'a antwortet nicht, weiter mit b|b gibt es nicht (mehr)', `Ausweichen: jedes Modell einmal, dann Fehler (${l.rufe.join()})`);
+  l = await laufe({ a: ['zeit'], b: ['zeit'], c: ['zeit', 'ok'] }, 1);
+  const danach = await l.f({});
+  check(l.fehler?.art === 'ueberlastet' && danach.modell === 'c' && l.rufe.join() === 'a,b,c,c' && l.meldungen.at(-1) === 'b antwortet nicht, weiter mit c', 'Ausweichen: die nächste Anfrage fängt beim zuletzt versuchten an, ohne wieder bei a zu beginnen');
+  l = await laufe({ a: ['zeit', 'zeit'], b: ['zeit', 'zeit'], c: ['zeit', 'zeit'] }, 1);
+  await l.f({}).catch(() => {});
+  check(l.rufe.join() === 'a,b,c,c,a,b', 'Ausweichen: beim zweiten Mal reihum weiter (c, a, b)');
   l = await laufe({ a: ['schluessel'] });
   check(l.fehler?.art === 'schluessel' && l.rufe.join() === 'a', 'Ausweichen: andere Fehler sofort nach oben');
   l = await laufe({ a: ['zeit'] });
-  check(l.ergebnis?.[0]?.modell === 'b' && l.rufe.join() === 'a,b,b' && /a antwortet nicht, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: Zeitablauf → ohne Wiederholung das nächste Modell');
-  const f = mitAusweichen({ schluessel: 'k', modelle: ['x', 'y'], warten: [], anfragen: async (r, { modell }) => { if (modell === 'x') throw fehlerMit('modell'); return { modell }; } });
-  check(f.modell() === 'x' && (await f({})).modell === 'y' && f.modell() === 'y', 'Ausweichen: modell() nennt das Modell, das gerade dran ist');
+  check(l.ergebnis[0]?.modell === 'b' && l.rufe.join() === 'a,b,b' && /a antwortet nicht, weiter mit b/.test(l.meldungen[0]) && l.f.modell() === 'b', 'Ausweichen: Zeitablauf → ohne Wiederholung das nächste Modell; modell() nennt es');
 }
 
 // --- geminiAnfragen gegen einen Mock von generateContent

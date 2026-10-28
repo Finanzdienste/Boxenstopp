@@ -212,13 +212,14 @@ const LIDL_JE_ANFRAGE = 4; // Seiten je Anfrage; wird die Antwort zu lang, halbi
 const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
 const LIDL_ZEIT = 18 * 60e3; // danach nichts mehr anfragen (der Lauf darf 30 Minuten)
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
-const GEMINI_ZEIT = 120000; // je Anfrage; ein gesundes Modell braucht für vier Seiten unter einer Minute
-// Das Modell der App zuerst; ist es überlastet oder zu langsam (im
-// Gratis-Kontingent kommt das beim neuesten vor) oder gibt es das nicht mehr,
-// das nächste – die Vorgänger haben meist Luft. Namen laut Modellliste des
-// Schlüssels (steht im Log, wenn etwas ungelesen bleibt).
-const GEMINI_MODELLE = [ANBIETER.gemini.modell, 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
-const GEMINI_WARTEN = [20000, 45000]; // Pausen vor dem 2. und 3. Versuch bei Überlastung (503)
+const GEMINI_ZEIT = 60000; // je Anfrage; ein gesundes Modell braucht für vier Seiten 3–15 s
+// Das Modell der App zuerst; antwortet es nicht oder ist es überlastet (im
+// Gratis-Kontingent hängt mal das eine, mal das andere), das nächste – und
+// nach dem letzten wieder das erste. Namen laut Modellliste des Schlüssels
+// (steht im Log, wenn etwas ungelesen bleibt); 2.5-flash gibt Google neuen
+// Konten nicht mehr.
+const GEMINI_MODELLE = [ANBIETER.gemini.modell, 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
+const GEMINI_WARTEN = [15000, 30000]; // Pausen vor dem 2. und 3. Versuch bei Überlastung (503)
 const pause = (ms) => new Promise((r) => { setTimeout(r, ms); });
 
 /** Die Modelle, die der Schlüssel für generateContent nutzen darf (nur Namen, fürs Log). */
@@ -231,30 +232,45 @@ export async function geminiModelle(schluessel, api = GEMINI_API) {
 
 /*
  * geminiAnfragen mit Ausweichen: bei Überlastung (503) bis zu drei Versuche
- * mit Pause, dann – wie bei Zeitablauf oder einem unbekannten Modell sofort –
- * das nächste Modell aus modelle; das bleibt für die folgenden Anfragen.
- * anfragen(rumpf, opt) ist austauschbar (Tests), warten die Pausen.
+ * mit Pause, dann – wie bei Zeitablauf sofort – das nächste Modell aus der
+ * Kette, nach dem letzten wieder das erste, bis jedes einmal dran war. Ein
+ * Modell, das es nicht (mehr) gibt, fällt aus der Kette. Das Modell, das
+ * geantwortet hat, bleibt für die folgenden Anfragen und steht in der
+ * Antwort (modell). anfragen(rumpf, opt) ist austauschbar (Tests), warten
+ * die Pausen.
  */
 export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = GEMINI_WARTEN, anfragen = geminiAnfragen, melde = () => {} }) {
+  const kette = [...modelle];
   let i = 0;
   const f = async (rumpf) => {
+    let wechsel = 0;
     for (let versuch = 0; ; versuch++) {
+      if (!kette.length) throw kiFehler('modell', 'kein Modell übrig', 'gemini');
+      const modell = kette[i % kette.length];
       try {
-        return await anfragen(rumpf, { schluessel, modell: modelle[i] });
+        return { ...await anfragen(rumpf, { schluessel, modell }), modell };
       } catch (e) {
-        const weiter = i < modelle.length - 1;
-        if (e?.art === 'ueberlastet' && !e.zeitablauf && versuch < warten.length) { await pause(warten[versuch]); continue; }
-        if ((e?.art === 'ueberlastet' || e?.art === 'modell') && weiter) {
-          melde(`${modelle[i]} ${e.art === 'modell' ? 'gibt es nicht' : e.zeitablauf ? 'antwortet nicht' : 'überlastet'}, weiter mit ${modelle[i + 1]}`);
-          i++;
+        if (e?.art === 'modell') {
+          melde(`${modell} gibt es nicht (mehr)`);
+          kette.splice(i % kette.length, 1);
+          if (!kette.length) throw e;
+          i %= kette.length;
           versuch = -1;
+          continue;
+        }
+        if (e?.art === 'ueberlastet' && !e.zeitablauf && versuch < warten.length) { await pause(warten[versuch]); continue; }
+        if (e?.art === 'ueberlastet' && wechsel < kette.length - 1) {
+          i = (i + 1) % kette.length;
+          wechsel++;
+          versuch = -1;
+          melde(`${modell} ${e.zeitablauf ? 'antwortet nicht' : 'überlastet'}, weiter mit ${kette[i]}`);
           continue;
         }
         throw e;
       }
     }
   };
-  f.modell = () => modelle[i];
+  f.modell = () => kette[i % kette.length] || '';
   return f;
 }
 
@@ -403,37 +419,57 @@ async function lidl(alt) {
   const anfragen = mitAusweichen({ schluessel: GEMINI_KEY, modelle, melde });
   const start = Date.now();
   const angebote = [];
-  const nichtLesbar = [];
   let gelesen = 0;
   let letzter = null;
   let zeitUm = false;
+  let modellGenutzt = '';
+  const uebernehmen = (roh, von, bis) => {
+    for (const a of angeboteBereinigen(roh, KATALOG)) {
+      if (!istZumKochen(a.name)) continue;
+      angebote.push({ ...a, id: stabileId('Lidl', a.name, a.preis), laden: 'Lidl', von, bis: a.bis || bis, k: a.k || schluesselRaten(a.name, KATALOG) });
+    }
+  };
+  // Ein Stapel: { seiten: [{ number, b64 }], von, bis, name }
+  const lesen = async (st) => {
+    if (Date.now() - start > LIDL_ZEIT) { zeitUm = true; return false; }
+    try {
+      uebernehmen(await lidlStapelLesen(st.seiten, { von: st.von, bis: st.bis, anfragen, melde }), st.von, st.bis);
+      gelesen += st.seiten.length;
+      modellGenutzt = anfragen.modell();
+      return true;
+    } catch (e) {
+      if (e?.art === 'schluessel') throw e; // falscher Schlüssel: weitere Anfragen sind sinnlos
+      letzter = e;
+      melde(`Seiten ${st.name} übersprungen: ${e?.message || e}${e?.detail ? ` [${e.detail}]` : ''}`);
+      return false;
+    } finally {
+      // Gratis-Kontingent: nicht zu schnell hintereinander
+      await pause(7000);
+    }
+  };
+  let uebrig = [];
   for (const p of passende) {
     const f = (await hole(`https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=${p.id}&region_id=0&region_code=0`, { json: true })).flyer;
     const seiten = lidlSeitenWahl(f?.pages, LIDL_MAX || LIDL_SEITEN_MAX);
     melde(`${p.id}: ${seiten.length} von ${(f?.pages || []).length} Seiten lesen`);
     const bis = (f?.offerEndDate || f?.endDate || p.bis).slice(0, 10);
     const von = (f?.offerStartDate || f?.startDate || p.von).slice(0, 10);
-    for (let i = 0; i < seiten.length; i += LIDL_JE_ANFRAGE) {
-      if (Date.now() - start > LIDL_ZEIT) { zeitUm = true; break; }
-      const stapel = [];
-      for (const s of seiten.slice(i, i + LIDL_JE_ANFRAGE)) stapel.push({ number: s.number, b64: (await hole(s.image, { bin: true })).toString('base64') });
-      try {
-        for (const a of angeboteBereinigen(await lidlStapelLesen(stapel, { von, bis, anfragen, melde }), KATALOG)) {
-          if (!istZumKochen(a.name)) continue;
-          angebote.push({ ...a, id: stabileId('Lidl', a.name, a.preis), laden: 'Lidl', von, bis: a.bis || bis, k: a.k || schluesselRaten(a.name, KATALOG) });
-        }
-        gelesen += stapel.length;
-      } catch (e) {
-        if (e?.art === 'schluessel') throw e; // falscher Schlüssel: weitere Anfragen sind sinnlos
-        letzter = e;
-        nichtLesbar.push(`${stapel[0].number}–${stapel.at(-1).number}`);
-        melde(`Seiten ${stapel[0].number}–${stapel.at(-1).number} übersprungen: ${e?.message || e}${e?.detail ? ` [${e.detail}]` : ''}`);
-      }
-      // Gratis-Kontingent: nicht zu schnell hintereinander
-      await pause(7000);
+    for (let i = 0; i < seiten.length && !zeitUm; i += LIDL_JE_ANFRAGE) {
+      const teil = seiten.slice(i, i + LIDL_JE_ANFRAGE);
+      const st = { seiten: [], von, bis, name: `${teil[0].number}–${teil.at(-1).number}` };
+      for (const x of teil) st.seiten.push({ number: x.number, b64: (await hole(x.image, { bin: true })).toString('base64') });
+      if (!await lesen(st) && !zeitUm) uebrig.push(st);
     }
     if (zeitUm) break;
   }
+  // Zweiter Durchgang für das, was beim ersten hing – oft klappt es dann
+  if (uebrig.length && !zeitUm) {
+    melde(`zweiter Durchgang für Seiten ${uebrig.map((st) => st.name).join(', ')}`);
+    const nochmal = uebrig;
+    uebrig = [];
+    for (const st of nochmal) if (!await lesen(st) && !zeitUm) uebrig.push(st);
+  }
+  const nichtLesbar = uebrig.map((st) => st.name);
   if (nichtLesbar.length) {
     // Fürs Log: welche Modelle der Schlüssel überhaupt nutzen darf
     try { melde(`Modelle mit diesem Schlüssel: ${(await geminiModelle(GEMINI_KEY)).join(', ')}`); } catch (e) { melde(`Modellliste nicht lesbar (${e?.message || e})`); }
@@ -443,8 +479,8 @@ async function lidl(alt) {
   if (nichtLesbar.length) teile.push(`Seiten ${nichtLesbar.join(', ')} nicht lesbar`);
   if (zeitUm) teile.push('Zeit um, Rest nicht gelesen');
   teile.push('Lesefehler möglich');
-  melde(`gelesen mit ${anfragen.modell()}`);
-  return { angebote, hinweis: teile.join(', '), modell: anfragen.modell() };
+  melde(`gelesen mit ${modellGenutzt}`);
+  return { angebote, hinweis: teile.join(', '), modell: modellGenutzt };
 }
 
 /* ------------------------------------------------------------ Ablauf */
