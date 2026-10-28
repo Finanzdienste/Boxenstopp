@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T10:39:00.973Z",
+ "stand": "2026-10-28T10:50:18.559Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
@@ -17,10 +17,10 @@
   {
    "laden": "Lidl",
    "ok": true,
-   "anzahl": 17,
-   "hinweis": "aus dem Aktionsprospekt gelesen (26.10.–31.10.), Seiten 17–20, 21–25, 27–30, 31–41, 58–63, 64–68 nicht lesbar, Lesefehler möglich",
-   "stand": "2026-10-28T10:39:00.966Z",
-   "modell": "gemini-2.5-flash"
+   "anzahl": 33,
+   "hinweis": "aus dem Aktionsprospekt gelesen (26.10.–31.10.), Seiten 27–30, 31–41, 58–63, 64–68 nicht lesbar, Lesefehler möglich",
+   "stand": "2026-10-28T10:50:18.552Z",
+   "modell": "gemini-3.5-flash"
   },
   {
    "laden": "Kaufland",
@@ -579,19 +579,39 @@
    "k": "butter"
   },
   {
-   "id": "a-0vrga1h",
+   "id": "a-0znxrwr",
    "laden": "Lidl",
-   "name": "Bio Vegane Bio Hafer Creme Cuisine",
-   "preis": 0.65,
-   "menge": 250,
-   "einheit": "ml",
+   "name": "Basmati Reis XXL",
+   "preis": 9.99,
+   "menge": 4.5,
+   "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "kochsahne"
+   "k": "reis"
   },
   {
-   "id": "a-1wjzu1x",
+   "id": "a-0fjk85c",
    "laden": "Lidl",
-   "name": "Deutsche Möhren XXL",
+   "name": "Delikatess Geflügel-/Hähnchenbrustfiletroulade XXL",
+   "preis": 2.29,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "haehnchenbrust"
+  },
+  {
+   "id": "a-1otjvi2",
+   "laden": "Lidl",
+   "name": "Delikatess Puten-/Hähnchenbrust XXL",
+   "preis": 1.59,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "putenbrust"
+  },
+  {
+   "id": "a-1qos049",
+   "laden": "Lidl",
+   "name": "Deutsche Möhren",
    "preis": 1.69,
    "menge": 3,
    "einheit": "kg",
@@ -599,14 +619,94 @@
    "k": "moehren"
   },
   {
-   "id": "a-1cvwj98",
+   "id": "a-0v2fj77",
    "laden": "Lidl",
-   "name": "METZGERFRISCH Frisches Hähnchen-Geschnetzeltes",
+   "name": "Frau Antje Beste Butter",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "butter"
+  },
+  {
+   "id": "a-1jlkwgl",
+   "laden": "Lidl",
+   "name": "Frisches Hähnchen-Geschnetzeltes",
    "preis": 3.79,
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
    "k": "haehnchenbrust"
+  },
+  {
+   "id": "a-0k9y9go",
+   "laden": "Lidl",
+   "name": "Haltbare fettarme Milch 1,5 %",
+   "preis": 8.5,
+   "menge": 12,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": "milch"
+  },
+  {
+   "id": "a-1799ca9",
+   "laden": "Lidl",
+   "name": "Heinz Tomaten Ketchup/Mayonnaise",
+   "preis": 3.49,
+   "menge": 800,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": "ketchup"
+  },
+  {
+   "id": "a-1oxu4i2",
+   "laden": "Lidl",
+   "name": "Joghurt Griechischer Art XXL",
+   "preis": 2.15,
+   "menge": 1.1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "joghurt"
+  },
+  {
+   "id": "a-0qblay7",
+   "laden": "Lidl",
+   "name": "Kerrygold Irische Käsescheiben",
+   "preis": 1.59,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "cheddar"
+  },
+  {
+   "id": "a-0j8oc7e",
+   "laden": "Lidl",
+   "name": "Maribel Bio Blütenhonig",
+   "preis": 2.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "honig"
+  },
+  {
+   "id": "a-0l2f68i",
+   "laden": "Lidl",
+   "name": "Natives Olivenöl Extra XXL",
+   "preis": 9.99,
+   "menge": 1.5,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": "olivenoel"
+  },
+  {
+   "id": "a-08pju6v",
+   "laden": "Lidl",
+   "name": "Patros Weißkäse Kräuter/Leicht XXL",
+   "preis": 2.22,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "feta"
   },
   {
    "id": "a-0lnlh4u",
@@ -629,14 +729,34 @@
    "k": "suesskartoffel"
   },
   {
-   "id": "a-0utdr7z",
+   "id": "a-05bhdx3",
    "laden": "Lidl",
-   "name": "Vegane Soja Joghurtalternative Classic",
+   "name": "Vemondo Vegane Soja Joghurtalternative Classic",
    "preis": 0.79,
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
    "k": "joghurt"
+  },
+  {
+   "id": "a-175lstc",
+   "laden": "Lidl",
+   "name": "Weißkäse in Salzlake XXL",
+   "preis": 7.99,
+   "menge": 1.2,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "feta"
+  },
+  {
+   "id": "a-01jeefv",
+   "laden": "Lidl",
+   "name": "Zarte Haferflocken XXL",
+   "preis": 1.19,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "haferflocken"
   },
   {
    "id": "a-19v6i56",
@@ -3379,6 +3499,26 @@
    "k": ""
   },
   {
+   "id": "a-09gyojh",
+   "laden": "Lidl",
+   "name": "4-Käse-Mix XXL",
+   "preis": 2.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1syaygy",
+   "laden": "Lidl",
+   "name": "Barbarie Entenbrustfilet",
+   "preis": 3.98,
+   "menge": 295,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
    "id": "a-08bev5q",
    "laden": "Lidl",
    "name": "Deutscher Wirsing, lose",
@@ -3405,6 +3545,26 @@
    "preis": 0.89,
    "menge": 1,
    "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1djoiuh",
+   "laden": "Lidl",
+   "name": "Frische Kalbs-Leber",
+   "preis": 5.79,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0d2kqdb",
+   "laden": "Lidl",
+   "name": "Kondensmilch XXL",
+   "preis": 0.79,
+   "menge": 500,
+   "einheit": "g",
    "bis": "2026-10-31",
    "k": ""
   },
@@ -3439,19 +3599,29 @@
    "k": ""
   },
   {
-   "id": "a-0f5cqvr",
+   "id": "a-08oo8k9",
    "laden": "Lidl",
-   "name": "Vegane Falafel",
-   "preis": 1.29,
+   "name": "Rügenwalder Mühle Veganes/Vegetarisches Sortiment",
+   "preis": 2.22,
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
    "k": ""
   },
   {
-   "id": "a-0q1n3us",
+   "id": "a-1vrse5w",
    "laden": "Lidl",
-   "name": "Vegane Rostbratwürstel-Alternative",
+   "name": "Vemondo Vegane Reibegenuss",
+   "preis": 1.12,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-10hgqr0",
+   "laden": "Lidl",
+   "name": "Vemondo Vegane Rostbratwürstel-Alternative",
    "preis": 1.47,
    "menge": 180,
    "einheit": "g",
@@ -3459,9 +3629,9 @@
    "k": ""
   },
   {
-   "id": "a-1kfhaxj",
+   "id": "a-1jef4tb",
    "laden": "Lidl",
-   "name": "Vegane Teigwaren",
+   "name": "Vemondo Vegane Teigwaren",
    "preis": 1.59,
    "menge": 500,
    "einheit": "g",
@@ -3469,20 +3639,10 @@
    "k": ""
   },
   {
-   "id": "a-0mva3u5",
+   "id": "a-05s6jen",
    "laden": "Lidl",
-   "name": "Vegane Tyrolini-Alternative",
-   "preis": 1.39,
-   "menge": 80,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-01vel66",
-   "laden": "Lidl",
-   "name": "Veganer Reibegenuss",
-   "preis": 1.12,
+   "name": "Vemondo Veganes Hack",
+   "preis": 1.79,
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
