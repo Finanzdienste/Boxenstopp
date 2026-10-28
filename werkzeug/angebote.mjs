@@ -212,11 +212,13 @@ const LIDL_JE_ANFRAGE = 4; // Seiten je Anfrage; wird die Antwort zu lang, halbi
 const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
 const LIDL_ZEIT = 18 * 60e3; // danach nichts mehr anfragen (der Lauf darf 30 Minuten)
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
-const GEMINI_ZEIT = 240000; // je Anfrage
-// Das Modell der App zuerst; ist es überlastet (im Gratis-Kontingent kommt
-// das vor) oder gibt es das nicht mehr, das nächste – ältere haben meist Luft.
-const GEMINI_MODELLE = [ANBIETER.gemini.modell, 'gemini-3.8-flash-lite', 'gemini-3-flash', 'gemini-2.5-flash'];
-const GEMINI_WARTEN = [20000, 45000]; // Pausen vor dem 2. und 3. Versuch bei Überlastung
+const GEMINI_ZEIT = 120000; // je Anfrage; ein gesundes Modell braucht für vier Seiten unter einer Minute
+// Das Modell der App zuerst; ist es überlastet oder zu langsam (im
+// Gratis-Kontingent kommt das beim neuesten vor) oder gibt es das nicht mehr,
+// das nächste – die Vorgänger haben meist Luft. Namen laut Modellliste des
+// Schlüssels (steht im Log, wenn etwas ungelesen bleibt).
+const GEMINI_MODELLE = [ANBIETER.gemini.modell, 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
+const GEMINI_WARTEN = [20000, 45000]; // Pausen vor dem 2. und 3. Versuch bei Überlastung (503)
 const pause = (ms) => new Promise((r) => { setTimeout(r, ms); });
 
 /** Die Modelle, die der Schlüssel für generateContent nutzen darf (nur Namen, fürs Log). */
@@ -228,10 +230,10 @@ export async function geminiModelle(schluessel, api = GEMINI_API) {
 }
 
 /*
- * geminiAnfragen mit Ausweichen: bei Überlastung bis zu drei Versuche mit
- * Pause, dann (wie bei einem unbekannten Modell) das nächste Modell aus
- * modelle – und das bleibt für die folgenden Anfragen. anfragen(rumpf, opt)
- * ist austauschbar (Tests), warten die Pausen.
+ * geminiAnfragen mit Ausweichen: bei Überlastung (503) bis zu drei Versuche
+ * mit Pause, dann – wie bei Zeitablauf oder einem unbekannten Modell sofort –
+ * das nächste Modell aus modelle; das bleibt für die folgenden Anfragen.
+ * anfragen(rumpf, opt) ist austauschbar (Tests), warten die Pausen.
  */
 export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = GEMINI_WARTEN, anfragen = geminiAnfragen, melde = () => {} }) {
   let i = 0;
@@ -241,9 +243,9 @@ export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = G
         return await anfragen(rumpf, { schluessel, modell: modelle[i] });
       } catch (e) {
         const weiter = i < modelle.length - 1;
-        if (e?.art === 'ueberlastet' && versuch < warten.length) { await pause(warten[versuch]); continue; }
+        if (e?.art === 'ueberlastet' && !e.zeitablauf && versuch < warten.length) { await pause(warten[versuch]); continue; }
         if ((e?.art === 'ueberlastet' || e?.art === 'modell') && weiter) {
-          melde(`${modelle[i]} ${e.art === 'modell' ? 'gibt es nicht' : 'überlastet'}, weiter mit ${modelle[i + 1]}`);
+          melde(`${modelle[i]} ${e.art === 'modell' ? 'gibt es nicht' : e.zeitablauf ? 'antwortet nicht' : 'überlastet'}, weiter mit ${modelle[i + 1]}`);
           i++;
           versuch = -1;
           continue;
@@ -289,7 +291,13 @@ export async function geminiAnfragen(rumpf, { schluessel, modell = ANBIETER.gemi
     res = await fetch(`${api}/${modell}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': schluessel }, body: JSON.stringify(rumpf), signal: ac.signal });
     text = await res.text();
   } catch (e) {
-    throw kiFehler('netz', e?.name === 'AbortError' ? `keine Antwort nach ${Math.round(timeout / 1000)} s` : e?.message, 'gemini');
+    if (e?.name === 'AbortError') {
+      // Keine Antwort in der Zeit: das Modell ist überlastet, mitAusweichen nimmt dann das nächste
+      const f = kiFehler('ueberlastet', `keine Antwort nach ${Math.round(timeout / 1000)} s`, 'gemini');
+      f.zeitablauf = true;
+      throw f;
+    }
+    throw kiFehler('netz', e?.message, 'gemini');
   } finally { clearTimeout(t); }
   let info = null;
   try { info = JSON.parse(text); } catch { /* kein JSON */ }

@@ -160,6 +160,7 @@ const anfragenMock = (zuViel) => {
     const anfragen = async (rumpf, { modell }) => {
       rufe.push(modell);
       const was = plan[modell]?.shift() || 'ok';
+      if (was === 'zeit') { const e = fehlerMit('ueberlastet'); e.zeitablauf = true; throw e; }
       if (was !== 'ok') throw fehlerMit(was);
       return { eingabe: { angebote: [] }, modell };
     };
@@ -179,6 +180,8 @@ const anfragenMock = (zuViel) => {
   check(l.fehler?.art === 'ueberlastet' && l.rufe.join() === 'a,a,a,b,c,c,c', 'Ausweichen: alle Modelle durch → Fehler');
   l = await laufe({ a: ['schluessel'] });
   check(l.fehler?.art === 'schluessel' && l.rufe.join() === 'a', 'Ausweichen: andere Fehler sofort nach oben');
+  l = await laufe({ a: ['zeit'] });
+  check(l.ergebnis?.[0]?.modell === 'b' && l.rufe.join() === 'a,b,b' && /a antwortet nicht, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: Zeitablauf → ohne Wiederholung das nächste Modell');
 }
 
 // --- geminiAnfragen gegen einen Mock von generateContent
@@ -230,6 +233,11 @@ const anfragenMock = (zuViel) => {
   antworten.push([503, { error: { code: 503, message: 'The model is overloaded. Please try again later.', status: 'UNAVAILABLE' } }]);
   a = await lauf();
   check(a.art === 'ueberlastet', 'generateContent: 503 → ueberlastet');
+  const langsam = createServer((req, res) => { setTimeout(() => { res.writeHead(200, { 'content-type': 'application/json' }); res.end('{}'); }, 1500); });
+  await new Promise((r) => { langsam.listen(0, '127.0.0.1', r); });
+  const zeit = await (async () => { try { return await geminiAnfragen(rumpf, { schluessel: 'AQ.test', api: `http://127.0.0.1:${langsam.address().port}/models`, timeout: 300 }); } catch (e) { return e; } })();
+  check(zeit.art === 'ueberlastet' && zeit.zeitablauf === true && /keine Antwort nach 0 s/.test(zeit.detail), 'generateContent: keine Antwort in der Zeit → ueberlastet mit Zeitablauf');
+  langsam.close();
   server.close();
   const weg = await (async () => { try { return await geminiAnfragen(rumpf, { schluessel: 'AQ.test', api: 'http://127.0.0.1:9/models', timeout: 3000 }); } catch (e) { return e; } })();
   check(weg.art === 'netz', 'generateContent: nicht erreichbar → netz');
