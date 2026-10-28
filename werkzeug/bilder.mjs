@@ -84,13 +84,6 @@ export const MOTIVE = {
 /** Der Auftrag fürs Bild; ein Rezept ohne Motiv bekommt Name und Beschreibung. */
 export const auftrag = (r) => `${VORN} ${MOTIVE[r.id] || `${r.name}: ${r.desc}`}, ${HINTEN}`;
 
-/** Immer derselbe Zufall je Rezept – dasselbe Rezept gibt beim Wiederholen ein ähnliches Bild. */
-export function samen(id) {
-  let h = 2166136261;
-  for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
-  return h % 2147483647;
-}
-
 async function main() {
   if (!KONTO || !TOKEN) { console.log('Ohne CF_ACCOUNT_ID und CF_API_TOKEN keine Fotos.'); return; }
   const { default: sharp } = await import('sharp');
@@ -107,7 +100,8 @@ async function main() {
       res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${KONTO}/ai/run/${MODELL}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${TOKEN}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt: auftrag(r), steps: SCHRITTE, seed: samen(r.id) }),
+        // Einen festen Zufall (seed) nimmt die Schnittstelle nicht an – jedes Neumachen gibt ein anderes Bild
+        body: JSON.stringify({ prompt: auftrag(r), steps: SCHRITTE }),
       });
       j = await res.json().catch(() => null);
     } catch (e) {
