@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T11:08:28.945Z",
+ "stand": "2026-10-28T13:39:22.109Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
@@ -10,9 +10,9 @@
   {
    "laden": "Aldi",
    "ok": true,
-   "anzahl": 130,
+   "anzahl": 122,
    "hinweis": "Aldi Nord, bundesweit",
-   "stand": "2026-10-28T09:31:59.932Z"
+   "stand": "2026-10-28T13:39:17.874Z"
   },
   {
    "laden": "Lidl",
@@ -25,16 +25,16 @@
   {
    "laden": "Kaufland",
    "ok": true,
-   "anzahl": 261,
+   "anzahl": 254,
    "hinweis": "bundesweite Angebote, regional kann es abweichen",
-   "stand": "2026-10-28T09:59:20.738Z"
+   "stand": "2026-10-28T13:39:19.250Z"
   },
   {
    "laden": "Penny",
    "ok": true,
-   "anzahl": 73,
+   "anzahl": 71,
    "hinweis": "KW 44, bundesweit",
-   "stand": "2026-10-28T09:59:24.049Z"
+   "stand": "2026-10-28T13:39:22.066Z"
   }
  ],
  "angebote": [
@@ -46,7 +46,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "mie"
+   "k": "mie",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1998_44_2026_mie_nudeln_250_g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-187dq0l",
@@ -56,17 +57,8 @@
    "menge": 1,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": "sojasauce"
-  },
-  {
-   "id": "a-15p5657",
-   "laden": "Aldi",
-   "name": "Asia Green Garden Sushi-Reis",
-   "preis": 1.29,
-   "menge": 500,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": "reis"
+   "k": "sojasauce",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1035955_44_2026_asia_green_garden_xxl_sojasauce_1l_1_on?wid=200&hei=200"
   },
   {
    "id": "a-1qc6tcr",
@@ -76,7 +68,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": "aubergine"
+   "k": "aubergine",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1034013_27_2026_auberginen_on_201026_130510?wid=200&hei=200"
   },
   {
    "id": "a-0np860g",
@@ -86,7 +79,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "brokkoli"
+   "k": "brokkoli",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1041692_25_2026_stangenbrokkoli_bimilogo_on_081026_121130?wid=200&hei=200"
   },
   {
    "id": "a-12i8cw1",
@@ -96,7 +90,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "ingwer"
+   "k": "ingwer",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6851_51_2025_ingwer_07_bio_on_081026_122053?wid=200&hei=200"
   },
   {
    "id": "a-1odppzv",
@@ -106,7 +101,8 @@
    "menge": 125,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "spinat"
+   "k": "spinat",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1029369_18_2026_spinat_logo_on_081026_141836?wid=200&hei=200"
   },
   {
    "id": "a-1ccwsrn",
@@ -116,7 +112,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": "honig"
+   "k": "honig",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1035338_44_2026_dib_echter_deutscher_honig_1_on?wid=200&hei=200"
   },
   {
    "id": "a-1usgvlj",
@@ -126,7 +123,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "haehnchenbrust"
+   "k": "haehnchenbrust",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/3574_44_2026_haehncheninnenfilet400g_neu_on_151026_082213?wid=200&hei=200"
   },
   {
    "id": "a-0m7blzl",
@@ -136,7 +134,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "haehnchenbrust"
+   "k": "haehnchenbrust",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/8998_44_2026_haehnchenbrust_600g_on_151026_081022?wid=200&hei=200"
   },
   {
    "id": "a-1x5x5i1",
@@ -146,7 +145,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "rindergulasch"
+   "k": "rindergulasch",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1040067_44_2026_rind_gulasch_750g_on?wid=200&hei=200"
   },
   {
    "id": "a-17vwaao",
@@ -156,7 +156,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": "feta"
+   "k": "feta",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1001077_44_2026_patros_natur_comp?wid=200&hei=200"
   },
   {
    "id": "a-1xb9438",
@@ -166,7 +167,8 @@
    "menge": 800,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "rinderhack"
+   "k": "rinderhack",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1008973_44_2026_rindhackfleischxxl_02_on_151026_121243?wid=200&hei=200"
   },
   {
    "id": "a-0y4mwt2",
@@ -176,7 +178,8 @@
    "menge": 5,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "kartoffeln"
+   "k": "kartoffeln",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6104_18_2026_speisekartoffeln_on_081026_113348?wid=200&hei=200"
   },
   {
    "id": "a-0bcm5n6",
@@ -186,7 +189,8 @@
    "menge": 2,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "kartoffeln"
+   "k": "kartoffeln",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1042558_13_2026_speisefruehkartoffel_on_201026_133903?wid=200&hei=200"
   },
   {
    "id": "a-1l17yqr",
@@ -196,7 +200,8 @@
    "menge": 2,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "moehren"
+   "k": "moehren",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6267_32_2021_moehren_4201_on_231026_102003?wid=200&hei=200"
   },
   {
    "id": "a-00q4o1r",
@@ -206,7 +211,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "spitzkohl"
+   "k": "spitzkohl",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6159_2026_spitzkohl_02_on_201026_152636?wid=200&hei=200"
   },
   {
    "id": "a-0v0ervl",
@@ -216,7 +222,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "aepfel"
+   "k": "aepfel",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1046383_aepfel_sweetango_on_231026_120347?wid=200&hei=200"
   },
   {
    "id": "a-1va19e2",
@@ -226,7 +233,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "butter"
+   "k": "butter",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/9362_44_2026_weihenstephanbutter_01_on?wid=200&hei=200"
   },
   {
    "id": "a-1dj75vh",
@@ -236,7 +244,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "zucchini"
+   "k": "zucchini",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6194_25_2026_zucchini_04_on_081026_142403?wid=200&hei=200"
   },
   {
    "id": "a-1vhl7of",
@@ -246,7 +255,8 @@
    "menge": 5,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "zwiebeln"
+   "k": "zwiebeln",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1022871_36_2026_zwiebeln_on_081026_113809?wid=200&hei=200"
   },
   {
    "id": "a-00djpqj",
@@ -256,7 +266,8 @@
    "menge": 1,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": "olivenoel"
+   "k": "olivenoel",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8002470032019_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-091hqj2",
@@ -266,7 +277,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-28",
-   "k": "moehren"
+   "k": "moehren",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01211323FRb?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-03t5pb8",
@@ -276,7 +288,8 @@
    "menge": 5,
    "einheit": "kg",
    "bis": "2026-10-28",
-   "k": "kartoffeln"
+   "k": "kartoffeln",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00397851?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-16m3j33",
@@ -286,7 +299,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-28",
-   "k": "kartoffeln"
+   "k": "kartoffeln",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01211343FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-01ixkz9",
@@ -296,7 +310,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-28",
-   "k": "aepfel"
+   "k": "aepfel",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01211363FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1gtl5co",
@@ -306,7 +321,8 @@
    "menge": 1,
    "einheit": "Bund",
    "bis": "2026-10-31",
-   "k": "fruehlingszwiebeln"
+   "k": "fruehlingszwiebeln",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01162622FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1pelwbw",
@@ -316,7 +332,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "rote-zwiebeln"
+   "k": "rote-zwiebeln",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00397638FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-08258ze",
@@ -326,7 +343,8 @@
    "menge": 235,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "mozzarella"
+   "k": "mozzarella",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00501583?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0gqej78",
@@ -336,7 +354,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "oliven"
+   "k": "oliven",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01157827FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1qed4tc",
@@ -346,7 +365,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "zitrone"
+   "k": "zitrone",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00374660a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0gykb64",
@@ -356,7 +376,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "rinderhack"
+   "k": "rinderhack",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4007887706649_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1j85tvq",
@@ -366,7 +387,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "haferflocken"
+   "k": "haferflocken",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE01057172-P-4046097800259-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0qmjpqf",
@@ -376,7 +398,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "erdnuesse"
+   "k": "erdnuesse",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4067776013753_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1rz1a8k",
@@ -386,7 +409,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "cashews"
+   "k": "cashews",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20818830_P_1565441?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1x8r1qc",
@@ -396,7 +420,8 @@
    "menge": 280,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "getr-tomaten"
+   "k": "getr-tomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01541715_P_803177?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-00afarj",
@@ -406,7 +431,8 @@
    "menge": 840,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "gewuerzgurken"
+   "k": "gewuerzgurken",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01483154_P_639296?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-10nbibk",
@@ -416,7 +442,8 @@
    "menge": 250,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": "bbq-sauce"
+   "k": "bbq-sauce",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4002239857901_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0djlb7g",
@@ -426,7 +453,8 @@
    "menge": 420,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "mozzarella"
+   "k": "mozzarella",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4337185555510_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0imq1bf",
@@ -436,7 +464,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "rinderhuefte"
+   "k": "rinderhuefte",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2219700000000_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0husosd",
@@ -446,7 +475,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "haehnchenbrust"
+   "k": "haehnchenbrust",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4063367668951_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1kpsaim",
@@ -456,7 +486,19 @@
    "menge": 900,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "aepfel"
+   "k": "aepfel",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01278700FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-1socr78",
+   "laden": "Kaufland",
+   "name": "Käthchen-Gold Feines Weizenmehl",
+   "preis": 3.79,
+   "menge": 5,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "mehl",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006363113414_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1qew09n",
@@ -466,7 +508,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "joghurt"
+   "k": "joghurt",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4067517001650_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1wuuuiq",
@@ -476,7 +519,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": "kirschtomaten"
+   "k": "kirschtomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00379461TV?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0uwf9x3",
@@ -486,7 +530,8 @@
    "menge": 135,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": "frischkaese"
+   "k": "frischkaese",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00515502?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-08dv3uc",
@@ -496,7 +541,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-28",
-   "k": "tomaten"
+   "k": "tomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00398222FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1mkpe5h",
@@ -506,7 +552,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "champignons"
+   "k": "champignons",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00372078FRa-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-10kc4n7",
@@ -516,7 +563,8 @@
    "menge": 750,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": "oel"
+   "k": "oel",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260106710340_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-01ond6o",
@@ -526,7 +574,8 @@
    "menge": 1,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": "milch"
+   "k": "milch",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00400481?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-02wtf5u",
@@ -536,7 +585,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "kirschtomaten"
+   "k": "kirschtomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00379461FRc-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1ev5pvz",
@@ -546,7 +596,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "paprika"
+   "k": "paprika",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00379022FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-17x71x7",
@@ -556,7 +607,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": "zucchini"
+   "k": "zucchini",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01110090FRb?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ponhcq",
@@ -566,7 +618,8 @@
    "menge": 750,
    "einheit": "ml",
    "bis": "2026-10-28",
-   "k": "oel"
+   "k": "oel",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4005500087151_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1u632dd",
@@ -576,7 +629,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": "butter"
+   "k": "butter",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00650002?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0uk24jw",
@@ -776,7 +830,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "cheddar"
+   "k": "cheddar",
+   "bild": "https://cdn.penny.de/dam/jcr:a153f9a9-318f-4049-a8e9-1cf796978cf6/37985236.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-02ejwzz",
@@ -786,7 +841,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "frischkaese"
+   "k": "frischkaese",
+   "bild": "https://cdn.penny.de/dam/jcr:34d7c34e-68c4-445b-a3d2-bbc4f5433278/3684540_01.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-13br69w",
@@ -796,7 +852,8 @@
    "menge": 1000,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "gnocchi"
+   "k": "gnocchi",
+   "bild": "https://cdn.penny.de/dam/jcr:47ece598-43e3-429e-80f7-3b322b876776/54274473.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1flwocx",
@@ -806,7 +863,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "moehren"
+   "k": "moehren",
+   "bild": "https://cdn.penny.de/dam/jcr:b7dcc9ae-e134-45c9-b538-ec0e73f9533e/37450832.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0g1y7pg",
@@ -816,7 +874,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "aepfel"
+   "k": "aepfel",
+   "bild": "https://cdn.penny.de/dam/jcr:430f2c5b-c0a5-4340-9af7-008439487028/52273045_02.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1abevpn",
@@ -826,7 +885,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": "sojasauce"
+   "k": "sojasauce",
+   "bild": "https://cdn.penny.de/dam/jcr:6c980acd-38f6-4167-a585-41fa9ba4ef72/37957072.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0ujiy58",
@@ -836,7 +896,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "butter"
+   "k": "butter",
+   "bild": "https://cdn.penny.de/dam/jcr:d4846339-1b0d-473e-85b3-5973f8d47ffd/32203086.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1daju22",
@@ -846,7 +907,8 @@
    "menge": 1000,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "honig"
+   "k": "honig",
+   "bild": "https://cdn.penny.de/dam/jcr:fbe9bf04-6d86-4e10-8219-431e0ff1003c/9481830.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1xhu4nq",
@@ -856,7 +918,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "schmand"
+   "k": "schmand",
+   "bild": "https://cdn.penny.de/dam/jcr:873c9798-c813-4cc0-ba89-1884956ef32e/1621590.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1giau9e",
@@ -866,7 +929,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "joghurt"
+   "k": "joghurt",
+   "bild": "https://cdn.penny.de/dam/jcr:bd255a66-3bcc-406c-ba07-1288e646c759/56622711.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0fuak4q",
@@ -876,7 +940,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "rindergulasch"
+   "k": "rindergulasch",
+   "bild": "https://cdn.penny.de/dam/jcr:397ffac3-cabf-497c-a03a-dbe4cb289b5e/49040300.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0aneiqk",
@@ -886,7 +951,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "kirschtomaten"
+   "k": "kirschtomaten",
+   "bild": "https://cdn.penny.de/dam/jcr:9d7aca7c-8d9f-4465-b000-44b5ad4278fa/41556684_neu.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1k68uz3",
@@ -896,7 +962,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "joghurt"
+   "k": "joghurt",
+   "bild": "https://cdn.penny.de/dam/jcr:9ef697c9-f12b-475f-b139-1c6ac6a88768/23882068.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1grr7rj",
@@ -906,7 +973,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": "milch"
+   "k": "milch",
+   "bild": "https://cdn.penny.de/dam/jcr:9956289c-90ba-4ae1-80dd-b20f697b8965/34754936.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0a7155s",
@@ -916,7 +984,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "honig"
+   "k": "honig",
+   "bild": "https://cdn.penny.de/dam/jcr:44061723-cb58-466a-a6d2-80b3ef7ec920/48471594.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0uv39ar",
@@ -926,7 +995,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "champignons"
+   "k": "champignons",
+   "bild": "https://cdn.penny.de/dam/jcr:5bf8ce10-26f4-4e79-900a-f4cf2fa53a7c/40290321.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1nv7a80",
@@ -936,7 +1006,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": "zitrone"
+   "k": "zitrone",
+   "bild": "https://cdn.penny.de/dam/jcr:666c41ea-665f-447e-b90e-79cc46c5aad9/47546221.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1ox4aw0",
@@ -946,7 +1017,8 @@
    "menge": 720,
    "einheit": "ml",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/4191_44_2026_stachelbeeren_720_ml_glas_2_on?wid=200&hei=200"
   },
   {
    "id": "a-0ca9btq",
@@ -956,17 +1028,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-19tk1ne",
-   "laden": "Aldi",
-   "name": "Alpro Not M*lk Drink",
-   "preis": 1.49,
-   "menge": 1,
-   "einheit": "l",
-   "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1019443_14_2026_backkaese_wuerzig_on_comp_061026_113646?wid=200&hei=200"
   },
   {
    "id": "a-0clmtrc",
@@ -976,7 +1039,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1006372_34_2026_arla_finello_reibekaese_150_g_3_on_comp3_131026_101431?wid=200&hei=200"
   },
   {
    "id": "a-1tv0a11",
@@ -986,7 +1050,8 @@
    "menge": 330,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1022153_44_2026_asia_gemuese_3_on_comp2_081026_182101?wid=200&hei=200"
   },
   {
    "id": "a-0ijjr83",
@@ -996,7 +1061,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/0247_44_2026_tk_bratnudeln_600_g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1lm8xpp",
@@ -1006,7 +1072,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1035265_44_2026_chicken_fried_wings_750g_on?wid=200&hei=200"
   },
   {
    "id": "a-18urvhu",
@@ -1016,7 +1083,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1016606_44_2026_tk_edamame_bohnen_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1cpg6az",
@@ -1026,7 +1094,8 @@
    "menge": 400,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/2143_44_2026_fernoestliche_suppen_400_ml_3_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-12c2ope",
@@ -1036,7 +1105,8 @@
    "menge": 120,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/2204_44_2026_gebratene_nudeln_4_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0d1vngx",
@@ -1046,7 +1116,8 @@
    "menge": 25,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/2201_44_2026_pilzsortiment_getrocknet_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1mva1go",
@@ -1056,7 +1127,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1018923_44_2026_tk_gyoza_teigtaschen_400g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1v58tk0",
@@ -1066,7 +1138,8 @@
    "menge": 340,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/0597_44_2026_instantnudeln_4x85g_7_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-16b5lek",
@@ -1076,7 +1149,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1024160_44_2026_kimchispicy_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0i97rij",
@@ -1086,7 +1160,8 @@
    "menge": 550,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/0467_44_2026_tk_knusperente_auf_gemuesebett_qs_1_on?wid=200&hei=200"
   },
   {
    "id": "a-14sqb8d",
@@ -1096,7 +1171,8 @@
    "menge": 192,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1036912_44_2026_konjaknudel_cup_3_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0u0t764",
@@ -1106,7 +1182,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/3616_44_2026_krupuk_100_g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0r688vd",
@@ -1116,7 +1193,8 @@
    "menge": 580,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1041215_44_2026_asiagg_lychees_lych01_27812_on?wid=200&hei=200"
   },
   {
    "id": "a-05lj7t7",
@@ -1126,7 +1204,8 @@
    "menge": 84,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1033823_44_2026_matchalatte_strawberry_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-10i00fm",
@@ -1136,7 +1215,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1024552_44_2026_udonsoba_nudeln_300g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-10ihzj9",
@@ -1146,7 +1226,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1035971_44_2026_asiatischenudeln_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0p3muxi",
@@ -1156,7 +1237,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1039975_44_2026_indonesian_nut_mix_200g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0ge7lhf",
@@ -1166,7 +1248,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1008208_44_2026_onigiri_teriyaki_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0tredh5",
@@ -1176,7 +1259,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1033778_44_2026_asian_sweet_chili_pistachio_250g_2_on?wid=200&hei=200"
   },
   {
    "id": "a-1baiqz9",
@@ -1186,7 +1270,8 @@
    "menge": 335,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1045918_44_2026_pokebowl_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1oh2qcj",
@@ -1196,7 +1281,8 @@
    "menge": 350,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1045920_44_2026_pokebowlhahnchen_on_081026_124729?wid=200&hei=200"
   },
   {
    "id": "a-1fcpu2f",
@@ -1206,7 +1292,8 @@
    "menge": 430,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1036298_44_2026_tk_ramensuppe_430g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1yn12my",
@@ -1216,7 +1303,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1025863_44_2026_reispapier_250g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0towiy8",
@@ -1226,7 +1314,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1024263_44_2026_asiatischesauce_suess_sauer_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-02nxa13",
@@ -1236,7 +1325,8 @@
    "menge": 250,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/0806_44_2026_sesam_oel_erdnuss_oel_250_ml_2_on_comp_081026_174705?wid=200&hei=200"
   },
   {
    "id": "a-18qykt4",
@@ -1246,7 +1336,8 @@
    "menge": 120,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1036670_44_2026_sushimake_03_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1uqk4ij",
@@ -1256,17 +1347,19 @@
    "menge": 26,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1020125_44_2026_sushi_nori_blaetter_1_on?wid=200&hei=200"
   },
   {
-   "id": "a-10lywrn",
+   "id": "a-15p5657",
    "laden": "Aldi",
-   "name": "Asia Green Garden Tteokbokki",
-   "preis": 1.79,
-   "menge": 120,
+   "name": "Asia Green Garden Sushi-Reis",
+   "preis": 1.29,
+   "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1000891_44_2026_sushireis_on?wid=200&hei=200"
   },
   {
    "id": "a-0o6ta6z",
@@ -1276,7 +1369,8 @@
    "menge": 249,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1036689_44_2026_udon_nudel_bowl_aktion_3_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1wv2ta4",
@@ -1286,7 +1380,8 @@
    "menge": 580,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1013739_44_2026_wok_gemuese_580ml_3_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1lua438",
@@ -1296,7 +1391,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1015022_44_2026_wok_nudeln_250g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0b1dohs",
@@ -1306,7 +1402,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1027636_44_2026_asia_green_garden_wok_saucen_200g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1yiz5s1",
@@ -1316,7 +1413,8 @@
    "menge": 250,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1017449_44_2026_reisessig_und_mirin_245_250ml_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-026kdbu",
@@ -1326,7 +1424,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1045950_44_2026_asiapfannenmix_400g_on?wid=200&hei=200"
   },
   {
    "id": "a-0g0juwo",
@@ -1336,7 +1435,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1021998_28_2026_avocado_05_on_201026_132553?wid=200&hei=200"
   },
   {
    "id": "a-11xi58m",
@@ -1346,7 +1446,8 @@
    "menge": 120,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1000865_45_2023_minibabybel_fs_on?wid=200&hei=200"
   },
   {
    "id": "a-1tyv3pz",
@@ -1356,7 +1457,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6151_25_2026_bananen_bund_on_081026_115747?wid=200&hei=200"
   },
   {
    "id": "a-0oyuc4s",
@@ -1366,7 +1468,8 @@
    "menge": 1.5,
    "einheit": "kg",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1028289_44_2026_lighter_wool_15kg_1_15_kg_bbq_fire_lighters_on?wid=200&hei=200"
   },
   {
    "id": "a-1mj9iuw",
@@ -1376,7 +1479,8 @@
    "menge": 10,
    "einheit": "kg",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1026363_44_2026_holzbriketts_premium_10kg_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0ngln5n",
@@ -1386,7 +1490,8 @@
    "menge": 0.5,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1038450_48_2025_bioshots_ingwer500mlrotefruechte_on_comp2?wid=200&hei=200"
   },
   {
    "id": "a-0rs2tcq",
@@ -1396,7 +1501,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6145_25_2026_orangen_bio_on_201026_132445?wid=200&hei=200"
   },
   {
    "id": "a-1hagwof",
@@ -1406,7 +1512,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1033896_44_2026_biscottoflorenzbiscuitmix_on?wid=200&hei=200"
   },
   {
    "id": "a-028bc1a",
@@ -1416,7 +1523,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1016601_44_2026_choceurmilchmaeuseduocreme_karamell_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0t5sa4x",
@@ -1426,7 +1534,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1031834_44_2026_milchmaeuse_milchmixgetraenk_3_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-17t6q9j",
@@ -1436,7 +1545,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/9532_44_2026_tk_cuw_sahnerolle_erdbeer_1_on?wid=200&hei=200"
   },
   {
    "id": "a-1c5wbzh",
@@ -1446,7 +1556,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/9549_44_2026_tk_cuw_sahnerolle_zitrone_2_on?wid=200&hei=200"
   },
   {
    "id": "a-0p5mgxc",
@@ -1456,37 +1567,8 @@
    "menge": 900,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-03cdt9z",
-   "laden": "Aldi",
-   "name": "Danone Actimel Classic XXL",
-   "preis": 2.99,
-   "menge": 1200,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-1f2243f",
-   "laden": "Aldi",
-   "name": "Danone Actimel Erdbeere XXL",
-   "preis": 2.99,
-   "menge": 1200,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-1wa4ktu",
-   "laden": "Aldi",
-   "name": "Danone Actimel Kids XXL",
-   "preis": 2.99,
-   "menge": 1200,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6747_44_2026_currybockwurstxxl_01_on?wid=200&hei=200"
   },
   {
    "id": "a-1f5c7qv",
@@ -1496,7 +1578,8 @@
    "menge": 460,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1028114_44_2026_activia_joghurt_4_x_115_g_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1gmimuk",
@@ -1506,7 +1589,8 @@
    "menge": 750,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1006831_44_2026_domestos_wc_gel_750ml_3_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1cp3r07",
@@ -1516,7 +1600,8 @@
    "menge": 480,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1044069_44_2026_tk_droetkla_mia_famknobl480g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0uyn42w",
@@ -1526,7 +1611,8 @@
    "menge": 360,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1026528_44_2026_tk_dr_oetker_la_mia_grande_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0sy9kxq",
@@ -1536,7 +1622,8 @@
    "menge": 380,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1026517_44_2026_tk_dr_oetker_la_mia_grande_salami_1_on?wid=200&hei=200"
   },
   {
    "id": "a-1dk51mm",
@@ -1546,7 +1633,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1042521_44_2026_entenbrustfiletstreifennatur_400g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0wz967v",
@@ -1556,7 +1644,8 @@
    "menge": 1000,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1043513_44_2026_falschesfilet_on?wid=200&hei=200"
   },
   {
    "id": "a-02dref6",
@@ -1566,7 +1655,8 @@
    "menge": 0.75,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/9391_44_2026_cremant_de_loire_rose_aop_075_l_2_on?wid=200&hei=200"
   },
   {
    "id": "a-1r83zuo",
@@ -1576,7 +1666,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1038884_29_2026_galiamelone_03_on_201026_133530?wid=200&hei=200"
   },
   {
    "id": "a-0wzqd3f",
@@ -1586,17 +1677,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-0r1u711",
-   "laden": "Aldi",
-   "name": "GÉRamont Le Snack",
-   "preis": 2.22,
-   "menge": 150,
-   "einheit": "g",
-   "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1001526_17_2020_geramont_classic_200g_0002_comp_neu?wid=200&hei=200"
   },
   {
    "id": "a-1un69wf",
@@ -1606,7 +1688,8 @@
    "menge": 130,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1023023_44_2026_geramont_scheiben_fein_wuerzig_130g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0xlh1kb",
@@ -1616,7 +1699,8 @@
    "menge": 140,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1023025_44_2026_geramont_scheiben_zartes_duo_140g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0darl2h",
@@ -1626,7 +1710,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1034886_44_2026_gourmet_entenkeule_m_sauce_600g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-0ligp08",
@@ -1636,7 +1721,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6130_19_2026_granatapfel_0037_on_201026_152615?wid=200&hei=200"
   },
   {
    "id": "a-0z2hkz6",
@@ -1646,7 +1732,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6227_34_2026_grapefruit_tz_on_201026_134031?wid=200&hei=200"
   },
   {
    "id": "a-01xb8bn",
@@ -1656,7 +1743,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1038516_44_2026_gefluegelfrikadelle_xxl_600g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-17hto26",
@@ -1666,7 +1754,8 @@
    "menge": 125,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6186_37_2026_himbeeren_on_230926_174125?wid=200&hei=200"
   },
   {
    "id": "a-0i68y9i",
@@ -1676,7 +1765,8 @@
    "menge": 50,
    "einheit": "ml",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1041874_44_2026_winter_room_fragrance_with_sleeve_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0th2f0a",
@@ -1686,7 +1776,8 @@
    "menge": 1,
    "einheit": "Bund",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1042936_12_2026_schnittkraeuter_koriander_on_081026_143452?wid=200&hei=200"
   },
   {
    "id": "a-1d1djd3",
@@ -1696,7 +1787,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1003295_44_2026_landliebe_konfituere_winter_2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0nnpfd3",
@@ -1706,7 +1798,8 @@
    "menge": 125,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1022666_20_2024_leerdammerscheibenkaesesortiert_original7s140g_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1xk67ma",
@@ -1716,7 +1809,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1042178_39_2029_mandarinen04_on_231026_102906?wid=200&hei=200"
   },
   {
    "id": "a-03a9asq",
@@ -1726,17 +1820,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-1qc2eee",
-   "laden": "Aldi",
-   "name": "Manner Snack-Minis / Törtchen",
-   "preis": 2.79,
-   "menge": 300,
-   "einheit": "g",
-   "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6286_1010141_09_2026_mango_on_201026_131249?wid=200&hei=200"
   },
   {
    "id": "a-1odmr59",
@@ -1746,7 +1831,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1012511_44_2026_lammmedaillons_marxxl_kg_ca500g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-19j8ar4",
@@ -1756,7 +1842,8 @@
    "menge": 1000,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/7843_44_2026_jungeente_01mithaltungsform_on?wid=200&hei=200"
   },
   {
    "id": "a-1u37py1",
@@ -1766,7 +1853,8 @@
    "menge": 800,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1000843_44_2026_rind_rouladen_gewuerzt_xxl_800_g_on?wid=200&hei=200"
   },
   {
    "id": "a-1abjgnz",
@@ -1776,7 +1864,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/8111_30_2026_minipakchoi_02_on_081026_120340?wid=200&hei=200"
   },
   {
    "id": "a-1cu1jgj",
@@ -1786,7 +1875,8 @@
    "menge": 675,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1043988_44_2026_miracoli_xxl_saucen_750g_klassiker02_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-1mr7tf4",
@@ -1796,7 +1886,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6319_44_2026_nashibirnen_01_on_081026_130647?wid=200&hei=200"
   },
   {
    "id": "a-1ymoufn",
@@ -1806,7 +1897,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1037408_44_2026_crepeverschsorten180g_frischkaese_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-033kqfj",
@@ -1816,7 +1908,8 @@
    "menge": 308,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1030532_44_2026_pick_up_choco_u_milk_308g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-1eqv59j",
@@ -1826,7 +1919,8 @@
    "menge": 308,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1030530_44_2026_pick_up_choco_308g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-09zt7qy",
@@ -1836,7 +1930,8 @@
    "menge": 308,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1039229_44_2026_pick_up_salted_caramel_1_on?wid=200&hei=200"
   },
   {
    "id": "a-1fm63ub",
@@ -1846,7 +1941,8 @@
    "menge": 680,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1038133_44_2026_hasbro_play_doh_play_clay_8pcs_vibrant_3_on_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-0bu7iw1",
@@ -1856,7 +1952,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6136_44_2026_honigpomelo_01_an_ai_on_121026_182153?wid=200&hei=200"
   },
   {
    "id": "a-1knm6qh",
@@ -1866,7 +1963,8 @@
    "menge": 0.75,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1013583_14_2026_rotkaeppchentradition_01_on_110326_175514?wid=200&hei=200"
   },
   {
    "id": "a-00b8a2g",
@@ -1876,7 +1974,8 @@
    "menge": 320,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1003484_44_2026_rougetteofenkaese320g_gartenkraeuter_v2_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-07kp5la",
@@ -1886,7 +1985,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6906_42_2026_halloweenkuerbis_on_240926_123010?wid=200&hei=200"
   },
   {
    "id": "a-0iq6988",
@@ -1896,17 +1996,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-09k9hfn",
-   "laden": "Aldi",
-   "name": "Sun Snacks Cocktail-Mix",
-   "preis": 1.49,
-   "menge": 300,
-   "einheit": "g",
-   "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1040901_39_2026_speisekuerbis_on_comp_240926_124713?wid=200&hei=200"
   },
   {
    "id": "a-14roipm",
@@ -1916,7 +2007,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1022423_2026_tafeltraube_crunchy_on_081026_114859?wid=200&hei=200"
   },
   {
    "id": "a-1bktbnb",
@@ -1926,7 +2018,8 @@
    "menge": 480,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1034381_44_2026_waescheparfumperlenxxl_3_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-12u7s9h",
@@ -1936,7 +2029,8 @@
    "menge": 31,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1010562_44_2026_biomagenfein_on_comp?wid=200&hei=200"
   },
   {
    "id": "a-09f71ah",
@@ -1946,7 +2040,8 @@
    "menge": 240,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1012563_44_2026_jamonserrano_fs02_on?wid=200&hei=200"
   },
   {
    "id": "a-1wgm3ad",
@@ -1956,7 +2051,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1033515_44_2026_weihenstephanstreichzart_gesalzen_on?wid=200&hei=200"
   },
   {
    "id": "a-00s8pck",
@@ -1966,7 +2062,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1033516_44_2026_weihenstephanstreichfein_01_on?wid=200&hei=200"
   },
   {
    "id": "a-012fx0z",
@@ -1976,7 +2073,8 @@
    "menge": 90,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1043759_44_2026_wonka_oompa_loompa_90g_2_on?wid=200&hei=200"
   },
   {
    "id": "a-0ovt8lq",
@@ -1986,7 +2084,8 @@
    "menge": 90,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1043761_44_2026_wonka_tafel_90g_1_on?wid=200&hei=200"
   },
   {
    "id": "a-05hvr9i",
@@ -1996,7 +2095,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6160_36_2026_kiwigold_zespri_on_140826_095142?wid=200&hei=200"
   },
   {
    "id": "a-0plb3jx",
@@ -2006,7 +2106,8 @@
    "menge": 330,
    "einheit": "g",
    "bis": "2026-11-04",
-   "k": ""
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1037233_44_2026_zott_zottarella_mozzarella_roll_classic_foil_200g_on?wid=200&hei=200"
   },
   {
    "id": "a-1dt6h4c",
@@ -2016,7 +2117,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4003880005239_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-059edqo",
@@ -2026,7 +2128,8 @@
    "menge": 1,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/5411188134985_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-011z1bo",
@@ -2036,7 +2139,8 @@
    "menge": 95,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20659468?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1dpdxlm",
@@ -2046,7 +2150,8 @@
    "menge": 0.7,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01250488?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1co8qva",
@@ -2056,7 +2161,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3073781106336_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0wum8mt",
@@ -2066,7 +2172,8 @@
    "menge": 0.7,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/5011013100156_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-13j2iol",
@@ -2076,7 +2183,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01400660?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1p43xev",
@@ -2086,17 +2194,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-1siatjc",
-   "laden": "Kaufland",
-   "name": "Bepflanztes Herz",
-   "preis": 11.99,
-   "menge": null,
-   "einheit": "",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20611529?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1ankox9",
@@ -2106,7 +2205,8 @@
    "menge": 175,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006402035516_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1tjwmhc",
@@ -2116,7 +2216,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20703733?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1lkiz0p",
@@ -2126,7 +2227,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050004085129_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-15x7f1v",
@@ -2136,7 +2238,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4017100449116_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0pty9rm",
@@ -2146,7 +2249,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00370197FRa1-2?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1v20oge",
@@ -2156,7 +2260,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://media.kaufland.com/images/PPIM/Lago/c45998848_1.jpg"
   },
   {
    "id": "a-039rg28",
@@ -2166,7 +2271,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2248290000000_DE_V_9013-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-14d73ts",
@@ -2176,7 +2282,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00399105FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-185bhw1",
@@ -2186,7 +2293,8 @@
    "menge": 0.5,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3838471035729_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1t0ndct",
@@ -2196,7 +2304,8 @@
    "menge": 240,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260650731051_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ebuyjv",
@@ -2206,7 +2315,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20855698a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ctqwu1",
@@ -2216,7 +2326,8 @@
    "menge": 800,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01132722?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0arvhqc",
@@ -2226,17 +2337,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-0jezpex",
-   "laden": "Kaufland",
-   "name": "Danone Actimel XXL",
-   "preis": 2.79,
-   "menge": 1200,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01426502a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0rvt0ey",
@@ -2246,7 +2348,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00372571FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1i0htrm",
@@ -2256,7 +2359,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01395798FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-06qo5i5",
@@ -2266,7 +2370,8 @@
    "menge": 250,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00980386?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1sfn5bj",
@@ -2276,7 +2381,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01150881?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1wln0ln",
@@ -2286,7 +2392,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20689556FRb?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1jsgiij",
@@ -2296,7 +2403,8 @@
    "menge": 0.75,
    "einheit": "l",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01120090?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0jo7ybj",
@@ -2306,7 +2414,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4032549047976_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-16623a6",
@@ -2316,7 +2425,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4032549031104_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0yv3cby",
@@ -2326,7 +2436,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4032549035478_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1wd4tef",
@@ -2336,7 +2447,8 @@
    "menge": 370,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4032549031678_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-047zd74",
@@ -2346,7 +2458,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4032549047808_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0u50n96",
@@ -2356,7 +2469,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4032549039858_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0t3g5zu",
@@ -2366,7 +2480,8 @@
    "menge": 125,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00374272FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-16bhhe1",
@@ -2376,7 +2491,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00398644FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0yswdnz",
@@ -2386,7 +2502,8 @@
    "menge": 900,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01507117?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-18g84y5",
@@ -2396,7 +2513,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00397356FRf?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1aj2y1p",
@@ -2406,7 +2524,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00427732?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-03g1mkb",
@@ -2416,7 +2535,8 @@
    "menge": 125,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00943312?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1b0as63",
@@ -2426,7 +2546,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/41002728_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1oyu4kb",
@@ -2436,7 +2557,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00422428?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1m61cdu",
@@ -2446,7 +2568,8 @@
    "menge": 450,
    "einheit": "ml",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8001090510327_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0c9xswj",
@@ -2456,7 +2579,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8000755020461_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1am0wlm",
@@ -2466,7 +2590,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20753698a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-19flsv6",
@@ -2476,7 +2601,8 @@
    "menge": 791,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4262367686730_DE_V_1336-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-124cpzf",
@@ -2486,7 +2612,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050009715229_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1labzuq",
@@ -2496,7 +2623,8 @@
    "menge": 0.75,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01804756?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0eu4ku0",
@@ -2506,7 +2634,8 @@
    "menge": 48,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01259170?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0jvqlsd",
@@ -2516,7 +2645,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01253600h?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-15h03nr",
@@ -2526,7 +2656,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/09945748c?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1thkt0r",
@@ -2536,7 +2667,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006375008098_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0y92h59",
@@ -2546,7 +2678,8 @@
    "menge": 180,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260322215568_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0g9j0dr",
@@ -2556,7 +2689,8 @@
    "menge": 140,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4002468210454_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0vjo2qg",
@@ -2566,7 +2700,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4063367688409_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0p95l1o",
@@ -2576,7 +2711,8 @@
    "menge": 160,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/04302172?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0g5pmy7",
@@ -2586,7 +2722,8 @@
    "menge": 125,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4000381003030_DE_P.?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0lu8hsz",
@@ -2596,7 +2733,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4250241208581_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-150txhl",
@@ -2606,7 +2744,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050009054328_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0w5hc26",
@@ -2616,7 +2755,8 @@
    "menge": 250,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20969734-P-4046869001358?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1ytwreq",
@@ -2626,7 +2766,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01187571?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0oi86qf",
@@ -2636,7 +2777,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE01132622-P-4337185281594?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1i9fms1",
@@ -2646,7 +2788,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE00133450-P-4063367227615?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1s2jhx7",
@@ -2656,7 +2799,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE01064404-P-4337185429514?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1g8pt5p",
@@ -2666,7 +2810,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE01140950-P-5997003584277?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0143jpt",
@@ -2676,7 +2821,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/02400895_P_718633?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0tttvvs",
@@ -2686,7 +2832,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20616385_P_1072165?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0n50atz",
@@ -2696,7 +2843,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20673183-P-4063367505935?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-07wbbib",
@@ -2706,7 +2854,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01220808_P_153571?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1tgfx3k",
@@ -2716,7 +2865,8 @@
    "menge": 420,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8002920017634_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0rtihj2",
@@ -2726,7 +2876,8 @@
    "menge": 820,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01432984?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-176a2qd",
@@ -2736,7 +2887,8 @@
    "menge": 680,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4063367157271_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1qa4480",
@@ -2746,7 +2898,8 @@
    "menge": 330,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01041276?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-06tft6u",
@@ -2756,7 +2909,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01018226a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0kuieb7",
@@ -2766,7 +2920,8 @@
    "menge": 8,
    "einheit": "l",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01550255_P_935067-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-150vke9",
@@ -2776,7 +2931,8 @@
    "menge": 560,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4068445000043_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1kiarc3",
@@ -2786,7 +2942,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00014106?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-02c5fn6",
@@ -2796,7 +2953,8 @@
    "menge": 80,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/5903260268256_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-10nf4q1",
@@ -2806,7 +2964,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE00017182-P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0dbd23u",
@@ -2816,7 +2975,8 @@
    "menge": 550,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01144870FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1mms6x4",
@@ -2826,7 +2986,8 @@
    "menge": 800,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01198923?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0fr44nc",
@@ -2836,7 +2997,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00013583b?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0tm0w9l",
@@ -2846,17 +3008,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-18ysjil",
-   "laden": "Kaufland",
-   "name": "K-Wertschätze Frischwurst-Aufschnitt aus eigener Herstellung",
-   "preis": 0.99,
-   "menge": 100,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00013526FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1qslzx4",
@@ -2866,7 +3019,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050006160473_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1ff00k9",
@@ -2876,7 +3030,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050007244288_DE_V_5153-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-11r9h86",
@@ -2886,17 +3041,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-1socr78",
-   "laden": "Kaufland",
-   "name": "Käthchen-Gold Feines Weizenmehl",
-   "preis": 3.79,
-   "menge": 5,
-   "einheit": "kg",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050007244271_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-15hkw2t",
@@ -2906,7 +3052,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/03800713?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1wmeck9",
@@ -2916,17 +3063,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-15mx3og",
-   "laden": "Kaufland",
-   "name": "Knorr Fix",
-   "preis": 0.44,
-   "menge": 28,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8711200339860_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ma2ja8",
@@ -2936,7 +3074,8 @@
    "menge": 500,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20708228?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1fueqy1",
@@ -2946,7 +3085,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2220590000000_DE_V_0297-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1v5utvl",
@@ -2956,7 +3096,8 @@
    "menge": 113,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006894554106_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-04xzr6j",
@@ -2966,7 +3107,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01111631?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0qn7wjy",
@@ -2976,7 +3118,8 @@
    "menge": 280,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8006530112918_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-05dl18l",
@@ -2986,7 +3129,8 @@
    "menge": 500,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01544175?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0voqsp0",
@@ -2996,7 +3140,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01304949?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1ww1jn1",
@@ -3006,7 +3151,8 @@
    "menge": 80,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01297385?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-165oa36",
@@ -3016,7 +3162,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4250239104628_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1gx5y50",
@@ -3026,7 +3173,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8594181462037_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1c27m7x",
@@ -3036,7 +3184,8 @@
    "menge": 300,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20736963?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ozr847",
@@ -3046,7 +3195,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01110776?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0hwhi2d",
@@ -3056,17 +3206,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-0vnamx6",
-   "laden": "Kaufland",
-   "name": "Nesquik Snack",
-   "preis": 1.99,
-   "menge": 208,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4251680814654_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ckpqvv",
@@ -3076,7 +3217,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00174922?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1058j32",
@@ -3086,7 +3228,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00952394a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1xcn4wa",
@@ -3096,7 +3239,8 @@
    "menge": 720,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4009233000210_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0smjyne",
@@ -3106,7 +3250,8 @@
    "menge": 0.5,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3850131005552_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1qvslae",
@@ -3116,7 +3261,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00370254FRb-2?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0by2e39",
@@ -3126,7 +3272,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00378992FRc-4?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0z9jet2",
@@ -3136,7 +3283,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260287440210_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0jzek8a",
@@ -3146,7 +3294,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050009156428_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0rrqvbq",
@@ -3156,7 +3305,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3850104008443_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-10klat3",
@@ -3166,7 +3316,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01120962?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-00x1hy8",
@@ -3176,7 +3327,8 @@
    "menge": 105,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260071794451_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0z4f5ea",
@@ -3186,7 +3338,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01601467?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1wlw2eu",
@@ -3196,7 +3349,8 @@
    "menge": 90,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01197920-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1pl428h",
@@ -3206,7 +3360,8 @@
    "menge": 80,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00134361?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-12ora8y",
@@ -3216,7 +3371,8 @@
    "menge": 1,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01093629TB?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-03vl0en",
@@ -3226,7 +3382,8 @@
    "menge": 180,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4000504174432_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1glh4sz",
@@ -3236,7 +3393,8 @@
    "menge": 125,
    "einheit": "g",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01188344?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ssplex",
@@ -3246,7 +3404,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01222627?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0fe0mrl",
@@ -3256,7 +3415,8 @@
    "menge": 600,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01126932-3?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0dc09we",
@@ -3266,7 +3426,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01041988a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0noxxfe",
@@ -3276,7 +3437,8 @@
    "menge": 10,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4007606200328_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-148lrh6",
@@ -3286,7 +3448,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2200670000000_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-11yzlbo",
@@ -3296,7 +3459,8 @@
    "menge": 280,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4011800840518_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-12uic9j",
@@ -3306,7 +3470,8 @@
    "menge": 255,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/03300100?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1jufqjh",
@@ -3316,7 +3481,8 @@
    "menge": 360,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4059373601532_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1tv9ab7",
@@ -3326,7 +3492,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8600939506936_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-01jbfrv",
@@ -3336,7 +3503,8 @@
    "menge": 800,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4002473960351_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1fyyuwa",
@@ -3346,7 +3514,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00374264FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-14fw6ez",
@@ -3356,7 +3525,8 @@
    "menge": 1.5,
    "einheit": "kg",
    "bis": "2026-10-28",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00372573FRb-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-16fuamb",
@@ -3366,7 +3536,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01195648FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-04s7akv",
@@ -3376,7 +3547,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00987133FR-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1t73zdq",
@@ -3386,7 +3558,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20837905?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0fws1s0",
@@ -3396,7 +3569,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260012587999_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1gc92zc",
@@ -3406,7 +3580,8 @@
    "menge": 340,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/9120003412332_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0nnat5z",
@@ -3416,7 +3591,8 @@
    "menge": 135,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01343126?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0wpspz7",
@@ -3426,7 +3602,8 @@
    "menge": 0.7,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00908671?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0q96dnw",
@@ -3436,7 +3613,8 @@
    "menge": 250,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/03836095?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-05x47kk",
@@ -3446,7 +3624,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050009050337_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1dzh959",
@@ -3456,7 +3635,8 @@
    "menge": 160,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/5997010301126_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1anyv01",
@@ -3466,7 +3646,8 @@
    "menge": 0.2,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4015533066603_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0u88wsl",
@@ -3476,7 +3657,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4071800008653_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1l9by1b",
@@ -3486,7 +3668,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20619691?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1jpmric",
@@ -3496,7 +3679,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4056838210193_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ev2uio",
@@ -3506,7 +3690,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01526481FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0mqs8fg",
@@ -3856,7 +4041,8 @@
    "menge": 1000,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:d2451ba4-057a-48ef-b828-f8097bdf1a4c/584510.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-037twon",
@@ -3866,7 +4052,8 @@
    "menge": 4.995,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:957e9d37-4434-48ac-b4a4-d6704b9ed355/54703400.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-18btgv9",
@@ -3876,7 +4063,8 @@
    "menge": 5.03,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:3bc98a71-928d-4e8e-bdb9-ea78ebcc2204/54703400_01.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-16iqsv0",
@@ -3886,7 +4074,8 @@
    "menge": 5,
    "einheit": "Stk",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:6f4ec6b4-ee55-4b54-a6e3-4fec3fbdcc59/KW37_BK_Quarkbaellchen.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1j9ql1j",
@@ -3896,7 +4085,8 @@
    "menge": 240,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:4fd493c8-0b98-43f7-a64e-ed976a7bcccc/56607690.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0br35c7",
@@ -3906,7 +4096,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:ecc6a54b-15ce-4779-85ed-8ef6b02cbd2c/27521609.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1oq4th9",
@@ -3916,7 +4107,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:6138d49d-e7fa-4acb-889a-a0dc759eadfc/51663607.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-00u4m8b",
@@ -3926,7 +4118,8 @@
    "menge": 100,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:825eb0a3-2824-4618-bcac-d554efdca12b/55369676.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0ub644f",
@@ -3936,7 +4129,8 @@
    "menge": 110,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:91114e60-2780-4f73-a568-0f882ccb5164/55369676_01.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-02895ep",
@@ -3946,7 +4140,8 @@
    "menge": 120,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:c03b3fa8-be22-47e2-b761-89ec7512eec6/3684540.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1sl15ox",
@@ -3956,7 +4151,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:9576f9fa-65c1-4bf5-a8ff-afe1c2f639bf/34964928.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0vuijzv",
@@ -3966,7 +4162,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:32ba26e3-2957-4a18-8136-b21686efcb5d/41705331.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0pqc2e6",
@@ -3976,7 +4173,8 @@
    "menge": 450,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:0ce437f0-7178-4867-b690-5ebe90d28768/57897942.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1g9qbdf",
@@ -3986,7 +4184,8 @@
    "menge": 300,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:78c0a484-da79-4a7e-af8f-0a0d595d0a5a/57176247.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0tm8rdh",
@@ -3996,17 +4195,8 @@
    "menge": 530,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-08yu0t6",
-   "laden": "Penny",
-   "name": "EXQUISA Skyr Drink",
-   "preis": 1.49,
-   "menge": 250,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:f87e4570-a547-4ac2-8e75-4bd50d21e8c8/35022296_01.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0i9mtlg",
@@ -4016,7 +4206,8 @@
    "menge": 1,
    "einheit": "l",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:8c30b513-43f5-426c-acfd-7666a82c156d/28064319.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-196q9x9",
@@ -4026,7 +4217,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:43db56ad-484a-45d8-b4f8-c50d0f28dd17/38006703.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0japkhn",
@@ -4036,7 +4228,8 @@
    "menge": 1660,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:a9420c14-d2c5-4d08-a9f9-d7884ff2b538/25537148.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0olcspv",
@@ -4046,7 +4239,8 @@
    "menge": 1,
    "einheit": "kg",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:c2bb26e9-6ede-41d2-97d3-bcd2b5d146c1/41607289.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0sklnsf",
@@ -4056,7 +4250,8 @@
    "menge": 80,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:70bac971-6626-4a0b-882d-a08b9e5efb14/43134613.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0lc2lxa",
@@ -4066,7 +4261,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:1e8b1a66-7abe-42be-b779-2e6df02a4874/25982617.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-19wi6ev",
@@ -4076,7 +4272,8 @@
    "menge": 350,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:30667dc3-3064-47db-bc3c-421547459757/56711889.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1oth092",
@@ -4086,7 +4283,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:7945bfc5-74bf-4dbb-913c-ba2cfff57390/57690866.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0djpm12",
@@ -4096,7 +4294,8 @@
    "menge": 1000,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:0f97ab96-9b44-435f-8dd3-c941d255b2ba/26263099.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1m5q2kr",
@@ -4106,7 +4305,8 @@
    "menge": 150,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:0ed90bc6-5b0a-4a4b-ae5b-3ea19fa48506/26382401.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1ydrff1",
@@ -4116,7 +4316,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:e96eaec8-e91d-4b36-af41-0f378caa543e/KW44_Rabattaktion_Maggi.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-12oureb",
@@ -4126,7 +4327,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:fa6cb847-39c4-4768-9955-8930ecd7565f/52941799.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1wdl8dw",
@@ -4136,7 +4338,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:99c0fe4e-fd0e-4d6a-9211-b75fdd007093/32203086_01.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0dssaca",
@@ -4146,7 +4349,8 @@
    "menge": 380,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:a92a85f4-c2d6-45cc-b454-180af9e3c128/9686110.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-01swqqp",
@@ -4156,7 +4360,8 @@
    "menge": 185,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:d1bce35d-cd7b-40be-bb68-7456056e4f53/30823410.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0ejiiip",
@@ -4166,7 +4371,8 @@
    "menge": 500,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:38422086-16c6-4014-a54c-07864c5be42d/2989120.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0hm2578",
@@ -4176,7 +4382,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:bb47ffda-9a7a-4812-beca-bfa59aaa4a31/53338014.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1fbb6xc",
@@ -4186,7 +4393,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:0a63d681-c3cb-4c01-8eb3-c2272552f829/42169904.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0c5cwi1",
@@ -4196,7 +4404,8 @@
    "menge": 450,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:5098f24a-2f17-44b9-a312-9088705d3df2/39916227.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1ymo948",
@@ -4206,7 +4415,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:622d92f5-ffd6-40d3-9c26-a4c432b769e7/52772763.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1wt7zja",
@@ -4216,7 +4426,8 @@
    "menge": 283.5,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:5dc5a521-e68d-431e-908c-c631002fcd3d/20324257_01.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1xxcexi",
@@ -4226,7 +4437,8 @@
    "menge": 240,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:78adf446-33f0-4898-b15d-f00890e84f0a/20324257.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-12w757f",
@@ -4236,7 +4448,8 @@
    "menge": 500,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:094807f0-204a-46bb-8129-753eb2f8807c/56683332.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1jnwd2y",
@@ -4246,7 +4459,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:6fefbf8f-00d6-434d-8072-4afe9810655c/28669892.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1uqdklt",
@@ -4256,7 +4470,8 @@
    "menge": 750,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:4bc89230-39ca-4492-8fc9-3b9fcc7f1581/41493126.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0csg412",
@@ -4266,7 +4481,8 @@
    "menge": 320,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:515600c4-a9ed-4226-bbc5-317657d7fa13/7359760.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0gembrr",
@@ -4276,7 +4492,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:ed85f32c-35fe-487f-821b-766d8e491bed/37526564.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0y6do52",
@@ -4286,7 +4503,8 @@
    "menge": 25,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:b30768da-f487-4d10-a227-ed10968cb6a6/53419956.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-04qnxwz",
@@ -4296,7 +4514,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:855b67be-daa6-4d23-ab5b-e07c4540991c/942460.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1fgea89",
@@ -4306,7 +4525,8 @@
    "menge": 180,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:4a30b81e-db31-4b36-844e-1681a819ef5e/942460_01.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1djvj6q",
@@ -4316,7 +4536,8 @@
    "menge": 200,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:85565378-9365-4891-bf49-89369770b572/55803214_neu.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0c652ff",
@@ -4326,7 +4547,8 @@
    "menge": 250,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:8c8d898e-593c-492b-9e53-74af5b007a15/57368432.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-073d4s6",
@@ -4336,7 +4558,8 @@
    "menge": 450,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:2ce446f5-416e-4da6-8320-32822737b3fa/24874822.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1if02jg",
@@ -4346,7 +4569,8 @@
    "menge": 400,
    "einheit": "ml",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:da3f92c4-f3d1-4809-9756-6b89110f4f49/32786295.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0bhkssg",
@@ -4356,7 +4580,8 @@
    "menge": 50,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:18b7e35b-ab4c-4641-9cb6-9cfd98a1a7d9/36774093.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0l9o2nr",
@@ -4366,7 +4591,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:7e8ac2ea-829c-4365-a4b2-fd367f796913/55977453.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0lxlsed",
@@ -4376,17 +4602,8 @@
    "menge": 500,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
-  },
-  {
-   "id": "a-02h1haf",
-   "laden": "Penny",
-   "name": "WIESBAUER Frühstücks Aufschnitt",
-   "preis": 1.49,
-   "menge": 150,
-   "einheit": "g",
-   "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:f2d610ae-f35c-4bc7-8301-49adc6ac0c0e/51489875.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-1ywm0em",
@@ -4396,7 +4613,8 @@
    "menge": null,
    "einheit": "",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:fc89aaef-a378-4d10-a3e3-1df7aecd3e26/51419108.png?impolicy=penny&imwidth=120"
   },
   {
    "id": "a-0vuhoqf",
@@ -4406,7 +4624,8 @@
    "menge": 400,
    "einheit": "g",
    "bis": "2026-10-31",
-   "k": ""
+   "k": "",
+   "bild": "https://cdn.penny.de/dam/jcr:97dde798-eeec-4a79-ab67-1d3b8de2c55e/22264573.png?impolicy=penny&imwidth=120"
   }
  ]
 }
