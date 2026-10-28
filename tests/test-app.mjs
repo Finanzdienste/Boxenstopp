@@ -147,21 +147,36 @@ check((await zeile('Knoblauch').locator('.item-qty').innerText()).replace(/\s+/g
 check((await zeile('Öl, neutral').innerText()).includes('Butter Chicken: 10 g'), 'Öl mit Text statt Menge');
 check(await page.locator('#forrow .forchip').count() === 2, '„Für“: Butter Chicken und Teriyaki Bowl');
 // Angebote auf der Liste und die Empfehlung (tests/daten/angebote.json: das Aldi-Hähnchen, 600 g 5,19 € – 24 % unter dem Richtpreis)
-const huhnAngebot = zeile('Hähnchenbrustfilet').locator('.l-angebot');
-check(await bis(async () => (await huhnAngebot.count()) === 1) && (await huhnAngebot.innerText()).replace(/\s+/g, ' ') === '−24 % bei Aldi: 600 g 5,19 €', `auf der Liste: Hähnchen gerade bei Aldi im Angebot (${await huhnAngebot.innerText().catch(() => '–')})`);
-check(await zeile('Basmati- oder Jasminreis').locator('.l-angebot').count() === 0, 'Reis nicht – der ist nirgends im Angebot');
+const huhnAngebote = zeile('Hähnchenbrustfilet').locator('.l-angebote');
+const txt = async (loc) => (await loc.innerText().catch(() => '–')).replace(/\s+/g, ' ');
+check(await bis(async () => (await huhnAngebote.count()) === 1) && (await txt(huhnAngebote.locator('.l-angebot'))) === '−24 % am günstigsten bei Aldi: 600 g 5,19 € · 8,65 €/kg', `auf der Liste: wo Hähnchen gerade am günstigsten ist (${await txt(huhnAngebote)})`);
+check(await zeile('Basmati- oder Jasminreis').locator('.l-angebote').count() === 0, 'Reis nicht – der ist nirgends im Angebot');
+check(await bis(async () => (await page.locator('#l-tipp').isVisible()) && (await txt(page.locator('#l-tipp'))).includes('Aldi – 1 Sache im Angebot, ≈')), `oben über der Liste: am günstigsten einkaufen bei Aldi (${await txt(page.locator('#l-tipp'))})`);
+// Ein eigenes Angebot dazu: Lidl hat das Hähnchen auch, je Kilo etwas teurer
+await page.click('.tab[data-tab="angebote"]');
+await page.click('.a-eigene summary');
+await page.fill('#a-text', 'Lidl Hähnchenbrustfilet 400 g 3,79');
+await page.click('#a-los');
+await page.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await huhnAngebote.locator('.l-auch').count()) === 1) && (await txt(huhnAngebote.locator('.l-auch'))) === 'Auch: Lidl 9,48 €/kg', `und wo es sonst noch im Angebot ist, mit dem Preis je Kilo (${await txt(huhnAngebote)})`);
 await page.click('.tab[data-tab="angebote"]');
 const tipp = page.locator('.a-tipp');
-check(await bis(async () => (await tipp.count()) === 1) && (await tipp.locator('.a-tipp-k').textContent()) === 'Empfehlung für eure Liste' && (await tipp.locator('.a-tipp-t b').innerText()) === 'Aldi' && (await tipp.locator('.a-tipp-d').innerText()).replace(/\s+/g, ' ') === '1 Sache von eurer Liste im Angebot: Hähnchenbrustfilet −24 %.', `oben die Empfehlung: Aldi, wegen des Hähnchens (${(await tipp.innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 120)})`);
+check(await bis(async () => (await tipp.count()) === 1) && (await tipp.locator('.a-tipp-k').textContent()) === 'Empfehlung für eure Liste' && (await tipp.locator('.a-tipp-t b').innerText()) === 'Aldi' && (await txt(tipp.locator('.a-tipp-d'))) === '1 Sache von eurer Liste im Angebot: Hähnchenbrustfilet −24 %.' && (await txt(tipp.locator('.a-tipp-n'))).startsWith('Danach: Lidl ≈'), `oben die Empfehlung: Aldi, wegen des Hähnchens; danach Lidl (${(await txt(tipp)).slice(0, 140)})`);
 await tipp.locator('[data-a-laden="Aldi"]').click();
 check(await page.locator('.a-laeden-chips [data-a-laden="Aldi"][aria-pressed="true"]').count() === 1 && (await tipp.innerText()).includes('✓ gewählt'), '„Zu Aldi“ wählt den Laden');
+await page.click('.a-laeden-chips [data-a-laden="Lidl"]');
+await page.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await huhnAngebote.locator('.l-dein').count()) === 1) && (await txt(huhnAngebote.locator('.l-dein'))) === 'Bei Lidl: 400 g 3,79 € · 9,48 €/kg −16 %' && (await huhnAngebote.locator('.l-auch').count()) === 0 && (await txt(huhnAngebote.locator('.l-angebot'))).includes('am günstigsten bei Aldi'), `mit Lidl gewählt: am günstigsten bleibt Aldi, darunter das Angebot bei Lidl (${await txt(huhnAngebote)})`);
+await page.click('.tab[data-tab="angebote"]');
 await page.click('.a-laeden-chips [data-a-laden="Kaufland"]');
 await page.click('.tab[data-tab="einkauf"]');
-check(await bis(async () => (await huhnAngebot.count()) === 0), 'mit Kaufland gewählt: kein Hähnchen-Angebot auf der Liste – Kaufland hat keins');
+check(await bis(async () => (await huhnAngebote.locator('.l-dein').count()) === 0 && (await huhnAngebote.locator('.l-auch').count()) === 1), 'mit Kaufland gewählt (hat kein Hähnchen): wieder „Auch: Lidl“');
 await page.click('.tab[data-tab="angebote"]');
 await page.click('.a-laeden-chips [data-a-laden=""]');
+await page.click('[data-act="a-leeren"]');
+await page.click('[data-act="a-leeren-ja"]');
 await page.click('.tab[data-tab="einkauf"]');
-check(await bis(async () => (await huhnAngebot.count()) === 1), 'wieder alle Läden: der Hinweis ist zurück');
+check(await bis(async () => (await huhnAngebote.locator('.l-auch').count()) === 0 && (await huhnAngebote.locator('.l-angebot').count()) === 1), 'eigenes Angebot wieder weg: nur noch Aldi');
 const offenVorher = await badge();
 check(offenVorher === 17, `17 offene Einträge (${offenVorher})`);
 

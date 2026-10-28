@@ -9,20 +9,64 @@
  */
 import { app, $, melde } from './kern.js';
 import { lobKlein } from './lob.js';
-import { euro, kostenListe } from './kosten.js';
+import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
 import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren } from './liste.js';
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
 import { nachBereichen, alsText, abteilungVon } from './bereiche.js';
 import { zutatImg } from './bilder.js';
-import { besteJeZutat, rabattText, angebotMenge, schluesselRaten } from './angebote.js';
+import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, GUENSTIG_AB } from './angebote.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
 let leerenFragen = false;
 let trennenFragen = false;
 let formular = null; // null | { token, name, fehler } – token kann aus einem Link kommen
-let angebotJe = new Map(); // je Zutat das günstigste Angebot (Reiter Angebote, gewählter Laden) – neu bei jedem Zeichnen
+let angebotJe = new Map(); // je Zutat die Angebote aller Läden, das günstigste zuerst – neu bei jedem Zeichnen
+
+/* ------------------------------------------------- Angebote auf der Liste */
+
+// Menge und Preis nicht mitten auseinanderbrechen („1,49 €“, „500 g“)
+const fest = (t) => String(t).replace(/(\d) (?=\S)/g, '$1\u00a0');
+/** „600 g 5,19 € · 8,65 €/kg“ – die Packung und, wenn es in Gramm geht, der Preis je Kilo. */
+const preisText = (a) => [angebotMenge(a), grundpreis(a)].filter(Boolean).map(fest).join(' · ');
+/** Kurz für „auch hier“: der Preis je Kilo, sonst die Packung. */
+const kurzPreis = (a) => fest(grundpreis(a, { immer: true }) || angebotMenge(a));
+
+/**
+ * Unter einem Eintrag: wo er gerade am günstigsten ist (das beste Angebot
+ * aller Läden), beim gewählten Laden, wenn der ihn auch im Angebot hat, und
+ * wo sonst noch. „Am günstigsten“ heißt es nur, wenn es wirklich günstiger
+ * ist als der übliche Discounter-Preis – sonst „im Angebot“.
+ */
+function angebotZeilen(liste) {
+  if (!liste?.length) return '';
+  const [best, ...rest] = liste;
+  const gut = best.rabatt !== null && best.rabatt >= GUENSTIG_AB;
+  const kommentar = best.rabatt === null || gut ? '' : best.rabatt < 0 ? ' – teurer als sonst' : ' – etwa wie sonst';
+  let html = gut
+    ? `<span class="l-angebot"><b>${esc(rabattText(best.rabatt))}</b> am günstigsten bei ${esc(best.a.laden)}: ${esc(preisText(best.a))}</span>`
+    : `<span class="l-angebot l-matt">Im Angebot bei ${esc(best.a.laden)}: ${esc(preisText(best.a))}${kommentar}</span>`;
+  const mein = app.ladenJetzt();
+  const dort = mein && mein !== best.a.laden ? rest.find((x) => x.a.laden === mein) : null;
+  if (dort) html += `<span class="l-dein">Bei ${esc(mein)}: ${esc(preisText(dort.a))}${dort.rabatt !== null && dort.rabatt >= GUENSTIG_AB ? ` <b>${esc(rabattText(dort.rabatt))}</b>` : ''}</span>`;
+  const sonst = rest.filter((x) => x !== dort);
+  if (sonst.length) html += `<span class="l-auch">Auch: ${sonst.slice(0, 3).map((x) => `${esc(x.a.laden)} ${esc(kurzPreis(x.a))}`).join(' · ')}${sonst.length > 3 ? ` · +${sonst.length - 3}` : ''}</span>`;
+  return html;
+}
+
+/** Oben über der Liste: in welchem Laden die offenen Einträge mit den Angeboten am günstigsten sind. */
+function tippZeichnen() {
+  const el = $('#l-tipp');
+  if (!el) return;
+  const wahl = app.listeDa ? ladenWahl(offenJeZutat(app.stand, app), app.angeboteJetzt(), app) : [];
+  el.hidden = !wahl.length;
+  if (!wahl.length) { el.innerHTML = ''; return; }
+  const [best, ...rest] = wahl;
+  const danach = rest.slice(0, 2).map((w) => `${esc(w.laden)} ≈ ${esc(euro(w.ersparnis))}`).join(' · ');
+  const n = best.treffer.length;
+  el.innerHTML = `<p><span class="l-tipp-k">Am günstigsten einkaufen</span><b>${esc(best.laden)}</b> – ${n === 1 ? '1 Sache' : `${n} Sachen`} im Angebot, ≈ ${esc(euro(best.ersparnis))} günstiger als sonst${danach ? `<small>Danach: ${danach}</small>` : ''}</p><button type="button" class="linkbtn" data-act="angebote">Angebote</button>`;
+}
 
 const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || rid;
 
@@ -47,16 +91,15 @@ function zeile([k, d]) {
     return `<span>${t}</span>`;
   }).join('');
   const von = fertig && d.by ? `<span class="item-by">abgehakt von ${d.by === app.name() ? 'dir' : esc(d.by)}</span>` : '';
-  // Gerade im Angebot (günstiger als sonst)? Eigene Einträge über den Namen („Hähnchenbrust“)
-  const ang = fertig ? null : angebotJe.get(d.custom ? schluesselRaten(d.name, app.katalog) : k);
-  // Menge und Preis nicht mitten auseinanderbrechen („1,49 €“)
-  const angebot = ang ? `<span class="l-angebot"><b>${esc(rabattText(ang.rabatt))}</b> bei ${esc(ang.a.laden)}: ${esc(angebotMenge(ang.a).replace(/(\d) (?=\S)/g, '$1\u00a0'))}</span>` : '';
+  // Gerade im Angebot, und wo am günstigsten? Eigene Einträge über den Namen („Hähnchenbrust“)
+  const angebot = fertig ? '' : angebotZeilen(angebotJe.get(d.custom ? schluesselRaten(d.name, app.katalog) : k));
   return `<li class="item${fertig ? ' is-done' : ''}">
 <button type="button" class="cb" role="checkbox" aria-checked="${fertig}" data-check="${esc(k)}" aria-label="${esc(d.name)}">${ic('check')}</button>
 ${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungVon(k, d, app.katalog) })}
-<div class="item-main"><span class="item-name">${esc(d.name)}</span>${herkunft || angebot ? `<span class="item-sub">${herkunft}${angebot}</span>` : ''}${von}</div>
+<div class="item-main"><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${von}</div>
 <span class="item-qty">${esc(mengeText)}${etwa ? `<small>${esc(etwa)}</small>` : ''}</span>
 <button type="button" class="x" data-del="${esc(k)}" aria-label="${esc(d.name)} löschen">${X}</button>
+${angebot ? `<div class="l-angebote">${angebot}</div>` : ''}
 </li>`;
 }
 
@@ -65,13 +108,15 @@ export function listeZeichnen() {
   fuerZeichnen();
   fruehstueckZeichnen();
   if (!app.listeDa) {
+    tippZeichnen();
     body.innerHTML = '<p class="loading">Liste wird geladen…</p>';
     $('#l-count').textContent = '';
     $('#l-foot').innerHTML = '';
     return;
   }
   const eintraege = Object.entries(app.stand.items);
-  angebotJe = besteJeZutat(app.angeboteJetzt(), app, { laden: app.ladenJetzt() });
+  angebotJe = angeboteJeZutat(app.angeboteJetzt(), app);
+  tippZeichnen();
   const gruppen = nachBereichen(app.stand, app.katalog);
   const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0);
   const fertig = eintraege.filter(([, d]) => erledigt(d));

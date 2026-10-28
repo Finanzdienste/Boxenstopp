@@ -7,8 +7,9 @@ import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
-import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE, angebotRabatt, grundpreis, istHaehnchen, nachRabatt, besteJeZutat, ladenWahl, rabattText } from '../js/angebote.js';
-import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg } from '../js/liste.js';
+import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE, angebotRabatt, grundpreis, istHaehnchen, nachRabatt, besteJeZutat, ladenWahl, rabattText, angeboteJeZutat } from '../js/angebote.js';
+import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg, opTeil, opHaken } from '../js/liste.js';
+import { offenJeZutat } from '../js/kosten.js';
 import { systemText, nutzerText } from '../js/ki.js';
 import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, mitAusweichen, kaufdaLesen, kaufdaDoppelt, kaufdaMenge, kalenderwoche } from '../werkzeug/angebote.mjs';
 
@@ -89,6 +90,12 @@ const beste = besteJeZutat(ang, preisDaten);
 check(beste.get('haehnchenbrust').a.laden === 'Aldi' && beste.get('zucchini').a.laden === 'Lidl' && !beste.has('rinderhack') && besteJeZutat(ang, preisDaten, { laden: 'Lidl' }).get('haehnchenbrust').a.name === 'H L', 'je Zutat das beste Angebot ab 5 % – auf Wunsch nur aus einem Laden');
 const empf = ladenWahl({ haehnchenbrust: 9.05, zucchini: 0.79, rinderhack: 5.79 }, ang, preisDaten);
 check(empf.length === 2 && empf[0].laden === 'Aldi' && nah(empf[0].ersparnis, rab(ang[0]) * 9.05) && empf[1].laden === 'Lidl' && empf[1].treffer.length === 2 && nah(empf[1].ersparnis, rab(ang[1]) * 9.05 + rab(ang[2]) * 0.79), `Empfehlung: Aldi spart am meisten (${empf.map((w) => `${w.laden} ${w.ersparnis.toFixed(2)} €`).join(', ')}), Rewe ohne nennenswerten Rabatt fällt raus`);
+const jeZ = angeboteJeZutat([...ang, { laden: 'Aldi', k: 'haehnchenbrust', name: 'H A2', preis: 9.99, menge: 1, einheit: 'kg' }, { laden: 'Penny', k: 'haehnchenbrust', name: 'H P', preis: 8.5, menge: 12, einheit: 'Pck' }], preisDaten);
+check(jeZ.get('haehnchenbrust').map((x) => x.a.name).join() === 'H A,H L,H P' && jeZ.get('zucchini').length === 1 && !jeZ.has('reis'), 'für die Liste: je Zutat alle Läden, je Laden das beste, das günstigste zuerst, Unvergleichbares hinten');
+check(grundpreis({ preis: 7.99, menge: 1, einheit: 'kg' }, { immer: true }) === '7,99 €/kg' && grundpreis({ preis: 3.79, menge: 400, einheit: 'g' }, { immer: true }) === '9,48 €/kg', 'Grundpreis auf Wunsch auch bei genau 1 kg');
+const listeStand = anwenden(leer(), [opTeil('haehnchenbrust', 'chili', { q: 800, u: 'g' }, katalog.haehnchenbrust), opTeil('haehnchenbrust', 'gyros', { q: 400, u: 'g' }, katalog.haehnchenbrust), opTeil('reis', 'chili', { q: 240, u: 'g' }, katalog.reis)]);
+const offen = offenJeZutat(anwenden(listeStand, opHaken(listeStand, 'reis', true, 'Tobi')), preisDaten);
+check(nah(offen.haehnchenbrust, 1200 * daten.preise.haehnchenbrust.je_g) && !offen.reis, 'offen je Zutat zum Richtpreis: Hähnchen aus zwei Rezepten, Abgehaktes nicht');
 const chiliR = daten.rezepte.find((r) => r.id === 'chili');
 const bohnen = rezeptTreffer(chiliR, [{ laden: 'Aldi', k: 'kidney', name: 'Kidneybohnen', preis: 0.59, menge: 400, einheit: 'g' }], preisDaten);
 check(nah(bohnen.ersparnisBox * 8, (1 - 0.59 / 0.69) * daten.preise.kidney.je_g * chiliR.items.find((it) => it.k === 'kidney').g), `Dosen nicht schöngerechnet: 0,59 statt 0,69 € je Dose spart im Chili ${(bohnen.ersparnisBox * 8).toFixed(2)} €`);
@@ -155,16 +162,16 @@ check(kalenderwoche(bezug) === '2026-44' && kalenderwoche(new Date('2027-01-01T1
 const lp = lidlProspekte(fix('lidl-prospekte.html'));
 check(lp.length === 2 && lp[0].von === '2026-10-26' && lp[0].bis === '2026-10-31' && lp[1].von === '2026-11-02' && lp[0].id.startsWith('aktionsprospekt-26-10-2026'), `Lidl: Prospekte mit Datum aus der Übersicht, doppelte einmal (${lp.map((p) => p.id).join(', ')})`);
 
-// --- kaufDA: Rewe, Edeka, Netto von einer Stichwortseite (Testseite im Aufbau von kaufDA, Angebote ausgedacht)
+// --- kaufDA: Rewe und Edeka von einer Stichwortseite (Testseite im Aufbau von kaufDA, Angebote ausgedacht)
 const kd = kaufdaLesen(fix('kaufda-stichwort.html'));
 const kdNamen = kd.map((a) => `${a.laden}: ${a.name}`);
-check(kd.length && kd.every((a) => ['Rewe', 'Edeka', 'Netto'].includes(a.laden)) && !kdNamen.some((n) => /Musterhof/i.test(n)), `kaufDA: nur Rewe, Edeka, Netto – Penny haben wir direkt (${kdNamen.join(' · ')})`);
+check(kd.length && kd.every((a) => ['Rewe', 'Edeka'].includes(a.laden)) && !kdNamen.some((n) => /Musterhof|Hackfleisch vom Hähnchen/i.test(n)), `kaufDA: nur Rewe und Edeka – Penny haben wir direkt, Netto nicht (${kdNamen.join(' · ')})`);
 check(!kdNamen.some((n) => /gemischt|Schweine|Aufschnitt|Puten Hack/.test(n)) && kdNamen.includes('Rewe: Rinder-Hackfleisch') && kdNamen.includes('Edeka: Hofgut Muster Rinder-Hackfleisch'), 'kaufDA: Schwein (auch nur „vom Rind und Schwein“ in der Beschreibung), Putenhack und Aufschnitt bleiben draußen');
 const rh = kd.find((a) => a.laden === 'Rewe' && a.name === 'Rinder-Hackfleisch');
 check(rh && rh.preis === 1.49 && rh.menge === 100 && rh.einheit === 'g' && rh.k === 'rinderhack' && rh.von === '2026-10-26' && rh.bis === '2026-10-31', `kaufDA: Preis je 100 g, Schlüssel, Gültigkeit in Berliner Tagen (${JSON.stringify(rh)})`);
 const ed = kd.find((a) => a.laden === 'Edeka' && /Mastortehof/.test(a.name));
 check(ed && ed.name === 'Mastortehof Food Group Frisches Hähnchenbrustfilet' && ed.k === 'haehnchenbrust' && ed.bis === '2026-10-30', `kaufDA: Marke in Großbuchstaben schön geschrieben, „…torte…“ im Markennamen ist keine Torte, Edeka-Woche endet Freitag (${ed?.name}, ${ed?.k}, ${ed?.bis})`);
-const inn = kd.find((a) => a.laden === 'Netto' && /Innenfilet/.test(a.name));
+const inn = kd.find((a) => a.laden === 'Rewe' && /Innenfilet/.test(a.name));
 check(inn && inn.menge === 400 && inn.einheit === 'g' && inn.k === 'haehnchenbrust', `kaufDA: „bis zu 23g Protein pro 100g 400 g“ → 400 g (${inn?.menge} ${inn?.einheit})`);
 check(!kd.some((a) => /Zitrone/.test(a.name)), 'kaufDA: ohne Preis (0) kein Angebot');
 check(kd.find((a) => a.laden === 'Rewe' && a.name === 'Rinder-Hackfleisch')?.bild === 'https://content-media.bonial.biz/test/hack.jpg?impolicy=SEO-offer-thumbnails' && !kd.find((a) => a.laden === 'Edeka' && /Hofgut/.test(a.name))?.bild, 'kaufDA: Vorschaubild des Angebots, ohne keins');

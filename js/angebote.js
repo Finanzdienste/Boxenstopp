@@ -18,7 +18,7 @@
 
 import { VERBOTEN } from './ki-rezept.js';
 
-export const LAEDEN = ['Aldi', 'Lidl', 'Rewe', 'Kaufland', 'Penny', 'Netto', 'Edeka', 'Norma'];
+export const LAEDEN = ['Aldi', 'Lidl', 'Rewe', 'Kaufland', 'Penny', 'Edeka', 'Norma'];
 export const MAX_ANGEBOTE = 120;
 const EINHEITEN = ['g', 'kg', 'ml', 'l', 'Stk', 'Dose', 'Pck', 'Glas', 'Bund', 'Stange', 'Zehe', 'Becher', 'Flasche', 'Netz', 'Schale', 'Beutel'];
 const ID = /^a-[a-z0-9]{4,16}$/;
@@ -351,10 +351,13 @@ export function angebotRabatt(a, { preise, naehrwerte } = {}) {
   return 1 - (a.preis / gA) / (r.eur / gR);
 }
 
-/** „8,65 €/kg“ – je Kilo oder Liter, wenn die Packung in Gramm oder Litern steht und nicht genau 1 kg oder 1 l ist. */
-export function grundpreis(a) {
+/**
+ * „8,65 €/kg“ – je Kilo oder Liter, wenn die Packung in Gramm oder Litern
+ * steht. Bei genau 1 kg oder 1 l nur mit immer: true (sonst steht es doppelt da).
+ */
+export function grundpreis(a, { immer = false } = {}) {
   const f = MASSE[a?.einheit];
-  if (!f || !(a.menge > 0) || !(a.preis > 0) || a.menge * f === 1000) return '';
+  if (!f || !(a.menge > 0) || !(a.preis > 0) || (a.menge * f === 1000 && !immer)) return '';
   return `${((a.preis / (a.menge * f)) * 1000).toFixed(2).replace('.', ',')} €/${a.einheit === 'ml' || a.einheit === 'l' ? 'l' : 'kg'}`;
 }
 
@@ -420,6 +423,27 @@ export function ladenWahl(bedarf, angebote, daten, { ab = GUENSTIG_AB } = {}) {
 
 /** „−24 %“ */
 export const rabattText = (r) => `−${Math.round(r * 100)} %`;
+
+/**
+ * Für die Einkaufsliste: je Zutat die Angebote aller Läden, je Laden nur das
+ * beste, das günstigste zuerst (größter Rabatt gegen den Richtpreis, also
+ * auch der niedrigste Preis je kg; Unvergleichbares danach).
+ * Map k → [{ a, rabatt }].
+ */
+export function angeboteJeZutat(angebote, daten) {
+  const m = new Map();
+  for (const a of angebote || []) {
+    if (!a?.k) continue;
+    if (!m.has(a.k)) m.set(a.k, []);
+    m.get(a.k).push({ a, rabatt: angebotRabatt(a, daten) });
+  }
+  for (const [k, liste] of m) {
+    liste.sort((x, y) => (x.rabatt === null) - (y.rabatt === null) || (y.rabatt ?? 0) - (x.rabatt ?? 0));
+    const gesehen = new Set();
+    m.set(k, liste.filter((x) => !gesehen.has(x.a.laden) && gesehen.add(x.a.laden)));
+  }
+  return m;
+}
 
 /**
  * Welche Zutaten eines Rezepts im Angebot sind und was das pro Box spart
@@ -491,7 +515,7 @@ export const ANGEBOTE_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          laden: { type: 'string', description: 'Aldi, Lidl, Rewe, Kaufland, Penny, Netto, Edeka, Norma oder wie im Prospekt' },
+          laden: { type: 'string', description: 'Aldi, Lidl, Rewe, Kaufland, Penny, Edeka, Norma oder wie im Prospekt' },
           name: { type: 'string', description: 'Produkt, wie es im Prospekt steht, kurz' },
           preis: { type: 'number', description: 'Angebotspreis in Euro, z. B. 7.49' },
           menge: { type: 'number', description: 'Packungsmenge, z. B. 1 bei 1 kg, 500 bei 500 g' },

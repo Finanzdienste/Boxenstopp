@@ -92,9 +92,9 @@ ehrlicher Kennung, zweimal die Woche:
 | Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit) |
 | Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe |
 | Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini (`generateContent`) liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Im Gratis-Kontingent hängt mal das eine, mal das andere Modell: Nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, steht in `daten/angebote.json` und kommt beim nächsten Lauf zuerst dran; hängende Stapel bekommen einen zweiten Durchgang. Dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` |
-| Rewe, Edeka, Netto | kaufDA, **privat** (siehe unten) | Die eigenen Seiten sperren automatische Abrufe (rewe.de: Cloudflare-Abfrage auf allen Seiten, Edeka: 403 mit Scherzantwort). Ihre Angebote kommen über kaufDA und landen nur im privaten Daten-Repo |
+| Rewe, Edeka | kaufDA, **privat** (siehe unten) | Die eigenen Seiten sperren automatische Abrufe (rewe.de: Cloudflare-Abfrage auf allen Seiten, Edeka: 403 mit Scherzantwort). Ihre Angebote kommen über kaufDA und landen nur im privaten Daten-Repo |
 
-**Rewe, Edeka und Netto über kaufDA – nur privat.** kaufDA (Bonial, der
+**Rewe und Edeka über kaufDA – nur privat.** kaufDA (Bonial, der
 Prospektdienst der Händler) zeigt deren Angebote auf öffentlichen Seiten je
 Stichwort und Stadt (`kaufda.de/<Stadt>/Angebote/<Stichwort>`), mit Produkt,
 Marke, Preis, Packung und Gültigkeit als Daten in der Seite; die robots.txt
@@ -113,7 +113,7 @@ Datei nur im privaten Daten-Repo neben `liste.json` liegt; die Stadt steht
 nicht im Code. Die App liest sie mit dem Schlüssel aus `zugang.js`
 (`privatLesen` in `js/speicher.js`) und legt sie mit `daten/angebote.json`
 zusammen; ohne Schlüssel oder ohne die Datei bleibt es bei Aldi, Lidl,
-Kaufland und Penny, und Rewe, Netto, Edeka stehen als „gesperrt“ da. Beim
+Kaufland und Penny, und Rewe und Edeka stehen als „gesperrt“ da. Beim
 Trennen vergisst das Handy die privaten Angebote.
 
 **Wie günstig ist ein Angebot?** Jede Rezeptzutat hat einen Richtpreis (siehe
@@ -136,11 +136,20 @@ Menge (`ladenWahl`) – und nennt den Laden mit der größten Ersparnis, die
 Zutaten dazu und die nächsten zwei Läden; „Zu Aldi“ wählt ihn. Ohne Liste:
 der Laden, der für eure Rezepte im Schnitt am meisten spart. Gerechnet ist
 nur mit den Angeboten; ist es Rewe, Edeka oder Kaufland, steht dabei, dass
-der Rest beim Discounter meist weniger kostet. **Auf der Einkaufsliste**
-steht bei jedem offenen Eintrag, ob er gerade günstiger zu haben ist („−24 %
-bei Aldi: 600 g 5,19 €“, das beste Angebot; mit gewähltem Laden nur dessen),
-eigene Einträge erkennt die App am Namen („Hähnchenbrust“). „Passt zu euren
-Rezepten“ rechnet mit demselben Vergleich.
+der Rest beim Discounter meist weniger kostet. Oben im Reiter springt
+**„Passt zu euren Rezepten“** (mit der Zahl der Rezepte) direkt dorthin.
+
+**Auf der Einkaufsliste** steht oben, in welchem Laden die offenen Einträge
+mit den Angeboten am günstigsten sind (dieselbe Rechnung, mit den nächsten
+zwei Läden). Unter jedem offenen Eintrag, der gerade irgendwo im Angebot ist
+(`angeboteJeZutat`): wo er am günstigsten ist („−24 % am günstigsten bei
+Aldi: 600 g 5,19 € · 8,65 €/kg“ – „am günstigsten“ nur, wenn es wirklich
+günstiger ist als der übliche Discounter-Preis, sonst „im Angebot bei …,
+teurer als sonst“), beim gewählten Laden, wenn der ihn auch im Angebot hat
+(„Bei Lidl: 400 g 3,79 € · 9,48 €/kg −16 %“), und wo sonst noch („Auch:
+Edeka 9,90 €/kg · Rewe 9,99 €/kg“). Eigene Einträge erkennt die App am
+Namen („Hähnchenbrust“). „Passt zu euren Rezepten“ rechnet mit demselben
+Vergleich.
 
 Getränke, Süßes, Drogerie,
 Schwein und Fisch fliegen raus; jedes Angebot bekommt, wenn es eine

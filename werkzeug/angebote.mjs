@@ -7,7 +7,7 @@
  *     node werkzeug/angebote.mjs                # Aldi, Lidl, Kaufland, Penny → daten/angebote.json
  *     node werkzeug/angebote.mjs aldi penny     # nur diese
  *     KAUFDA_STADT=… node werkzeug/angebote.mjs --privat --ziel pfad/angebote-privat.json
- *                                               # Rewe, Edeka, Netto über kaufDA → privat
+ *                                               # Rewe und Edeka über kaufDA → privat
  *
  * Quellen – nur öffentliche Seiten, die ein normaler Abruf ohne Tricks
  * bekommt (eine ehrliche Kennung, zweimal die Woche, robots.txt beachtet):
@@ -23,7 +23,7 @@
  *             Schlüssel in GEMINI_KEY (bei GitHub als Secret). Ohne Schlüssel
  *             fällt Lidl aus, der Rest läuft.
  *
- *   Rewe, Edeka, Netto  Die eigenen Seiten sperren automatische Abrufe (403
+ *   Rewe, Edeka  Die eigenen Seiten sperren automatische Abrufe (403
  *             bzw. eine Scherzantwort). Ihre Angebote stehen aber bei kaufDA
  *             (Bonial, der Prospektdienst der Händler) auf öffentlichen
  *             Seiten je Stichwort und Stadt – mit Produkt, Marke, Preis,
@@ -528,7 +528,8 @@ const KAUFDA_STADT = process.env.KAUFDA_STADT || '';
 const KAUFDA_PAUSE = 4000; // robots.txt: Crawl-Delay 2 – wir lassen doppelt so viel Luft
 const KAUFDA_NOCHMAL = 30000; // antwortet eine Seite nicht (503), einmal so lange warten
 // Welche Händler bei kaufDA wie heißen – nur die, die wir sonst nicht bekommen
-const KAUFDA_LAEDEN = { REWE: 'Rewe', EDEKA: 'Edeka', 'EDEKA center': 'Edeka', 'E center': 'Edeka', 'EDEKA Frischemarkt': 'Edeka', 'E neukauf': 'Edeka', 'E aktiv markt': 'Edeka', 'Netto Marken-Discount': 'Netto' };
+// (Netto nicht: da kauft ihr nicht ein)
+const KAUFDA_LAEDEN = { REWE: 'Rewe', EDEKA: 'Edeka', 'EDEKA center': 'Edeka', 'E center': 'Edeka', 'EDEKA Frischemarkt': 'Edeka', 'E neukauf': 'Edeka', 'E aktiv markt': 'Edeka' };
 // Die Stichwörter (so, wie kaufDA sie in der Adresse schreibt: ae/oe/ue). Nur Wörter, zu denen
 // kaufDA eine Seite hat (Stand Oktober 2026) – andere geben 404. Je Seite bis zu 16 Angebote.
 const KAUFDA_WORTE = [
@@ -558,7 +559,7 @@ export function kaufdaMenge(text) {
 /** Ein Titel ganz in Großbuchstaben („SPEISE-KARTOFFELN“) wie ein normaler Name. */
 const kaufdaTitel = (t) => { const s = entities(t).replace(/[„“”"]/g, '').trim(); return /[a-zäöüß]/.test(s) ? s : schoeneMarke(s); };
 
-/** Die Angebote einer kaufDA-Stichwortseite (Rewe, Edeka, Netto – die anderen haben wir direkt). */
+/** Die Angebote einer kaufDA-Stichwortseite (Rewe und Edeka – die anderen haben wir direkt). */
 export function kaufdaLesen(html, laeden = KAUFDA_LAEDEN) {
   const m = html.match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s);
   if (!m) throw new Error('kein __NEXT_DATA__');
@@ -593,7 +594,7 @@ const kaufdaKern = (titel) => String(titel || '').toLowerCase().replace(/frische
 export const kaufdaDoppelt = (liste, a) => liste.some((b) => b.laden === a.laden && b.preis === a.preis && (b.menge || null) === (a.menge || null) && (b.einheit || '') === (a.einheit || '') && a.kern && b.kern && (a.kern.includes(b.kern) || b.kern.includes(a.kern)));
 
 /*
- * Rewe, Edeka und Netto über kaufDA: je Stichwort eine Seite, Dubletten einmal.
+ * Rewe und Edeka über kaufDA: je Stichwort eine Seite, Dubletten einmal.
  * Gemächlich (4 s zwischen den Seiten). Antwortet eine Seite nicht, einmal
  * nach 30 s nochmal, sonst weiter mit dem nächsten Wort; dreimal hintereinander
  * nichts heißt: kaufDA will gerade nicht – dann aufhören und behalten, was da ist.
@@ -640,14 +641,14 @@ async function kaufda() {
   const hinweis = `über kaufDA, gezielt nach ${seiten} Stichwörtern für Rezeptzutaten gesucht – nicht das ganze Prospekt${abgebrochen ? ' (kaufDA hat zwischendurch nicht geantwortet, unvollständig)' : ''}`;
   return { angebote: angebote.map(({ kern, ...a }) => a), hinweis };
 }
-kaufda.laeden = ['Rewe', 'Edeka', 'Netto'];
+kaufda.laeden = ['Rewe', 'Edeka'];
 
 /* ------------------------------------------------------------ Ablauf */
 
 /*
  * Zwei Läufe mit derselben Mechanik:
  *   öffentlich  Aldi, Lidl, Kaufland, Penny → daten/angebote.json (öffentliches Repo)
- *   --privat    Rewe, Edeka, Netto über kaufDA → angebote-privat.json (privates Daten-Repo)
+ *   --privat    Rewe und Edeka über kaufDA → angebote-privat.json (privates Daten-Repo)
  */
 const QUELLEN = PRIVAT_LAUF ? { kaufda } : { aldi, lidl, kaufland, penny };
 
@@ -692,8 +693,8 @@ async function main() {
   const daten = {
     stand: new Date().toISOString(),
     woche: kalenderwoche(),
-    // Im öffentlichen Feed stehen Rewe, Netto und Edeka nicht – die kommen, wenn überhaupt, privat über kaufDA
-    gesperrt: PRIVAT_LAUF ? [] : ['Rewe', 'Netto', 'Edeka'],
+    // Im öffentlichen Feed stehen Rewe und Edeka nicht – die kommen, wenn überhaupt, privat über kaufDA
+    gesperrt: PRIVAT_LAUF ? [] : ['Rewe', 'Edeka'],
     quellen,
     angebote,
   };

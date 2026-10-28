@@ -1,11 +1,11 @@
 /*
  * Reiter „Angebote“: die Angebote der Woche bei Aldi, Lidl, Kaufland, Penny –
- * und, mit dem Schlüssel fürs Daten-Repo, Rewe, Edeka und Netto.
+ * und, mit dem Schlüssel fürs Daten-Repo, Rewe und Edeka.
  *
  *   1. Die App holt sie selbst: montags und donnerstags läuft bei GitHub
  *      werkzeug/angebote.mjs und schreibt daten/angebote.json (Aldi und
  *      Kaufland von deren Angebotsseiten, Penny aus deren JSON, Lidl aus dem
- *      Prospekt per Gemini). Rewe, Edeka und Netto kommen über die
+ *      Prospekt per Gemini). Rewe und Edeka kommen über die
  *      Stichwortseiten von kaufDA – nur die Rezeptzutaten, das steht dran –
  *      und liegen als angebote-privat.json im privaten Daten-Repo, weil
  *      kaufDA nur die private Nutzung erlaubt. Die App lädt beide beim Start
@@ -35,10 +35,10 @@ import { esc, tagKurz, heute } from './format.js';
 import { angeboteBereinigen, zeileLesen, aktuelle, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN, angebotRabatt, nachRabatt, grundpreis, istHaehnchen, ladenWahl, rabattText, GUENSTIG_AB } from './angebote.js';
 import { kiAnfragen, anbieterVon, ANBIETER, KI_FEHLER } from './ki.js';
 import { ladeKi } from './zugang.js';
-import { opAngeboteDazu, opAngebote, opAngebotWeg, erledigt, summen } from './liste.js';
+import { opAngeboteDazu, opAngebote, opAngebotWeg } from './liste.js';
 import { oeffneRezept } from './ansicht-rezepte.js';
 import { fotoVorbereiten, resteMitAngeboten, oeffneEinrichten } from './ansicht-ki.js';
-import { euro, kostenMenge } from './kosten.js';
+import { euro, offenJeZutat } from './kosten.js';
 import { bildName, bildPfad } from './bilder.js';
 
 const MAX_FOTOS = 4;
@@ -46,6 +46,7 @@ const KAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentC
 const BILD = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l4.5-4.5 3.5 3.5 2.5-2.5L20 17"/><circle cx="15.5" cy="9.5" r="1.4"/></svg>';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+const RUNTER = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5"/></svg>';
 
 const AUTO = 'boxenstopp.angebote.auto.v1'; // daten/angebote.json
 const PRIVAT = 'boxenstopp.angebote.privat.v1'; // angebote-privat.json aus dem Daten-Repo
@@ -235,7 +236,7 @@ function standHTML() {
     : `<span class="a-quelle" title="${esc(q.hinweis || '')}">${esc(q.laden)} ${q.anzahl}</span>`)).join('');
   const gesperrt = (auto.gesperrt || []).length ? `<span class="a-quelle a-quelle-aus">${esc(auto.gesperrt.join(', '))}: sperren automatische Abrufe</span>` : '';
   const lidlOhne = (auto.quellen || []).find((q) => q.laden === 'Lidl' && q.ok === false && /GEMINI_KEY/.test(q.hinweis || ''));
-  // Rewe, Edeka, Netto kommen über kaufDA – gezielt nach Rezeptzutaten gesucht, nicht das ganze Prospekt
+  // Rewe und Edeka kommen über kaufDA – gezielt nach Rezeptzutaten gesucht, nicht das ganze Prospekt
   const ueberKaufda = (auto.quellen || []).filter((q) => q.ok !== false && /kaufDA/.test(q.hinweis || '')).map((q) => q.laden);
   return `<div class="a-stand"><span class="fine">${auto.woche ? `KW ${esc(auto.woche.slice(5))}` : ''}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}${ueberKaufda.length ? `<p class="fine a-kaufda">${esc(ueberKaufda.join(', '))}: über kaufDA gezielt nach euren Rezeptzutaten gesucht – nicht das ganze Prospekt.</p>` : ''}${leadHTML()}</div>`;
 }
@@ -261,17 +262,7 @@ function autoHTML() {
 /* -------------------------------------------------- Empfehlung oben */
 
 /** Was die offenen Einträge der Liste zum Richtpreis kosten, je Zutat – der Bedarf für die Empfehlung. */
-function bedarfListe() {
-  const b = {};
-  if (!app.listeDa) return b;
-  for (const [k, d] of Object.entries(app.stand.items || {})) {
-    if (!d || d.custom || erledigt(d)) continue;
-    let eur = 0;
-    for (const [u, q] of Object.entries(summen(d))) eur += kostenMenge(k, q, u, app) || 0;
-    if (eur > 0) b[k] = eur;
-  }
-  return b;
-}
+const bedarfListe = () => (app.listeDa ? offenJeZutat(app.stand, app) : {});
 
 /** Ohne Liste: was ein Rezept im Schnitt von jeder Zutat braucht (zum Richtpreis). */
 function bedarfRezepte() {
@@ -322,17 +313,16 @@ function eigeneHTML() {
     : '<button type="button" class="linkbtn" data-act="a-leeren">Alle eigenen löschen</button>'}</div>`;
 }
 
-function passtHTML() {
+function passtHTML(top) {
   const liste = imLaden(eintraege());
   if (!liste.length) return '';
-  const top = topRezepte(app.rezepte, liste, app);
   const karten = top.map(({ r, treffer, ersparnisBox }) => {
     const was = treffer.map((t) => esc(t.it.n.split(' (')[0])).join(', ');
     const spart = ersparnisBox >= 0.05 ? ` · spart ≈ ${esc(euro(ersparnisBox))}/Box` : '';
     return `<li><button type="button" class="ki-liste-b a-passt-b" data-a-open="${esc(r.id)}"><b>${esc(r.name)}</b><small>${treffer.length === 1 ? 'Im Angebot' : `${treffer.length} im Angebot`}: ${was}${spart}</small></button></li>`;
   }).join('');
   const mitKatalog = liste.filter((a) => a.k).length;
-  return `<section class="a-passt"><h3 class="sub-h">Passt zu euren Rezepten${laden ? ` <small>mit den Angeboten von ${esc(laden)}</small>` : ''}</h3>
+  return `<section class="a-passt" id="a-passt"><h3 class="sub-h">Passt zu euren Rezepten${laden ? ` <small>mit den Angeboten von ${esc(laden)}</small>` : ''}</h3>
 ${top.length ? `<ul class="ki-liste" id="a-passt-liste">${karten}</ul>` : `<p class="fine">${mitKatalog ? 'Kein Rezept nutzt diese Angebote.' : 'Keins der Angebote ist eine Rezeptzutat.'}</p>`}
 <div class="a-ki"><button type="button" class="btn btn-primary" data-act="a-vorschlag">Neues Rezept aus den Angeboten</button><p class="fine">Die KI baut ein Rezept um die Angebote herum, die App rechnet es auf eure Ziele. Mit „Neuer Vorschlag“ gibt es dann das nächste.</p></div>
 </section>`;
@@ -348,13 +338,18 @@ export function angeboteZeichnen() {
   const el = $('#view-angebote');
   if (!el) return;
   const n = laden ? anzahlIn(laden) : angeboteAnzahl();
+  // Die Rezepte, die von den Angeboten profitieren – unten als Liste, oben als Sprung dorthin
+  const mitAngeboten = imLaden(eintraege());
+  const top = mitAngeboten.length ? topRezepte(app.rezepte, mitAngeboten, app) : [];
+  const sprung = mitAngeboten.length ? `<div class="a-oben"><button type="button" class="btn a-zu-passt" data-act="a-zu-passt">${RUNTER}Passt zu euren Rezepten${top.length ? `<span class="btn-n">${top.length}</span>` : ''}</button></div>` : '';
   el.innerHTML = `<button type="button" class="back nur-breit" data-act="angebote-zu">${ZURUECK}Alle Rezepte</button>
 <div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
+${sprung}
 ${empfehlungHTML()}
 ${laedenHTML()}
 ${werkzeugHTML()}
 <div id="a-auto">${autoHTML()}</div>
-${passtHTML()}
+${passtHTML(top)}
 <details class="a-eigene"${eigeneOffen || eigene().length || fotos.length || text ? ' open' : ''}><summary>Eigene Angebote dazu <small>Foto, Screenshot oder getippt</small></summary>
 <div class="a-lesen">${lesenHTML()}</div>
 <div id="a-liste">${app.listeDa ? eigeneHTML() : '<p class="loading">Wird geladen…</p>'}</div>
@@ -485,6 +480,7 @@ export function klickAngebote(el) {
   switch (d.act) {
     case 'angebote': zeigeReiter('angebote'); window.scrollTo(0, 0); return true;
     case 'angebote-zu': zeigeReiter('rezepte'); return true;
+    case 'a-zu-passt': $('#a-passt')?.scrollIntoView({ block: 'start' }); return true;
     case 'a-abbrechen': lauf?.controller.abort(); return true;
     case 'a-einrichten': zeigeReiter('rezepte'); oeffneEinrichten(); return true;
     case 'a-leeren': leerenFragen = true; angeboteZeichnen(); return true;

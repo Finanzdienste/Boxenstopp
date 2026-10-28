@@ -436,8 +436,25 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .a-tipp-b{flex:none}
 .a-tipp-ok{flex:none;font-weight:700;color:var(--ok)}
 .a-filter{scroll-margin-top:72px}
-/* Einkaufsliste: gerade im Angebot */
-.item-sub .l-angebot{color:var(--ok);font-weight:650}
+.a-oben{display:flex;flex-wrap:wrap;gap:8px}
+.a-zu-passt{height:40px;padding:0 14px;font-size:14.5px}
+.a-zu-passt .ic{width:17px;height:17px}
+.a-passt{scroll-margin-top:72px}
+/* Einkaufsliste: gerade im Angebot – wo am günstigsten, beim gewählten Laden, wo sonst (eigene Zeile unter dem Eintrag) */
+.l-angebote{grid-column:3 / -1;display:grid;gap:2px;margin-top:-5px;font-size:12.5px;line-height:1.4}
+.l-angebote .l-angebot{color:var(--ok);font-weight:650}
+.l-angebote .l-matt{color:var(--muted);font-weight:600}
+.l-angebote .l-dein{color:var(--ink);font-weight:600}
+.item.is-done .l-angebote{display:none}
+.l-dein b{display:inline-block;margin-left:2px;padding:1px 5px;border-radius:5px;background:var(--ok);color:var(--surface);font:700 11.5px/1.35 var(--f-mono)}
+.l-angebote .l-auch{color:var(--muted)}
+.l-tipp{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding:11px 14px;border-radius:14px;border:1.5px solid var(--ok);background:var(--surface)}
+.l-tipp[hidden]{display:none}
+.l-tipp p{margin:0;font-size:14.5px;line-height:1.4}
+.l-tipp b{font-weight:770}
+.l-tipp-k{display:block;font:600 11.5px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--ok)}
+.l-tipp small{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
+.l-tipp .linkbtn{flex:none}
 .l-angebot b{display:inline-block;margin-right:1px;padding:1px 5px;border-radius:5px;background:var(--ok);color:var(--surface);font:700 11.5px/1.35 var(--f-mono)}
 .a-ohne{color:var(--muted)}
 .a-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}

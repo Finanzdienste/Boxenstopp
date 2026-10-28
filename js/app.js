@@ -22,7 +22,7 @@ import { lobStart, klickLob } from './lob.js';
 import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
 
 const apiBasis = () => lese('__api', null) || API;
-/** Rewe, Edeka, Netto (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
+/** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
 const privateAngebote = () => {
   if (!app.zugang?.token) return;
   privatLesen('angebote-privat.json', { token: app.zugang.token, api: apiBasis() }).then((a) => { if (a) angeboteAutoSetzen(a, { privat: true }); });

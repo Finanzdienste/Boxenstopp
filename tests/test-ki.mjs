@@ -447,6 +447,10 @@ check(await bis(async () => (await hBild.getAttribute('src')) === 'bilder/zutate
 const aBilder = await t.$$eval('#a-auto .a-item .a-bild img', (is) => is.map((i) => i.getAttribute('src')));
 check(aBilder.length === 7 && aBilder.every((src) => src.startsWith('bilder/zutaten/')) && aBilder.includes('bilder/zutaten/bell-pepper.svg'), `jedes Angebot hat ein Bild (${aBilder.map((x) => x.split('/').pop()).join(', ')})`);
 check((await t.locator('#a-passt-liste li').count()) >= 5 && (await t.locator('#a-passt-liste li').first().innerText()).includes('im Angebot'), 'und „Passt zu euren Rezepten“ nutzt sie');
+check((await t.locator('.a-oben [data-act="a-zu-passt"] .btn-n').innerText()) === String(await t.locator('#a-passt-liste li').count()), 'oben der Knopf „Passt zu euren Rezepten“, mit der Zahl der Rezepte');
+await t.evaluate(() => window.scrollTo(0, 0));
+await t.click('[data-act="a-zu-passt"]');
+check(await bis(async () => Math.abs(await t.evaluate(() => document.querySelector('#a-passt').getBoundingClientRect().top)) < 120), 'der Knopf springt direkt dorthin');
 check(await t.locator('#a-form').count() === 1 && (await t.locator('#a-liste .a-item').count()) === 0 && !(await t.locator('#a-text').isVisible()), 'eigene Angebote: Formular zugeklappt, noch keine');
 await t.click('.a-eigene summary');
 check(await t.locator('#a-text').isVisible(), 'aufklappen');
@@ -540,7 +544,7 @@ check(await bis(async () => (await t.locator('[data-a-laden="Rewe"]').count()) =
 const chipsPrivat = (await t.locator('.a-laeden-chips .chip').allInnerTexts()).map((x) => x.replace(/\s+/g, ' ').trim());
 check(chipsPrivat.join(' | ') === 'Alle 16 | Aldi 5 | Lidl 4 | Rewe 2 | Kaufland 2 | Penny 2 | Edeka 1', `Läden: Rewe und Edeka dazu, in fester Reihenfolge (${chipsPrivat.join(' | ')})`);
 const standPrivat = await t.locator('#a-auto .a-stand').innerText();
-check(standPrivat.includes('Rewe 2') && standPrivat.includes('Netto: sperren automatische Abrufe') && !/Rewe, |Edeka, |, Edeka/.test(standPrivat.split('sperren')[0].split('\n').at(-1)) && (await t.locator('.a-kaufda').innerText()).includes('Rewe, Edeka: über kaufDA gezielt nach euren Rezeptzutaten gesucht'), 'Quellen: Rewe und Edeka nicht mehr „gesperrt“, nur noch Netto; Hinweis, dass kaufDA nur die Rezeptzutaten liefert');
+check(standPrivat.includes('Rewe 2') && !standPrivat.includes('sperren') && (await t.locator('.a-kaufda').innerText()).includes('Rewe, Edeka: über kaufDA gezielt nach euren Rezeptzutaten gesucht'), 'Quellen: Rewe und Edeka nicht mehr „gesperrt“; Hinweis, dass kaufDA nur die Rezeptzutaten liefert');
 check((await t.locator('.a-lead').innerText()).includes('Aldi, Lidl, Rewe, Kaufland, Penny und Edeka'), 'der Text oben nennt die Läden aus beiden Abrufen');
 await t.click('[data-a-laden="Rewe"]');
 check((await t.locator('#a-title').innerText()) === 'Angebote bei Rewe' && (await t.locator('#a-auto .a-item').count()) === 2 && (await t.locator('#a-passt-liste li').count()) >= 1, 'Rewe gewählt: die zwei Rewe-Angebote und passende Rezepte');
@@ -586,7 +590,7 @@ await a.click('.tab[data-tab="einkauf"]');
 await a.click('[data-act="z-trennen"]');
 await a.click('[data-act="z-trennen-ja"]');
 await a.click('.tab[data-tab="angebote"]');
-check(await bis(async () => (await a.locator('[data-a-laden="Rewe"]').count()) === 0) && await a.evaluate(() => localStorage.getItem('boxenstopp.angebote.privat.v1') === null) && (await a.locator('.a-quelle-aus', { hasText: 'sperren' }).innerText()).startsWith('Rewe, Netto, Edeka'), 'nach dem Trennen sind Rewe & Co. weg – auch aus dem Speicher –, und Rewe steht wieder als gesperrt da');
+check(await bis(async () => (await a.locator('[data-a-laden="Rewe"]').count()) === 0) && await a.evaluate(() => localStorage.getItem('boxenstopp.angebote.privat.v1') === null) && (await a.locator('.a-quelle-aus', { hasText: 'sperren' }).innerText()).startsWith('Rewe, Edeka:'), 'nach dem Trennen sind Rewe & Co. weg – auch aus dem Speicher –, und Rewe steht wieder als gesperrt da');
 
 check(await t.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'kein seitliches Scrollen');
 for (const h of [tobi, amy]) check(h.fehler.length === 0, `keine Fehler in der Konsole${h.fehler.length ? `: ${h.fehler.slice(0, 3).join(' | ')}` : ''}`);

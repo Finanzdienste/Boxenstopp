@@ -50,6 +50,24 @@ export function kostenRezept(r, daten) {
   return { gesamt, box: gesamt / n, luecken };
 }
 
+/**
+ * Was die offenen Einträge der Liste zum Richtpreis kosten, je Zutat:
+ * { k: Euro }. Daran misst die Empfehlung, welcher Laden mit seinen
+ * Angeboten am meisten spart (ladenWahl in angebote.js).
+ */
+export function offenJeZutat(stand, daten) {
+  const b = {};
+  for (const [k, d] of Object.entries(stand?.items || {})) {
+    if (!d || typeof d !== 'object' || d.custom) continue;
+    for (const p of Object.values(d.parts || {})) {
+      if (!p || typeof p !== 'object' || p.done === true) continue;
+      const e = kostenMenge(k, p.q, p.u, daten);
+      if (e > 0) b[k] = (b[k] || 0) + e;
+    }
+  }
+  return b;
+}
+
 /** Summe der Einkaufsliste: alle Einträge mit Katalog-Schlüssel und Menge. */
 export function kostenListe(stand, daten) {
   let gesamt = 0;
