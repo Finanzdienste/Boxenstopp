@@ -52,6 +52,9 @@ function nimmSpeicher(neu) {
   neu.start(beiAenderung, beiStatus);
 }
 
+// Angebote oder Laden geändert (ansicht-angebote.js): die Hinweise auf der Liste mitziehen
+app.listeNeu = () => listeZeichnen();
+
 app.verbinden = async (token, name) => {
   const ergebnis = await pruefeSchluessel(token, { api: apiBasis() });
   if (ergebnis !== 'ok') return ergebnis;

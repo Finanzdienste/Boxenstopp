@@ -393,7 +393,7 @@ await t.fill('#a-text', 'Aldi Hähnchenbrustfilet 1 kg 7,49\nAldi Paprika 500 g 
 await t.click('#a-los');
 check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 3), 'drei getippte Zeilen eingetragen, die vierte nicht');
 check((await t.locator('#a-badge').innerText()) === '10' && (await t.locator('#a-count').innerText()) === '10 für euch', 'Zahl am Reiter und oben: 7 automatische Zutaten + 3 eigene');
-check((await t.locator('.a-grp[data-laden="Aldi"] .item-sub').first().innerText()).includes('→ Hähnchenbrustfilet') && (await t.locator('.a-grp[data-laden="Lidl"] .a-ohne').count()) === 1, 'Aldi-Hähnchen ist eine Rezeptzutat, Gummibärchen nicht');
+check((await t.locator('#a-liste .a-grp[data-laden="Aldi"] .item-sub').first().innerText()).includes('→ Hähnchenbrustfilet') && (await t.locator('#a-liste .a-grp[data-laden="Lidl"] .a-ohne').count()) === 1, 'Aldi-Hähnchen ist eine Rezeptzutat, Gummibärchen nicht');
 check(await bis(() => (gh.liste()?.angebote?.eintraege || []).length === 3), 'die Angebote stehen in GitHub');
 check((await t.locator('#a-passt-liste li').count()) >= 5 && /spart ≈ \d,\d\d €\/Box/.test(await t.locator('#a-passt-liste li').first().innerText()), `„Passt zu euren Rezepten“ mit Ersparnis (${(await t.locator('#a-passt-liste li').first().innerText()).replace(/\s+/g, ' ').slice(0, 70)})`);
 await t.click('#a-passt-liste li:first-child button');
@@ -484,6 +484,28 @@ check((await t.locator('.a-lead').innerText()).includes('Aldi, Lidl, Rewe, Kaufl
 await t.click('[data-a-laden="Rewe"]');
 check((await t.locator('#a-title').innerText()) === 'Angebote bei Rewe' && (await t.locator('#a-auto .a-item').count()) === 2 && (await t.locator('#a-passt-liste li').count()) >= 1, 'Rewe gewählt: die zwei Rewe-Angebote und passende Rezepte');
 await t.click('[data-a-laden=""]');
+
+// --- Hähnchen auf einen Tipp, und die besten Angebote zuerst (Rabatt gegen den Richtpreis)
+check((await t.locator('.a-chips .chip').first().getAttribute('data-a-filter')) === 'haehnchen' && (await t.locator('[data-a-filter="haehnchen"] .n').innerText()) === '2', 'vorn der Knopf „Hähnchen“: zwei – Aldi und Rewe');
+await t.click('[data-a-filter="haehnchen"]');
+const huehner = await t.$$eval('#a-auto .a-item .item-name', (xs) => xs.map((x) => x.textContent));
+check(huehner.length === 2 && huehner.every((n) => /Hähnchen/.test(n)), `„Hähnchen“ zeigt nur Hähnchen (${huehner.join(', ')})`);
+const teilstuecke = t.locator('#a-auto .a-item', { hasText: 'Teilstücke' });
+check((await teilstuecke.locator('.a-rabatt').innerText()) === '−24 %' && (await teilstuecke.locator('.item-sub').innerText()).includes('8,65 €/kg'), 'Aldi-Hähnchen: −24 % gegen den üblichen Preis, 8,65 €/kg');
+await t.click('[data-a-sort="rabatt"]');
+const besteH = await t.$$eval('#a-auto .a-beste .a-item', (xs) => xs.map((x) => `${x.querySelector('.a-ladenname')?.textContent}|${x.querySelector('.a-rabatt')?.textContent || ''}`));
+check(besteH.join(' / ') === 'Aldi|−24 % / Rewe|−21 %' && (await t.locator('#a-auto .a-grp').count()) === 0, `„Beste zuerst“: eine Liste über alle Läden, der Laden steht in der Zeile (${besteH.join(' / ')})`);
+await t.click('[data-a-filter="zutaten"]');
+const besteZ = await t.$$eval('#a-auto .a-beste .a-item .item-name', (xs) => xs.map((x) => x.textContent));
+check(besteZ.join(' | ') === 'Zucchini | Rispentomaten | Rinderhackfleisch XXL | Hähnchenbrustfilet-Teilstücke | Hähnchen-Brustfilet | K-classic Cashewkerne | Rinder-Hackfleisch | Bürger XXL Gnocchi | Span. Bio-Paprika, rot und gelb | Mühlenhof Frisches Rinder-Gulasch', `alle Rezeptzutaten, die besten zuerst, teurere unten (${besteZ.join(' | ')})`);
+check((await t.locator('#a-auto .a-beste .a-rabatt').count()) === 6, 'die Plakette nur, wo es günstiger ist als sonst (6 von 10)');
+await t.reload({ waitUntil: 'load' });
+await t.waitForFunction(() => document.querySelector('.tab[data-tab="angebote"]'));
+await t.click('.tab[data-tab="angebote"]');
+check(await bis(async () => (await t.locator('[data-a-sort="rabatt"][aria-pressed="true"]').count()) === 1 && (await t.locator('#a-auto .a-beste').count()) === 1), 'die Sortierung bleibt auf diesem Handy');
+await t.click('[data-a-sort="laden"]');
+const aldiReihe = await t.$$eval('#a-auto .a-grp[data-laden="Aldi"] .item-name', (xs) => xs.map((x) => x.textContent));
+check(aldiReihe.join(' | ') === 'Zucchini | Rinderhackfleisch XXL | Hähnchenbrustfilet-Teilstücke', `nach Laden: je Laden die besten zuerst (${aldiReihe.join(' | ')})`);
 await t.click('.tab[data-tab="rezepte"]');
 
 // --- löschen und rückgängig

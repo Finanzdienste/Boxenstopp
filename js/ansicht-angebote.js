@@ -19,19 +19,26 @@
  *      ein neues Rezept aus den Angeboten machen lässt (Resteverwertung im
  *      Modus „angebote“, mit „Neuer Vorschlag“ für den nächsten).
  *
- * Oben steht, zu welchem Laden man geht: Mit einem Laden gewählt zeigt der
- * Reiter nur dessen Angebote, und auch die passenden Rezepte und das neue
- * Rezept der KI rechnen nur mit denen. Die Wahl bleibt auf diesem Handy.
+ * Ganz oben die Empfehlung, wo sich der Einkauf lohnt: für die offenen
+ * Einträge der Liste der Laden, dessen Angebote am meisten sparen (ohne
+ * Liste: für eure Rezepte im Schnitt). Darunter, zu welchem Laden man geht:
+ * Mit einem Laden gewählt zeigt der Reiter nur dessen Angebote, und auch die
+ * passenden Rezepte, das neue Rezept der KI und die Hinweise auf der
+ * Einkaufsliste rechnen nur mit denen. Die Wahl bleibt auf diesem Handy.
+ *
+ * Dann die Liste: Hähnchen, Rezeptzutaten oder alle Lebensmittel, Suche,
+ * nach Laden oder „Beste zuerst“ (Rabatt gegen den üblichen Discounter-Preis,
+ * angebotRabatt in angebote.js). Die Sortierung merkt sich das Handy.
  */
 import { app, $, melde, zeigeReiter, lese, schreibe } from './kern.js';
 import { esc, tagKurz, heute } from './format.js';
-import { angeboteBereinigen, zeileLesen, aktuelle, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN } from './angebote.js';
+import { angeboteBereinigen, zeileLesen, aktuelle, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN, angebotRabatt, nachRabatt, grundpreis, istHaehnchen, ladenWahl, rabattText, GUENSTIG_AB } from './angebote.js';
 import { kiAnfragen, anbieterVon, ANBIETER, KI_FEHLER } from './ki.js';
 import { ladeKi } from './zugang.js';
-import { opAngeboteDazu, opAngebote, opAngebotWeg } from './liste.js';
+import { opAngeboteDazu, opAngebote, opAngebotWeg, erledigt, summen } from './liste.js';
 import { oeffneRezept } from './ansicht-rezepte.js';
 import { fotoVorbereiten, resteMitAngeboten, oeffneEinrichten } from './ansicht-ki.js';
-import { euro } from './kosten.js';
+import { euro, kostenMenge } from './kosten.js';
 import { bildName, bildPfad } from './bilder.js';
 
 const MAX_FOTOS = 4;
@@ -43,16 +50,18 @@ const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="current
 const AUTO = 'boxenstopp.angebote.auto.v1'; // daten/angebote.json
 const PRIVAT = 'boxenstopp.angebote.privat.v1'; // angebote-privat.json aus dem Daten-Repo
 const LADEN = 'boxenstopp.angebote.laden.v1';
+const SORTIERUNG = 'boxenstopp.angebote.sortierung.v1';
 
 let fotos = []; // { url, b64 }
 let text = '';
 let lauf = null; // { controller, start, timer }
 let fehler = null;
 let leerenFragen = false;
-let nurZutaten = true; // die automatischen Angebote: nur Rezeptzutaten oder alles
+let art = 'zutaten'; // die automatischen Angebote: 'haehnchen', 'zutaten' (Rezeptzutaten) oder 'alle'
 let eigeneOffen = false; // der Abschnitt „Eigene Angebote dazu“ ist aufgeklappt
 let suche = '';
 let laden = String(lese(LADEN, '') || ''); // der Laden, zu dem man geht – '' für alle
+let sortierung = lese(SORTIERUNG, 'laden') === 'rabatt' ? 'rabatt' : 'laden'; // nach Laden oder die besten zuerst
 
 const gemerkt = (k) => { const a = lese(k, null); return a && Array.isArray(a.angebote) ? a : null; };
 /** Die beiden Abrufe, zuletzt gesehen auch ohne Netz. */
@@ -90,6 +99,10 @@ export const angeboteAnzahl = () => eigene().length + automatisch().filter((a) =
 /** Dasselbe für einen Laden. */
 const anzahlIn = (l) => eigene().filter((a) => a.laden === l).length + automatisch().filter((a) => a.laden === l && a.k).length;
 
+// Für die Einkaufsliste: was gerade gilt und wohin man geht (ansicht-liste.js zeigt daraus die Angebote an)
+app.angeboteJetzt = () => eintraege();
+app.ladenJetzt = () => laden;
+
 /** Von app.js nach dem Laden von daten/angebote.json – oder, mit privat: true, von angebote-privat.json. */
 export function angeboteAutoSetzen(daten, { privat = false } = {}) {
   if (!daten || !Array.isArray(daten.angebote)) return;
@@ -98,6 +111,7 @@ export function angeboteAutoSetzen(daten, { privat = false } = {}) {
   schreibe(privat ? PRIVAT : AUTO, teil);
   auto = zusammen();
   angeboteZeichnen();
+  app.listeNeu();
 }
 
 /** Beim Trennen vom Daten-Repo: die privaten Angebote vergessen – die gehören zum Schlüssel. */
@@ -106,6 +120,7 @@ export function angebotePrivatVergessen() {
   try { localStorage.removeItem(PRIVAT); } catch { /* ohne Speicher */ }
   auto = zusammen();
   angeboteZeichnen();
+  app.listeNeu();
 }
 
 /** „Aldi, Lidl, Kaufland und Penny“ – die Läden des Abrufs in fester Reihenfolge. */
@@ -157,18 +172,29 @@ function bildHTML(a) {
   return `<span class="a-bild a-bild-zb"><img src="${esc(ersatz)}" alt="" loading="lazy" decoding="async"></span>`;
 }
 
-function zeileHTML(a, { eigen = false } = {}) {
+function zeileHTML(a, { eigen = false, mitLaden = false } = {}) {
+  const r = angebotRabatt(a, app);
+  const gp = grundpreis(a);
+  const sub = [
+    mitLaden ? `<span class="a-ladenname">${esc(a.laden)}</span>` : '',
+    a.k && app.katalog[a.k] ? `<span>→ ${esc(app.katalog[a.k].n)}</span>` : '<span class="a-ohne">keine Rezeptzutat</span>',
+    gp ? `<span>${esc(gp)}</span>` : '',
+    bisText(a) ? `<span>${esc(bisText(a))}</span>` : '',
+  ].join('');
+  // Die Plakette: wie viel günstiger als der übliche Discounter-Preis (Richtpreis) – nur, wenn es das ist
+  const plakette = r !== null && r >= GUENSTIG_AB ? `<span class="a-rabatt" title="günstiger als der übliche Preis">${rabattText(r)}</span>` : '';
   return `<li class="item a-item${eigen ? ' a-eigen' : ''}" data-a-id="${esc(a.id)}">
 ${bildHTML(a)}
-<div class="item-main"><span class="item-name">${esc(a.name)}</span><span class="item-sub">${a.k && app.katalog[a.k] ? `<span>→ ${esc(app.katalog[a.k].n)}</span>` : '<span class="a-ohne">keine Rezeptzutat</span>'}${bisText(a) ? `<span>${esc(bisText(a))}</span>` : ''}</span></div>
-<span class="item-qty">${esc(angebotMenge(a))}</span>
+<div class="item-main"><span class="item-name">${esc(a.name)}</span><span class="item-sub">${sub}</span></div>
+<span class="item-qty">${esc(angebotMenge(a))}${plakette}</span>
 ${eigen ? `<button type="button" class="x" data-a-weg="${esc(a.id)}" aria-label="${esc(a.name)} entfernen">${X}</button>` : '<span></span>'}</li>`;
 }
 
 function gruppenHTML(liste, { eigen = false } = {}) {
   const nachLaden = new Map();
   const reihenfolge = [...LAEDEN, ...new Set(liste.map((a) => a.laden))];
-  for (const a of liste) { if (!nachLaden.has(a.laden)) nachLaden.set(a.laden, []); nachLaden.get(a.laden).push(a); }
+  // Je Laden die besten Angebote zuerst – die eigenen bleiben, wie sie eingetragen wurden
+  for (const a of eigen ? liste : nachRabatt(liste, app)) { if (!nachLaden.has(a.laden)) nachLaden.set(a.laden, []); nachLaden.get(a.laden).push(a); }
   let html = '';
   for (const laden of reihenfolge) {
     const g = nachLaden.get(laden);
@@ -180,12 +206,29 @@ function gruppenHTML(liste, { eigen = false } = {}) {
   return html;
 }
 
-/** Die automatisch geholten Angebote: Stand, Quellen, Filter, Liste. */
-function autoHTML() {
-  if (!auto) return '<div class="empty-state"><p class="es-t">Die Angebote der Woche sind noch nicht geladen.</p><p>Die App holt sie montags und donnerstags selbst. Gleich nochmal öffnen – oder unten eigene eintragen.</p></div>';
+/** „Beste zuerst“: eine Liste über alle Läden, nach Rabatt gegen den üblichen Preis – Unvergleichbares unten. */
+function besteHTML(liste) {
+  const sortiert = nachRabatt(liste, app);
+  return `<section class="grp a-beste"><h3><span class="grp-name">Beste zuerst <small>gegen den üblichen Preis</small></span><span class="num">${sortiert.length}</span></h3><ul class="items">${sortiert.map((a) => zeileHTML(a, { mitLaden: !laden })).join('')}</ul></section>`;
+}
+
+/** Was oben über der Liste steht: Hähnchen, Rezeptzutaten oder alles; Suche; Sortierung. */
+function werkzeugHTML() {
+  if (!auto) return '';
   const alle = imLaden(automatisch());
-  const zutaten = alle.filter((a) => a.k);
-  const gezeigt = (nurZutaten ? zutaten : alle).filter(passtSuche);
+  const n = { haehnchen: alle.filter(istHaehnchen).length, zutaten: alle.filter((a) => a.k).length, alle: alle.length };
+  const chip = (wert, text, vorn = '') => `<button type="button" class="chip${wert === 'haehnchen' ? ' a-chip-h' : ''}" data-a-filter="${wert}" aria-pressed="${art === wert}">${vorn}${text}<span class="n">${n[wert]}</span></button>`;
+  const sortChip = (wert, text) => `<button type="button" class="chip" data-a-sort="${wert}" aria-pressed="${sortierung === wert}">${text}</button>`;
+  return `<div class="a-filter">
+<div class="chips a-chips" role="group" aria-label="Was zeigen">${chip('haehnchen', 'Hähnchen', `<img src="${bildPfad('poultry-leg')}" alt="" width="20" height="20">`)}${chip('zutaten', 'Rezeptzutaten')}${chip('alle', 'Alle Lebensmittel')}</div>
+<div class="suche a-suche"><input id="a-suche" type="search" placeholder="Angebote durchsuchen" aria-label="Angebote durchsuchen" autocomplete="off" value="${esc(suche)}"></div>
+<div class="a-sort"><span class="fine">Sortieren</span><div class="chips a-sort-chips" role="group" aria-label="Sortieren">${sortChip('laden', 'Nach Laden')}${sortChip('rabatt', 'Beste zuerst')}</div></div>
+${sortierung === 'rabatt' ? '<p class="fine a-sort-hint">Nach Rabatt gegen den üblichen Discounter-Preis, je Kilo oder Stück. Was sich nicht vergleichen lässt, steht unten.</p>' : ''}
+</div>`;
+}
+
+/** Stand und Quellen des Abrufs – unter der Liste. */
+function standHTML() {
   const wann = auto.stand && !Number.isNaN(Date.parse(auto.stand)) ? tagKurz(heute(new Date(auto.stand))) : '';
   const quellen = (auto.quellen || []).map((q) => (q.ok === false
     ? `<span class="a-quelle a-quelle-aus" title="${esc(q.hinweis || '')}">${esc(q.laden)}: –</span>`
@@ -194,10 +237,76 @@ function autoHTML() {
   const lidlOhne = (auto.quellen || []).find((q) => q.laden === 'Lidl' && q.ok === false && /GEMINI_KEY/.test(q.hinweis || ''));
   // Rewe, Edeka, Netto kommen über kaufDA – gezielt nach Rezeptzutaten gesucht, nicht das ganze Prospekt
   const ueberKaufda = (auto.quellen || []).filter((q) => q.ok !== false && /kaufDA/.test(q.hinweis || '')).map((q) => q.laden);
-  return `<div class="a-stand"><span class="fine">${auto.woche ? `KW ${esc(auto.woche.slice(5))}` : ''}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}${ueberKaufda.length ? `<p class="fine a-kaufda">${esc(ueberKaufda.join(', '))}: über kaufDA gezielt nach euren Rezeptzutaten gesucht – nicht das ganze Prospekt.</p>` : ''}</div>
-<div class="a-filter"><div class="chips a-chips"><button type="button" class="chip" data-a-filter="zutaten" aria-pressed="${nurZutaten}">Rezeptzutaten<span class="n">${zutaten.length}</span></button><button type="button" class="chip" data-a-filter="alle" aria-pressed="${!nurZutaten}">Alle Lebensmittel<span class="n">${alle.length}</span></button></div>
-<div class="suche a-suche"><input id="a-suche" type="search" placeholder="Angebote durchsuchen" aria-label="Angebote durchsuchen" autocomplete="off" value="${esc(suche)}"></div></div>
-${gezeigt.length ? gruppenHTML(gezeigt) : `<p class="fine a-leer">${suche ? `Nichts gefunden für „${esc(suche)}“.` : alle.length ? `Diese Woche ist ${laden ? `bei ${esc(laden)} ` : ''}keine Rezeptzutat im Angebot.` : laden ? `Von ${esc(laden)} ist diese Woche nichts da${(auto.quellen || []).some((q) => q.laden === laden && q.ok === false) ? ' – der Abruf hat nicht geklappt' : ''}.` : 'Diese Woche kam nichts an – die Quellen waren nicht erreichbar.'}</p>`}`;
+  return `<div class="a-stand"><span class="fine">${auto.woche ? `KW ${esc(auto.woche.slice(5))}` : ''}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}${ueberKaufda.length ? `<p class="fine a-kaufda">${esc(ueberKaufda.join(', '))}: über kaufDA gezielt nach euren Rezeptzutaten gesucht – nicht das ganze Prospekt.</p>` : ''}${leadHTML()}</div>`;
+}
+
+const leadHTML = () => `<p class="a-lead">${laden ? `Nur, was diese Woche bei ${esc(laden)} günstig ist – und welche Rezepte davon profitieren.` : `Was ist diese Woche bei ${esc(quellenText())} günstig? Die App holt es montags und donnerstags selbst. Darunter steht, welche Rezepte davon profitieren.`}</p>`;
+
+/** Die automatisch geholten Angebote: die Liste, darunter Stand und Quellen. */
+function autoHTML() {
+  if (!auto) return `<div class="empty-state"><p class="es-t">Die Angebote der Woche sind noch nicht geladen.</p><p>Die App holt sie montags und donnerstags selbst. Gleich nochmal öffnen – oder unten eigene eintragen.</p></div>${leadHTML()}`;
+  const alle = imLaden(automatisch());
+  const auswahl = art === 'haehnchen' ? alle.filter(istHaehnchen) : art === 'alle' ? alle : alle.filter((a) => a.k);
+  const gezeigt = auswahl.filter(passtSuche);
+  const bei = laden ? `bei ${esc(laden)} ` : '';
+  const leer = suche ? `Nichts gefunden für „${esc(suche)}“.`
+    : art === 'haehnchen' && alle.length ? `Diese Woche ist ${bei}kein Hähnchen im Angebot.`
+      : alle.length ? `Diese Woche ist ${bei}keine Rezeptzutat im Angebot.`
+        : laden ? `Von ${esc(laden)} ist diese Woche nichts da${(auto.quellen || []).some((q) => q.laden === laden && q.ok === false) ? ' – der Abruf hat nicht geklappt' : ''}.`
+          : 'Diese Woche kam nichts an – die Quellen waren nicht erreichbar.';
+  const liste = gezeigt.length ? (sortierung === 'rabatt' ? besteHTML(gezeigt) : gruppenHTML(gezeigt)) : `<p class="fine a-leer">${leer}</p>`;
+  return `${liste}${standHTML()}`;
+}
+
+/* -------------------------------------------------- Empfehlung oben */
+
+/** Was die offenen Einträge der Liste zum Richtpreis kosten, je Zutat – der Bedarf für die Empfehlung. */
+function bedarfListe() {
+  const b = {};
+  if (!app.listeDa) return b;
+  for (const [k, d] of Object.entries(app.stand.items || {})) {
+    if (!d || d.custom || erledigt(d)) continue;
+    let eur = 0;
+    for (const [u, q] of Object.entries(summen(d))) eur += kostenMenge(k, q, u, app) || 0;
+    if (eur > 0) b[k] = eur;
+  }
+  return b;
+}
+
+/** Ohne Liste: was ein Rezept im Schnitt von jeder Zutat braucht (zum Richtpreis). */
+function bedarfRezepte() {
+  const b = {};
+  const n = app.rezepte.length || 1;
+  for (const r of app.rezepte) for (const it of r.items || []) if (it.k && it.eur > 0 && !it.opt && !it.haus && !it.pantry) b[it.k] = (b[it.k] || 0) + it.eur / n;
+  return b;
+}
+
+const kurzZutat = (k, a) => String(app.katalog[k]?.n || a.name).split(/,| \(/)[0];
+const VOLLSORTIMENT = new Set(['Rewe', 'Edeka', 'Kaufland']);
+
+/** Wo sich der Einkauf lohnt – für die Liste, sonst für die Rezepte im Schnitt. */
+function empfehlungHTML() {
+  const angebote = eintraege();
+  if (!angebote.length) return '';
+  const bedarf = bedarfListe();
+  const mitListe = Object.keys(bedarf).length > 0;
+  const wahl = ladenWahl(mitListe ? bedarf : bedarfRezepte(), angebote, app);
+  if (!wahl.length) {
+    return mitListe ? '<section class="a-tipp" aria-label="Empfehlung"><p class="a-tipp-k">Empfehlung für eure Liste</p><p class="a-tipp-d">Von eurer Liste ist diese Woche nichts günstiger als sonst – geht dahin, wo es für euch passt.</p></section>' : '';
+  }
+  const [best, ...rest] = wahl;
+  const was = best.treffer.slice(0, 4).map((t) => `${esc(kurzZutat(t.k, t.a))} <b>${rabattText(t.rabatt)}</b>`).join(', ');
+  const mehr = best.treffer.length > 4 ? ` und ${best.treffer.length - 4} mehr` : '';
+  const danach = rest.slice(0, 2).map((w) => `${esc(w.laden)}${mitListe ? ` ≈ ${esc(euro(w.ersparnis))}` : ''}`).join(' · ');
+  const knopf = laden === best.laden ? '<span class="a-tipp-ok">✓ gewählt</span>' : `<button type="button" class="btn a-tipp-b" data-a-laden="${esc(best.laden)}">Zu ${esc(best.laden)}</button>`;
+  const rest2 = mitListe && VOLLSORTIMENT.has(best.laden) ? ' Was nicht im Angebot ist, kostet beim Discounter meist weniger.' : '';
+  return `<section class="a-tipp" aria-label="Empfehlung">
+<div class="a-tipp-kopf"><div><p class="a-tipp-k">${mitListe ? 'Empfehlung für eure Liste' : 'Empfehlung diese Woche'}</p>
+<p class="a-tipp-t"><b>${esc(best.laden)}</b>${mitListe ? ` <span>≈ ${esc(euro(best.ersparnis))} günstiger als sonst</span>` : ''}</p></div>${knopf}</div>
+<p class="a-tipp-d">${mitListe ? `${best.treffer.length === 1 ? '1 Sache' : `${best.treffer.length} Sachen`} von eurer Liste im Angebot: ` : 'Für eure Rezepte im Angebot: '}${was}${mehr}.${rest2}</p>
+${danach ? `<p class="a-tipp-n">Danach: ${danach}</p>` : ''}
+${mitListe ? '' : '<p class="fine">Setzt Rezepte auf die Liste, dann rechnet die App aus, wo ihr am meisten spart.</p>'}
+</section>`;
 }
 
 /** Die eigenen Angebote (liste.json): Liste mit Löschen. */
@@ -241,8 +350,9 @@ export function angeboteZeichnen() {
   const n = laden ? anzahlIn(laden) : angeboteAnzahl();
   el.innerHTML = `<button type="button" class="back nur-breit" data-act="angebote-zu">${ZURUECK}Alle Rezepte</button>
 <div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
+${empfehlungHTML()}
 ${laedenHTML()}
-<p class="a-lead">${laden ? `Nur, was diese Woche bei ${esc(laden)} günstig ist – und welche Rezepte davon profitieren.` : `Was ist diese Woche bei ${esc(quellenText())} günstig? Die App holt es montags und donnerstags selbst. Darunter steht, welche Rezepte davon profitieren.`}</p>
+${werkzeugHTML()}
 <div id="a-auto">${autoHTML()}</div>
 ${passtHTML()}
 <details class="a-eigene"${eigeneOffen || eigene().length || fotos.length || text ? ' open' : ''}><summary>Eigene Angebote dazu <small>Foto, Screenshot oder getippt</small></summary>
@@ -363,8 +473,15 @@ export function klickAngebote(el) {
     return true;
   }
   if (d.aOpen) { zeigeReiter('rezepte'); oeffneRezept(d.aOpen); return true; }
-  if (d.aFilter) { nurZutaten = d.aFilter === 'zutaten'; angeboteZeichnen(); return true; }
-  if (d.aLaden !== undefined) { laden = d.aLaden; schreibe(LADEN, laden); angeboteZeichnen(); return true; }
+  if (d.aFilter) {
+    art = ['haehnchen', 'zutaten', 'alle'].includes(d.aFilter) ? d.aFilter : 'zutaten';
+    angeboteZeichnen();
+    // Direkt zur Liste: Filter, Suche und die ersten Angebote oben im Bild
+    $('#view-angebote .a-filter')?.scrollIntoView({ block: 'start' });
+    return true;
+  }
+  if (d.aSort) { sortierung = d.aSort === 'rabatt' ? 'rabatt' : 'laden'; schreibe(SORTIERUNG, sortierung); angeboteZeichnen(); return true; }
+  if (d.aLaden !== undefined) { laden = d.aLaden; schreibe(LADEN, laden); angeboteZeichnen(); app.listeNeu(); return true; }
   switch (d.act) {
     case 'angebote': zeigeReiter('angebote'); window.scrollTo(0, 0); return true;
     case 'angebote-zu': zeigeReiter('rezepte'); return true;
@@ -393,9 +510,10 @@ export function klickAngebote(el) {
 
 export function eingabeAngebote(t) {
   if (t.id === 'a-suche') {
+    // Das Suchfeld steht über der Liste und bleibt stehen – nur die Liste neu
     suche = t.value.trim().toLowerCase();
     const el = $('#a-auto');
-    if (el) { el.innerHTML = autoHTML(); const f = $('#a-suche'); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); } }
+    if (el) el.innerHTML = autoHTML();
     return true;
   }
   if (t.id === 'a-text') { text = t.value.slice(0, 2000); if (fehler) { fehler = null; const f = $('#a-fehler'); if (f) f.hidden = true; } return true; }

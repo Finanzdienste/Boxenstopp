@@ -140,7 +140,7 @@ export function zeileLesen(zeile, katalog = {}) {
  * wenn „Paprika“ oder „Reis“ im Namen steht; die Regeln mit roh: true gelten
  * nur für unverarbeitete Ware.
  */
-const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle\b|rollen\b|\btorte|torten\b|kuchen\b|gebäck|chips|flips|pulver|gewürz|dressing|aufstrich|mäuse|riegel|snack|pizza|suppe|eintopf|fertig|salat|marinade|mariniert|paniert|gefüllt|gegrillt|püree|sirup|konfitüre|marmelade|gelee|likör|bonbon|keks|waffel|cracker|nudel|teig|burger|nugget|schnitzel|spieß|würstchen|wurst|füllung|pastete|frikadelle|bällchen|röllchen|taschen|schnitte|strudel|laugen|knusper|aufschnitt|delikatess|dulano|bratkartoffel|geräuchert|geraeuchert|gemahlen|granuliert|gerebelt|edelsüß|erdbeer|pfirsich|maracuja|vanill|himbeer|heidelbeer|stracciatella|sahnejoghurt|auf frucht|fruchtjoghurt|rahm-|rahmspinat|rahmgemüse|\b(?:dip|mix|tee|wrap|bowl)\b|dr\. ?oetker|wagner|frosta|knorr|maggi|lay['’]?s|pringles|funny|chio|lorenz|bahlsen|milka|ferrero|haribo|kinder\b|nestl[eé]/i;
+const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle\b|rollen\b|\btorte|torten\b|kuchen\b|gebäck|chips|flips|pulver|gewürz|dressing|aufstrich|mäuse|riegel|snack|pizza|suppe|eintopf|fertig|salat|marinade|mariniert|paniert|gefüllt|gegrillt|püree|sirup|konfitüre|marmelade|gelee|likör|bonbon|keks|waffel|cracker|nudel|teig|burger|nugget|schnitzel|spieß|würstchen|wurst|füllung|pastete|frikadelle|bällchen|röllchen|taschen|schnitte|strudel|laugen|knusper|aufschnitt|delikatess|dulano|bratkartoffel|geräuchert|geraeuchert|gemahlen|granuliert|gerebelt|edelsüß|erdbeer|pfirsich|maracuja|vanill|himbeer|heidelbeer|stracciatella|sahnejoghurt|auf frucht|fruchtjoghurt|rahm-|rahmspinat|rahmgemüse|crunchy|crispy|patties|cordon|hacksteak|roulade|\b(?:dip|mix|tee|wrap|bowl)\b|dr\. ?oetker|wagner|frosta|knorr|maggi|lay['’]?s|pringles|funny|chio|lorenz|bahlsen|milka|ferrero|haribo|kinder\b|nestl[eé]/i;
 
 export function schluesselRaten(name, katalog = {}) {
   const n = String(name || '').toLowerCase().replace(/ß/g, 'ß');
@@ -312,6 +312,115 @@ export function angebotJeG(a, naehrwerte) {
 /** Richtpreis je Gramm aus daten.preise. */
 const richtJeG = (k, preise) => preise?.[k]?.je_g ?? null;
 
+const MASSE = { g: 1, kg: 1000, ml: 1, l: 1000 };
+/*
+ * Gramm je Stück (Bund, Stange …), wie man es kauft – fürs Vergleichen, wenn
+ * Angebot und Richtpreis verschiedene Einheiten haben (Zucchini „1 kg“ gegen
+ * „1 Stück“). Sonst aus den Nährwerten (je); die zählen aber bei Zitrone und
+ * Limette nur den Saft und bei Dosen und Gläsern das Abgetropfte – dort also
+ * eigene Werte oder gar kein Vergleich über Gramm.
+ */
+const KAUF_G = {
+  zitrone: 110, limette: 70,
+  // Dosen mit Füllmenge, wie sie auf dem Angebot steht (400 g) – nicht abgetropft
+  kidney: 400, 'schwarze-bohnen': 400, kichererbsen: 400, 'linsen-dose': 400, 'tomaten-dose': 400, kokosmilch: 400, 'kokosmilch-light': 400,
+};
+const OHNE_KAUFGEWICHT = new Set(['Dose', 'Glas', 'Pck', 'Zehe']);
+function kaufGramm(k, einheit, naehrwerte) {
+  if (MASSE[einheit]) return MASSE[einheit];
+  if ((einheit === 'Stk' || einheit === 'Dose') && KAUF_G[k]) return KAUF_G[k];
+  if (OHNE_KAUFGEWICHT.has(einheit)) return 0;
+  const n = naehrwerte?.[k];
+  return n && n.u === einheit && n.je > 0 ? n.je : 0;
+}
+
+/**
+ * Wie viel günstiger ein Angebot ist als der Richtpreis seiner Zutat (der
+ * übliche Discounter-Preis aus werkzeug/preise.py): 0.25 heißt 25 % günstiger,
+ * negativ teurer. Gleiche Einheit: je Einheit; sonst je Gramm über das
+ * Kaufgewicht. null, wenn es sich nicht ehrlich vergleichen lässt – keine
+ * Rezeptzutat, keine Menge, Dose gegen Gramm.
+ */
+export function angebotRabatt(a, { preise, naehrwerte } = {}) {
+  const r = a?.k ? preise?.[a.k] : null;
+  if (!r || !(r.eur > 0) || !(r.menge > 0) || !(a.preis > 0) || !(a.menge > 0) || !a.einheit) return null;
+  if (a.einheit === r.u) return 1 - (a.preis / a.menge) / (r.eur / r.menge);
+  const gA = a.menge * kaufGramm(a.k, a.einheit, naehrwerte);
+  const gR = r.menge * kaufGramm(a.k, r.u, naehrwerte);
+  if (!gA || !gR) return null;
+  return 1 - (a.preis / gA) / (r.eur / gR);
+}
+
+/** „8,65 €/kg“ – je Kilo oder Liter, wenn die Packung in Gramm oder Litern steht und nicht genau 1 kg oder 1 l ist. */
+export function grundpreis(a) {
+  const f = MASSE[a?.einheit];
+  if (!f || !(a.menge > 0) || !(a.preis > 0) || a.menge * f === 1000) return '';
+  return `${((a.preis / (a.menge * f)) * 1000).toFixed(2).replace('.', ',')} €/${a.einheit === 'ml' || a.einheit === 'l' ? 'l' : 'kg'}`;
+}
+
+/** Ist das Hähnchen? Die Rezeptzutaten Brust und Keule – und anderes rohes Hähnchen (Schenkel, Flügel), keine Fertigware. */
+const HAEHNCHEN_K = new Set(['haehnchenbrust', 'haehnchenkeule']);
+export function istHaehnchen(a) {
+  if (HAEHNCHEN_K.has(a?.k)) return true;
+  const n = String(a?.name || '').toLowerCase();
+  // Minutenschnitzel sind rohe, dünne Brustscheiben – sonst ist „Schnitzel“ meist paniert
+  return /hähnchen|haehnchen|hühnchen|hühnerbrust|hühnerschenkel|hühnerkeule|huhn\b|chicken/.test(n) && !VERARBEITET.test(n.replace(/minuten(?:schnitzel|steaks?)/g, 'minuten'));
+}
+
+/**
+ * Die besten Angebote zuerst: nach Rabatt gegen den Richtpreis, absteigend.
+ * Was sich nicht vergleichen lässt, behält seine Reihenfolge und kommt ans Ende.
+ */
+export function nachRabatt(liste, daten) {
+  return liste
+    .map((a, i) => ({ a, i, r: angebotRabatt(a, daten) }))
+    .sort((x, y) => (x.r === null) - (y.r === null) || (y.r ?? 0) - (x.r ?? 0) || x.i - y.i)
+    .map((x) => x.a);
+}
+
+/** Ab diesem Rabatt gegen den Richtpreis zählt ein Angebot als günstig (Liste, Empfehlung, Plakette). */
+export const GUENSTIG_AB = 0.05;
+
+/** Je Zutat das Angebot mit dem größten Rabatt (ab GUENSTIG_AB), auf Wunsch nur aus einem Laden: Map k → { a, rabatt }. */
+export function besteJeZutat(angebote, daten, { laden = '', ab = GUENSTIG_AB } = {}) {
+  const m = new Map();
+  for (const a of angebote || []) {
+    if (!a?.k || (laden && a.laden !== laden)) continue;
+    const rabatt = angebotRabatt(a, daten);
+    if (rabatt === null || rabatt < ab) continue;
+    const vorher = m.get(a.k);
+    if (!vorher || rabatt > vorher.rabatt) m.set(a.k, { a, rabatt });
+  }
+  return m;
+}
+
+/**
+ * Wo sich der Einkauf lohnt: je Laden, was dessen Angebote am Bedarf sparen.
+ * bedarf: { k: Euro zum Richtpreis } – die offenen Einträge der Liste, oder
+ * was ein Rezept im Schnitt davon braucht. Die übrigen Sachen sind gleich
+ * teuer gerechnet (Richtpreis). Absteigend nach Ersparnis:
+ * [{ laden, ersparnis, treffer: [{ k, a, rabatt, ersparnis }] }].
+ */
+export function ladenWahl(bedarf, angebote, daten, { ab = GUENSTIG_AB } = {}) {
+  const laeden = [...new Set((angebote || []).map((a) => a.laden).filter(Boolean))];
+  return laeden
+    .map((laden) => {
+      const beste = besteJeZutat(angebote, daten, { laden, ab });
+      const treffer = [];
+      for (const [k, eur] of Object.entries(bedarf || {})) {
+        const b = beste.get(k);
+        if (b && eur > 0) treffer.push({ k, a: b.a, rabatt: b.rabatt, ersparnis: b.rabatt * eur });
+      }
+      treffer.sort((x, y) => y.ersparnis - x.ersparnis);
+      return { laden, ersparnis: treffer.reduce((s, t) => s + t.ersparnis, 0), treffer };
+    })
+    .filter((x) => x.treffer.length)
+    .sort((x, y) => y.ersparnis - x.ersparnis || y.treffer.length - x.treffer.length || x.laden.localeCompare(y.laden, 'de'));
+}
+
+/** „−24 %“ */
+export const rabattText = (r) => `−${Math.round(r * 100)} %`;
+
 /**
  * Welche Zutaten eines Rezepts im Angebot sind und was das pro Box spart
  * (gegen die Richtpreise). { treffer: [{ it, a, ersparnis }], ersparnisBox }.
@@ -323,13 +432,13 @@ export function rezeptTreffer(r, angebote, { preise, naehrwerte } = {}) {
     if (!it.k || it.opt || it.haus) continue;
     const passende = angebote.filter((a) => a.k === it.k);
     if (!passende.length) continue;
-    // Das günstigste Angebot je Gramm zählt
+    // Das Angebot mit dem größten Rabatt zählt – auf die Menge, die das Rezept braucht
     let best = null;
     for (const a of passende) {
-      const je = angebotJeG(a, naehrwerte);
+      const rabatt = angebotRabatt(a, { preise, naehrwerte });
       const richt = richtJeG(it.k, preise);
       const g = it.g || 0;
-      const sp = je !== null && richt !== null && g ? Math.max(0, (richt - je) * g) : 0;
+      const sp = rabatt !== null && richt !== null && g ? Math.max(0, rabatt * richt * g) : 0;
       if (!best || sp > best.ersparnis) best = { it, a, ersparnis: sp };
     }
     treffer.push(best);

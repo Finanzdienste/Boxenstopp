@@ -16,13 +16,19 @@ import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
 import { nachBereichen, alsText, abteilungVon } from './bereiche.js';
 import { zutatImg } from './bilder.js';
+import { besteJeZutat, rabattText, angebotMenge, schluesselRaten } from './angebote.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
 let leerenFragen = false;
 let trennenFragen = false;
 let formular = null; // null | { token, name, fehler } – token kann aus einem Link kommen
+let angebotJe = new Map(); // je Zutat das günstigste Angebot (Reiter Angebote, gewählter Laden) – neu bei jedem Zeichnen
 
 const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || rid;
+
+/** iPhone oder iPad: Dort hat die App vom Home-Bildschirm einen eigenen Speicher, getrennt von Safari. */
+const istIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const vomHomeBildschirm = () => navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches === true;
 
 /* -------------------------------------------------------------- Einträge */
 
@@ -41,10 +47,14 @@ function zeile([k, d]) {
     return `<span>${t}</span>`;
   }).join('');
   const von = fertig && d.by ? `<span class="item-by">abgehakt von ${d.by === app.name() ? 'dir' : esc(d.by)}</span>` : '';
+  // Gerade im Angebot (günstiger als sonst)? Eigene Einträge über den Namen („Hähnchenbrust“)
+  const ang = fertig ? null : angebotJe.get(d.custom ? schluesselRaten(d.name, app.katalog) : k);
+  // Menge und Preis nicht mitten auseinanderbrechen („1,49 €“)
+  const angebot = ang ? `<span class="l-angebot"><b>${esc(rabattText(ang.rabatt))}</b> bei ${esc(ang.a.laden)}: ${esc(angebotMenge(ang.a).replace(/(\d) (?=\S)/g, '$1\u00a0'))}</span>` : '';
   return `<li class="item${fertig ? ' is-done' : ''}">
 <button type="button" class="cb" role="checkbox" aria-checked="${fertig}" data-check="${esc(k)}" aria-label="${esc(d.name)}">${ic('check')}</button>
 ${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungVon(k, d, app.katalog) })}
-<div class="item-main"><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${von}</div>
+<div class="item-main"><span class="item-name">${esc(d.name)}</span>${herkunft || angebot ? `<span class="item-sub">${herkunft}${angebot}</span>` : ''}${von}</div>
 <span class="item-qty">${esc(mengeText)}${etwa ? `<small>${esc(etwa)}</small>` : ''}</span>
 <button type="button" class="x" data-del="${esc(k)}" aria-label="${esc(d.name)} löschen">${X}</button>
 </li>`;
@@ -61,6 +71,7 @@ export function listeZeichnen() {
     return;
   }
   const eintraege = Object.entries(app.stand.items);
+  angebotJe = besteJeZutat(app.angeboteJetzt(), app, { laden: app.ladenJetzt() });
   const gruppen = nachBereichen(app.stand, app.katalog);
   const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0);
   const fertig = eintraege.filter(([, d]) => erledigt(d));
@@ -162,7 +173,7 @@ function teilenZeichnen(zuletzt) {
   el.innerHTML = `<p><b>Gemeinsame Liste</b>${wer}${wann}</p>
 <div class="zugang-btns"><button type="button" class="btn" data-act="z-link">Link fürs zweite Handy kopieren</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a><button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
 <input class="z-linkfeld" id="z-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>
-<p class="fine">Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.</p>`;
+<p class="fine">Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal „Einrichten“ antippen und diesen Link ins Feld „Schlüssel“ einfügen.</p>' : ''}`;
 }
 
 export function zugangZeichnen() {
@@ -187,7 +198,11 @@ export function zugangZeichnen() {
     return;
   }
   if (!app.zugang) {
-    el.innerHTML = '<div class="zugang-banner"><p><b>Nur auf diesem Handy.</b> Richte die gemeinsame Liste ein, dann seht ihr beide dasselbe.</p><button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>';
+    // Auf dem iPhone kommt, was in Safari eingerichtet ist, in der App vom Home-Bildschirm nicht an – und Links öffnen immer Safari
+    const text = istIos() && vomHomeBildschirm()
+      ? 'Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher – was in Safari eingerichtet ist, kommt hier nicht an. Kopier den Link vom ersten Handy (etwa aus WhatsApp) und füg ihn unter „Einrichten“ ins Feld „Schlüssel“ ein.'
+      : 'Richte die gemeinsame Liste ein, dann seht ihr beide dasselbe.';
+    el.innerHTML = `<div class="zugang-banner"><p><b>Nur auf diesem Handy.</b> ${text}</p><button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>`;
     return;
   }
   el.innerHTML = '';

@@ -35,6 +35,11 @@ export const app = {
   kiVorAktion: () => {},
   /** Den Anpassen-Editor schließen (ansicht-anpassen.js), wenn das Rezept wechselt. */
   anpassenZu: () => {},
+  /** Die Angebote, die gerade gelten, und der Laden, zu dem man geht ('' für alle) – setzt ansicht-angebote.js, die Liste zeigt sie an. */
+  angeboteJetzt: () => [],
+  ladenJetzt: () => '',
+  /** Die Liste neu zeichnen, wenn sich Angebote oder Laden ändern (setzt app.js). */
+  listeNeu: () => {},
 };
 
 export const $ = (s, el = document) => el.querySelector(s);

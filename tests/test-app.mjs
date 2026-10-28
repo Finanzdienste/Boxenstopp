@@ -8,7 +8,7 @@
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS, ROOT } from './hilfe.mjs';
+import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS, ROOT, APP_URL } from './hilfe.mjs';
 
 const { check, ende } = pruefer();
 const browser = await starteBrowser();
@@ -146,6 +146,22 @@ check(/≈ \d+(,\d\d)? €/.test(await text('#l-count')), `die Liste summiert di
 check((await zeile('Knoblauch').locator('.item-qty').innerText()).replace(/\s+/g, ' ') === '10 Zehen ≈ 1 Knolle', 'Knoblauch: 10 Zehen, etwa 1 Knolle');
 check((await zeile('Öl, neutral').innerText()).includes('Butter Chicken: 10 g'), 'Öl mit Text statt Menge');
 check(await page.locator('#forrow .forchip').count() === 2, '„Für“: Butter Chicken und Teriyaki Bowl');
+// Angebote auf der Liste und die Empfehlung (tests/daten/angebote.json: das Aldi-Hähnchen, 600 g 5,19 € – 24 % unter dem Richtpreis)
+const huhnAngebot = zeile('Hähnchenbrustfilet').locator('.l-angebot');
+check(await bis(async () => (await huhnAngebot.count()) === 1) && (await huhnAngebot.innerText()).replace(/\s+/g, ' ') === '−24 % bei Aldi: 600 g 5,19 €', `auf der Liste: Hähnchen gerade bei Aldi im Angebot (${await huhnAngebot.innerText().catch(() => '–')})`);
+check(await zeile('Basmati- oder Jasminreis').locator('.l-angebot').count() === 0, 'Reis nicht – der ist nirgends im Angebot');
+await page.click('.tab[data-tab="angebote"]');
+const tipp = page.locator('.a-tipp');
+check(await bis(async () => (await tipp.count()) === 1) && (await tipp.locator('.a-tipp-k').textContent()) === 'Empfehlung für eure Liste' && (await tipp.locator('.a-tipp-t b').innerText()) === 'Aldi' && (await tipp.locator('.a-tipp-d').innerText()).replace(/\s+/g, ' ') === '1 Sache von eurer Liste im Angebot: Hähnchenbrustfilet −24 %.', `oben die Empfehlung: Aldi, wegen des Hähnchens (${(await tipp.innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 120)})`);
+await tipp.locator('[data-a-laden="Aldi"]').click();
+check(await page.locator('.a-laeden-chips [data-a-laden="Aldi"][aria-pressed="true"]').count() === 1 && (await tipp.innerText()).includes('✓ gewählt'), '„Zu Aldi“ wählt den Laden');
+await page.click('.a-laeden-chips [data-a-laden="Kaufland"]');
+await page.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await huhnAngebot.count()) === 0), 'mit Kaufland gewählt: kein Hähnchen-Angebot auf der Liste – Kaufland hat keins');
+await page.click('.tab[data-tab="angebote"]');
+await page.click('.a-laeden-chips [data-a-laden=""]');
+await page.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await huhnAngebot.count()) === 1), 'wieder alle Läden: der Hinweis ist zurück');
 const offenVorher = await badge();
 check(offenVorher === 17, `17 offene Einträge (${offenVorher})`);
 
@@ -249,6 +265,17 @@ await page.click('[data-act="leeren"]');
 check(await page.locator('.confirm').count() === 1, 'Liste leeren fragt nach');
 await page.click('[data-act="leeren-ja"]');
 check(await bis(async () => (await page.locator('#list-body .empty-state').count()) === 1), 'Liste leer');
+
+// --- iPhone, App vom Home-Bildschirm: eigener Speicher, getrennt von Safari – der Hinweis sagt, was zu tun ist
+const iphone = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE', serviceWorkers: 'block', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
+await iphone.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
+await iphone.addInitScript(() => { Object.defineProperty(Object.getPrototypeOf(navigator), 'standalone', { get: () => true, configurable: true }); });
+const ip = await iphone.newPage();
+await ip.goto(APP_URL, { waitUntil: 'load' });
+await ip.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await ip.locator('#zugang .zugang-banner').innerText()).includes('eigenen Speicher')), 'iPhone, vom Home-Bildschirm: der Hinweis erklärt, dass der Link dort nochmal eingefügt werden muss');
+check(!(await page.locator('#zugang .zugang-banner').innerText().catch(() => '')).includes('eigenen Speicher'), 'auf Android steht der Hinweis nicht');
+await iphone.close();
 
 // --- Layout
 check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'kein seitliches Scrollen auf dem Handy');

@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
-import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE } from '../js/angebote.js';
+import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE, angebotRabatt, grundpreis, istHaehnchen, nachRabatt, besteJeZutat, ladenWahl, rabattText } from '../js/angebote.js';
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg } from '../js/liste.js';
 import { systemText, nutzerText } from '../js/ki.js';
 import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, mitAusweichen, kaufdaLesen, kaufdaDoppelt, kaufdaMenge, kalenderwoche } from '../werkzeug/angebote.mjs';
@@ -58,6 +58,40 @@ check(top.length === 12 && top[0].treffer.length >= 2 && top.every((x, i) => !i 
 check(topRezepte(daten.rezepte, [], preisDaten).length === 0, 'ohne Angebote keine Treffer');
 check(angebotMenge(z1) === '1 kg 7,49 €' && angebotMenge({ preis: 0.99, menge: null }) === '0,99 €', 'Mengentext');
 check(angeboteText([z1, z2, z5]) === 'Aldi: Hähnchenbrustfilet 1 kg 7,49 €\nLidl: Paprika rot 500 g 1,29 €\nKaufland: Rinderhackfleisch 5 % Fett 400 g 4,49 €', 'Text für die KI: eine Zeile je Laden');
+
+// --- Rabatt gegen den Richtpreis (der übliche Discounter-Preis), Grundpreis, Hähnchen, Sortierung, Empfehlung
+const rab = (a) => angebotRabatt(a, preisDaten);
+const nah = (x, y) => x !== null && Math.abs(x - y) < 0.005;
+check(nah(rab({ k: 'haehnchenbrust', preis: 5.19, menge: 600, einheit: 'g' }), 1 - 5.19 / 600 / (6.79 / 600)) && nah(rab({ k: 'haehnchenbrust', preis: 7.99, menge: 1, einheit: 'kg' }), 1 - 7.99 / 1000 / (6.79 / 600)) && rabattText(rab({ k: 'haehnchenbrust', preis: 5.19, menge: 600, einheit: 'g' })) === '−24 %', 'Rabatt: Gramm gegen Gramm, Kilo gegen Gramm; „−24 %“');
+check(nah(rab({ k: 'zucchini', preis: 1.11, menge: 1, einheit: 'kg' }), 1 - 1.11 / 1000 / (0.79 / 300)) && nah(rab({ k: 'zucchini', preis: 0.59, menge: 1, einheit: 'Stk' }), 1 - 0.59 / 0.79), 'Zucchini: Kilo über das Stückgewicht (300 g), Stück gegen Stück');
+check(nah(rab({ k: 'zitrone', preis: 1.29, menge: 750, einheit: 'g' }), 1 - 1.29 / 750 / (0.39 / 110)), 'Zitronen mit 110 g je Stück – nicht mit den 30 g Saft aus den Nährwerten');
+check(nah(rab({ k: 'kidney', preis: 0.59, menge: 400, einheit: 'g' }), 1 - 0.59 / 0.69) && nah(rab({ k: 'kidney', preis: 0.59, menge: 1, einheit: 'Dose' }), 1 - 0.59 / 0.69), 'Kidneybohnen: 400 g sind eine Dose (Füllmenge, nicht abgetropft)');
+check(rab({ k: 'getr-tomaten', preis: 1.29, menge: 280, einheit: 'g' }) === null && rab({ k: '', preis: 1, menge: 1, einheit: 'kg' }) === null && rab({ k: 'haehnchenbrust', preis: 5, menge: null, einheit: '' }) === null && rab({ k: 'milch', preis: 8.5, menge: 12, einheit: 'Pck' }) === null, 'nicht vergleichbar: Glas gegen Gramm, keine Rezeptzutat, keine Menge, Packungen Milch');
+check(grundpreis({ preis: 5.19, menge: 600, einheit: 'g' }) === '8,65 €/kg' && grundpreis({ preis: 2.49, menge: 750, einheit: 'ml' }) === '3,32 €/l' && grundpreis({ preis: 7.99, menge: 1, einheit: 'kg' }) === '' && grundpreis({ preis: 1, menge: 3, einheit: 'Stk' }) === '', 'Grundpreis je kg oder l – nicht bei genau 1 kg und nicht bei Stück');
+const h = (name, k = '') => istHaehnchen({ name, k });
+check(h('Hähnchenbrustfilet', 'haehnchenbrust') && h('Mais-Hähnchenschenkel') && h('Frische Freiland-Hähnchen-Minutenschnitzel') && h('K-Purland Hähnchenflügel'), 'Hähnchen: Brust, Schenkel, Minutenschnitzel, Flügel');
+check(!h('Crunchy Chicken Patties XXL') && !h('VOSSKO Hähnchen Schnitzel') && !h('Hähnchen-Nuggets') && !h('Hähnchen-Hacksteaks') && !h('Freilandeier Hühnereier') && !h('Puten-Schnitzel') && !h('Poké Bowl Hähnchen'), 'kein Hähnchen: Paniertes, Fertiges, Eier, Pute');
+const reihe = [
+  { id: 'a-1', name: 'ohne', k: '', preis: 1, menge: 1, einheit: 'kg' },
+  { id: 'a-2', name: 'Hähnchen', k: 'haehnchenbrust', preis: 5.19, menge: 600, einheit: 'g' },
+  { id: 'a-3', name: 'Zucchini', k: 'zucchini', preis: 1.11, menge: 1, einheit: 'kg' },
+  { id: 'a-4', name: 'teures Gulasch', k: 'rindergulasch', preis: 7.79, menge: 500, einheit: 'g' },
+  { id: 'a-5', name: 'auch ohne', k: '', preis: 2, menge: 1, einheit: 'kg' },
+];
+check(nachRabatt(reihe, preisDaten).map((a) => a.id).join() === 'a-3,a-2,a-4,a-1,a-5', 'Beste zuerst: Zucchini, Hähnchen, das teurere Gulasch; ohne Vergleich unten in alter Reihenfolge');
+const ang = [
+  { laden: 'Aldi', k: 'haehnchenbrust', name: 'H A', preis: 5.19, menge: 600, einheit: 'g' },
+  { laden: 'Lidl', k: 'haehnchenbrust', name: 'H L', preis: 3.79, menge: 400, einheit: 'g' },
+  { laden: 'Lidl', k: 'zucchini', name: 'Z L', preis: 1.11, menge: 1, einheit: 'kg' },
+  { laden: 'Rewe', k: 'rinderhack', name: 'R R', preis: 5.69, menge: 500, einheit: 'g' },
+];
+const beste = besteJeZutat(ang, preisDaten);
+check(beste.get('haehnchenbrust').a.laden === 'Aldi' && beste.get('zucchini').a.laden === 'Lidl' && !beste.has('rinderhack') && besteJeZutat(ang, preisDaten, { laden: 'Lidl' }).get('haehnchenbrust').a.name === 'H L', 'je Zutat das beste Angebot ab 5 % – auf Wunsch nur aus einem Laden');
+const empf = ladenWahl({ haehnchenbrust: 9.05, zucchini: 0.79, rinderhack: 5.79 }, ang, preisDaten);
+check(empf.length === 2 && empf[0].laden === 'Aldi' && nah(empf[0].ersparnis, rab(ang[0]) * 9.05) && empf[1].laden === 'Lidl' && empf[1].treffer.length === 2 && nah(empf[1].ersparnis, rab(ang[1]) * 9.05 + rab(ang[2]) * 0.79), `Empfehlung: Aldi spart am meisten (${empf.map((w) => `${w.laden} ${w.ersparnis.toFixed(2)} €`).join(', ')}), Rewe ohne nennenswerten Rabatt fällt raus`);
+const chiliR = daten.rezepte.find((r) => r.id === 'chili');
+const bohnen = rezeptTreffer(chiliR, [{ laden: 'Aldi', k: 'kidney', name: 'Kidneybohnen', preis: 0.59, menge: 400, einheit: 'g' }], preisDaten);
+check(nah(bohnen.ersparnisBox * 8, (1 - 0.59 / 0.69) * daten.preise.kidney.je_g * chiliR.items.find((it) => it.k === 'kidney').g), `Dosen nicht schöngerechnet: 0,59 statt 0,69 € je Dose spart im Chili ${(bohnen.ersparnisBox * 8).toFixed(2)} €`);
 
 // --- Stand (liste.json)
 let st = anwenden(leer(), opAngeboteDazu([z1, z2], 'Tobi', '2026-10-27T20:00:00.000Z'));

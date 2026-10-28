@@ -60,11 +60,15 @@ Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
 ### Angebote der Woche
 
 Dritter Reiter (auf dem Handy unten, am Rechner über die Karte bei den
-Rezepten). Oben steht „Wo gehst du hin?“: Mit einem Laden gewählt (die
+Rezepten). Ganz oben die **Empfehlung**, wo sich der Einkauf lohnt (siehe
+unten). Darunter „Wo gehst du hin?“: Mit einem Laden gewählt (die
 Läden aus dem Abruf – und jeder, für den eigene Angebote eingetragen
 sind) zeigt der Reiter nur dessen Angebote, und auch „Passt zu euren
-Rezepten“ und das neue Rezept der KI rechnen nur mit denen; die Wahl bleibt
-auf dem jeweiligen Handy (localStorage). **Die App holt die Angebote selbst:** montags und donnerstags
+Rezepten“, das neue Rezept der KI und die Hinweise auf der Einkaufsliste
+rechnen nur mit denen; die Wahl bleibt auf dem jeweiligen Handy
+(localStorage). Dann die Liste: **Hähnchen** (ein Tipp, und die App springt
+direkt zu den Hähnchen-Angeboten), Rezeptzutaten oder alle Lebensmittel,
+Suche, sortiert **nach Laden** oder **„Beste zuerst“**. **Die App holt die Angebote selbst:** montags und donnerstags
 früh läuft bei GitHub `werkzeug/angebote.mjs` (`.github/workflows/angebote.yml`)
 und schreibt `daten/angebote.json`, die App lädt die Datei beim Start und
 merkt sie sich fürs Offline-Lesen. Quellen – nur öffentliche Seiten, mit
@@ -100,12 +104,38 @@ zusammen; ohne Schlüssel oder ohne die Datei bleibt es bei Aldi, Lidl,
 Kaufland und Penny, und Rewe, Netto, Edeka stehen als „gesperrt“ da. Beim
 Trennen vergisst das Handy die privaten Angebote.
 
+**Wie günstig ist ein Angebot?** Jede Rezeptzutat hat einen Richtpreis (siehe
+Kosten), den üblichen Discounter-Preis. Daran misst die App jedes Angebot
+(`angebotRabatt` in `js/angebote.js`): bei gleicher Einheit je Einheit, sonst
+je Gramm über das Kaufgewicht (Zucchini 300 g das Stück, Zitrone 110 g statt
+der 30 g Saft aus den Nährwerten, Dosen mit der Füllmenge von 400 g statt
+abgetropft). Glas gegen Gramm oder ein Karton Milch lassen sich nicht ehrlich
+vergleichen und bekommen keinen Wert. Ab 5 % günstiger steht die Plakette
+„−24 %“ am Angebot, bei Packungen in Gramm oder Litern dazu der Preis je kg
+oder l. „Beste zuerst“ ist eine Liste über alle Läden, danach sortiert
+(Unvergleichbares unten); „Nach Laden“ sortiert innerhalb jedes Ladens
+danach; die Wahl merkt sich das Handy. „Hähnchen“ heißt: Brust und Keule aus
+dem Katalog und anderes rohes Hähnchen (Schenkel, Flügel, Minutenschnitzel),
+nichts Paniertes oder Fertiges (`istHaehnchen`).
+
+**Empfehlung:** Für die offenen Einträge der Einkaufsliste rechnet die App je
+Laden, was dessen Angebote sparen – Rabatt mal Richtpreis der gebrauchten
+Menge (`ladenWahl`) – und nennt den Laden mit der größten Ersparnis, die
+Zutaten dazu und die nächsten zwei Läden; „Zu Aldi“ wählt ihn. Ohne Liste:
+der Laden, der für eure Rezepte im Schnitt am meisten spart. Gerechnet ist
+nur mit den Angeboten; ist es Rewe, Edeka oder Kaufland, steht dabei, dass
+der Rest beim Discounter meist weniger kostet. **Auf der Einkaufsliste**
+steht bei jedem offenen Eintrag, ob er gerade günstiger zu haben ist („−24 %
+bei Aldi: 600 g 5,19 €“, das beste Angebot; mit gewähltem Laden nur dessen),
+eigene Einträge erkennt die App am Namen („Hähnchenbrust“). „Passt zu euren
+Rezepten“ rechnet mit demselben Vergleich.
+
 Getränke, Süßes, Drogerie,
 Schwein und Fisch fliegen raus; jedes Angebot bekommt, wenn es eine
 Rezeptzutat ist, den Katalog-Schlüssel (`schluesselRaten` in
 `js/angebote.js`, mit Sperre für Verarbeitetes wie Saucen und Chips). Die
-Ansicht zeigt erst die Rezeptzutaten, auf Wunsch alle Lebensmittel, mit
-Suche; abgelaufene verschwinden von selbst. Fällt eine Quelle aus, bleiben
+Ansicht zeigt erst die Rezeptzutaten, auf Wunsch nur Hähnchen oder alle
+Lebensmittel, mit Suche; abgelaufene verschwinden von selbst. Fällt eine Quelle aus, bleiben
 ihre alten Angebote, solange sie gelten.
 
 Dazu **eigene Angebote**: Prospektseite fotografieren oder Screenshot aus
@@ -271,9 +301,11 @@ Liste nur auf dem einen Handy („Nur lokal“).
 4. Zweites Handy: unter der Liste **„Link fürs zweite Handy kopieren“** (oder
    „Per WhatsApp schicken“). Der Link öffnet die App mit eingetragenem
    Schlüssel, dort fehlt nur noch der Name.
-   - iPhone: Eine App auf dem Home-Bildschirm hat dort einen eigenen Speicher.
-     Erst zum Home-Bildschirm hinzufügen, die App von dort öffnen und den
-     ganzen Link ins Schlüsselfeld einfügen.
+   - iPhone: Eine App auf dem Home-Bildschirm hat dort einen eigenen Speicher,
+     getrennt von Safari, und Links öffnen immer Safari. Also erst zum
+     Home-Bildschirm hinzufügen, die App von dort öffnen und den ganzen Link
+     ins Schlüsselfeld einfügen. Die App sagt das auf dem iPhone auch selbst
+     (im Hinweis „Nur auf diesem Handy“ und unter dem Link in Safari).
 
 Der Schlüssel steht nur im Speicher der beiden Handys, nirgends im Code. Wer
 den Link hat, kann die Liste ändern – mehr nicht. Ist er abgelaufen oder
