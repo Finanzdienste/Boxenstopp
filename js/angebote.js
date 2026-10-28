@@ -137,14 +137,14 @@ export function zeileLesen(zeile, katalog = {}) {
  * wenn „Paprika“ oder „Reis“ im Namen steht; die Regeln mit roh: true gelten
  * nur für unverarbeitete Ware.
  */
-const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle|torte|kuchen|gebäck|chips|flips|pulver|gewürz|dressing|aufstrich|mäuse|riegel|snack|pizza|suppe|eintopf|fertig|salat|marinade|mariniert|paniert|gefüllt|gegrillt|püree|sirup|konfitüre|marmelade|gelee|likör|bonbon|keks|waffel|cracker|nudel|teig|burger|nugget|schnitzel|spieß|würstchen|wurst|füllung|pastete|frikadelle|bällchen|röllchen|taschen|schnitte|knusper|rahm-|rahmspinat|rahmgemüse|\b(?:dip|mix|tee|wrap|bowl)\b|dr\. ?oetker|wagner|frosta|knorr|maggi|lay['’]?s|pringles|funny|chio|lorenz|bahlsen|milka|ferrero|haribo|kinder\b|nestl[eé]/i;
+const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle|torte|kuchen|gebäck|chips|flips|pulver|gewürz|dressing|aufstrich|mäuse|riegel|snack|pizza|suppe|eintopf|fertig|salat|marinade|mariniert|paniert|gefüllt|gegrillt|püree|sirup|konfitüre|marmelade|gelee|likör|bonbon|keks|waffel|cracker|nudel|teig|burger|nugget|schnitzel|spieß|würstchen|wurst|füllung|pastete|frikadelle|bällchen|röllchen|taschen|schnitte|knusper|aufschnitt|delikatess|dulano|rahm-|rahmspinat|rahmgemüse|\b(?:dip|mix|tee|wrap|bowl)\b|dr\. ?oetker|wagner|frosta|knorr|maggi|lay['’]?s|pringles|funny|chio|lorenz|bahlsen|milka|ferrero|haribo|kinder\b|nestl[eé]/i;
 
 export function schluesselRaten(name, katalog = {}) {
   const n = String(name || '').toLowerCase().replace(/ß/g, 'ß');
   const verarbeitet = VERARBEITET.test(n);
   // [Muster, Schlüssel, nur roh?]
   const REGELN = [
-    [/hähnchen.?brust|hühnerbrust|chicken breast|hähnchen.?innenfilet/, 'haehnchenbrust', true],
+    [/hähnchen.?brust|hühnerbrust|chicken breast|hähnchen.?innenfilet|hähnchen.?geschnetz|hähnchen.?streifen|hähnchen.?filet/, 'haehnchenbrust', true],
     [/oberkeule|hähnchen.?keule|hähnchenschenkel.*filet|hähnchen.?schenkel.?filet/, 'haehnchenkeule', true],
     [/puten.?brust|puten.?geschnetz|puten.?filet|puten.?steak/, 'putenbrust', true],
     [/rind.*hack.*(?:5 ?%|mager)|mager.*rind.*hack|tatar|rinder.?tatar/, 'rinderhack-mager', true],

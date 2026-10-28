@@ -95,7 +95,7 @@ const entities = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&quot;/g
 const zahl = (s) => { const m = String(s || '').replace(',', '.').match(/\d+(?:\.\d+)?/); return m ? Number(m[0]) : NaN; };
 
 // Was nicht in den Topf gehört – Getränke, Süßes, Drogerie, Tierbedarf.
-const NICHT_KOCHEN = /\b(?:bier|pils|weizenbier|wein|sekt|prosecco|spirituos|wodka|vodka|whisk|rum\b|likör|gin\b|cola|limo|energy|mineralwasser|wasser|saft(?!ig)|nektar|schorle|kaffee(?!sahne)|espresso|cappuccino|tee\b|kakao(?!pulver)|schokolade|schoko|praline|bonbon|dragee|kaudragee|lutscher|fruchtgummi|gummi|kaugummi|keks|cookie|chips|cracker|riegel|eis\b|eiscreme|speiseeis|lebkuchen|stollen|spekulatius|dominostein|marzipan|kuchen|torte|waffel|müsli|cerealien|flakes|zigarett|tabak|wasch|spül|windel|zahn|shampoo|dusch|deo\b|kerze|batterie|toiletten|küchenrolle|müll|taschentuch|lotion|tablette|kapsel|vitamin|katze|hund|tier|futter|streu|blume|pflanze|strauß|rose\b|tulpe|orchidee|pizza|fertiggericht|nugget|burger|pommes|frikadelle|bratwurst|wiener|würstchen|salami|schinken|leberkäse|mett|pastete|brotaufstrich|brot\b|brötchen|toast|baguette|croissant|pudding|dessert|knabber|erdnussflips|popcorn|studentenfutter|datteln|feigen|trockenfr|pangasius|tilapia|hering|matjes|scholle|dorsch|sardine|makrele|seelachs|zander|mentos|pringles|lay['’]?s|chio|funny|lorenz|haribo|milka|ferrero|kinder\b|katjes|ritter sport|lindt|toblerone|snickers|mars\b|twix|kitkat|oreo|leibniz|bahlsen|jacobs|dallmayr|tchibo|melitta|nescaf|coca|fanta|sprite|pepsi|red bull|monster|volvic|evian|gerolsteiner|krombacher|beck['’]?s|warsteiner|bitburger|veltins|jever|paulaner|erdinger|franziskaner|radeberger|heineken|corona|guinness|budweiser|tyskie|karamalz)/i;
+const NICHT_KOCHEN = /\b(?:bier|pils|weizenbier|wein|sekt|prosecco|spirituos|wodka|vodka|whisk|rum\b|likör|gin\b|cola|limo|energy|mineralwasser|wasser|saft(?!ig)|nektar|schorle|kaffee(?!sahne)|espresso|cappuccino|tee\b|kakao(?!pulver)|schokolade|schoko|praline|bonbon|dragee|kaudragee|lutscher|fruchtgummi|gummi|kaugummi|keks|cookie|chips|cracker|riegel|eis\b|eiscreme|speiseeis|lebkuchen|stollen|spekulatius|dominostein|marzipan|kuchen|torte|waffel|müsli|cerealien|flakes|zigarett|tabak|wasch|spül|windel|zahn|shampoo|dusch|deo\b|kerze|batterie|toiletten|küchenrolle|müll|taschentuch|lotion|tablette|kapsel|vitamin|katze|hund|tier|futter|streu|blume|pflanze|strauß|rose\b|tulpe|orchidee|pizza|fertiggericht|nugget|knusperchen|cordon bleu|burger|pommes|frikadelle|bratwurst|wiener|würstchen|salami|schinken|leberkäse|mett|pastete|aufschnitt|dulano|brotaufstrich|brot\b|brötchen|toast|baguette|croissant|pudding|dessert|knabber|erdnussflips|popcorn|studentenfutter|datteln|feigen|trockenfr|pangasius|tilapia|hering|matjes|scholle|dorsch|sardine|makrele|seelachs|zander|mentos|pringles|lay['’]?s|chio|funny|lorenz|haribo|milka|ferrero|kinder\b|katjes|ritter sport|lindt|toblerone|snickers|mars\b|twix|kitkat|oreo|leibniz|bahlsen|jacobs|dallmayr|tchibo|melitta|nescaf|coca|fanta|sprite|pepsi|red bull|monster|volvic|evian|gerolsteiner|krombacher|beck['’]?s|warsteiner|bitburger|veltins|jever|paulaner|erdinger|franziskaner|radeberger|heineken|corona|guinness|budweiser|tyskie|karamalz)/i;
 const istZumKochen = (name) => !NICHT_KOCHEN.test(name) && !istTabu(name);
 
 /* ------------------------------------------------------------- Aldi */
@@ -237,7 +237,7 @@ export async function geminiModelle(schluessel, api = GEMINI_API) {
  */
 export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = GEMINI_WARTEN, anfragen = geminiAnfragen, melde = () => {} }) {
   let i = 0;
-  return async (rumpf) => {
+  const f = async (rumpf) => {
     for (let versuch = 0; ; versuch++) {
       try {
         return await anfragen(rumpf, { schluessel, modell: modelle[i] });
@@ -254,6 +254,8 @@ export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = G
       }
     }
   };
+  f.modell = () => modelle[i];
+  return f;
 }
 
 /*
@@ -386,7 +388,7 @@ export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () =
   return roh;
 }
 
-async function lidl() {
+async function lidl(alt) {
   if (!GEMINI_KEY) return { angebote: [], hinweis: 'ohne GEMINI_KEY nicht gelesen', ok: false };
   const html = await hole('https://www.lidl.de/c/online-prospekte/s10005610');
   const alle = lidlProspekte(html);
@@ -395,7 +397,10 @@ async function lidl() {
   const passende = alle.filter((p) => p.bis >= h && (p.von <= h || new Date().getUTCDay() >= 5 || new Date().getUTCDay() === 0)).slice(0, 2);
   if (!passende.length) throw new Error('kein laufender Aktionsprospekt gefunden');
   const melde = (s) => console.log(`  Lidl ${s}`);
-  const anfragen = mitAusweichen({ schluessel: GEMINI_KEY, melde });
+  // Das Modell, das beim letzten Lauf geantwortet hat, zuerst – das neueste ist oft überlastet
+  const zuletzt = alt?.quellen?.find((q) => q.laden === 'Lidl')?.modell;
+  const modelle = [...new Set([zuletzt, ...GEMINI_MODELLE].filter(Boolean))];
+  const anfragen = mitAusweichen({ schluessel: GEMINI_KEY, modelle, melde });
   const start = Date.now();
   const angebote = [];
   const nichtLesbar = [];
@@ -438,7 +443,8 @@ async function lidl() {
   if (nichtLesbar.length) teile.push(`Seiten ${nichtLesbar.join(', ')} nicht lesbar`);
   if (zeitUm) teile.push('Zeit um, Rest nicht gelesen');
   teile.push('Lesefehler möglich');
-  return { angebote, hinweis: teile.join(', ') };
+  melde(`gelesen mit ${anfragen.modell()}`);
+  return { angebote, hinweis: teile.join(', '), modell: anfragen.modell() };
 }
 
 /* ------------------------------------------------------------ Ablauf */
@@ -457,14 +463,15 @@ async function main() {
       continue;
     }
     try {
-      const { angebote: neu, hinweis, ok = true } = await fn();
-      quellen.push({ laden, ok, anzahl: neu.length, hinweis, stand: new Date().toISOString() });
+      const { angebote: neu, hinweis, ok = true, modell } = await fn(alt);
+      quellen.push({ laden, ok, anzahl: neu.length, hinweis, stand: new Date().toISOString(), ...(modell ? { modell } : {}) });
       angebote.push(...neu);
       console.log(`${laden.padEnd(9)} ${String(neu.length).padStart(4)} Angebote${hinweis ? ` – ${hinweis}` : ''}`);
     } catch (e) {
       // Fällt eine Quelle aus, bleiben ihre alten Angebote, solange sie gelten
       const vorher = (alt?.angebote || []).filter((a) => a.laden === laden && (!a.bis || a.bis >= heute()));
-      quellen.push({ laden, ok: false, anzahl: vorher.length, hinweis: `heute nicht erreichbar (${String(e?.message || e).slice(0, 80)})`, stand: alt?.quellen?.find((q) => q.laden === laden)?.stand || '' });
+      const q = alt?.quellen?.find((x) => x.laden === laden);
+      quellen.push({ laden, ok: false, anzahl: vorher.length, hinweis: `heute nicht erreichbar (${String(e?.message || e).slice(0, 80)})`, stand: q?.stand || '', ...(q?.modell ? { modell: q.modell } : {}) });
       angebote.push(...vorher);
       console.log(`${laden.padEnd(9)} FEHLER ${e?.message || e}${vorher.length ? ` – ${vorher.length} alte behalten` : ''}`);
     }

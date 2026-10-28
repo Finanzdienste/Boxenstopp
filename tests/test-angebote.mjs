@@ -29,6 +29,7 @@ check(zeileLesen('Aldi Hähnchen', katalog) === null && zeileLesen('', katalog) 
 const z5 = zeileLesen('Kaufland Rinderhackfleisch 5 % Fett 400 g 4,49', katalog);
 check(z5 && z5.k === 'rinderhack-mager' && z5.name === 'Rinderhackfleisch 5 % Fett', 'Hack mit 5 % → mageres Hack');
 check(zeileLesen('Penny Gummibärchen 200 g 0,99', katalog).k === '', 'Süßkram: kein Katalog-Schlüssel');
+check(schluesselRaten('Dulano Delikatess Puten-/ Hähnchenbrust XXL', katalog) === '' && schluesselRaten('Geflügel-Aufschnitt', katalog) === '' && schluesselRaten('Frisches Hähnchen-Geschnetzeltes', katalog) === 'haehnchenbrust', 'Aufschnitt ist keine Hähnchenbrust, Geschnetzeltes schon');
 check(einheitNorm('Stück') === 'Stk' && einheitNorm('Packung') === 'Pck' && einheitNorm('Liter') === 'l' && einheitNorm('kg') === 'kg' && einheitNorm('Quatsch') === '', 'Einheiten normiert');
 check(schluesselRaten('Basmati Reis', katalog) === 'reis' && schluesselRaten('Tomatenmark', katalog) === 'tomatenmark' && schluesselRaten('Stückige Tomaten', katalog) === 'tomaten-dose' && schluesselRaten('Rote Zwiebeln', katalog) === 'rote-zwiebeln' && schluesselRaten('Zwiebeln', katalog) === 'zwiebeln', 'Schlüssel raten: Reis, Tomatenmark vor Tomaten, rote Zwiebeln vor Zwiebeln');
 check(ladenName('ALDI Nord') === 'Aldi' && ladenName('Edeka Meyer') === 'Edeka' && ladenName('Bio Company') === 'Bio Company', 'Ladennamen: bekannte Ketten vereinheitlicht');
@@ -182,6 +183,8 @@ const anfragenMock = (zuViel) => {
   check(l.fehler?.art === 'schluessel' && l.rufe.join() === 'a', 'Ausweichen: andere Fehler sofort nach oben');
   l = await laufe({ a: ['zeit'] });
   check(l.ergebnis?.[0]?.modell === 'b' && l.rufe.join() === 'a,b,b' && /a antwortet nicht, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: Zeitablauf → ohne Wiederholung das nächste Modell');
+  const f = mitAusweichen({ schluessel: 'k', modelle: ['x', 'y'], warten: [], anfragen: async (r, { modell }) => { if (modell === 'x') throw fehlerMit('modell'); return { modell }; } });
+  check(f.modell() === 'x' && (await f({})).modell === 'y' && f.modell() === 'y', 'Ausweichen: modell() nennt das Modell, das gerade dran ist');
 }
 
 // --- geminiAnfragen gegen einen Mock von generateContent
