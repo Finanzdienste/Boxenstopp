@@ -363,6 +363,21 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .a-ohne{color:var(--muted)}
 .a-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
 .a-passt .ki-liste{margin-bottom:12px}
+.a-stand{display:grid;gap:6px}
+.a-quellen{display:flex;flex-wrap:wrap;gap:6px}
+.a-quelle{font:600 12px/1 var(--f-mono);padding:6px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink)}
+.a-quelle-aus{color:var(--muted);background:transparent;border:1px dashed var(--line)}
+.a-lidl code{font:500 12px var(--f-mono);background:var(--surface-2);padding:1px 5px;border-radius:5px}
+.a-filter{display:grid;gap:8px;margin-top:4px}
+.a-chips{margin:0}
+.a-suche{margin:0}
+.a-suche input{height:40px}
+.a-leer{margin:8px 0 0}
+.a-eigene{margin-top:8px;border-top:1px solid var(--line);padding-top:12px}
+.a-eigene summary{cursor:pointer;font-weight:700;font-size:15px;padding:6px 0}
+.a-eigene summary small{display:block;font-weight:500;font-size:12.5px;color:var(--muted);margin-top:2px}
+.a-eigene .a-lesen{margin-top:10px}
+.a-eigene-h{margin-top:14px}
 .a-ki{display:grid;gap:8px;padding:14px;border-radius:16px;background:var(--surface-2)}
 .a-ki .fine{margin:0}
 .angebote-kopf{display:flex;align-items:center;gap:10px}

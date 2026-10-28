@@ -1,0 +1,22 @@
+{
+ "stand": "2026-10-26T05:23:00.000Z",
+ "woche": "2026-44",
+ "gesperrt": ["Rewe", "Netto", "Edeka"],
+ "quellen": [
+  { "laden": "Aldi", "ok": true, "anzahl": 4, "hinweis": "Aldi Nord, bundesweit", "stand": "2026-10-26T05:23:00.000Z" },
+  { "laden": "Lidl", "ok": false, "anzahl": 0, "hinweis": "ohne GEMINI_KEY nicht gelesen", "stand": "" },
+  { "laden": "Kaufland", "ok": true, "anzahl": 3, "hinweis": "bundesweite Angebote, regional kann es abweichen", "stand": "2026-10-26T05:23:10.000Z" },
+  { "laden": "Penny", "ok": true, "anzahl": 2, "hinweis": "KW 44, bundesweit", "stand": "2026-10-26T05:23:20.000Z" }
+ ],
+ "angebote": [
+  { "id": "a-aldi001", "laden": "Aldi", "name": "Hähnchenbrustfilet-Teilstücke", "preis": 5.19, "menge": 600, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "haehnchenbrust" },
+  { "id": "a-aldi002", "laden": "Aldi", "name": "Rinderhackfleisch XXL", "preis": 6.99, "menge": 800, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "rinderhack" },
+  { "id": "a-aldi003", "laden": "Aldi", "name": "Zucchini", "preis": 1.11, "menge": 1, "einheit": "kg", "von": "2026-10-26", "bis": "2099-12-31", "k": "zucchini" },
+  { "id": "a-aldi004", "laden": "Aldi", "name": "Asia Green Garden Gyoza", "preis": 2.49, "menge": 400, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "" },
+  { "id": "a-kauf001", "laden": "Kaufland", "name": "Span. Bio-Paprika, rot und gelb", "preis": 2.49, "menge": 400, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "paprika" },
+  { "id": "a-kauf002", "laden": "Kaufland", "name": "K-classic Cashewkerne", "preis": 2.49, "menge": 200, "einheit": "g", "von": "", "bis": "2099-12-31", "k": "cashews" },
+  { "id": "a-kauf003", "laden": "Kaufland", "name": "Dtsch. Speisekartoffeln", "preis": 2.99, "menge": 5, "einheit": "kg", "von": "", "bis": "2000-01-01", "k": "kartoffeln" },
+  { "id": "a-penn001", "laden": "Penny", "name": "Mühlenhof Frisches Rinder-Gulasch", "preis": 7.79, "menge": 500, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "rindergulasch" },
+  { "id": "a-penn002", "laden": "Penny", "name": "Bürger XXL Gnocchi", "preis": 3.49, "menge": 1000, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "gnocchi" }
+ ]
+}

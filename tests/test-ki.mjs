@@ -366,14 +366,29 @@ check(await t.locator('[data-filter="reste"] .n').innerText() === '2' && (await 
 
 // --- Angebote der Woche: tippen, fotografieren, Treffer, Rezept daraus, das andere Handy
 await t.click('.tab[data-tab="angebote"]');
-check(await t.locator('#a-form').count() === 1 && (await t.locator('#a-liste .empty-state').count()) === 1, 'Reiter Angebote: Formular, noch keine Angebote');
+// die automatisch geholten Angebote (tests/daten/angebote.json über die Attrappe)
+check(await bis(async () => (await t.locator('#a-auto .a-item').count()) === 7), `automatisch geholt: 7 Rezeptzutaten von Aldi, Kaufland, Penny, abgelaufene nicht (${await t.locator('#a-auto .a-item').count()})`);
+check((await t.locator('#a-auto .a-stand').innerText()).includes('KW 44') && (await t.locator('.a-quelle', { hasText: 'Aldi 4' }).count()) === 1 && (await t.locator('.a-quelle-aus', { hasText: 'Lidl' }).count()) === 1 && (await t.locator('.a-quelle-aus', { hasText: 'Rewe' }).count()) === 1, 'Stand und Quellen: KW, Aldi 4, Lidl fehlt, Rewe gesperrt');
+check((await t.locator('#a-auto .a-lidl').innerText()).includes('GEMINI_KEY'), 'ohne Lidl steht dran, welches Secret fehlt');
+check((await t.locator('#a-badge').innerText()) === '7' && (await t.locator('[data-a-filter="zutaten"] .n').innerText()) === '7' && (await t.locator('[data-a-filter="alle"] .n').innerText()) === '8', 'Zahl am Reiter: die Rezeptzutaten; Chips: 7 Zutaten, 8 Lebensmittel');
+await t.click('[data-a-filter="alle"]');
+check(await t.locator('#a-auto .a-item').count() === 8 && (await t.locator('#a-auto .a-ohne').count()) === 1, '„Alle Lebensmittel“: auch die Gyoza, ohne Rezeptzutat');
+await t.fill('#a-suche', 'hack');
+check(await bis(async () => (await t.locator('#a-auto .a-item').count()) === 1) && (await t.locator('#a-auto .a-item .item-name').innerText()).includes('Rinderhack'), 'Suche in den Angeboten');
+await t.fill('#a-suche', '');
+await t.click('[data-a-filter="zutaten"]');
+check(await t.locator('#a-auto .a-item .x').count() === 0, 'automatische Angebote lassen sich nicht löschen – die kommen wieder');
+check((await t.locator('#a-passt-liste li').count()) >= 5 && (await t.locator('#a-passt-liste li').first().innerText()).includes('im Angebot'), 'und „Passt zu euren Rezepten“ nutzt sie');
+check(await t.locator('#a-form').count() === 1 && (await t.locator('#a-liste .a-item').count()) === 0 && !(await t.locator('#a-text').isVisible()), 'eigene Angebote: Formular zugeklappt, noch keine');
+await t.click('.a-eigene summary');
+check(await t.locator('#a-text').isVisible(), 'aufklappen');
 await t.fill('#a-text', 'Aldi Hähnchenbrustfilet 1 kg 7,49\nAldi Paprika 500 g 1,29\nLidl: Gummibärchen 200 g 0,99\nQuatsch ohne Preis');
 await t.click('#a-los');
 check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 3), 'drei getippte Zeilen eingetragen, die vierte nicht');
-check((await t.locator('#a-badge').innerText()) === '3' && (await t.locator('#a-count').innerText()) === '3 drin', 'Zahl am Reiter und oben');
+check((await t.locator('#a-badge').innerText()) === '10' && (await t.locator('#a-count').innerText()) === '10 für euch', 'Zahl am Reiter und oben: 7 automatische Zutaten + 3 eigene');
 check((await t.locator('.a-grp[data-laden="Aldi"] .item-sub').first().innerText()).includes('→ Hähnchenbrustfilet') && (await t.locator('.a-grp[data-laden="Lidl"] .a-ohne').count()) === 1, 'Aldi-Hähnchen ist eine Rezeptzutat, Gummibärchen nicht');
 check(await bis(() => (gh.liste()?.angebote?.eintraege || []).length === 3), 'die Angebote stehen in GitHub');
-check((await t.locator('#a-passt-liste li').count()) >= 5 && (await t.locator('#a-passt-liste li').first().innerText()).includes('im Angebot') && /spart ≈ \d,\d\d €\/Box/.test(await t.locator('#a-passt-liste li').first().innerText()), `„Passt zu euren Rezepten“ mit Ersparnis (${(await t.locator('#a-passt-liste li').first().innerText()).replace(/\s+/g, ' ').slice(0, 70)})`);
+check((await t.locator('#a-passt-liste li').count()) >= 5 && /spart ≈ \d,\d\d €\/Box/.test(await t.locator('#a-passt-liste li').first().innerText()), `„Passt zu euren Rezepten“ mit Ersparnis (${(await t.locator('#a-passt-liste li').first().innerText()).replace(/\s+/g, ' ').slice(0, 70)})`);
 await t.click('#a-passt-liste li:first-child button');
 check(await bis(async () => (await t.locator('#detail').isVisible()) && (await t.evaluate(() => document.querySelector('#app').dataset.tab)) === 'rezepte'), 'antippen öffnet das Rezept im Reiter Rezepte');
 await t.click('[data-act="zurueck"]');
@@ -390,7 +405,7 @@ check((await t.locator('.a-grp[data-laden="Lidl"] .item').count()) === 4 && (awa
 check(await t.locator('#a-vorschau img').count() === 0 && (await t.inputValue('#a-text')) === '', 'danach sind Bild und Text weg');
 // das andere Handy
 await a.click('.tab[data-tab="angebote"]');
-check(await bis(async () => (await a.locator('#a-liste .a-item').count()) === 6), 'Amy sieht dieselben sechs Angebote');
+check(await bis(async () => (await a.locator('#a-liste .a-item').count()) === 6), 'Amy sieht dieselben sechs eigenen Angebote');
 check((await a.locator('#a-liste .a-foot .fine').innerText()).includes('von Tobi'), 'mit „von Tobi“');
 // eins weg und zurück
 await t.click('.a-grp[data-laden="Lidl"] [data-a-weg]');
@@ -400,10 +415,9 @@ check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 6)
 // ein Rezept aus den Angeboten
 const anfragenVorVorschlag = ki.z.anfragen.length;
 await t.click('[data-act="a-vorschlag"]');
-check(await bis(async () => (await t.locator('#reste').isVisible()) && (await t.locator('#k-titel').innerText()) === 'Rezept aus den Angeboten'), 'der Knopf wechselt zur KI im Modus „Angebote“');
-check(await bis(() => ki.z.anfragen.length > anfragenVorVorschlag), 'und schickt die Anfrage los');
+check(await bis(() => ki.z.anfragen.length > anfragenVorVorschlag), 'der Knopf wechselt zur KI im Modus „Angebote“ und schickt die Anfrage los');
 const rezeptAnfrage = ki.z.anfragen.at(-1).rumpf;
-check(/Angeboten der Woche/.test(rezeptAnfrage.system_instruction) && rezeptAnfrage.input.at(-1).text.includes('Das ist diese Woche im Angebot:') && rezeptAnfrage.input.at(-1).text.includes('Aldi: Hähnchenbrustfilet 1 kg 7,49 €'), 'die Anfrage enthält die Angebote je Laden');
+check(/Angeboten der Woche/.test(rezeptAnfrage.system_instruction) && rezeptAnfrage.input.at(-1).text.includes('Das ist diese Woche im Angebot:') && rezeptAnfrage.input.at(-1).text.includes('Aldi: Hähnchenbrustfilet 1 kg 7,49 €') && rezeptAnfrage.input.at(-1).text.includes('Rinder-Gulasch'), 'die Anfrage enthält die eigenen und die automatischen Angebote je Laden');
 check(await bis(async () => (await t.locator('.ki-leiste').count()) === 1 && (await t.locator('.ki-leiste').innerText()).includes('Aus den Angeboten')), 'der Vorschlag öffnet sich mit „Aus den Angeboten“');
 await t.click('[data-act="ki-verwerfen"]');
 check(await bis(async () => (await t.locator('#k-titel').innerText()) === 'Rezept aus den Angeboten') && (await t.inputValue('#k-text')).includes('Lidl:'), 'Verwerfen: zurück ins Formular, die Angebote stehen noch drin');
@@ -413,7 +427,7 @@ check((await t.locator('#k-titel').innerText()) === 'Was ist noch da?' && (await
 await t.click('.tab[data-tab="angebote"]');
 await t.click('[data-act="a-leeren"]');
 await t.click('[data-act="a-leeren-ja"]');
-check(await bis(async () => (await t.locator('#a-liste .empty-state').count()) === 1) && (await t.locator('#a-badge').isHidden()), 'Alle löschen: leer, Zahl weg');
+check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 0) && (await t.locator('#a-badge').innerText()) === '7', 'Alle eigenen löschen: leer, am Reiter bleiben die 7 automatischen');
 await t.click('#toast button');
 check(await bis(async () => (await t.locator('#a-liste .a-item').count()) === 6), 'Rückgängig: alle wieder da');
 await t.click('.tab[data-tab="rezepte"]');

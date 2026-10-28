@@ -19,7 +19,7 @@ import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMi
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
-import { angeboteZeichnen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
+import { angeboteZeichnen, angeboteAutoSetzen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
 
 const apiBasis = () => lese('__api', null) || API;
 const takt = () => Number(lese('__takt', 0)) || 8000;
@@ -134,6 +134,8 @@ async function start() {
   rasterZeichnen();
   listeZeichnen();
   angeboteZeichnen();
+  // Die Angebote der Woche kommen nebenbei – ohne Netz bleibt der letzte Stand aus dem Speicher.
+  fetch('daten/angebote.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((a) => { if (a) angeboteAutoSetzen(a); }).catch(() => {});
 
   if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
   if (hash === 'angebote') ansicht.tab = 'angebote';

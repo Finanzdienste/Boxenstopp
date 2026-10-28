@@ -135,6 +135,8 @@ export async function handy(browser, { attrappe = null, tiere = null, takt = 400
   if (attrappe) await ctx.route('https://api.github.com/**', attrappe.route);
   else await ctx.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
   await ctx.route(TIER_HOSTS, tiere ? tiere.route : (r) => r.abort('blockedbyclient'));
+  // Die Angebote der Woche: in den Tests immer dieselben (tests/daten/angebote.json), nie das echte Feld
+  await ctx.route('**/daten/angebote.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote.json'), 'utf8') }));
   const page = await ctx.newPage();
   const fehler = [];
   page.on('pageerror', (e) => fehler.push(`PAGEERROR: ${e.message}`));

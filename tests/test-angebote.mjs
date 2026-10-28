@@ -9,6 +9,7 @@ import { pruefer, ROOT } from './hilfe.mjs';
 import { zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE } from '../js/angebote.js';
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg } from '../js/liste.js';
 import { systemText, nutzerText } from '../js/ki.js';
+import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, kalenderwoche } from '../werkzeug/angebote.mjs';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -77,5 +78,34 @@ check(/kein Schwein, kein Fisch/.test(systemTextAngebote({ katalog })) && !/salz
 const sys = systemText({ portionen: 8, ziel: daten.ziel, dazukaufen: true, katalog, anbieter: 'gemini', modus: 'angebote' });
 check(/Angeboten der Woche/.test(sys) && /quelle: kaufen/.test(sys) && !/Kühlschrank und im Vorrat ist, machst/.test(sys), 'Rezept aus Angeboten: eigener Auftrag, alles zu kaufen');
 check(nutzerText({ text: 'Aldi: X', portionen: 8, dazukaufen: true, modus: 'angebote' }).startsWith('Das ist diese Woche im Angebot:'), 'und der Nutzertext sagt, dass es Angebote sind');
+
+// --- das Werkzeug, das die Angebote holt (werkzeug/angebote.mjs) – an kleinen Ausschnitten der echten Seiten
+const fix = (f) => readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote', f), 'utf8');
+const bezug = new Date('2026-10-28T06:00:00Z');
+const aldiA = aldiLesen(fix('aldi.html'), bezug);
+const aldiNamen = aldiA.map((a) => a.name);
+check(aldiNamen.includes('Hähnchenbrustfilet-Teilstücke') && aldiNamen.includes('Zucchini') && aldiNamen.includes('Rinderhackfleisch XXL') && !aldiNamen.includes('Retropants'), `Aldi: Lebensmittel aus dem eingebetteten JSON, Non-Food nicht (${aldiNamen.join(', ')})`);
+const aldiHuhn = aldiA.find((a) => a.name === 'Hähnchenbrustfilet-Teilstücke');
+check(aldiHuhn && aldiHuhn.laden === 'Aldi' && aldiHuhn.preis === 5.19 && aldiHuhn.menge === 600 && aldiHuhn.einheit === 'g' && aldiHuhn.k === 'haehnchenbrust' && /^\d{4}-\d{2}-\d{2}$/.test(aldiHuhn.bis) && /^a-[a-z0-9]{4,16}$/.test(aldiHuhn.id), `Aldi: Preis, Packung, Schlüssel, Gültigkeit, feste id (${JSON.stringify(aldiHuhn)})`);
+const aldiZuc = aldiA.find((a) => a.name === 'Zucchini');
+check(aldiZuc && aldiZuc.menge === 1 && aldiZuc.einheit === 'kg', '„kg-Preis“ → 1 kg');
+const mentos = aldiA.find((a) => /Mentos/.test(a.name));
+check(!mentos, 'Süßes fliegt raus');
+check(aldiA.find((a) => a.name === 'Speisekartoffeln')?.menge === 5, 'Aldi: „5-kg-Netz“ → 5 kg');
+
+const kl = kauflandLesen(fix('kaufland.html'), bezug);
+check(kl.length >= 3 && kl.every((a) => a.laden === 'Kaufland' && a.preis > 0) && kl.some((a) => a.k === 'aepfel'), `Kaufland: ${kl.length} Kacheln aus Fleisch und Obst/Gemüse (${kl.map((a) => a.name).join(' · ')})`);
+check(!kl.some((a) => /fisch|lachs|bier|pils/i.test(a.name)), 'Kaufland: Fisch- und Getränkegruppen bleiben draußen');
+check(kl.some((a) => a.bis === '2026-10-31') || kl.some((a) => a.bis === '2026-10-28'), `Kaufland: Gültigkeit aus der Gruppenzeile (${[...new Set(kl.map((a) => a.bis))].join(', ')})`);
+check(kl.some((a) => a.menge && a.einheit), 'Kaufland: Packung aus „je 250-g-Packg.“');
+
+const pe = pennyLesen([['fleisch-und-wurst', JSON.parse(fix('penny-fleisch-und-wurst.json'))], ['obst-und-gemuese', JSON.parse(fix('penny-obst-und-gemuese.json'))]], bezug);
+const peNamen = pe.map((a) => a.name);
+check(peNamen.includes('Zitronen') && !peNamen.some((n) => /Schweine|Kaffee|Coca|Pringles/i.test(n)), `Penny: Zitronen ja, Schwein, Kaffee, Cola, Chips nein (${peNamen.join(' · ')})`);
+check(pe.find((a) => a.name === 'Zitronen')?.k === 'zitrone' && pe.every((a) => a.bis === '2026-10-31'), 'Penny: Schlüssel, Gültigkeit bis Samstag der Woche');
+check(kalenderwoche(bezug) === '2026-44' && kalenderwoche(new Date('2027-01-01T12:00:00Z')) === '2026-53' && kalenderwoche(new Date('2026-01-01T12:00:00Z')) === '2026-01', 'Kalenderwoche nach ISO');
+
+const lp = lidlProspekte(fix('lidl-prospekte.html'));
+check(lp.length === 2 && lp[0].von === '2026-10-26' && lp[0].bis === '2026-10-31' && lp[1].von === '2026-11-02' && lp[0].id.startsWith('aktionsprospekt-26-10-2026'), `Lidl: Prospekte mit Datum aus der Übersicht, doppelte einmal (${lp.map((p) => p.id).join(', ')})`);
 
 ende();

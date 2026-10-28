@@ -1,18 +1,21 @@
 /*
- * Reiter „Angebote“: die Angebote der Woche bei Aldi, Lidl, Rewe, Kaufland & Co.
+ * Reiter „Angebote“: die Angebote der Woche bei Aldi, Lidl, Kaufland und Penny.
  *
- *   1. Rein kommen sie über Fotos der Prospektseiten oder Screenshots aus den
- *      Supermarkt-Apps, die die KI ausliest (angebote.js: rumpfAngebote), oder
- *      getippt, eine Zeile je Angebot („Aldi Hähnchenbrustfilet 1 kg 7,49“) –
- *      das liest die App selbst, ohne KI.
- *   2. Sie liegen in liste.json unter `angebote`, also für beide Handys, mit
- *      dem Namen dessen, der sie eingetragen hat.
+ *   1. Die App holt sie selbst: montags und donnerstags läuft bei GitHub
+ *      werkzeug/angebote.mjs und schreibt daten/angebote.json (Aldi und
+ *      Kaufland von deren Angebotsseiten, Penny aus deren JSON, Lidl aus dem
+ *      Prospekt per Gemini). Die App lädt die Datei beim Start und merkt sie
+ *      sich fürs Offline-Lesen. Rewe, Netto und Edeka sperren automatische
+ *      Abrufe – das steht dran.
+ *   2. Dazu kommen eigene Angebote: fotografiert (die KI liest sie aus) oder
+ *      getippt, eine Zeile je Angebot („Aldi Hähnchenbrustfilet 1 kg 7,49“).
+ *      Die liegen in liste.json unter `angebote`, also für beide Handys.
  *   3. Darunter: welche der Rezepte davon profitieren (Zutat im Angebot,
  *      Ersparnis pro Box gegen die Richtpreise) – und ein Knopf, der die KI
  *      ein neues Rezept aus den Angeboten machen lässt (Resteverwertung im
  *      Modus „angebote“, mit „Neuer Vorschlag“ für den nächsten).
  */
-import { app, $, melde, zeigeReiter, lese } from './kern.js';
+import { app, $, melde, zeigeReiter, lese, schreibe } from './kern.js';
 import { esc, tagKurz, heute } from './format.js';
 import { angeboteBereinigen, zeileLesen, aktuelle, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN } from './angebote.js';
 import { kiAnfragen, anbieterVon, ANBIETER, KI_FEHLER } from './ki.js';
@@ -28,14 +31,34 @@ const BILD = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentCol
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
 
+const AUTO = 'boxenstopp.angebote.auto.v1';
+
 let fotos = []; // { url, b64 }
 let text = '';
 let lauf = null; // { controller, start, timer }
 let fehler = null;
 let leerenFragen = false;
+let nurZutaten = true; // die automatischen Angebote: nur Rezeptzutaten oder alles
+let eigeneOffen = false; // der Abschnitt „Eigene Angebote dazu“ ist aufgeklappt
+let suche = '';
 
-const eintraege = () => (app.listeDa ? aktuelle(app.stand.angebote?.eintraege || []) : []);
-export const angeboteAnzahl = () => eintraege().length;
+/** Die automatisch geholten Angebote (daten/angebote.json), zuletzt gesehen auch ohne Netz. */
+let auto = (() => { const a = lese(AUTO, null); return a && Array.isArray(a.angebote) ? a : null; })();
+
+const automatisch = () => aktuelle(auto?.angebote || []);
+const eigene = () => (app.listeDa ? aktuelle(app.stand.angebote?.eintraege || []) : []);
+/** Alles, was gerade gilt – eigene zuerst, damit sie bei gleichem Namen gewinnen. */
+const eintraege = () => [...eigene(), ...automatisch()];
+/** Was am Reiter steht: Angebote, die eine Rezeptzutat sind, plus die eigenen. */
+export const angeboteAnzahl = () => eigene().length + automatisch().filter((a) => a.k).length;
+
+/** Von app.js nach dem Laden von daten/angebote.json. */
+export function angeboteAutoSetzen(daten) {
+  if (!daten || !Array.isArray(daten.angebote)) return;
+  auto = { stand: String(daten.stand || ''), woche: String(daten.woche || ''), quellen: Array.isArray(daten.quellen) ? daten.quellen : [], gesperrt: Array.isArray(daten.gesperrt) ? daten.gesperrt : [], angebote: angeboteBereinigen(daten.angebote, app.katalog, 800) };
+  schreibe(AUTO, auto);
+  angeboteZeichnen();
+}
 
 /* ------------------------------------------------------------- Ansicht */
 
@@ -68,31 +91,60 @@ function lesenHTML() {
 </form>`;
 }
 
-function listeHTML() {
-  const liste = eintraege();
-  if (!liste.length) return '<div class="empty-state"><p class="es-t">Noch keine Angebote drin.</p><p>Fotografier die Prospektseiten, nimm Screenshots aus der Aldi-, Lidl-, Rewe- oder Kaufland-App – oder tipp die Angebote ein. Beide Handys sehen sie dann.</p></div>';
+const bisText = (a) => (a.bis && !Number.isNaN(Date.parse(a.bis)) ? `bis ${tagKurz(a.bis)}` : '');
+const passtSuche = (a) => !suche || `${a.laden} ${a.name} ${a.k && app.katalog[a.k] ? app.katalog[a.k].n : ''}`.toLowerCase().includes(suche);
+
+function zeileHTML(a, { eigen = false } = {}) {
+  return `<li class="item a-item${eigen ? ' a-eigen' : ''}" data-a-id="${esc(a.id)}">
+<div class="item-main"><span class="item-name">${esc(a.name)}</span><span class="item-sub">${a.k && app.katalog[a.k] ? `<span>→ ${esc(app.katalog[a.k].n)}</span>` : '<span class="a-ohne">keine Rezeptzutat</span>'}${bisText(a) ? `<span>${esc(bisText(a))}</span>` : ''}</span></div>
+<span class="item-qty">${esc(angebotMenge(a))}</span>
+${eigen ? `<button type="button" class="x" data-a-weg="${esc(a.id)}" aria-label="${esc(a.name)} entfernen">${X}</button>` : '<span></span>'}</li>`;
+}
+
+function gruppenHTML(liste, { eigen = false } = {}) {
   const nachLaden = new Map();
   const reihenfolge = [...LAEDEN, ...new Set(liste.map((a) => a.laden))];
   for (const a of liste) { if (!nachLaden.has(a.laden)) nachLaden.set(a.laden, []); nachLaden.get(a.laden).push(a); }
-  const bisText = (a) => (a.bis && !Number.isNaN(Date.parse(a.bis)) ? `bis ${tagKurz(a.bis)}` : '');
   let html = '';
   for (const laden of reihenfolge) {
     const g = nachLaden.get(laden);
     if (!g) continue;
     nachLaden.delete(laden);
     const bis = [...new Set(g.map(bisText).filter(Boolean))];
-    html += `<section class="grp a-grp" data-laden="${esc(laden)}"><h3><span class="grp-name">${esc(laden)}${bis.length === 1 ? ` <small>${esc(bis[0])}</small>` : ''}</span><span class="num">${g.length}</span></h3><ul class="items">${g.map((a) => `<li class="item a-item" data-a-id="${esc(a.id)}">
-<div class="item-main"><span class="item-name">${esc(a.name)}</span><span class="item-sub">${a.k && app.katalog[a.k] ? `<span>→ ${esc(app.katalog[a.k].n)}</span>` : '<span class="a-ohne">keine Rezeptzutat</span>'}${bis.length > 1 && bisText(a) ? `<span>${esc(bisText(a))}</span>` : ''}</span></div>
-<span class="item-qty">${esc(angebotMenge(a))}</span>
-<button type="button" class="x" data-a-weg="${esc(a.id)}" aria-label="${esc(a.name)} entfernen">${X}</button></li>`).join('')}</ul></section>`;
+    html += `<section class="grp a-grp" data-laden="${esc(laden)}"><h3><span class="grp-name">${esc(laden)}${bis.length === 1 ? ` <small>${esc(bis[0])}</small>` : ''}</span><span class="num">${g.length}</span></h3><ul class="items">${g.map((a) => zeileHTML(bis.length === 1 ? { ...a, bis: '' } : a, { eigen })).join('')}</ul></section>`;
   }
+  return html;
+}
+
+/** Die automatisch geholten Angebote: Stand, Quellen, Filter, Liste. */
+function autoHTML() {
+  if (!auto) return '<div class="empty-state"><p class="es-t">Die Angebote der Woche sind noch nicht geladen.</p><p>Die App holt sie montags und donnerstags von Aldi, Lidl, Kaufland und Penny. Gleich nochmal öffnen – oder unten eigene eintragen.</p></div>';
+  const alle = automatisch();
+  const zutaten = alle.filter((a) => a.k);
+  const gezeigt = (nurZutaten ? zutaten : alle).filter(passtSuche);
+  const wann = auto.stand && !Number.isNaN(Date.parse(auto.stand)) ? tagKurz(heute(new Date(auto.stand))) : '';
+  const quellen = (auto.quellen || []).map((q) => (q.ok === false
+    ? `<span class="a-quelle a-quelle-aus" title="${esc(q.hinweis || '')}">${esc(q.laden)}: –</span>`
+    : `<span class="a-quelle" title="${esc(q.hinweis || '')}">${esc(q.laden)} ${q.anzahl}</span>`)).join('');
+  const gesperrt = (auto.gesperrt || []).length ? `<span class="a-quelle a-quelle-aus">${esc(auto.gesperrt.join(', '))}: sperren automatische Abrufe</span>` : '';
+  const lidlOhne = (auto.quellen || []).find((q) => q.laden === 'Lidl' && q.ok === false && /GEMINI_KEY/.test(q.hinweis || ''));
+  return `<div class="a-stand"><span class="fine">${auto.woche ? `KW ${esc(auto.woche.slice(5))}` : ''}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}</div>
+<div class="a-filter"><div class="chips a-chips"><button type="button" class="chip" data-a-filter="zutaten" aria-pressed="${nurZutaten}">Rezeptzutaten<span class="n">${zutaten.length}</span></button><button type="button" class="chip" data-a-filter="alle" aria-pressed="${!nurZutaten}">Alle Lebensmittel<span class="n">${alle.length}</span></button></div>
+<div class="suche a-suche"><input id="a-suche" type="search" placeholder="Angebote durchsuchen" aria-label="Angebote durchsuchen" autocomplete="off" value="${esc(suche)}"></div></div>
+${gezeigt.length ? gruppenHTML(gezeigt) : `<p class="fine a-leer">${suche ? `Nichts gefunden für „${esc(suche)}“.` : alle.length ? 'Diese Woche ist keine Rezeptzutat im Angebot.' : 'Diese Woche kam nichts an – die Quellen waren nicht erreichbar.'}</p>`}`;
+}
+
+/** Die eigenen Angebote (liste.json): Liste mit Löschen. */
+function eigeneHTML() {
+  const liste = eigene();
+  if (!liste.length) return '';
   const st = app.stand.angebote || {};
   const wer = st.von ? `von ${st.von === app.name() ? 'dir' : esc(st.von)}` : '';
   const wann = st.stand && !Number.isNaN(Date.parse(st.stand)) ? esc(tagKurz(heute(new Date(st.stand)))) : '';
-  html += `<div class="a-foot"><span class="fine">${liste.length} Angebot${liste.length === 1 ? '' : 'e'}${wer || wann ? `, zuletzt ${[wer, wann].filter(Boolean).join(' ')}` : ''}</span>${leerenFragen
-    ? '<span class="confirm">Alle Angebote löschen? <button type="button" class="btn btn-quiet" data-act="a-leeren-ja">Ja</button><button type="button" class="btn btn-quiet" data-act="a-leeren-nein">Nein</button></span>'
-    : '<button type="button" class="linkbtn" data-act="a-leeren">Alle löschen</button>'}</div>`;
-  return html;
+  return `<h3 class="sub-h a-eigene-h">Selbst eingetragen <small>für euch beide</small></h3>${gruppenHTML(liste, { eigen: true })}
+<div class="a-foot"><span class="fine">${liste.length} eigene${wer || wann ? `, zuletzt ${[wer, wann].filter(Boolean).join(' ')}` : ''}</span>${leerenFragen
+    ? '<span class="confirm">Alle eigenen löschen? <button type="button" class="btn btn-quiet" data-act="a-leeren-ja">Ja</button><button type="button" class="btn btn-quiet" data-act="a-leeren-nein">Nein</button></span>'
+    : '<button type="button" class="linkbtn" data-act="a-leeren">Alle eigenen löschen</button>'}</div>`;
 }
 
 function passtHTML() {
@@ -106,7 +158,7 @@ function passtHTML() {
   }).join('');
   const mitKatalog = liste.filter((a) => a.k).length;
   return `<section class="a-passt"><h3 class="sub-h">Passt zu euren Rezepten</h3>
-${top.length ? `<ul class="ki-liste" id="a-passt-liste">${karten}</ul>` : `<p class="fine">${mitKatalog ? 'Kein Rezept nutzt diese Angebote.' : 'Keins der Angebote ist eine Rezeptzutat – die KI kann trotzdem etwas daraus machen.'}</p>`}
+${top.length ? `<ul class="ki-liste" id="a-passt-liste">${karten}</ul>` : `<p class="fine">${mitKatalog ? 'Kein Rezept nutzt diese Angebote.' : 'Keins der Angebote ist eine Rezeptzutat.'}</p>`}
 <div class="a-ki"><button type="button" class="btn btn-primary" data-act="a-vorschlag">Neues Rezept aus den Angeboten</button><p class="fine">Die KI baut ein Rezept um die Angebote herum, die App rechnet es auf eure Ziele. Mit „Neuer Vorschlag“ gibt es dann das nächste.</p></div>
 </section>`;
 }
@@ -116,11 +168,15 @@ export function angeboteZeichnen() {
   if (!el) return;
   const n = angeboteAnzahl();
   el.innerHTML = `<button type="button" class="back nur-breit" data-act="angebote-zu">${ZURUECK}Alle Rezepte</button>
-<div class="l-head"><h2 id="a-title">Angebote der Woche</h2><span class="l-count" id="a-count">${n ? `${n} drin` : ''}</span></div>
-<p class="a-lead">Was ist diese Woche bei Aldi, Lidl, Rewe oder Kaufland günstig? Fotografier die Prospektseite oder mach Screenshots aus der App – die KI liest die Angebote aus. Darunter steht, welche Rezepte davon profitieren.</p>
+<div class="l-head"><h2 id="a-title">Angebote der Woche</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
+<p class="a-lead">Was ist diese Woche bei Aldi, Lidl, Kaufland und Penny günstig? Die App holt es montags und donnerstags selbst. Darunter steht, welche Rezepte davon profitieren.</p>
+<div id="a-auto">${autoHTML()}</div>
+${passtHTML()}
+<details class="a-eigene"${eigeneOffen || eigene().length || fotos.length || text ? ' open' : ''}><summary>Eigene Angebote dazu <small>Foto, Screenshot oder getippt</small></summary>
 <div class="a-lesen">${lesenHTML()}</div>
-<div id="a-liste">${app.listeDa ? listeHTML() : '<p class="loading">Angebote werden geladen…</p>'}</div>
-${passtHTML()}`;
+<div id="a-liste">${app.listeDa ? eigeneHTML() : '<p class="loading">Wird geladen…</p>'}</div>
+</details>`;
+  el.querySelector('.a-eigene')?.addEventListener('toggle', (ev) => { eigeneOffen = ev.target.open; });
   zahlZeichnen();
 }
 
@@ -130,7 +186,7 @@ export function zahlZeichnen() {
   const b = $('#a-badge');
   if (b) { b.textContent = String(n); b.hidden = !n; }
   const k = $('#angebote-karte-text');
-  if (k) k.textContent = n ? `${n} Angebot${n === 1 ? '' : 'e'} drin – welche Rezepte davon profitieren, und ein neues aus den Angeboten.` : 'Prospekt fotografieren oder Angebote eintippen – welche Rezepte davon profitieren, und ein neues aus den Angeboten.';
+  if (k) k.textContent = n ? `${n} Rezeptzutat${n === 1 ? '' : 'en'} diese Woche im Angebot – welche Rezepte davon profitieren, und ein neues aus den Angeboten.` : 'Aldi, Lidl, Kaufland, Penny – was diese Woche günstig ist, welche Rezepte davon profitieren, und ein neues aus den Angeboten.';
 }
 
 /* ------------------------------------------------------------- Fotos */
@@ -234,6 +290,7 @@ export function klickAngebote(el) {
     return true;
   }
   if (d.aOpen) { zeigeReiter('rezepte'); oeffneRezept(d.aOpen); return true; }
+  if (d.aFilter) { nurZutaten = d.aFilter === 'zutaten'; angeboteZeichnen(); return true; }
   switch (d.act) {
     case 'angebote': zeigeReiter('angebote'); window.scrollTo(0, 0); return true;
     case 'angebote-zu': zeigeReiter('rezepte'); return true;
@@ -249,7 +306,8 @@ export function klickAngebote(el) {
       return true;
     }
     case 'a-vorschlag': {
-      const liste = eintraege();
+      // Eigene zuerst, dann die Rezeptzutaten aus dem automatischen Abruf – höchstens 60 Zeilen
+      const liste = [...eigene(), ...automatisch().filter((a) => a.k)].slice(0, 60);
       if (!liste.length) return true;
       zeigeReiter('rezepte');
       resteMitAngeboten(angeboteText(liste));
@@ -260,6 +318,12 @@ export function klickAngebote(el) {
 }
 
 export function eingabeAngebote(t) {
+  if (t.id === 'a-suche') {
+    suche = t.value.trim().toLowerCase();
+    const el = $('#a-auto');
+    if (el) { el.innerHTML = autoHTML(); const f = $('#a-suche'); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); } }
+    return true;
+  }
   if (t.id === 'a-text') { text = t.value.slice(0, 2000); if (fehler) { fehler = null; const f = $('#a-fehler'); if (f) f.hidden = true; } return true; }
   return false;
 }

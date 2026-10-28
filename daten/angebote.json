@@ -1,0 +1,4724 @@
+{
+ "stand": "2026-10-28T07:56:13.742Z",
+ "woche": "2026-44",
+ "gesperrt": [
+  "Rewe",
+  "Netto",
+  "Edeka"
+ ],
+ "quellen": [
+  {
+   "laden": "Aldi",
+   "ok": true,
+   "anzahl": 175,
+   "hinweis": "Aldi Nord, bundesweit",
+   "stand": "2026-10-28T07:56:10.389Z"
+  },
+  {
+   "laden": "Kaufland",
+   "ok": true,
+   "anzahl": 295,
+   "hinweis": "bundesweite Angebote, regional kann es abweichen",
+   "stand": "2026-10-28T07:56:10.929Z"
+  },
+  {
+   "laden": "Penny",
+   "ok": true,
+   "anzahl": 92,
+   "hinweis": "KW 44, bundesweit",
+   "stand": "2026-10-28T07:56:13.666Z"
+  }
+ ],
+ "angebote": [
+  {
+   "id": "a-1er8zje",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Mie-Nudeln",
+   "preis": 0.69,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "mie"
+  },
+  {
+   "id": "a-187dq0l",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Soja-Sauce XXL",
+   "preis": 2.49,
+   "menge": 1,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": "sojasauce"
+  },
+  {
+   "id": "a-15p5657",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Sushi-Reis",
+   "preis": 1.29,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "reis"
+  },
+  {
+   "id": "a-1qc6tcr",
+   "laden": "Aldi",
+   "name": "Aubergine",
+   "preis": 0.59,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": "aubergine"
+  },
+  {
+   "id": "a-0np860g",
+   "laden": "Aldi",
+   "name": "Bimi Stangenbrokkoli",
+   "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "brokkoli"
+  },
+  {
+   "id": "a-12i8cw1",
+   "laden": "Aldi",
+   "name": "Bio Ingwer",
+   "preis": 0.39,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "ingwer"
+  },
+  {
+   "id": "a-1odppzv",
+   "laden": "Aldi",
+   "name": "Bio Spinat",
+   "preis": 1.11,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "spinat"
+  },
+  {
+   "id": "a-1ccwsrn",
+   "laden": "Aldi",
+   "name": "Dib Echter deutscher Honig",
+   "preis": 5.49,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": "honig"
+  },
+  {
+   "id": "a-1usgvlj",
+   "laden": "Aldi",
+   "name": "Hähnchen-Innenfilets",
+   "preis": 3.69,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "haehnchenbrust"
+  },
+  {
+   "id": "a-0m7blzl",
+   "laden": "Aldi",
+   "name": "Hähnchenbrustfilet-Teilstücke",
+   "preis": 5.19,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "haehnchenbrust"
+  },
+  {
+   "id": "a-1x5x5i1",
+   "laden": "Aldi",
+   "name": "Meine Metzgerei Rindergulasch XXL",
+   "preis": 8.49,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "rindergulasch"
+  },
+  {
+   "id": "a-17vwaao",
+   "laden": "Aldi",
+   "name": "Patros Hirtenkäse",
+   "preis": 1.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": "feta"
+  },
+  {
+   "id": "a-1xb9438",
+   "laden": "Aldi",
+   "name": "Rinderhackfleisch XXL",
+   "preis": 6.99,
+   "menge": 800,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "rinderhack"
+  },
+  {
+   "id": "a-0y4mwt2",
+   "laden": "Aldi",
+   "name": "Speisekartoffeln",
+   "preis": 2.99,
+   "menge": 5,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "kartoffeln"
+  },
+  {
+   "id": "a-0bcm5n6",
+   "laden": "Aldi",
+   "name": "Speisekartoffeln \"Kleine Feine\"",
+   "preis": 1.79,
+   "menge": 2,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "kartoffeln"
+  },
+  {
+   "id": "a-1l17yqr",
+   "laden": "Aldi",
+   "name": "Speisemöhren",
+   "preis": 1.19,
+   "menge": 2,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "moehren"
+  },
+  {
+   "id": "a-00q4o1r",
+   "laden": "Aldi",
+   "name": "Spitzkohl",
+   "preis": 0.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "spitzkohl"
+  },
+  {
+   "id": "a-0v0ervl",
+   "laden": "Aldi",
+   "name": "Sweetango® Äpfel",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "aepfel"
+  },
+  {
+   "id": "a-1va19e2",
+   "laden": "Aldi",
+   "name": "Weihenstephan Butter",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "butter"
+  },
+  {
+   "id": "a-1dj75vh",
+   "laden": "Aldi",
+   "name": "Zucchini",
+   "preis": 1.11,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "zucchini"
+  },
+  {
+   "id": "a-1vhl7of",
+   "laden": "Aldi",
+   "name": "Zwiebeln",
+   "preis": 2.99,
+   "menge": 5,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "zwiebeln"
+  },
+  {
+   "id": "a-00djpqj",
+   "laden": "Kaufland",
+   "name": "Bertolli Olivenöl Cucina extra nativ",
+   "preis": 9.99,
+   "menge": 1,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": "olivenoel"
+  },
+  {
+   "id": "a-091hqj2",
+   "laden": "Kaufland",
+   "name": "Dtsch. Möhren, lose",
+   "preis": 0.79,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-28",
+   "k": "moehren"
+  },
+  {
+   "id": "a-03t5pb8",
+   "laden": "Kaufland",
+   "name": "Dtsch. Speisekartoffeln",
+   "preis": 2.99,
+   "menge": 5,
+   "einheit": "kg",
+   "bis": "2026-10-28",
+   "k": "kartoffeln"
+  },
+  {
+   "id": "a-16m3j33",
+   "laden": "Kaufland",
+   "name": "Dtsch. Speisekartoffeln, lose",
+   "preis": 0.79,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-28",
+   "k": "kartoffeln"
+  },
+  {
+   "id": "a-01ixkz9",
+   "laden": "Kaufland",
+   "name": "Dtsch. Tafeläpfel, lose",
+   "preis": 0.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-28",
+   "k": "aepfel"
+  },
+  {
+   "id": "a-1gtl5co",
+   "laden": "Kaufland",
+   "name": "Dtsch./ital.Lauchzwiebeln",
+   "preis": 0.49,
+   "menge": 1,
+   "einheit": "Bund",
+   "bis": "2026-10-31",
+   "k": "fruehlingszwiebeln"
+  },
+  {
+   "id": "a-1pelwbw",
+   "laden": "Kaufland",
+   "name": "Dtsch./niederl. Zwiebeln, rot",
+   "preis": 0.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "rote-zwiebeln"
+  },
+  {
+   "id": "a-08258ze",
+   "laden": "Kaufland",
+   "name": "Galbani Mozzarella di Latte di Bufala",
+   "preis": 2.49,
+   "menge": 235,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "mozzarella"
+  },
+  {
+   "id": "a-0gqej78",
+   "laden": "Kaufland",
+   "name": "Grüne Oliven",
+   "preis": 0.99,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "oliven"
+  },
+  {
+   "id": "a-1qed4tc",
+   "laden": "Kaufland",
+   "name": "Ital./span. Bio-Zitronen",
+   "preis": 1.49,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "zitrone"
+  },
+  {
+   "id": "a-0gykb64",
+   "laden": "Kaufland",
+   "name": "K-Bio Bioland Rinderhackfleisch",
+   "preis": 5.59,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "rinderhack"
+  },
+  {
+   "id": "a-1j85tvq",
+   "laden": "Kaufland",
+   "name": "K-Bio Organic Bio-Haferflocken",
+   "preis": 0.69,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "haferflocken"
+  },
+  {
+   "id": "a-0qmjpqf",
+   "laden": "Kaufland",
+   "name": "K-Classic Amerik./ägypt. Erdnüsse XXL",
+   "preis": 2.99,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "erdnuesse"
+  },
+  {
+   "id": "a-1rz1a8k",
+   "laden": "Kaufland",
+   "name": "K-Classic Cashewkerne",
+   "preis": 2.49,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "cashews"
+  },
+  {
+   "id": "a-1x8r1qc",
+   "laden": "Kaufland",
+   "name": "K-Classic Getrocknete Tomaten",
+   "preis": 1.29,
+   "menge": 280,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "getr-tomaten"
+  },
+  {
+   "id": "a-00afarj",
+   "laden": "Kaufland",
+   "name": "K-Classic Gewürzgurken XXL",
+   "preis": 1.19,
+   "menge": 840,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "gewuerzgurken"
+  },
+  {
+   "id": "a-10nbibk",
+   "laden": "Kaufland",
+   "name": "K-Classic Grillsauce",
+   "preis": 0.79,
+   "menge": 250,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": "bbq-sauce"
+  },
+  {
+   "id": "a-0djlb7g",
+   "laden": "Kaufland",
+   "name": "K-Classic Mozzarella XXL",
+   "preis": 1.49,
+   "menge": 420,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "mozzarella"
+  },
+  {
+   "id": "a-0imq1bf",
+   "laden": "Kaufland",
+   "name": "K-Purland Kaiserbraten aus der Hüfte",
+   "preis": 6.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "rinderhuefte"
+  },
+  {
+   "id": "a-0husosd",
+   "laden": "Kaufland",
+   "name": "K-Wertschätze Hähnchenbrustfilet Teilstücke",
+   "preis": 1.39,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "haehnchenbrust"
+  },
+  {
+   "id": "a-1kpsaim",
+   "laden": "Kaufland",
+   "name": "Kanzi Dtsch. Tafeläpfel",
+   "preis": 1.99,
+   "menge": 900,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "aepfel"
+  },
+  {
+   "id": "a-1qew09n",
+   "laden": "Kaufland",
+   "name": "Landliebe Joghurt",
+   "preis": 1.11,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "joghurt"
+  },
+  {
+   "id": "a-1wuuuiq",
+   "laden": "Kaufland",
+   "name": "Marokk. Miniromatomaten",
+   "preis": 0.88,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": "kirschtomaten"
+  },
+  {
+   "id": "a-0uwf9x3",
+   "laden": "Kaufland",
+   "name": "Miree oder Exquisa Frischkäsezubereitung",
+   "preis": 0.99,
+   "menge": 135,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": "frischkaese"
+  },
+  {
+   "id": "a-08dv3uc",
+   "laden": "Kaufland",
+   "name": "Poln. Fleischtomaten, lose",
+   "preis": 2.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-28",
+   "k": "tomaten"
+  },
+  {
+   "id": "a-1mkpe5h",
+   "laden": "Kaufland",
+   "name": "Poln./kroat. Kulturchampignons, braun",
+   "preis": 1.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "champignons"
+  },
+  {
+   "id": "a-10kc4n7",
+   "laden": "Kaufland",
+   "name": "Rapsgold Bio-Rapsöl",
+   "preis": 4.49,
+   "menge": 750,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": "oel"
+  },
+  {
+   "id": "a-01ond6o",
+   "laden": "Kaufland",
+   "name": "Schwarzwaldmilch Weidefrischmilch, 3,8 % Fett",
+   "preis": 1.39,
+   "menge": 1,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": "milch"
+  },
+  {
+   "id": "a-02wtf5u",
+   "laden": "Kaufland",
+   "name": "Span. Bio-Miniromatomaten",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "kirschtomaten"
+  },
+  {
+   "id": "a-1ev5pvz",
+   "laden": "Kaufland",
+   "name": "Span. Bio-Paprika, rot und gelb",
+   "preis": 2.49,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "paprika"
+  },
+  {
+   "id": "a-17x71x7",
+   "laden": "Kaufland",
+   "name": "Span. Zucchini, lose",
+   "preis": 1.29,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": "zucchini"
+  },
+  {
+   "id": "a-0ponhcq",
+   "laden": "Kaufland",
+   "name": "Thomy Reines Sonnenblumenöl",
+   "preis": 2.22,
+   "menge": 750,
+   "einheit": "ml",
+   "bis": "2026-10-28",
+   "k": "oel"
+  },
+  {
+   "id": "a-1u632dd",
+   "laden": "Kaufland",
+   "name": "Weihenstephan Butter oder Die Streichzarte",
+   "preis": 1.11,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": "butter"
+  },
+  {
+   "id": "a-19v6i56",
+   "laden": "Penny",
+   "name": "BEST MOMENTS Irischer Cheddar",
+   "preis": 2.79,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "cheddar"
+  },
+  {
+   "id": "a-02ejwzz",
+   "laden": "Penny",
+   "name": "BRESSO Frischkäse",
+   "preis": 1.29,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "frischkaese"
+  },
+  {
+   "id": "a-13br69w",
+   "laden": "Penny",
+   "name": "BÜRGER XXL Gnocchi",
+   "preis": 3.49,
+   "menge": 1000,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "gnocchi"
+  },
+  {
+   "id": "a-1flwocx",
+   "laden": "Penny",
+   "name": "Deutsche Halloweenkarotten",
+   "preis": 0.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "moehren"
+  },
+  {
+   "id": "a-0g1y7pg",
+   "laden": "Penny",
+   "name": "Deutsche rotfleischige Äpfel*",
+   "preis": 1.99,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "aepfel"
+  },
+  {
+   "id": "a-1abevpn",
+   "laden": "Penny",
+   "name": "KIKKOMAN Sojasauce",
+   "preis": 7.77,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": "sojasauce"
+  },
+  {
+   "id": "a-0ujiy58",
+   "laden": "Penny",
+   "name": "MEGGLE Feine Butter",
+   "preis": 1.39,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "butter"
+  },
+  {
+   "id": "a-1daju22",
+   "laden": "Penny",
+   "name": "MEISSEN XXL Imkerhonig",
+   "preis": 8.99,
+   "menge": 1000,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "honig"
+  },
+  {
+   "id": "a-1xhu4nq",
+   "laden": "Penny",
+   "name": "MILRAM Frischer Schmand",
+   "preis": 1.11,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "schmand"
+  },
+  {
+   "id": "a-1giau9e",
+   "laden": "Penny",
+   "name": "MÖVENPICK Feinjoghurt",
+   "preis": 0.69,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "joghurt"
+  },
+  {
+   "id": "a-0fuak4q",
+   "laden": "Penny",
+   "name": "MÜHLENHOF Frisches Rinder-Gulasch",
+   "preis": 7.79,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "rindergulasch"
+  },
+  {
+   "id": "a-0aneiqk",
+   "laden": "Penny",
+   "name": "NATURGUT Bio Cherry-Romatomaten",
+   "preis": 1.29,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "kirschtomaten"
+  },
+  {
+   "id": "a-1k68uz3",
+   "laden": "Penny",
+   "name": "NATURGUT Bio Naturjoghurt",
+   "preis": 0.45,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "joghurt"
+  },
+  {
+   "id": "a-1grr7rj",
+   "laden": "Penny",
+   "name": "SCHWARZWALDMILCH Haltbare Protein Milch",
+   "preis": 1.49,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": "milch"
+  },
+  {
+   "id": "a-0a7155s",
+   "laden": "Penny",
+   "name": "SOLBELLA Blütenhonig",
+   "preis": 2.29,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "honig"
+  },
+  {
+   "id": "a-0uv39ar",
+   "laden": "Penny",
+   "name": "Weiße Champignons",
+   "preis": 0.99,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "champignons"
+  },
+  {
+   "id": "a-1nv7a80",
+   "laden": "Penny",
+   "name": "Zitronen",
+   "preis": 1.29,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "zitrone"
+  },
+  {
+   "id": "a-1ox4aw0",
+   "laden": "Aldi",
+   "name": "All Seasons Stachelbeeren",
+   "preis": 1.99,
+   "menge": 720,
+   "einheit": "ml",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0ca9btq",
+   "laden": "Aldi",
+   "name": "Alpenhain Back-Camembert",
+   "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0r1nbzu",
+   "laden": "Aldi",
+   "name": "Alpenschmaus Knusperrollbraten",
+   "preis": 6.99,
+   "menge": 1000,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-19tk1ne",
+   "laden": "Aldi",
+   "name": "Alpro Not M*lk Drink",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "l",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0clmtrc",
+   "laden": "Aldi",
+   "name": "Arla Finello Reibekäse",
+   "preis": 1.29,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1tv0a11",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Asia-Gemüse",
+   "preis": 0.79,
+   "menge": 330,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ijjr83",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Bratnudeln",
+   "preis": 2.29,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1lm8xpp",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Chicken Wings",
+   "preis": 3.99,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-18urvhu",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Edamame",
+   "preis": 1.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1cpg6az",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Fernöstliche Suppe",
+   "preis": 0.99,
+   "menge": 400,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-12c2ope",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Gebratene Nudeln",
+   "preis": 0.79,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0d1vngx",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Getrocknete Pilze",
+   "preis": 0.69,
+   "menge": 25,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1mva1go",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Gyoza",
+   "preis": 2.49,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1v58tk0",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Instant-Nudeln",
+   "preis": 1.19,
+   "menge": 340,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-16b5lek",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Kimchi",
+   "preis": 1.49,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0i97rij",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Knusperente",
+   "preis": 8.99,
+   "menge": 550,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-14sqb8d",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Konjak-Nudeln",
+   "preis": 1.19,
+   "menge": 192,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0u0t764",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Krupuk",
+   "preis": 1.19,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0r688vd",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Litschis",
+   "preis": 1.79,
+   "menge": 580,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-05lj7t7",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Matcha Latte",
+   "preis": 1.49,
+   "menge": 84,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-10i00fm",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Nudeln",
+   "preis": 0.69,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-10ihzj9",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Nudeln",
+   "preis": 0.99,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0p3muxi",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Nuss-Mix",
+   "preis": 1.79,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ge7lhf",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Onigiri",
+   "preis": 1.79,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-17hxath",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Pangasius in Tempura",
+   "preis": 2.99,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0tredh5",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Pistazien Sweet Chili",
+   "preis": 2.99,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1baiqz9",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Poké Bowl",
+   "preis": 3.99,
+   "menge": 335,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1oh2qcj",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Poké Bowl Hähnchen",
+   "preis": 3.99,
+   "menge": 350,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1fcpu2f",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Ramensuppe",
+   "preis": 2.79,
+   "menge": 430,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1yn12my",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Reispapier",
+   "preis": 1.19,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0towiy8",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Sauce zu Reis",
+   "preis": 1.49,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-02nxa13",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Sesam- / Erdnussöl",
+   "preis": 1.79,
+   "menge": 250,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-18qykt4",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Sushi-Maki-Mix",
+   "preis": 1.99,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1uqk4ij",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Sushi-Nori-Seetang-Blätter",
+   "preis": 1.99,
+   "menge": 26,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-10lywrn",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Tteokbokki",
+   "preis": 1.79,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0o6ta6z",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Udon-Nudel-Bowl",
+   "preis": 1.29,
+   "menge": 249,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1wv2ta4",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Wok-Gemüse",
+   "preis": 0.99,
+   "menge": 580,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1lua438",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Wok-Nudeln",
+   "preis": 0.69,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0b1dohs",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Wok-Sauce",
+   "preis": 0.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1yiz5s1",
+   "laden": "Aldi",
+   "name": "Asia Green Garden Würzsauce",
+   "preis": 0.99,
+   "menge": 250,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-026kdbu",
+   "laden": "Aldi",
+   "name": "Asia Pfannenmix",
+   "preis": 1.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0g0juwo",
+   "laden": "Aldi",
+   "name": "Avocado",
+   "preis": 0.88,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-11xi58m",
+   "laden": "Aldi",
+   "name": "Babybel Mini",
+   "preis": 1.79,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1tyv3pz",
+   "laden": "Aldi",
+   "name": "Bananen",
+   "preis": 1.19,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-09fy11y",
+   "laden": "Aldi",
+   "name": "Barissimo Cappuccino X-Mas",
+   "preis": 1.79,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0oyuc4s",
+   "laden": "Aldi",
+   "name": "Bbq Kaminofen- und Grillanzünder",
+   "preis": 8.99,
+   "menge": 1.5,
+   "einheit": "kg",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1mj9iuw",
+   "laden": "Aldi",
+   "name": "Bbq Premium-Holzbriketts",
+   "preis": 4.49,
+   "menge": 10,
+   "einheit": "kg",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0ngln5n",
+   "laden": "Aldi",
+   "name": "Bio Ingwer-Shot",
+   "preis": 2.49,
+   "menge": 0.5,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0rs2tcq",
+   "laden": "Aldi",
+   "name": "Bio Orangen",
+   "preis": 1.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1hagwof",
+   "laden": "Aldi",
+   "name": "Biscotto Florenz Gebäckmischung",
+   "preis": 3.79,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0827x85",
+   "laden": "Aldi",
+   "name": "Brunch",
+   "preis": 1.29,
+   "menge": 185,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1eojfa2",
+   "laden": "Aldi",
+   "name": "Choceur Milch-Mäuse XXL",
+   "preis": 2.99,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0dwc26i",
+   "laden": "Aldi",
+   "name": "Choceur Milchmäuse-Knusperfreunde",
+   "preis": 1.11,
+   "menge": 108,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0t5sa4x",
+   "laden": "Aldi",
+   "name": "Choceur Milchmäuse-Milchshake",
+   "preis": 1.49,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1dr3g7r",
+   "laden": "Aldi",
+   "name": "Choceur Milchmäuse-SchoKeksis",
+   "preis": 2.99,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1xv9t8w",
+   "laden": "Aldi",
+   "name": "Choceur Mozartkugeln",
+   "preis": 2.49,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-17t6q9j",
+   "laden": "Aldi",
+   "name": "Coppenrath & Wiese Sahne-Rolle Erdbeer-Sahne",
+   "preis": 2.79,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1c5wbzh",
+   "laden": "Aldi",
+   "name": "Coppenrath & Wiese Sahne-Rolle Zitronen-Sahne",
+   "preis": 2.79,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0p5mgxc",
+   "laden": "Aldi",
+   "name": "Currystar Currywurst XXL",
+   "preis": 4.99,
+   "menge": 900,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-17e995w",
+   "laden": "Aldi",
+   "name": "Currystar Currywurst XXL",
+   "preis": 1.49,
+   "menge": 240,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-03cdt9z",
+   "laden": "Aldi",
+   "name": "Danone Actimel Classic XXL",
+   "preis": 2.99,
+   "menge": 1200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1f2243f",
+   "laden": "Aldi",
+   "name": "Danone Actimel Erdbeere XXL",
+   "preis": 2.99,
+   "menge": 1200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1wa4ktu",
+   "laden": "Aldi",
+   "name": "Danone Actimel Kids XXL",
+   "preis": 2.99,
+   "menge": 1200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1f5c7qv",
+   "laden": "Aldi",
+   "name": "Danone Activia",
+   "preis": 1.49,
+   "menge": 460,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1gmimuk",
+   "laden": "Aldi",
+   "name": "Domestos WC-Reiniger",
+   "preis": 1.59,
+   "menge": 750,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1cp3r07",
+   "laden": "Aldi",
+   "name": "Dr. Oetker La Mia Familia Knoblauch",
+   "preis": 3.29,
+   "menge": 480,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0uyn42w",
+   "laden": "Aldi",
+   "name": "Dr. Oetker La Mia Grande Margherita",
+   "preis": 3.29,
+   "menge": 360,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0sy9kxq",
+   "laden": "Aldi",
+   "name": "Dr. Oetker La Mia Grande Salame Piccante",
+   "preis": 3.29,
+   "menge": 380,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-07v79qj",
+   "laden": "Aldi",
+   "name": "Duschdas Duschgel",
+   "preis": 2.79,
+   "menge": 675,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1dk51mm",
+   "laden": "Aldi",
+   "name": "Entenbrustfiletstreifen",
+   "preis": 5.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0wz967v",
+   "laden": "Aldi",
+   "name": "Falsches Filet",
+   "preis": 14.99,
+   "menge": 1000,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1quiblx",
+   "laden": "Aldi",
+   "name": "Fanta / Sprite / Mezzo Mix",
+   "preis": 1.29,
+   "menge": 2,
+   "einheit": "l",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-02bciwz",
+   "laden": "Aldi",
+   "name": "Ferrero Duplo Knusperlen",
+   "preis": 2.99,
+   "menge": 97.5,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0k2su5e",
+   "laden": "Aldi",
+   "name": "Ferrero Duplo Weihnachtsmann",
+   "preis": 2.99,
+   "menge": 0.75,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ukwa73",
+   "laden": "Aldi",
+   "name": "Ferrero Kinder Maxi King",
+   "preis": 1.49,
+   "menge": 105,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-02dref6",
+   "laden": "Aldi",
+   "name": "Fontagnac Crémant de Loire Rosé brut AOP",
+   "preis": 6.99,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1r83zuo",
+   "laden": "Aldi",
+   "name": "Galiamelone",
+   "preis": 1.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0wzqd3f",
+   "laden": "Aldi",
+   "name": "GÉRamont Französischer Weichkäse",
+   "preis": 2.22,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0r1u711",
+   "laden": "Aldi",
+   "name": "GÉRamont Le Snack",
+   "preis": 2.22,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1un69wf",
+   "laden": "Aldi",
+   "name": "GÉRamont Weichkäse",
+   "preis": 2.22,
+   "menge": 130,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0xlh1kb",
+   "laden": "Aldi",
+   "name": "GÉRamont Weichkäse Duo",
+   "preis": 2.22,
+   "menge": 140,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-095v4z3",
+   "laden": "Aldi",
+   "name": "Gerolsteiner Medium",
+   "preis": 0.75,
+   "menge": 1.5,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0darl2h",
+   "laden": "Aldi",
+   "name": "Gourmet Finest Cuisine Entenkeule mit Sauce",
+   "preis": 7.99,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0ligp08",
+   "laden": "Aldi",
+   "name": "Granatapfel",
+   "preis": 0.79,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0z2hkz6",
+   "laden": "Aldi",
+   "name": "Grapefruit",
+   "preis": 0.55,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-16hbmwb",
+   "laden": "Aldi",
+   "name": "Guinness Draught Stout",
+   "preis": 4.99,
+   "menge": 1.76,
+   "einheit": "l",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-01xb8bn",
+   "laden": "Aldi",
+   "name": "Güldenhof Geflügelfrikadellen XXL",
+   "preis": 2.99,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-11gyp84",
+   "laden": "Aldi",
+   "name": "Gutedel Baden QbA",
+   "preis": 3.99,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-06q481d",
+   "laden": "Aldi",
+   "name": "Haribo",
+   "preis": 0.89,
+   "menge": 175,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-07w9016",
+   "laden": "Aldi",
+   "name": "Haribo Bumix",
+   "preis": 0.89,
+   "menge": 175,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1r0ymea",
+   "laden": "Aldi",
+   "name": "Haribo Goldbären",
+   "preis": 0.89,
+   "menge": 160,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0xmg4st",
+   "laden": "Aldi",
+   "name": "Haribo Konfekties / Lakritz-Schnecken",
+   "preis": 0.89,
+   "menge": 160,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1tlusdp",
+   "laden": "Aldi",
+   "name": "Haribo Pico-Balla",
+   "preis": 0.89,
+   "menge": 160,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0qy0ny0",
+   "laden": "Aldi",
+   "name": "Haribo Sortiment",
+   "preis": 0.89,
+   "menge": 160,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-17hto26",
+   "laden": "Aldi",
+   "name": "Himbeeren",
+   "preis": 1.69,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0i68y9i",
+   "laden": "Aldi",
+   "name": "Home Creation Raumduft",
+   "preis": 2.49,
+   "menge": 50,
+   "einheit": "ml",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0ujh72t",
+   "laden": "Aldi",
+   "name": "Jacobs Krönung",
+   "preis": 6.49,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1dh37l2",
+   "laden": "Aldi",
+   "name": "Kilbeggan Irish Whiskey / Berry",
+   "preis": 10.99,
+   "menge": 0.7,
+   "einheit": "l",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-0th2f0a",
+   "laden": "Aldi",
+   "name": "Koriander",
+   "preis": 1.29,
+   "menge": 1,
+   "einheit": "Bund",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1d1djd3",
+   "laden": "Aldi",
+   "name": "Landliebe Konfitüre",
+   "preis": 1.29,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-00jcs8e",
+   "laden": "Aldi",
+   "name": "Lay’s Gesalzen",
+   "preis": 0.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-10s340u",
+   "laden": "Aldi",
+   "name": "Lay’s Red Paprika",
+   "preis": 0.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0bp9i5d",
+   "laden": "Aldi",
+   "name": "Lay’s Sour Cream & Onion",
+   "preis": 0.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0nnpfd3",
+   "laden": "Aldi",
+   "name": "Leerdammer Käsescheiben",
+   "preis": 1.29,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0y8fsvy",
+   "laden": "Aldi",
+   "name": "Lorenz NicNac’s XXL",
+   "preis": 5.79,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1xk67ma",
+   "laden": "Aldi",
+   "name": "Mandarinen",
+   "preis": 1.89,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-03a9asq",
+   "laden": "Aldi",
+   "name": "Mango",
+   "preis": 1.11,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1qc2eee",
+   "laden": "Aldi",
+   "name": "Manner Snack-Minis / Törtchen",
+   "preis": 2.79,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-06c1thx",
+   "laden": "Aldi",
+   "name": "Mars Celebrations",
+   "preis": 3.49,
+   "menge": 230,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1odmr59",
+   "laden": "Aldi",
+   "name": "Meine Metzgerei Lammmedaillons XXL",
+   "preis": 10.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-19j8ar4",
+   "laden": "Aldi",
+   "name": "Meine Metzgerei Pekingente",
+   "preis": 5.79,
+   "menge": 1000,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1u37py1",
+   "laden": "Aldi",
+   "name": "Meine Metzgerei Rinder-Rouladen XXL",
+   "preis": 9.99,
+   "menge": 800,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1vyrf64",
+   "laden": "Aldi",
+   "name": "Mentos",
+   "preis": 1.99,
+   "menge": 188,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1abjgnz",
+   "laden": "Aldi",
+   "name": "Mini-Pak-Choi",
+   "preis": 0.99,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1cu1jgj",
+   "laden": "Aldi",
+   "name": "Miracoli Pasta-Sauce XXL",
+   "preis": 2.29,
+   "menge": 675,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1mr7tf4",
+   "laden": "Aldi",
+   "name": "Nashibirne",
+   "preis": 0.66,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ymoufn",
+   "laden": "Aldi",
+   "name": "Pays Gourmand Crêpes",
+   "preis": 1.99,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-033kqfj",
+   "laden": "Aldi",
+   "name": "Pick up! Choco & Milk",
+   "preis": 2.99,
+   "menge": 308,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1eqv59j",
+   "laden": "Aldi",
+   "name": "Pick up! Original",
+   "preis": 2.99,
+   "menge": 308,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-09zt7qy",
+   "laden": "Aldi",
+   "name": "Pick up! Salted Caramel",
+   "preis": 2.99,
+   "menge": 308,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1fm63ub",
+   "laden": "Aldi",
+   "name": "Play-Doh Knete",
+   "preis": 5.99,
+   "menge": 680,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0bu7iw1",
+   "laden": "Aldi",
+   "name": "Pomelo",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1kbgqzp",
+   "laden": "Aldi",
+   "name": "Pringles",
+   "preis": 1.49,
+   "menge": 185,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0wbz2hs",
+   "laden": "Aldi",
+   "name": "Red Bull Energydrink",
+   "preis": 0.89,
+   "menge": 0.25,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0aycp6k",
+   "laden": "Aldi",
+   "name": "Red Bull Energydrink Classic",
+   "preis": 0.89,
+   "menge": 0.25,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0oz4fv3",
+   "laden": "Aldi",
+   "name": "Red Bull Energydrink Sea Blue Edition",
+   "preis": 0.89,
+   "menge": 0.25,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0lujvr8",
+   "laden": "Aldi",
+   "name": "Red Bull Energydrink Sugarfree",
+   "preis": 0.89,
+   "menge": 0.25,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ltj525",
+   "laden": "Aldi",
+   "name": "Red Bull Energydrink White Edition",
+   "preis": 0.89,
+   "menge": 0.25,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0bxoxss",
+   "laden": "Aldi",
+   "name": "Red Bull Energydrink White Peach",
+   "preis": 0.89,
+   "menge": 0.25,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1knm6qh",
+   "laden": "Aldi",
+   "name": "Rotkäppchen Alkoholfrei weiß",
+   "preis": 3.29,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-00b8a2g",
+   "laden": "Aldi",
+   "name": "Rougette Ofenkäse",
+   "preis": 3.99,
+   "menge": 320,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-07kp5la",
+   "laden": "Aldi",
+   "name": "Speise- und Schnitzkürbis „Halloween“",
+   "preis": 3.99,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0iq6988",
+   "laden": "Aldi",
+   "name": "Speisekürbis",
+   "preis": 1.59,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-09k9hfn",
+   "laden": "Aldi",
+   "name": "Sun Snacks Cocktail-Mix",
+   "preis": 1.49,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-14roipm",
+   "laden": "Aldi",
+   "name": "Tafeltrauben hell",
+   "preis": 1.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1bktbnb",
+   "laden": "Aldi",
+   "name": "Tandil Duftperlen XXL",
+   "preis": 3.95,
+   "menge": 480,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-12u7s9h",
+   "laden": "Aldi",
+   "name": "Teekanne Harmonie für Körper & Seele",
+   "preis": 2.19,
+   "menge": 31,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-09f71ah",
+   "laden": "Aldi",
+   "name": "Tesoros Del Sur Jamón Serrano XXL",
+   "preis": 3.59,
+   "menge": 240,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1wgm3ad",
+   "laden": "Aldi",
+   "name": "Weihenstephan Die Streichzarte gesalzen",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-00s8pck",
+   "laden": "Aldi",
+   "name": "Weihenstephan Die Streichzarte ungesalzen",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0r2moqj",
+   "laden": "Aldi",
+   "name": "Wiltmann Genießerteller",
+   "preis": 1.29,
+   "menge": 70,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0j4l9mm",
+   "laden": "Aldi",
+   "name": "Wintertraum Marzipanbrot",
+   "preis": 1.49,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0v87946",
+   "laden": "Aldi",
+   "name": "Wintertraum Mini-Lebkuchenmännchen",
+   "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1lbce5q",
+   "laden": "Aldi",
+   "name": "Wonka Kinder Joy",
+   "preis": 1.49,
+   "menge": 20,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-05s3sfm",
+   "laden": "Aldi",
+   "name": "Wonka Magic Garden",
+   "preis": 1.99,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1hx12a2",
+   "laden": "Aldi",
+   "name": "Wonka Magic Hats",
+   "preis": 4.99,
+   "menge": 116,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-012fx0z",
+   "laden": "Aldi",
+   "name": "Wonka Oompa Loompa",
+   "preis": 4.99,
+   "menge": 90,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0zovgjo",
+   "laden": "Aldi",
+   "name": "Wonka Oompa Loompa Fruchtgummi",
+   "preis": 1.49,
+   "menge": 71.5,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ovt8lq",
+   "laden": "Aldi",
+   "name": "Wonka Purplypurple",
+   "preis": 1.99,
+   "menge": 90,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-05hvr9i",
+   "laden": "Aldi",
+   "name": "Zespri SunGold Kiwi",
+   "preis": 0.59,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0plb3jx",
+   "laden": "Aldi",
+   "name": "Zott Zottarella Classic",
+   "preis": 1.99,
+   "menge": 330,
+   "einheit": "g",
+   "bis": "2026-11-04",
+   "k": ""
+  },
+  {
+   "id": "a-1dt6h4c",
+   "laden": "Kaufland",
+   "name": "Agrarfrost Back-Frites oder Genießer-Kroketten",
+   "preis": 1.79,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-059edqo",
+   "laden": "Kaufland",
+   "name": "Alpro Not M*LK",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-011z1bo",
+   "laden": "Kaufland",
+   "name": "Argeta Aufstrich",
+   "preis": 0.99,
+   "menge": 95,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1dpdxlm",
+   "laden": "Kaufland",
+   "name": "Asbach Uralt",
+   "preis": 9.99,
+   "menge": 0.7,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1co8qva",
+   "laden": "Kaufland",
+   "name": "Babybel Mini",
+   "preis": 1.79,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0wum8mt",
+   "laden": "Kaufland",
+   "name": "Baileys Irish Cream Liqueur",
+   "preis": 9.99,
+   "menge": 0.7,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-13j2iol",
+   "laden": "Kaufland",
+   "name": "Bäuerliche Erzeuger Sha Echt Hällische Bio-Lyoner",
+   "preis": 2.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1p43xev",
+   "laden": "Kaufland",
+   "name": "Bazar Cevapcici",
+   "preis": 5.99,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1siatjc",
+   "laden": "Kaufland",
+   "name": "Bepflanztes Herz",
+   "preis": 11.99,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ankox9",
+   "laden": "Kaufland",
+   "name": "Bergader Almzeit, Bavaria Blu oder Lieblingskäse",
+   "preis": 1.99,
+   "menge": 175,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1tjwmhc",
+   "laden": "Kaufland",
+   "name": "Böklunder Aspik-Spezialität",
+   "preis": 1.69,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1lkiz0p",
+   "laden": "Kaufland",
+   "name": "Börekstick",
+   "preis": 0.59,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-15x7f1v",
+   "laden": "Kaufland",
+   "name": "Brandt Jaffa Cake",
+   "preis": 1.59,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0pty9rm",
+   "laden": "Kaufland",
+   "name": "Brasil. Mango, lose",
+   "preis": 1.99,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1v20oge",
+   "laden": "Kaufland",
+   "name": "Bürger Maultaschen",
+   "preis": 1.49,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-039rg28",
+   "laden": "Kaufland",
+   "name": "Cedrob Polnische Ente",
+   "preis": 4.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-14d73ts",
+   "laden": "Kaufland",
+   "name": "Chin. Pomelo gelb oder rot, lose",
+   "preis": 1.99,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-185bhw1",
+   "laden": "Kaufland",
+   "name": "Cockta Erfrischungsgetränk",
+   "preis": 0.89,
+   "menge": 0.5,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1t0ndct",
+   "laden": "Kaufland",
+   "name": "Complete Organics Bio-Kimchi",
+   "preis": 3.99,
+   "menge": 240,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ebuyjv",
+   "laden": "Kaufland",
+   "name": "ComtÉ Aop Franz. Hartkäse",
+   "preis": 1.99,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ctqwu1",
+   "laden": "Kaufland",
+   "name": "Coppenrath & Wiese Feinste Sahne",
+   "preis": 8.88,
+   "menge": 800,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0arvhqc",
+   "laden": "Kaufland",
+   "name": "Crunchy Chicken Patties XXL",
+   "preis": 3.49,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0jezpex",
+   "laden": "Kaufland",
+   "name": "Danone Actimel XXL",
+   "preis": 2.79,
+   "menge": 1200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0rvt0ey",
+   "laden": "Kaufland",
+   "name": "Demeter dtsch. Kürbis, lose",
+   "preis": 1.99,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1i0htrm",
+   "laden": "Kaufland",
+   "name": "Der Grüne Altenburger Ziegenweichkäse",
+   "preis": 1.49,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-06qo5i5",
+   "laden": "Kaufland",
+   "name": "Develey Würzsaucen",
+   "preis": 1.29,
+   "menge": 250,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1sfn5bj",
+   "laden": "Kaufland",
+   "name": "Dinkel Max Bio-Dinkel-Nudeln",
+   "preis": 2.22,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-08itm8s",
+   "laden": "Kaufland",
+   "name": "Dokas Hundesnack",
+   "preis": 3.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1wln0ln",
+   "laden": "Kaufland",
+   "name": "Donut",
+   "preis": 0.44,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1jsgiij",
+   "laden": "Kaufland",
+   "name": "Doppio Passo Primitivo Rosato IGT",
+   "preis": 4.99,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-0jo7ybj",
+   "laden": "Kaufland",
+   "name": "Dovgan Backpulver XXL",
+   "preis": 0.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-16623a6",
+   "laden": "Kaufland",
+   "name": "Dovgan Blinys",
+   "preis": 2.69,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0yv3cby",
+   "laden": "Kaufland",
+   "name": "Dovgan Buchweizen",
+   "preis": 4,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1wd4tef",
+   "laden": "Kaufland",
+   "name": "Dovgan Kondensmilch",
+   "preis": 0.99,
+   "menge": 370,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-047zd74",
+   "laden": "Kaufland",
+   "name": "Dovgan Lavash Fladenbrot",
+   "preis": 1.49,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0u50n96",
+   "laden": "Kaufland",
+   "name": "Dovgan Plombir Kefir",
+   "preis": 1.69,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0t3g5zu",
+   "laden": "Kaufland",
+   "name": "Driscoll's Port. Himbeeren",
+   "preis": 1.79,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-16bhhe1",
+   "laden": "Kaufland",
+   "name": "Dtsch./franz. Feldsalat",
+   "preis": 0.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0yswdnz",
+   "laden": "Kaufland",
+   "name": "Dymow Pelmeni",
+   "preis": 4.99,
+   "menge": 900,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-18g84y5",
+   "laden": "Kaufland",
+   "name": "Ecuador./kolumb. Bananen, lose",
+   "preis": 0.88,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1aj2y1p",
+   "laden": "Kaufland",
+   "name": "Ehrmann Almighurt",
+   "preis": 0.35,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-03g1mkb",
+   "laden": "Kaufland",
+   "name": "ErgüllÜ Aufstrich",
+   "preis": 1.99,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1b0as63",
+   "laden": "Kaufland",
+   "name": "Esko Kochkäse mit Kümmel",
+   "preis": 1.29,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1oyu4kb",
+   "laden": "Kaufland",
+   "name": "Exquisa Quark-Genuss",
+   "preis": 1.49,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1m61cdu",
+   "laden": "Kaufland",
+   "name": "Fairy Geschirrspülmittel",
+   "preis": 1.39,
+   "menge": 450,
+   "einheit": "ml",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-0c9xswj",
+   "laden": "Kaufland",
+   "name": "Felicetti Pasta",
+   "preis": 0.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1am0wlm",
+   "laden": "Kaufland",
+   "name": "Fladenbrot",
+   "preis": 0.77,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-19flsv6",
+   "laden": "Kaufland",
+   "name": "Freche Freunde Adventskalender",
+   "preis": 24.99,
+   "menge": 791,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-124cpzf",
+   "laden": "Kaufland",
+   "name": "Frico Gouda jung g. g. A.",
+   "preis": 0.88,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1labzuq",
+   "laden": "Kaufland",
+   "name": "Genossenschaftskellerei Hn Heilbronner Grauburgunder",
+   "preis": 4.29,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0eu4ku0",
+   "laden": "Kaufland",
+   "name": "Goplana Mega Grzeski",
+   "preis": 0.79,
+   "menge": 48,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0jvqlsd",
+   "laden": "Kaufland",
+   "name": "Grabgesteck mit Grablicht",
+   "preis": 7.49,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-15h03nr",
+   "laden": "Kaufland",
+   "name": "Grabschale",
+   "preis": 19.99,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0y92h59",
+   "laden": "Kaufland",
+   "name": "Greenforce Veganes Bio-Hack",
+   "preis": 2.49,
+   "menge": 180,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0g9j0dr",
+   "laden": "Kaufland",
+   "name": "Grünländer Dtsch. Schnittkäse",
+   "preis": 1.49,
+   "menge": 140,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1eira8o",
+   "laden": "Kaufland",
+   "name": "Haribo Party-Box",
+   "preis": 3.69,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1bpichz",
+   "laden": "Kaufland",
+   "name": "Harry Toastbrot",
+   "preis": 0.99,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0vjo2qg",
+   "laden": "Kaufland",
+   "name": "Heidegrund Fleischwurst",
+   "preis": 1.99,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1yp42x6",
+   "laden": "Kaufland",
+   "name": "Henglein Frischer Pizzateig XXL",
+   "preis": 0.99,
+   "menge": 550,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-09gcrkn",
+   "laden": "Kaufland",
+   "name": "Heuchelberg Weingärtner Trollinger mit Lemberger Schwaigerner Grafenberg",
+   "preis": 3.99,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1aux8xq",
+   "laden": "Kaufland",
+   "name": "Heuchelberg Weingärtner Trollinger Rosé",
+   "preis": 3.99,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0p95l1o",
+   "laden": "Kaufland",
+   "name": "Hipp Bio-Mahlzeit oder -Fruchtbrei",
+   "preis": 1.29,
+   "menge": 160,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0g5pmy7",
+   "laden": "Kaufland",
+   "name": "Huober Bio-Knusperlaugengebäck",
+   "preis": 1.29,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0lu8hsz",
+   "laden": "Kaufland",
+   "name": "Iglo Rahm-Spinat",
+   "preis": 1.79,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1b1mmfh",
+   "laden": "Kaufland",
+   "name": "Johnnie Walker Red Label oder Red Soul Blended Scotch Whisky",
+   "preis": 10.99,
+   "menge": 0.7,
+   "einheit": "l",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-150txhl",
+   "laden": "Kaufland",
+   "name": "Junge Ente",
+   "preis": 3.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0w5hc26",
+   "laden": "Kaufland",
+   "name": "K-Bio Organic Agavensirup",
+   "preis": 2.49,
+   "menge": 250,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ytwreq",
+   "laden": "Kaufland",
+   "name": "K-Classic Amerik./franz. Walnüsse XXL",
+   "preis": 3.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0oi86qf",
+   "laden": "Kaufland",
+   "name": "K-Classic Bayerischer Wurstsalat",
+   "preis": 2.69,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1i9fms1",
+   "laden": "Kaufland",
+   "name": "K-Classic Debreziner",
+   "preis": 3.49,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1s2jhx7",
+   "laden": "Kaufland",
+   "name": "K-Classic Feinzucker",
+   "preis": 0.79,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1g8pt5p",
+   "laden": "Kaufland",
+   "name": "K-Classic Frittieröl",
+   "preis": 3.33,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0geycqa",
+   "laden": "Kaufland",
+   "name": "K-Classic Gefüllte Croissants",
+   "preis": 1.19,
+   "menge": 240,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-101fzti",
+   "laden": "Kaufland",
+   "name": "K-Classic Hundenahrung",
+   "preis": 1.29,
+   "menge": 1.24,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0o701wu",
+   "laden": "Kaufland",
+   "name": "K-Classic Kaffeepads",
+   "preis": 1.99,
+   "menge": 140,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0143jpt",
+   "laden": "Kaufland",
+   "name": "K-Classic Kakaopulver",
+   "preis": 2.69,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0tttvvs",
+   "laden": "Kaufland",
+   "name": "K-Classic Kashkaval",
+   "preis": 3.99,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0n50atz",
+   "laden": "Kaufland",
+   "name": "K-Classic Krakauer",
+   "preis": 2.22,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1rqrtkf",
+   "laden": "Kaufland",
+   "name": "K-Classic Kuchenglasur",
+   "preis": 0.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-07wbbib",
+   "laden": "Kaufland",
+   "name": "K-Classic Nudeln",
+   "preis": 0.59,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1tgfx3k",
+   "laden": "Kaufland",
+   "name": "K-Classic Pastasauce",
+   "preis": 1.19,
+   "menge": 420,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0rtihj2",
+   "laden": "Kaufland",
+   "name": "K-Classic Pfirsiche",
+   "preis": 4,
+   "menge": 820,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-176a2qd",
+   "laden": "Kaufland",
+   "name": "K-Classic Rotkohl",
+   "preis": 0.89,
+   "menge": 680,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1qa4480",
+   "laden": "Kaufland",
+   "name": "K-Classic Spargelstangen",
+   "preis": 1.59,
+   "menge": 330,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-06tft6u",
+   "laden": "Kaufland",
+   "name": "K-Classic Spritzgebäck",
+   "preis": 1.59,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0kuieb7",
+   "laden": "Kaufland",
+   "name": "K-Classic Ultra-Klumpstreu XXL",
+   "preis": 3.95,
+   "menge": 8,
+   "einheit": "l",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-150vke9",
+   "laden": "Kaufland",
+   "name": "K-Classic Weizenbrötchen",
+   "preis": 0.99,
+   "menge": 560,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1kiarc3",
+   "laden": "Kaufland",
+   "name": "K-Favourites Irisches Lammnackenkarree",
+   "preis": 24.98,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-02c5fn6",
+   "laden": "Kaufland",
+   "name": "K-Gold Edition Poln. Krakauer",
+   "preis": 0.99,
+   "menge": 80,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-10nf4q1",
+   "laden": "Kaufland",
+   "name": "K-Purland Entrecôte vom Jungbullen",
+   "preis": 22.95,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0dbd23u",
+   "laden": "Kaufland",
+   "name": "K-Purland Hähnchenflügel",
+   "preis": 2.49,
+   "menge": 550,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1mms6x4",
+   "laden": "Kaufland",
+   "name": "K-Purland Puten-Ministeaks",
+   "preis": 6.99,
+   "menge": 800,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0fr44nc",
+   "laden": "Kaufland",
+   "name": "K-Purland Rinderrouladen XXL",
+   "preis": 14.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0tm0w9l",
+   "laden": "Kaufland",
+   "name": "K-Purland Tafelspitz vom Jungbullen",
+   "preis": 13.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-18ysjil",
+   "laden": "Kaufland",
+   "name": "K-Wertschätze Frischwurst-Aufschnitt aus eigener Herstellung",
+   "preis": 0.99,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1qslzx4",
+   "laden": "Kaufland",
+   "name": "K-Wertschätze Rinderschmorbraten aus der Keule des Jungbullen",
+   "preis": 1.49,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ff00k9",
+   "laden": "Kaufland",
+   "name": "Kalbsbraten aus der Keule",
+   "preis": 1.79,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-11r9h86",
+   "laden": "Kaufland",
+   "name": "Käserei Bauhofer Allgäuer Emmentaler",
+   "preis": 1.29,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1socr78",
+   "laden": "Kaufland",
+   "name": "Käthchen-Gold Feines Weizenmehl",
+   "preis": 3.79,
+   "menge": 5,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0xcbn78",
+   "laden": "Kaufland",
+   "name": "Kinder Maxi King",
+   "preis": 1.49,
+   "menge": 105,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-15hkw2t",
+   "laden": "Kaufland",
+   "name": "Knorr Feinschmecker Sauce",
+   "preis": 0.79,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1wmeck9",
+   "laden": "Kaufland",
+   "name": "Knorr Feinschmecker Suppe",
+   "preis": 0.79,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-15mx3og",
+   "laden": "Kaufland",
+   "name": "Knorr Fix",
+   "preis": 0.44,
+   "menge": 28,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ma2ja8",
+   "laden": "Kaufland",
+   "name": "Korolewskij Mayonnaise",
+   "preis": 1.99,
+   "menge": 500,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-13uex07",
+   "laden": "Kaufland",
+   "name": "Krüger Family Cappuccino",
+   "preis": 2.79,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1fueqy1",
+   "laden": "Kaufland",
+   "name": "La Ferme De Lise Franz. Barbarie-Entenbrust",
+   "preis": 15.95,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1v5utvl",
+   "laden": "Kaufland",
+   "name": "Lambertz Coco-Fleur, Balena oder Divina",
+   "preis": 0.99,
+   "menge": 113,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-04xzr6j",
+   "laden": "Kaufland",
+   "name": "Langnese Flotte Biene",
+   "preis": 4.44,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0qn7wjy",
+   "laden": "Kaufland",
+   "name": "Lenor Wäscheparfüm",
+   "preis": 10,
+   "menge": 280,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-05dl18l",
+   "laden": "Kaufland",
+   "name": "Listerine Mundspülung",
+   "preis": 2.99,
+   "menge": 500,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-184ecoo",
+   "laden": "Kaufland",
+   "name": "Lorenz Nic Nac's",
+   "preis": 5,
+   "menge": 170,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0voqsp0",
+   "laden": "Kaufland",
+   "name": "Lutschy Wybor Sauerrahm",
+   "preis": 1.69,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1i7zadl",
+   "laden": "Kaufland",
+   "name": "Lysell Heringsfiletröllchen oder Surimi-Sticks",
+   "preis": 1.69,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ap8sh2",
+   "laden": "Kaufland",
+   "name": "Manner Waffeln »Winterglück«",
+   "preis": 2.29,
+   "menge": 185,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ww1jn1",
+   "laden": "Kaufland",
+   "name": "Milsy Villa Ben Käsezöpfe",
+   "preis": 1.59,
+   "menge": 80,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-165oa36",
+   "laden": "Kaufland",
+   "name": "Miltonas Pilz-Bande",
+   "preis": 1.29,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0pwfr4f",
+   "laden": "Kaufland",
+   "name": "Mon ChÉRi Pralinen mit Alkoholfüllung",
+   "preis": 4.99,
+   "menge": 315,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1gx5y50",
+   "laden": "Kaufland",
+   "name": "Monarch Kürbiskerne",
+   "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1c27m7x",
+   "laden": "Kaufland",
+   "name": "Monarch Sonnenblumenkerne",
+   "preis": 1.99,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ozr847",
+   "laden": "Kaufland",
+   "name": "Mövenpick Sahnepudding",
+   "preis": 0.69,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0hwhi2d",
+   "laden": "Kaufland",
+   "name": "Mymuesli Bio-Müsl",
+   "preis": 6.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0vnamx6",
+   "laden": "Kaufland",
+   "name": "Nesquik Snack",
+   "preis": 1.99,
+   "menge": 208,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ckpqvv",
+   "laden": "Kaufland",
+   "name": "Nothwang Wurstspezialitäten",
+   "preis": 1.39,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1eitzan",
+   "laden": "Kaufland",
+   "name": "Odol-MED3 Zahncreme XXL",
+   "preis": 1.39,
+   "menge": 125,
+   "einheit": "ml",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-1058j32",
+   "laden": "Kaufland",
+   "name": "Old Amsterdam Holl. Hartkäse",
+   "preis": 1.79,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-00yzgtr",
+   "laden": "Kaufland",
+   "name": "Oreo Doppelkekse",
+   "preis": 0.99,
+   "menge": 154,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1xcn4wa",
+   "laden": "Kaufland",
+   "name": "Original Wagner Piccolinis",
+   "preis": 4.49,
+   "menge": 720,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-0smjyne",
+   "laden": "Kaufland",
+   "name": "Ozujsko Helles Lager",
+   "preis": 0.99,
+   "menge": 0.5,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1vmysql",
+   "laden": "Kaufland",
+   "name": "Palmolive Duschgel",
+   "preis": 0.88,
+   "menge": 250,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1qvslae",
+   "laden": "Kaufland",
+   "name": "Peruan. Kulturheidelbeeren",
+   "preis": 3.99,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0by2e39",
+   "laden": "Kaufland",
+   "name": "Peruan./südafrik. Avocado, lose",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0z9jet2",
+   "laden": "Kaufland",
+   "name": "Peynoos Ziegenkäse",
+   "preis": 1.99,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0jzek8a",
+   "laden": "Kaufland",
+   "name": "Pinky Donut",
+   "preis": 0.44,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0rrqvbq",
+   "laden": "Kaufland",
+   "name": "Podravka Vegeta Würzmischung",
+   "preis": 2.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-10klat3",
+   "laden": "Kaufland",
+   "name": "Quarki Quark",
+   "preis": 1.59,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-00x1hy8",
+   "laden": "Kaufland",
+   "name": "Quarki Quarksnack",
+   "preis": 1.49,
+   "menge": 105,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0z4f5ea",
+   "laden": "Kaufland",
+   "name": "Rama Pflanzliches Streichfett",
+   "preis": 1.29,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-1wlw2eu",
+   "laden": "Kaufland",
+   "name": "Reinert Bärchen-Wurstspezialität",
+   "preis": 1.39,
+   "menge": 90,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-1pl428h",
+   "laden": "Kaufland",
+   "name": "Reinert Chambelle",
+   "preis": 1.49,
+   "menge": 80,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-12ora8y",
+   "laden": "Kaufland",
+   "name": "Rosenbrötchen",
+   "preis": 0.33,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-03vl0en",
+   "laden": "Kaufland",
+   "name": "Rougette Grill- oder Ofenkäse",
+   "preis": 1.99,
+   "menge": 180,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1glh4sz",
+   "laden": "Kaufland",
+   "name": "Rügenwalder Mühle Veganes Wurstersatzprodukt",
+   "preis": 1.79,
+   "menge": 125,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-0ssplex",
+   "laden": "Kaufland",
+   "name": "Salzburgmilch Bergkäse oder Heujuwel",
+   "preis": 2.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0fe0mrl",
+   "laden": "Kaufland",
+   "name": "Sanlucar Ital./span. Tafeltrauben, hell oder rot",
+   "preis": 2.49,
+   "menge": 600,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0dc09we",
+   "laden": "Kaufland",
+   "name": "Schärdinger Bergfex oder Moosbacher",
+   "preis": 1.49,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0noxxfe",
+   "laden": "Kaufland",
+   "name": "Schwaben Bräu Das Echte",
+   "preis": 13.99,
+   "menge": 10,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-148lrh6",
+   "laden": "Kaufland",
+   "name": "Schwamm Saarl. Landbierschwenker »Herzglut«",
+   "preis": 6.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-11yzlbo",
+   "laden": "Kaufland",
+   "name": "Schwartau Konfitüre Extra",
+   "preis": 1.99,
+   "menge": 280,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-12uic9j",
+   "laden": "Kaufland",
+   "name": "Schwartau Samt",
+   "preis": 1.99,
+   "menge": 255,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1490f1a",
+   "laden": "Kaufland",
+   "name": "Senseo Kaffeepads",
+   "preis": 2.22,
+   "menge": 84,
+   "einheit": "g",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-1jufqjh",
+   "laden": "Kaufland",
+   "name": "Slooow Demeter Bio-Rusti",
+   "preis": 2.29,
+   "menge": 360,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1tv9ab7",
+   "laden": "Kaufland",
+   "name": "Smoki Flips Original",
+   "preis": 1.49,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-01jbfrv",
+   "laden": "Kaufland",
+   "name": "Sonnen Bassermann Eintopf",
+   "preis": 1.49,
+   "menge": 800,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1fyyuwa",
+   "laden": "Kaufland",
+   "name": "Span. Kaki",
+   "preis": 2.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-14fw6ez",
+   "laden": "Kaufland",
+   "name": "Span. Satsumas",
+   "preis": 2.49,
+   "menge": 1.5,
+   "einheit": "kg",
+   "bis": "2026-10-28",
+   "k": ""
+  },
+  {
+   "id": "a-16fuamb",
+   "laden": "Kaufland",
+   "name": "Span./ital. Maronen, lose",
+   "preis": 0.79,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-04s7akv",
+   "laden": "Kaufland",
+   "name": "Span./ital. Pflaumen",
+   "preis": 1.79,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1t73zdq",
+   "laden": "Kaufland",
+   "name": "Sprehe Chicken Wings XXL",
+   "preis": 4.29,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1j9y6n3",
+   "laden": "Kaufland",
+   "name": "Stuttgarter Hofbräu Pilsner",
+   "preis": 11.99,
+   "menge": 10,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0fws1s0",
+   "laden": "Kaufland",
+   "name": "Sweet Peppacaps",
+   "preis": 1.49,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1gc92zc",
+   "laden": "Kaufland",
+   "name": "Tante Fanny Flammkuchenböden",
+   "preis": 1.99,
+   "menge": 340,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1drgnk7",
+   "laden": "Kaufland",
+   "name": "Tante Fanny Frischer Dinkel-Pizzateig",
+   "preis": 1.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0nnat5z",
+   "laden": "Kaufland",
+   "name": "Tartex Bio-Abendbrotaufstrich",
+   "preis": 1.99,
+   "menge": 135,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0wpspz7",
+   "laden": "Kaufland",
+   "name": "Tekirdag Rakisi Gold",
+   "preis": 19.99,
+   "menge": 0.7,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0q96dnw",
+   "laden": "Kaufland",
+   "name": "Thomy Les Sauces",
+   "preis": 0.99,
+   "menge": 250,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-05x47kk",
+   "laden": "Kaufland",
+   "name": "Ungar./poln. Gänsebrust",
+   "preis": 14.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1dzh959",
+   "laden": "Kaufland",
+   "name": "Univer Paprikacreme",
+   "preis": 1.99,
+   "menge": 160,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1anyv01",
+   "laden": "Kaufland",
+   "name": "Voelkel Demeter Fruchtsaft",
+   "preis": 2.99,
+   "menge": 0.2,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0u88wsl",
+   "laden": "Kaufland",
+   "name": "Weltmeisterbrot",
+   "preis": 1.69,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1l9by1b",
+   "laden": "Kaufland",
+   "name": "Wiffkids Bio-Fruchtpüree",
+   "preis": 0.79,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1jpmric",
+   "laden": "Kaufland",
+   "name": "Wild Schwäb. Kartoffelsalat",
+   "preis": 1.99,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ev2uio",
+   "laden": "Kaufland",
+   "name": "Zespri Ital. Kiwi gold",
+   "preis": 2.99,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0jimtsk",
+   "laden": "Penny",
+   "name": "3 GLOCKEN XXL Genuss pur Teigware",
+   "preis": 1.99,
+   "menge": 1000,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-037twon",
+   "laden": "Penny",
+   "name": "ARIEL Color flüssig",
+   "preis": 19.99,
+   "menge": 4.995,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-18btgv9",
+   "laden": "Penny",
+   "name": "ARIEL Universal Pulver",
+   "preis": 19.99,
+   "menge": 5.03,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-16iqsv0",
+   "laden": "Penny",
+   "name": "BÄCKERKRÖNUNG Quarkbällchen",
+   "preis": 1,
+   "menge": 5,
+   "einheit": "Stk",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1j9ql1j",
+   "laden": "Penny",
+   "name": "BEL BRANDS Mini Babybel",
+   "preis": 3.99,
+   "menge": 240,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0br35c7",
+   "laden": "Penny",
+   "name": "BERGADER Käsescheiben",
+   "preis": 1.69,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1oq4th9",
+   "laden": "Penny",
+   "name": "BEST MOMENTS dunkle oder helle kernlose Tafeltrauben",
+   "preis": 3.69,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-00u4m8b",
+   "laden": "Penny",
+   "name": "BIFI Original Minis",
+   "preis": 1.99,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ub644f",
+   "laden": "Penny",
+   "name": "BIFI Original XL",
+   "preis": 1.99,
+   "menge": 110,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-02895ep",
+   "laden": "Penny",
+   "name": "BRESSO Portionen",
+   "preis": 1.29,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1sl15ox",
+   "laden": "Penny",
+   "name": "CASTELLO Käsescheiben",
+   "preis": 1.79,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-05txr80",
+   "laden": "Penny",
+   "name": "CHIO Tortillas XXL",
+   "preis": 1.69,
+   "menge": 225,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0vuijzv",
+   "laden": "Penny",
+   "name": "Clementinen",
+   "preis": 1.69,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0pqc2e6",
+   "laden": "Penny",
+   "name": "DELI REFORM Perfekt zum Backen",
+   "preis": 1.19,
+   "menge": 450,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1g9qbdf",
+   "laden": "Penny",
+   "name": "DEVELEY Sauce",
+   "preis": 1.99,
+   "menge": 300,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0tm8rdh",
+   "laden": "Penny",
+   "name": "DR. OETKER Bistro Flammkuchen",
+   "preis": 3.49,
+   "menge": 530,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-08yu0t6",
+   "laden": "Penny",
+   "name": "EXQUISA Skyr Drink",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-15l1sv2",
+   "laden": "Penny",
+   "name": "FERRERO Kinder bueno +2 gratis",
+   "preis": 2.49,
+   "menge": 172,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ywkh0q",
+   "laden": "Penny",
+   "name": "FERRERO XXL Milch-Schnitte",
+   "preis": 2.59,
+   "menge": 308,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0i9mtlg",
+   "laden": "Penny",
+   "name": "FREIXENET Mia Vino de España",
+   "preis": 3.49,
+   "menge": 1,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-131fngk",
+   "laden": "Penny",
+   "name": "FUNNY-FRISCH Chipsfrisch",
+   "preis": 1.99,
+   "menge": 160,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1c8hhpz",
+   "laden": "Penny",
+   "name": "FUNNY-FRISCH Pom-Bär",
+   "preis": 1.99,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-196q9x9",
+   "laden": "Penny",
+   "name": "GUSTOLAND Prosciutto cotto",
+   "preis": 1.49,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1l9ftly",
+   "laden": "Penny",
+   "name": "Hähnchen-Nuggets „Halloween“",
+   "preis": 2.99,
+   "menge": 350,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0japkhn",
+   "laden": "Penny",
+   "name": "HEINZ XXL Baked Beanz",
+   "preis": 3.99,
+   "menge": 1660,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0olcspv",
+   "laden": "Penny",
+   "name": "Honigpomelo",
+   "preis": 1.99,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0sklnsf",
+   "laden": "Penny",
+   "name": "INNOCENT Shot",
+   "preis": 1.69,
+   "menge": 80,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-01cp8wm",
+   "laden": "Penny",
+   "name": "JACOBS 2in1 Classic",
+   "preis": 1.99,
+   "menge": 148.8,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1x6oxi5",
+   "laden": "Penny",
+   "name": "JACOBS 3in1 Classic",
+   "preis": 1.99,
+   "menge": 144,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0lc2lxa",
+   "laden": "Penny",
+   "name": "KERRYGOLD Irisches Butterschmalz",
+   "preis": 3.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-19wi6ev",
+   "laden": "Penny",
+   "name": "KÖLLN Granola",
+   "preis": 2.49,
+   "menge": 350,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1oth092",
+   "laden": "Penny",
+   "name": "KRAKUS Fleischklopse",
+   "preis": 2.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0tg9hlz",
+   "laden": "Penny",
+   "name": "LANDMARK Halloween Nuggets",
+   "preis": 2.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0djpm12",
+   "laden": "Penny",
+   "name": "LAVAZZA Caffè Crema",
+   "preis": 13.99,
+   "menge": 1000,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1m5q2kr",
+   "laden": "Penny",
+   "name": "LEICHT & CROSS Knusperbrot",
+   "preis": 0.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ydrff1",
+   "laden": "Penny",
+   "name": "Maggi-Sortiment",
+   "preis": 25,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0skfn9a",
+   "laden": "Penny",
+   "name": "MARS XXL Celebrations",
+   "preis": 3.99,
+   "menge": 230,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1gieres",
+   "laden": "Penny",
+   "name": "MARS XXL Mixed Minis",
+   "preis": 3.99,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-12oureb",
+   "laden": "Penny",
+   "name": "MC CAINAir Spicy Fries oder Fryer Frites",
+   "preis": 1.59,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1wdl8dw",
+   "laden": "Penny",
+   "name": "MEGGLE Streichzart ungesalzen",
+   "preis": 1.39,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0dssaca",
+   "laden": "Penny",
+   "name": "MEICA Mini Wini",
+   "preis": 2.99,
+   "menge": 380,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-01swqqp",
+   "laden": "Penny",
+   "name": "MILRAM Quark",
+   "preis": 0.99,
+   "menge": 185,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0ejiiip",
+   "laden": "Penny",
+   "name": "MIRACEL WHIP Salatcreme",
+   "preis": 1.49,
+   "menge": 500,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-07sc201",
+   "laden": "Penny",
+   "name": "MÖVENPICK Kaffeepads",
+   "preis": 5.77,
+   "menge": 336,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0hm2578",
+   "laden": "Penny",
+   "name": "MÜHLENHOF Frische deutsche Enten-Schenkel",
+   "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1fbb6xc",
+   "laden": "Penny",
+   "name": "MÜHLENHOF Frische Puten-Schnitzel",
+   "preis": 4.49,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0c5cwi1",
+   "laden": "Penny",
+   "name": "MÜHLENHOF Rinder-Rouladen",
+   "preis": 6.99,
+   "menge": 450,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ymo948",
+   "laden": "Penny",
+   "name": "MÜHLENHOF XXL Pfefferbeißer",
+   "preis": 4.44,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0k1w73k",
+   "laden": "Penny",
+   "name": "MÜLLER Müllermilch",
+   "preis": 0.79,
+   "menge": 400,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-06848f1",
+   "laden": "Penny",
+   "name": "NESCAFÉ Dolce Gusto Kapseln Cappuccino",
+   "preis": 3.99,
+   "menge": 186,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ifjwkj",
+   "laden": "Penny",
+   "name": "NESCAFÉ Dolce Gusto Kapseln Grande",
+   "preis": 3.99,
+   "menge": 136,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1wt7zja",
+   "laden": "Penny",
+   "name": "PFANNI Kartoffel Püree Das Komplette",
+   "preis": 1.49,
+   "menge": 283.5,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1xxcexi",
+   "laden": "Penny",
+   "name": "PFANNI Kartoffel Püree Das Lockere",
+   "preis": 1.49,
+   "menge": 240,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0q5n1nh",
+   "laden": "Penny",
+   "name": "PRINGLES",
+   "preis": 1.69,
+   "menge": 185,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-12w757f",
+   "laden": "Penny",
+   "name": "RAMA Cremefine",
+   "preis": 1.99,
+   "menge": 500,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1jnwd2y",
+   "laden": "Penny",
+   "name": "ROMA Sahnepudding",
+   "preis": 0.39,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1uqdklt",
+   "laden": "Penny",
+   "name": "Rosenkohl",
+   "preis": 1.11,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0csg412",
+   "laden": "Penny",
+   "name": "ROUGETTE Ofenkäse",
+   "preis": 3.99,
+   "menge": 320,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0gembrr",
+   "laden": "Penny",
+   "name": "RÜGENWALDER Teewurst",
+   "preis": 2.22,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0y6do52",
+   "laden": "Penny",
+   "name": "SIMPLY SUNNY Erdbeerscheiben",
+   "preis": 1.69,
+   "menge": 25,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-04qnxwz",
+   "laden": "Penny",
+   "name": "ST. MANG Allgäuer Limburger",
+   "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1fgea89",
+   "laden": "Penny",
+   "name": "ST. MANG Allgäuer Rubius Weichkäse",
+   "preis": 1.99,
+   "menge": 180,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-065v35t",
+   "laden": "Penny",
+   "name": "STEINHAUS Tortellini",
+   "preis": 2.99,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1djvj6q",
+   "laden": "Penny",
+   "name": "STOCKMEYER XXL Lyoner",
+   "preis": 1.29,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0c652ff",
+   "laden": "Penny",
+   "name": "STORCK XXL Toffifee",
+   "preis": 1.85,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-073d4s6",
+   "laden": "Penny",
+   "name": "SURIG Essig­essenz",
+   "preis": 1.11,
+   "menge": 450,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1if02jg",
+   "laden": "Penny",
+   "name": "TAFT XXL Haarspray",
+   "preis": 4.45,
+   "menge": 400,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0bhkssg",
+   "laden": "Penny",
+   "name": "TEEKANNE Winterzeit oder Süßer Bratapfel",
+   "preis": 1.79,
+   "menge": 50,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0l9o2nr",
+   "laden": "Penny",
+   "name": "TEMPO XXL Trio-Box",
+   "preis": 3.99,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1tnscza",
+   "laden": "Penny",
+   "name": "TUBORG XXL Pilsener",
+   "preis": 0.59,
+   "menge": 0.568,
+   "einheit": "l",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0lxlsed",
+   "laden": "Penny",
+   "name": "VOSSKO Hähnchen Schnitzel",
+   "preis": 3.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-02h1haf",
+   "laden": "Penny",
+   "name": "WIESBAUER Frühstücks Aufschnitt",
+   "preis": 1.49,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-1ywm0em",
+   "laden": "Penny",
+   "name": "ZEWA XXL Ultra Soft",
+   "preis": 6.99,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-09eof16",
+   "laden": "Penny",
+   "name": "ZIMBO Mettenden",
+   "preis": 2.79,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0vuhoqf",
+   "laden": "Penny",
+   "name": "ZOTT Monte",
+   "preis": 1.49,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": ""
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+# Montags und donnerstags früh: die Angebote der Woche holen (werkzeug/angebote.mjs)
+# und daten/angebote.json einchecken. Von Hand: Actions → Angebote → Run workflow.
+#
+# Lidl braucht einen Gemini-Schlüssel (Prospektseiten sind Bilder): als Secret
+# GEMINI_KEY unter Settings → Secrets and variables → Actions anlegen. Ohne ihn
+# läuft alles andere trotzdem.
+name: Angebote
+
+on:
+  schedule:
+    - cron: '23 4 * * 1,4'   # 05:23 bzw. 06:23 Berlin, Montag und Donnerstag
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: angebote
+  cancel-in-progress: false
+
+jobs:
+  holen:
+    name: Angebote holen
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Angebote holen
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: node werkzeug/angebote.mjs
+
+      - name: Einchecken
+        run: |
+          git config user.name "Boxenstopp-Bot"
+          git config user.email "boxenstopp-bot@users.noreply.github.com"
+          if git diff --quiet -- daten/angebote.json; then
+            echo "Keine Änderung."
+            exit 0
+          fi
+          WOCHE=$(node -e "console.log(require('./daten/angebote.json').woche)")
+          ANZAHL=$(node -e "console.log(require('./daten/angebote.json').angebote.length)")
+          git add daten/angebote.json
+          git commit -m "Angebote KW ${WOCHE#*-}: ${ANZAHL} Einträge"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -60,17 +60,33 @@ Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
 ### Angebote der Woche
 
 Dritter Reiter (auf dem Handy unten, am Rechner über die Karte bei den
-Rezepten). Einen offiziellen, kostenlosen Datenfeed mit den Angeboten von
-Aldi, Lidl, Rewe und Kaufland gibt es nicht – die Prospektseiten wollen
-nicht automatisch abgegrast werden, und die inoffiziellen Schnittstellen
-brauchen Schlüssel aus deren Webseiten. Deshalb kommen die Angebote so rein:
-**Prospektseite fotografieren oder Screenshot aus der Supermarkt-App**, die
-KI (derselbe Schlüssel wie bei der Resteverwertung) liest Laden, Produkt,
-Preis, Packung und Gültigkeit aus (`js/angebote.js`: eigenes Schema,
-Katalog-Schlüssel je Angebot) – oder **eine getippte Zeile je Angebot**
-(„Aldi Hähnchenbrustfilet 1 kg 7,49“), die liest die App selbst, ohne KI.
-Die Angebote liegen in `liste.json` unter `angebote` (für beide, mit Name
-und Datum), abgelaufene verschwinden von selbst.
+Rezepten). **Die App holt die Angebote selbst:** montags und donnerstags
+früh läuft bei GitHub `werkzeug/angebote.mjs` (`.github/workflows/angebote.yml`)
+und schreibt `daten/angebote.json`, die App lädt die Datei beim Start und
+merkt sie sich fürs Offline-Lesen. Quellen – nur öffentliche Seiten, mit
+ehrlicher Kennung, zweimal die Woche:
+
+| Laden | Woher | Wie |
+|---|---|---|
+| Aldi (Nord) | `aldi-nord.de/angebote.html` | alle Artikel der Woche als eingebettetes JSON: Preis, Packung, Grundpreis, gültig bis |
+| Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit) |
+| Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe |
+| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini liest die Seiten – dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus |
+
+Rewe, Netto und Edeka sperren automatische Abrufe (403 bzw. eine
+Scherzantwort) – das steht auch in der App. Getränke, Süßes, Drogerie,
+Schwein und Fisch fliegen raus; jedes Angebot bekommt, wenn es eine
+Rezeptzutat ist, den Katalog-Schlüssel (`schluesselRaten` in
+`js/angebote.js`, mit Sperre für Verarbeitetes wie Saucen und Chips). Die
+Ansicht zeigt erst die Rezeptzutaten, auf Wunsch alle Lebensmittel, mit
+Suche; abgelaufene verschwinden von selbst. Fällt eine Quelle aus, bleiben
+ihre alten Angebote, solange sie gelten.
+
+Dazu **eigene Angebote**: Prospektseite fotografieren oder Screenshot aus
+der Supermarkt-App, die KI (derselbe Schlüssel wie bei der Resteverwertung)
+liest sie aus – oder eine getippte Zeile je Angebot („Aldi Hähnchenbrustfilet
+1 kg 7,49“), die liest die App selbst. Die liegen in `liste.json` unter
+`angebote` (für beide, mit Name und Datum).
 
 Darunter **„Passt zu euren Rezepten“**: die Rezepte, deren Zutaten im
 Angebot sind, mit der Ersparnis pro Box gegen die Richtpreise, antippen
@@ -310,7 +326,9 @@ neues Rezept muss dort nichts geändert werden.
 | `js/lob.js` | Belohnung: Sprüche, Tierquellen, Vorladen, Overlay mit Konfetti |
 | `js/kosten.js` | Richtpreise auf Mengen: Liste, eigene Rezepte, Euro-Format |
 | `js/angebote.js` | Angebote: Zeilen lesen, Schlüssel raten, Treffer und Ersparnis, Anfrage an die KI – ohne DOM |
-| `js/ansicht-angebote.js` | Reiter Angebote: Fotos, Eingabe, Liste, passende Rezepte, Rezept daraus |
+| `js/ansicht-angebote.js` | Reiter Angebote: automatischer Abruf, eigene Angebote, passende Rezepte, Rezept daraus |
+| `werkzeug/angebote.mjs` | holt die Angebote (Aldi, Kaufland, Penny, Lidl per Gemini) → daten/angebote.json |
+| `.github/workflows/angebote.yml` | Montag und Donnerstag: Angebote holen und einchecken |
 | `werkzeug/preise.py` | Richtpreise je Katalogschlüssel (Packung, Menge, Einheit) |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |

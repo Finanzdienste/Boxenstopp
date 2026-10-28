@@ -1,0 +1,32 @@
+{
+ "offerTiles": [
+  {
+   "title": "PRINGLES*",
+   "type": "food",
+   "quantity": "je 185 g",
+   "price": "1.69",
+   "basePrice": "(1 kg = 9.14)"
+  },
+  {
+   "title": "Zitronen*",
+   "type": "food",
+   "quantity": "je 750-g-Netz",
+   "price": "1.29",
+   "basePrice": "(1 kg = 1.72)"
+  },
+  {
+   "title": "JACOBS Auslese Kaffee*",
+   "type": "food",
+   "quantity": "je 500 g",
+   "price": "5.77",
+   "basePrice": "(1 kg = 11.54)"
+  },
+  {
+   "title": "COCA-COLA, FANTA, SPRITE oder MEZZO MIX*",
+   "type": "food",
+   "quantity": "je 1,25 l",
+   "price": "1.19",
+   "basePrice": "(1 l = 0.95)"
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "offerTiles": [
+  {
+   "title": "MÜHLENHOF Frisches Schweine-Filet*",
+   "type": "food",
+   "quantity": "z. B. 500 g",
+   "price": "3.99",
+   "basePrice": "(1 kg = 7.98)"
+  },
+  {
+   "title": "MÜHLENHOF Schweine-Käsefleischkäse*",
+   "type": "food",
+   "quantity": "je 800-g-Packung",
+   "price": "3.99",
+   "basePrice": "(1 kg = 4.99)"
+  },
+  {
+   "title": "Hähnchen-Nuggets „Halloween“*",
+   "type": "food",
+   "quantity": "je 350-g-Packung",
+   "price": "2.99",
+   "basePrice": "(1 kg = 8.54)"
+  },
+  {
+   "title": "MÜHLENHOF Frische Puten-Schnitzel*",
+   "type": "food",
+   "quantity": "je 500-g-Packung",
+   "price": "4.49",
+   "basePrice": "(1 kg = 8.98)"
+  }
+ ]
+}

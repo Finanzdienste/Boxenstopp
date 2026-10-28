@@ -16,6 +16,8 @@
  * Text für die KI, die daraus ein neues Rezept auf die Ziele macht.
  */
 
+import { VERBOTEN } from './ki-rezept.js';
+
 export const LAEDEN = ['Aldi', 'Lidl', 'Rewe', 'Kaufland', 'Penny', 'Netto', 'Edeka', 'Norma'];
 export const MAX_ANGEBOTE = 120;
 const EINHEITEN = ['g', 'kg', 'ml', 'l', 'Stk', 'Dose', 'Pck', 'Glas', 'Bund', 'Stange', 'Zehe', 'Becher', 'Flasche', 'Netz', 'Schale', 'Beutel'];
@@ -88,7 +90,7 @@ export function angebotBereinigen(roh, katalog = null) {
 }
 
 /** Eine Liste bereinigen, doppelte (gleicher Laden, gleicher Name) raus, höchstens MAX_ANGEBOTE. */
-export function angeboteBereinigen(liste, katalog = null) {
+export function angeboteBereinigen(liste, katalog = null, max = MAX_ANGEBOTE) {
   const aus = [];
   const gesehen = new Set();
   for (const roh of Array.isArray(liste) ? liste : []) {
@@ -98,7 +100,7 @@ export function angeboteBereinigen(liste, katalog = null) {
     if (gesehen.has(s)) continue;
     gesehen.add(s);
     aus.push(a);
-    if (aus.length >= MAX_ANGEBOTE) break;
+    if (aus.length >= max) break;
   }
   return aus;
 }
@@ -129,100 +131,160 @@ export function zeileLesen(zeile, katalog = {}) {
   return angebotBereinigen({ laden, name: t, preis, menge, einheit, k: schluesselRaten(t, katalog) }, katalog);
 }
 
-/** Den Katalog-Schlüssel zu einem Angebotstext raten – nur sichere Treffer. */
+/**
+ * Den Katalog-Schlüssel zu einem Angebotstext raten – nur sichere Treffer.
+ * Verarbeitetes (Sauce, Creme, Chips, Shot …) ist keine Rezeptzutat, auch
+ * wenn „Paprika“ oder „Reis“ im Namen steht; die Regeln mit roh: true gelten
+ * nur für unverarbeitete Ware.
+ */
+const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle|torte|kuchen|gebäck|chips|flips|pulver|gewürz|dressing|aufstrich|mäuse|riegel|snack|pizza|suppe|eintopf|fertig|salat|marinade|mariniert|paniert|gefüllt|gegrillt|püree|sirup|konfitüre|marmelade|gelee|likör|bonbon|keks|waffel|cracker|nudel|teig|burger|nugget|schnitzel|spieß|würstchen|wurst|füllung|pastete|frikadelle|bällchen|röllchen|taschen|schnitte|knusper|rahm-|rahmspinat|rahmgemüse|\b(?:dip|mix|tee|wrap|bowl)\b|dr\. ?oetker|wagner|frosta|knorr|maggi|lay['’]?s|pringles|funny|chio|lorenz|bahlsen|milka|ferrero|haribo|kinder\b|nestl[eé]/i;
+
 export function schluesselRaten(name, katalog = {}) {
-  const n = String(name || '').toLowerCase();
+  const n = String(name || '').toLowerCase().replace(/ß/g, 'ß');
+  const verarbeitet = VERARBEITET.test(n);
+  // [Muster, Schlüssel, nur roh?]
   const REGELN = [
-    [/hähnchen.?brust|hühnerbrust|chicken breast/, 'haehnchenbrust'],
-    [/oberkeule|hähnchen.?keule|hähnchenschenkel.*filet/, 'haehnchenkeule'],
-    [/puten.?brust|puten.?geschnetz/, 'putenbrust'],
-    [/rind.*hack.*(5|mager)|mager.*rind.*hack|tatar/, 'rinderhack-mager'],
-    [/rinder?.?hack|hack.*rind/, 'rinderhack'],
-    [/gulasch/, 'rindergulasch'],
-    [/hüft|huft|rumpsteak/, 'rinderhuefte'],
-    [/süßkartoffel|suesskartoffel/, 'suesskartoffel'],
-    [/kartoffel/, 'kartoffeln'],
-    [/rote zwiebel/, 'rote-zwiebeln'],
-    [/zwiebel/, 'zwiebeln'],
-    [/knoblauch/, 'knoblauch'],
-    [/ingwer/, 'ingwer'],
-    [/paprika/, 'paprika'],
-    [/zucchini/, 'zucchini'],
-    [/brokkoli|broccoli/, 'brokkoli'],
-    [/möhre|moehre|karotte/, 'moehren'],
-    [/champignon/, 'champignons'],
-    [/spinat/, 'spinat'],
-    [/zuckerschote/, 'zuckerschoten'],
-    [/frühlingszwiebel|lauchzwiebel/, 'fruehlingszwiebeln'],
-    [/spitzkohl/, 'spitzkohl'],
-    [/weißkohl|weisskohl/, 'weisskohl'],
-    [/salatgurke|\bgurke/, 'gurke'],
-    [/kirschtomate|cherrytomate|cocktailtomate/, 'kirschtomaten'],
-    [/passata|passierte tomaten/, 'passata'],
-    [/stückige tomaten|gehackte tomaten|tomaten.*dose|dosentomaten|tomaten.*stück/, 'tomaten-dose'],
-    [/tomatenmark/, 'tomatenmark'],
-    [/tomate/, 'tomaten'],
-    [/staudensellerie/, 'staudensellerie'],
-    [/limette/, 'limette'],
-    [/zitrone/, 'zitrone'],
-    [/blumenkohl/, 'blumenkohl'],
-    [/aubergine/, 'aubergine'],
-    [/lauch|porree/, 'lauch'],
-    [/kohlrabi/, 'kohlrabi'],
-    [/skyr/, 'skyr'],
-    [/magerquark/, 'magerquark'],
-    [/frischkäse/, 'frischkaese'],
-    [/kochsahne|sahne zum kochen/, 'kochsahne'],
-    [/schlagsahne/, 'schlagsahne'],
-    [/schmand/, 'schmand'],
-    [/\bmilch\b/, 'milch'],
-    [/cheddar/, 'cheddar'],
-    [/parmesan|grana/, 'parmesan'],
-    [/feta|hirtenkäse/, 'feta'],
-    [/gnocchi/, 'gnocchi'],
-    [/butter(?!schmalz)/, 'butter'],
-    [/mozzarella.*light|light.*mozzarella/, 'mozzarella-light'],
-    [/mozzarella/, 'mozzarella'],
-    [/joghurt/, 'joghurt'],
-    [/\beier\b|\bei\b/, 'eier'],
-    [/tofu/, 'tofu'],
-    [/erbsen/, 'erbsen'],
-    [/kokosmilch/, 'kokosmilch'],
-    [/kidney/, 'kidney'],
-    [/schwarze bohnen/, 'schwarze-bohnen'],
-    [/\bmais\b/, 'mais'],
-    [/kichererbsen/, 'kichererbsen'],
-    [/rote linsen/, 'linsen-rot'],
-    [/pesto/, 'pesto'],
-    [/ananas/, 'ananas-dose'],
-    [/gewürzgurke|cornichon/, 'gewuerzgurken'],
-    [/oliven/, 'oliven'],
-    [/basmati|jasmin|\breis\b/, 'reis'],
-    [/penne/, 'penne'],
-    [/spaghetti/, 'spaghetti'],
-    [/hörnchen|makkaroni|maccheroni/, 'hoernchen'],
-    [/kritharaki|orzo/, 'kritharaki'],
-    [/lasagne/, 'lasagne'],
-    [/mie.?nudel/, 'mie'],
-    [/bandnudel|tagliatelle/, 'bandnudeln'],
-    [/vollkorn.*nudel/, 'vollkornnudeln'],
-    [/couscous/, 'couscous'],
-    [/bulgur/, 'bulgur'],
-    [/tortilla|wrap/, 'tortillas'],
-    [/erdnüsse|erdnuss(?!butter)(?!.?crunch)/, 'erdnuesse'],
-    [/cashew/, 'cashews'],
-    [/mandel/, 'mandeln'],
-    [/rosinen/, 'rosinen'],
-    [/olivenöl/, 'olivenoel'],
-    [/rapsöl|sonnenblumenöl|pflanzenöl/, 'oel'],
-    [/honig/, 'honig'],
-    [/sojasauce|sojasoße/, 'sojasauce'],
-    [/haferflocken/, 'haferflocken'],
-    [/äpfel|apfel/, 'aepfel'],
-    [/whey|proteinpulver/, 'whey-vanille'],
+    [/hähnchen.?brust|hühnerbrust|chicken breast|hähnchen.?innenfilet/, 'haehnchenbrust', true],
+    [/oberkeule|hähnchen.?keule|hähnchenschenkel.*filet|hähnchen.?schenkel.?filet/, 'haehnchenkeule', true],
+    [/puten.?brust|puten.?geschnetz|puten.?filet|puten.?steak/, 'putenbrust', true],
+    [/rind.*hack.*(?:5 ?%|mager)|mager.*rind.*hack|tatar|rinder.?tatar/, 'rinderhack-mager', true],
+    [/rinder?.?hack|hack.*rind|rinderhackfleisch/, 'rinderhack', true],
+    [/rinder?.?gulasch|gulasch.*rind/, 'rindergulasch', true],
+    [/rinder?.?hüft|hüftsteak|huftsteak|rumpsteak|aus der hüfte/, 'rinderhuefte', true],
+    [/süßkartoffel|suesskartoffel|süsskartoffel/, 'suesskartoffel', true],
+    [/kartoffel/, 'kartoffeln', true],
+    [/frühlingszwiebel|lauchzwiebel|bundzwiebel/, 'fruehlingszwiebeln', true],
+    [/rote zwiebel|zwiebeln?,? rot/, 'rote-zwiebeln', true],
+    [/zwiebel/, 'zwiebeln', true],
+    [/knoblauch/, 'knoblauch', true],
+    [/ingwer/, 'ingwer', true],
+    [/paprika/, 'paprika', true],
+    [/zucchini/, 'zucchini', true],
+    [/brokkoli|broccoli/, 'brokkoli', true],
+    [/möhre|moehre|karotte/, 'moehren', true],
+    [/champignon/, 'champignons', true],
+    [/spinat/, 'spinat', true],
+    [/zuckerschote|zuckererbse/, 'zuckerschoten', true],
+    [/spitzkohl/, 'spitzkohl', true],
+    [/weißkohl|weisskohl/, 'weisskohl', true],
+    [/salatgurke|\bgurke/, 'gurke', true],
+    [/kirschtomate|cherrytomate|cocktailtomate|rispentomate|romatomate|minitomate|miniroma|datteltomate/, 'kirschtomaten', true],
+    [/passata|passierte tomaten/, 'passata', false],
+    [/stückige tomaten|gehackte tomaten|tomaten.*dose|dosentomaten|tomaten.*stück|tomaten.*(?:in stücken|gestückelt)/, 'tomaten-dose', false],
+    [/tomatenmark/, 'tomatenmark', false],
+    [/getrocknete tomaten|tomaten.*getrocknet/, 'getr-tomaten', false],
+    [/tomate/, 'tomaten', true],
+    [/staudensellerie|stangensellerie/, 'staudensellerie', true],
+    [/limette/, 'limette', true],
+    [/zitrone/, 'zitrone', true],
+    [/blumenkohl/, 'blumenkohl', true],
+    [/aubergine/, 'aubergine', true],
+    [/\blauch\b|porree/, 'lauch', true],
+    [/kohlrabi/, 'kohlrabi', true],
+    [/skyr/, 'skyr', true],
+    [/magerquark|quark.*mager/, 'magerquark', false],
+    [/frischkäse/, 'frischkaese', false],
+    [/kochsahne|sahne zum kochen|küchensahne/, 'kochsahne', false],
+    [/schlagsahne|schlagrahm/, 'schlagsahne', false],
+    [/schmand/, 'schmand', false],
+    [/\bmilch\b|frischmilch|vollmilch|h-milch|haltbare milch/, 'milch', true],
+    [/cheddar/, 'cheddar', false],
+    [/parmesan|parmigiano|\bgrana padano\b/, 'parmesan', false],
+    [/\bfeta\b|hirtenkäse|schafskäse/, 'feta', false],
+    [/gnocchi/, 'gnocchi', false],
+    [/\bbutter\b(?!schmalz)/, 'butter', true],
+    [/mozzarella.*light|light.*mozzarella/, 'mozzarella-light', false],
+    [/mozzarella/, 'mozzarella', false],
+    [/joghurt|jogurt/, 'joghurt', true],
+    [/\beier\b|freilandeier|bodenhaltung.*eier/, 'eier', true],
+    [/tofu/, 'tofu', false],
+    [/erbsen/, 'erbsen', true],
+    [/kokosmilch|kokosnussmilch/, 'kokosmilch', false],
+    [/kidney/, 'kidney', false],
+    [/schwarze bohnen/, 'schwarze-bohnen', false],
+    [/\bmais\b|gemüsemais|zuckermais/, 'mais', false],
+    [/kichererbsen/, 'kichererbsen', false],
+    [/rote linsen/, 'linsen-rot', false],
+    [/pesto/, 'pesto', false],
+    [/ananas/, 'ananas-dose', false],
+    [/gewürzgurke|cornichon/, 'gewuerzgurken', false],
+    [/olivenöl|olivenoel/, 'olivenoel', false],
+    [/oliven/, 'oliven', false],
+    [/basmati|jasminreis|langkorn|parboiled|\breis\b/, 'reis', true],
+    [/penne/, 'penne', false],
+    [/spaghetti/, 'spaghetti', false],
+    [/hörnchen|makkaroni|maccheroni/, 'hoernchen', false],
+    [/kritharaki|orzo/, 'kritharaki', false],
+    [/lasagne.?platten|lasagneblätter/, 'lasagne', false],
+    [/mie.?nudel/, 'mie', false],
+    [/bandnudel|tagliatelle/, 'bandnudeln', false],
+    [/vollkorn.*nudel|vollkornpasta/, 'vollkornnudeln', false],
+    [/couscous/, 'couscous', false],
+    [/bulgur/, 'bulgur', false],
+    [/tortilla|wraps?\b/, 'tortillas', true],
+    [/erdnüsse|erdnusskerne|erdnuss(?!butter)(?!.?crunch)(?!öl)(?!.?öl)(?!.?flips)/, 'erdnuesse', true],
+    [/cashew/, 'cashews', true],
+    [/mandel/, 'mandeln', true],
+    [/rosinen|sultaninen/, 'rosinen', true],
+    [/rapsöl|sonnenblumenöl|pflanzenöl|bratöl/, 'oel', false],
+    [/\bhonig\b|imkerhonig|blütenhonig|waldhonig/, 'honig', true],
+    [/soja.?sauce|soja.?soße|sojasosse/, 'sojasauce', false],
+    [/haferflocken/, 'haferflocken', false],
+    [/äpfel|\bapfel\b|tafeläpfel/, 'aepfel', true],
+    [/whey|proteinpulver|eiweißpulver/, 'whey-vanille', false],
+    [/sweet.?chili.?(?:sauce|soße)/, 'sweetchili', false],
+    [/(?:bbq|barbecue|grill).?(?:sauce|soße)/, 'bbq-sauce', false],
+    [/ketchup/, 'ketchup', false],
+    [/curry.?paste/, 'currypaste', false],
+    [/ajvar/, 'ajvar', false],
+    [/erdnussbutter|erdnussmus/, 'erdnussbutter', false],
+    [/semmelbrösel|paniermehl/, 'semmelbroesel', false],
+    [/speisestärke/, 'staerke', false],
+    [/senf/, 'senf', false],
   ];
-  for (const [re, k] of REGELN) if (re.test(n) && katalog[k]) return k;
+  for (const [re, k, roh] of REGELN) {
+    if (!re.test(n) || !katalog[k]) continue;
+    if (roh && verarbeitet) return '';
+    return k;
+  }
   return '';
+}
+
+/**
+ * Packungsmenge aus einem Text, wie ihn die Läden schreiben: „je 500-g-Packung“,
+ * „z. B. 1.000 g“, „4x85-g-Packung“, „je Ka. 20 x 0,5-l-Fl.“, „je 385 - 415-g-Packg.“
+ * (dann die kleinere), „kg-Preis“, „je kg“, „Stück“, „3er-Packung“.
+ * { menge, einheit } oder { menge: null, einheit: '' }.
+ */
+export function mengeAus(text) {
+  let t = String(text || '').replace(/(\d)\.(\d{3})\b/g, '$1$2').replace(/,/g, '.').trim();
+  if (!t) return { menge: null, einheit: '' };
+  const multi = t.match(/(\d+)\s*[x×]\s*(\d+(?:\.\d+)?)\s*-?\s*(kg|g|ml|l)\b/i);
+  if (multi) return { menge: Number(multi[1]) * Number(multi[2]), einheit: einheitNorm(multi[3]) };
+  const m = t.match(/(\d+(?:\.\d+)?)(?:\s*-\s*\d+(?:\.\d+)?)?\s*-?\s*(kg|g|ml|l)\b/i);
+  if (m) return { menge: Number(m[1]), einheit: einheitNorm(m[2]) };
+  if (/\b(kg|kilo)\b/i.test(t) && /preis|je|pro/i.test(t)) return { menge: 1, einheit: 'kg' };
+  if (/^(kg|je kg|kg-preis)$/i.test(t)) return { menge: 1, einheit: 'kg' };
+  const er = t.match(/(\d+)\s*er(?:-| )?(?:packung|pack|set|tray)/i);
+  if (er) return { menge: Number(er[1]), einheit: 'Stk' };
+  const st = t.match(/(\d+)\s*(?:stück|stk|st\.)/i);
+  if (st) return { menge: Number(st[1]), einheit: 'Stk' };
+  if (/stück|^st\.?$|je st/i.test(t)) return { menge: 1, einheit: 'Stk' };
+  if (/bund/i.test(t)) return { menge: 1, einheit: 'Bund' };
+  if (/dose/i.test(t)) return { menge: 1, einheit: 'Dose' };
+  if (/glas/i.test(t)) return { menge: 1, einheit: 'Glas' };
+  return { menge: null, einheit: '' };
+}
+
+/** Schwein, Fisch & Co. – was die beiden nicht essen – fliegt aus den Angeboten raus. */
+export const istTabu = (name) => VERBOTEN.test(String(name || ''));
+
+/** Eine feste id aus Laden, Name und Preis – damit derselbe Artikel bei jedem Abruf dieselbe hat. */
+export function stabileId(laden, name, preis) {
+  const t = `${laden}|${String(name).toLowerCase()}|${preis}`;
+  let h = 2166136261;
+  for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return `a-${h.toString(36).padStart(7, '0')}`;
 }
 
 /** Gramm je Einheit fürs Vergleichen – aus den Nährwerten (je) oder den festen Umrechnungen. */

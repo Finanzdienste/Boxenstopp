@@ -14,7 +14,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['js/**/*.js', 'sw.js', 'tests/**/*.mjs'],
+    files: ['js/**/*.js', 'sw.js', 'tests/**/*.mjs', 'werkzeug/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',
@@ -66,8 +66,8 @@ export default [
     },
   },
   {
-    // Die Tests laufen in Node.
-    files: ['tests/**/*.mjs'],
+    // Die Tests und das Angebote-Werkzeug laufen in Node.
+    files: ['tests/**/*.mjs', 'werkzeug/**/*.mjs'],
     languageOptions: {
       globals: {
         process: 'readonly',
