@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T10:04:53.771Z",
+ "stand": "2026-10-28T10:15:39.204Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
@@ -18,7 +18,7 @@
    "laden": "Lidl",
    "ok": false,
    "anzahl": 7,
-   "hinweis": "heute nicht erreichbar (keine Seite lesbar (Gemini ist gerade überlastet. Gleich nochmal versuchen.))",
+   "hinweis": "heute nicht erreichbar (keine Seite lesbar (Keine Verbindung zu Google. Prüf das Internet und versuch es)",
    "stand": "2026-10-28T09:59:19.703Z"
   },
   {
