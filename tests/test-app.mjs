@@ -266,6 +266,40 @@ check(await page.locator('.confirm').count() === 1, 'Liste leeren fragt nach');
 await page.click('[data-act="leeren-ja"]');
 check(await bis(async () => (await page.locator('#list-body .empty-state').count()) === 1), 'Liste leer');
 
+// --- Rezept: „Zum Rezept“, Bereiche auf- und zuklappen, anpinnen („läuft gerade“)
+await page.click('.tab[data-tab="rezepte"]');
+await page.click('[data-open="gulasch"]');
+check(await page.locator('#detail .d-top [data-act="zum-rezept"]').count() === 1, 'oben im Rezept: „Zum Rezept“');
+await page.click('[data-act="zum-rezept"]');
+check(await bis(async () => Math.abs(await page.evaluate(() => document.querySelector('#s-zubereitung').getBoundingClientRect().top)) < 120), '„Zum Rezept“ springt zur Zubereitung');
+const offen = (id) => page.evaluate((x) => document.querySelector(`#s-${x}`)?.open, id);
+await page.click('#s-zutaten > summary');
+check(!(await offen('zutaten')) && !(await page.locator('#s-zutaten .ings').first().isVisible()), 'Zutaten zugeklappt');
+await page.click('[data-act="zurueck"]');
+await page.click('[data-open="chili"]');
+check(!(await offen('zutaten')) && (await offen('zubereitung')) && (await offen('notizen')), 'im nächsten Rezept bleiben die Zutaten zu, der Rest offen');
+await page.reload({ waitUntil: 'load' });
+check(await bis(async () => (await page.locator('#d-title').count()) === 1) && !(await offen('zutaten')), 'auch nach dem Neuladen');
+await page.click('#s-zubereitung > summary');
+await page.click('[data-act="zum-rezept"]');
+check(await offen('zubereitung'), '„Zum Rezept“ klappt die Zubereitung wieder auf');
+await page.click('#s-zutaten > summary');
+check(await offen('zutaten'), 'Zutaten wieder auf');
+await page.click('[data-act="anpinnen"]');
+check(await bis(async () => (await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 1) && (await page.locator('#d-laeuft').innerText()).includes('Läuft gerade'), 'angepinnt: Knopf gedrückt, oben „Läuft gerade“');
+await page.click('[data-step="0"]');
+await page.click('[data-act="zurueck"]');
+const leiste = page.locator('#gepinnt [data-open="chili"]');
+check(await bis(async () => (await leiste.count()) === 1) && (await page.locator('.box[data-open="chili"] .pill-pin').count()) === 1, 'oben bei den Rezepten „Läuft gerade“ mit dem Chili, auf der Karte die Pille');
+check((await leiste.locator('small').innerText()).startsWith('1 von 26 Schritten'), `mit dem Fortschritt beim Kochen (${await leiste.locator('small').innerText()})`);
+check(await page.evaluate(() => document.querySelector('#gepinnt').getBoundingClientRect().top < document.querySelector('#r-title').getBoundingClientRect().top), 'die Leiste steht ganz oben, über der Überschrift');
+await leiste.click();
+check(await bis(async () => (await page.locator('#d-title').innerText()) === 'Chili con Carne mit Süßkartoffel'), 'antippen öffnet das Rezept');
+await page.click('[data-act="schritte-zurueck"]');
+await page.click('[data-act="anpinnen"]');
+await page.click('[data-act="zurueck"]');
+check(await bis(async () => page.locator('#gepinnt').isHidden()) && (await page.locator('.box .pill-pin').count()) === 0, 'gelöst: Leiste und Pille sind weg');
+
 // --- iPhone, App vom Home-Bildschirm: eigener Speicher, getrennt von Safari – der Hinweis sagt, was zu tun ist
 const iphone = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE', serviceWorkers: 'block', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
 await iphone.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));

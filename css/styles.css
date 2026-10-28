@@ -198,8 +198,36 @@ p{margin:0}
 .onlist{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 4px;font-weight:700;color:var(--ok)}
 .cooked-note{flex-basis:100%;font-size:13px;color:var(--muted)}
 .sec{margin-top:34px}
-.sec>h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;font-size:22px;line-height:1.15;letter-spacing:-.015em;font-weight:730}
-.sec>h2 small{font:500 13.5px/1.2 var(--f-body);letter-spacing:0;color:var(--muted)}
+.sec>h2,.sec>summary>h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;font-size:22px;line-height:1.15;letter-spacing:-.015em;font-weight:730}
+.sec>h2 small,.sec>summary>h2 small{font:500 13.5px/1.2 var(--f-body);letter-spacing:0;color:var(--muted)}
+/* Bereiche im Rezept zum Auf- und Zuklappen */
+.klapp>summary{display:flex;align-items:center;gap:10px;min-height:40px;list-style:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.klapp>summary::-webkit-details-marker{display:none}
+.klapp>summary>h2,.klapp>summary>h3{flex:1;min-width:0;margin:0}
+.klapp>summary::after{content:"";flex:none;width:9px;height:9px;margin-right:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-3px) rotate(45deg);transition:transform .15s ease}
+.klapp:not([open])>summary::after{transform:rotate(-45deg)}
+#detail .klapp{scroll-margin-top:72px}
+.d-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.d-zum{height:38px;padding:0 13px;font-size:14px}
+.d-zum .ic{width:17px;height:17px}
+.d-laeuft{display:inline-flex;align-items:center;gap:6px;margin:12px 0 0;padding:6px 11px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13.5px}
+.d-laeuft[hidden]{display:none}
+.d-laeuft .ic{width:15px;height:15px}
+.btn.is-pin{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+/* Oben bei den Rezepten: was gerade läuft */
+.gepinnt{display:grid;gap:8px;margin:2px 0 20px}
+.gepinnt[hidden]{display:none}
+.gepinnt-k{display:flex;align-items:center;gap:6px;font:600 12px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.gepinnt-k .ic{width:15px;height:15px}
+.gepinnt-liste{display:grid;gap:8px}
+.gepinnt-b{display:grid;grid-template-columns:64px minmax(0,1fr) 18px;align-items:center;gap:12px;width:100%;padding:8px 12px 8px 8px;border-radius:14px;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--ink);text-align:left}
+.gepinnt-b>img,.g-ersatz{width:64px;height:48px;border-radius:9px;object-fit:cover;background:var(--surface)}
+.g-ersatz{display:grid;place-items:center}
+.gepinnt-b b{display:block;font-weight:720;font-size:16px;line-height:1.25}
+.gepinnt-b small{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
+.gepinnt-b>.ic{width:18px;height:18px;color:var(--accent)}
+.pill-pin{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.pill-pin .ic{width:13px;height:13px}
 .sec-lead{margin-top:6px;color:var(--muted);font-size:14px;max-width:60ch}
 .sub-h{margin:20px 0 2px;font:600 12px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .ings{list-style:none;margin:0;padding:0}
@@ -527,8 +555,9 @@ a.btn{text-decoration:none;color:inherit}
 .pill.p-hoch{color:var(--ok)}.pill.p-mittel{color:var(--kh)}.pill.p-runter{color:var(--danger)}
 
 /* ----------------------------------------------------------------- Notizen */
-.notizen{margin-top:14px;padding:10px 14px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
-.notizen .sub-h{margin:0 0 4px}
+.notizen{margin-top:14px;padding:4px 14px 6px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.notizen[open]{padding-bottom:12px}
+.notizen .sub-h{margin:0}
 .notizen .sub-h small{font-weight:500;letter-spacing:0;text-transform:none;font-size:12px}
 .notiz-liste{list-style:none;margin:0;padding:0;display:grid}
 .notiz-liste[hidden]{display:none}

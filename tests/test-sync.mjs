@@ -113,6 +113,17 @@ check(await bis(async () => (await a.locator('#d-notizen .notiz-t').count()) ===
 check((await a.locator('#d-notizen .notiz-von').innerText()).startsWith('Tobi'), 'mit „Tobi“ dran');
 await a.click('[data-act="zurueck"]');
 
+// --- Angepinnt: „läuft gerade“ steht bei beiden oben
+await t.click('[data-act="anpinnen"]');
+check(await bis(() => gh.liste()?.gepinnt?.chili?.by === 'Tobi'), 'Tobi pinnt das Chili an – es steht in GitHub');
+check(await bis(async () => (await a.locator('#gepinnt [data-open="chili"]').count()) === 1) && (await a.locator('#gepinnt [data-open="chili"] small').innerText()).includes('von Tobi'), 'Amy sieht es oben bei den Rezepten: „Läuft gerade“, von Tobi');
+await a.click('#gepinnt [data-open="chili"]');
+check(await bis(async () => (await a.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 1) && (await a.locator('#d-laeuft').innerText()).includes('angepinnt von Tobi'), 'antippen öffnet das Rezept, dort steht „Läuft gerade“');
+await a.click('[data-act="anpinnen"]');
+check(await bis(() => !gh.liste()?.gepinnt?.chili), 'Amy löst es wieder');
+await a.click('[data-act="zurueck"]');
+check(await bis(async () => (await a.locator('#gepinnt').isHidden())), 'und die Leiste oben ist weg');
+
 // --- Daumen: einer für beide
 await t.click('[data-bewerten="hoch"]');
 check(await bis(() => gh.liste()?.bewertung?.chili?.wert === 'hoch'), 'Tobis Daumen hoch steht in GitHub');

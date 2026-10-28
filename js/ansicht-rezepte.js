@@ -20,10 +20,11 @@ import { lobPruefen, lobGross, tierVorladen } from './lob.js';
 import { euro, kostenRezept } from './kosten.js';
 import { zutatImg, rezeptBildchen, bildPfad } from './bilder.js';
 import { opNotiz, opNotizWeg } from './liste.js';
-import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
+import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, opAnpinnen, DAUMEN } from './liste.js';
 
 const SCHRITTE = 'boxenstopp.schritte.v2';
 const TOPF = 'boxenstopp.topf.v1';
+const ZUGEKLAPPT = 'boxenstopp.zugeklappt.v1';
 
 /** Darunter gilt ein Rezept als schnell – mit ehrlichen Zeiten ist keins unter einer Stunde. */
 const SCHNELL = 90;
@@ -58,6 +59,9 @@ const PFADE = {
   check: '<path d="M5 12.5l4.2 4.2L19 7"/>',
   back: '<path d="M15 5l-7 7 7 7"/>',
   list: '<path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M3.8 6.6l1.3 1.3L7.6 5.4M3.8 12.1l1.3 1.3 2.5-2.5M3.8 17.6l1.3 1.3 2.5-2.5"/>',
+  pin: '<path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"/>',
+  runter: '<path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5"/>',
+  weiter: '<path d="M9 5l7 7-7 7"/>',
 };
 /*
  * Daumen: ein gemeinsamer pro Gericht (liste.js). Hoch und runter sind
@@ -77,6 +81,8 @@ export const ic = (name, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24
 
 let aktuell = null;
 let zeilen = [];
+/** Die Bereiche im Rezept, die zugeklappt sind (Zutaten, Zubereitung …) – das Handy merkt sie sich für alle Rezepte. */
+const zugeklappt = new Set((lese(ZUGEKLAPPT, []) || []).filter((x) => typeof x === 'string'));
 let rasterScroll = 0;
 const schritte = lese(SCHRITTE, {}) || {};
 
@@ -116,11 +122,34 @@ ${rezeptFoto(r)}<span class="tape">${esc(r.short)}</span><span class="box-time">
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}${preis}</span>
 <span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
-<span class="box-foot">${ki}${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
+<span class="box-foot">${app.stand.gepinnt?.[r.id] ? `<span class="pill pill-pin">${ic('pin')}Läuft gerade</span>` : ''}${ki}${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
 </button>`;
 }
 
+/** Oben bei den Rezepten: was gerade läuft (angepinnt, für beide), mit Foto und Fortschritt beim Kochen. */
+function gepinntZeichnen() {
+  const el = $('#gepinnt');
+  if (!el) return;
+  const laufen = Object.entries(app.stand.gepinnt || {})
+    .filter(([rid]) => app.nachId[rid])
+    .sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)));
+  el.hidden = !laufen.length;
+  el.innerHTML = laufen.length ? `<h2 class="gepinnt-k">${ic('pin')}Läuft gerade</h2><div class="gepinnt-liste">${laufen.map(([rid, e]) => {
+    const r = app.nachId[rid];
+    const bild = r.bild && /^bilder\/rezepte\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(r.bild)
+      ? `<img src="${esc(r.bild)}" alt="" width="64" height="48" decoding="async">`
+      : `<span class="g-ersatz"><img src="${bildPfad(rezeptBildchen(r, app.katalog)[0] || 'pot-of-food')}" alt="" width="30" height="30"></span>`;
+    const fertig = (schritte[rid] || []).length;
+    const alle = (r.ablauf || []).reduce((n, p) => n + p.schritte.length, 0);
+    const seit = e.at && !Number.isNaN(Date.parse(e.at)) ? `seit ${tagKurz(heute(new Date(e.at)))}` : '';
+    const wer = e.by ? `von ${e.by === app.name() ? 'dir' : esc(e.by)}` : '';
+    const was = [fertig && alle ? `${fertig} von ${alle} Schritten` : '', [wer, seit].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
+    return `<button type="button" class="gepinnt-b" data-open="${esc(rid)}">${bild}<span><b>${esc(r.name)}</b>${was ? `<small>${was}</small>` : ''}</span>${ic('weiter')}</button>`;
+  }).join('')}</div>` : '';
+}
+
 export function rasterZeichnen() {
+  gepinntZeichnen();
   if (!FILTER.some((f) => f[0] === ansicht.filter)) ansicht.filter = 'alle';
   const f = FILTER.find((x) => x[0] === ansicht.filter);
   const alle = alleRezepte();
@@ -192,6 +221,18 @@ function etikett(r) {
   }).join('')}</div>`;
 }
 
+/** Ein Bereich im Rezept, auf- und zuklappbar. Was zu ist, bleibt zu – auch im nächsten Rezept. */
+const bereich = (id, kopf, inhalt, klasse = 'sec') => `<details class="${klasse} klapp" id="s-${id}" data-abschnitt="${id}"${zugeklappt.has(id) ? '' : ' open'}><summary>${kopf}</summary>${inhalt}</details>`;
+
+/** Von app.js (toggle, in der Capture-Phase): einen Bereich auf- oder zugeklappt merken. */
+export function abschnittGeklappt(el) {
+  if (!el?.matches?.('#detail details[data-abschnitt]')) return;
+  const id = el.dataset.abschnitt;
+  if (el.open === !zugeklappt.has(id)) return;
+  if (el.open) zugeklappt.delete(id); else zugeklappt.add(id);
+  schreibe(ZUGEKLAPPT, [...zugeklappt]);
+}
+
 function zutatZeile(z, i) {
   return `<li class="ing">${zutatImg(z.k, { name: z.n, cat: z.art === 'gewuerz' ? 'gewuerz' : '', katalog: app.katalog, groesse: 24 })}<div><span class="ing-name">${esc(z.n)}</span>${z.h ? `<span class="ing-hint">${esc(z.h)}</span>` : ''}</div><span class="ing-amt">${esc(z.a)}</span><button type="button" class="tog" data-tog="${i}" aria-pressed="false" aria-label="${esc(z.n)} auf die Einkaufsliste setzen">${ic('plus', 'i-plus')}${ic('check', 'i-check')}</button></li>`;
 }
@@ -206,13 +247,14 @@ function detailHTML(r) {
   const ko = kostenRezept(r, app);
   if (ko.box > 0) fakten.push(`<span class="pill-cost">≈ ${esc(euro(ko.box))} pro Box${ko.luecken ? ' (mind.)' : ''}</span>`);
   const t = r.total;
-  return `<button type="button" class="back" data-act="zurueck">${ic('back')}Alle Rezepte</button>
+  return `<div class="d-top"><button type="button" class="back" data-act="zurueck">${ic('back')}Alle Rezepte</button><button type="button" class="btn d-zum" data-act="zum-rezept">${ic('runter')}Zum Rezept</button></div>
 ${rezeptFoto(r, { gross: true })}
 <div class="d-head">
   <span class="tape">${esc(r.short)} · ${boxen(r)}×</span>
   <h1 id="d-title">${esc(r.name)}</h1>
   <p class="d-desc">${esc(r.desc)}</p>
   <div class="facts">${fakten.map((f) => `<span class="pill">${f}</span>`).join('')}</div>
+  <p class="d-laeuft" id="d-laeuft" hidden></p>
 </div>
 <span class="label-k">Pro Box, eine von ${zahlwort(boxen(r))}</span>
 ${etikett(r)}
@@ -220,18 +262,15 @@ ${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
 <div class="actions" id="d-actions"></div>
 <section class="anpassen" id="d-anpassen" aria-label="Rezept anpassen" hidden></section>
 <div class="bewertung" id="d-bewertung" role="group" aria-label="Wie war's?"></div>
-<section class="notizen" aria-labelledby="h-notizen">
-  <h3 id="h-notizen" class="sub-h">Notizen <small>für euch beide</small></h3>
+${bereich('notizen', '<h3 id="h-notizen" class="sub-h">Notizen <small>für euch beide</small></h3>', `
   <ul class="notiz-liste" id="d-notizen"></ul>
   <form class="notiz-form" id="notiz-form" autocomplete="off">
     <label class="sr" for="notiz-feld">Notiz</label>
     <input id="notiz-feld" type="text" maxlength="300" placeholder="z. B. nächstes Mal weniger Chili" enterkeyhint="done">
     <button type="submit" class="btn" id="notiz-btn" aria-label="Notiz speichern">${ic('plus')}</button>
-  </form>
-</section>
+  </form>`, 'notizen')}
 
-<section class="sec" aria-labelledby="h-ing">
-  <h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</small></h2>
+${bereich('zutaten', `<h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</small></h2>`, `
   <p class="sec-lead">Mit + setzt du einzelne Zutaten auf die Liste, mit ✓ nimmst du sie wieder runter.</p>
   ${ko.gesamt > 0 ? `<p class="kosten" id="d-kosten">Kostet ≈ <b>${esc(euro(ko.gesamt))}</b> für ${boxen(r)} Boxen, also ≈ ${esc(euro(ko.box))} pro Box${ko.luecken ? ` – mindestens, ${ko.luecken} Zutat${ko.luecken > 1 ? 'en' : ''} ohne Richtpreis` : ''}. <small>Richtpreise Discounter, ${esc(app.preiseStand || 'Stand unbekannt')}; verwendete Mengen, nicht ganze Packungen.</small></p>` : ''}
   ${gruppe('einkauf', 'Einkaufen')}
@@ -239,31 +278,26 @@ ${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
   ${gruppe('vorrat', 'Aus dem Vorrat')}
   ${gruppe('optional', 'Optional')}
   ${gruppe('gewuerz', 'Gewürze')}
-  ${gruppe('haushalt', 'Extras')}
-</section>
+  ${gruppe('haushalt', 'Extras')}`)}
 
 ${zubereitungHTML(r)}
 
-<section class="sec" aria-labelledby="h-calc">
-  <h2 id="h-calc">Portionieren</h2>
+${bereich('portionieren', '<h2 id="h-calc">Portionieren</h2>', `
   <p class="sec-lead">Topf oder Schüssel leer wiegen, dann mit dem fertigen Essen. Die Differenz geht durch ${boxen(r)}.</p>
   <div class="calc">
     <div class="field"><label for="pot-empty">Gefäß leer</label><div class="inp"><input id="pot-empty" type="number" inputmode="numeric" min="0" step="1" placeholder="2150"><span>g</span></div></div>
     <div class="field"><label for="pot-full">Mit Essen</label><div class="inp"><input id="pot-full" type="number" inputmode="numeric" min="0" step="1" placeholder="5450"><span>g</span></div></div>
     <div class="calc-out"><span>Pro Box</span><output id="per-box" for="pot-empty pot-full"></output></div>
-  </div>
-</section>
+  </div>`)}
 
-<section class="sec" aria-labelledby="h-keep">
-  <h2 id="h-keep">Aufbewahren</h2>
+${bereich('aufbewahren', '<h2 id="h-keep">Aufbewahren</h2>', `
   <div class="keep"><div><span class="k">Kühlschrank</span><b>${esc(r.fridge)}</b></div><div><span class="k">Tiefkühler</span><b>${esc(r.freeze)}</b></div></div>
   <ul class="tips">
     <li>Boxen offen höchstens 1–2 Stunden abkühlen lassen, dann in den Kühlschrank oder Tiefkühler.</li>
     <li>Gefrorene Boxen am besten über Nacht im Kühlschrank auftauen.</li>
     <li>Abgedeckt in der Mikrowelle erhitzen und zwischendurch umrühren, bis alles durch und durch heiß ist.</li>
-  </ul>
-</section>
-${r.tips && r.tips.length ? `<section class="sec" aria-labelledby="h-tips"><h2 id="h-tips">Tipps</h2><ul class="tips">${r.tips.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>` : ''}
+  </ul>`)}
+${r.tips && r.tips.length ? bereich('tipps', '<h2 id="h-tips">Tipps</h2>', `<ul class="tips">${r.tips.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`) : ''}
 
 <details class="nut">
   <summary>Nährwertrechnung für alle ${boxen(r)} Boxen</summary>
@@ -320,8 +354,7 @@ function zubereitungHTML(r) {
   const phasen = r.ablauf.map((p, pi) => `<h3 class="phase"><span class="phase-n">${pi + 1}</span><span class="phase-name">${esc(p.t)}</span><span class="phase-t">ca. ${dauer(zeit.phasen[pi])}</span></h3>
 <ol class="steps">${p.schritte.map((s) => schrittHTML(r, s, i++)).join('')}</ol>`).join('');
   const schalen = (r.schalen || []).map((s) => `<li>${schaleSchild(s)}<span class="schale-gr">${esc(s.gr || '')}</span></li>`).join('');
-  return `<section class="sec" aria-labelledby="h-steps">
-  <h2 id="h-steps">Zubereitung <small>ca. ${dauer(zeit.gesamt)}</small></h2>
+  return bereich('zubereitung', `<h2 id="h-steps">Zubereitung <small>ca. ${dauer(zeit.gesamt)}</small></h2>`, `
   <div class="zeiten">${r.ablauf.map((p, pi) => `<div><span class="k">${esc(p.t)}</span><b>${dauer(zeit.phasen[pi])}</b></div>`).join('')}</div>
   <p class="sec-lead">Zeiten für normales Tempo zu Hause, mit Waschen, Schälen und Abfall wegräumen.</p>
   ${schalen ? `<div class="mise"><h3 class="sub-h">Stell dir bereit</h3><ul class="schalen">${schalen}</ul>${r.geraete?.length ? `<p class="geraete"><b>Außerdem:</b> ${r.geraete.map(esc).join(', ')}, Waage</p>` : ''}</div>` : ''}
@@ -329,8 +362,7 @@ function zubereitungHTML(r) {
     <button type="button" class="switch" id="wake" role="switch" aria-checked="false" data-act="wach" hidden><span class="sw" aria-hidden="true"></span>Bildschirm anlassen</button>
     <button type="button" class="linkbtn" id="reset-steps" data-act="schritte-zurueck" hidden>Haken zurücksetzen</button>
   </div>
-  ${phasen}
-</section>`;
+  ${phasen}`);
 }
 
 export function detailAktualisieren() {
@@ -348,9 +380,16 @@ export function detailAktualisieren() {
   html += heuteGekocht
     ? `<button type="button" class="btn btn-quiet" disabled>${ic('check')}Heute gekocht</button>`
     : `<button type="button" class="btn" data-act="gekocht"${gesperrt}>Heute gekocht</button>`;
+  const pin = app.stand.gepinnt?.[aktuell];
+  html += `<button type="button" class="btn${pin ? ' is-pin' : ''}" data-act="anpinnen" aria-pressed="${!!pin}"${gesperrt}>${ic('pin')}${pin ? 'Angepinnt' : 'Anpinnen'}</button>`;
   if (r.ki || r.items.some((it) => it.pro100)) html += '<button type="button" class="btn" data-act="anpassen">Anpassen</button>';
   if (c && !heuteGekocht && tagKurz(c.at)) html += `<span class="cooked-note">Zuletzt gekocht am ${esc(tagKurz(c.at))}${c.by ? ` von ${esc(c.by)}` : ''}</span>`;
   $('#d-actions').innerHTML = html;
+  const laeuft = $('#d-laeuft');
+  if (laeuft) {
+    laeuft.hidden = !pin;
+    laeuft.innerHTML = pin ? `${ic('pin')}Läuft gerade${pin.by ? ` · angepinnt von ${pin.by === app.name() ? 'dir' : esc(pin.by)}` : ''}` : '';
+  }
   $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
   notizenZeichnen();
   if ($('#d-ki')) $('#d-ki').innerHTML = app.kiLeiste(r);
@@ -576,6 +615,20 @@ export function klickRezepte(el) {
       lobGross({ rezept: app.nachId[aktuell], name: app.name(), grund: 'gekocht' }).then((da) => { if (!da) melde('Eingetragen: heute gekocht'); });
       return true;
     case 'schritte-zurueck': schritte[aktuell] = []; schreibe(SCHRITTE, schritte); schritteZeichnen(); return true;
+    case 'zum-rezept': {
+      // Direkt zur Zubereitung – aufgeklappt, auch wenn sie zu war
+      const z = $('#s-zubereitung');
+      if (z) { z.open = true; z.scrollIntoView({ block: 'start' }); }
+      return true;
+    }
+    case 'anpinnen': {
+      if (!aktuell) return true;
+      app.kiVorAktion(aktuell);
+      const an = !app.stand.gepinnt?.[aktuell];
+      app.aendern(opAnpinnen(aktuell, an, app.name()));
+      melde(an ? 'Angepinnt – steht jetzt oben bei den Rezepten, auch beim anderen Handy' : 'Nicht mehr angepinnt');
+      return true;
+    }
     case 'wach': setzeWach(!wachSperre); return true;
     default: return false;
   }

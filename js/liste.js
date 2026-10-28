@@ -8,12 +8,14 @@
  *     cooked:    { <Rezept-id>: { at: '2026-10-26', by: 'Tobi' } },
  *     bewertung: { <Rezept-id>: { wert: 'hoch' | 'mittel' | 'runter', by: 'Amy', at } },
  *     ki:        { <ki-…>: { r: Rezept aus der Resteverwertung, by, at } },
- *     notizen:   { <Rezept-id>: [{ id, text, by, at }, …] } }
+ *     notizen:   { <Rezept-id>: [{ id, text, by, at }, …] },
+ *     gepinnt:   { <Rezept-id>: { by: 'Tobi', at } } }
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
  * Resteverwertung, die jemand behalten hat (ki-rezept.js, höchstens 12) –
- * so sieht das andere Handy sie auch.
+ * so sieht das andere Handy sie auch. `gepinnt` sind die Rezepte, die gerade
+ * laufen (Lesezeichen, höchstens vier) – sie stehen bei beiden oben.
  *
  * Ein Eintrag:
  *
@@ -38,8 +40,9 @@
 import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, angebote: { stand: '', von: null, eintraege: [] } });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] } });
 const MAX_NOTIZEN = 20;
+export const MAX_GEPINNT = 4;
 export const DAUMEN = ['hoch', 'mittel', 'runter'];
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -152,6 +155,13 @@ export function bereinigen(roh) {
       if (n.length) s.notizen[rid] = n;
     }
   }
+  if (istObj(roh.gepinnt)) {
+    const p = Object.entries(roh.gepinnt)
+      .filter(([rid, e]) => SCHLUESSEL.test(rid) && istObj(e))
+      .map(([rid, e]) => [rid, { by: text(e.by, 40), at: text(e.at, 40) || '' }])
+      .sort((a, b) => b[1].at.localeCompare(a[1].at));
+    s.gepinnt = Object.fromEntries(p.slice(0, MAX_GEPINNT));
+  }
   if (istObj(roh.ki)) {
     const ki = [];
     for (const [id, e] of Object.entries(roh.ki)) {
@@ -205,6 +215,8 @@ export const opNotizWeg = (rid, id) => ({ typ: 'notizWeg', rid, id });
 export const opAngebote = (eintraege, by, at) => ({ typ: 'angebote', eintraege, by: by || null, at: at || jetzt() });
 export const opAngeboteDazu = (eintraege, by, at) => ({ typ: 'angeboteDazu', eintraege, by: by || null, at: at || jetzt() });
 export const opAngebotWeg = (id) => ({ typ: 'angebotWeg', id });
+/** Ein Rezept anpinnen („läuft gerade“) oder wieder lösen – für beide; das älteste fällt nach MAX_GEPINNT raus. */
+export const opAnpinnen = (rid, an, by) => ({ typ: 'anpinnen', rid, an: !!an, by: by || null, at: jetzt() });
 /** Daumen für ein Gericht setzen (wert null nimmt ihn weg) – gilt für beide. */
 export const opBewerten = (rid, wert, by) => ({ typ: 'bewerten', rid, wert: wert || null, by: by || null, at: jetzt() });
 
@@ -289,7 +301,17 @@ function aendere(s, op) {
     case 'kiWeg':
       if (istObj(s.ki)) delete s.ki[op.id];
       if (istObj(s.notizen)) delete s.notizen[op.id];
+      if (istObj(s.gepinnt)) delete s.gepinnt[op.id];
       return;
+    case 'anpinnen': {
+      if (!SCHLUESSEL.test(String(op.rid))) return;
+      if (!istObj(s.gepinnt)) s.gepinnt = {};
+      if (!op.an) { delete s.gepinnt[op.rid]; return; }
+      s.gepinnt[op.rid] = { by: op.by || null, at: op.at || jetzt() };
+      const alle = Object.entries(s.gepinnt).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)));
+      s.gepinnt = Object.fromEntries(alle.slice(0, MAX_GEPINNT));
+      return;
+    }
     case 'notiz': {
       if (!SCHLUESSEL.test(String(op.rid)) || !SCHLUESSEL.test(String(op.id)) || typeof op.text !== 'string' || !op.text.trim()) return;
       if (!istObj(s.notizen)) s.notizen = {};

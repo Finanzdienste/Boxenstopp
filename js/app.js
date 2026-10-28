@@ -13,7 +13,7 @@ import { app, $, ansicht, zeigeReiter, melde, lese } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, API } from './speicher.js';
 import { opZusammen } from './liste.js';
 import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
-import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, absendenRezepte, timerZeichnen, zuSchritt } from './ansicht-rezepte.js';
+import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
@@ -107,6 +107,8 @@ document.addEventListener('error', (ev) => {
 }, true);
 document.addEventListener('input', (ev) => { if (!eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
 document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target)) aenderungAngebote(ev.target); });
+// Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
+document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
 document.addEventListener('submit', (ev) => { if (!absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenRezepte(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */

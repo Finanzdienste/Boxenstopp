@@ -7,8 +7,7 @@
  */
 import { pruefer } from './hilfe.mjs';
 import {
-  leer, anwenden, bereinigen, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opNotiz, opNotizWeg,
-  opTeil, opTeilWeg, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opGekocht, opZusammen, opBewerten,
+  leer, anwenden, bereinigen, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opNotiz, opNotizWeg, opTeil, opTeilWeg, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opGekocht, opZusammen, opBewerten, opAnpinnen, MAX_GEPINNT, opKiWeg,
 } from '../js/liste.js';
 import { menge, ungefaehr, abteilung, esc, abweichung, tagKurz, heute } from '../js/format.js';
 import { nachBereichen, alsText } from '../js/bereiche.js';
@@ -104,6 +103,16 @@ const viele = anwenden(leer(), Array.from({ length: 25 }, (_, i) => opNotiz('chi
 check(viele.notizen.chili.length === 20 && viele.notizen.chili.at(-1).text === 'Notiz 24', 'höchstens 20 Notizen, die ältesten fallen raus');
 const nRoh = bereinigen({ notizen: { chili: [{ id: 'n-1', text: ' ok ', by: 'Amy' }, { id: 'kaputt id', text: 'x' }, { id: 'n-3', text: '' }, 'quatsch'], 'x/../y': [{ id: 'n', text: 'x' }] } });
 check(nRoh.notizen.chili.length === 1 && nRoh.notizen.chili[0].text === 'ok' && Object.keys(nRoh.notizen).length === 1, 'bereinigen: nur gültige Notizen und Rezepte');
+
+// --- Angepinnt („läuft gerade“), für beide
+const pin = anwenden(leer(), [opAnpinnen('chili', true, 'Tobi'), opAnpinnen('gyros', true, 'Amy')]);
+check(pin.gepinnt.chili.by === 'Tobi' && pin.gepinnt.gyros.by === 'Amy' && !!pin.gepinnt.chili.at, 'Anpinnen: mit Namen und Zeit');
+check(!anwenden(pin, opAnpinnen('chili', false, 'Amy')).gepinnt.chili && !!anwenden(pin, opAnpinnen('chili', false, 'Amy')).gepinnt.gyros, 'Lösen nimmt nur dieses Rezept weg');
+const vielePins = anwenden(leer(), ['a', 'b', 'c', 'd', 'e'].map((rid, i) => ({ ...opAnpinnen(rid, true, 'Tobi'), at: `2026-10-2${i}T10:00:00.000Z` })));
+check(Object.keys(vielePins.gepinnt).length === MAX_GEPINNT && !vielePins.gepinnt.a && !!vielePins.gepinnt.e, `höchstens ${MAX_GEPINNT} angepinnt, das älteste fällt raus`);
+check(!anwenden(anwenden(leer(), opAnpinnen('ki-abc123', true, 'Tobi')), opKiWeg('ki-abc123')).gepinnt['ki-abc123'], 'ein gelöschtes KI-Rezept ist auch nicht mehr angepinnt');
+const pRoh = bereinigen({ gepinnt: { chili: { by: 'Tobi', at: '2026-10-28T10:00:00.000Z' }, 'x/../y': { by: 'x' }, gyros: 'quatsch' } });
+check(Object.keys(pRoh.gepinnt).join() === 'chili' && pRoh.gepinnt.chili.by === 'Tobi' && JSON.stringify(bereinigen({ rev: 1, items: {} }).gepinnt) === '{}', 'bereinigen: nur gültige Rezepte; ältere Listen ohne gepinnt');
 
 // --- bereinigen: was aus GitHub kommt, kann alles sein
 const roh = { rev: 3, items: { 'ok-1': { name: '<b>Milch</b>', cat: 'kuehl', parts: { x: { q: 'viel' }, y: { t: '1 l', done: true } } }, 'kaputt/../x': { name: 'weg' }, 'leer-2': 5 }, cooked: { chili: { at: 'morgen' } } };

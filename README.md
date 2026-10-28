@@ -45,6 +45,18 @@ ruhiges Tempo zu Hause gerechnet, mit Waschen, Schälen und Abfall wegräumen
 Abschnitte und Gesamtzeit: Wartezeiten (`ruhe`, etwa Marinieren) laufen im
 Hintergrund weiter, „währenddessen“ kostet keine zusätzliche Zeit.
 
+### Im Rezept
+
+Oben neben „Alle Rezepte“ springt **Zum Rezept** direkt zur Zubereitung (und
+klappt sie auf, falls sie zu war). Jeder Bereich – Notizen, Zutaten,
+Zubereitung, Portionieren, Aufbewahren, Tipps – klappt mit einem Tipp auf die
+Überschrift zu und wieder auf; was zu ist, bleibt auf diesem Handy zu, auch
+im nächsten Rezept (localStorage). **Anpinnen** (bei „Heute gekocht“) markiert
+ein Rezept als „läuft gerade“: Es steht dann bei euch beiden ganz oben bei den
+Rezepten, mit Foto und dem Fortschritt beim Kochen („5 von 26 Schritten“ – die
+Haken dieses Handys), auf seiner Karte steht „Läuft gerade“. Höchstens vier,
+für beide in `liste.json` unter `gepinnt`.
+
 ### Kosten
 
 Jedes Rezept zeigt, was es ungefähr kostet – auf der Karte pro Box, im
@@ -349,6 +361,7 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
  "bewertung": { "chili": { "wert": "hoch", "by": "Amy", "at": "2026-10-26T19:10:00.000Z" } },
  "ki": { "ki-mh9x2k1a7f": { "r": { "name": "Hähnchen-Reispfanne mit Feta", "portionen": 8, "zutaten": […], "ablauf": […], "…": "…" }, "by": "Amy", "at": "…" } },
  "notizen": { "chili": [{ "id": "n-mh9x…", "text": "Nächstes Mal weniger Chili", "by": "Amy", "at": "…" }] },
+ "gepinnt": { "chili": { "by": "Tobi", "at": "2026-10-28T19:20:00.000Z" } },
  "angebote": { "stand": "…", "von": "Tobi", "eintraege": [{ "id": "a-mh9x…", "laden": "Aldi", "name": "Hähnchenbrustfilet", "preis": 7.49, "menge": 1, "einheit": "kg", "bis": "2026-11-01", "k": "haehnchenbrust" }] }
 }
 ```
@@ -362,7 +375,8 @@ Einrichten. `bewertung` hat pro Gericht einen Daumen (`hoch`, `mittel`,
 `runter`) – wer zuletzt drückt, überschreibt ihn für beide. Unter `ki` liegen
 die behaltenen Rezepte aus der Resteverwertung im KI-Format (ki-rezept.js);
 ihre Zutaten stehen auf der Liste unter dem Katalog-Schlüssel oder als
-`ki-<zutat>`. `angebote` sind die Angebote der Woche (höchstens 120), `k`
+`ki-<zutat>`. `gepinnt` sind die Rezepte, die gerade laufen (höchstens vier,
+das älteste fällt raus). `angebote` sind die Angebote der Woche (höchstens 120), `k`
 ist der Katalog-Schlüssel der Zutat, wenn es eine ist. Von Hand bearbeiten
 geht, die App bereinigt beim Lesen alles, was nicht passt.
 
