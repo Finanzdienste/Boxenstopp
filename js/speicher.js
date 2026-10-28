@@ -51,6 +51,25 @@ const weg = (k) => { try { localStorage.removeItem(k); } catch { /* egal */ } };
 const warte = (ms) => new Promise((ok) => setTimeout(ok, ms));
 const alsListe = (op) => (Array.isArray(op) ? op : [op]);
 
+/**
+ * Eine weitere Datei aus dem Daten-Repo lesen (z. B. angebote-privat.json) –
+ * nur lesen, mit demselben Schlüssel. Gibt das JSON zurück oder null, wenn es
+ * die Datei (noch) nicht gibt, der Schlüssel nicht passt oder kein Netz ist.
+ */
+export async function privatLesen(pfad, { token, api = API, ort = DATEN } = {}) {
+  if (!token) return null;
+  try {
+    const r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/contents/${pfad}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.raw+json' },
+      cache: 'no-store',
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
+}
+
 /** Was nur auf diesem Handy steht – zum Übernehmen in die gemeinsame Liste. */
 export const lokalerStand = () => bereinigen(lese(LOKAL, null));
 export function lokalLoeschen() { weg(LOKAL); }

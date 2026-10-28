@@ -31,7 +31,7 @@ export const MAX_GESPEICHERT = 12;
  * nicht – die KI kennt die Regel, das hier ist das Netz darunter. „ohne …“
  * zählt nicht („Currypaste ohne Garnelen“).
  */
-export const VERBOTEN = /schwein|speck|schinken|bacon|salami|chorizo|pancetta|guanciale|mortadella|leberkäse|leberwurst|mett\b|bratwurst|wiener würstchen|kassler|kasseler|gelatine|gemischtes hack|hackfleisch,? gemischt|halb und halb|fisch|lachs|thunfisch|forelle|kabeljau|seelachs|garnele|shrimp|krabbe|sardelle|anchovi|muschel|tintenfisch|calamar|putenhack|puten-hack|hüttenkäse/i;
+export const VERBOTEN = /schwein|speck|schinken|bacon|salami|chorizo|pancetta|guanciale|mortadella|leberkäse|leberwurst|mett\b|bratwurst|wiener würstchen|kassler|kasseler|gelatine|gemischtes hack|hackfleisch,? gemischt|halb und halb|fisch|lachs|thunfisch|forelle|kabeljau|seelachs|garnele|shrimp|krabbe|sardelle|anchovi|muschel|tintenfisch|calamar|puten.?hack|hack\w* (?:von|aus) der pute|hüttenkäse/i;
 const ohneOhne = (s) => String(s).replace(/ohne [\wäöüß-]+(?: (?:und|oder) [\wäöüß-]+)?/gi, '');
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);

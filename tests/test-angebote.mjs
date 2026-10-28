@@ -7,10 +7,10 @@ import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
-import { zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE } from '../js/angebote.js';
+import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE } from '../js/angebote.js';
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg } from '../js/liste.js';
 import { systemText, nutzerText } from '../js/ki.js';
-import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, mitAusweichen, kalenderwoche } from '../werkzeug/angebote.mjs';
+import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, mitAusweichen, kaufdaLesen, kaufdaDoppelt, kaufdaMenge, kalenderwoche } from '../werkzeug/angebote.mjs';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -109,6 +109,33 @@ check(kalenderwoche(bezug) === '2026-44' && kalenderwoche(new Date('2027-01-01T1
 
 const lp = lidlProspekte(fix('lidl-prospekte.html'));
 check(lp.length === 2 && lp[0].von === '2026-10-26' && lp[0].bis === '2026-10-31' && lp[1].von === '2026-11-02' && lp[0].id.startsWith('aktionsprospekt-26-10-2026'), `Lidl: Prospekte mit Datum aus der Übersicht, doppelte einmal (${lp.map((p) => p.id).join(', ')})`);
+
+// --- kaufDA: Rewe, Edeka, Netto von einer Stichwortseite (Testseite im Aufbau von kaufDA, Angebote ausgedacht)
+const kd = kaufdaLesen(fix('kaufda-stichwort.html'));
+const kdNamen = kd.map((a) => `${a.laden}: ${a.name}`);
+check(kd.length && kd.every((a) => ['Rewe', 'Edeka', 'Netto'].includes(a.laden)) && !kdNamen.some((n) => /Musterhof/i.test(n)), `kaufDA: nur Rewe, Edeka, Netto – Penny haben wir direkt (${kdNamen.join(' · ')})`);
+check(!kdNamen.some((n) => /gemischt|Schweine|Aufschnitt|Puten Hack/.test(n)) && kdNamen.includes('Rewe: Rinder-Hackfleisch') && kdNamen.includes('Edeka: Hofgut Muster Rinder-Hackfleisch'), 'kaufDA: Schwein (auch nur „vom Rind und Schwein“ in der Beschreibung), Putenhack und Aufschnitt bleiben draußen');
+const rh = kd.find((a) => a.laden === 'Rewe' && a.name === 'Rinder-Hackfleisch');
+check(rh && rh.preis === 1.49 && rh.menge === 100 && rh.einheit === 'g' && rh.k === 'rinderhack' && rh.von === '2026-10-26' && rh.bis === '2026-10-31', `kaufDA: Preis je 100 g, Schlüssel, Gültigkeit in Berliner Tagen (${JSON.stringify(rh)})`);
+const ed = kd.find((a) => a.laden === 'Edeka' && /Mastortehof/.test(a.name));
+check(ed && ed.name === 'Mastortehof Food Group Frisches Hähnchenbrustfilet' && ed.k === 'haehnchenbrust' && ed.bis === '2026-10-30', `kaufDA: Marke in Großbuchstaben schön geschrieben, „…torte…“ im Markennamen ist keine Torte, Edeka-Woche endet Freitag (${ed?.name}, ${ed?.k}, ${ed?.bis})`);
+const inn = kd.find((a) => a.laden === 'Netto' && /Innenfilet/.test(a.name));
+check(inn && inn.menge === 400 && inn.einheit === 'g' && inn.k === 'haehnchenbrust', `kaufDA: „bis zu 23g Protein pro 100g 400 g“ → 400 g (${inn?.menge} ${inn?.einheit})`);
+check(!kd.some((a) => /Zitrone/.test(a.name)), 'kaufDA: ohne Preis (0) kein Angebot');
+const kdN = (n) => kd.find((a) => a.name === n);
+check(kdN('Musterland Beste Butter')?.k === 'butter' && kdN('Speise-Kartoffeln')?.menge === 5 && kdN('Speise-Kartoffeln')?.einheit === 'kg' && kdN('Speise-Kartoffeln')?.k === 'kartoffeln', `kaufDA: Marke nicht doppelt, Anführungszeichen weg, Titel in Großbuchstaben normal (${kd.map((a) => a.name).slice(-8).join(' · ')})`);
+check(kdN('Hausmarke Kidneybohnen')?.menge === 400 && kdN('Hausmarke Kidneybohnen')?.k === 'kidney' && kdN('Süßkartoffeln')?.menge === 1 && kdN('Süßkartoffeln')?.einheit === 'Stk', 'kaufDA: die verkaufte Menge ist die letzte (Abtropfgewicht nicht); „St.“ → 1 Stück');
+check(!kd.some((a) => /Zuckerdose|Kräuterschale/.test(a.name)), 'kaufDA: was kaufDA nicht unter Lebensmittel führt, und Deko fliegen raus');
+check(kdN('Holsteiner Muster Putenbrustfilet')?.k === '' && kdN('Rewe Beste Wahl Rote Speisezwiebeln')?.k === 'rote-zwiebeln' && kdN('Mustermühle Weizenmehl')?.k === 'mehl' && kdN('Mustermühle Weizenmehl')?.menge === 1, 'kaufDA: geräuchert ist keine Rezeptzutat; rote Speisezwiebeln, Weizenmehl erkannt');
+check(['Teilstück 1000-g-Pckg.', '4 x 115-g-Becher-Pckg.', '1,5-kg-Btl.', 'versch. Sorten 200 - 250 g', 'ca. 2,5 kg 1 kg', '450 g + 50 g gratis = 500 g', 'XXL 15 Stück', '1 L'].map((x) => { const r = kaufdaMenge(x); return `${r.menge} ${r.einheit}`; }).join(', ') === '1000 g, 460 g, 1.5 kg, 200 g, 1 kg, 500 g, 15 Stk, 1 l', `kaufDA: Packungen (${['Teilstück 1000-g-Pckg.', '4 x 115-g-Becher-Pckg.', '1,5-kg-Btl.', 'versch. Sorten 200 - 250 g', 'ca. 2,5 kg 1 kg', '450 g + 50 g gratis = 500 g', 'XXL 15 Stück', '1 L'].map((x) => { const r = kaufdaMenge(x); return `${r.menge} ${r.einheit}`; }).join(', ')})`);
+{
+  const liste = [];
+  let doppelt = 0;
+  for (const a of kd) { if (kaufdaDoppelt(liste, a)) { doppelt++; continue; } liste.push(a); }
+  const hb = liste.filter((a) => a.laden === 'Rewe' && /Brustfilet/.test(a.name));
+  check(doppelt >= 3 && hb.length === 1 && hb[0].menge === 1000 && liste.filter((a) => a.laden === 'Edeka' && /Rinder-Hack/.test(a.name)).length === 1, `kaufDA: dasselbe Angebot aus den Prospektvarianten nur einmal (${doppelt} doppelte, Hähnchen-Brustfilet ${hb.length}×)`);
+}
+check(istTabu('Puten Hackfleisch') && istTabu('Putenhack') && istTabu('Hackfleisch von der Pute') && !istTabu('Putenbrust') && !istTabu('Puten-Geschnetzeltes'), 'Putenhack ist tabu, Putenbrust nicht');
 
 // --- Lidl: welche Seiten gelesen werden, wie ein Stapel gelesen wird
 const seite = (number, ...arten) => ({ number, image: `https://bild/${number}.jpg`, links: arten.map((displayType) => ({ displayType })) });

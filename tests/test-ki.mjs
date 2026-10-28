@@ -453,6 +453,30 @@ check(await bis(async () => (await t.locator('[data-a-laden="Lidl"][aria-pressed
 check(await bis(async () => (await a.locator('[data-a-laden=""][aria-pressed="true"]').count()) === 1), 'Amys Handy hat seine eigene Wahl (Alle)');
 await t.click('[data-a-laden=""]');
 check((await t.locator('#a-title').innerText()) === 'Angebote der Woche' && (await t.locator('#a-auto .a-grp').count()) === 3 && (await t.locator('#a-liste .a-item').count()) === 6, '„Alle“: wieder alle Läden');
+
+// --- Rewe & Co. aus dem privaten Daten-Repo (angebote-privat.json, kaufDA erlaubt nur private Nutzung)
+const KAUFDA_HINWEIS = 'über kaufDA, gezielt nach 40 Stichwörtern für Rezeptzutaten gesucht – nicht das ganze Prospekt';
+gh.zustand.dateien['angebote-privat.json'] = JSON.stringify({
+  stand: '2026-10-28T05:47:00.000Z', woche: '2026-44', gesperrt: [],
+  quellen: [{ laden: 'Rewe', ok: true, anzahl: 2, hinweis: KAUFDA_HINWEIS, stand: '2026-10-28T05:47:00.000Z' }, { laden: 'Edeka', ok: true, anzahl: 1, hinweis: KAUFDA_HINWEIS, stand: '2026-10-28T05:47:00.000Z' }],
+  angebote: [
+    { id: 'a-rewe001', laden: 'Rewe', name: 'Hähnchen-Brustfilet', preis: 8.99, menge: 1000, einheit: 'g', von: '2026-10-26', bis: '2099-12-31', k: 'haehnchenbrust' },
+    { id: 'a-rewe002', laden: 'Rewe', name: 'Rispentomaten', preis: 1.79, menge: 1, einheit: 'kg', von: '2026-10-26', bis: '2099-12-31', k: 'tomaten' },
+    { id: 'a-edek001', laden: 'Edeka', name: 'Rinder-Hackfleisch', preis: 1.19, menge: 100, einheit: 'g', von: '2026-10-26', bis: '2099-12-31', k: 'rinderhack' },
+  ],
+});
+await t.reload({ waitUntil: 'load' });
+await t.waitForFunction(() => document.querySelector('.tab[data-tab="angebote"]'));
+await t.click('.tab[data-tab="angebote"]');
+check(await bis(async () => (await t.locator('[data-a-laden="Rewe"]').count()) === 1) && gh.zustand.lesen['angebote-privat.json'] >= 1, 'mit dem Schlüssel holt die App angebote-privat.json aus dem Daten-Repo: Rewe steht zur Wahl');
+const chipsPrivat = (await t.locator('.a-laeden-chips .chip').allInnerTexts()).map((x) => x.replace(/\s+/g, ' ').trim());
+check(chipsPrivat.join(' | ') === 'Alle 16 | Aldi 5 | Lidl 4 | Rewe 2 | Kaufland 2 | Penny 2 | Edeka 1', `Läden: Rewe und Edeka dazu, in fester Reihenfolge (${chipsPrivat.join(' | ')})`);
+const standPrivat = await t.locator('#a-auto .a-stand').innerText();
+check(standPrivat.includes('Rewe 2') && standPrivat.includes('Netto: sperren automatische Abrufe') && !/Rewe, |Edeka, |, Edeka/.test(standPrivat.split('sperren')[0].split('\n').at(-1)) && (await t.locator('.a-kaufda').innerText()).includes('Rewe, Edeka: über kaufDA gezielt nach euren Rezeptzutaten gesucht'), 'Quellen: Rewe und Edeka nicht mehr „gesperrt“, nur noch Netto; Hinweis, dass kaufDA nur die Rezeptzutaten liefert');
+check((await t.locator('.a-lead').innerText()).includes('Aldi, Lidl, Rewe, Kaufland, Penny und Edeka'), 'der Text oben nennt die Läden aus beiden Abrufen');
+await t.click('[data-a-laden="Rewe"]');
+check((await t.locator('#a-title').innerText()) === 'Angebote bei Rewe' && (await t.locator('#a-auto .a-item').count()) === 2 && (await t.locator('#a-passt-liste li').count()) >= 1, 'Rewe gewählt: die zwei Rewe-Angebote und passende Rezepte');
+await t.click('[data-a-laden=""]');
 await t.click('.tab[data-tab="rezepte"]');
 
 // --- löschen und rückgängig
@@ -462,6 +486,17 @@ await t.click('[data-act="ki-loeschen"]');
 check(await bis(() => !gh.liste()?.ki?.[rid] && !Object.values(gh.liste().items).some((d) => d.parts?.[rid])), 'Löschen nimmt das Rezept und seine Zeilen auf der Liste weg');
 await t.click('#toast button');
 check(await bis(() => !!gh.liste()?.ki?.[rid] && Object.values(gh.liste().items).filter((d) => d.parts?.[rid]).length === 4), 'Rückgängig bringt beides zurück');
+
+// --- Amy sieht Rewe auch; nach dem Trennen sind die privaten Angebote von ihrem Handy weg
+await a.reload({ waitUntil: 'load' });
+await a.waitForFunction(() => document.querySelector('.tab[data-tab="angebote"]'));
+await a.click('.tab[data-tab="angebote"]');
+check(await bis(async () => (await a.locator('[data-a-laden="Rewe"]').count()) === 1), 'Amy sieht Rewe auch (mit ihrem Schlüssel)');
+await a.click('.tab[data-tab="einkauf"]');
+await a.click('[data-act="z-trennen"]');
+await a.click('[data-act="z-trennen-ja"]');
+await a.click('.tab[data-tab="angebote"]');
+check(await bis(async () => (await a.locator('[data-a-laden="Rewe"]').count()) === 0) && await a.evaluate(() => localStorage.getItem('boxenstopp.angebote.privat.v1') === null) && (await a.locator('.a-quelle-aus', { hasText: 'sperren' }).innerText()).startsWith('Rewe, Netto, Edeka'), 'nach dem Trennen sind Rewe & Co. weg – auch aus dem Speicher –, und Rewe steht wieder als gesperrt da');
 
 check(await t.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'kein seitliches Scrollen');
 for (const h of [tobi, amy]) check(h.fehler.length === 0, `keine Fehler in der Konsole${h.fehler.length ? `: ${h.fehler.slice(0, 3).join(' | ')}` : ''}`);

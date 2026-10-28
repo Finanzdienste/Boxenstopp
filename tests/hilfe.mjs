@@ -52,7 +52,8 @@ const CORS = {
 };
 
 export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste', repo = 'Boxenstopp-Daten', pfad = 'liste.json' } = {}) {
-  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false };
+  // dateien: weitere Dateien im Repo, die die App nur liest (z. B. angebote-privat.json) – Pfad → Inhalt (Text)
+  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, lesen: {} };
   const basis = `https://api.github.com/repos/${owner}/${repo}`;
   let alt = null; // für staleEinmal: die Fassung vor dem letzten Schreiben
 
@@ -64,6 +65,14 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
     if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
     if (req.headers().authorization !== `Bearer ${schluessel}`) return antwort(401, { message: 'Bad credentials' });
     if (url === basis && req.method() === 'GET') return antwort(200, { full_name: `${owner}/${repo}`, private: true });
+    const weitere = url.startsWith(`${basis}/contents/`) ? decodeURIComponent(url.slice(`${basis}/contents/`.length)) : '';
+    if (weitere && weitere !== pfad && req.method() === 'GET') {
+      zustand.lesen[weitere] = (zustand.lesen[weitere] || 0) + 1;
+      const inhalt = zustand.dateien[weitere];
+      if (inhalt === undefined) return antwort(404, { message: 'Not Found' });
+      if (/raw/.test(req.headers().accept || '')) return r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/vnd.github.raw+json; charset=utf-8' }, body: inhalt });
+      return antwort(200, { sha: 'weitere', encoding: 'base64', content: Buffer.from(inhalt).toString('base64') });
+    }
     if (url === `${basis}/contents/${pfad}`) {
       if (req.method() === 'GET') {
         zustand.gets++;

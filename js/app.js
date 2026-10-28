@@ -10,7 +10,7 @@
  * __api (statt https://api.github.com) und __takt (Abgleich in ms).
  */
 import { app, $, ansicht, zeigeReiter, melde, lese } from './kern.js';
-import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, API } from './speicher.js';
+import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, API } from './speicher.js';
 import { opZusammen } from './liste.js';
 import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, absendenRezepte, timerZeichnen, zuSchritt } from './ansicht-rezepte.js';
@@ -19,9 +19,14 @@ import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMi
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
-import { angeboteZeichnen, angeboteAutoSetzen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
+import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
 
 const apiBasis = () => lese('__api', null) || API;
+/** Rewe, Edeka, Netto (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
+const privateAngebote = () => {
+  if (!app.zugang?.token) return;
+  privatLesen('angebote-privat.json', { token: app.zugang.token, api: apiBasis() }).then((a) => { if (a) angeboteAutoSetzen(a, { privat: true }); });
+};
 const takt = () => Number(lese('__takt', 0)) || 8000;
 
 function beiAenderung(stand) {
@@ -58,6 +63,7 @@ app.verbinden = async (token, name) => {
   if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length)) app.aendern(opZusammen(bisher.items, bisher.ki));
   lokalLoeschen();
   statusZeichnen();
+  privateAngebote();
   return 'ok';
 };
 
@@ -66,6 +72,7 @@ app.trennen = () => {
   githubVergessen();
   app.zugang = null;
   app.listeDa = false;
+  angebotePrivatVergessen();
   nimmSpeicher(lokal());
   zugangZeichnen();
   melde('Getrennt. Die Liste bleibt in GitHub, hier ist sie jetzt leer.');
@@ -148,6 +155,7 @@ async function start() {
   app.zugang = ladeZugang();
   if (app.zugang) nimmSpeicher(github({ ...app.zugang, api: apiBasis(), takt: takt() }));
   else nimmSpeicher(lokal());
+  privateAngebote();
 
   if (ausLink && ausLink !== app.zugang?.token) formularMitSchluessel(ausLink);
   else zugangZeichnen();

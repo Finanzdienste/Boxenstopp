@@ -4,8 +4,10 @@
  * montags und donnerstags als GitHub Action (.github/workflows/angebote.yml),
  * zur Not auch von Hand:
  *
- *     node werkzeug/angebote.mjs                # alle Quellen
+ *     node werkzeug/angebote.mjs                # Aldi, Lidl, Kaufland, Penny → daten/angebote.json
  *     node werkzeug/angebote.mjs aldi penny     # nur diese
+ *     KAUFDA_STADT=… node werkzeug/angebote.mjs --privat --ziel pfad/angebote-privat.json
+ *                                               # Rewe, Edeka, Netto über kaufDA → privat
  *
  * Quellen – nur öffentliche Seiten, die ein normaler Abruf ohne Tricks
  * bekommt (eine ehrliche Kennung, zweimal die Woche, robots.txt beachtet):
@@ -21,8 +23,21 @@
  *             Schlüssel in GEMINI_KEY (bei GitHub als Secret). Ohne Schlüssel
  *             fällt Lidl aus, der Rest läuft.
  *
- *   Rewe, Netto und Edeka sperren automatische Abrufe (403 bzw. eine
- *   Scherzantwort) – die bleiben draußen, das steht auch in der App.
+ *   Rewe, Edeka, Netto  Die eigenen Seiten sperren automatische Abrufe (403
+ *             bzw. eine Scherzantwort). Ihre Angebote stehen aber bei kaufDA
+ *             (Bonial, der Prospektdienst der Händler) auf öffentlichen
+ *             Seiten je Stichwort und Stadt – mit Produkt, Marke, Preis,
+ *             Packung und Gültigkeit; die robots.txt erlaubt es (Crawl-Delay
+ *             2 s). Je Seite stehen bis zu 16 Angebote, darum fragt der Lauf
+ *             gezielt die Stichwörter der Rezeptzutaten ab (KAUFDA_WORTE),
+ *             für die Stadt in KAUFDA_STADT.
+ *
+ *             kaufDA erlaubt die Nutzung nur privat, nicht das Veröffentlichen
+ *             (AGB § 3 e). Darum ist das ein eigener Lauf (--privat), und
+ *             seine Datei liegt nur im privaten Daten-Repo neben liste.json –
+ *             die App liest sie dort mit ihrem Schlüssel. Ins öffentliche
+ *             daten/angebote.json kommt nichts davon, die Stadt steht auch
+ *             nicht im Code.
  *
  * Was nicht zum Kochen taugt (Getränke, Süßes, Drogerie), fliegt raus, ebenso
  * Schwein und Fisch (ki-rezept.js VERBOTEN). Jedes Angebot bekommt, wenn es
@@ -37,12 +52,15 @@ import { ANBIETER, kiFehler, artVonStatus } from '../js/ki.js';
 
 const HIER = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HIER, '..');
-const ZIEL = path.join(ROOT, 'daten', 'angebote.json');
+const ARGS = process.argv.slice(2);
+const zielBei = ARGS.indexOf('--ziel');
+const PRIVAT_LAUF = ARGS.includes('--privat');
+const ZIEL = zielBei >= 0 && ARGS[zielBei + 1] ? path.resolve(ARGS[zielBei + 1]) : PRIVAT_LAUF ? path.resolve('angebote-privat.json') : path.join(ROOT, 'daten', 'angebote.json');
 const UA = 'Boxenstopp-Angebote/1.0 (+https://github.com/Finanzdienste/Boxenstopp)';
 const KATALOG = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8')).katalog;
 const GEMINI_KEY = process.env.GEMINI_KEY || '';
 const LIDL_MAX = Number(process.env.LIDL_MAX) || 0; // Probelauf: höchstens so viele Lidl-Seiten
-const nur = process.argv.slice(2).map((s) => s.toLowerCase());
+const nur = ARGS.filter((s, i) => !s.startsWith('--') && !(zielBei >= 0 && i === zielBei + 1)).map((s) => s.toLowerCase());
 const will = (q) => !nur.length || nur.includes(q);
 
 /* ------------------------------------------------------------ Hilfen */
@@ -95,7 +113,7 @@ const entities = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&quot;/g
 const zahl = (s) => { const m = String(s || '').replace(',', '.').match(/\d+(?:\.\d+)?/); return m ? Number(m[0]) : NaN; };
 
 // Was nicht in den Topf gehört – Getränke, Süßes, Drogerie, Tierbedarf.
-const NICHT_KOCHEN = /\b(?:bier|pils|weizenbier|wein|sekt|prosecco|spirituos|wodka|vodka|whisk|rum\b|likör|gin\b|cola|limo|energy|mineralwasser|wasser|saft(?!ig)|nektar|schorle|kaffee(?!sahne)|espresso|cappuccino|tee\b|kakao(?!pulver)|schokolade|schoko|praline|bonbon|dragee|kaudragee|lutscher|fruchtgummi|gummi|kaugummi|keks|cookie|chips|cracker|riegel|eis\b|eiscreme|speiseeis|lebkuchen|stollen|spekulatius|dominostein|marzipan|kuchen|torte|waffel|müsli|cerealien|flakes|zigarett|tabak|wasch|spül|windel|zahn|shampoo|dusch|deo\b|kerze|batterie|toiletten|küchenrolle|müll|taschentuch|lotion|tablette|kapsel|vitamin|katze|hund|tier|futter|streu|blume|pflanze|strauß|rose\b|tulpe|orchidee|pizza|fertiggericht|nugget|knusperchen|cordon bleu|burger|pommes|frikadelle|bratwurst|wiener|würstchen|salami|schinken|leberkäse|mett|pastete|aufschnitt|delikatess|dulano|brotaufstrich|brot\b|brötchen|toast|baguette|croissant|pudding|dessert|knabber|erdnussflips|popcorn|studentenfutter|datteln|feigen|trockenfr|pangasius|tilapia|hering|matjes|scholle|dorsch|sardine|makrele|seelachs|zander|mentos|pringles|lay['’]?s|chio|funny|lorenz|haribo|milka|ferrero|kinder\b|katjes|ritter sport|lindt|toblerone|snickers|mars\b|twix|kitkat|oreo|leibniz|bahlsen|jacobs|dallmayr|tchibo|melitta|nescaf|coca|fanta|sprite|pepsi|red bull|monster|volvic|evian|gerolsteiner|krombacher|beck['’]?s|warsteiner|bitburger|veltins|jever|paulaner|erdinger|franziskaner|radeberger|heineken|corona|guinness|budweiser|tyskie|karamalz)/i;
+const NICHT_KOCHEN = /\b(?:bier|pils|weizenbier|wein|sekt|prosecco|spirituos|wodka|vodka|whisk|rum\b|likör|gin\b|cola|limo|energy|mineralwasser|wasser|saft(?!ig)|nektar|schorle|kaffee(?!sahne)|espresso|cappuccino|tee\b|kakao(?!pulver)|schokolade|schoko|praline|bonbon|dragee|kaudragee|lutscher|fruchtgummi|gummi|kaugummi|keks|cookie|chips|cracker|riegel|eis\b|eiscreme|speiseeis|lebkuchen|stollen|spekulatius|dominostein|marzipan|kuchen|torte|waffel|müsli|cerealien|flakes|zigarett|tabak|wasch|spül|windel|zahn|shampoo|dusch|deo\b|kerze|batterie|toiletten|küchenrolle|müll|taschentuch|lotion|tablette|kapsel|vitamin|katze|hund|tier|futter|streu|blume|pflanze|strauß|rose\b|tulpe|orchidee|pizza|fertiggericht|nugget|knusperchen|cordon bleu|burger|pommes|frikadelle|bratwurst|wiener|würstchen|salami|schinken|leberkäse|mett|pastete|aufschnitt|delikatess|dulano|risbellis|reiswaffel|snacks?\b|käsesnack|drink\b|actimel|fix\b|strudel|laugen|nudelsuppe|nutella|nuss-nugat|knoppers|tupperware|salatsauce|dressing|keramik|dekoration|bepflanzt|reise\b|rundreise|kombireise|flugreise|busreise|urlaub|hotel|kreuzfahrt|brotaufstrich|brot\b|brötchen|toast|baguette|croissant|pudding|dessert|knabber|erdnussflips|popcorn|studentenfutter|datteln|feigen|trockenfr|pangasius|tilapia|hering|matjes|scholle|dorsch|sardine|makrele|seelachs|zander|mentos|pringles|lay['’]?s|chio|funny|lorenz|haribo|milka|ferrero|kinder\b|katjes|ritter sport|lindt|toblerone|snickers|mars\b|twix|kitkat|oreo|leibniz|bahlsen|jacobs|dallmayr|tchibo|melitta|nescaf|coca|fanta|sprite|pepsi|red bull|monster|volvic|evian|gerolsteiner|krombacher|beck['’]?s|warsteiner|bitburger|veltins|jever|paulaner|erdinger|franziskaner|radeberger|heineken|corona|guinness|budweiser|tyskie|karamalz)/i;
 const istZumKochen = (name) => !NICHT_KOCHEN.test(name) && !istTabu(name);
 
 /* ------------------------------------------------------------- Aldi */
@@ -494,33 +512,167 @@ async function lidl(alt) {
   return { angebote, hinweis: teile.join(', '), modell: modellGenutzt };
 }
 
+/* ------------------------------------------------------------ kaufDA */
+
+// Die Stadt kommt aus der Umgebung des privaten Laufs – sie steht bewusst nicht im öffentlichen Code.
+const KAUFDA_STADT = process.env.KAUFDA_STADT || '';
+const KAUFDA_PAUSE = 4000; // robots.txt: Crawl-Delay 2 – wir lassen doppelt so viel Luft
+const KAUFDA_NOCHMAL = 30000; // antwortet eine Seite nicht (503), einmal so lange warten
+// Welche Händler bei kaufDA wie heißen – nur die, die wir sonst nicht bekommen
+const KAUFDA_LAEDEN = { REWE: 'Rewe', EDEKA: 'Edeka', 'EDEKA center': 'Edeka', 'E center': 'Edeka', 'EDEKA Frischemarkt': 'Edeka', 'E neukauf': 'Edeka', 'E aktiv markt': 'Edeka', 'Netto Marken-Discount': 'Netto' };
+// Die Stichwörter (so, wie kaufDA sie in der Adresse schreibt: ae/oe/ue). Nur Wörter, zu denen
+// kaufDA eine Seite hat (Stand Oktober 2026) – andere geben 404. Je Seite bis zu 16 Angebote.
+const KAUFDA_WORTE = [
+  'Haehnchenbrust', 'Haehnchen', 'Huhn', 'Gefluegel', 'Pute', 'Putenbrust', 'Hackfleisch', 'Rindfleisch', 'Gulasch', 'Fleisch',
+  'Gemuese', 'Paprika', 'Zucchini', 'Tomaten', 'Kartoffeln', 'Champignons', 'Blumenkohl', 'Zitronen', 'Obst', 'Aepfel',
+  'Milch', 'Joghurt', 'Quark', 'Sahne', 'Butter', 'Eier', 'Kaese', 'Mozzarella', 'Feta',
+  'Reis', 'Nudeln', 'Pasta', 'Bohnen', 'Mais', 'Nuesse', 'Mehl', 'Honig', 'Olivenoel',
+];
+
+const tagBerlin = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' }); };
+
+/*
+ * Die Packung aus einer kaufDA-Beschreibung. Die verkaufte Menge steht dort
+ * meist am Ende („Abtropfg.: 265 g 400 g“, „ca. 2,5 kg 1 kg“, „450 g + 50 g
+ * gratis = 500 g“) – also die letzte Mengenangabe; ohne eine „St.“ → 1 Stück.
+ */
+export function kaufdaMenge(text) {
+  const t = String(text || '');
+  let letzte = null;
+  for (const m of t.matchAll(/(?:\d+\s*[x×]\s*)?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?\s*-?\s*(?:kg|g|ml|l)\b/gi)) letzte = m[0];
+  if (letzte) return mengeAus(letzte);
+  const r = mengeAus(t);
+  if (!r.menge && /\bst\.?$|\bstück\b/i.test(t.trim())) return { menge: 1, einheit: 'Stk' };
+  return r;
+}
+
+/** Ein Titel ganz in Großbuchstaben („SPEISE-KARTOFFELN“) wie ein normaler Name. */
+const kaufdaTitel = (t) => { const s = entities(t).replace(/[„“”"]/g, '').trim(); return /[a-zäöüß]/.test(s) ? s : schoeneMarke(s); };
+
+/** Die Angebote einer kaufDA-Stichwortseite (Rewe, Edeka, Netto – die anderen haben wir direkt). */
+export function kaufdaLesen(html, laeden = KAUFDA_LAEDEN) {
+  const m = html.match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s);
+  if (!m) throw new Error('kein __NEXT_DATA__');
+  const items = JSON.parse(m[1])?.props?.pageProps?.pageInformation?.offers?.main?.items || [];
+  const aus = [];
+  for (const it of items) {
+    const laden = laeden[it.publisherName];
+    if (!laden || it.type !== 'OFFER') continue;
+    // Nur, was kaufDA (auch) unter Lebensmittel führt – keine Reisen, Dosen zum Aufbewahren, Tierfutter
+    const pfade = Array.isArray(it.categoryPaths) ? it.categoryPaths : [];
+    if (pfade.length && !pfade.some((p) => p?.[0]?.name === 'Lebensmittel und Getränke')) continue;
+    const titel = kaufdaTitel(it.title || '');
+    const marke = schoeneMarke(entities(it.brand || '').replace(/[„“”"]/g, ''));
+    const name = marke && !titel.toLowerCase().includes(marke.toLowerCase()) ? `${marke} ${titel}` : titel;
+    // „bis zu 23g Protein pro 100g 400 g“: die Nährwert-Floskel darf nicht als Packung gelten
+    const beschreibung = entities(it.description || '').replace(/\d+\s?g\s+(?:protein|eiweiß)\s+pro\s+\d+\s?g/gi, ' ');
+    const preis = Number(it.prices?.mainPrice);
+    if (!name || !(preis > 0) || !istZumKochen(`${name} ${beschreibung}`)) continue;
+    const { menge, einheit } = kaufdaMenge(beschreibung);
+    // Geräuchert, gegart, paniert … steht oft nur in der Beschreibung – dann ist es keine Rezeptzutat
+    const k = /geräuchert|gegart|gekocht|paniert|mariniert|gewürzt|gegrillt/i.test(beschreibung) ? '' : schluesselRaten(name, KATALOG);
+    aus.push({ laden, name, preis, menge, einheit, von: tagBerlin(it.validFrom), bis: tagBerlin(it.validUntil), k, kern: kaufdaKern(it.title) });
+  }
+  return aus;
+}
+
+/** Der Kern eines Produktnamens, um dasselbe Angebot aus den Prospektvarianten zu erkennen („Frisches Hähnchen-Brustfilet“ ≈ „Hähnchen-Brustfilet“). */
+const kaufdaKern = (titel) => String(titel || '').toLowerCase().replace(/frische[sr]?\b|\bbio\b|original|\bje\b/g, '').replace(/[^a-zäöüß]/g, '');
+
+/** Dasselbe Angebot schon da? Gleicher Laden, Preis und Packung, und der eine Name steckt im anderen. */
+export const kaufdaDoppelt = (liste, a) => liste.some((b) => b.laden === a.laden && b.preis === a.preis && (b.menge || null) === (a.menge || null) && (b.einheit || '') === (a.einheit || '') && a.kern && b.kern && (a.kern.includes(b.kern) || b.kern.includes(a.kern)));
+
+/*
+ * Rewe, Edeka und Netto über kaufDA: je Stichwort eine Seite, Dubletten einmal.
+ * Gemächlich (4 s zwischen den Seiten). Antwortet eine Seite nicht, einmal
+ * nach 30 s nochmal, sonst weiter mit dem nächsten Wort; dreimal hintereinander
+ * nichts heißt: kaufDA will gerade nicht – dann aufhören und behalten, was da ist.
+ */
+async function kaufda() {
+  if (!KAUFDA_STADT) throw new Error('KAUFDA_STADT fehlt');
+  const angebote = [];
+  const gesehen = new Set();
+  let seiten = 0;
+  let fehlerFolge = 0;
+  let abgebrochen = false;
+  const holeWort = async (wort) => {
+    const url = `https://www.kaufda.de/${encodeURIComponent(KAUFDA_STADT)}/Angebote/${wort}`;
+    try {
+      return await hole(url);
+    } catch (e) {
+      if (/HTTP 404/.test(e.message)) return null; // zu dem Wort gibt es gerade keine Seite
+      await pause(KAUFDA_NOCHMAL);
+      return hole(url);
+    }
+  };
+  for (const wort of KAUFDA_WORTE) {
+    let html = null;
+    try {
+      html = await holeWort(wort);
+      fehlerFolge = 0;
+    } catch (e) {
+      fehlerFolge++;
+      console.log(`  kaufDA ${wort}: ${e?.message || e}`);
+      if (fehlerFolge >= 3) { abgebrochen = true; break; }
+    }
+    if (html) {
+      seiten++;
+      for (const a of kaufdaLesen(html)) {
+        const id = stabileId(a.laden, a.name, a.preis);
+        if (gesehen.has(id) || kaufdaDoppelt(angebote, a)) continue;
+        gesehen.add(id);
+        angebote.push(a);
+      }
+    }
+    await pause(KAUFDA_PAUSE);
+  }
+  if (!seiten) throw new Error('keine Stichwortseite erreichbar');
+  const hinweis = `über kaufDA, gezielt nach ${seiten} Stichwörtern für Rezeptzutaten gesucht – nicht das ganze Prospekt${abgebrochen ? ' (kaufDA hat zwischendurch nicht geantwortet, unvollständig)' : ''}`;
+  return { angebote: angebote.map(({ kern, ...a }) => a), hinweis };
+}
+kaufda.laeden = ['Rewe', 'Edeka', 'Netto'];
+
 /* ------------------------------------------------------------ Ablauf */
 
-const QUELLEN = { aldi, lidl, kaufland, penny };
+/*
+ * Zwei Läufe mit derselben Mechanik:
+ *   öffentlich  Aldi, Lidl, Kaufland, Penny → daten/angebote.json (öffentliches Repo)
+ *   --privat    Rewe, Edeka, Netto über kaufDA → angebote-privat.json (privates Daten-Repo)
+ */
+const QUELLEN = PRIVAT_LAUF ? { kaufda } : { aldi, lidl, kaufland, penny };
 
 async function main() {
   const alt = (() => { try { return JSON.parse(readFileSync(ZIEL, 'utf8')); } catch { return null; } })();
   const quellen = [];
   let angebote = [];
   for (const [name, fn] of Object.entries(QUELLEN)) {
-    const laden = name.charAt(0).toUpperCase() + name.slice(1);
-    if (!will(name)) { // nicht angefragt: das Alte behalten
-      const vorher = alt?.quellen?.find((q) => q.laden === laden);
-      if (vorher) { quellen.push(vorher); angebote.push(...(alt.angebote || []).filter((a) => a.laden === laden)); }
+    // Eine Quelle liefert meist einen Laden (aldi → Aldi), kaufDA drei
+    const laeden = fn.laeden || [name.charAt(0).toUpperCase() + name.slice(1)];
+    const alteVon = (laden) => (alt?.angebote || []).filter((a) => a.laden === laden);
+    if (!will(name) && !laeden.some((l) => will(l.toLowerCase()))) { // nicht angefragt: das Alte behalten
+      for (const laden of laeden) {
+        const vorher = alt?.quellen?.find((q) => q.laden === laden);
+        if (vorher) { quellen.push(vorher); angebote.push(...alteVon(laden)); }
+      }
       continue;
     }
     try {
       const { angebote: neu, hinweis, ok = true, modell } = await fn(alt);
-      quellen.push({ laden, ok, anzahl: neu.length, hinweis, stand: new Date().toISOString(), ...(modell ? { modell } : {}) });
+      for (const laden of laeden) {
+        const meine = neu.filter((a) => a.laden === laden);
+        quellen.push({ laden, ok, anzahl: meine.length, hinweis, stand: new Date().toISOString(), ...(modell ? { modell } : {}) });
+        console.log(`${laden.padEnd(9)} ${String(meine.length).padStart(4)} Angebote${hinweis ? ` – ${hinweis}` : ''}`);
+      }
       angebote.push(...neu);
-      console.log(`${laden.padEnd(9)} ${String(neu.length).padStart(4)} Angebote${hinweis ? ` – ${hinweis}` : ''}`);
     } catch (e) {
       // Fällt eine Quelle aus, bleiben ihre alten Angebote, solange sie gelten
-      const vorher = (alt?.angebote || []).filter((a) => a.laden === laden && (!a.bis || a.bis >= heute()));
-      const q = alt?.quellen?.find((x) => x.laden === laden);
-      quellen.push({ laden, ok: false, anzahl: vorher.length, hinweis: `heute nicht erreichbar (${String(e?.message || e).slice(0, 80)})`, stand: q?.stand || '', ...(q?.modell ? { modell: q.modell } : {}) });
-      angebote.push(...vorher);
-      console.log(`${laden.padEnd(9)} FEHLER ${e?.message || e}${vorher.length ? ` – ${vorher.length} alte behalten` : ''}`);
+      for (const laden of laeden) {
+        const vorher = alteVon(laden).filter((a) => !a.bis || a.bis >= heute());
+        const q = alt?.quellen?.find((x) => x.laden === laden);
+        quellen.push({ laden, ok: false, anzahl: vorher.length, hinweis: `heute nicht erreichbar (${String(e?.message || e).slice(0, 80)})`, stand: q?.stand || '', ...(q?.modell ? { modell: q.modell } : {}) });
+        angebote.push(...vorher);
+        console.log(`${laden.padEnd(9)} FEHLER ${e?.message || e}${vorher.length ? ` – ${vorher.length} alte behalten` : ''}`);
+      }
     }
   }
   // Rezeptzutaten zuerst, dann der Rest – und deutlich mehr Platz als die von Hand eingetragene Liste
@@ -530,7 +682,8 @@ async function main() {
   const daten = {
     stand: new Date().toISOString(),
     woche: kalenderwoche(),
-    gesperrt: ['Rewe', 'Netto', 'Edeka'],
+    // Im öffentlichen Feed stehen Rewe, Netto und Edeka nicht – die kommen, wenn überhaupt, privat über kaufDA
+    gesperrt: PRIVAT_LAUF ? [] : ['Rewe', 'Netto', 'Edeka'],
     quellen,
     angebote,
   };

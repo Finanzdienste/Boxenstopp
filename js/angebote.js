@@ -137,7 +137,7 @@ export function zeileLesen(zeile, katalog = {}) {
  * wenn „Paprika“ oder „Reis“ im Namen steht; die Regeln mit roh: true gelten
  * nur für unverarbeitete Ware.
  */
-const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle|torte|kuchen|gebäck|chips|flips|pulver|gewürz|dressing|aufstrich|mäuse|riegel|snack|pizza|suppe|eintopf|fertig|salat|marinade|mariniert|paniert|gefüllt|gegrillt|püree|sirup|konfitüre|marmelade|gelee|likör|bonbon|keks|waffel|cracker|nudel|teig|burger|nugget|schnitzel|spieß|würstchen|wurst|füllung|pastete|frikadelle|bällchen|röllchen|taschen|schnitte|knusper|aufschnitt|delikatess|dulano|rahm-|rahmspinat|rahmgemüse|\b(?:dip|mix|tee|wrap|bowl)\b|dr\. ?oetker|wagner|frosta|knorr|maggi|lay['’]?s|pringles|funny|chio|lorenz|bahlsen|milka|ferrero|haribo|kinder\b|nestl[eé]/i;
+const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle\b|rollen\b|\btorte|torten\b|kuchen\b|gebäck|chips|flips|pulver|gewürz|dressing|aufstrich|mäuse|riegel|snack|pizza|suppe|eintopf|fertig|salat|marinade|mariniert|paniert|gefüllt|gegrillt|püree|sirup|konfitüre|marmelade|gelee|likör|bonbon|keks|waffel|cracker|nudel|teig|burger|nugget|schnitzel|spieß|würstchen|wurst|füllung|pastete|frikadelle|bällchen|röllchen|taschen|schnitte|strudel|laugen|knusper|aufschnitt|delikatess|dulano|bratkartoffel|geräuchert|geraeuchert|gemahlen|granuliert|gerebelt|edelsüß|erdbeer|pfirsich|maracuja|vanill|himbeer|heidelbeer|stracciatella|sahnejoghurt|auf frucht|fruchtjoghurt|rahm-|rahmspinat|rahmgemüse|\b(?:dip|mix|tee|wrap|bowl)\b|dr\. ?oetker|wagner|frosta|knorr|maggi|lay['’]?s|pringles|funny|chio|lorenz|bahlsen|milka|ferrero|haribo|kinder\b|nestl[eé]/i;
 
 export function schluesselRaten(name, katalog = {}) {
   const n = String(name || '').toLowerCase().replace(/ß/g, 'ß');
@@ -146,7 +146,7 @@ export function schluesselRaten(name, katalog = {}) {
   const REGELN = [
     [/hähnchen.?brust|hühnerbrust|chicken breast|hähnchen.?innenfilet|hähnchen.?geschnetz|hähnchen.?streifen|hähnchen.?filet/, 'haehnchenbrust', true],
     [/oberkeule|hähnchen.?keule|hähnchenschenkel.*filet|hähnchen.?schenkel.?filet/, 'haehnchenkeule', true],
-    [/puten.?brust|puten.?geschnetz|puten.?filet|puten.?steak/, 'putenbrust', true],
+    [/puten.?brust|puten.?geschnetz|puten.?filet|puten.?mini.?filet|puten.?innen.?filet|puten.?steak/, 'putenbrust', true],
     [/rind.*hack.*(?:5 ?%|mager)|mager.*rind.*hack|tatar|rinder.?tatar/, 'rinderhack-mager', true],
     [/rinder?.?hack|hack.*rind|rinderhackfleisch/, 'rinderhack', true],
     [/rinder?.?gulasch|gulasch.*rind/, 'rindergulasch', true],
@@ -154,7 +154,7 @@ export function schluesselRaten(name, katalog = {}) {
     [/süßkartoffel|suesskartoffel|süsskartoffel/, 'suesskartoffel', true],
     [/kartoffel/, 'kartoffeln', true],
     [/frühlingszwiebel|lauchzwiebel|bundzwiebel/, 'fruehlingszwiebeln', true],
-    [/rote zwiebel|zwiebeln?,? rot/, 'rote-zwiebeln', true],
+    [/rote (?:speise)?zwiebel|zwiebeln?,? rot/, 'rote-zwiebeln', true],
     [/zwiebel/, 'zwiebeln', true],
     [/knoblauch/, 'knoblauch', true],
     [/ingwer/, 'ingwer', true],
@@ -168,7 +168,7 @@ export function schluesselRaten(name, katalog = {}) {
     [/spitzkohl/, 'spitzkohl', true],
     [/weißkohl|weisskohl/, 'weisskohl', true],
     [/salatgurke|\bgurke/, 'gurke', true],
-    [/kirschtomate|cherrytomate|cocktailtomate|rispentomate|romatomate|minitomate|miniroma|datteltomate/, 'kirschtomaten', true],
+    [/kirschtomate|cherrytomate|cocktailtomate|romatomate|minitomate|miniroma|datteltomate|mini.?pflaumen.?tomate|pflaumentomate/, 'kirschtomaten', true],
     [/passata|passierte tomaten/, 'passata', false],
     [/stückige tomaten|gehackte tomaten|tomaten.*dose|dosentomaten|tomaten.*stück|tomaten.*(?:in stücken|gestückelt)/, 'tomaten-dose', false],
     [/tomatenmark/, 'tomatenmark', false],
@@ -202,7 +202,7 @@ export function schluesselRaten(name, katalog = {}) {
     [/kokosmilch|kokosnussmilch/, 'kokosmilch', false],
     [/kidney/, 'kidney', false],
     [/schwarze bohnen/, 'schwarze-bohnen', false],
-    [/\bmais\b|gemüsemais|zuckermais/, 'mais', false],
+    [/\bmais\b(?!\s*-?\s*h[äa]hn)|gemüsemais|zuckermais/, 'mais', false],
     [/kichererbsen/, 'kichererbsen', false],
     [/rote linsen/, 'linsen-rot', false],
     [/pesto/, 'pesto', false],
@@ -239,6 +239,7 @@ export function schluesselRaten(name, katalog = {}) {
     [/ajvar/, 'ajvar', false],
     [/erdnussbutter|erdnussmus/, 'erdnussbutter', false],
     [/semmelbrösel|paniermehl/, 'semmelbroesel', false],
+    [/weizenmehl|\bmehl\b/, 'mehl', false],
     [/speisestärke/, 'staerke', false],
     [/senf/, 'senf', false],
   ];

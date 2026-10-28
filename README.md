@@ -60,8 +60,8 @@ Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
 ### Angebote der Woche
 
 Dritter Reiter (auf dem Handy unten, am Rechner über die Karte bei den
-Rezepten). Oben steht „Wo gehst du hin?“: Mit einem Laden gewählt (Aldi,
-Lidl, Kaufland, Penny – und jeder, für den eigene Angebote eingetragen
+Rezepten). Oben steht „Wo gehst du hin?“: Mit einem Laden gewählt (die
+Läden aus dem Abruf – und jeder, für den eigene Angebote eingetragen
 sind) zeigt der Reiter nur dessen Angebote, und auch „Passt zu euren
 Rezepten“ und das neue Rezept der KI rechnen nur mit denen; die Wahl bleibt
 auf dem jeweiligen Handy (localStorage). **Die App holt die Angebote selbst:** montags und donnerstags
@@ -76,9 +76,31 @@ ehrlicher Kennung, zweimal die Woche:
 | Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit) |
 | Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe |
 | Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini (`generateContent`) liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Im Gratis-Kontingent hängt mal das eine, mal das andere Modell: Nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, steht in `daten/angebote.json` und kommt beim nächsten Lauf zuerst dran; hängende Stapel bekommen einen zweiten Durchgang. Dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` |
+| Rewe, Edeka, Netto | kaufDA, **privat** (siehe unten) | Die eigenen Seiten sperren automatische Abrufe (rewe.de: Cloudflare-Abfrage auf allen Seiten, Edeka: 403 mit Scherzantwort). Ihre Angebote kommen über kaufDA und landen nur im privaten Daten-Repo |
 
-Rewe, Netto und Edeka sperren automatische Abrufe (403 bzw. eine
-Scherzantwort) – das steht auch in der App. Getränke, Süßes, Drogerie,
+**Rewe, Edeka und Netto über kaufDA – nur privat.** kaufDA (Bonial, der
+Prospektdienst der Händler) zeigt deren Angebote auf öffentlichen Seiten je
+Stichwort und Stadt (`kaufda.de/<Stadt>/Angebote/<Stichwort>`), mit Produkt,
+Marke, Preis, Packung und Gültigkeit als Daten in der Seite; die robots.txt
+erlaubt diese Seiten (Crawl-Delay 2 s, der Lauf wartet 4 s). Je Seite sind
+höchstens 16 Angebote zu sehen, darum fragt der Lauf gezielt 38 Stichwörter
+der Rezeptzutaten ab (`KAUFDA_WORTE`) – also nicht das ganze Prospekt, das
+steht auch in der App. Dasselbe Angebot aus den Prospektvarianten zählt
+einmal; was kaufDA nicht unter Lebensmittel führt, fliegt raus. Antwortet
+kaufDA zwischendurch nicht (503), wartet der Lauf und macht weiter, nach
+dreimal hintereinander hört er auf und behält, was er hat.
+
+kaufDA erlaubt die Nutzung nur privat, **nicht das Veröffentlichen** (AGB
+§ 3 e). Darum ist das ein eigener Lauf, `KAUFDA_STADT=… node
+werkzeug/angebote.mjs --privat --ziel <pfad>/angebote-privat.json`, dessen
+Datei nur im privaten Daten-Repo neben `liste.json` liegt; die Stadt steht
+nicht im Code. Die App liest sie mit dem Schlüssel aus `zugang.js`
+(`privatLesen` in `js/speicher.js`) und legt sie mit `daten/angebote.json`
+zusammen; ohne Schlüssel oder ohne die Datei bleibt es bei Aldi, Lidl,
+Kaufland und Penny, und Rewe, Netto, Edeka stehen als „gesperrt“ da. Beim
+Trennen vergisst das Handy die privaten Angebote.
+
+Getränke, Süßes, Drogerie,
 Schwein und Fisch fliegen raus; jedes Angebot bekommt, wenn es eine
 Rezeptzutat ist, den Katalog-Schlüssel (`schluesselRaten` in
 `js/angebote.js`, mit Sperre für Verarbeitetes wie Saucen und Chips). Die
