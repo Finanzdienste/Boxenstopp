@@ -12,7 +12,11 @@
    "type": "food",
    "quantity": "je 750-g-Netz",
    "price": "1.29",
-   "basePrice": "(1 kg = 1.72)"
+   "basePrice": "(1 kg = 1.72)",
+   "imageRendition": {
+    "tileXs": "https://cdn.penny.de/dam/jcr:test/zitronen.png?imwidth=100",
+    "tileSm": "https://cdn.penny.de/dam/jcr:test/zitronen.png?impolicy=penny&imwidth=200"
+   }
   },
   {
    "title": "JACOBS Auslese Kaffee*",

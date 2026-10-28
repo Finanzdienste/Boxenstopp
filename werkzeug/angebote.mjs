@@ -111,6 +111,8 @@ async function hole(url, { json = false, bin = false, timeout = 30000 } = {}) {
 const schoeneMarke = (m) => String(m || '').trim().replace(/\b([A-ZÄÖÜ])([A-ZÄÖÜ'’]{1,})\b/g, (_, a, b) => a + b.toLowerCase());
 const entities = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#34;/g, '"').replace(/&#39;/g, '\'').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 const zahl = (s) => { const m = String(s || '').replace(',', '.').match(/\d+(?:\.\d+)?/); return m ? Number(m[0]) : NaN; };
+/** Ein Produktfoto der Händler – nur https, ohne Leerzeichen und Anführungszeichen, nicht ewig lang. */
+export const bildUrl = (u) => { const t = String(u || '').trim().replace(/&amp;/g, '&'); return /^https:\/\/[^\s"'<>]{8,480}$/.test(t) ? t : ''; };
 
 // Was nicht in den Topf gehört – Getränke, Süßes, Drogerie, Tierbedarf.
 const NICHT_KOCHEN = /\b(?:bier|pils|weizenbier|wein|sekt|prosecco|spirituos|wodka|vodka|whisk|rum\b|likör|gin\b|cola|limo|energy|mineralwasser|wasser|saft(?!ig)|nektar|schorle|kaffee(?!sahne)|espresso|cappuccino|tee\b|kakao(?!pulver)|schokolade|schoko|praline|bonbon|dragee|kaudragee|lutscher|fruchtgummi|gummi|kaugummi|keks|cookie|chips|cracker|riegel|eis\b|eiscreme|speiseeis|lebkuchen|stollen|spekulatius|dominostein|marzipan|kuchen|torte|waffel|müsli|cerealien|flakes|zigarett|tabak|wasch|spül|windel|zahn|shampoo|dusch|deo\b|kerze|batterie|toiletten|küchenrolle|müll|taschentuch|lotion|tablette|kapsel|vitamin|katze|hund|tier|futter|streu|blume|pflanze|strauß|rose\b|tulpe|orchidee|pizza|fertiggericht|nugget|knusperchen|cordon bleu|burger|pommes|frikadelle|bratwurst|wiener|würstchen|salami|schinken|leberkäse|mett|pastete|aufschnitt|delikatess|dulano|risbellis|reiswaffel|snacks?\b|käsesnack|drink\b|actimel|fix\b|strudel|laugen|nudelsuppe|nutella|nuss-nugat|knoppers|tupperware|salatsauce|dressing|keramik|dekoration|bepflanzt|reise\b|rundreise|kombireise|flugreise|busreise|urlaub|hotel|kreuzfahrt|brotaufstrich|brot\b|brötchen|toast|baguette|croissant|pudding|dessert|knabber|erdnussflips|popcorn|studentenfutter|datteln|feigen|trockenfr|pangasius|tilapia|hering|matjes|scholle|dorsch|sardine|makrele|seelachs|zander|mentos|pringles|lay['’]?s|chio|funny|lorenz|haribo|milka|ferrero|kinder\b|katjes|ritter sport|lindt|toblerone|snickers|mars\b|twix|kitkat|oreo|leibniz|bahlsen|jacobs|dallmayr|tchibo|melitta|nescaf|coca|fanta|sprite|pepsi|red bull|monster|volvic|evian|gerolsteiner|krombacher|beck['’]?s|warsteiner|bitburger|veltins|jever|paulaner|erdinger|franziskaner|radeberger|heineken|corona|guinness|budweiser|tyskie|karamalz)/i;
@@ -139,7 +141,9 @@ export function aldiLesen(html, bezug = new Date()) {
     if (!menge && bp?.basePriceValue && /^kg$/i.test(bp.basePriceScale)) { menge = Math.round(preis / bp.basePriceValue * 1000); einheit = 'g'; }
     if (!menge && bp?.basePriceValue && /^(liter|l)$/i.test(bp.basePriceScale)) { menge = Math.round(preis / bp.basePriceValue * 1000); einheit = 'ml'; }
     const pp = (p.promotionPrices || [])[0] || {};
-    aus.push({ id: stabileId('Aldi', name, preis), laden: 'Aldi', name, preis, menge, einheit, von: pp.validFromLocalDate || '', bis: pp.validUntilLocalDate || p.validUntilLocalDate || samstagDieserWoche(bezug), k });
+    const foto = (p.assets || []).find((x) => x?.type === 'primary') || (p.assets || [])[0];
+    const bild = foto?.url ? bildUrl(`${foto.url}${foto.url.includes('?') ? '&' : '?'}wid=200&hei=200`) : '';
+    aus.push({ id: stabileId('Aldi', name, preis), laden: 'Aldi', name, preis, menge, einheit, von: pp.validFromLocalDate || '', bis: pp.validUntilLocalDate || p.validUntilLocalDate || samstagDieserWoche(bezug), k, bild });
   }
   return aus;
 }
@@ -178,7 +182,10 @@ export function kauflandLesen(html, bezug = new Date()) {
       const lebensmittel = k || /\(1 (kg|l) =/.test(grund) || /Obst__Gemuese|Fleisch|Molkerei|Grundnahrung|Feinkost|Tiefkuehl/.test(id);
       if (!lebensmittel || !istZumKochen(name)) continue;
       const { menge, einheit } = mengeAus(feld('k-product-tile__unit-price'));
-      aus.push({ id: stabileId('Kaufland', name, preis), laden: 'Kaufland', name, preis, menge, einheit, von, bis, k });
+      const img = t.match(/<img[^>]*class="[^"]*k-product-tile__main-image[^"]*"[^>]*>/s)?.[0] || '';
+      const klein = (img.match(/srcset="([^"]+)"/)?.[1] || '').split(',').map((x) => x.trim().split(/\s+/)[0]).filter(Boolean)[0];
+      const bild = bildUrl(klein || img.match(/\ssrc="([^"]+)"/)?.[1]);
+      aus.push({ id: stabileId('Kaufland', name, preis), laden: 'Kaufland', name, preis, menge, einheit, von, bis, k, bild });
     }
   }
   return aus;
@@ -208,7 +215,9 @@ export function pennyLesen(gruppen, bezug = new Date()) {
       if (!menge && bpm) { menge = Math.round(preis / Number(bpm[2].replace(',', '.')) * 1000); einheit = bpm[1] === 'kg' ? 'g' : 'ml'; }
       // Die Gruppen „ab Donnerstag“ (Obst 1, Food-Highlights, XXL) gelten kürzer, Ende ist immer der Samstag
       const von = /1$|highlights|xxl/.test(gruppe) ? wochentag(bezug, 3) : wochentag(bezug, 0);
-      aus.push({ id: stabileId('Penny', name, preis), laden: 'Penny', name, preis, menge, einheit, von, bis: samstagDieserWoche(bezug), k });
+      // 120 px reichen fürs Vorschaubild (44 px auf dem Handy) – das 200er ist als PNG dreimal so schwer
+      const bild = bildUrl(String(t.imageRendition?.tileSm || t.imageRendition?.tileXs || '').replace(/([?&]imwidth=)\d+/, '$1120'));
+      aus.push({ id: stabileId('Penny', name, preis), laden: 'Penny', name, preis, menge, einheit, von, bis: samstagDieserWoche(bezug), k, bild });
     }
   }
   return aus;
@@ -571,7 +580,8 @@ export function kaufdaLesen(html, laeden = KAUFDA_LAEDEN) {
     const { menge, einheit } = kaufdaMenge(beschreibung);
     // Geräuchert, gegart, paniert … steht oft nur in der Beschreibung – dann ist es keine Rezeptzutat
     const k = /geräuchert|gegart|gekocht|paniert|mariniert|gewürzt|gegrillt/i.test(beschreibung) ? '' : schluesselRaten(name, KATALOG);
-    aus.push({ laden, name, preis, menge, einheit, von: tagBerlin(it.validFrom), bis: tagBerlin(it.validUntil), k, kern: kaufdaKern(it.title) });
+    const bild = bildUrl(it.offerImages?.url?.thumbnail || it.offerImages?.url?.normal);
+    aus.push({ laden, name, preis, menge, einheit, von: tagBerlin(it.validFrom), bis: tagBerlin(it.validUntil), k, bild, kern: kaufdaKern(it.title) });
   }
   return aus;
 }

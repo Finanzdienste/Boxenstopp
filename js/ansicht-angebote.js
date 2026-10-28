@@ -32,6 +32,7 @@ import { opAngeboteDazu, opAngebote, opAngebotWeg } from './liste.js';
 import { oeffneRezept } from './ansicht-rezepte.js';
 import { fotoVorbereiten, resteMitAngeboten, oeffneEinrichten } from './ansicht-ki.js';
 import { euro } from './kosten.js';
+import { bildName, bildPfad } from './bilder.js';
 
 const MAX_FOTOS = 4;
 const KAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg>';
@@ -149,8 +150,16 @@ function lesenHTML() {
 const bisText = (a) => (a.bis && !Number.isNaN(Date.parse(a.bis)) ? `bis ${tagKurz(a.bis)}` : '');
 const passtSuche = (a) => !suche || `${a.laden} ${a.name} ${a.k && app.katalog[a.k] ? app.katalog[a.k].n : ''}`.toLowerCase().includes(suche);
 
+/** Das Produktfoto des Händlers; ohne (oder wenn es nicht lädt) das Bildchen der Zutat. */
+function bildHTML(a) {
+  const ersatz = bildPfad(bildName(a.k, { name: a.name, katalog: app.katalog }));
+  if (a.bild) return `<span class="a-bild"><img src="${esc(a.bild)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-ersatz="${esc(ersatz)}"></span>`;
+  return `<span class="a-bild a-bild-zb"><img src="${esc(ersatz)}" alt="" loading="lazy" decoding="async"></span>`;
+}
+
 function zeileHTML(a, { eigen = false } = {}) {
   return `<li class="item a-item${eigen ? ' a-eigen' : ''}" data-a-id="${esc(a.id)}">
+${bildHTML(a)}
 <div class="item-main"><span class="item-name">${esc(a.name)}</span><span class="item-sub">${a.k && app.katalog[a.k] ? `<span>→ ${esc(app.katalog[a.k].n)}</span>` : '<span class="a-ohne">keine Rezeptzutat</span>'}${bisText(a) ? `<span>${esc(bisText(a))}</span>` : ''}</span></div>
 <span class="item-qty">${esc(angebotMenge(a))}</span>
 ${eigen ? `<button type="button" class="x" data-a-weg="${esc(a.id)}" aria-label="${esc(a.name)} entfernen">${X}</button>` : '<span></span>'}</li>`;

@@ -77,6 +77,8 @@ export function angebotBereinigen(roh, katalog = null) {
   const gilt = (x) => typeof x === 'string' && (katalog ? !!katalog[x] : /^[a-z0-9-]{1,40}$/.test(x));
   const k = gilt(roh.k) ? roh.k : (gilt(roh.katalog) ? roh.katalog : '');
   const bis = /^\d{4}-\d{2}-\d{2}$/.test(String(roh.bis || '')) ? String(roh.bis) : '';
+  // Das Produktfoto des Händlers (nur aus dem Abruf): nur https, nichts, was aus dem Attribut ausbrechen könnte
+  const bild = typeof roh.bild === 'string' && /^https:\/\/[^\s"'<>]{8,480}$/.test(roh.bild.trim()) ? roh.bild.trim() : '';
   return {
     id: ID.test(String(roh.id || '')) ? roh.id : neueId(),
     laden: ladenName(roh.laden) || 'Sonstige',
@@ -86,6 +88,7 @@ export function angebotBereinigen(roh, katalog = null) {
     einheit: menge > 0 && einheit ? einheit : '',
     bis,
     k,
+    ...(bild ? { bild } : {}),
   };
 }
 
@@ -205,12 +208,14 @@ export function schluesselRaten(name, katalog = {}) {
     [/\bmais\b(?!\s*-?\s*h[äa]hn)|gemüsemais|zuckermais/, 'mais', false],
     [/kichererbsen/, 'kichererbsen', false],
     [/rote linsen/, 'linsen-rot', false],
-    [/pesto/, 'pesto', false],
+    // Im Katalog steht Pesto Genovese – Pesto Rosso (getrocknete Tomaten) ist etwas anderes
+    [/pesto(?![\s-]*rosso)/, 'pesto', false],
     [/ananas/, 'ananas-dose', false],
     [/gewürzgurke|cornichon/, 'gewuerzgurken', false],
     [/olivenöl|olivenoel/, 'olivenoel', false],
     [/oliven/, 'oliven', false],
-    [/basmati|jasminreis|langkorn|parboiled|\breis\b/, 'reis', true],
+    // Sushi- und Risottoreis kleben – kein Ersatz für Basmati oder Jasmin
+    [/basmati|jasminreis|langkorn|parboiled|(?<!sushi.|risotto.|rundkorn.)\breis\b/, 'reis', true],
     [/penne/, 'penne', false],
     [/spaghetti/, 'spaghetti', false],
     [/hörnchen|makkaroni|maccheroni/, 'hoernchen', false],

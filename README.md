@@ -135,6 +135,43 @@ Rezept wird frühestens nach 8 Stunden wieder belohnt. „Noch ein Tier“ holt
 das nächste. Das Tier wird vorgeladen, sobald ein Rezept offen ist; ohne
 Netz kommt ein gemaltes. Im Datensparmodus gibt es nur Fotos, keine Clips.
 
+### Bilder
+
+**Rezepte** haben ein Foto – von einer KI gemacht, nicht fotografiert (im
+Rezept steht „KI-Bild“ dran): Cloudflare Workers AI mit FLUX.1 [schnell] im
+Gratis-Kontingent (10 000 „Neurons“ am Tag, ein Foto braucht gut 75).
+`werkzeug/bilder.mjs` beschreibt je Rezept auf Englisch, was in der Box ist
+(`MOTIVE`; immer eine Glasbox von oben auf hellem Holz, kein Text, keine
+Hände), und legt das Foto 800 × 600 als WebP nach `bilder/rezepte/<id>.webp`
+(30–50 KB); `werkzeug/rezepte.py` trägt es mit Prüfsumme als `bild` ein
+(`bilder/rezepte/chili.webp?v=…`). Das läuft als GitHub Action
+„Rezeptfotos“ (`.github/workflows/bilder.yml`), sobald sich
+`daten/rezepte.json` ändert – ein neues Rezept bekommt sein Foto also von
+selbst, bis dahin zeigt die Karte Bildchen seiner Hauptzutaten. Gefällt
+eins nicht: Actions → Rezeptfotos → Run workflow mit der Rezept-id, dann
+kommt ein neues. Der Lauf braucht die Secrets `CF_ACCOUNT_ID` und
+`CF_API_TOKEN` (API-Token mit dem Recht „Workers AI“). Rezepte aus der
+Resteverwertung haben kein Foto, sondern die Bildchen.
+
+**Zutaten** haben auf der Einkaufsliste und im Rezept ein Bildchen: Fluent
+Emoji von Microsoft (MIT-Lizenz, `bilder/zutaten/LIZENZ.txt`), als SVG aus
+dem npm-Paket `@iconify-json/fluent-emoji`. Welche Zutat welches bekommt,
+steht in `js/bilder.js` – erst der Katalog-Schlüssel, dann Stichwörter im
+Namen (für eigene Einträge wie „Bananen“ oder „Zahnpasta“), sonst die
+Abteilung. Ein neues Bildchen: dort eintragen, dann `npm install && node
+werkzeug/zutaten-bilder.mjs`.
+
+**Angebote** zeigen das Produktfoto, das in den Daten des Ladens steht
+(Aldi, Kaufland, Penny, kaufDA; bei Lidl liest die KI nur Text aus den
+Seitenbildern). Die App holt es direkt vom Bildserver des Ladens, ohne
+Referrer; fehlt es oder lädt es nicht, steht das Bildchen der Zutat da.
+
+Offline (`sw.js`): Die Bildchen kommen schon beim Installieren mit (Liste in
+`bilder/zutaten/alle.json`), damit die Liste auch im Laden ohne Netz
+vollständig ist. Rezeptfotos landen beim ersten Ansehen in einem eigenen
+Vorrat, der Updates der App übersteht; ein neues Foto hat eine neue
+Adresse, das alte fliegt raus.
+
 ## Resteverwertung
 
 Oben im Reiter Rezepte: aufschreiben oder fotografieren, was im Kühlschrank
@@ -332,7 +369,10 @@ Döschen, Spieße) kommt mit `H(...)` ins Rezept und steht dann unter
 `trocken`/`konserven`/`vorrat`/`tk` → Trockenes, `gewuerz` → Gewürze,
 `haushalt` → Extras (js/bereiche.js).
 `daten/rezepte.json` steht nicht im Offline-Vorrat von `sw.js`: Für ein
-neues Rezept muss dort nichts geändert werden.
+neues Rezept muss dort nichts geändert werden. Dafür braucht es ein Motiv
+fürs Foto in `werkzeug/bilder.mjs` (`MOTIVE`, auf Englisch, ohne Schwein und
+Fisch – `test-bilder.mjs` prüft das); das Foto selbst macht nach dem Push
+die Action „Rezeptfotos“.
 
 ## Dateien
 
@@ -353,7 +393,10 @@ neues Rezept muss dort nichts geändert werden.
 | `js/kosten.js` | Richtpreise auf Mengen: Liste, eigene Rezepte, Euro-Format |
 | `js/angebote.js` | Angebote: Zeilen lesen, Schlüssel raten, Treffer und Ersparnis, Anfrage an die KI – ohne DOM |
 | `js/ansicht-angebote.js` | Reiter Angebote: automatischer Abruf, eigene Angebote, passende Rezepte, Rezept daraus |
-| `werkzeug/angebote.mjs` | holt die Angebote (Aldi, Kaufland, Penny, Lidl per Gemini) → daten/angebote.json |
+| `js/bilder.js` | Bildchen je Zutat (Schlüssel, Stichwort, Abteilung) und für Rezepte ohne Foto – ohne DOM |
+| `werkzeug/bilder.mjs`, `.github/workflows/bilder.yml` | Rezeptfotos per KI (Cloudflare Workers AI) → bilder/rezepte |
+| `werkzeug/zutaten-bilder.mjs` | Bildchen aus Fluent Emoji → bilder/zutaten (mit alle.json für den Offline-Vorrat) |
+| `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny, Lidl per Gemini) → daten/angebote.json |
 | `.github/workflows/angebote.yml` | Montag und Donnerstag: Angebote holen und einchecken |
 | `werkzeug/preise.py` | Richtpreise je Katalogschlüssel (Packung, Menge, Einheit) |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
@@ -377,5 +420,7 @@ Antwort, offline, falscher Schlüssel, Trennen). `test-ki.mjs` prüft die
 Resteverwertung erst ohne Browser (Antwort bereinigen, verbotene Zutaten,
 Mengen aufs Ziel, Anfragen und Antwortströme beider Anbieter, Fehler) und
 dann mit einer nachgebauten Gemini-API und zwei Handys – Beispielantwort in
-`tests/daten/ki-antwort.json`. Der Workflow „Prüfung“ lässt
+`tests/daten/ki-antwort.json`. `test-bilder.mjs` prüft ohne Browser, dass
+jede Zutat ein Bildchen hat und jedes Foto zu seinem Rezept passt
+(Prüfsumme). Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

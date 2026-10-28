@@ -18,6 +18,7 @@ import { zahlwort } from './ki-rezept.js';
 import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
 import { lobPruefen, lobGross, tierVorladen } from './lob.js';
 import { euro, kostenRezept } from './kosten.js';
+import { zutatImg, rezeptBildchen, bildPfad } from './bilder.js';
 import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, DAUMEN } from './liste.js';
 
@@ -87,6 +88,20 @@ export function filterZeichnen() {
   $('#chips').innerHTML = FILTER.map(([id, label]) => `<button type="button" class="chip" data-filter="${id}" aria-pressed="false">${esc(label)}<span class="n"></span></button>`).join('');
 }
 
+/*
+ * Das Bild eines Rezepts: das KI-Foto (r.bild aus daten/rezepte.json), sonst
+ * ein Ersatzbild aus den Bildchen der Hauptzutaten (Eiweiß, Beilage, Gemüse).
+ */
+function rezeptFoto(r, { gross = false } = {}) {
+  if (r.bild && /^bilder\/rezepte\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(r.bild)) {
+    return gross
+      ? `<figure class="d-foto"><img src="${esc(r.bild)}" alt="${esc(r.name)}" decoding="async" width="800" height="600"><figcaption>KI-Bild</figcaption></figure>`
+      : `<span class="box-foto"><img src="${esc(r.bild)}" alt="" loading="lazy" decoding="async" width="800" height="600"></span>`;
+  }
+  const bildchen = rezeptBildchen(r, app.katalog).map((b, i) => `<img class="e${i}" src="${bildPfad(b)}" alt="" loading="lazy" decoding="async" width="64" height="64">`).join('');
+  return gross ? `<div class="d-foto d-foto-ersatz" aria-hidden="true">${bildchen}</div>` : `<span class="box-foto box-foto-ersatz" aria-hidden="true">${bildchen}</span>`;
+}
+
 function karte(r) {
   const st = rezeptStand(app.stand, r);
   const c = app.stand.cooked[r.id];
@@ -97,7 +112,7 @@ function karte(r) {
   const ko = kostenRezept(r, app);
   const preis = ko.box > 0 ? `<span class="box-cost">≈ ${esc(euro(ko.box))}/Box</span>` : '';
   return `<button type="button" class="box" data-open="${esc(r.id)}">
-<span class="tape">${esc(r.short)}</span><span class="box-time">${dauer(gesamtZeit(r))}</span>
+${rezeptFoto(r)}<span class="tape">${esc(r.short)}</span><span class="box-time">${dauer(gesamtZeit(r))}</span>
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}${preis}</span>
 <span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
@@ -178,7 +193,7 @@ function etikett(r) {
 }
 
 function zutatZeile(z, i) {
-  return `<li class="ing"><div><span class="ing-name">${esc(z.n)}</span>${z.h ? `<span class="ing-hint">${esc(z.h)}</span>` : ''}</div><span class="ing-amt">${esc(z.a)}</span><button type="button" class="tog" data-tog="${i}" aria-pressed="false" aria-label="${esc(z.n)} auf die Einkaufsliste setzen">${ic('plus', 'i-plus')}${ic('check', 'i-check')}</button></li>`;
+  return `<li class="ing">${zutatImg(z.k, { name: z.n, cat: z.art === 'gewuerz' ? 'gewuerz' : '', katalog: app.katalog, groesse: 24 })}<div><span class="ing-name">${esc(z.n)}</span>${z.h ? `<span class="ing-hint">${esc(z.h)}</span>` : ''}</div><span class="ing-amt">${esc(z.a)}</span><button type="button" class="tog" data-tog="${i}" aria-pressed="false" aria-label="${esc(z.n)} auf die Einkaufsliste setzen">${ic('plus', 'i-plus')}${ic('check', 'i-check')}</button></li>`;
 }
 
 function detailHTML(r) {
@@ -192,6 +207,7 @@ function detailHTML(r) {
   if (ko.box > 0) fakten.push(`<span class="pill-cost">≈ ${esc(euro(ko.box))} pro Box${ko.luecken ? ' (mind.)' : ''}</span>`);
   const t = r.total;
   return `<button type="button" class="back" data-act="zurueck">${ic('back')}Alle Rezepte</button>
+${rezeptFoto(r, { gross: true })}
 <div class="d-head">
   <span class="tape">${esc(r.short)} · ${boxen(r)}×</span>
   <h1 id="d-title">${esc(r.name)}</h1>

@@ -6,7 +6,9 @@
  * Erledigtes weg, Frühstück, Portionsrechner – und nach dem Neuladen ist
  * alles noch da.
  */
-import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS } from './hilfe.mjs';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS, ROOT } from './hilfe.mjs';
 
 const { check, ende } = pruefer();
 const browser = await starteBrowser();
@@ -44,10 +46,20 @@ check((await page.locator('#grid .empty').textContent()).includes('Nichts gefund
 await page.fill('#suche', '');
 check(await page.locator('#grid .box').count() === 50, 'Suche leer: wieder alle 50');
 check((await page.locator('[data-filter="haehnchen"] .n').textContent()) === '30', 'Chip-Zahlen folgen der Suche');
+// Bilder: jede Karte hat ihr KI-Foto (mit Prüfsumme in der Adresse), geladen erst beim Hinscrollen.
+// Ein neues Rezept bekommt seins erst von der Action „Rezeptfotos“ – bis dahin stehen Bildchen da.
+const mitFoto = Object.fromEntries(JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8')).rezepte.map((r) => [r.id, r.bild || '']));
+const fotos = await page.$$eval('#grid .box', (bs) => bs.map((b) => [b.dataset.open, b.querySelector('.box-foto img')?.getAttribute('src') || '', b.querySelectorAll('.box-foto-ersatz img').length]));
+const falscheFotos = fotos.filter(([id, src, ersatz]) => (mitFoto[id] ? src !== mitFoto[id] : ersatz < 1)).map(([id]) => id);
+check(fotos.length === 50 && !falscheFotos.length && (await page.locator('#grid .box-foto img[loading="lazy"]').count()) >= fotos.filter(([, src]) => src).length, `jede Karte zeigt ihr Foto, ohne Foto ihre Bildchen (${fotos.filter(([, src]) => src).length} Fotos${falscheFotos.length ? ` – falsch: ${falscheFotos.join(', ')}` : ''})`);
+check(await page.evaluate(async () => { const img = document.querySelector('[data-open="chili"] .box-foto img'); img.scrollIntoView(); for (let i = 0; i < 40 && !img.complete; i++) await new Promise((r) => { setTimeout(r, 50); }); return img.naturalWidth === 800 && img.naturalHeight === 600; }), 'das Foto lädt: 800 × 600');
 check((await page.locator('[data-open="gulasch"] .box-time').textContent()) === '3 Std. 40 Min.', `Gulasch ehrlich: 3 Std. 40 Min. (${await page.locator('[data-open="gulasch"] .box-time').textContent()})`);
 
 await page.click('[data-open="butter-chicken"]');
 check((await text('#d-title')) === 'Butter Chicken mit Reis', 'Butter Chicken öffnet');
+check(/^bilder\/rezepte\/butter-chicken\.webp\?v=/.test(await page.getAttribute('.d-foto img', 'src')) && (await page.getAttribute('.d-foto img', 'alt')) === 'Butter Chicken mit Reis' && (await text('.d-foto figcaption')) === 'KI-Bild', 'im Rezept: das Foto groß, mit Namen als Alternativtext und „KI-Bild“');
+const zutatBilder = await page.$$eval('.ings .ing', (ls) => ls.map((l) => [l.querySelector('.ing-name')?.textContent, l.querySelector('img.zb')?.getAttribute('src')]));
+check(zutatBilder.length > 10 && zutatBilder.every(([, src]) => /^bilder\/zutaten\/[a-z-]+\.svg$/.test(src || '')) && zutatBilder.find(([n]) => /Hähnchen/.test(n))?.[1] === 'bilder/zutaten/poultry-leg.svg' && zutatBilder.find(([n]) => /Garam Masala/.test(n))?.[1] === 'bilder/zutaten/salt.svg', `jede Zutat mit Bildchen: Hähnchen 🍗, Gewürze 🧂 (${zutatBilder.slice(0, 3).map(([n, s]) => `${n} ${s?.split('/').pop()}`).join(', ')})`);
 check((await page.$$eval('.phase-name', (hs) => hs.map((h) => h.textContent))).join(' → ') === 'Vorbereiten → Kochen → Portionieren', 'Zubereitung in drei Abschnitten: Vorbereiten → Kochen → Portionieren');
 check(await page.locator('.mise .schalen li').count() === 5, 'oben steht, welche 5 Schalen bereitstehen sollen');
 const marinade = page.locator('.step', { has: page.locator('.step-l') }).first();
@@ -147,6 +159,8 @@ await page.fill('#add-input', 'Zahnpasta');
 await page.click('#add-btn');
 const gruppeVon = (name) => page.locator('#list-body .grp', { has: page.locator('.item-name', { hasText: new RegExp(`^${name}$`) }) }).getAttribute('data-bereich');
 check((await gruppeVon('Bananen')) === 'frisch', 'Bananen landen bei Frisches');
+check((await zeile('Bananen').locator('img.zb').getAttribute('src')) === 'bilder/zutaten/banana.svg' && (await zeile('Zahnpasta').locator('img.zb').getAttribute('src')) === 'bilder/zutaten/toothbrush.svg' && (await zeile('Möhren').locator('img.zb').getAttribute('src')) === 'bilder/zutaten/carrot.svg', 'auf der Liste: Bildchen nach Zutat, auch für Getipptes (Bananen 🍌, Zahnpasta 🪥)');
+check(await page.evaluate(() => [...document.querySelectorAll('#list-body img.zb')].every((i) => i.getAttribute('alt') === '')), 'die Bildchen sind Schmuck (alt leer) – der Name steht daneben');
 check((await gruppeVon('Zahnpasta')) === 'extras', 'Zahnpasta bei Extras');
 const bereiche = await page.$$eval('#list-body .grp:not(.grp-done)', (gs) => gs.map((g) => g.dataset.bereich));
 check(bereiche.join(' > ') === 'frisch > tierisch > trocken > gewuerze > extras', `Bereiche von oben nach unten (${bereiche.join(' > ')})`);

@@ -6,12 +6,18 @@
  * die Bereiche überschneiden sich nicht, und beim Aufräumen fasst dieser
  * Worker nur Vorräte an, die mit „boxenstopp-“ beginnen.
  *
- * Drei Strategien:
+ * Vier Strategien:
  *
  *   Seitenaufrufe    erst Netz, bei Fehlschlag der Zwischenspeicher.
  *   daten/*.json     erst Netz, bei Fehlschlag der Zwischenspeicher – neue
  *                    Rezepte sollen sofort da sein, alte nur ohne Netz.
- *   Alles andere     sofort aus dem Zwischenspeicher, parallel erneuern.
+ *   bilder/rezepte/  aus einem eigenen Vorrat (BILDER), der ein Update der
+ *                    App übersteht; nur, was fehlt, kommt aus dem Netz. Ein
+ *                    neues Rezeptfoto hat eine neue Adresse (?v=…), das alte
+ *                    fliegt dann raus.
+ *   Alles andere     sofort aus dem Zwischenspeicher, parallel erneuern –
+ *                    auch die Zutaten-Bildchen, die schon beim Installieren
+ *                    mitkommen (Liste in bilder/zutaten/alle.json).
  *
  * Die Einkaufsliste geht an api.github.com und damit nie durch diesen Worker
  * (fremder Ursprung, siehe unten).
@@ -21,8 +27,9 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v17';
+const VERSION = 'v18';
 const CACHE = `boxenstopp-${VERSION}`;
+const BILDER = 'boxenstopp-bilder-v1';
 
 const SHELL = [
   './',
@@ -41,6 +48,7 @@ const SHELL = [
   './js/lob.js',
   './js/kosten.js',
   './js/angebote.js',
+  './js/bilder.js',
   './js/ansicht-angebote.js',
   './js/ansicht-anpassen.js',
   './js/speicher.js',
@@ -68,11 +76,21 @@ const SHELL = [
 const frisch = (eingabe) => fetch(new Request(eingabe, { cache: 'reload' }));
 
 self.addEventListener('install', (event) => {
+  const holen = (cache, url) => frisch(url)
+    .then((res) => (res && res.ok ? cache.put(url, res) : null))
+    .catch(() => null);
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => Promise.all(SHELL.map((url) => frisch(url)
-        .then((res) => (res && res.ok ? cache.put(url, res) : null))
-        .catch(() => null))))
+      .then((cache) => Promise.all([
+        ...SHELL.map((url) => holen(cache, url)),
+        // Die Zutaten-Bildchen gehören zur Einkaufsliste – die muss auch im Laden ohne Netz gehen
+        frisch('./bilder/zutaten/alle.json')
+          .then((res) => (res.ok ? res.json() : []))
+          .then((namen) => Promise.all(namen
+            .filter((n) => /^[a-z0-9-]+$/.test(n))
+            .map((n) => holen(cache, `./bilder/zutaten/${n}.svg`))))
+          .catch(() => null),
+      ]))
       .then(() => self.skipWaiting()),
   );
 });
@@ -81,7 +99,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(keys
-        .filter((k) => k.startsWith('boxenstopp-') && k !== CACHE)
+        .filter((k) => k.startsWith('boxenstopp-') && k !== CACHE && k !== BILDER)
         .map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
@@ -112,6 +130,21 @@ self.addEventListener('fetch', (event) => {
   }
   if (url.pathname.startsWith(new URL('./daten/', self.location).pathname)) {
     event.respondWith(erstNetz(() => imVorrat(request)));
+    return;
+  }
+  if (url.pathname.startsWith(new URL('./bilder/rezepte/', self.location).pathname)) {
+    event.respondWith(caches.open(BILDER).then((c) => c.match(request).then((hit) => hit || fetch(request).then((res) => {
+      if (gut(res)) {
+        // Ablegen und ältere Fassungen desselben Fotos (andere ?v=) wegräumen
+        event.waitUntil(c.put(request, res.clone())
+          .then(() => c.keys())
+          .then((alle) => Promise.all(alle
+            .filter((k) => { const u = new URL(k.url); return u.pathname === url.pathname && u.search !== url.search; })
+            .map((k) => c.delete(k))))
+          .catch(() => null));
+      }
+      return res;
+    }))).catch(() => Response.error()));
     return;
   }
 

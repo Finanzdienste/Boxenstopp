@@ -14,7 +14,8 @@ import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
 import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren } from './liste.js';
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
-import { nachBereichen, alsText } from './bereiche.js';
+import { nachBereichen, alsText, abteilungVon } from './bereiche.js';
+import { zutatImg } from './bilder.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
 let leerenFragen = false;
@@ -42,6 +43,7 @@ function zeile([k, d]) {
   const von = fertig && d.by ? `<span class="item-by">abgehakt von ${d.by === app.name() ? 'dir' : esc(d.by)}</span>` : '';
   return `<li class="item${fertig ? ' is-done' : ''}">
 <button type="button" class="cb" role="checkbox" aria-checked="${fertig}" data-check="${esc(k)}" aria-label="${esc(d.name)}">${ic('check')}</button>
+${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungVon(k, d, app.katalog) })}
 <div class="item-main"><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${von}</div>
 <span class="item-qty">${esc(mengeText)}${etwa ? `<small>${esc(etwa)}</small>` : ''}</span>
 <button type="button" class="x" data-del="${esc(k)}" aria-label="${esc(d.name)} löschen">${X}</button>

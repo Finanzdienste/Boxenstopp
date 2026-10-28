@@ -9,7 +9,7 @@
   { "laden": "Penny", "ok": true, "anzahl": 2, "hinweis": "KW 44, bundesweit", "stand": "2026-10-26T05:23:20.000Z" }
  ],
  "angebote": [
-  { "id": "a-aldi001", "laden": "Aldi", "name": "Hähnchenbrustfilet-Teilstücke", "preis": 5.19, "menge": 600, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "haehnchenbrust" },
+  { "id": "a-aldi001", "laden": "Aldi", "name": "Hähnchenbrustfilet-Teilstücke", "preis": 5.19, "menge": 600, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "haehnchenbrust", "bild": "https://bilder.test/haehnchen.jpg" },
   { "id": "a-aldi002", "laden": "Aldi", "name": "Rinderhackfleisch XXL", "preis": 6.99, "menge": 800, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "rinderhack" },
   { "id": "a-aldi003", "laden": "Aldi", "name": "Zucchini", "preis": 1.11, "menge": 1, "einheit": "kg", "von": "2026-10-26", "bis": "2099-12-31", "k": "zucchini" },
   { "id": "a-aldi004", "laden": "Aldi", "name": "Asia Green Garden Gyoza", "preis": 2.49, "menge": 400, "einheit": "g", "von": "2026-10-26", "bis": "2099-12-31", "k": "" },

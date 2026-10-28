@@ -32,6 +32,7 @@ check(zeileLesen('Penny Gummibärchen 200 g 0,99', katalog).k === '', 'Süßkram
 check(schluesselRaten('Dulano Delikatess Puten-/ Hähnchenbrust XXL', katalog) === '' && schluesselRaten('Geflügel-Aufschnitt', katalog) === '' && schluesselRaten('Frisches Hähnchen-Geschnetzeltes', katalog) === 'haehnchenbrust', 'Aufschnitt ist keine Hähnchenbrust, Geschnetzeltes schon');
 check(einheitNorm('Stück') === 'Stk' && einheitNorm('Packung') === 'Pck' && einheitNorm('Liter') === 'l' && einheitNorm('kg') === 'kg' && einheitNorm('Quatsch') === '', 'Einheiten normiert');
 check(schluesselRaten('Basmati Reis', katalog) === 'reis' && schluesselRaten('Tomatenmark', katalog) === 'tomatenmark' && schluesselRaten('Stückige Tomaten', katalog) === 'tomaten-dose' && schluesselRaten('Rote Zwiebeln', katalog) === 'rote-zwiebeln' && schluesselRaten('Zwiebeln', katalog) === 'zwiebeln', 'Schlüssel raten: Reis, Tomatenmark vor Tomaten, rote Zwiebeln vor Zwiebeln');
+check(schluesselRaten('Barilla Pesto Rosso vegan', katalog) === '' && schluesselRaten('Pesto alla Genovese', katalog) === 'pesto' && schluesselRaten('Asia Green Garden Sushi-Reis', katalog) === '' && schluesselRaten('Risotto Reis', katalog) === '' && schluesselRaten('Langkorn-Reis', katalog) === 'reis', 'Pesto Rosso ist kein Genovese, Sushi- und Risottoreis sind kein Basmati');
 check(ladenName('ALDI Nord') === 'Aldi' && ladenName('Edeka Meyer') === 'Edeka' && ladenName('Bio Company') === 'Bio Company', 'Ladennamen: bekannte Ketten vereinheitlicht');
 
 // --- bereinigen
@@ -105,6 +106,16 @@ const pe = pennyLesen([['fleisch-und-wurst', JSON.parse(fix('penny-fleisch-und-w
 const peNamen = pe.map((a) => a.name);
 check(peNamen.includes('Zitronen') && !peNamen.some((n) => /Schweine|Kaffee|Coca|Pringles/i.test(n)), `Penny: Zitronen ja, Schwein, Kaffee, Cola, Chips nein (${peNamen.join(' · ')})`);
 check(pe.find((a) => a.name === 'Zitronen')?.k === 'zitrone' && pe.every((a) => a.bis === '2026-10-31'), 'Penny: Schlüssel, Gültigkeit bis Samstag der Woche');
+// --- Produktfotos der Händler
+const alH = aldiLesen(fix('aldi.html'), bezug).find((a) => /Hähnchen/.test(a.name));
+check(alH?.bild === 'https://s7g10.scene7.com/is/image/aldinord/test_haehnchen?wid=200&hei=200', `Aldi: das Hauptbild (primary), klein angefragt (${alH?.bild})`);
+const klB = kauflandLesen(fix('kaufland.html'), bezug);
+check(klB.length && klB.every((a) => /^https:\/\/kaufland\.media\.schwarz\/is\/image\/schwarz\/test\d+\?klein$/.test(a.bild)), `Kaufland: das kleinste Bild aus dem srcset (${klB.map((a) => a.bild).slice(0, 2).join(', ')})`);
+const peB = pennyLesen([['obst-und-gemuese', JSON.parse(fix('penny-obst-und-gemuese.json'))]], bezug).find((a) => a.name === 'Zitronen');
+check(peB?.bild === 'https://cdn.penny.de/dam/jcr:test/zitronen.png?impolicy=penny&imwidth=120', `Penny: das Bild der Kachel, 120 px breit angefragt (${peB?.bild})`);
+const bb = (bild) => angebotBereinigen({ name: 'X', preis: 1, bild }, katalog)?.bild;
+check(bb('https://cdn.example.de/a.jpg') === 'https://cdn.example.de/a.jpg' && bb('http://cdn.example.de/a.jpg') === undefined && bb('javascript:alert(1)') === undefined && bb('https://x.de/a.jpg" onerror="x') === undefined && bb(42) === undefined, 'Bereinigen: nur https-Bilder ohne Anführungszeichen; sonst kein Feld bild');
+
 check(kalenderwoche(bezug) === '2026-44' && kalenderwoche(new Date('2027-01-01T12:00:00Z')) === '2026-53' && kalenderwoche(new Date('2026-01-01T12:00:00Z')) === '2026-01', 'Kalenderwoche nach ISO');
 
 const lp = lidlProspekte(fix('lidl-prospekte.html'));
@@ -122,6 +133,7 @@ check(ed && ed.name === 'Mastortehof Food Group Frisches Hähnchenbrustfilet' &&
 const inn = kd.find((a) => a.laden === 'Netto' && /Innenfilet/.test(a.name));
 check(inn && inn.menge === 400 && inn.einheit === 'g' && inn.k === 'haehnchenbrust', `kaufDA: „bis zu 23g Protein pro 100g 400 g“ → 400 g (${inn?.menge} ${inn?.einheit})`);
 check(!kd.some((a) => /Zitrone/.test(a.name)), 'kaufDA: ohne Preis (0) kein Angebot');
+check(kd.find((a) => a.laden === 'Rewe' && a.name === 'Rinder-Hackfleisch')?.bild === 'https://content-media.bonial.biz/test/hack.jpg?impolicy=SEO-offer-thumbnails' && !kd.find((a) => a.laden === 'Edeka' && /Hofgut/.test(a.name))?.bild, 'kaufDA: Vorschaubild des Angebots, ohne keins');
 const kdN = (n) => kd.find((a) => a.name === n);
 check(kdN('Musterland Beste Butter')?.k === 'butter' && kdN('Speise-Kartoffeln')?.menge === 5 && kdN('Speise-Kartoffeln')?.einheit === 'kg' && kdN('Speise-Kartoffeln')?.k === 'kartoffeln', `kaufDA: Marke nicht doppelt, Anführungszeichen weg, Titel in Großbuchstaben normal (${kd.map((a) => a.name).slice(-8).join(' · ')})`);
 check(kdN('Hausmarke Kidneybohnen')?.menge === 400 && kdN('Hausmarke Kidneybohnen')?.k === 'kidney' && kdN('Süßkartoffeln')?.menge === 1 && kdN('Süßkartoffeln')?.einheit === 'Stk', 'kaufDA: die verkaufte Menge ist die letzte (Abtropfgewicht nicht); „St.“ → 1 Stück');

@@ -363,6 +363,8 @@ check((await t.locator('.ki-leiste').innerText()).includes('Angepasst von Teriya
 check((await t.$$eval('.step-d', (xs) => xs.map((x) => x.textContent))).some((x) => x.startsWith('200 g Brokkoli')) && (await t.locator('.step-li .step-k', { hasText: 'neu dazu' }).count()) === 1, 'Schritte mit den neuen Mengen und dem neuen Schritt für die Erbsen');
 await t.click('[data-act="zurueck"]');
 check(await t.locator('[data-filter="reste"] .n').innerText() === '2' && (await t.locator('.pill-ki', { hasText: 'Angepasst' }).count()) === 1, 'im Raster: 2 eigene Rezepte, eins davon „Angepasst“');
+const ersatz = await t.$$eval('[data-open^="ki-"] .box-foto-ersatz', (es) => es.map((e) => [...e.querySelectorAll('img')].map((i) => i.getAttribute('src').split('/').pop())));
+check(ersatz.length === 2 && ersatz.every((l) => l.length >= 1 && l.length <= 3 && new Set(l).size === l.length && l.every((n) => n.endsWith('.svg'))), `KI-Rezepte ohne Foto: Ersatzbild aus bis zu drei Zutaten-Bildchen (${ersatz.map((l) => l.join('+')).join(' | ')})`);
 
 // --- Angebote der Woche: tippen, fotografieren, Treffer, Rezept daraus, das andere Handy
 await t.click('.tab[data-tab="angebote"]');
@@ -378,6 +380,11 @@ check(await bis(async () => (await t.locator('#a-auto .a-item').count()) === 1) 
 await t.fill('#a-suche', '');
 await t.click('[data-a-filter="zutaten"]');
 check(await t.locator('#a-auto .a-item .x').count() === 0, 'automatische Angebote lassen sich nicht löschen – die kommen wieder');
+// Produktfotos: das Aldi-Hähnchen hat eins (lädt im Test nicht → Bildchen der Zutat), die anderen gleich das Bildchen
+const hBild = t.locator('#a-auto .a-item', { hasText: 'Hähnchenbrustfilet-Teilstücke' }).locator('.a-bild img');
+check(await bis(async () => (await hBild.getAttribute('src')) === 'bilder/zutaten/poultry-leg.svg') && (await hBild.getAttribute('referrerpolicy')) === 'no-referrer' && (await t.locator('#a-auto .a-item', { hasText: 'Hähnchenbrustfilet-Teilstücke' }).locator('.a-bild-zb').count()) === 1, 'Produktfoto lädt nicht → das Bildchen der Zutat springt ein');
+const aBilder = await t.$$eval('#a-auto .a-item .a-bild img', (is) => is.map((i) => i.getAttribute('src')));
+check(aBilder.length === 7 && aBilder.every((src) => src.startsWith('bilder/zutaten/')) && aBilder.includes('bilder/zutaten/bell-pepper.svg'), `jedes Angebot hat ein Bild (${aBilder.map((x) => x.split('/').pop()).join(', ')})`);
 check((await t.locator('#a-passt-liste li').count()) >= 5 && (await t.locator('#a-passt-liste li').first().innerText()).includes('im Angebot'), 'und „Passt zu euren Rezepten“ nutzt sie');
 check(await t.locator('#a-form').count() === 1 && (await t.locator('#a-liste .a-item').count()) === 0 && !(await t.locator('#a-text').isVisible()), 'eigene Angebote: Formular zugeklappt, noch keine');
 await t.click('.a-eigene summary');

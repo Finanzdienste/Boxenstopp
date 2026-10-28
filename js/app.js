@@ -93,6 +93,15 @@ document.addEventListener('click', (ev) => {
   if (klickKi(el)) return;
   klickRezepte(el);
 });
+// Ein Produktfoto, das nicht lädt (Händler hat es weggenommen, kein Netz): das Bildchen der Zutat zeigen
+document.addEventListener('error', (ev) => {
+  const img = ev.target;
+  if (img?.tagName !== 'IMG' || !img.dataset.ersatz) return;
+  const ersatz = img.dataset.ersatz;
+  delete img.dataset.ersatz;
+  img.src = ersatz;
+  img.parentElement?.classList.add('a-bild-zb');
+}, true);
 document.addEventListener('input', (ev) => { if (!eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
 document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target)) aenderungAngebote(ev.target); });
 document.addEventListener('submit', (ev) => { if (!absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenRezepte(ev)) absendenListe(ev); });

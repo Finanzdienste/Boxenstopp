@@ -96,6 +96,37 @@ const vorrat = await page.evaluate(async (v) => {
 }, version);
 check(vorrat.filter((k) => !k.startsWith('/daten/')).length >= shell.length - 1, `im Vorrat liegt die App (${vorrat.length} Dateien, SHELL hat ${shell.length})`);
 check(vorrat.includes('/daten/rezepte.json'), 'die zuletzt geladenen Rezepte liegen ebenfalls im Vorrat');
+const bildchen = JSON.parse(readFileSync(path.join(ROOT, 'bilder', 'zutaten', 'alle.json'), 'utf8'));
+const ohneBildchen = bildchen.filter((b) => !vorrat.includes(`/bilder/zutaten/${b}.svg`));
+check(!ohneBildchen.length, `alle ${bildchen.length} Zutaten-Bildchen liegen schon nach dem Installieren im Vorrat${ohneBildchen.length ? ` – nicht: ${ohneBildchen.slice(0, 5).join(', ')}` : ''}`);
+
+// Rezeptfotos: eigener Vorrat, der ein Update übersteht; eine neue Fassung räumt die alte weg
+const chiliFoto = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8')).rezepte.find((r) => r.id === 'chili').bild;
+const fotos = await page.evaluate(async (foto) => {
+  const c = await caches.open('boxenstopp-bilder-v1');
+  const namen = async () => (await c.keys()).map((r) => { const u = new URL(r.url); return u.pathname + u.search; });
+  let vorher = [];
+  for (let i = 0; i < 50; i++) {
+    vorher = await namen();
+    if (vorher.includes(`/${foto}`)) break;
+    await new Promise((f) => { setTimeout(f, 100); });
+  }
+  // So täte es eine ältere Fassung: anderes ?v=, gleiche Datei
+  const alt = foto.replace(/\?v=.*$/, '?v=00000000');
+  await c.delete(`/${foto}`);
+  await c.put(`/${alt}`, new Response('alt', { headers: { 'content-type': 'image/webp' } }));
+  const res = await fetch(foto);
+  const groesse = (await res.arrayBuffer()).byteLength;
+  let nachher = [];
+  for (let i = 0; i < 30; i++) {
+    nachher = await namen();
+    if (nachher.includes(`/${foto}`) && !nachher.includes(`/${alt}`)) break;
+    await new Promise((f) => { setTimeout(f, 100); });
+  }
+  return { vorher, nachher, alt, groesse };
+}, chiliFoto);
+check(fotos.vorher.includes(`/${chiliFoto}`) && !fotos.vorher.some((k) => k.startsWith('/bilder/zutaten/')), `die Rezeptfotos liegen im eigenen Vorrat, die Bildchen nicht (${fotos.vorher.length} Fotos)`);
+check(fotos.groesse > 1000 && fotos.nachher.includes(`/${chiliFoto}`) && !fotos.nachher.includes(`/${fotos.alt}`), 'eine neue Fassung eines Fotos räumt die alte (anderes ?v=) aus dem Vorrat');
 
 await aus();
 await page.reload({ waitUntil: 'load' });
@@ -103,7 +134,22 @@ await page.waitForFunction(() => document.querySelectorAll('#grid .box').length 
 check(await page.title() === 'Boxenstopp', 'ohne Server öffnet die App');
 check(await page.locator('#grid .box').count() === 50, 'ohne Server: alle 50 Rezepte');
 check(await page.locator('#list-body .item-name', { hasText: 'Bananen' }).count() === 1, 'ohne Server: die Liste mit den Bananen');
+// Ein Bild ist da, wenn es geladen ist (die Bilder laden faul, also erst, wenn ihr Reiter offen ist)
+const bildDa = (loc) => loc.evaluate(async (img) => {
+  if (!img.complete) {
+    await Promise.race([
+      new Promise((f) => { img.addEventListener('load', f, { once: true }); img.addEventListener('error', f, { once: true }); }),
+      new Promise((f) => { setTimeout(f, 3000); }),
+    ]);
+  }
+  return { breite: img.naturalWidth, src: img.getAttribute('src') || '' };
+}).catch(() => ({ breite: 0, src: '' }));
+await page.click('.tab[data-tab="einkauf"]');
+const banane = await bildDa(page.locator('#list-body .item', { hasText: 'Bananen' }).locator('.zb').first());
+check(banane.breite > 0 && banane.src.endsWith('/banana.svg'), `ohne Server: das Bildchen der Bananen ist da (${banane.src || 'keins'})`);
 await page.click('.tab[data-tab="rezepte"]');
+const foto = await bildDa(page.locator('[data-open="chili"] .box-foto img'));
+check(foto.breite === 800, `ohne Server: das Chili-Foto kommt aus dem Vorrat (${foto.breite} px breit)`);
 await page.click('[data-open="gulasch"]');
 check((await page.locator('#d-title').innerText()) === 'Rindergulasch mit Kartoffeln', 'ohne Server: ein Rezept öffnet');
 const schrift = await page.evaluate(() => document.fonts.check('16px "Permanent Marker"'));
