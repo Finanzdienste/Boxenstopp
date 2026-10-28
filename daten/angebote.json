@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T09:20:44.848Z",
+ "stand": "2026-10-28T09:59:24.078Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
@@ -12,28 +12,28 @@
    "ok": true,
    "anzahl": 130,
    "hinweis": "Aldi Nord, bundesweit",
-   "stand": "2026-10-28T09:14:14.365Z"
+   "stand": "2026-10-28T09:31:59.932Z"
   },
   {
    "laden": "Lidl",
-   "ok": false,
-   "anzahl": 0,
-   "hinweis": "heute nicht erreichbar (Die Antwort wurde zu lang und ist abgebrochen. Nochmal versuchen, vielleicht mit)",
-   "stand": "2026-10-28T08:08:39.771Z"
+   "ok": true,
+   "anzahl": 7,
+   "hinweis": "aus dem Aktionsprospekt gelesen (26.10.–31.10.), Seiten 1–4, 5–12, 13–16, 21–25 nicht lesbar, Zeit um, Rest nicht gelesen, Lesefehler möglich",
+   "stand": "2026-10-28T09:59:19.703Z"
   },
   {
    "laden": "Kaufland",
    "ok": true,
    "anzahl": 261,
    "hinweis": "bundesweite Angebote, regional kann es abweichen",
-   "stand": "2026-10-28T09:20:42.419Z"
+   "stand": "2026-10-28T09:59:20.738Z"
   },
   {
    "laden": "Penny",
    "ok": true,
    "anzahl": 73,
    "hinweis": "KW 44, bundesweit",
-   "stand": "2026-10-28T09:20:44.821Z"
+   "stand": "2026-10-28T09:59:24.049Z"
   }
  ],
  "angebote": [
@@ -576,6 +576,56 @@
    "einheit": "g",
    "bis": "2026-10-28",
    "k": "butter"
+  },
+  {
+   "id": "a-0v2fj77",
+   "laden": "Lidl",
+   "name": "Frau Antje Beste Butter",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "butter"
+  },
+  {
+   "id": "a-13jtfrm",
+   "laden": "Lidl",
+   "name": "Heinz Tomaten Ketchup",
+   "preis": 3.49,
+   "menge": 1170,
+   "einheit": "ml",
+   "bis": "2026-10-31",
+   "k": "tomaten"
+  },
+  {
+   "id": "a-0mz6n84",
+   "laden": "Lidl",
+   "name": "Kerrygold Irische Käsescheiben Cheddar",
+   "preis": 1.59,
+   "menge": 120,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "cheddar"
+  },
+  {
+   "id": "a-0j8oc7e",
+   "laden": "Lidl",
+   "name": "Maribel Bio Blütenhonig",
+   "preis": 2.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "honig"
+  },
+  {
+   "id": "a-1ul7l0g",
+   "laden": "Lidl",
+   "name": "Patros Weißkäse",
+   "preis": 2.22,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-10-31",
+   "k": "feta"
   },
   {
    "id": "a-19v6i56",
@@ -3314,6 +3364,26 @@
    "preis": 2.99,
    "menge": null,
    "einheit": "",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-0iel8cy",
+   "laden": "Lidl",
+   "name": "Freshona Obst XXL Beeren",
+   "preis": 3.79,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-10-31",
+   "k": ""
+  },
+  {
+   "id": "a-01l7arb",
+   "laden": "Lidl",
+   "name": "Heinz Mayonnaise Das Original",
+   "preis": 3.49,
+   "menge": 800,
+   "einheit": "ml",
    "bis": "2026-10-31",
    "k": ""
   },
