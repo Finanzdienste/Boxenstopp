@@ -1,9 +1,8 @@
 {
- "stand": "2026-10-28T13:39:22.109Z",
+ "stand": "2026-10-28T20:07:22.478Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
-  "Netto",
   "Edeka"
  ],
  "quellen": [
@@ -12,7 +11,7 @@
    "ok": true,
    "anzahl": 122,
    "hinweis": "Aldi Nord, bundesweit",
-   "stand": "2026-10-28T13:39:17.874Z"
+   "stand": "2026-10-28T20:07:22.450Z"
   },
   {
    "laden": "Lidl",
