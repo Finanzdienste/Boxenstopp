@@ -1464,7 +1464,8 @@
     ],
     "gesamt": 100
    },
-   "time": 100
+   "time": 100,
+   "bild": "bilder/rezepte/butter-chicken.webp?v=68d05471"
   },
   {
    "id": "gulasch",
@@ -2070,7 +2071,8 @@
     ],
     "gesamt": 220
    },
-   "time": 220
+   "time": 220,
+   "bild": "bilder/rezepte/gulasch.webp?v=ec24e671"
   },
   {
    "id": "tomaten-pasta",
@@ -2731,7 +2733,8 @@
     ],
     "gesamt": 85
    },
-   "time": 85
+   "time": 85,
+   "bild": "bilder/rezepte/tomaten-pasta.webp?v=baed91e8"
   },
   {
    "id": "mac-cheese",
@@ -3333,7 +3336,8 @@
     ],
     "gesamt": 75
    },
-   "time": 75
+   "time": 75,
+   "bild": "bilder/rezepte/mac-cheese.webp?v=94a6d968"
   },
   {
    "id": "teriyaki",
@@ -3987,7 +3991,8 @@
     ],
     "gesamt": 85
    },
-   "time": 85
+   "time": 85,
+   "bild": "bilder/rezepte/teriyaki.webp?v=a3516fa1"
   },
   {
    "id": "thai-curry",
@@ -5379,7 +5384,8 @@
     ],
     "gesamt": 90
    },
-   "time": 90
+   "time": 90,
+   "bild": "bilder/rezepte/burrito-bowl.webp?v=04daab1f"
   },
   {
    "id": "gyros",
@@ -6069,7 +6075,8 @@
     ],
     "gesamt": 90
    },
-   "time": 90
+   "time": 90,
+   "bild": "bilder/rezepte/gyros.webp?v=b0d0ae08"
   },
   {
    "id": "bolognese",
@@ -6775,7 +6782,8 @@
     ],
     "gesamt": 115
    },
-   "time": 115
+   "time": 115,
+   "bild": "bilder/rezepte/bolognese.webp?v=f86e33e6"
   },
   {
    "id": "lasagne",
@@ -7510,7 +7518,8 @@
     ],
     "gesamt": 135
    },
-   "time": 135
+   "time": 135,
+   "bild": "bilder/rezepte/lasagne.webp?v=03a7a241"
   },
   {
    "id": "ofen-haehnchen",
@@ -8162,7 +8171,8 @@
     ],
     "gesamt": 105
    },
-   "time": 105
+   "time": 105,
+   "bild": "bilder/rezepte/ofen-haehnchen.webp?v=d75c623f"
   },
   {
    "id": "erdnuss-nudeln",
@@ -8820,7 +8830,8 @@
     ],
     "gesamt": 85
    },
-   "time": 85
+   "time": 85,
+   "bild": "bilder/rezepte/erdnuss-nudeln.webp?v=38c6dc51"
   },
   {
    "id": "geschnetzeltes",
@@ -9436,7 +9447,8 @@
     ],
     "gesamt": 80
    },
-   "time": 80
+   "time": 80,
+   "bild": "bilder/rezepte/geschnetzeltes.webp?v=ae1396f8"
   },
   {
    "id": "balkan-pfanne",
@@ -10099,7 +10111,8 @@
     ],
     "gesamt": 100
    },
-   "time": 100
+   "time": 100,
+   "bild": "bilder/rezepte/balkan-pfanne.webp?v=ecfa32b7"
   },
   {
    "id": "gnocchi",
@@ -10729,7 +10742,8 @@
     ],
     "gesamt": 85
    },
-   "time": 85
+   "time": 85,
+   "bild": "bilder/rezepte/gnocchi.webp?v=8e24e602"
   },
   {
    "id": "gelbes-curry",
@@ -11345,7 +11359,8 @@
     ],
     "gesamt": 100
    },
-   "time": 100
+   "time": 100,
+   "bild": "bilder/rezepte/gelbes-curry.webp?v=f6ccd0f6"
   },
   {
    "id": "shawarma-bowl",
@@ -12051,7 +12066,8 @@
     ],
     "gesamt": 80
    },
-   "time": 80
+   "time": 80,
+   "bild": "bilder/rezepte/shawarma-bowl.webp?v=54644d72"
   },
   {
    "id": "jambalaya",
@@ -12672,7 +12688,8 @@
     ],
     "gesamt": 110
    },
-   "time": 110
+   "time": 110,
+   "bild": "bilder/rezepte/jambalaya.webp?v=8761ef2e"
   },
   {
    "id": "frikassee",
@@ -13293,7 +13310,8 @@
     ],
     "gesamt": 90
    },
-   "time": 90
+   "time": 90,
+   "bild": "bilder/rezepte/frikassee.webp?v=ffd6afdc"
   },
   {
    "id": "kung-pao",
@@ -13930,7 +13948,8 @@
     ],
     "gesamt": 75
    },
-   "time": 75
+   "time": 75,
+   "bild": "bilder/rezepte/kung-pao.webp?v=8412d282"
   },
   {
    "id": "honig-senf",
@@ -14475,7 +14494,8 @@
     ],
     "gesamt": 120
    },
-   "time": 120
+   "time": 120,
+   "bild": "bilder/rezepte/honig-senf.webp?v=f8112161"
   },
   {
    "id": "pesto-nudelsalat",
@@ -14972,7 +14992,8 @@
     ],
     "gesamt": 60
    },
-   "time": 60
+   "time": 60,
+   "bild": "bilder/rezepte/pesto-nudelsalat.webp?v=348c235c"
   },
   {
    "id": "sweet-chili",
@@ -15584,7 +15605,8 @@
     ],
     "gesamt": 80
    },
-   "time": 80
+   "time": 80,
+   "bild": "bilder/rezepte/sweet-chili.webp?v=39e3c7e8"
   },
   {
    "id": "zitronen-couscous",
@@ -16235,7 +16257,8 @@
     ],
     "gesamt": 90
    },
-   "time": 90
+   "time": 90,
+   "bild": "bilder/rezepte/zitronen-couscous.webp?v=e2bce76c"
   },
   {
    "id": "biryani",
@@ -16886,7 +16909,8 @@
     ],
     "gesamt": 135
    },
-   "time": 135
+   "time": 135,
+   "bild": "bilder/rezepte/biryani.webp?v=4100f4ed"
   },
   {
    "id": "enchilada",
@@ -17527,7 +17551,8 @@
     ],
     "gesamt": 115
    },
-   "time": 115
+   "time": 115,
+   "bild": "bilder/rezepte/enchilada.webp?v=039d0b1c"
   },
   {
    "id": "schaschlik",
@@ -18123,7 +18148,8 @@
     ],
     "gesamt": 95
    },
-   "time": 95
+   "time": 95,
+   "bild": "bilder/rezepte/schaschlik.webp?v=e87d3185"
   },
   {
    "id": "paprikahuhn",
@@ -18752,7 +18778,8 @@
     ],
     "gesamt": 100
    },
-   "time": 100
+   "time": 100,
+   "bild": "bilder/rezepte/paprikahuhn.webp?v=c124a64b"
   },
   {
    "id": "gebratener-reis",
@@ -19341,7 +19368,8 @@
     ],
     "gesamt": 75
    },
-   "time": 75
+   "time": 75,
+   "bild": "bilder/rezepte/gebratener-reis.webp?v=0c4fdfef"
   },
   {
    "id": "haehnchen-eintopf",
@@ -20009,7 +20037,8 @@
     ],
     "gesamt": 125
    },
-   "time": 125
+   "time": 125,
+   "bild": "bilder/rezepte/haehnchen-eintopf.webp?v=4ea9d31a"
   },
   {
    "id": "pasta-limone",
@@ -20618,7 +20647,8 @@
     ],
     "gesamt": 75
    },
-   "time": 75
+   "time": 75,
+   "bild": "bilder/rezepte/pasta-limone.webp?v=faed4158"
   },
   {
    "id": "kichererbsen-curry",
@@ -21258,7 +21288,8 @@
     ],
     "gesamt": 90
    },
-   "time": 90
+   "time": 90,
+   "bild": "bilder/rezepte/kichererbsen-curry.webp?v=fa16aea6"
   },
   {
    "id": "suesskartoffel-blech",
@@ -21816,7 +21847,8 @@
     ],
     "gesamt": 105
    },
-   "time": 105
+   "time": 105,
+   "bild": "bilder/rezepte/suesskartoffel-blech.webp?v=d15d684e"
   },
   {
    "id": "beef-broccoli",
@@ -22464,7 +22496,8 @@
     ],
     "gesamt": 80
    },
-   "time": 80
+   "time": 80,
+   "bild": "bilder/rezepte/beef-broccoli.webp?v=55115590"
   },
   {
    "id": "koettbullar",
@@ -23822,7 +23855,8 @@
     ],
     "gesamt": 150
    },
-   "time": 150
+   "time": 150,
+   "bild": "bilder/rezepte/cottage-pie.webp?v=5d96fc6f"
   },
   {
    "id": "moussaka",
@@ -24506,7 +24540,8 @@
     ],
     "gesamt": 170
    },
-   "time": 170
+   "time": 170,
+   "bild": "bilder/rezepte/moussaka.webp?v=b47950ee"
   },
   {
    "id": "taco-reis",
@@ -25162,7 +25197,8 @@
     ],
     "gesamt": 85
    },
-   "time": 85
+   "time": 85,
+   "bild": "bilder/rezepte/taco-reis.webp?v=f1c27ed9"
   },
   {
    "id": "hackbaellchen",
@@ -25765,7 +25801,8 @@
     ],
     "gesamt": 105
    },
-   "time": 105
+   "time": 105,
+   "bild": "bilder/rezepte/hackbaellchen.webp?v=b613234b"
   },
   {
    "id": "kohl-hack",
@@ -26317,7 +26354,8 @@
     ],
     "gesamt": 120
    },
-   "time": 120
+   "time": 120,
+   "bild": "bilder/rezepte/kohl-hack.webp?v=0beba712"
   },
   {
    "id": "frikadellen",
@@ -26946,7 +26984,8 @@
     ],
     "gesamt": 95
    },
-   "time": 95
+   "time": 95,
+   "bild": "bilder/rezepte/frikadellen.webp?v=efcac539"
   },
   {
    "id": "giouvetsi",
@@ -27498,7 +27537,8 @@
     ],
     "gesamt": 75
    },
-   "time": 75
+   "time": 75,
+   "bild": "bilder/rezepte/giouvetsi.webp?v=2c746907"
   },
   {
    "id": "orient-bulgur",
@@ -28167,7 +28207,8 @@
     ],
     "gesamt": 85
    },
-   "time": 85
+   "time": 85,
+   "bild": "bilder/rezepte/orient-bulgur.webp?v=67966e1a"
   },
   {
    "id": "massaman",
@@ -28794,7 +28835,8 @@
     ],
     "gesamt": 155
    },
-   "time": 155
+   "time": 155,
+   "bild": "bilder/rezepte/massaman.webp?v=9d50934b"
   },
   {
    "id": "puten-ananas-curry",
@@ -29421,7 +29463,8 @@
     ],
     "gesamt": 85
    },
-   "time": 85
+   "time": 85,
+   "bild": "bilder/rezepte/puten-ananas-curry.webp?v=b18f368d"
   },
   {
    "id": "puten-pilaw",
@@ -30104,7 +30147,8 @@
     ],
     "gesamt": 100
    },
-   "time": 100
+   "time": 100,
+   "bild": "bilder/rezepte/puten-pilaw.webp?v=8d9e33c9"
   },
   {
    "id": "dal",
@@ -30780,7 +30824,8 @@
     ],
     "gesamt": 95
    },
-   "time": 95
+   "time": 95,
+   "bild": "bilder/rezepte/dal.webp?v=96882bf7"
   },
   {
    "id": "cheeseburger",
@@ -31385,7 +31430,8 @@
     ],
     "gesamt": 90
    },
-   "time": 90
+   "time": 90,
+   "bild": "bilder/rezepte/cheeseburger.webp?v=6fa65586"
   },
   {
    "id": "pulled-chicken",
@@ -32032,7 +32078,8 @@
     ],
     "gesamt": 150
    },
-   "time": 150
+   "time": 150,
+   "bild": "bilder/rezepte/pulled-chicken.webp?v=852c541c"
   }
  ],
  "katalog": {
