@@ -10,7 +10,7 @@ import { pruefer, ROOT } from './hilfe.mjs';
 import { zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE } from '../js/angebote.js';
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg } from '../js/liste.js';
 import { systemText, nutzerText } from '../js/ki.js';
-import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, kalenderwoche } from '../werkzeug/angebote.mjs';
+import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, mitAusweichen, kalenderwoche } from '../werkzeug/angebote.mjs';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -149,6 +149,36 @@ const anfragenMock = (zuViel) => {
   fehler = null;
   try { await lidlStapelLesen(stapel, { von: '', bis: '', anfragen: kaputt }); } catch (e) { fehler = e; }
   check(fehler?.art === 'schluessel', 'Lidl: falscher Schlüssel kommt als Fehler durch');
+}
+
+// --- Ausweichen: Überlastung mit Pausen wiederholen, dann das nächste Modell
+{
+  const fehlerMit = (art) => { const e = new Error(art); e.art = art; return e; };
+  const laufe = async (plan) => {
+    const rufe = [];
+    const meldungen = [];
+    const anfragen = async (rumpf, { modell }) => {
+      rufe.push(modell);
+      const was = plan[modell]?.shift() || 'ok';
+      if (was !== 'ok') throw fehlerMit(was);
+      return { eingabe: { angebote: [] }, modell };
+    };
+    const f = mitAusweichen({ schluessel: 'k', modelle: ['a', 'b', 'c'], warten: [1, 1], anfragen, melde: (m) => meldungen.push(m) });
+    let ergebnis = null;
+    let fehler = null;
+    try { ergebnis = await f({}); ergebnis = [ergebnis, await f({})]; } catch (e) { fehler = e; }
+    return { rufe, meldungen, ergebnis, fehler };
+  };
+  let l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ok'] });
+  check(l.ergebnis?.[0]?.modell === 'a' && l.rufe.join() === 'a,a,a,a' && !l.meldungen.length, 'Ausweichen: zweimal überlastet, dritter Versuch klappt, Modell bleibt');
+  l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ueberlastet'] });
+  check(l.ergebnis?.[0]?.modell === 'b' && l.ergebnis?.[1]?.modell === 'b' && l.rufe.join() === 'a,a,a,b,b' && /a überlastet, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: dreimal überlastet → nächstes Modell, auch für die folgende Anfrage');
+  l = await laufe({ a: ['modell'], b: ['modell'] });
+  check(l.ergebnis?.[0]?.modell === 'c' && l.rufe.join() === 'a,b,c,c' && /a gibt es nicht, weiter mit b/.test(l.meldungen[0]), 'Ausweichen: unbekanntes Modell → sofort das nächste');
+  l = await laufe({ a: ['ueberlastet', 'ueberlastet', 'ueberlastet'], b: ['modell'], c: ['ueberlastet', 'ueberlastet', 'ueberlastet'] });
+  check(l.fehler?.art === 'ueberlastet' && l.rufe.join() === 'a,a,a,b,c,c,c', 'Ausweichen: alle Modelle durch → Fehler');
+  l = await laufe({ a: ['schluessel'] });
+  check(l.fehler?.art === 'schluessel' && l.rufe.join() === 'a', 'Ausweichen: andere Fehler sofort nach oben');
 }
 
 // --- geminiAnfragen gegen einen Mock von generateContent

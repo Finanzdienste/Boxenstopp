@@ -213,7 +213,46 @@ const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
 const LIDL_ZEIT = 18 * 60e3; // danach nichts mehr anfragen (der Lauf darf 30 Minuten)
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_ZEIT = 240000; // je Anfrage
+// Das Modell der App zuerst; ist es überlastet (im Gratis-Kontingent kommt
+// das vor) oder gibt es das nicht mehr, das nächste – ältere haben meist Luft.
+const GEMINI_MODELLE = [ANBIETER.gemini.modell, 'gemini-3.8-flash-lite', 'gemini-3-flash', 'gemini-2.5-flash'];
+const GEMINI_WARTEN = [20000, 45000]; // Pausen vor dem 2. und 3. Versuch bei Überlastung
 const pause = (ms) => new Promise((r) => { setTimeout(r, ms); });
+
+/** Die Modelle, die der Schlüssel für generateContent nutzen darf (nur Namen, fürs Log). */
+export async function geminiModelle(schluessel, api = GEMINI_API) {
+  const res = await fetch(`${api}?pageSize=200`, { headers: { 'x-goog-api-key': schluessel } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const j = await res.json();
+  return (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes('generateContent')).map((m) => String(m.name || '').replace(/^models\//, '')).filter((n) => /gemini/.test(n)).sort();
+}
+
+/*
+ * geminiAnfragen mit Ausweichen: bei Überlastung bis zu drei Versuche mit
+ * Pause, dann (wie bei einem unbekannten Modell) das nächste Modell aus
+ * modelle – und das bleibt für die folgenden Anfragen. anfragen(rumpf, opt)
+ * ist austauschbar (Tests), warten die Pausen.
+ */
+export function mitAusweichen({ schluessel, modelle = GEMINI_MODELLE, warten = GEMINI_WARTEN, anfragen = geminiAnfragen, melde = () => {} }) {
+  let i = 0;
+  return async (rumpf) => {
+    for (let versuch = 0; ; versuch++) {
+      try {
+        return await anfragen(rumpf, { schluessel, modell: modelle[i] });
+      } catch (e) {
+        const weiter = i < modelle.length - 1;
+        if (e?.art === 'ueberlastet' && versuch < warten.length) { await pause(warten[versuch]); continue; }
+        if ((e?.art === 'ueberlastet' || e?.art === 'modell') && weiter) {
+          melde(`${modelle[i]} ${e.art === 'modell' ? 'gibt es nicht' : 'überlastet'}, weiter mit ${modelle[i + 1]}`);
+          i++;
+          versuch = -1;
+          continue;
+        }
+        throw e;
+      }
+    }
+  };
+}
 
 /*
  * Der Rumpf für Geminis models/<modell>:generateContent – ohne Streaming,
@@ -347,8 +386,8 @@ async function lidl() {
   // Der laufende Prospekt und, ab Freitag, auch der nächste
   const passende = alle.filter((p) => p.bis >= h && (p.von <= h || new Date().getUTCDay() >= 5 || new Date().getUTCDay() === 0)).slice(0, 2);
   if (!passende.length) throw new Error('kein laufender Aktionsprospekt gefunden');
-  const anfragen = (rumpf) => geminiAnfragen(rumpf, { schluessel: GEMINI_KEY });
   const melde = (s) => console.log(`  Lidl ${s}`);
+  const anfragen = mitAusweichen({ schluessel: GEMINI_KEY, melde });
   const start = Date.now();
   const angebote = [];
   const nichtLesbar = [];
@@ -381,6 +420,10 @@ async function lidl() {
       await pause(7000);
     }
     if (zeitUm) break;
+  }
+  if (nichtLesbar.length) {
+    // Fürs Log: welche Modelle der Schlüssel überhaupt nutzen darf
+    try { melde(`Modelle mit diesem Schlüssel: ${(await geminiModelle(GEMINI_KEY)).join(', ')}`); } catch (e) { melde(`Modellliste nicht lesbar (${e?.message || e})`); }
   }
   if (!gelesen) throw new Error(letzter ? `keine Seite lesbar (${String(letzter.message || letzter).slice(0, 60)})` : 'keine Seiten im Prospekt');
   const teile = [`aus dem Aktionsprospekt gelesen (${passende.map((p) => `${p.von.slice(8)}.${p.von.slice(5, 7)}.–${p.bis.slice(8)}.${p.bis.slice(5, 7)}.`).join(', ')})`];
