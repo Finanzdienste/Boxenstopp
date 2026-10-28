@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T08:08:43.939Z",
+ "stand": "2026-10-28T09:20:44.848Z",
  "woche": "2026-44",
  "gesperrt": [
   "Rewe",
@@ -12,13 +12,13 @@
    "ok": true,
    "anzahl": 130,
    "hinweis": "Aldi Nord, bundesweit",
-   "stand": "2026-10-28T08:08:39.770Z"
+   "stand": "2026-10-28T09:14:14.365Z"
   },
   {
    "laden": "Lidl",
    "ok": false,
    "anzahl": 0,
-   "hinweis": "ohne GEMINI_KEY nicht gelesen",
+   "hinweis": "heute nicht erreichbar (Die Antwort wurde zu lang und ist abgebrochen. Nochmal versuchen, vielleicht mit)",
    "stand": "2026-10-28T08:08:39.771Z"
   },
   {
@@ -26,14 +26,14 @@
    "ok": true,
    "anzahl": 261,
    "hinweis": "bundesweite Angebote, regional kann es abweichen",
-   "stand": "2026-10-28T08:08:41.388Z"
+   "stand": "2026-10-28T09:20:42.419Z"
   },
   {
    "laden": "Penny",
    "ok": true,
    "anzahl": 73,
    "hinweis": "KW 44, bundesweit",
-   "stand": "2026-10-28T08:08:43.908Z"
+   "stand": "2026-10-28T09:20:44.821Z"
   }
  ],
  "angebote": [
