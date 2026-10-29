@@ -13,13 +13,14 @@ import { app, $, ansicht, zeigeReiter, melde, lese } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, API } from './speicher.js';
 import { opZusammen } from './liste.js';
 import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
-import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt } from './ansicht-rezepte.js';
+import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
 import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
+import { amyZeichnen, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, absendenAmy } from './ansicht-amy.js';
 
 const apiBasis = () => lese('__api', null) || API;
 /** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
@@ -37,6 +38,7 @@ function beiAenderung(stand) {
   zahlZeichnen();
   angeboteZeichnen();
   angeboteZahl();
+  amyZeichnen();
   // Ein Rezept aus der Resteverwertung kann auf dem anderen Handy gelöscht worden sein.
   if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
   if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
@@ -54,6 +56,8 @@ function nimmSpeicher(neu) {
 
 // Angebote oder Laden geändert (ansicht-angebote.js): die Hinweise auf der Liste mitziehen
 app.listeNeu = () => listeZeichnen();
+// Tempo vergessen (ansicht-rezepte.js): auch die Zeiten bei Amy
+app.tempoNeu = () => amyZeichnen();
 
 app.verbinden = async (token, name) => {
   const ergebnis = await pruefeSchluessel(token, { api: apiBasis() });
@@ -63,7 +67,7 @@ app.verbinden = async (token, name) => {
   app.zugang = { token, name };
   speichereZugang(app.zugang);
   nimmSpeicher(github({ token, name, api: apiBasis(), takt: takt() }));
-  if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length)) app.aendern(opZusammen(bisher.items, bisher.ki));
+  if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || Object.keys(bisher.amy || {}).length)) app.aendern(opZusammen(bisher.items, bisher.ki, bisher.amy));
   lokalLoeschen();
   statusZeichnen();
   privateAngebote();
@@ -83,13 +87,25 @@ app.trennen = () => {
 
 /* --------------------------------------------------------------- Klicks */
 
+/** Ein Timer oben in der Leiste: zum Schritt springen – bei Amys Rezepten in ihren Reiter. */
+function zumTimerSchritt(tm) {
+  const rid = tm.dataset.timerZu;
+  if (rid.startsWith('amy-')) amyZuSchritt(rid, Number(tm.dataset.timerSchritt)); else zuSchritt(rid, Number(tm.dataset.timerSchritt));
+}
+
 document.addEventListener('click', (ev) => {
   const el = ev.target.closest('button');
-  if (!el || el.disabled) return;
+  if (!el) {
+    // Die Timer oben sind keine Knöpfe (darin stecken +1 und ×) – antippen springt zum Schritt
+    const tm = ev.target.closest('[data-timer-zu]');
+    if (tm) zumTimerSchritt(tm);
+    return;
+  }
+  if (el.disabled) return;
   if (el.dataset.tab) { zeigeReiter(el.dataset.tab); return; }
   if (klickLob(el)) return;
   if (klickTimer(el)) return;
-  if (el.dataset.timerZu) { zuSchritt(el.dataset.timerZu, Number(el.dataset.timerSchritt)); return; }
+  if (klickAmy(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
   if (klickAnpassen(el)) return;
@@ -105,11 +121,14 @@ document.addEventListener('error', (ev) => {
   img.src = ersatz;
   img.parentElement?.classList.add('a-bild-zb');
 }, true);
-document.addEventListener('input', (ev) => { if (!eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('keydown', (ev) => {
+  if ((ev.key === 'Enter' || ev.key === ' ') && ev.target?.matches?.('[data-timer-zu]')) { ev.preventDefault(); zumTimerSchritt(ev.target); }
+});
+document.addEventListener('input', (ev) => { if (!eingabeAmy(ev.target) && !eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
+document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungRezepte(ev.target)) aenderungAngebote(ev.target); });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
 document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
-document.addEventListener('submit', (ev) => { if (!absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenRezepte(ev)) absendenListe(ev); });
+document.addEventListener('submit', (ev) => { if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenRezepte(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */
 
@@ -150,16 +169,19 @@ async function start() {
     if (leiste.innerHTML !== html) leiste.innerHTML = html;
     leiste.hidden = !html;
     timerZeichnen();
+    amyTimerZeichnen();
   });
   filterZeichnen();
   rasterZeichnen();
   listeZeichnen();
   angeboteZeichnen();
+  amyStart();
   // Die Angebote der Woche kommen nebenbei – ohne Netz bleibt der letzte Stand aus dem Speicher.
   fetch('daten/angebote.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((a) => { if (a) angeboteAutoSetzen(a); }).catch(() => {});
 
   if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
   if (hash === 'angebote') ansicht.tab = 'angebote';
+  if (hash === 'amy') ansicht.tab = 'amy';
   zeigeReiter(ansicht.tab, true);
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
   if (hash === 'reste' || (kiLink && !ausLink)) kiStart({ oeffnen: true });

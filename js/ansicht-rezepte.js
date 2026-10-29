@@ -13,7 +13,8 @@
  */
 import { app, $, $$, ansicht, ansichtMerken, melde, zeigeReiter, istSchmal, lese, schreibe } from './kern.js';
 import { esc, nf1, nfi, heute, tagKurz, abweichung, platzhalter } from './format.js';
-import { zeitVon, dauer } from './zeiten.js';
+import { dauer, timerPlan, timerDauer } from './zeiten.js';
+import { tempoHaken, tempoZurueck, tempoZeit, tempoGelernt, tempoInfo, tempoLoeschen, tempoWiederherstellen, GRUPPEN_TEXT } from './tempo.js';
 import { zahlwort } from './ki-rezept.js';
 import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
 import { lobPruefen, lobGross, tierVorladen } from './lob.js';
@@ -28,7 +29,22 @@ const ZUGEKLAPPT = 'boxenstopp.zugeklappt.v1';
 
 /** Darunter gilt ein Rezept als schnell – mit ehrlichen Zeiten ist keins unter einer Stunde. */
 const SCHNELL = 90;
-const gesamtZeit = (r) => (r.zeit || (r.zeit = zeitVon(r))).gesamt;
+/*
+ * Die Zeiten eines Rezepts in eurem Tempo (tempo.js) – gemerkt, bis das
+ * Handy etwas Neues gelernt hat; das Raster fragt beim Filtern, Sortieren
+ * und Zeichnen oft.
+ */
+const zeitMemo = new WeakMap();
+export function zeitFuer(r) {
+  const g = tempoGelernt();
+  const m = zeitMemo.get(r);
+  if (m && m.g === g) return m.z;
+  const z = tempoZeit(r, g);
+  zeitMemo.set(r, { g, z });
+  return z;
+}
+const gesamtZeit = (r) => zeitFuer(r).gesamt;
+const boxPreis = (r) => kostenRezept(r, app).box || 0;
 
 export const FILTER = [
   ['alle', 'Alle', () => true],
@@ -45,6 +61,17 @@ export const FILTER = [
   ['reste', 'Eigene', (r) => !!r.ki],
 ];
 const alleRezepte = () => [...app.rezepte, ...app.kiRezepte.filter((r) => r.ki?.von?.gespeichert)];
+/* Preis und Reihenfolge: zusätzlich zum Chip, das Handy merkt sie sich (kern.js ansicht). */
+export const PREISE = [1.75, 2, 2.25, 2.5];
+export const SORTIERUNG = [['standard', 'Empfohlen'], ['preis', 'Günstigste'], ['zeit', 'Schnellste']];
+/** 2 → „2 €“, 1.75 → „1,75 €“ – kurz, damit das Auswahlfeld aufs Handy passt. */
+const preisKurz = (x) => `${Number.isInteger(x) ? x : x.toFixed(2).replace('.', ',')} €`;
+const passtPreis = (r) => !ansicht.preis || (boxPreis(r) > 0 && boxPreis(r) <= ansicht.preis + 1e-9);
+function sortiert(liste) {
+  if (ansicht.sort === 'preis') return [...liste].sort((a, b) => (boxPreis(a) || 99) - (boxPreis(b) || 99));
+  if (ansicht.sort === 'zeit') return [...liste].sort((a, b) => gesamtZeit(a) - gesamtZeit(b));
+  return liste;
+}
 /* Suche: Name, Beschreibung, Zutaten – „curry“, „kichererbsen“, „ofen“. Wird nicht gemerkt. */
 let suche = '';
 const normal = (t) => String(t || '').toLowerCase().replace(/ß/g, 'ss').replace(/[äöü]/g, (c) => ({ ä: 'ae', ö: 'oe', ü: 'ue' })[c]);
@@ -63,6 +90,8 @@ const PFADE = {
   runter: '<path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5"/>',
   weiter: '<path d="M9 5l7 7-7 7"/>',
   ki: '<path d="M11 3.5l1.9 5.1 5.1 1.9-5.1 1.9L11 17.5l-1.9-5.1-5.1-1.9 5.1-1.9z"/><path d="M18.5 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  preis: '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.4 1.4 0 0 1 0 2l-6.7 6.7a1.4 1.4 0 0 1-2 0z"/><circle cx="8.2" cy="8.2" r="1.4"/>',
+  sortieren: '<path d="M7 4v16M3.5 7.5L7 4l3.5 3.5M17 20V4M13.5 16.5L17 20l3.5-3.5"/>',
 };
 /*
  * Daumen: ein gemeinsamer pro Gericht (liste.js). Hoch und runter sind
@@ -93,6 +122,11 @@ export const offenesRezept = () => aktuell;
 
 export function filterZeichnen() {
   $('#chips').innerHTML = FILTER.map(([id, label]) => `<button type="button" class="chip" data-filter="${id}" aria-pressed="false">${esc(label)}<span class="n"></span></button>`).join('');
+  const el = $('#sortier');
+  if (el) {
+    el.innerHTML = `<label class="sel">${ic('preis')}<select id="r-preis" aria-label="Höchstens so viel pro Box"><option value="0">Jeder Preis</option>${PREISE.map((x) => `<option value="${x}">Bis ${esc(preisKurz(x))}</option>`).join('')}</select></label>
+<label class="sel">${ic('sortieren')}<select id="r-sort" aria-label="Rezepte sortieren">${SORTIERUNG.map(([id, t]) => `<option value="${id}">${esc(t)}</option>`).join('')}</select></label>`;
+  }
 }
 
 /*
@@ -109,6 +143,14 @@ function rezeptFoto(r, { gross = false } = {}) {
   return gross ? `<div class="d-foto d-foto-ersatz" aria-hidden="true">${bildchen}</div>` : `<span class="box-foto box-foto-ersatz" aria-hidden="true">${bildchen}</span>`;
 }
 
+/** Die Zeit auf der Karte – in eurem Tempo hervorgehoben. */
+function zeitPille(r) {
+  const z = zeitFuer(r);
+  if (z.quelle === 'standard') return `<span class="box-time">${dauer(z.gesamt)}</span>`;
+  const was = z.quelle === 'gemessen' ? `so lange hat es zuletzt gedauert (Standard ${dauer(z.standard)})` : `in deinem Tempo (Standard ${dauer(z.standard)})`;
+  return `<span class="box-time is-tempo" title="${esc(was)}">${dauer(z.gesamt)}</span>`;
+}
+
 function karte(r) {
   const st = rezeptStand(app.stand, r);
   const c = app.stand.cooked[r.id];
@@ -119,7 +161,7 @@ function karte(r) {
   const ko = kostenRezept(r, app);
   const preis = ko.box > 0 ? `<span class="box-cost">≈ ${esc(euro(ko.box))}/Box</span>` : '';
   return `<button type="button" class="box" data-open="${esc(r.id)}">
-${rezeptFoto(r)}<span class="tape">${esc(r.short)}</span><span class="box-time">${dauer(gesamtZeit(r))}</span>
+${rezeptFoto(r)}<span class="tape">${esc(r.short)}</span>${zeitPille(r)}
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}${preis}</span>
 <span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
@@ -154,16 +196,32 @@ export function rasterZeichnen() {
   if (!FILTER.some((f) => f[0] === ansicht.filter)) ansicht.filter = 'alle';
   const f = FILTER.find((x) => x[0] === ansicht.filter);
   const alle = alleRezepte();
-  const liste = alle.filter(f[2]).filter(passtSuche);
-  $('#grid').innerHTML = liste.length ? liste.map(karte).join('') : `<p class="empty">${suche ? `Nichts gefunden für „${esc(suche)}“.` : ansicht.filter === 'liste' ? 'Gerade steht kein Rezept auf der Einkaufsliste.' : 'Hier ist gerade nichts.'}</p>`;
+  const liste = sortiert(alle.filter(f[2]).filter(passtSuche).filter(passtPreis));
+  const leer = suche ? `Nichts gefunden für „${esc(suche)}“${ansicht.preis ? ` bis ${esc(euro(ansicht.preis))} pro Box` : ''}.`
+    : ansicht.preis && alle.filter(f[2]).length ? `Kein Rezept hier kostet höchstens ${esc(euro(ansicht.preis))} pro Box.`
+      : ansicht.filter === 'liste' ? 'Gerade steht kein Rezept auf der Einkaufsliste.' : 'Hier ist gerade nichts.';
+  $('#grid').innerHTML = liste.length ? liste.map(karte).join('') : `<p class="empty">${leer}</p>`;
   for (const b of $$('[data-filter]')) {
     const fx = FILTER.find((x) => x[0] === b.dataset.filter);
     b.setAttribute('aria-pressed', String(b.dataset.filter === ansicht.filter));
     const n = b.querySelector('.n');
-    const zahl = fx ? alle.filter(fx[2]).filter(passtSuche).length : 0;
+    const zahl = fx ? alle.filter(fx[2]).filter(passtSuche).filter(passtPreis).length : 0;
     if (n && fx) n.textContent = String(zahl);
     if (fx?.[0] === 'reste') b.hidden = !zahl && ansicht.filter !== 'reste';
   }
+  // Im Preis-Menü steht, wie viele es jeweils sind
+  const preis = $('#r-preis');
+  if (preis) {
+    const basis = alle.filter(f[2]).filter(passtSuche);
+    for (const o of preis.options) {
+      const x = Number(o.value);
+      o.textContent = x ? `Bis ${preisKurz(x)} (${basis.filter((r) => boxPreis(r) > 0 && boxPreis(r) <= x + 1e-9).length})` : 'Jeder Preis';
+    }
+    preis.value = String(ansicht.preis || 0);
+    preis.closest('.sel')?.classList.toggle('an', !!ansicht.preis);
+  }
+  const sort = $('#r-sort');
+  if (sort) { sort.value = ansicht.sort; sort.closest('.sel')?.classList.toggle('an', ansicht.sort !== 'standard'); }
 }
 
 /* ----------------------------------------------------------------- Detail */
@@ -244,7 +302,8 @@ function detailHTML(r) {
     const idx = zeilen.map((z, i) => [z, i]).filter(([z]) => z.art === art);
     return idx.length ? `<h3 class="sub-h">${titel}</h3><ul class="ings">${idx.map(([z, i]) => zutatZeile(z, i)).join('')}</ul>` : '';
   };
-  const fakten = [`ca. ${dauer(gesamtZeit(r))}`, esc(r.method), `Kühlschrank ${esc(r.fridge)}`, `Tiefkühler ${esc(r.freeze)}`];
+  const z = zeitFuer(r);
+  const fakten = [`ca. ${dauer(z.gesamt)}${z.quelle === 'standard' ? '' : ' <small>dein Tempo</small>'}`, esc(r.method), `Kühlschrank ${esc(r.fridge)}`, `Tiefkühler ${esc(r.freeze)}`];
   const ko = kostenRezept(r, app);
   if (ko.box > 0) fakten.push(`<span class="pill-cost">≈ ${esc(euro(ko.box))} pro Box${ko.luecken ? ' (mind.)' : ''}</span>`);
   const t = r.total;
@@ -315,25 +374,58 @@ ${r.tips && r.tips.length ? bereich('tipps', '<h2 id="h-tips">Tipps</h2>', `<ul 
 }
 
 /*
- * Der Timer eines Schritts läuft über die Wartezeit, wenn es eine gibt
- * („2 Min. + 22 warten“ → 22), sonst über die Minuten des Schritts.
+ * Timer gibt es nur, wo man einen braucht (zeiten.js timerPlan): köcheln,
+ * backen, marinieren, ruhen lassen. Der Plan eines Schritts wird gemerkt.
  */
-export const timerMinuten = (s) => (s.ruhe ? s.ruhe : s.min);
-const timerLabel = (r, s) => `${r.short}: ${s.d.replace(/\s*→.*$/, '').slice(0, 44)}`;
+const plaene = new WeakMap();
+export function planVon(s) {
+  if (!s || typeof s !== 'object') return null;
+  if (!plaene.has(s)) plaene.set(s, timerPlan(s));
+  return plaene.get(s);
+}
+export const timerLabel = (r, s) => `${r.short || r.name}: ${String(s.d).replace(/\{[^}]*\}\s*/g, '').replace(/\s*→.*$/, '').slice(0, 44)}`;
+const UHR = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 10v3.6l2.4 1.5M9.5 2.8h5"/></svg>';
 
-function timerKnopf(r, s, i) {
+/** Der kleine Timer-Knopf eines Schritts – leer, wenn der Schritt keinen braucht. */
+export function timerKnopf(rid, s, i) {
+  const p = planVon(s);
+  if (!p) return '';
+  const t = timerFuer(rid, i);
+  if (t) return `<button type="button" class="step-timer laeuft${t.fertig ? ' fertig' : ''}" data-timer="${i}" aria-label="Timer beenden">${UHR}<span class="tt">${timerText(t)}</span>${t.stufen > 1 && !t.fertig ? `<small>${t.stufe}/${t.stufen}</small>` : ''}</button>`;
+  return `<button type="button" class="step-timer" data-timer="${i}" aria-label="Timer ${esc(timerDauer(p))} starten">${UHR}<span class="tt">${esc(timerDauer(p))}</span></button>`;
+}
+/** Timer zu einem Schritt starten oder, wenn er läuft, beenden. */
+export function timerUmschalten(r, s, i) {
+  const p = planVon(s);
+  if (!p) return;
   const t = timerFuer(r.id, i);
-  const ruhe = s.ruhe ? `<small>+${s.ruhe} warten</small>` : '';
-  if (t) return `<button type="button" class="step-min laeuft${t.fertig ? ' fertig' : ''}" data-timer="${i}" aria-label="Timer beenden">${timerText(t)}<small>${t.fertig ? 'fertig' : 'Timer'}</small></button>`;
-  return `<button type="button" class="step-min" data-timer="${i}" aria-label="Timer ${timerMinuten(s)} Minuten starten">${s.min} Min.${ruhe}</button>`;
+  if (t) { timerStoppen(t.id); melde('Timer beendet'); return; }
+  const [erste, ...weiter] = p.stufen;
+  timerStarten({ rid: r.id, schritt: i, minuten: erste.min, dann: erste.dann, folge: weiter.map((x) => ({ minuten: x.min, dann: x.dann })), label: timerLabel(r, s) });
+  melde(weiter.length ? `Timer läuft: ${timerDauer(p)} – meldet sich nach ${erste.min} Min.` : `Timer läuft: ${timerDauer(p)}`);
 }
 
-function schrittHTML(r, s, i) {
+/*
+ * Die Minuten eines Schritts klein im Text – in eurem Tempo, wenn das Handy
+ * es schon kennt. Bei Timer-Schritten nur, wenn vorher noch etwas zu tun ist
+ * (Hähnchen schneiden, dann 30 Min. marinieren).
+ */
+function minutenText(s, zs) {
+  const min = zs?.min ?? s.min;
+  if (!min) return '';
+  if (planVon(s) && !(s.ruhe && s.min >= 3)) return '';
+  const art = zs?.art || '';
+  const titel = art === 'gemessen' ? ' title="so lange hast du hier gebraucht"' : art === 'tempo' ? ` title="in deinem Tempo – Standard ${s.min} Min."` : '';
+  return ` <span class="step-z${art ? ` is-${art}` : ''}"${titel}>${min} Min.</span>`;
+}
+
+function schrittHTML(r, s, i, z) {
   const liste = s.liste?.length ? `<span class="step-l">${s.liste.map((x) => `<span>${schrittText(x, r)}</span>`).join('')}</span>` : '';
-  return `<li class="step-li${s.neben ? ' neben' : ''}${s.entfaellt ? ' entfaellt' : ''}" data-li="${i}"><button type="button" class="step${s.neben ? ' neben' : ''}" data-step="${i}" aria-pressed="false">
+  const timer = timerKnopf(r.id, s, i);
+  return `<li class="step-li${s.neben ? ' neben' : ''}${s.entfaellt ? ' entfaellt' : ''}${timer ? ' mit-timer' : ''}" data-li="${i}"><button type="button" class="step${s.neben ? ' neben' : ''}" data-step="${i}" aria-pressed="false">
 <span class="step-n"><span class="sn">${i + 1}</span>${ic('check')}</span>
-<span class="step-b">${s.neben ? '<span class="step-k">währenddessen</span>' : ''}${s.entfaellt ? '<span class="step-k">entfällt – Zutat weggelassen</span>' : ''}${s.neu ? '<span class="step-k">neu dazu</span>' : ''}<span class="step-d">${schrittText(s.d, r)}</span>${liste}</span>
-</button>${timerKnopf(r, s, i)}</li>`;
+<span class="step-b">${s.neben ? '<span class="step-k">währenddessen</span>' : ''}${s.entfaellt ? '<span class="step-k">entfällt – Zutat weggelassen</span>' : ''}${s.neu ? '<span class="step-k">neu dazu</span>' : ''}<span class="step-d">${schrittText(s.d, r)}${minutenText(s, z?.schritte[i])}</span>${liste}</span>
+</button>${timer}</li>`;
 }
 
 /** Die Timer-Knöpfe im offenen Rezept nachzeichnen (jede Sekunde, von timer.js). */
@@ -342,22 +434,37 @@ export function timerZeichnen() {
   const r = app.nachId[aktuell];
   if (!r) return;
   const alle = r.ablauf.flatMap((p) => p.schritte);
-  for (const b of $$('#detail .step-min')) {
+  for (const b of $$('#detail .step-timer')) {
     const i = Number(b.dataset.timer);
-    const neu = timerKnopf(r, alle[i], i);
-    if (b.outerHTML !== neu) b.outerHTML = neu;
+    const neu = timerKnopf(r.id, alle[i], i);
+    if (neu && b.outerHTML !== neu) b.outerHTML = neu;
   }
 }
 
+/** Unter den Zeiten: woher sie kommen – Standard, dein Tempo oder das letzte Mal. */
+export function tempoText(z) {
+  const info = tempoInfo();
+  if (z.quelle === 'standard') {
+    return `Zeiten für normales Tempo zu Hause, mit Waschen, Schälen und Abfall wegräumen. ${info.proben ? 'Dein Tempo kennt das Handy noch nicht genau genug –' : 'Hak beim Kochen die Schritte ab, dann'} lernt das Handy, wie lange du brauchst.`;
+  }
+  const faktoren = Object.entries(info.faktor).filter(([k, f]) => k !== 'alle' && Math.abs(f - 1) >= 0.1)
+    .map(([k, f]) => `${GRUPPEN_TEXT[k] || k} ${String(f).replace('.', ',')}×`);
+  const teile = [];
+  if (z.quelle === 'gemessen' && z.letztes) teile.push(`Letztes Mal hat das ganze Rezept <b>${dauer(z.letztes.min)}</b> gedauert${z.letztes.tag ? ` (${esc(tagKurz(z.letztes.tag))})` : ''}${z.letztes.n > 1 ? ` – gerechnet mit den letzten ${Math.min(3, z.letztes.n)} Malen` : ''}.`);
+  else teile.push(`Zeiten in deinem Tempo${faktoren.length ? ` (${faktoren.join(', ')} so lange wie Standard)` : ''}.`);
+  teile.push(`Standard wären ${dauer(z.standard)}; gelernt aus ${info.proben} abgehakten ${info.proben === 1 ? 'Schritt' : 'Schritten'}${info.rezepte ? ` und ${info.rezepte} ganzen ${info.rezepte === 1 ? 'Rezept' : 'Rezepten'}` : ''}.`);
+  return `${teile.join(' ')} <button type="button" class="linkbtn" data-act="tempo-weg">Tempo vergessen</button>`;
+}
+
 function zubereitungHTML(r) {
-  const zeit = r.zeit || (r.zeit = zeitVon(r));
+  const zeit = zeitFuer(r);
   let i = 0;
   const phasen = r.ablauf.map((p, pi) => `<h3 class="phase"><span class="phase-n">${pi + 1}</span><span class="phase-name">${esc(p.t)}</span><span class="phase-t">ca. ${dauer(zeit.phasen[pi])}</span></h3>
-<ol class="steps">${p.schritte.map((s) => schrittHTML(r, s, i++)).join('')}</ol>`).join('');
+<ol class="steps">${p.schritte.map((s) => schrittHTML(r, s, i++, zeit)).join('')}</ol>`).join('');
   const schalen = (r.schalen || []).map((s) => `<li>${schaleSchild(s)}<span class="schale-gr">${esc(s.gr || '')}</span></li>`).join('');
   return bereich('zubereitung', `<h2 id="h-steps">Zubereitung <small>ca. ${dauer(zeit.gesamt)}</small></h2>`, `
-  <div class="zeiten">${r.ablauf.map((p, pi) => `<div><span class="k">${esc(p.t)}</span><b>${dauer(zeit.phasen[pi])}</b></div>`).join('')}</div>
-  <p class="sec-lead">Zeiten für normales Tempo zu Hause, mit Waschen, Schälen und Abfall wegräumen.</p>
+  <div class="zeiten${zeit.quelle === 'standard' ? '' : ' is-tempo'}">${r.ablauf.map((p, pi) => `<div><span class="k">${esc(p.t)}</span><b>${dauer(zeit.phasen[pi])}</b></div>`).join('')}</div>
+  <p class="sec-lead" id="d-tempo">${tempoText(zeit)}</p>
   ${schalen ? `<div class="mise"><h3 class="sub-h">Stell dir bereit</h3><ul class="schalen">${schalen}</ul>${r.geraete?.length ? `<p class="geraete"><b>Außerdem:</b> ${r.geraete.map(esc).join(', ')}, Waage</p>` : ''}</div>` : ''}
   <div class="steps-tools">
     <button type="button" class="switch" id="wake" role="switch" aria-checked="false" data-act="wach" hidden><span class="sw" aria-hidden="true"></span>Bildschirm anlassen</button>
@@ -512,7 +619,7 @@ export function rezeptAufListe(rid) {
 }
 
 export function rezeptVonListe(rid) {
-  const r = app.nachId[rid] || app.extras[rid];
+  const r = app.nachId[rid] || app.extras[rid] || app.amyNach?.[rid];
   const vorher = [];
   for (const [k, d] of Object.entries(app.stand.items)) if (d.parts?.[rid]) vorher.push([k, d.parts[rid]]);
   if (!vorher.length) return;
@@ -581,20 +688,18 @@ export function klickRezepte(el) {
     schritte[aktuell] = [...s];
     schreibe(SCHRITTE, schritte);
     schritteZeichnen();
+    // Die Zeit zwischen den Haken ist das Tempo (tempo.js)
+    tempoHaken(app.nachId[aktuell], i, s.has(i));
     // Phase fertig? Alles fertig? Dann gibt es Lob – und zum Schluss ein Tier.
     lobPruefen(app.nachId[aktuell], s, vorher, { name: app.name() });
     return true;
   }
-  if ('timer' in d) {
+  if ('timer' in d && el.closest('#detail')) {
     const r = app.nachId[aktuell];
     const i = Number(d.timer);
     const s = r?.ablauf.flatMap((p) => p.schritte)[i];
     if (!s) return true;
-    const t = timerFuer(aktuell, i);
-    if (t) { timerStoppen(t.id); melde('Timer beendet'); } else {
-      timerStarten({ rid: aktuell, schritt: i, minuten: timerMinuten(s), label: timerLabel(r, s) });
-      melde(`Timer läuft: ${timerMinuten(s)} Min.`);
-    }
+    timerUmschalten(r, s, i);
     timerZeichnen();
     return true;
   }
@@ -615,7 +720,13 @@ export function klickRezepte(el) {
       app.aendern(opGekocht(aktuell, heute(), app.name()));
       lobGross({ rezept: app.nachId[aktuell], name: app.name(), grund: 'gekocht' }).then((da) => { if (!da) melde('Eingetragen: heute gekocht'); });
       return true;
-    case 'schritte-zurueck': schritte[aktuell] = []; schreibe(SCHRITTE, schritte); schritteZeichnen(); return true;
+    case 'schritte-zurueck': schritte[aktuell] = []; schreibe(SCHRITTE, schritte); schritteZeichnen(); tempoZurueck(aktuell); return true;
+    case 'tempo-weg': {
+      const alt = tempoLoeschen();
+      tempoNeu();
+      melde('Tempo vergessen – es gelten wieder die Standardzeiten', { knopf: 'Rückgängig', beiKnopf: () => { tempoWiederherstellen(alt); tempoNeu(); } });
+      return true;
+    }
     case 'zum-rezept': {
       // Direkt zur Zubereitung – aufgeklappt, auch wenn sie zu war
       const z = $('#s-zubereitung');
@@ -633,6 +744,23 @@ export function klickRezepte(el) {
     case 'wach': setzeWach(!wachSperre); return true;
     default: return false;
   }
+}
+
+/** Nach „Tempo vergessen“: Zeiten im offenen Rezept und im Raster neu. */
+function tempoNeu() {
+  if (aktuell && app.nachId[aktuell]) {
+    const y = window.scrollY;
+    oeffneRezept(aktuell, { still: true });
+    window.scrollTo(0, y);
+  } else rasterZeichnen();
+  app.tempoNeu();
+}
+
+/** Preis und Reihenfolge im Raster (change an den beiden Auswahlfeldern). true, wenn es hierher gehörte. */
+export function aenderungRezepte(ziel) {
+  if (ziel.id === 'r-preis') { ansicht.preis = Number(ziel.value) || 0; ansichtMerken(); rasterZeichnen(); return true; }
+  if (ziel.id === 'r-sort') { ansicht.sort = SORTIERUNG.some(([id]) => id === ziel.value) ? ziel.value : 'standard'; ansichtMerken(); rasterZeichnen(); return true; }
+  return false;
 }
 
 export function eingabeRezepte(ziel) {

@@ -68,7 +68,7 @@ function tippZeichnen() {
   el.innerHTML = `<p><span class="l-tipp-k">Am günstigsten einkaufen</span><b>${esc(best.laden)}</b> – ${n === 1 ? '1 Sache' : `${n} Sachen`} im Angebot, ≈ ${esc(euro(best.ersparnis))} günstiger als sonst${danach ? `<small>Danach: ${danach}</small>` : ''}</p><button type="button" class="linkbtn" data-act="angebote">Angebote</button>`;
 }
 
-const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || rid;
+const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || (app.amyNach?.[rid] ? `♡ ${app.amyNach[rid].short}` : rid.startsWith('amy-') ? '♡ Amys Rezept' : rid);
 
 /** iPhone oder iPad: Dort hat die App vom Home-Bildschirm einen eigenen Speicher, getrennt von Safari. */
 const istIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -159,7 +159,7 @@ function fuerZeichnen() {
   el.hidden = false;
   el.innerHTML = '<span class="for-k">Für</span>' + rids.map((rid) => {
     const nm = esc(kurzName(rid));
-    const offen = app.nachId[rid] ? ` data-open="${esc(rid)}"` : ' disabled';
+    const offen = app.nachId[rid] ? ` data-open="${esc(rid)}"` : app.amyNach?.[rid] ? ` data-amy-open="${esc(rid)}"` : ' disabled';
     return `<span class="forchip"><button type="button" class="for-open"${offen}>${nm}</button><button type="button" class="for-x" data-rmrec="${esc(rid)}" aria-label="${nm} von der Liste nehmen">${X}</button></span>`;
   }).join('');
 }

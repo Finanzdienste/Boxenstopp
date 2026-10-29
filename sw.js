@@ -27,7 +27,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v22';
+const VERSION = 'v23';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 
@@ -41,6 +41,9 @@ const SHELL = [
   './js/liste.js',
   './js/bereiche.js',
   './js/zeiten.js',
+  './js/tempo.js',
+  './js/amy.js',
+  './js/ansicht-amy.js',
   './js/ki-rezept.js',
   './js/ki.js',
   './js/ansicht-ki.js',
@@ -61,6 +64,8 @@ const SHELL = [
   './schrift/ibm-plex-mono-500.woff2',
   './schrift/ibm-plex-mono-600.woff2',
   './schrift/permanent-marker.woff2',
+  './schrift/pacifico.woff2',
+  './schrift/fredoka.woff2',
   './icon.svg',
   './icon-192.png',
   './icon-512.png',

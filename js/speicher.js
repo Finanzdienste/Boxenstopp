@@ -32,7 +32,7 @@
  *   jetzt()   sofort abgleichen
  *   stop()
  */
-import { leer, anwenden, bereinigen } from './liste.js';
+import { leer, anwenden, bereinigen, opZusammen } from './liste.js';
 
 export const API = 'https://api.github.com';
 export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: 'liste.json' };
@@ -176,12 +176,22 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
         if (!r.ok) { status('offline'); return; }
         const j = await r.json();
         let stand;
+        let roh = null;
         // Kaputtes JSON (von Hand bearbeitet?) zählt als leere Liste; der
         // nächste Commit schreibt die Datei dann wieder sauber.
-        try { stand = bereinigen(JSON.parse(ausB64(j.content || ''))); } catch { stand = leer(); }
+        try { roh = JSON.parse(ausB64(j.content || '')); stand = bereinigen(roh); } catch { stand = leer(); }
         const etag = r.headers.get('ETag');
         if (j.sha !== remote.sha) {
           if (!remote.sha || stand.rev >= remote.stand.rev) {
+            // Eine ältere App-Fassung kennt `amy` nicht und lässt es beim Schreiben
+            // weg. Dann kommen Amys Rezepte, die dieses Handy kannte, wieder dazu.
+            const bekannt = remote.stand?.amy || {};
+            if (roh && typeof roh === 'object' && !('amy' in roh) && Object.keys(bekannt).length) {
+              stand = anwenden(stand, opZusammen({}, {}, bekannt));
+              offen.push(opZusammen({}, {}, bekannt));
+              merkeOffen();
+              plane(700);
+            }
             remote = { sha: j.sha, etag, stand };
             merkeRemote();
             zeige();

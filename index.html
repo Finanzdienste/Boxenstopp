@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" data-tab="rezepte">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -38,6 +38,11 @@
           <span class="reste-txt"><b>Resteverwertung</b><span>Was ist noch da? Foto oder Liste – die KI macht ein Rezept, das eure Ziele trifft. Kostenlos mit Google-Konto.</span><small id="reste-letzter" hidden></small></span>
           <svg class="ic reste-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
         </button>
+        <button type="button" class="reste-karte amy-link nur-breit" data-tab="amy">
+          <span class="reste-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span>
+          <span class="reste-txt"><b>Amys Rezepte</b><span>Eigene Rezepte schreiben – die Zutaten kommen auf die gemeinsame Liste.</span></span>
+          <svg class="ic reste-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
         <button type="button" class="reste-karte angebote-karte" data-act="angebote">
           <span class="reste-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/><path d="M8.5 7.5V6a3.5 3.5 0 0 1 7 0v1.5"/><path d="M9.5 12.5l1.8 1.8 3.5-3.5"/></svg></span>
           <span class="reste-txt"><b>Angebote der Woche</b><span id="angebote-karte-text">Prospekt fotografieren oder Angebote eintippen – welche Rezepte davon profitieren, und ein neues aus den Angeboten.</span></span>
@@ -45,6 +50,7 @@
         </button>
         <div class="suche"><input id="suche" type="search" placeholder="Rezept suchen: Name, Zutat, Gericht …" aria-label="Rezepte durchsuchen" autocomplete="off" enterkeyhint="search"></div>
         <div class="chips" id="chips" role="toolbar" aria-label="Rezepte filtern"></div>
+        <div class="sortier" id="sortier"></div>
         <div class="grid" id="grid"><p class="empty">Rezepte werden geladen…</p></div>
       </section>
       <section id="detail" hidden></section>
@@ -75,6 +81,8 @@
     </aside>
 
     <section id="view-angebote" class="pane angebote-pane" aria-labelledby="a-title"><p class="loading">Angebote werden geladen…</p></section>
+
+    <section id="view-amy" class="pane amy-pane" aria-label="Amys Rezepte"><p class="loading">Amys Rezepte werden geladen…</p></section>
   </div>
 
   <!-- Die Reiter stehen fest im HTML, damit die App auch mit einem Skript aus
@@ -83,6 +91,10 @@
     <button type="button" class="tab" data-tab="rezepte" aria-current="page">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 10.5h15v7.5a2.5 2.5 0 0 1-2.5 2.5H7a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M3 8.2C3 7.5 3.5 7 4.2 7h15.6c.7 0 1.2.5 1.2 1.2v2.3H3z"/><path d="M9 4.5h6"/></svg>
       <span>Rezepte</span>
+    </button>
+    <button type="button" class="tab tab-amy" data-tab="amy" aria-label="Amys Rezepte">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>
+      <span>Amys Rezepte</span>
     </button>
     <button type="button" class="tab" data-tab="einkauf">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M3.8 6.6l1.3 1.3L7.6 5.4M3.8 12.1l1.3 1.3 2.5-2.5M3.8 17.6l1.3 1.3 2.5-2.5"/></svg>

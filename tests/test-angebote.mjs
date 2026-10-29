@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
-import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE, angebotRabatt, grundpreis, istHaehnchen, nachRabatt, besteJeZutat, ladenWahl, rabattText, angeboteJeZutat } from '../js/angebote.js';
+import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBereinigen, angeboteBereinigen, angebotJeG, rezeptTreffer, topRezepte, aktuelle, angebotMenge, angeboteText, rumpfAngebote, systemTextAngebote, ANGEBOTE_SCHEMA, MAX_ANGEBOTE, angebotRabatt, grundpreis, istHaehnchen, nachRabatt, besteJeZutat, ladenWahl, rabattText, angeboteJeZutat, woche, giltIn, inWoche, abText, besteJeLaden, stabileId, kalenderwoche as kwVon } from '../js/angebote.js';
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg, opTeil, opHaken } from '../js/liste.js';
 import { offenJeZutat } from '../js/kosten.js';
 import { systemText, nutzerText } from '../js/ki.js';
@@ -333,5 +333,40 @@ const anfragenMock = (zuViel) => {
   const weg = await (async () => { try { return await geminiAnfragen(rumpf, { schluessel: 'AQ.test', api: 'http://127.0.0.1:9/models', timeout: 3000 }); } catch (e) { return e; } })();
   check(weg.art === 'netz', 'generateContent: nicht erreichbar → netz');
 }
+
+// --- Diese und nächste Woche (Mo–Sa); sonntags gilt schon die neue Woche als „diese“
+const DO = new Date(2026, 9, 29, 19, 0); // Donnerstag, 29.10.2026
+const SO = new Date(2026, 10, 1, 11, 0); // Sonntag, 1.11.
+const wD = woche('diese', DO);
+const wN = woche('naechste', DO);
+check(wD.von === '2026-10-29' && wD.bis === '2026-10-31' && wD.kw === 44 && wN.von === '2026-11-02' && wN.bis === '2026-11-07' && wN.kw === 45, `Donnerstag: diese Woche 29.–31.10. (KW 44), nächste 2.–7.11. (KW 45) – ${JSON.stringify([wD, wN])}`);
+const wSo = woche('diese', SO);
+check(wSo.von === '2026-11-02' && wSo.kw === 45 && woche('naechste', SO).kw === 46, 'Sonntag: „diese Woche“ ist schon die ab Montag');
+check(kwVon(new Date(2026, 11, 31)) === 53 && kwVon(new Date(2027, 0, 4)) === 1, 'Kalenderwochen über den Jahreswechsel (2026 hat 53)');
+const altA = { von: '2026-10-26', bis: '2026-10-31' };
+const ueber = { von: '2026-10-29', bis: '2026-11-04' };
+const neuA = { von: '2026-11-02', bis: '2026-11-07' };
+const ohne = { bis: '' };
+check(giltIn(altA, wD) && !giltIn(altA, wN) && giltIn(ueber, wD) && giltIn(ueber, wN) && !giltIn(neuA, wD) && giltIn(neuA, wN) && giltIn(ohne, wD) && giltIn(ohne, wN), 'Do.–Mi.-Angebote stehen in beiden Wochen, die neuen nur in der nächsten');
+check(inWoche([altA, ueber, neuA], wN).length === 2, 'inWoche filtert');
+check(abText({ von: '2026-11-05' }, wN) === 'ab Do.' && abText(neuA, wN) === '' && abText(altA, wD) === '', '„ab Do.“, wenn ein Angebot erst später beginnt');
+check(angebotBereinigen({ laden: 'Aldi', name: 'X', preis: 1, von: '2026-11-02', bis: '2026-11-07' }).von === '2026-11-02' && !('von' in angebotBereinigen({ laden: 'Aldi', name: 'X', preis: 1, von: 'Montag' })), 'der Beginn bleibt erhalten, wenn er ein Datum ist');
+check(angeboteBereinigen([{ laden: 'Aldi', name: 'Milch', preis: 0.99, von: '2026-10-26' }, { laden: 'Aldi', name: 'Milch', preis: 0.99, von: '2026-11-02' }, { laden: 'Aldi', name: 'Milch', preis: 0.99, von: '2026-11-02' }]).length === 2, 'dasselbe Angebot diese und nächste Woche bleibt zweimal, doppelt in einer Woche einmal');
+check(stabileId('Aldi', 'Milch', 0.99, '2026-11-02') !== stabileId('Aldi', 'Milch', 0.99, '2026-10-26') && stabileId('Aldi', 'Milch', 0.99) === stabileId('Aldi', 'Milch', 0.99, ''), 'die id unterscheidet die Wochen');
+
+// --- Nur ein Laden: das Rezept mit den meisten Zutaten dort im Angebot
+const DATEN = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
+const dz = { preise: DATEN.preise, naehrwerte: DATEN.naehrwerte };
+const nurAngebote = [
+  { laden: 'Aldi', name: 'Hähnchenbrust', preis: 5.19, menge: 600, einheit: 'g', k: 'haehnchenbrust' },
+  { laden: 'Aldi', name: 'Paprika', preis: 0.99, menge: 500, einheit: 'g', k: 'paprika' },
+  { laden: 'Aldi', name: 'Zwiebeln', preis: 0.59, menge: 1, einheit: 'kg', k: 'zwiebeln' },
+  { laden: 'Penny', name: 'Rindergulasch', preis: 6.99, menge: 600, einheit: 'g', k: 'rindergulasch' },
+  { laden: 'Penny', name: 'Gyoza', preis: 2.49, menge: 400, einheit: 'g', k: '' },
+];
+const je = besteJeLaden(DATEN.rezepte, nurAngebote, dz);
+check(je.length === 2 && je[0].laden === 'Aldi' && je[0].treffer.length === 3 && je[1].laden === 'Penny' && je[1].r.id === 'gulasch', `je Laden das beste Rezept, der Laden mit den meisten Treffern zuerst (${je.map((x) => `${x.laden}: ${x.r.id} ${x.treffer.length}`).join(', ')})`);
+const aldiTop = topRezepte(DATEN.rezepte, nurAngebote.filter((a) => a.laden === 'Aldi'), dz, 50);
+check(aldiTop.every((x, i) => !i || aldiTop[i - 1].treffer.length >= x.treffer.length) && aldiTop[0].r.id === je[0].r.id, 'das beste ist das mit den meisten Zutaten im Angebot');
 
 ende();

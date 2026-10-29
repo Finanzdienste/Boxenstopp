@@ -7,12 +7,14 @@ fürs Handy, für Tobi und seine Freundin.
 (in Chrome öffnen, dann Menü ⋮ → „App installieren“; auf dem iPhone in
 Safari: Teilen → „Zum Home-Bildschirm“).
 
-Zwei Reiter:
+Vier Reiter:
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste). Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
+| **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt (siehe unten). Ihre Zutaten kommen auf dieselbe gemeinsame Liste |
+| **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, und welche Rezepte davon profitieren (siehe unten) |
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
 15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein Schwein,
@@ -32,12 +34,36 @@ Jedes Rezept läuft in drei Abschnitten, jeder mit seiner Zeit:
    als „währenddessen“ darunter.
 3. **Portionieren** – wiegen, durch 8, Boxen füllen, Döschen kalt stellen.
 
-Ein Schritt ist eine Handlung und eine Zeile zum Abhaken, rechts mit seinen
-Minuten. Der nächste offene Schritt ist markiert. **Die Minuten antippen
-startet einen Timer** (über die Wartezeit, wenn es eine gibt: „2 Min. + 22
-warten“ → 22), mehrere nebeneinander; sie laufen oben unter der Kopfzeile
-mit, überleben ein Neuladen und melden sich mit Ton, Vibration und
-Benachrichtigung (`js/timer.js`, nur auf dem Handy, das kocht). Unter den
+Ein Schritt ist eine Handlung und eine Zeile zum Abhaken, die Minuten
+stehen klein dahinter. Der nächste offene Schritt ist markiert. **Timer gibt
+es nur, wo man einen braucht** (`timerPlan` in `js/zeiten.js`): wenn danach
+etwas eine feste Zeit läuft und man am Ende etwas tun muss – köcheln, backen,
+braten, garen, marinieren, ruhen lassen. Dann steht rechts ein kleiner Knopf
+mit der Uhr („15 Min.“), bei „8–10 Min.“ mit der kürzeren Zeit. Kein Timer
+fürs Schneiden und Abwiegen, für Ofen vorheizen und Wasser aufsetzen (das
+merkt man selbst), für weniger als 3 Minuten und für Verweise auf einen
+anderen Timer („sobald die 10–12 Min. um sind“) – im Schnitt 5 Timer je
+Rezept statt einem an jedem der 28 Schritte. Zwei Zeiten hintereinander
+werden zwei Stufen: „12 Min. garen und 10 Min. ruhen lassen“ meldet sich
+nach 12 Min. mit „Jetzt: 10 Min. ruhen lassen“ und läuft weiter, genauso
+„35 Min. backen, nach 20 Min. wenden“ und „je Seite 5 Min.“. Mehrere Timer
+laufen nebeneinander oben unter der Kopfzeile mit (antippen springt zum
+Schritt), überleben ein Neuladen und melden sich mit Ton, Vibration und
+Benachrichtigung (`js/timer.js`, nur auf dem Handy, das kocht).
+
+**Die Zeiten lernen euer Tempo** (`js/tempo.js`, nur auf diesem Handy –
+jeder kocht in seinem Tempo): Die Zeit zwischen zwei Haken ist, was ein
+Schritt gedauert hat. Gemessen wird nur, wo man selbst arbeitet; feste
+Garzeiten („15 Min. köcheln“) bleiben, wie sie sind, und unsaubere Messungen
+fallen weg (nach einer Wartezeit, „währenddessen“, über 45 Min., weniger als
+ein Drittel oder mehr als das Vierfache der Standardzeit). Was in 20 Sekunden
+zusammen abgehakt wird, zählt zusammen. Daraus: je Schritt die eigene Zeit
+(die ersten Male mit der Standardzeit gemischt), je Abschnitt ein Faktor
+(gewichteter Median; „Vorbereiten 1,5×“), der für alle Rezepte gilt – und
+war man einmal ganz durch, die ganze Zeit des Rezepts (Median der letzten
+drei Male). Auf der Karte ist die Zeit dann farbig, im Rezept steht „dein
+Tempo“, die Minuten der Schritte und „Unter 1½ Std.“ rechnen damit. „Tempo
+vergessen“ (mit Rückgängig) setzt alles zurück. Unter den
 Daumen stehen **Notizen** zum Rezept („nächstes Mal weniger Chili“), für
 beide, in `liste.json` unter `notizen`. Die Zeiten sind für ein
 ruhiges Tempo zu Hause gerechnet, mit Waschen, Schälen und Abfall wegräumen
@@ -69,11 +95,54 @@ Gewürze pauschal nach Gramm. `werkzeug/rezepte.py` schreibt sie je Rezept
 (Euro je Gramm je Schlüssel) für die Liste und für Rezepte aus der
 Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
 
+### Amys Rezepte
+
+Der Reiter, in dem Amy ihre eigenen Rezepte schreibt (am Rechner über die
+Karte bei den Rezepten, direkt mit `#amy` in der Adresse). Alles ist rosa
+und rund: das Thema hängt an `html[data-tab="amy"]` und färbt auch Kopf,
+Reiter und Liste um, Überschriften in Pacifico, Text in Fredoka (beide OFL),
+Pünktchen im Hintergrund, Herzchen und Glitzer aus den Fluent Emoji; dunkel
+in Pflaume und Rosa.
+
+- **Schreiben:** Name, ein Bildchen (16 zur Wahl), Portionen, Dauer (wenn
+  sie es weiß), Zutaten mit einer Zeile je Zutat und Menge vorne („500 g
+  Hähnchenbrust“, „2–3 Zwiebeln, gewürfelt“, „1 Dose Kokosmilch (400 ml)“,
+  „1½ EL Sojasauce“, „Salz, Pfeffer“), Schritte mit einer Zeile je Schritt
+  (eine kurze Zeile mit Doppelpunkt, „Soße:“, beginnt einen Abschnitt),
+  Notiz. Schon beim Tippen zeigt der Editor, was die App aus jeder
+  Zutat liest: erkannt (✓ mit dem Katalognamen), neu, Gewürz, nicht
+  einkaufen. Was gerade im Editor steht, bleibt als Entwurf, auch wenn die
+  App zugeht.
+- **Lesen** (`js/amy.js`, ohne DOM): Menge, Einheit (g, kg, ml, l, EL, TL,
+  Dose, Bund, Zehe, Stück …), Name und Zusatz; über den Namen der
+  Katalog-Schlüssel (`schluesselRaten`). Erkannte Zutaten teilen sich auf der
+  Einkaufsliste eine Zeile mit den festen Rezepten – in deren Einheit („2
+  Zwiebeln“ → 200 g zu den 300 g vom Chili, „300 g Paprika“ → 2 Stück) –, und
+  die App kennt Nährwerte und Richtpreis. Unbekanntes bekommt `amyz-…` und
+  eine geratene Abteilung. Gewürze, Wasser, Salz und Pfeffer kommen nicht mit
+  „Alles auf die Einkaufsliste“, lassen sich aber einzeln mit + setzen.
+- **Im Rezept:** Portionen, Zeit, ≈ Kosten pro Portion, ≈ kcal/P/KH/F pro
+  Portion (ohne die Zutaten, die die App nicht kennt – die stehen dabei),
+  Zutaten mit +, Schritte zum Abhaken mit Timern wie bei den festen Rezepten
+  (Zeiten im Text), das Tempo lernt mit, zum Schluss das Tier. Bearbeiten,
+  Löschen (mit Rückfrage und Rückgängig – ihre Zutaten gehen mit von der
+  Liste). Auf der Liste steht als Herkunft „♡ Kokos-Curry“, antippen öffnet es.
+- **Gespeichert** in `liste.json` unter `amy` (für beide, höchstens 60), so
+  wie sie es getippt hat. Schreibt eine ältere App-Fassung die Liste ohne
+  `amy`, legt das Handy, das die Rezepte kennt, sie wieder dazu
+  (`js/speicher.js`).
+
 ### Angebote der Woche
 
-Dritter Reiter (auf dem Handy unten, am Rechner über die Karte bei den
-Rezepten). Ganz oben die **Empfehlung**, wo sich der Einkauf lohnt (siehe
-unten). Darunter „Wo gehst du hin?“: Mit einem Laden gewählt (die
+Vierter Reiter (auf dem Handy unten, am Rechner über die Karte bei den
+Rezepten). Ganz oben **Diese Woche / Nächste Woche** (KW und wie viele
+Rezeptzutaten im Angebot sind): Angebote gelten Montag bis Samstag; „diese
+Woche“ heißt ab dem nächsten Einkaufstag (sonntags schon die neue Woche),
+und was Donnerstag bis Mittwoch läuft, steht in beiden (`woche`, `inWoche`
+in `js/angebote.js`; „ab Do.“ am Angebot, wenn es später beginnt). Fehlen
+die Angebote der nächsten Woche noch, sagt der Reiter, wann sie kommen. Die
+Einkaufsliste und die Zahl am Reiter rechnen immer mit dieser Woche. Dann
+die **Empfehlung**, wo sich der Einkauf lohnt (siehe unten). Darunter „Wo gehst du hin?“: Mit einem Laden gewählt (die
 Läden aus dem Abruf – und jeder, für den eigene Angebote eingetragen
 sind) zeigt der Reiter nur dessen Angebote, und auch „Passt zu euren
 Rezepten“, das neue Rezept der KI und die Hinweise auf der Einkaufsliste
@@ -81,16 +150,18 @@ rechnen nur mit denen; die Wahl bleibt auf dem jeweiligen Handy
 (localStorage). Dann die Liste: **Hähnchen** (ein Tipp, und die App springt
 direkt zu den Hähnchen-Angeboten), Rezeptzutaten oder alle Lebensmittel,
 Suche, sortiert **nach Laden** oder **„Beste zuerst“**. **Die App holt die Angebote selbst:** montags und donnerstags
-früh läuft bei GitHub `werkzeug/angebote.mjs` (`.github/workflows/angebote.yml`)
-und schreibt `daten/angebote.json`, die App lädt die Datei beim Start und
+früh und sonntags vormittags (dann sind die Angebote der nächsten Woche
+überall online) läuft bei GitHub `werkzeug/angebote.mjs` (`.github/workflows/angebote.yml`)
+und schreibt `daten/angebote.json` – diese und nächste Woche zusammen, jedes
+Angebot mit `von` und `bis` –, die App lädt die Datei beim Start und
 merkt sie sich fürs Offline-Lesen. Quellen – nur öffentliche Seiten, mit
-ehrlicher Kennung, zweimal die Woche:
+ehrlicher Kennung, dreimal die Woche:
 
 | Laden | Woher | Wie |
 |---|---|---|
-| Aldi (Nord) | `aldi-nord.de/angebote.html` | alle Artikel der Woche als eingebettetes JSON: Preis, Packung, Grundpreis, gültig bis |
-| Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit) |
-| Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe |
+| Aldi (Nord) | `aldi-nord.de/angebote.html`, `…/angebote-vorschau.html` | alle Artikel der Woche als eingebettetes JSON: Preis, Packung, Grundpreis, gültig von/bis; die Vorschau auf die nächste Woche ist ab Donnerstag da |
+| Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` (und `?kloffer-week=next`) | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit); die nächste Woche ist anfangs nur Vorwerbung, die Lebensmittel kommen zum Wochenende |
+| Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe, diese und nächste Kalenderwoche (die nächste antwortet ab dem Wochenende) |
 | Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini (`generateContent`) liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Im Gratis-Kontingent hängt mal das eine, mal das andere Modell: Nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, steht in `daten/angebote.json` und kommt beim nächsten Lauf zuerst dran; hängende Stapel bekommen einen zweiten Durchgang. Dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` |
 | Rewe, Edeka | kaufDA, **privat** (siehe unten) | Die eigenen Seiten sperren automatische Abrufe (rewe.de: Cloudflare-Abfrage auf allen Seiten, Edeka: 403 mit Scherzantwort). Ihre Angebote kommen über kaufDA und landen nur im privaten Daten-Repo |
 
@@ -133,7 +204,13 @@ nichts Paniertes oder Fertiges (`istHaehnchen`).
 **Empfehlung:** Für die offenen Einträge der Einkaufsliste rechnet die App je
 Laden, was dessen Angebote sparen – Rabatt mal Richtpreis der gebrauchten
 Menge (`ladenWahl`) – und nennt den Laden mit der größten Ersparnis, die
-Zutaten dazu und die nächsten zwei Läden; „Zu Aldi“ wählt ihn. Ohne Liste:
+Zutaten dazu und die nächsten zwei Läden; „Zu Aldi“ wählt ihn. Darunter
+**„Nur in einen Laden?“**: je Laden das beste Rezept, wenn man nur dort
+einkauft – das mit den meisten Zutaten dort im Angebot, bei Gleichstand das,
+was am meisten spart (`besteJeLaden`). Antippen (oder einen Laden bei „Wo
+gehst du hin?“ wählen) macht daraus „Nur Aldi – das beste Rezept diese
+Woche“: das Rezept mit seinen Zutaten im Angebot und der Ersparnis pro Box,
+„Auf die Liste“, zwei weitere und was eure Liste dort spart. Ohne Liste:
 der Laden, der für eure Rezepte im Schnitt am meisten spart. Gerechnet ist
 nur mit den Angeboten; ist es Rewe, Edeka oder Kaufland, steht dabei, dass
 der Rest beim Discounter meist weniger kostet. Oben im Reiter springt
@@ -388,6 +465,7 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
  "ki": { "ki-mh9x2k1a7f": { "r": { "name": "Hähnchen-Reispfanne mit Feta", "portionen": 8, "zutaten": […], "ablauf": […], "…": "…" }, "by": "Amy", "at": "…" } },
  "notizen": { "chili": [{ "id": "n-mh9x…", "text": "Nächstes Mal weniger Chili", "by": "Amy", "at": "…" }] },
  "gepinnt": { "chili": { "by": "Tobi", "at": "2026-10-28T19:20:00.000Z" } },
+ "amy": { "amy-kokos-curry-x7k2": { "name": "Kokos-Curry", "bild": "curry-rice", "portionen": 4, "zeit": 0, "zutaten": ["500 g Hähnchenbrust", "2 Zwiebeln"], "schritte": ["Zwiebeln würfeln", "15 Min. köcheln"], "notiz": "", "by": "Amy", "at": "…", "geaendert": "…" } },
  "angebote": { "stand": "…", "von": "Tobi", "eintraege": [{ "id": "a-mh9x…", "laden": "Aldi", "name": "Hähnchenbrustfilet", "preis": 7.49, "menge": 1, "einheit": "kg", "bis": "2026-11-01", "k": "haehnchenbrust" }] }
 }
 ```
@@ -403,7 +481,10 @@ die behaltenen Rezepte aus der Resteverwertung im KI-Format (ki-rezept.js);
 ihre Zutaten stehen auf der Liste unter dem Katalog-Schlüssel oder als
 `ki-<zutat>`. `gepinnt` sind die Rezepte, die gerade laufen (höchstens vier,
 das älteste fällt raus). `angebote` sind die Angebote der Woche (höchstens 120), `k`
-ist der Katalog-Schlüssel der Zutat, wenn es eine ist. Von Hand bearbeiten
+ist der Katalog-Schlüssel der Zutat, wenn es eine ist. `amy` sind Amys Rezepte
+(`{ "amy-kokos-curry-x7k2": { "name", "bild", "portionen", "zeit", "zutaten": ["500 g Hähnchenbrust", …], "schritte": […], "notiz", "by", "at", "geaendert" } }`);
+ihre Zutaten liegen auf der Liste unter dem Katalog-Schlüssel oder als
+`amyz-<zutat>`, mit der amy-id als Teil. Von Hand bearbeiten
 geht, die App bereinigt beim Lesen alles, was nicht passt.
 
 ## Rezepte ändern
@@ -457,10 +538,13 @@ die Action „Rezeptfotos“.
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
 | `js/zugang.js` | Schlüssel und Name, Einladungslink |
-| `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | die beiden Reiter |
+| `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
+| `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten, Schritte – ohne DOM |
+| `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste, Rezept, Editor |
+| `js/tempo.js` | euer Tempo: aus den Haken lernen, Zeiten umrechnen – ohne DOM |
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
-| `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“ |
-| `js/timer.js` | Küchentimer: starten, Leiste oben, Alarm, überlebt Neuladen |
+| `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“; welcher Schritt einen Timer braucht |
+| `js/timer.js` | Küchentimer: starten, Stufen, Leiste oben, Alarm, überlebt Neuladen |
 | `js/lob.js` | Belohnung: Sprüche, Tierquellen, Vorladen, Overlay mit Konfetti |
 | `js/kosten.js` | Richtpreise auf Mengen: Liste, eigene Rezepte, Euro-Format |
 | `js/angebote.js` | Angebote: Zeilen lesen, Schlüssel raten, Treffer und Ersparnis, Anfrage an die KI – ohne DOM |
@@ -469,7 +553,7 @@ die Action „Rezeptfotos“.
 | `werkzeug/bilder.mjs`, `.github/workflows/bilder.yml` | Rezeptfotos per KI (Cloudflare Workers AI) → bilder/rezepte |
 | `werkzeug/zutaten-bilder.mjs` | Bildchen aus Fluent Emoji → bilder/zutaten (mit alle.json für den Offline-Vorrat) |
 | `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny, Lidl per Gemini) → daten/angebote.json |
-| `.github/workflows/angebote.yml` | Montag und Donnerstag: Angebote holen und einchecken |
+| `.github/workflows/angebote.yml` | Montag, Donnerstag und Sonntag: Angebote holen und einchecken |
 | `werkzeug/preise.py` | Richtpreise je Katalogschlüssel (Packung, Menge, Einheit) |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
@@ -494,5 +578,9 @@ Mengen aufs Ziel, Anfragen und Antwortströme beider Anbieter, Fehler) und
 dann mit einer nachgebauten Gemini-API und zwei Handys – Beispielantwort in
 `tests/daten/ki-antwort.json`. `test-bilder.mjs` prüft ohne Browser, dass
 jede Zutat ein Bildchen hat und jedes Foto zu seinem Rezept passt
-(Prüfsumme). Der Workflow „Prüfung“ lässt
+(Prüfsumme). `test-tempo.mjs` prüft ohne Browser, welche Schritte einen
+Timer bekommen, und spielt einen Kochabend mit vorgestellter Uhr durch.
+`test-amy.mjs` liest Amys Zeilen in Node und spielt ihren Reiter dann auf
+zwei Handys durch (Editor, Entwurf, Liste zusammen mit einem festen Rezept,
+Timer, Löschen, eine ältere App-Fassung ohne `amy`). Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

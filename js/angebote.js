@@ -77,6 +77,7 @@ export function angebotBereinigen(roh, katalog = null) {
   const gilt = (x) => typeof x === 'string' && (katalog ? !!katalog[x] : /^[a-z0-9-]{1,40}$/.test(x));
   const k = gilt(roh.k) ? roh.k : (gilt(roh.katalog) ? roh.katalog : '');
   const bis = /^\d{4}-\d{2}-\d{2}$/.test(String(roh.bis || '')) ? String(roh.bis) : '';
+  const von = /^\d{4}-\d{2}-\d{2}$/.test(String(roh.von || '')) ? String(roh.von) : '';
   // Das Produktfoto des Händlers (nur aus dem Abruf): nur https, nichts, was aus dem Attribut ausbrechen könnte
   const bild = typeof roh.bild === 'string' && /^https:\/\/[^\s"'<>]{8,480}$/.test(roh.bild.trim()) ? roh.bild.trim() : '';
   return {
@@ -87,19 +88,24 @@ export function angebotBereinigen(roh, katalog = null) {
     menge: menge > 0 && einheit ? menge : null,
     einheit: menge > 0 && einheit ? einheit : '',
     bis,
+    ...(von ? { von } : {}),
     k,
     ...(bild ? { bild } : {}),
   };
 }
 
-/** Eine Liste bereinigen, doppelte (gleicher Laden, gleicher Name) raus, höchstens MAX_ANGEBOTE. */
+/**
+ * Eine Liste bereinigen, doppelte (gleicher Laden, Name, Preis und Beginn)
+ * raus, höchstens MAX_ANGEBOTE. Dasselbe Angebot diese und nächste Woche
+ * bleibt zweimal – es gilt ja zweimal.
+ */
 export function angeboteBereinigen(liste, katalog = null, max = MAX_ANGEBOTE) {
   const aus = [];
   const gesehen = new Set();
   for (const roh of Array.isArray(liste) ? liste : []) {
     const a = angebotBereinigen(roh, katalog);
     if (!a) continue;
-    const s = `${a.laden}|${a.name.toLowerCase()}|${a.preis}`;
+    const s = `${a.laden}|${a.name.toLowerCase()}|${a.preis}|${a.von || ''}`;
     if (gesehen.has(s)) continue;
     gesehen.add(s);
     aus.push(a);
@@ -286,8 +292,8 @@ export function mengeAus(text) {
 export const istTabu = (name) => VERBOTEN.test(String(name || ''));
 
 /** Eine feste id aus Laden, Name und Preis – damit derselbe Artikel bei jedem Abruf dieselbe hat. */
-export function stabileId(laden, name, preis) {
-  const t = `${laden}|${String(name).toLowerCase()}|${preis}`;
+export function stabileId(laden, name, preis, von = '') {
+  const t = `${laden}|${String(name).toLowerCase()}|${preis}${von ? `|${von}` : ''}`;
   let h = 2166136261;
   for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
   return `a-${h.toString(36).padStart(7, '0')}`;
@@ -485,6 +491,56 @@ export function topRezepte(rezepte, angebote, daten, max = 12) {
 /** Nur, was noch gilt (bis heute einschließlich) oder kein Datum hat. */
 export function aktuelle(angebote, heute = new Date().toISOString().slice(0, 10)) {
   return (angebote || []).filter((a) => !a.bis || a.bis >= heute);
+}
+
+/*
+ * Wochen: Angebote gelten Montag bis Samstag. „Diese Woche“ heißt vom
+ * nächsten Einkaufstag (heute, sonntags schon der Montag) bis Samstag,
+ * „nächste Woche“ die Woche danach. Ein Angebot gehört zu einer Woche, wenn
+ * es an einem ihrer Tage gilt – was Donnerstag bis Mittwoch läuft, steht in
+ * beiden. Gerechnet in der Zeit des Handys.
+ */
+const zwei = (n) => String(n).padStart(2, '0');
+const tagText = (d) => `${d.getFullYear()}-${zwei(d.getMonth() + 1)}-${zwei(d.getDate())}`;
+/** ISO-Kalenderwoche eines Datums: 45 */
+export function kalenderwoche(d) {
+  const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  x.setUTCDate(x.getUTCDate() + 3 - ((x.getUTCDay() + 6) % 7));
+  const erster = new Date(Date.UTC(x.getUTCFullYear(), 0, 4));
+  return 1 + Math.round(((x - erster) / 86400000 - 3 + ((erster.getUTCDay() + 6) % 7)) / 7);
+}
+/** { von, bis, kw, montag } der Woche – art 'diese' oder 'naechste'. */
+export function woche(art = 'diese', jetzt = new Date()) {
+  const start = new Date(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate());
+  if (start.getDay() === 0) start.setDate(start.getDate() + 1);
+  const montag = new Date(start);
+  montag.setDate(start.getDate() - ((start.getDay() + 6) % 7) + (art === 'naechste' ? 7 : 0));
+  const samstag = new Date(montag);
+  samstag.setDate(montag.getDate() + 5);
+  return { von: tagText(art === 'naechste' ? montag : start), bis: tagText(samstag), kw: kalenderwoche(montag), montag: tagText(montag) };
+}
+/** Gilt das Angebot an einem Tag dieser Woche? */
+export const giltIn = (a, w) => (!a.bis || a.bis >= w.von) && (!a.von || a.von <= w.bis);
+export const inWoche = (liste, w) => (liste || []).filter((a) => giltIn(a, w));
+/** „ab Do.“, wenn ein Angebot erst später in der Woche beginnt – sonst leer. */
+export function abText(a, w) {
+  if (!a.von || a.von <= w.von) return '';
+  const d = new Date(`${a.von}T12:00:00`);
+  return Number.isNaN(d.getTime()) ? '' : `ab ${['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.'][d.getDay()]}`;
+}
+
+/**
+ * Das beste Rezept, wenn man nur in einen Laden geht: das mit den meisten
+ * Zutaten dort im Angebot, bei Gleichstand das, was am meisten spart.
+ * Für jeden Laden eins: [{ laden, r, treffer, ersparnisBox }], beste zuerst.
+ */
+export function besteJeLaden(rezepte, angebote, daten) {
+  const laeden = [...new Set(angebote.filter((a) => a.k).map((a) => a.laden))];
+  return laeden.map((laden) => {
+    const [best] = topRezepte(rezepte, angebote.filter((a) => a.laden === laden), daten, 1);
+    return best ? { laden, ...best } : null;
+  }).filter(Boolean)
+    .sort((a, b) => b.treffer.length - a.treffer.length || b.ersparnisBox - a.ersparnisBox || LAEDEN.indexOf(a.laden) - LAEDEN.indexOf(b.laden));
 }
 
 /** „1 kg 7,49 €“ */

@@ -2,7 +2,8 @@
  * Reiter „Angebote“: die Angebote der Woche bei Aldi, Lidl, Kaufland, Penny –
  * und, mit dem Schlüssel fürs Daten-Repo, Rewe und Edeka.
  *
- *   1. Die App holt sie selbst: montags und donnerstags läuft bei GitHub
+ *   1. Die App holt sie selbst: montags, donnerstags und sonntags (dann für
+ *      die nächste Woche) läuft bei GitHub
  *      werkzeug/angebote.mjs und schreibt daten/angebote.json (Aldi und
  *      Kaufland von deren Angebotsseiten, Penny aus deren JSON, Lidl aus dem
  *      Prospekt per Gemini). Rewe und Edeka kommen über die
@@ -19,12 +20,17 @@
  *      ein neues Rezept aus den Angeboten machen lässt (Resteverwertung im
  *      Modus „angebote“, mit „Neuer Vorschlag“ für den nächsten).
  *
- * Ganz oben die Empfehlung, wo sich der Einkauf lohnt: für die offenen
- * Einträge der Liste der Laden, dessen Angebote am meisten sparen (ohne
- * Liste: für eure Rezepte im Schnitt). Darunter, zu welchem Laden man geht:
- * Mit einem Laden gewählt zeigt der Reiter nur dessen Angebote, und auch die
- * passenden Rezepte, das neue Rezept der KI und die Hinweise auf der
- * Einkaufsliste rechnen nur mit denen. Die Wahl bleibt auf diesem Handy.
+ * Ganz oben: diese oder nächste Woche (angebote.js woche – sonntags holt
+ * der Abruf die nächste Woche, Aldi hat sie schon ab Donnerstag). Dann die
+ * Empfehlung, wo sich der Einkauf lohnt: für die offenen Einträge der Liste
+ * der Laden, dessen Angebote am meisten sparen (ohne Liste: für eure Rezepte
+ * im Schnitt), und je Laden das beste Rezept, wenn man nur dort einkauft.
+ * Darunter, zu welchem Laden man geht: Mit einem Laden gewählt zeigt der
+ * Reiter nur dessen Angebote, die Empfehlung das Rezept mit den meisten
+ * Zutaten dort im Angebot, und auch die passenden Rezepte, das neue Rezept
+ * der KI und die Hinweise auf der Einkaufsliste rechnen nur mit denen. Die
+ * Wahl des Ladens bleibt auf diesem Handy; die Liste rechnet immer mit
+ * dieser Woche.
  *
  * Dann die Liste: Hähnchen, Rezeptzutaten oder alle Lebensmittel, Suche,
  * nach Laden oder „Beste zuerst“ (Rabatt gegen den üblichen Discounter-Preis,
@@ -32,11 +38,12 @@
  */
 import { app, $, melde, zeigeReiter, lese, schreibe } from './kern.js';
 import { esc, tagKurz, heute } from './format.js';
-import { angeboteBereinigen, zeileLesen, aktuelle, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN, angebotRabatt, nachRabatt, grundpreis, istHaehnchen, ladenWahl, rabattText, GUENSTIG_AB } from './angebote.js';
+import { angeboteBereinigen, zeileLesen, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN, angebotRabatt, nachRabatt, grundpreis, istHaehnchen, ladenWahl, rabattText, GUENSTIG_AB, woche, inWoche, abText, besteJeLaden } from './angebote.js';
 import { kiAnfragen, anbieterVon, ANBIETER, KI_FEHLER } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { opAngeboteDazu, opAngebote, opAngebotWeg } from './liste.js';
-import { oeffneRezept } from './ansicht-rezepte.js';
+import { oeffneRezept, rezeptAufListe } from './ansicht-rezepte.js';
+import { rezeptStand } from './liste.js';
 import { fotoVorbereiten, resteMitAngeboten, oeffneEinrichten } from './ansicht-ki.js';
 import { euro, offenJeZutat } from './kosten.js';
 import { bildName, bildPfad } from './bilder.js';
@@ -63,6 +70,7 @@ let eigeneOffen = false; // der Abschnitt „Eigene Angebote dazu“ ist aufgekl
 let suche = '';
 let laden = String(lese(LADEN, '') || ''); // der Laden, zu dem man geht – '' für alle
 let sortierung = lese(SORTIERUNG, 'laden') === 'rabatt' ? 'rabatt' : 'laden'; // nach Laden oder die besten zuerst
+let wahlWoche = 'diese'; // 'diese' oder 'naechste' – gilt für diesen Besuch
 
 const gemerkt = (k) => { const a = lese(k, null); return a && Array.isArray(a.angebote) ? a : null; };
 /** Die beiden Abrufe, zuletzt gesehen auch ohne Netz. */
@@ -85,9 +93,13 @@ function zusammen() {
 /** Die automatisch geholten Angebote, öffentlich und privat zusammen. */
 let auto = zusammen();
 
-const automatisch = () => aktuelle(auto?.angebote || []);
-const eigene = () => (app.listeDa ? aktuelle(app.stand.angebote?.eintraege || []) : []);
-/** Alles, was gerade gilt – eigene zuerst, damit sie bei gleichem Namen gewinnen. */
+/** Die gewählte Woche: { von, bis, kw } – diese oder nächste. */
+const W = () => woche(wahlWoche);
+const autoIn = (w) => inWoche(auto?.angebote || [], w);
+const eigeneIn = (w) => (app.listeDa ? inWoche(app.stand.angebote?.eintraege || [], w) : []);
+const automatisch = () => autoIn(W());
+const eigene = () => eigeneIn(W());
+/** Alles, was in der gewählten Woche gilt – eigene zuerst, damit sie bei gleichem Namen gewinnen. */
 const eintraege = () => [...eigene(), ...automatisch()];
 /** Nur die Angebote des gewählten Ladens – oder alle, wenn keiner gewählt ist. */
 const imLaden = (liste) => (laden ? liste.filter((a) => a.laden === laden) : liste);
@@ -95,19 +107,21 @@ const imLaden = (liste) => (laden ? liste.filter((a) => a.laden === laden) : lis
 const quellenLaeden = () => (auto?.quellen || []).map((q) => q.laden).filter(Boolean);
 /** Die Läden zur Wahl: die Quellen, dazu alle mit eigenen Angeboten und der gewählte, in fester Reihenfolge. */
 const laedenDa = () => { const da = new Set([...quellenLaeden(), ...eintraege().map((a) => a.laden), laden].filter(Boolean)); return [...LAEDEN.filter((l) => da.has(l)), ...[...da].filter((l) => !LAEDEN.includes(l)).sort((a, b) => a.localeCompare(b, 'de'))]; };
-/** Was am Reiter steht: Angebote, die eine Rezeptzutat sind, plus die eigenen – über alle Läden. */
-export const angeboteAnzahl = () => eigene().length + automatisch().filter((a) => a.k).length;
+/** Was am Reiter steht: Angebote, die eine Rezeptzutat sind, plus die eigenen – über alle Läden, immer diese Woche. */
+export const angeboteAnzahl = () => eigeneIn(woche('diese')).length + autoIn(woche('diese')).filter((a) => a.k).length;
+/** Dasselbe für die Woche, die gerade gezeigt wird. */
+const anzahlGezeigt = () => eigene().length + automatisch().filter((a) => a.k).length;
 /** Dasselbe für einen Laden. */
 const anzahlIn = (l) => eigene().filter((a) => a.laden === l).length + automatisch().filter((a) => a.laden === l && a.k).length;
 
-// Für die Einkaufsliste: was gerade gilt und wohin man geht (ansicht-liste.js zeigt daraus die Angebote an)
-app.angeboteJetzt = () => eintraege();
+// Für die Einkaufsliste: was diese Woche gilt und wohin man geht (ansicht-liste.js zeigt daraus die Angebote an)
+app.angeboteJetzt = () => [...eigeneIn(woche('diese')), ...autoIn(woche('diese'))];
 app.ladenJetzt = () => laden;
 
 /** Von app.js nach dem Laden von daten/angebote.json – oder, mit privat: true, von angebote-privat.json. */
 export function angeboteAutoSetzen(daten, { privat = false } = {}) {
   if (!daten || !Array.isArray(daten.angebote)) return;
-  const teil = { stand: String(daten.stand || ''), woche: String(daten.woche || ''), quellen: Array.isArray(daten.quellen) ? daten.quellen : [], gesperrt: Array.isArray(daten.gesperrt) ? daten.gesperrt : [], angebote: angeboteBereinigen(daten.angebote, app.katalog, 800) };
+  const teil = { stand: String(daten.stand || ''), woche: String(daten.woche || ''), quellen: Array.isArray(daten.quellen) ? daten.quellen : [], gesperrt: Array.isArray(daten.gesperrt) ? daten.gesperrt : [], angebote: angeboteBereinigen(daten.angebote, app.katalog, 1600) };
   teile[privat ? 'privat' : 'oeffentlich'] = teil;
   schreibe(privat ? PRIVAT : AUTO, teil);
   auto = zusammen();
@@ -180,6 +194,7 @@ function zeileHTML(a, { eigen = false, mitLaden = false } = {}) {
     mitLaden ? `<span class="a-ladenname">${esc(a.laden)}</span>` : '',
     a.k && app.katalog[a.k] ? `<span>→ ${esc(app.katalog[a.k].n)}</span>` : '<span class="a-ohne">keine Rezeptzutat</span>',
     gp ? `<span>${esc(gp)}</span>` : '',
+    abText(a, W()) ? `<span class="a-ab">${esc(abText(a, W()))}</span>` : '',
     bisText(a) ? `<span>${esc(bisText(a))}</span>` : '',
   ].join('');
   // Die Plakette: wie viel günstiger als der übliche Discounter-Preis (Richtpreis) – nur, wenn es das ist
@@ -238,23 +253,27 @@ function standHTML() {
   const lidlOhne = (auto.quellen || []).find((q) => q.laden === 'Lidl' && q.ok === false && /GEMINI_KEY/.test(q.hinweis || ''));
   // Rewe und Edeka kommen über kaufDA – gezielt nach Rezeptzutaten gesucht, nicht das ganze Prospekt
   const ueberKaufda = (auto.quellen || []).filter((q) => q.ok !== false && /kaufDA/.test(q.hinweis || '')).map((q) => q.laden);
-  return `<div class="a-stand"><span class="fine">${auto.woche ? `KW ${esc(auto.woche.slice(5))}` : ''}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}${ueberKaufda.length ? `<p class="fine a-kaufda">${esc(ueberKaufda.join(', '))}: über kaufDA gezielt nach euren Rezeptzutaten gesucht – nicht das ganze Prospekt.</p>` : ''}${leadHTML()}</div>`;
+  return `<div class="a-stand"><span class="fine">KW ${W().kw}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}${ueberKaufda.length ? `<p class="fine a-kaufda">${esc(ueberKaufda.join(', '))}: über kaufDA gezielt nach euren Rezeptzutaten gesucht – nicht das ganze Prospekt.</p>` : ''}${leadHTML()}</div>`;
 }
 
-const leadHTML = () => `<p class="a-lead">${laden ? `Nur, was diese Woche bei ${esc(laden)} günstig ist – und welche Rezepte davon profitieren.` : `Was ist diese Woche bei ${esc(quellenText())} günstig? Die App holt es montags und donnerstags selbst. Darunter steht, welche Rezepte davon profitieren.`}</p>`;
+const wannText = () => (wahlWoche === 'naechste' ? 'nächste Woche' : 'diese Woche');
+const leadHTML = () => `<p class="a-lead">${laden ? `Nur, was ${wannText()} bei ${esc(laden)} günstig ist – und welche Rezepte davon profitieren.` : `Was ist ${wannText()} bei ${esc(quellenText())} günstig? Die App holt es montags, donnerstags und sonntags (dann für die nächste Woche) selbst. Darunter steht, welche Rezepte davon profitieren.`}</p>`;
 
 /** Die automatisch geholten Angebote: die Liste, darunter Stand und Quellen. */
 function autoHTML() {
-  if (!auto) return `<div class="empty-state"><p class="es-t">Die Angebote der Woche sind noch nicht geladen.</p><p>Die App holt sie montags und donnerstags selbst. Gleich nochmal öffnen – oder unten eigene eintragen.</p></div>${leadHTML()}`;
+  if (!auto) return `<div class="empty-state"><p class="es-t">Die Angebote der Woche sind noch nicht geladen.</p><p>Die App holt sie montags, donnerstags und sonntags selbst. Gleich nochmal öffnen – oder unten eigene eintragen.</p></div>${leadHTML()}`;
   const alle = imLaden(automatisch());
   const auswahl = art === 'haehnchen' ? alle.filter(istHaehnchen) : art === 'alle' ? alle : alle.filter((a) => a.k);
   const gezeigt = auswahl.filter(passtSuche);
   const bei = laden ? `bei ${esc(laden)} ` : '';
+  const Wann = wahlWoche === 'naechste' ? 'Nächste Woche' : 'Diese Woche';
+  const naechsteFehlt = wahlWoche === 'naechste' && !alle.length;
   const leer = suche ? `Nichts gefunden für „${esc(suche)}“.`
-    : art === 'haehnchen' && alle.length ? `Diese Woche ist ${bei}kein Hähnchen im Angebot.`
-      : alle.length ? `Diese Woche ist ${bei}keine Rezeptzutat im Angebot.`
-        : laden ? `Von ${esc(laden)} ist diese Woche nichts da${(auto.quellen || []).some((q) => q.laden === laden && q.ok === false) ? ' – der Abruf hat nicht geklappt' : ''}.`
-          : 'Diese Woche kam nichts an – die Quellen waren nicht erreichbar.';
+    : art === 'haehnchen' && alle.length ? `${Wann} ist ${bei}kein Hähnchen im Angebot.`
+      : alle.length ? `${Wann} ist ${bei}keine Rezeptzutat im Angebot.`
+        : naechsteFehlt ? `Von ${laden ? esc(laden) : 'den Läden'} sind die Angebote für nächste Woche noch nicht da. Die meisten veröffentlichen sie am Wochenende – die App holt sie sonntags.`
+          : laden ? `Von ${esc(laden)} ist ${wannText()} nichts da${(auto.quellen || []).some((q) => q.laden === laden && q.ok === false) ? ' – der Abruf hat nicht geklappt' : ''}.`
+            : 'Diese Woche kam nichts an – die Quellen waren nicht erreichbar.';
   const liste = gezeigt.length ? (sortierung === 'rabatt' ? besteHTML(gezeigt) : gruppenHTML(gezeigt)) : `<p class="fine a-leer">${leer}</p>`;
   return `${liste}${standHTML()}`;
 }
@@ -272,18 +291,65 @@ function bedarfRezepte() {
   return b;
 }
 
-const kurzZutat = (k, a) => String(app.katalog[k]?.n || a.name).split(/,| \(/)[0];
+// „Milch 1,5 %“ bleibt ganz, „Kokosmilch, Dose à 400 ml“ wird „Kokosmilch“
+const kurzZutat = (k, a) => String(app.katalog[k]?.n || a.name).split(/,\s| \(/)[0];
 const VOLLSORTIMENT = new Set(['Rewe', 'Edeka', 'Kaufland']);
 
-/** Wo sich der Einkauf lohnt – für die Liste, sonst für die Rezepte im Schnitt. */
+/** Die Zutaten eines Rezepts, die im Angebot sind: „Hähnchenbrustfilet −24 %, Paprika −15 %“ */
+function trefferText(treffer, max = 5) {
+  const t = treffer.slice(0, max).map(({ it, a }) => {
+    const r = angebotRabatt(a, app);
+    return `${esc(kurzZutat(it.k, a))}${r !== null && r >= GUENSTIG_AB ? ` <b>${rabattText(r)}</b>` : ''}`;
+  }).join(', ');
+  return treffer.length > max ? `${t} und ${treffer.length - max} mehr` : t;
+}
+
+/*
+ * Nur ein Laden gewählt: das beste Rezept, wenn man nur dort einkauft – das
+ * mit den meisten Zutaten im Angebot (angebote.js topRezepte), dazu zwei
+ * weitere und was eure Liste dort spart.
+ */
+function nurLadenHTML(angebote, bedarf) {
+  const top = topRezepte(app.rezepte, angebote, app, 3);
+  const zurueck = '<button type="button" class="linkbtn a-nur-zurueck" data-a-nur="">Alle Läden vergleichen</button>';
+  if (!top.length) {
+    return `<section class="a-tipp a-tipp-nur" aria-label="Empfehlung"><p class="a-tipp-k">Nur ${esc(laden)}</p><p class="a-tipp-d">${wahlWoche === 'naechste' ? 'Nächste Woche' : 'Diese Woche'} ist bei ${esc(laden)} keine eurer Rezeptzutaten im Angebot${angebote.length ? '' : ' – oder die Angebote sind noch nicht da'}.</p>${zurueck}</section>`;
+  }
+  const [best, ...weitere] = top;
+  const r = best.r;
+  const st = rezeptStand(app.stand, r);
+  const liste = !app.listeDa ? '' : st.komplett ? '<span class="a-tipp-ok">✓ auf der Liste</span>' : `<button type="button" class="btn a-tipp-b" data-a-liste="${esc(r.id)}">${st.drauf ? 'Fehlendes auf die Liste' : 'Auf die Liste'}</button>`;
+  const spart = best.ersparnisBox >= 0.05 ? ` Spart ≈ ${esc(euro(best.ersparnisBox))} pro Box.` : '';
+  const auch = weitere.map((x) => `<button type="button" class="linkbtn" data-a-open="${esc(x.r.id)}">${esc(x.r.short || x.r.name)}</button> (${x.treffer.length})`).join(' · ');
+  const meine = Object.keys(bedarf).length ? ladenWahl(bedarf, angebote, app).find((w) => w.laden === laden) : null;
+  return `<section class="a-tipp a-tipp-nur" aria-label="Empfehlung">
+<p class="a-tipp-k">Nur ${esc(laden)} – das beste Rezept ${wannText()}</p>
+<div class="a-tipp-kopf"><p class="a-tipp-t"><button type="button" class="a-tipp-r" data-a-open="${esc(r.id)}"><b>${esc(r.name)}</b></button> <span>${best.treffer.length === 1 ? '1 Zutat' : `${best.treffer.length} Zutaten`} im Angebot</span></p>${liste}</div>
+<p class="a-tipp-d">Bei ${esc(laden)}: ${trefferText(best.treffer)}.${spart}</p>
+${auch ? `<p class="a-tipp-n">Auch gut: ${auch}</p>` : ''}
+${meine ? `<p class="a-tipp-n">Von eurer Liste: ${meine.treffer.length === 1 ? '1 Sache' : `${meine.treffer.length} Sachen`} bei ${esc(laden)} im Angebot, ≈ ${esc(euro(meine.ersparnis))} günstiger als sonst.</p>` : ''}
+${zurueck}
+</section>`;
+}
+
+/** Je Laden das beste Rezept – zum Antippen: dann gilt nur noch dieser Laden. */
+function jeLadenHTML(angebote) {
+  const je = besteJeLaden(app.rezepte, angebote, app);
+  if (je.length < 2) return '';
+  return `<div class="a-nur"><p class="a-tipp-k2">Nur in einen Laden? Das beste Rezept dort</p><ul class="a-nur-liste">${je.map((x) => `<li><button type="button" class="a-nur-b" data-a-nur="${esc(x.laden)}"><b>${esc(x.laden)}</b><span>${esc(x.r.short || x.r.name)}</span><small>${x.treffer.length} im Angebot</small></button></li>`).join('')}</ul></div>`;
+}
+
+/** Wo sich der Einkauf lohnt – für die Liste, sonst für die Rezepte im Schnitt. Mit Laden: das beste Rezept dort. */
 function empfehlungHTML() {
   const angebote = eintraege();
   if (!angebote.length) return '';
   const bedarf = bedarfListe();
+  if (laden) return nurLadenHTML(angebote.filter((a) => a.laden === laden), bedarf);
   const mitListe = Object.keys(bedarf).length > 0;
   const wahl = ladenWahl(mitListe ? bedarf : bedarfRezepte(), angebote, app);
   if (!wahl.length) {
-    return mitListe ? '<section class="a-tipp" aria-label="Empfehlung"><p class="a-tipp-k">Empfehlung für eure Liste</p><p class="a-tipp-d">Von eurer Liste ist diese Woche nichts günstiger als sonst – geht dahin, wo es für euch passt.</p></section>' : '';
+    const je = jeLadenHTML(angebote);
+    return mitListe || je ? `<section class="a-tipp" aria-label="Empfehlung">${mitListe ? `<p class="a-tipp-k">Empfehlung für eure Liste</p><p class="a-tipp-d">Von eurer Liste ist ${wannText()} nichts günstiger als sonst – geht dahin, wo es für euch passt.</p>` : ''}${je}</section>` : '';
   }
   const [best, ...rest] = wahl;
   const was = best.treffer.slice(0, 4).map((t) => `${esc(kurzZutat(t.k, t.a))} <b>${rabattText(t.rabatt)}</b>`).join(', ');
@@ -292,11 +358,12 @@ function empfehlungHTML() {
   const knopf = laden === best.laden ? '<span class="a-tipp-ok">✓ gewählt</span>' : `<button type="button" class="btn a-tipp-b" data-a-laden="${esc(best.laden)}">Zu ${esc(best.laden)}</button>`;
   const rest2 = mitListe && VOLLSORTIMENT.has(best.laden) ? ' Was nicht im Angebot ist, kostet beim Discounter meist weniger.' : '';
   return `<section class="a-tipp" aria-label="Empfehlung">
-<div class="a-tipp-kopf"><div><p class="a-tipp-k">${mitListe ? 'Empfehlung für eure Liste' : 'Empfehlung diese Woche'}</p>
+<div class="a-tipp-kopf"><div><p class="a-tipp-k">${mitListe ? 'Empfehlung für eure Liste' : `Empfehlung ${wannText()}`}</p>
 <p class="a-tipp-t"><b>${esc(best.laden)}</b>${mitListe ? ` <span>≈ ${esc(euro(best.ersparnis))} günstiger als sonst</span>` : ''}</p></div>${knopf}</div>
 <p class="a-tipp-d">${mitListe ? `${best.treffer.length === 1 ? '1 Sache' : `${best.treffer.length} Sachen`} von eurer Liste im Angebot: ` : 'Für eure Rezepte im Angebot: '}${was}${mehr}.${rest2}</p>
 ${danach ? `<p class="a-tipp-n">Danach: ${danach}</p>` : ''}
 ${mitListe ? '' : '<p class="fine">Setzt Rezepte auf die Liste, dann rechnet die App aus, wo ihr am meisten spart.</p>'}
+${jeLadenHTML(angebote)}
 </section>`;
 }
 
@@ -328,6 +395,17 @@ ${top.length ? `<ul class="ki-liste" id="a-passt-liste">${karten}</ul>` : `<p cl
 </section>`;
 }
 
+/** Diese oder nächste Woche – mit der Zahl der Rezeptzutaten im Angebot. */
+function wocheHTML() {
+  if (!auto) return '';
+  const chip = (art, text) => {
+    const w = woche(art);
+    const n = inWoche(auto.angebote || [], w).filter((a) => a.k).length + eigeneIn(w).length;
+    return `<button type="button" class="a-woche-b" data-a-woche="${art}" aria-pressed="${wahlWoche === art}"><b>${text}</b><small>KW ${w.kw} · ${n ? `${n} für euch` : 'noch nichts da'}</small></button>`;
+  };
+  return `<div class="a-woche" role="group" aria-label="Woche">${chip('diese', 'Diese Woche')}${chip('naechste', 'Nächste Woche')}</div>`;
+}
+
 function laedenHTML() {
   const da = laedenDa();
   const chip = (l, name, n) => `<button type="button" class="chip" data-a-laden="${esc(l)}" aria-pressed="${laden === l}">${esc(name)}${n ? `<span class="n">${n}</span>` : ''}</button>`;
@@ -337,13 +415,14 @@ function laedenHTML() {
 export function angeboteZeichnen() {
   const el = $('#view-angebote');
   if (!el) return;
-  const n = laden ? anzahlIn(laden) : angeboteAnzahl();
+  const n = laden ? anzahlIn(laden) : anzahlGezeigt();
   // Die Rezepte, die von den Angeboten profitieren – unten als Liste, oben als Sprung dorthin
   const mitAngeboten = imLaden(eintraege());
   const top = mitAngeboten.length ? topRezepte(app.rezepte, mitAngeboten, app) : [];
   const sprung = mitAngeboten.length ? `<div class="a-oben"><button type="button" class="btn a-zu-passt" data-act="a-zu-passt">${RUNTER}Passt zu euren Rezepten${top.length ? `<span class="btn-n">${top.length}</span>` : ''}</button></div>` : '';
   el.innerHTML = `<button type="button" class="back nur-breit" data-act="angebote-zu">${ZURUECK}Alle Rezepte</button>
-<div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
+<div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : wahlWoche === 'naechste' ? 'Angebote nächste Woche' : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
+${wocheHTML()}
 ${sprung}
 ${empfehlungHTML()}
 ${laedenHTML()}
@@ -477,6 +556,17 @@ export function klickAngebote(el) {
   }
   if (d.aSort) { sortierung = d.aSort === 'rabatt' ? 'rabatt' : 'laden'; schreibe(SORTIERUNG, sortierung); angeboteZeichnen(); return true; }
   if (d.aLaden !== undefined) { laden = d.aLaden; schreibe(LADEN, laden); angeboteZeichnen(); app.listeNeu(); return true; }
+  // „Nur in einen Laden?“ in der Empfehlung: wie die Ladenwahl, und die Empfehlung bleibt im Blick
+  if (d.aNur !== undefined) {
+    laden = d.aNur;
+    schreibe(LADEN, laden);
+    angeboteZeichnen();
+    app.listeNeu();
+    $('#view-angebote .a-tipp')?.scrollIntoView({ block: 'nearest' });
+    return true;
+  }
+  if (d.aWoche) { wahlWoche = d.aWoche === 'naechste' ? 'naechste' : 'diese'; angeboteZeichnen(); return true; }
+  if (d.aListe) { rezeptAufListe(d.aListe); return true; }
   switch (d.act) {
     case 'angebote': zeigeReiter('angebote'); window.scrollTo(0, 0); return true;
     case 'angebote-zu': zeigeReiter('rezepte'); return true;

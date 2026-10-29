@@ -40,6 +40,10 @@ export const app = {
   ladenJetzt: () => '',
   /** Die Liste neu zeichnen, wenn sich Angebote oder Laden ändern (setzt app.js). */
   listeNeu: () => {},
+  /** Das Tempo wurde vergessen oder wiederhergestellt: Zeiten neu zeichnen (setzt app.js). */
+  tempoNeu: () => {},
+  /** Amys Rezepte, wie Liste und Timer sie verstehen: id → { id, name, short, ablauf, items } (ansicht-amy.js). */
+  amyNach: {},
 };
 
 export const $ = (s, el = document) => el.querySelector(s);
@@ -58,9 +62,12 @@ export const schreibe = (k, v) => {
 const ANSICHT = 'boxenstopp.ansicht.v1';
 const gemerkt = lese(ANSICHT, {}) || {};
 export const ansicht = {
-  tab: ['einkauf', 'angebote'].includes(gemerkt.tab) ? gemerkt.tab : 'rezepte',
+  tab: ['einkauf', 'angebote', 'amy'].includes(gemerkt.tab) ? gemerkt.tab : 'rezepte',
   filter: typeof gemerkt.filter === 'string' ? gemerkt.filter : 'alle',
   rezept: typeof gemerkt.rezept === 'string' ? gemerkt.rezept : null,
+  /** Höchstens so viel pro Box (0 = egal) und die Reihenfolge im Raster. */
+  preis: [1.75, 2, 2.25, 2.5].includes(gemerkt.preis) ? gemerkt.preis : 0,
+  sort: ['preis', 'zeit'].includes(gemerkt.sort) ? gemerkt.sort : 'standard',
 };
 export const ansichtMerken = () => schreibe(ANSICHT, ansicht);
 
@@ -91,11 +98,16 @@ export function meldungWeg() { $('#toast').classList.remove('show'); meldungArt 
 
 /* ---------------------------------------------------------------- Reiter */
 
-const scrollPos = { rezepte: 0, einkauf: 0, angebote: 0 };
+const scrollPos = { rezepte: 0, einkauf: 0, angebote: 0, amy: 0 };
+/* Die Farbe der Leiste oben im Browser: rosa bei Amy (siehe css, html[data-tab="amy"]). */
+const LEISTE = { hell: ['#EDF1EF', '#FFEAF3'], dunkel: ['#0E1412', '#2A1120'] };
 export function zeigeReiter(t, scrollBehalten = false) {
   if (istSchmal()) scrollPos[ansicht.tab] = window.scrollY;
-  ansicht.tab = t === 'einkauf' ? 'einkauf' : t === 'angebote' ? 'angebote' : 'rezepte';
+  ansicht.tab = ['einkauf', 'angebote', 'amy'].includes(t) ? t : 'rezepte';
   $('#app').dataset.tab = ansicht.tab;
+  document.documentElement.dataset.tab = ansicht.tab;
+  const amy = ansicht.tab === 'amy' ? 1 : 0;
+  for (const m of $$('meta[name="theme-color"]')) m.setAttribute('content', /dark/.test(m.media || '') ? LEISTE.dunkel[amy] : LEISTE.hell[amy]);
   if (ansicht.tab === 'einkauf' && meldungArt === 'zur-liste') meldungWeg();
   for (const b of $$('.tab')) {
     if (b.dataset.tab === ansicht.tab) b.setAttribute('aria-current', 'page');

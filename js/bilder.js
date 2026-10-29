@@ -94,8 +94,12 @@ export function zutatImg(k, { name = '', cat = '', katalog = null, klasse = 'zb'
   return `<img class="${klasse}" src="${bildPfad(bildName(k, { name, cat, katalog }))}" alt="" width="${groesse}" height="${groesse}" loading="lazy" decoding="async">`;
 }
 
+/* Für Amys Rezepte: ein Bildchen je Rezept zum Aussuchen, dazu Herzchen und Glitzer zum Schmücken. */
+export const AMY_BILDER = ['shortcake', 'pancakes', 'green-salad', 'steaming-bowl', 'curry-rice', 'spaghetti', 'taco', 'burrito', 'sandwich', 'cooking', 'pot-of-food', 'strawberry', 'peach', 'bubble-tea', 'cookie', 'avocado'];
+export const AMY_DEKO = ['sparkles', 'ribbon', 'pink-heart'];
+
 /** Alle Bildchen, die die App braucht – für werkzeug/zutaten-bilder.mjs und die Tests. */
-export const ALLE_BILDER = [...new Set([...Object.values(ZUTAT_BILD), ...Object.values(KAT_BILD), ...WORTE.map(([, b]) => b)])].sort();
+export const ALLE_BILDER = [...new Set([...Object.values(ZUTAT_BILD), ...Object.values(KAT_BILD), ...WORTE.map(([, b]) => b), ...AMY_BILDER, ...AMY_DEKO])].sort();
 
 /*
  * Bis zu drei Bildchen, die ein Rezept ausmachen – fürs Ersatzbild ohne Foto:

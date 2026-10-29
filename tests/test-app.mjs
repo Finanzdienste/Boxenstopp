@@ -9,6 +9,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS, ROOT, APP_URL } from './hilfe.mjs';
+import { woche } from '../js/angebote.js';
 
 const { check, ende } = pruefer();
 const browser = await starteBrowser();
@@ -68,7 +69,14 @@ const haehnchenSchritt = page.locator('.step', { hasText: '800 g Hähnchenbrust'
 check(await haehnchenSchritt.locator('.schale').textContent() === 'Schale 2Hähnchen in Marinade', `„→ Schale 2“ wird zum Schild mit Inhalt (${await haehnchenSchritt.locator('.schale').textContent()})`);
 check(Number(await haehnchenSchritt.getAttribute('data-step')) < await page.locator('.steps').first().locator('.step').count(), '„800 g Hähnchenbrust“ steht im Vorbereiten, nicht erst beim Kochen');
 const haehnchenLi = page.locator('.step-li', { has: haehnchenSchritt });
-check((await haehnchenLi.locator('.step-min').innerText()).replace(/\s+/g, ' ') === '7 Min. +30 warten', `Schneiden 7 Min., dann 30 Min. marinieren (${await haehnchenLi.locator('.step-min').innerText()})`);
+check((await haehnchenLi.locator('.step-z').innerText()) === '7 Min.' && (await haehnchenLi.locator('.step-timer').innerText()).trim() === '30 Min.', `Schneiden 7 Min. steht klein im Text, der Timer für 30 Min. marinieren daneben (${await haehnchenLi.locator('.step-z').innerText()} / ${await haehnchenLi.locator('.step-timer').innerText()})`);
+// Timer nur, wo man einen braucht: köcheln, backen, marinieren – nicht bei jedem Schritt
+const mitTimer = await page.$$eval('#detail .step-li', (ls) => ls.filter((l) => l.querySelector('.step-timer')).map((l) => Number(l.dataset.li)));
+check(JSON.stringify(mitTimer) === JSON.stringify([4, 19, 21, 26, 28, 30, 37]), `nur 7 von 38 Schritten haben einen Timer (${mitTimer.join(', ')})`);
+check(await page.locator('.step-li[data-li="0"] .step-timer').count() === 0 && (await page.locator('.step-li[data-li="0"] .step-z').innerText()) === '2 Min.' && await page.locator('.step-li[data-li="9"] .step-timer').count() === 0, 'Knoblauch reiben und Ofen vorheizen: kein Timer, die Minuten stehen klein im Text');
+check((await page.locator('.step-li[data-li="28"] .step-timer').innerText()).trim() === '12 + 10 Min.' && (await page.locator('.step-li[data-li="26"] .step-timer').innerText()).trim() === '15 Min.', 'Reis: 12 + 10 Min. (garen, dann ruhen), Sauce: 15 Min.');
+const timerHoehe = await page.locator('.step-li[data-li="26"] .step-timer').evaluate((b) => b.getBoundingClientRect().height);
+check(timerHoehe <= 32, `der Timer-Knopf ist klein (${Math.round(timerHoehe)} px hoch)`);
 check(await page.locator('.step.neben .step-k').first().textContent() === 'währenddessen', 'was nebenbei passiert, steht als „währenddessen“ da');
 await page.click('.step[data-step="0"]');
 check(await page.getAttribute('.step[data-step="0"]', 'aria-pressed') === 'true', 'Schritt 1 abgehakt');
@@ -76,11 +84,19 @@ check(await page.locator('.step[data-step="1"].jetzt').count() === 1, 'der näch
 
 // --- Timer: Minuten antippen, Leiste oben, Neuladen, fertig, Notizen
 const nr = Number(await haehnchenSchritt.getAttribute('data-step'));
-await haehnchenLi.locator('.step-min').click();
-check((await haehnchenLi.locator('.step-min').innerText()).includes('29:5') || (await haehnchenLi.locator('.step-min').innerText()).includes('30:00'), `Timer läuft über die Wartezeit: 30 Min. marinieren (${(await haehnchenLi.locator('.step-min').innerText()).replace(/\s+/g, ' ')})`);
+await haehnchenLi.locator('.step-timer').click();
+check((await haehnchenLi.locator('.step-timer').innerText()).includes('29:5') || (await haehnchenLi.locator('.step-timer').innerText()).includes('30:00'), `Timer läuft über die Wartezeit: 30 Min. marinieren (${(await haehnchenLi.locator('.step-timer').innerText()).replace(/\s+/g, ' ')})`);
 check(await page.locator('#timerleiste .tm').count() === 1 && (await page.locator('#timerleiste .tm-label').innerText()).startsWith('Butter Chicken:'), 'oben in der Leiste steht der Timer mit dem Rezept');
-await page.locator('.step-li[data-li="0"] .step-min').click();
+await page.locator('.step-li[data-li="28"] .step-timer').click();
 check(await page.locator('#timerleiste .tm').count() === 2, 'zwei Timer nebeneinander');
+check((await page.locator('.step-li[data-li="28"] .step-timer').innerText()).replace(/\s+/g, ' ').match(/^1[12]:\d\d 1\/2$/), `der Reis-Timer läuft in Stufe 1 von 2 (${(await page.locator('.step-li[data-li="28"] .step-timer').innerText()).replace(/\s+/g, ' ')})`);
+// Stufe 1 ist um: Er meldet sich mit dem, was jetzt dran ist, und läuft mit den 10 Min. weiter
+await page.evaluate(() => { const t = JSON.parse(localStorage.getItem('boxenstopp.timer.v1')); const reis = t.find((x) => x.schritt === 28); reis.ende = Date.now() + 1200; localStorage.setItem('boxenstopp.timer.v1', JSON.stringify(t)); });
+await page.reload({ waitUntil: 'load' });
+await page.waitForFunction(() => document.querySelector('#timerleiste .tm'));
+check(await bis(async () => (await page.locator('#toast').innerText()).startsWith('Jetzt: 10 Min. ruhen lassen'), 5000), `nach 12 Min.: „Jetzt: 10 Min. ruhen lassen“ (${await page.locator('#toast').innerText()})`);
+const reisJetzt = (await page.locator('.step-li[data-li="28"] .step-timer').innerText()).replace(/\s+/g, ' ');
+check(/^(9:5\d|10:00) 2\/2$/.test(reisJetzt) && await page.locator('#timerleiste .tm-fertig').count() === 0, `und läuft in Stufe 2 weiter (${reisJetzt})`);
 await page.reload({ waitUntil: 'load' });
 await page.waitForFunction(() => document.querySelector('#timerleiste .tm'));
 check(await page.locator('#timerleiste .tm').count() === 2, 'nach dem Neuladen laufen beide weiter');
@@ -89,13 +105,13 @@ await page.reload({ waitUntil: 'load' });
 await page.waitForFunction(() => document.querySelector('#timerleiste .tm'));
 check(await bis(async () => (await page.locator('#timerleiste .tm-fertig').count()) === 1, 5000), 'ist die Zeit um, blinkt der Timer „fertig“');
 check(await bis(async () => (await page.locator('#toast').innerText()).startsWith('Fertig:')), 'und unten steht „Fertig: …“');
-check(await page.locator('.step-li .step-min.fertig').count() === 1, 'auch am Schritt selbst');
+check(await page.locator('.step-li .step-timer.fertig').count() === 1, 'auch am Schritt selbst');
 await page.click('#timerleiste .tm-fertig [data-timer-plus]');
 check(await page.locator('#timerleiste .tm-fertig').count() === 0 && await page.locator('#timerleiste .tm').count() === 2, '+1: eine Minute dazu, Timer läuft wieder');
 await page.click('#timerleiste .tm:nth-child(1) [data-timer-stopp]');
 await page.click('#timerleiste .tm [data-timer-stopp]');
 check(await page.locator('#timerleiste').isHidden(), 'alle Timer aus: Leiste weg');
-check(await page.locator(`.step-li[data-li="${nr}"] .step-min.laeuft`).count() === 0, 'der Knopf zeigt wieder die Minuten');
+check(await page.locator(`.step-li[data-li="${nr}"] .step-timer.laeuft`).count() === 0 && (await page.locator(`.step-li[data-li="${nr}"] .step-timer`).innerText()).trim() === '30 Min.', 'der Knopf zeigt wieder die Minuten');
 await page.fill('#notiz-feld', 'Nächstes Mal weniger Chili');
 await page.press('#notiz-feld', 'Enter');
 check(await bis(async () => (await page.locator('#d-notizen .notiz').count()) === 1), 'Notiz gespeichert');
@@ -162,8 +178,17 @@ check(await bis(async () => (await huhnAngebote.locator('.l-auch').count()) === 
 await page.click('.tab[data-tab="angebote"]');
 const tipp = page.locator('.a-tipp');
 check(await bis(async () => (await tipp.count()) === 1) && (await tipp.locator('.a-tipp-k').textContent()) === 'Empfehlung für eure Liste' && (await tipp.locator('.a-tipp-t b').innerText()) === 'Aldi' && (await txt(tipp.locator('.a-tipp-d'))) === '1 Sache von eurer Liste im Angebot: Hähnchenbrustfilet −24 %.' && (await txt(tipp.locator('.a-tipp-n'))).startsWith('Danach: Lidl ≈'), `oben die Empfehlung: Aldi, wegen des Hähnchens; danach Lidl (${(await txt(tipp)).slice(0, 140)})`);
+check((await txt(tipp.locator('.a-nur'))).startsWith('Nur in einen Laden? Das beste Rezept dort') && (await tipp.locator('.a-nur-b').count()) >= 2, `darunter je Laden das beste Rezept, wenn man nur dort einkauft (${(await tipp.locator('.a-nur-b').allInnerTexts()).map((x) => x.replace(/\s+/g, ' ')).join(' | ')})`);
 await tipp.locator('[data-a-laden="Aldi"]').click();
-check(await page.locator('.a-laeden-chips [data-a-laden="Aldi"][aria-pressed="true"]').count() === 1 && (await tipp.innerText()).includes('✓ gewählt'), '„Zu Aldi“ wählt den Laden');
+const nurAldi = await txt(tipp);
+check(await page.locator('.a-laeden-chips [data-a-laden="Aldi"][aria-pressed="true"]').count() === 1 && (await tipp.locator('.a-tipp-k').textContent()) === 'Nur Aldi – das beste Rezept diese Woche' && (await tipp.locator('.a-tipp-r').count()) === 1 && /\d Zutaten? im Angebot/.test(nurAldi) && nurAldi.includes('Von eurer Liste: 1 Sache bei Aldi im Angebot'), `„Zu Aldi“: nur noch Aldi – oben das Rezept mit den meisten Zutaten dort im Angebot (${nurAldi})`);
+const bestesAldi = await tipp.locator('.a-tipp-r').getAttribute('data-a-open');
+await tipp.locator('[data-a-liste]').click();
+check(await bis(async () => (await tipp.locator('.a-tipp-ok').count()) === 1) && (await page.locator(`#forrow [data-rmrec="${bestesAldi}"]`).count()) === 1, `„Auf die Liste“ setzt ${bestesAldi} auf die Liste – dann steht da „✓ auf der Liste“`);
+await page.click('.tab[data-tab="einkauf"]');
+await page.click(`#forrow [data-rmrec="${bestesAldi}"]`);
+check(await bis(async () => (await page.locator(`#forrow [data-rmrec="${bestesAldi}"]`).count()) === 0), 'und wieder runter');
+await page.click('.tab[data-tab="angebote"]');
 await page.click('.a-laeden-chips [data-a-laden="Lidl"]');
 await page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await huhnAngebote.locator('.l-dein').count()) === 1) && (await txt(huhnAngebote.locator('.l-dein'))) === 'Bei Lidl: 400 g 3,79 € · 9,48 €/kg −16 %' && (await huhnAngebote.locator('.l-auch').count()) === 0 && (await txt(huhnAngebote.locator('.l-angebot'))).includes('am günstigsten bei Aldi'), `mit Lidl gewählt: am günstigsten bleibt Aldi, darunter das Angebot bei Lidl (${await txt(huhnAngebote)})`);
@@ -314,6 +339,89 @@ await page.click('[data-act="schritte-zurueck"]');
 await page.click('[data-act="anpinnen"]');
 await page.click('[data-act="zurueck"]');
 check(await bis(async () => page.locator('#gepinnt').isHidden()) && (await page.locator('.box .pill-pin').count()) === 0, 'gelöst: Leiste und Pille sind weg');
+
+// --- Preis und Reihenfolge: zusätzlich zum Chip, das Handy merkt sie sich
+const kosten = () => page.$$eval('#grid .box', (bs) => bs.map((b) => { const m = b.querySelector('.box-cost')?.textContent.match(/(\d+),(\d\d)/); return m ? Number(`${m[1]}.${m[2]}`) : null; }));
+const zeiten = () => page.$$eval('#grid .box .box-time', (xs) => xs.map((x) => x.textContent));
+await page.selectOption('#r-preis', '2');
+let preise = await kosten();
+check(preise.length >= 5 && preise.length < 50 && preise.every((x) => x !== null && x <= 2), `„Bis 2 €“: nur Rezepte bis 2 € pro Box (${preise.length})`);
+check((await page.locator('#r-preis option:checked').textContent()) === `Bis 2 € (${preise.length})` && (await page.locator('.sel.an').count()) === 1, `im Auswahlfeld steht, wie viele es sind (${await page.locator('#r-preis option:checked').textContent()})`);
+check(Number(await page.locator('[data-filter="alle"] .n').textContent()) === preise.length, 'die Chips zählen mit dem Preis');
+await page.selectOption('#r-sort', 'preis');
+preise = await kosten();
+check(preise.every((x, i) => !i || preise[i - 1] <= x), `„Günstigste“: billigste zuerst (${preise.slice(0, 3).join(', ')} …)`);
+await page.click('[data-filter="haehnchen"]');
+const huhnBillig = await kosten();
+check(huhnBillig.length >= 1 && huhnBillig.length < 30 && huhnBillig.every((x, i) => x <= 2 && (!i || huhnBillig[i - 1] <= x)), `Hähnchen bis 2 €, billigste zuerst (${huhnBillig.length})`);
+await page.reload({ waitUntil: 'load' });
+await page.waitForSelector('#grid .box');
+check((await page.inputValue('#r-preis')) === '2' && (await page.inputValue('#r-sort')) === 'preis' && (await kosten()).length === huhnBillig.length, 'nach dem Neuladen noch so eingestellt');
+await page.click('[data-filter="alle"]');
+await page.selectOption('#r-preis', '0');
+await page.selectOption('#r-sort', 'zeit');
+const zs = (await zeiten()).map(minuten);
+check(zs.length === 50 && zs.every((x, i) => !i || zs[i - 1] <= x), `„Schnellste“: kürzeste zuerst (${(await zeiten()).slice(0, 2).join(', ')} … ${(await zeiten()).slice(-1)})`);
+await page.selectOption('#r-sort', 'standard');
+check((await page.locator('#grid .box').first().getAttribute('data-open')) === 'chili' && (await page.locator('.sel.an').count()) === 0, 'zurück auf „Empfohlen“: Chili wieder vorne');
+
+// --- Tempo: Beim Abhaken misst das Handy mit …
+await page.click('[data-open="tomaten-pasta"]');
+await page.click('[data-step="0"]');
+await page.click('[data-step="1"]');
+const offenerLauf = await page.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.tempo.v1') || '{}').offen?.['tomaten-pasta']?.h?.length);
+check(offenerLauf === 2, `zwei Haken – das Handy misst mit (${offenerLauf})`);
+await page.click('[data-act="schritte-zurueck"]');
+await page.click('[data-act="zurueck"]');
+// … und so sieht es aus, wenn es dein Tempo kennt (hier vorgegeben: Vorbereiten 1,5×, Gulasch zuletzt 4 Std. 10 Min.)
+await page.evaluate(() => {
+  const proben = Array.from({ length: 8 }, () => ['', 'vor', 5, 7.5]);
+  localStorage.setItem('boxenstopp.tempo.v1', JSON.stringify({ offen: {}, proben, gesamt: { gulasch: [[250, '2026-10-24']] } }));
+});
+await page.reload({ waitUntil: 'load' });
+await page.waitForSelector('#grid .box');
+const gulaschZeit = page.locator('[data-open="gulasch"] .box-time');
+check((await gulaschZeit.textContent()) === '4 Std. 10 Min.' && (await gulaschZeit.getAttribute('class')).includes('is-tempo'), `Gulasch: 4 Std. 10 Min. wie beim letzten Mal, hervorgehoben (${await gulaschZeit.textContent()})`);
+const chiliZeit = minuten(await page.locator('[data-open="chili"] .box-time').textContent());
+check(chiliZeit > 115 && (await page.locator('[data-open="chili"] .box-time').getAttribute('class')).includes('is-tempo'), `Chili: länger als die Standard-1 Std. 55 Min., weil du langsamer schnippelst (${chiliZeit} Min.)`);
+await page.click('[data-open="chili"]');
+check((await page.locator('.facts .pill').first().textContent()).includes('dein Tempo') && (await text('#d-tempo')).includes('Zeiten in deinem Tempo (Vorbereiten 1,5× so lange wie Standard)'), `im Rezept: „Zeiten in deinem Tempo (Vorbereiten 1,5×)“ (${await text('#d-tempo')})`);
+const ersterSchritt = page.locator('.step-li[data-li="0"] .step-z');
+check((await ersterSchritt.getAttribute('class')).includes('is-tempo') && (await page.locator('.zeiten.is-tempo').count()) === 1, `die Minuten der Schritte in deinem Tempo (${await ersterSchritt.textContent()})`);
+await page.click('[data-act="zurueck"]');
+await page.click('[data-open="gulasch"]');
+check((await text('#d-tempo')).includes('Letztes Mal hat das ganze Rezept 4 Std. 10 Min. gedauert (24.10.)'), `Gulasch: „Letztes Mal … 4 Std. 10 Min.“ (${await text('#d-tempo')})`);
+await page.click('#d-tempo [data-act="tempo-weg"]');
+check(await bis(async () => (await page.locator('#toast').innerText()).startsWith('Tempo vergessen')) && (await page.locator('.facts .pill').first().textContent()) === 'ca. 3 Std. 40 Min.' && (await text('#d-tempo')).includes('Hak beim Kochen die Schritte ab'), 'Tempo vergessen: wieder die Standardzeiten');
+await page.click('#toast button');
+check(await bis(async () => (await page.locator('.facts .pill').first().textContent()).startsWith('ca. 4 Std. 10 Min.')), 'Rückgängig: wieder in deinem Tempo');
+await page.click('#d-tempo [data-act="tempo-weg"]');
+await page.click('[data-act="zurueck"]');
+
+// --- Angebote der nächsten Woche: im Abruf zwei Penny-Angebote ab nächstem Montag
+const naechste = woche('naechste');
+const mitNaechster = JSON.parse(readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote.json'), 'utf8'));
+mitNaechster.angebote.push(
+  { id: 'a-next001', laden: 'Penny', name: 'Hähnchenbrustfilet XXL', preis: 4.44, menge: 600, einheit: 'g', von: naechste.montag, bis: naechste.bis, k: 'haehnchenbrust' },
+  { id: 'a-next002', laden: 'Penny', name: 'Paprika rot', preis: 0.99, menge: 500, einheit: 'g', von: naechste.montag, bis: naechste.bis, k: 'paprika' },
+);
+const nx = await handy(browser);
+await nx.page.route('**/daten/angebote.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mitNaechster) }));
+await nx.page.reload({ waitUntil: 'load' });
+await nx.page.click('.tab[data-tab="angebote"]');
+await nx.page.waitForSelector('.a-woche');
+const wocheText = async (art) => (await nx.page.locator(`[data-a-woche="${art}"]`).innerText()).replace(/\s+/g, ' ');
+const badgeVorher = await nx.page.locator('#a-badge').innerText();
+check((await wocheText('diese')).includes('Diese Woche') && (await wocheText('naechste')).startsWith(`Nächste Woche KW ${naechste.kw} ·`), `oben: Diese Woche / Nächste Woche mit Kalenderwoche (${await wocheText('naechste')})`);
+check(!(await nx.page.locator('#a-auto').innerText()).includes('Hähnchenbrustfilet XXL') && (await nx.page.locator('#a-auto').innerText()).includes('Hähnchenbrustfilet-Teilstücke'), 'diese Woche: das Penny-Hähnchen ab Montag steht noch nicht da, das Aldi-Hähnchen schon');
+await nx.page.click('[data-a-woche="naechste"]');
+check((await nx.page.locator('#a-title').innerText()) === 'Angebote nächste Woche' && await nx.page.locator('[data-a-woche="naechste"][aria-pressed="true"]').count() === 1, 'nächste Woche gewählt: Überschrift „Angebote nächste Woche“');
+check((await nx.page.locator('#a-auto .a-grp[data-laden="Penny"]').innerText()).includes('Hähnchenbrustfilet XXL') && (await nx.page.locator('#a-auto .a-stand').innerText()).startsWith(`KW ${naechste.kw}`), 'und die Angebote ab Montag stehen in der Liste, darunter die KW');
+check((await nx.page.locator('#a-badge').innerText()) === badgeVorher, 'die Zahl am Reiter bleibt bei dieser Woche');
+await nx.page.click('.a-laeden-chips [data-a-laden="Penny"]');
+const pennyNaechste = (await nx.page.locator('.a-tipp').innerText()).replace(/\s+/g, ' ');
+check(pennyNaechste.includes('das beste Rezept nächste Woche'.toUpperCase()) || pennyNaechste.toLowerCase().includes('das beste rezept nächste woche'), `Nur Penny, nächste Woche: das beste Rezept dort (${pennyNaechste.slice(0, 120)})`);
+await nx.ctx.close();
 
 // --- iPhone, App vom Home-Bildschirm: eigener Speicher, getrennt von Safari – der Hinweis sagt, was zu tun ist
 const iphone = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE', serviceWorkers: 'block', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });

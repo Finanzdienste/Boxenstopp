@@ -9,13 +9,17 @@
  *     bewertung: { <Rezept-id>: { wert: 'hoch' | 'mittel' | 'runter', by: 'Amy', at } },
  *     ki:        { <ki-…>: { r: Rezept aus der Resteverwertung, by, at } },
  *     notizen:   { <Rezept-id>: [{ id, text, by, at }, …] },
- *     gepinnt:   { <Rezept-id>: { by: 'Tobi', at } } }
+ *     gepinnt:   { <Rezept-id>: { by: 'Tobi', at } },
+ *     amy:       { <amy-…>: Amys eigenes Rezept (amy.js) } }
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
  * Resteverwertung, die jemand behalten hat (ki-rezept.js, höchstens 12) –
  * so sieht das andere Handy sie auch. `gepinnt` sind die Rezepte, die gerade
- * laufen (Lesezeichen, höchstens vier) – sie stehen bei beiden oben.
+ * laufen (Lesezeichen, höchstens vier) – sie stehen bei beiden oben. Unter
+ * `amy` liegen die Rezepte, die Amy selbst schreibt (höchstens 60), so wie
+ * sie sie getippt hat; ihre Zutaten kommen über dieselben Teile auf die
+ * Liste wie die der festen Rezepte (Teil-Schlüssel ist die amy-id).
  *
  * Ein Eintrag:
  *
@@ -39,8 +43,9 @@
 
 import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
+import { amyBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] } });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {} });
 const MAX_NOTIZEN = 20;
 export const MAX_GEPINNT = 4;
 export const DAUMEN = ['hoch', 'mittel', 'runter'];
@@ -175,8 +180,15 @@ export function bereinigen(roh) {
   if (istObj(roh.angebote)) {
     s.angebote = { stand: text(roh.angebote.stand, 40) || '', von: text(roh.angebote.von, 40) || null, eintraege: angeboteBereinigen(roh.angebote.eintraege) };
   }
+  if (istObj(roh.amy)) {
+    const a = Object.entries(roh.amy).filter(([id]) => AMY_ID.test(id)).map(([id, r]) => amyBereinigen({ ...(istObj(r) ? r : {}), id })).filter(Boolean);
+    s.amy = Object.fromEntries(neuesteAmy(a).map((r) => [r.id, r]));
+  }
   return s;
 }
+
+/** Die neuesten MAX_AMY Rezepte (nach letzter Änderung). */
+const neuesteAmy = (liste) => [...liste].sort((a, b) => String(b.geaendert || b.at).localeCompare(String(a.geaendert || a.at))).slice(0, MAX_AMY);
 
 /* -------------------------------------------------------------- Änderungen */
 
@@ -203,8 +215,11 @@ export function opEigener(id, name, cat) {
 export const opErledigteWeg = () => ({ typ: 'erledigteWeg' });
 export const opLeeren = () => ({ typ: 'leeren' });
 export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || null });
-/** Einträge (und behaltene KI-Rezepte) von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
-export const opZusammen = (items, ki = {}) => ({ typ: 'zusammen', items: klon(items), ki: klon(ki || {}) });
+/** Einträge (behaltene KI-Rezepte, Amys Rezepte) von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
+export const opZusammen = (items, ki = {}, amy = {}) => ({ typ: 'zusammen', items: klon(items), ki: klon(ki || {}), amy: klon(amy || {}) });
+/** Amys Rezept anlegen oder ändern (ganz ersetzen) – für beide; wegwerfen mit opAmyWeg. */
+export const opAmy = (r, by) => ({ typ: 'amy', r: klon(r), by: by || null, at: jetzt() });
+export const opAmyWeg = (id) => ({ typ: 'amyWeg', id });
 /** Ein Rezept aus der Resteverwertung für beide behalten – oder wieder wegwerfen. */
 export const opKiBehalten = (id, r, by) => ({ typ: 'kiBehalten', id, r: klon(r), by: by || null, at: jetzt() });
 export const opKiWeg = (id) => ({ typ: 'kiWeg', id });
@@ -286,6 +301,14 @@ function aendere(s, op) {
         if (!istObj(s.ki)) s.ki = {};
         for (const [id, e] of Object.entries(op.ki)) if (KI_ID.test(id) && istObj(e) && !s.ki[id]) s.ki[id] = klon(e);
       }
+      if (istObj(op.amy)) {
+        if (!istObj(s.amy)) s.amy = {};
+        for (const [id, r] of Object.entries(op.amy)) {
+          const b = AMY_ID.test(id) && !s.amy[id] ? amyBereinigen({ ...r, id }) : null;
+          if (b) s.amy[id] = b;
+        }
+        s.amy = Object.fromEntries(neuesteAmy(Object.values(s.amy)).map((r) => [r.id, r]));
+      }
       return;
     case 'kiBehalten': {
       if (!KI_ID.test(String(op.id))) return;
@@ -330,6 +353,20 @@ function aendere(s, op) {
     }
     case 'angebote':
       s.angebote = { stand: op.at || jetzt(), von: op.by || null, eintraege: angeboteBereinigen(op.eintraege) };
+      return;
+    case 'amy': {
+      const vorher = istObj(s.amy) ? s.amy[op.r?.id] : null;
+      const r = amyBereinigen({ ...op.r, by: vorher?.by || op.r?.by || op.by, at: vorher?.at || op.r?.at || op.at, geaendert: op.at });
+      if (!r) return;
+      if (!istObj(s.amy)) s.amy = {};
+      s.amy[r.id] = r;
+      s.amy = Object.fromEntries(neuesteAmy(Object.values(s.amy)).map((x) => [x.id, x]));
+      return;
+    }
+    case 'amyWeg':
+      if (istObj(s.amy)) delete s.amy[op.id];
+      if (istObj(s.notizen)) delete s.notizen[op.id];
+      if (istObj(s.gepinnt)) delete s.gepinnt[op.id];
       return;
     case 'angeboteDazu': {
       const alt = s.angebote?.eintraege || [];

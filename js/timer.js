@@ -1,9 +1,14 @@
 /*
- * Küchentimer: In jedem Schritt steht rechts die Zeit – antippen startet
- * einen Timer dafür, mehrere nebeneinander (Reis und Sauce). Sie laufen oben
- * unter der Kopfzeile mit, überleben ein Neuladen (Endzeit im localStorage)
- * und melden sich am Ende mit Ton, Vibration und – wenn erlaubt –
- * einer Benachrichtigung.
+ * Küchentimer: Wo ein Schritt eine feste Zeit läuft (köcheln, backen,
+ * marinieren – zeiten.js timerPlan), steht rechts ein kleiner Timer-Knopf.
+ * Antippen startet ihn, mehrere laufen nebeneinander (Reis und Sauce). Sie
+ * laufen oben unter der Kopfzeile mit, überleben ein Neuladen (Endzeit im
+ * localStorage) und melden sich am Ende mit Ton, Vibration und – wenn
+ * erlaubt – einer Benachrichtigung.
+ *
+ * Ein Timer kann Stufen haben („12 Min. garen und 10 Min. ruhen lassen“):
+ * Nach der ersten meldet er sich mit dem, was jetzt zu tun ist, und läuft
+ * von selbst mit der nächsten weiter.
  *
  * Nur auf diesem Handy: Wer kocht, hat das Handy in der Hand; das andere
  * braucht die Timer nicht.
@@ -37,9 +42,13 @@ export function restText(ms) {
   return `${h ? `${h}:` : ''}${h ? String(m).padStart(2, '0') : m}:${String(sek).padStart(2, '0')}`;
 }
 
-export function timerStarten({ rid, schritt, minuten, label }) {
-  const min = Math.max(1, Math.round(Number(minuten) || 1));
-  const t = { id: neueId(), rid, schritt, label: String(label || '').slice(0, 60), minuten: min, start: Date.now(), ende: Date.now() + min * 60000, fertig: false };
+const ganz = (m) => Math.min(600, Math.max(1, Math.round(Number(m) || 1)));
+
+/** folge: die weiteren Stufen [{ minuten, dann }]; dann: was am Ende dieser Stufe zu tun ist. */
+export function timerStarten({ rid, schritt, minuten, label, dann = '', folge = [] }) {
+  const min = ganz(minuten);
+  const weiter = (Array.isArray(folge) ? folge : []).slice(0, 3).map((f) => ({ minuten: ganz(f.minuten), dann: String(f.dann || '').slice(0, 80) }));
+  const t = { id: neueId(), rid, schritt, label: String(label || '').slice(0, 60), minuten: min, start: Date.now(), ende: Date.now() + min * 60000, fertig: false, dann: String(dann || '').slice(0, 80), folge: weiter, stufe: 1, stufen: 1 + weiter.length };
   timer = [...timer.filter((x) => !(x.rid === rid && x.schritt === schritt)), t];
   merken();
   erlaubnisHolen();
@@ -100,16 +109,29 @@ function piepen() {
   } catch { /* dann eben ohne Ton */ }
 }
 
-function alarm(t) {
-  piepen();
-  try { navigator.vibrate?.([400, 150, 400, 150, 600]); } catch { /* egal */ }
+function benachrichtigen(titel, text, tag) {
   try {
     if ('Notification' in window && Notification.permission === 'granted') {
-      const n = new Notification('Timer fertig', { body: t.label || `${t.minuten} Min. sind um`, tag: t.id, renotify: true });
+      const n = new Notification(titel, { body: text, tag, renotify: true });
       n.onclick = () => { window.focus(); n.close(); };
     }
   } catch { /* egal */ }
+}
+
+function alarm(t) {
+  piepen();
+  try { navigator.vibrate?.([400, 150, 400, 150, 600]); } catch { /* egal */ }
+  benachrichtigen('Timer fertig', t.label || `${t.minuten} Min. sind um`, t.id);
   melde(`Fertig: ${t.label || `${t.minuten} Min.`}`, { knopf: 'Aus', beiKnopf: () => timerStoppen(t.id) });
+}
+
+/** Eine Stufe ist um, die nächste läuft schon: sagen, was jetzt dran ist. */
+function zwischenAlarm(t, was) {
+  piepen();
+  try { navigator.vibrate?.([400, 150, 400]); } catch { /* egal */ }
+  const text = `Jetzt: ${was || 'weiter'} – der Timer läuft weiter`;
+  benachrichtigen(t.label || 'Timer', text, t.id);
+  melde(text, { knopf: 'Aus', beiKnopf: () => timerStoppen(t.id) });
 }
 
 /* ----------------------------------------------------------------- Takt */
@@ -118,7 +140,19 @@ function tick() {
   const jetzt = Date.now();
   let geaendert = false;
   for (const t of timer) {
-    if (!t.fertig && t.ende <= jetzt) { t.fertig = true; geaendert = true; alarm(t); }
+    if (t.fertig || t.ende > jetzt) continue;
+    geaendert = true;
+    // Zur nächsten Stufe; was schon vorbei ist (Handy schlief), still überspringen
+    while (t.folge?.length && t.ende <= jetzt) {
+      const was = t.dann;
+      const n = t.folge.shift();
+      t.ende += n.minuten * 60000;
+      t.minuten = n.minuten;
+      t.dann = n.dann || '';
+      t.stufe = (t.stufe || 1) + 1;
+      if (t.ende > jetzt) zwischenAlarm(t, was);
+    }
+    if (t.ende <= jetzt) { t.fertig = true; alarm(t); }
   }
   if (geaendert) merken();
   zeichnen();
@@ -132,8 +166,8 @@ export function timerText(t) {
 
 export function leisteHTML() {
   if (!timer.length) return '';
-  return timer.map((t) => `<div class="tm${t.fertig ? ' tm-fertig' : ''}" data-timer-zu="${esc(t.rid)}" data-timer-schritt="${t.schritt}">
-<span class="tm-rest">${timerText(t)}</span><span class="tm-label">${esc(t.label || `${t.minuten} Min.`)}</span>
+  return timer.map((t) => `<div class="tm${t.fertig ? ' tm-fertig' : ''}" role="button" tabindex="0" aria-label="Zum Schritt: ${esc(t.label || `${t.minuten} Min.`)}" data-timer-zu="${esc(t.rid)}" data-timer-schritt="${t.schritt}">
+<span class="tm-rest">${timerText(t)}</span><span class="tm-label">${esc(t.label || `${t.minuten} Min.`)}${t.stufen > 1 && !t.fertig ? ` · ${t.stufe}/${t.stufen}` : ''}</span>
 ${t.fertig ? `<button type="button" class="tm-btn" data-timer-plus="${t.id}" aria-label="1 Minute dazu">+1</button>` : ''}
 <button type="button" class="tm-btn tm-x" data-timer-stopp="${t.id}" aria-label="Timer beenden">×</button>
 </div>`).join('');

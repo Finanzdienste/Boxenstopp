@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
  * Holt die Angebote der Woche und schreibt daten/angebote.json – läuft
- * montags und donnerstags als GitHub Action (.github/workflows/angebote.yml),
+ * montags, donnerstags und sonntags als GitHub Action (.github/workflows/angebote.yml),
  * zur Not auch von Hand:
  *
  *     node werkzeug/angebote.mjs                # Aldi, Lidl, Kaufland, Penny → daten/angebote.json
@@ -13,10 +13,18 @@
  * bekommt (eine ehrliche Kennung, zweimal die Woche, robots.txt beachtet):
  *
  *   Aldi      www.aldi-nord.de/angebote.html – die Seite hat alle Artikel der
- *             Woche als JSON eingebettet (Preis, Packung, Grundpreis, gültig bis).
+ *             Woche als JSON eingebettet (Preis, Packung, Grundpreis, gültig
+ *             von/bis); angebote-vorschau.html genauso für die nächste Woche
+ *             (ab Donnerstag online).
  *   Kaufland  filiale.kaufland.de/angebote/uebersicht.html – Artikelkacheln im
  *             HTML, nach Warengruppen, mit Gültigkeit je Gruppe. Bundesweit.
- *   Penny     www.penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe> – JSON.
+ *             Mit ?kloffer-week=next die nächste Woche (anfangs nur Vorwerbung).
+ *   Penny     www.penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe> – JSON,
+ *             für diese und die nächste Kalenderwoche (die kommt am Wochenende).
+ *
+ * Zusätzlich zu montags und donnerstags läuft der Abruf sonntags: Dann sind
+ * die Angebote der nächsten Woche überall da, und die App zeigt sie unter
+ * „Nächste Woche“.
  *   Lidl      Der Aktionsprospekt (lidl.de/l/prospekte) liegt als Seitenbilder
  *             vor, ohne Text. Die Lebensmittel-Seiten (lidlSeitenWahl) liest
  *             Gemini aus, vier je Anfrage – dafür braucht der Lauf den
@@ -148,14 +156,21 @@ export function aldiLesen(html, bezug = new Date()) {
   return aus;
 }
 
+/** Montag in einer Woche (+7 Tage) als Date – Bezug fürs Lesen der nächsten Woche. */
+const naechsterMontag = (d = new Date()) => new Date(`${wochentag(d, 7)}T12:00:00Z`);
+
 async function aldi() {
   const html = await hole('https://www.aldi-nord.de/angebote.html');
-  return { angebote: aldiLesen(html), hinweis: 'Aldi Nord, bundesweit' };
+  const angebote = aldiLesen(html);
+  // Die Vorschau auf die nächste Woche – fehlt sie gerade, ist das kein Fehler
+  let vorschau = [];
+  try { vorschau = aldiLesen(await hole('https://www.aldi-nord.de/angebote-vorschau.html'), naechsterMontag()); } catch (e) { console.log(`  Aldi Vorschau: ${e?.message || e}`); }
+  return { angebote: [...angebote, ...vorschau], hinweis: `Aldi Nord, bundesweit${vorschau.length ? `, mit Vorschau auf nächste Woche (${vorschau.length})` : ''}` };
 }
 
 /* --------------------------------------------------------- Kaufland */
 
-const KAUFLAND_GRUPPEN = /TopArticle|K-Card|Obst__Gemuese|Fleisch__Gefluegel|Molkereiprodukte|Tiefkuehlkost|Feinkost__Konserven|Grundnahrungsmittel|Foodknueller|XXL|Bio|Regio|Eigenmarken|MultiBuy|Bester_Preis/;
+const KAUFLAND_GRUPPEN = /TopArticle|K-Card|Obst__Gemuese|Fleisch__Gefluegel|Molkereiprodukte|Tiefkuehlkost|Feinkost__Konserven|Grundnahrungsmittel|Foodknueller|XXL|Bio|Regio|Eigenmarken|MultiBuy|Bester_Preis|Vorwerbung/;
 
 export function kauflandLesen(html, bezug = new Date()) {
   const aus = [];
@@ -165,10 +180,12 @@ export function kauflandLesen(html, bezug = new Date()) {
     const id = (sek.match(/id="(cat_[^"]+)"/) || [])[1] || '';
     if (!KAUFLAND_GRUPPEN.test(id) || /Frischer_Fisch/.test(id)) continue;
     const sub = entities((sek.match(/k-product-section__subheadline">(.*?)<\/div>/s) || [])[1]);
-    const bisM = sub.match(/bis\s+(\d{1,2}\.\d{1,2}\.(?:\d{4})?)/) || sub.match(/am\s+(\d{1,2}\.\d{1,2}\.(?:\d{4})?)/);
+    const amM = sub.match(/am\s+(\d{1,2}\.\d{1,2}\.(?:\d{4})?)/);
+    const bisM = sub.match(/bis\s+(\d{1,2}\.\d{1,2}\.(?:\d{4})?)/) || amM;
     const vonM = sub.match(/vom\s+(\d{1,2}\.\d{1,2}\.(?:\d{4})?)/);
     const bis = bisM ? datumAus(bisM[1], bezug) : samstagDieserWoche(bezug);
-    const von = vonM ? datumAus(vonM[1], bezug) : '';
+    // „gültig am 02.11.“ gilt nur an dem Tag – sonst stünde es schon in dieser Woche
+    const von = vonM ? datumAus(vonM[1], bezug) : (amM && bisM === amM ? bis : '');
     for (const t of sek.split('<a class="k-product-tile"').slice(1)) {
       const feld = (cls) => entities((t.match(new RegExp(`class="${cls}">(.*?)</div>`, 's')) || [])[1]);
       const marke = feld('k-product-tile__title');
@@ -193,7 +210,10 @@ export function kauflandLesen(html, bezug = new Date()) {
 
 async function kaufland() {
   const html = await hole('https://filiale.kaufland.de/angebote/uebersicht.html');
-  return { angebote: kauflandLesen(html), hinweis: 'bundesweite Angebote, regional kann es abweichen' };
+  const angebote = kauflandLesen(html);
+  let naechste = [];
+  try { naechste = kauflandLesen(await hole('https://filiale.kaufland.de/angebote/uebersicht.html?kloffer-week=next'), naechsterMontag()); } catch (e) { console.log(`  Kaufland nächste Woche: ${e?.message || e}`); }
+  return { angebote: [...angebote, ...naechste], hinweis: `bundesweite Angebote, regional kann es abweichen${naechste.length ? `; nächste Woche ${naechste.length}` : ''}` };
 }
 
 /* ------------------------------------------------------------ Penny */
@@ -224,13 +244,19 @@ export function pennyLesen(gruppen, bezug = new Date()) {
 }
 
 async function penny() {
-  const kw = kalenderwoche();
-  const gruppen = [];
-  for (const g of PENNY_GRUPPEN) {
-    try { gruppen.push([g, await hole(`https://www.penny.de/.rest/offers/by-category/${kw}/${g}`, { json: true })]); } catch (e) { if (!/404/.test(e.message)) throw e; }
+  // Diese und die nächste Kalenderwoche; die nächste gibt es meist erst ab dem Wochenende (sonst 404)
+  const angebote = [];
+  const wochen = [];
+  for (const bezug of [new Date(), naechsterMontag()]) {
+    const kw = kalenderwoche(bezug);
+    const gruppen = [];
+    for (const g of PENNY_GRUPPEN) {
+      try { gruppen.push([g, await hole(`https://www.penny.de/.rest/offers/by-category/${kw}/${g}`, { json: true })]); } catch (e) { if (!/404/.test(e.message)) throw e; }
+    }
+    if (gruppen.length) { angebote.push(...pennyLesen(gruppen, bezug)); wochen.push(kw.slice(5)); }
   }
-  if (!gruppen.length) throw new Error('keine Warengruppe geantwortet');
-  return { angebote: pennyLesen(gruppen), hinweis: `KW ${kw.slice(5)}, bundesweit` };
+  if (!wochen.length) throw new Error('keine Warengruppe geantwortet');
+  return { angebote, hinweis: `KW ${wochen.join(' und ')}, bundesweit` };
 }
 
 /* ------------------------------------------------------------- Lidl */
@@ -689,7 +715,8 @@ async function main() {
   // Rezeptzutaten zuerst, dann der Rest – und deutlich mehr Platz als die von Hand eingetragene Liste
   const gueltig = angebote.filter((a) => !a.bis || a.bis >= heute()).map((a) => ({ ...a, k: a.k || '' }));
   gueltig.sort((a, b) => (b.k ? 1 : 0) - (a.k ? 1 : 0) || a.laden.localeCompare(b.laden) || a.name.localeCompare(b.name, 'de'));
-  angebote = angeboteBereinigen(gueltig, KATALOG, 800).map((a) => ({ ...a, id: stabileId(a.laden, a.name, a.preis) }));
+  // Diese und nächste Woche zusammen – darum doppelt so viel Platz wie früher
+  angebote = angeboteBereinigen(gueltig, KATALOG, 1600).map((a) => ({ ...a, id: stabileId(a.laden, a.name, a.preis, a.von) }));
   const daten = {
     stand: new Date().toISOString(),
     woche: kalenderwoche(),
