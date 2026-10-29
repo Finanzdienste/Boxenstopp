@@ -11,7 +11,12 @@
  *             (angebote.js schluesselRaten): Dann teilt sich die Zutat auf
  *             der Einkaufsliste eine Zeile mit den festen Rezepten, und die
  *             App kennt Nährwerte und Richtpreis. Unbekanntes bekommt einen
- *             eigenen Schlüssel (amyz-…) und eine geratene Abteilung.
+ *             eigenen Schlüssel (amyz-…) und eine geratene Abteilung. Was
+ *             auf der Liste zusammengelegt wurde („leckere Dino nuggies“ ist
+ *             dasselbe wie „Dino nuggets“) oder in eine andere Abteilung
+ *             verschoben, gilt hier auch (stand.gleich, stand.abteilungen).
+ *   Tags      die sie selbst vergibt („bauchfreundlich“, „gesund“) – sie
+ *             stehen in liste.json unter `amyTags`, nicht im Rezept.
  *   Schritte  Zeiten im Text werden zum Timer (zeiten.js timerPlan); eine
  *             kurze Zeile mit Doppelpunkt am Ende („Soße:“) beginnt einen
  *             neuen Abschnitt.
@@ -25,7 +30,7 @@
  *     schritte: [Zeile], notiz, by, at, geaendert }
  */
 import { schluesselRaten } from './angebote.js';
-import { abteilung } from './format.js';
+import { abteilung, nameSchluessel, umleiten } from './format.js';
 import { kostenMenge } from './kosten.js';
 import { textMinuten } from './zeiten.js';
 import { AMY_BILDER } from './bilder.js';
@@ -45,6 +50,53 @@ export function slug(t) {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'rezept';
 }
 export const neueAmyId = (name) => `amy-${slug(name).slice(0, 30)}-${Math.random().toString(36).slice(2, 6)}`;
+
+/* ------------------------------------------------------------------ Tags */
+
+export const MAX_TAGS = 8;
+const TAG_LAENGE = 24;
+/** Was die App vorschlägt, solange Amy noch keine eigenen Tags hat. */
+export const TAG_VORSCHLAEGE = ['gesund', 'bauchfreundlich', 'schnell', 'vegetarisch', 'süß', 'Lieblingsrezept', 'Meal Prep', 'günstig'];
+
+/** Tags aus beliebigem JSON: höchstens acht, je 24 Zeichen, ohne Doppelte (groß/klein egal). */
+export function tagsBereinigen(roh) {
+  const aus = [];
+  const gesehen = new Set();
+  for (const t of Array.isArray(roh) ? roh : []) {
+    const x = typeof t === 'string' ? t.replace(/^[#\s]+/, '').replace(/[\p{Cc}<>]/gu, '').replace(/\s+/g, ' ').trim().slice(0, TAG_LAENGE).trim() : '';
+    if (!x || gesehen.has(x.toLowerCase())) continue;
+    gesehen.add(x.toLowerCase());
+    aus.push(x);
+    if (aus.length >= MAX_TAGS) break;
+  }
+  return aus;
+}
+/** „gesund, schnell“ → ['gesund', 'schnell'] */
+export const tagsAusText = (t) => String(t || '').split(/[,;\n]+/).map((x) => x.trim()).filter(Boolean);
+
+/** Alle vergebenen Tags mit ihrer Anzahl, die häufigsten zuerst: [['gesund', 3], …] – nur für ids, wenn angegeben. */
+export function alleTags(amyTags = {}, ids = null) {
+  const je = new Map();
+  for (const [id, liste] of Object.entries(amyTags || {})) {
+    if (ids && !ids.has(id)) continue;
+    for (const t of Array.isArray(liste) ? liste : []) {
+      const e = je.get(t.toLowerCase()) || [t, 0];
+      e[1] += 1;
+      je.set(t.toLowerCase(), e);
+    }
+  }
+  return [...je.values()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'));
+}
+
+/** Hat ein Rezept alle gewählten Tags? (groß/klein egal) */
+export const hatTags = (tags, gewaehlt) => (gewaehlt || []).every((g) => (tags || []).some((t) => t.toLowerCase() === String(g).toLowerCase()));
+
+/** Eine von sechs Pastellfarben je Tag – derselbe Tag hat immer dieselbe. */
+export function tagFarbe(t) {
+  let h = 0;
+  for (const c of String(t).toLowerCase()) h = (h * 31 + c.codePointAt(0)) % 997;
+  return h % 6;
+}
 
 /** Ein Rezept aus beliebigem JSON – oder null. */
 export function amyBereinigen(roh) {
@@ -86,6 +138,8 @@ const EINHEITEN = [
 const STUECK_G = { zwiebeln: 100, 'rote-zwiebeln': 100, moehren: 100, tomaten: 100, aepfel: 150, kartoffeln: 150, suesskartoffel: 300, zucchini: 300, gurke: 400, aubergine: 300, champignons: 20, brokkoli: 400, blumenkohl: 600, eier: 60 };
 /* Löffel in Gramm, ungefähr – für Nährwerte und Kosten. */
 const LOEFFEL_G = { EL: 12, TL: 4 };
+/** „1 kleine Flasche …“, „1 großen Wrap“: Die Größe ist ein Zusatz, nicht Teil des Namens. */
+const GROESSE = /^(?:sehr\s+)?(gro(?:ß|ss)|klein|mittelgro(?:ß|ss))(?:e[nrsm]?)?\s+/i;
 /** Was man nicht einkauft: Wasser, Salz, Pfeffer. */
 const NIE_KAUFEN = /^(?:(?:kaltes |warmes |heißes )?wasser|leitungswasser|eiswasser|salz|pfeffer|salz (?:und|&) pfeffer|salz, pfeffer|meersalz|jodsalz)$/i;
 
@@ -94,12 +148,14 @@ const gross = (t) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : t);
 
 /**
  * Eine Zeile lesen: „1½ EL Sojasauce“, „2–3 Zwiebeln, gewürfelt“, „1 Dose Kokosmilch (400 ml)“, „Salz“.
- * → { roh, name, q, u, a, h, k, kat, gewuerz, kaufen }
+ * → { roh, name, q, u, a, h, k, kat, gewuerz, kaufen, zusammen }
  *   q/u  Menge und Einheit, wie sie auf die Liste kommen (q null, wenn keine dasteht)
  *   a    die Menge, wie sie im Rezept steht („1½ EL“), h ein Zusatz („gewürfelt“)
  *   k    Katalog-Schlüssel oder amyz-…; kat { n, c } für die Liste
+ *   zusammen  true, wenn k von der Liste kommt (zusammengelegt mit einer anderen Zeile)
+ * mehr = { gleich, abteilungen } aus dem Stand: Zusammengelegtes und Verschobenes.
  */
-export function zutatLesen(zeile, katalog = {}) {
+export function zutatLesen(zeile, katalog = {}, mehr = {}) {
   const roh = text(zeile, 120);
   let t = roh.replace(/^[-•*·]\s*/, '').replace(/^(?:ca\.|circa|etwa)\s+/i, '');
   let q = null;
@@ -114,25 +170,46 @@ export function zutatLesen(zeile, katalog = {}) {
   }
   let u = '';
   let faktor = 1;
+  let groesse = '';
+  const ohneGroesse = (mitMenge) => {
+    const g = t.match(GROESSE);
+    if (!g || groesse || g[0].length >= t.length) return;
+    groesse = g[1].toLowerCase().replace(/ss$/, 'ß');
+    if (mitMenge) menge = `${menge} ${g[0].trim()}`;
+    t = t.slice(g[0].length).trim();
+  };
   if (q !== null) {
+    ohneGroesse(true);
     const w = t.match(/^([A-Za-zÄÖÜäöüß]+)\.?(?=\s|$)/);
     const e = w && EINHEITEN.find(([re]) => re.test(w[1].toLowerCase()));
     if (e) { u = e[1]; faktor = e[2]; menge = `${menge} ${w[0]}`; t = t.slice(w[0].length).trim(); }
   }
+  ohneGroesse(false);
   t = t.replace(/^(?:x|×)\s+/, '');
   // Zusatz: „(400 ml)“ und alles nach dem ersten Komma
   let h = '';
   const klammer = t.match(/\s*\(([^)]*)\)\s*$/);
-  if (klammer) { h = klammer[1].trim(); t = t.slice(0, klammer.index).trim(); }
+  if (klammer && klammer.index > 0) { h = klammer[1].trim(); t = t.slice(0, klammer.index).trim(); }
+  // „(Dürüm)Wrap“: eine Klammer mitten im Namen ist auch ein Zusatz
+  const mitte = t.match(/\(([^)]*)\)/);
+  const rest = mitte ? `${t.slice(0, mitte.index)} ${t.slice(mitte.index + mitte[0].length)}`.replace(/\s+/g, ' ').trim() : '';
+  if (mitte && rest) { h = [mitte[1].trim(), h].filter(Boolean).join(', '); t = rest; }
   const komma = t.indexOf(',');
   if (komma > 0 && !NIE_KAUFEN.test(t)) { h = [t.slice(komma + 1).trim(), h].filter(Boolean).join(', '); t = t.slice(0, komma).trim(); }
+  if (groesse) h = [h, groesse].filter(Boolean).join(', ');
   const name = gross(t || roh);
   const k0 = schluesselRaten(name, katalog);
-  const k = k0 || `amyz-${slug(name)}`;
-  const kat = k0 ? { n: katalog[k0].n, c: katalog[k0].c } : { n: name, c: abteilung(name, katalog) };
-  if (q !== null && !u) u = k0 === 'knoblauch' && /zehe/i.test(name) ? 'Zehe' : 'Stk';
+  const eigen = k0 || `amyz-${slug(name)}`;
+  // Auf der Liste zusammengelegt? Dann gehört die Zutat zu dieser Zeile – auch für Nährwerte und Preis
+  const g = mehr?.gleich;
+  let k = umleiten(g, eigen);
+  if (k === eigen && g && typeof g[nameSchluessel(name)] === 'string') k = umleiten(g, nameSchluessel(name));
+  let kat = katalog[k] ? { n: katalog[k].n, c: katalog[k].c } : { n: name, c: abteilung(name, katalog) };
+  const verschoben = mehr?.abteilungen?.[k] || mehr?.abteilungen?.[nameSchluessel(name)];
+  if (verschoben) kat = { ...kat, c: verschoben };
+  if (q !== null && !u) u = k === 'knoblauch' && /zehe/i.test(name) ? 'Zehe' : 'Stk';
   const gewuerz = kat.c === 'gewuerz' || /^(salz|pfeffer)\b/i.test(name);
-  return { roh, name, q: q === null ? null : Math.round(q * faktor * 100) / 100, u, a: menge, h, k, kat, gewuerz, kaufen: !NIE_KAUFEN.test(name) && !NIE_KAUFEN.test(roh) };
+  return { roh, name, q: q === null ? null : Math.round(q * faktor * 100) / 100, u, a: menge, h, k, kat, gewuerz, kaufen: !NIE_KAUFEN.test(name) && !NIE_KAUFEN.test(roh), zusammen: k !== eigen };
 }
 
 /** Gramm einer Zutat – null, wenn die App es nicht weiß. */
@@ -164,8 +241,8 @@ export function listenMenge(z, { naehrwerte = {}, einheiten = {} } = {}) {
   return je ? { q: Math.max(1, Math.ceil(g / je - 0.15)), u: ziel } : { q: z.q, u: z.u };
 }
 
-/** Alle Zutaten eines Rezepts gelesen. */
-export const zutatenVon = (r, katalog = {}) => (r?.zutaten || []).map((z) => zutatLesen(z, katalog));
+/** Alle Zutaten eines Rezepts gelesen (mehr wie bei zutatLesen). */
+export const zutatenVon = (r, katalog = {}, mehr = {}) => (r?.zutaten || []).map((z) => zutatLesen(z, katalog, mehr));
 
 /**
  * Was „Alles auf die Einkaufsliste“ einträgt: alles außer Gewürzen, Wasser,
@@ -174,7 +251,7 @@ export const zutatenVon = (r, katalog = {}) => (r?.zutaten || []).map((z) => zut
  */
 export function amyEinkauf(r, daten = {}) {
   const je = new Map();
-  for (const z of zutatenVon(r, daten.katalog || {})) {
+  for (const z of zutatenVon(r, daten.katalog || {}, daten)) {
     if (!z.kaufen || z.gewuerz) continue;
     const lm = listenMenge(z, daten);
     const da = je.get(z.k);
@@ -205,7 +282,7 @@ export function amyNaehrwerte(r, daten = {}) {
   const s = { kcal: 0, p: 0, kh: 0, f: 0 };
   const unbekannt = [];
   let bekannt = 0;
-  for (const z of zutatenVon(r, daten.katalog || {})) {
+  for (const z of zutatenVon(r, daten.katalog || {}, daten)) {
     const n = daten.naehrwerte?.[z.k];
     const g = gramm(z, daten);
     if (n?.pro100 && g !== null) {
@@ -221,7 +298,7 @@ export function amyNaehrwerte(r, daten = {}) {
 export function amyKosten(r, daten = {}) {
   let gesamt = 0;
   let luecken = 0;
-  for (const z of zutatenVon(r, daten.katalog || {})) {
+  for (const z of zutatenVon(r, daten.katalog || {}, daten)) {
     if (!z.kaufen || z.gewuerz) continue;
     const g = gramm(z, daten);
     const e = g !== null && g > 0 ? kostenMenge(z.k, g, 'g', daten) : z.q !== null ? kostenMenge(z.k, z.q, z.u, daten) : null;
@@ -267,7 +344,7 @@ export function alsRezept(r, daten = {}) {
     amy: true,
     portionen: r.portionen,
     ablauf,
-    items: zutatenVon(r, daten.katalog || {}).map((z) => ({ k: z.k, n: z.name, kat: z.kat, q: z.q, u: z.u })),
+    items: zutatenVon(r, daten.katalog || {}, daten).map((z) => ({ k: z.k, n: z.name, kat: z.kat, q: z.q, u: z.u })),
     zeitAngabe: r.zeit || 0,
   };
 }

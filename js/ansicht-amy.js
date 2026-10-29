@@ -12,22 +12,31 @@
  * im Editor steht, merkt sich das Handy als Entwurf, falls die App zugeht.
  * Die Haken beim Kochen bleiben auf diesem Handy, wie bei den festen
  * Rezepten.
+ *
+ * Tags vergibt Amy selbst („bauchfreundlich“, „gesund“) – im Editor, mit
+ * Vorschlägen aus ihren anderen Rezepten. In der Liste filtert sie danach
+ * (mehrere Tags: Rezepte mit allen) und sortiert: neueste, Name, schnellste,
+ * günstigste oder nach Tags gruppiert. Filter und Sortierung merkt sich das
+ * Handy; die Tags selbst stehen in liste.json unter `amyTags`.
  */
 import { app, $, $$, melde, zeigeReiter, lese, schreibe, istSchmal, ansicht } from './kern.js';
 import { esc, nf1, nfi } from './format.js';
 import { dauer } from './zeiten.js';
 import { euro } from './kosten.js';
-import { zutatenVon, zutatLesen, amyNaehrwerte, amyKosten, amyEinkauf, teilFuer, alsRezept, amySchaetzung, neueAmyId, AMY_ID } from './amy.js';
+import { zutatenVon, zutatLesen, amyNaehrwerte, amyKosten, amyEinkauf, teilFuer, alsRezept, amySchaetzung, neueAmyId, AMY_ID, tagsBereinigen, tagsAusText, alleTags, hatTags, tagFarbe, TAG_VORSCHLAEGE, MAX_TAGS } from './amy.js';
 import { AMY_BILDER, bildPfad, zutatImg } from './bilder.js';
-import { opAmy, opAmyWeg, opTeil, opTeilWeg, hatTeil } from './liste.js';
+import { opAmy, opAmyWeg, opAmyTags, opTeil, opTeilWeg, hatTeil } from './liste.js';
 import { timerKnopf, timerUmschalten, mengenHervor } from './ansicht-rezepte.js';
 import { tempoHaken, tempoZurueck, tempoZeit } from './tempo.js';
 import { lobPruefen, tierVorladen } from './lob.js';
+import { istIpad, TABLET_IC } from './ansicht-tablet.js';
 
 const ANSICHT = 'boxenstopp.amy.ansicht.v1';
 const SCHRITTE = 'boxenstopp.amy.schritte.v1';
 const ENTWURF = 'boxenstopp.amy.entwurf.v1';
+const FILTER = 'boxenstopp.amy.filter.v1'; // { tags: ['gesund'], sort: 'neu' } – nur auf diesem Handy
 const ARTEN = ['liste', 'detail', 'editor'];
+const SORTEN = [['neu', 'Neueste zuerst'], ['name', 'Name A–Z'], ['schnell', 'Schnellste zuerst'], ['guenstig', 'Günstigste zuerst'], ['tags', 'Nach Tags']];
 
 let zustand = (() => {
   const z = lese(ANSICHT, null);
@@ -36,9 +45,18 @@ let zustand = (() => {
 let entwurf = lese(ENTWURF, null);
 let loeschenFragen = false;
 const schritte = lese(SCHRITTE, {}) || {};
+let filter = (() => {
+  const f = lese(FILTER, null);
+  return { tags: tagsBereinigen(f?.tags), sort: SORTEN.some(([k]) => k === f?.sort) ? f.sort : 'neu' };
+})();
 
 const merken = () => schreibe(ANSICHT, zustand);
-const daten = () => ({ katalog: app.katalog, naehrwerte: app.naehrwerte, preise: app.preise, einheiten: app.einheiten });
+const filterMerken = () => schreibe(FILTER, filter);
+// Was auf der Liste zusammengelegt oder verschoben wurde, gilt auch für Amys Zutaten
+const daten = () => ({ katalog: app.katalog, naehrwerte: app.naehrwerte, preise: app.preise, einheiten: app.einheiten, gleich: app.stand.gleich, abteilungen: app.stand.abteilungen });
+const tagsVon = (id) => app.stand.amyTags?.[id] || [];
+const gleicherTag = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
+const tagPille = (t) => `<span class="amy-tag tf${tagFarbe(t)}">${esc(t)}</span>`;
 const rezepte = () => Object.values(app.stand.amy || {}).sort((a, b) => String(b.geaendert || b.at).localeCompare(String(a.geaendert || a.at)));
 const rezept = (id) => (id && app.stand.amy?.[id]) || null;
 
@@ -46,12 +64,16 @@ const HERZ = '<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidde
 const PLUS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 const HAKEN = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
 const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+const KREUZ = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
+const SORT_IC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/></svg>';
 const deko = (name, k = '') => `<img class="amy-deko ${k}" src="${bildPfad(name)}" alt="" width="22" height="22" decoding="async">`;
 
 /** Für die Einkaufsliste und die Timer: Amys Rezepte so, wie die anderen Teile sie verstehen. */
 function nachIdNeu() {
   app.amyNach = Object.fromEntries(rezepte().map((r) => [r.id, alsRezept(r, daten())]));
 }
+/** Vor dem Zeichnen der Liste: Dort stehen ihre Rezepte mit Namen („♡ Kokos-Curry“), nicht als „Amys Rezept“. */
+export const amyVorbereiten = () => nachIdNeu();
 const alsR = (id) => app.amyNach?.[id] || null;
 
 /** Wie lange es dauert: gemessen oder im Tempo (tempo.js), sonst ihre Angabe, sonst geschätzt. */
@@ -78,11 +100,49 @@ function karte(r) {
   const ko = amyKosten(r, daten());
   const st = aufListe(r);
   const zahlen = [nw.bekannt ? `≈ ${nfi(nw.kcal)} kcal` : '', ko.gesamt > 0 ? `≈ ${euro(ko.portion)}` : ''].filter(Boolean).join(' · ');
+  const tags = tagsVon(r.id);
   return `<button type="button" class="amy-karte" data-amy-open="${esc(r.id)}">
 <span class="amy-karte-bild"><img src="${bildPfad(r.bild)}" alt="" width="56" height="56" decoding="async"></span>
-<span class="amy-karte-t"><b>${esc(r.name)}</b><small>${r.portionen} ${r.portionen === 1 ? 'Portion' : 'Portionen'} · ${esc(zeitText(zeitVon(r)))}</small>${zahlen ? `<small class="amy-karte-z">${esc(zahlen)} pro Portion</small>` : ''}</span>
+<span class="amy-karte-t"><b>${esc(r.name)}</b><small>${r.portionen} ${r.portionen === 1 ? 'Portion' : 'Portionen'} · ${esc(zeitText(zeitVon(r)))}</small>${zahlen ? `<small class="amy-karte-z">${esc(zahlen)} pro Portion</small>` : ''}${tags.length ? `<span class="amy-tags">${tags.map(tagPille).join('')}</span>` : ''}</span>
 ${st.drauf ? `<span class="amy-pill">${HERZ}auf der Liste</span>` : ''}
 </button>`;
+}
+
+/** Sortiert nach der Wahl oben: neueste (so kommen sie schon), Name, Zeit, Preis pro Portion. */
+function sortiert(liste, art) {
+  const name = (a, b) => a.name.localeCompare(b.name, 'de');
+  if (art === 'name') return [...liste].sort(name);
+  if (art === 'schnell') {
+    const m = new Map(liste.map((r) => [r.id, zeitVon(r).min || Infinity]));
+    return [...liste].sort((a, b) => m.get(a.id) - m.get(b.id) || name(a, b));
+  }
+  if (art === 'guenstig') {
+    const m = new Map(liste.map((r) => { const k = amyKosten(r, daten()); return [r.id, k.gesamt > 0 ? k.portion : Infinity]; }));
+    return [...liste].sort((a, b) => m.get(a.id) - m.get(b.id) || name(a, b));
+  }
+  return liste;
+}
+
+/** Filter-Tags und Sortierung über den Karten. */
+function werkzeugeHTML(alle, vorhanden, gewaehlt, n) {
+  if (alle.length < 2 && !vorhanden.length) return '';
+  const chips = vorhanden.length
+    ? `<div class="amy-filter" role="group" aria-label="Nach Tags filtern"><button type="button" class="amy-chip" data-amy-filter="" aria-pressed="${!gewaehlt.length}">Alle</button>${vorhanden.map(([t, z]) => `<button type="button" class="amy-chip tf${tagFarbe(t)}" data-amy-filter="${esc(t)}" aria-pressed="${gewaehlt.some((g) => gleicherTag(g, t))}">${esc(t)}<span class="n">${z}</span></button>`).join('')}</div>`
+    : '';
+  const sorten = SORTEN.filter(([k]) => k !== 'tags' || vorhanden.length);
+  const sort = `<label class="sel amy-sort">${SORT_IC}<select id="amy-sort" aria-label="Rezepte sortieren">${sorten.map(([k, v]) => `<option value="${k}"${k === filter.sort ? ' selected' : ''}>${v}</option>`).join('')}</select></label>`;
+  const treffer = gewaehlt.length ? `<p class="amy-treffer" id="amy-treffer">${n === 1 ? '1 Rezept' : `${n} Rezepte`} mit ${gewaehlt.map((g) => `„${esc(g)}“`).join(' und ')}</p>` : '';
+  return `<div class="amy-werkzeuge">${chips}<div class="amy-werkzeuge-zeile">${sort}${treffer}</div></div>`;
+}
+
+/** „Nach Tags“: je Tag ein Abschnitt (ein Rezept mit zwei Tags steht in beiden), zuletzt die ohne. */
+function nachTagsHTML(liste, gewaehlt) {
+  const gruppen = alleTags(app.stand.amyTags, new Set(liste.map((r) => r.id))).filter(([t]) => !gewaehlt.some((g) => gleicherTag(g, t)));
+  if (!gruppen.length) return `<div class="amy-raster">${sortiert(liste, 'name').map(karte).join('')}</div>`;
+  const abschnitt = (kopf, n, rs) => `<section class="amy-gruppe"><h2 class="amy-gruppe-t">${kopf}<span class="n">${n === 1 ? '1 Rezept' : `${n} Rezepte`}</span></h2><div class="amy-raster">${sortiert(rs, 'name').map(karte).join('')}</div></section>`;
+  const ohne = liste.filter((r) => !tagsVon(r.id).some((t) => gruppen.some(([x]) => gleicherTag(x, t))));
+  return gruppen.map(([t, n]) => abschnitt(tagPille(t), n, liste.filter((r) => hatTags(tagsVon(r.id), [t])))).join('')
+    + (ohne.length ? abschnitt('<span class="amy-tag ohne">ohne Tag</span>', ohne.length, ohne) : '');
 }
 
 function listeHTML() {
@@ -93,12 +153,20 @@ function listeHTML() {
 <h1 class="amy-titel" id="amy-titel">Amys Rezepte</h1>
 <p class="amy-lead">Deine eigenen Lieblingsrezepte. Mit einem Tipp landen die Zutaten auf eurer gemeinsamen Einkaufsliste – und beim Kochen lernt das Handy, wie lange du brauchst.</p>
 <button type="button" class="amy-btn amy-neu" data-act="amy-neu"${app.listeDa ? '' : ' disabled'}>${PLUS}Neues Rezept</button>
+${app.zugang && !istIpad() ? `<button type="button" class="linkbtn amy-ipad" data-act="tablet-zeigen">${TABLET_IC}Auch auf dem iPad ♡</button>` : ''}
 </header>`;
   if (!app.listeDa) return `${kopf}<p class="loading">Wird geladen…</p>`;
   if (!alle.length) {
     return `${kopf}<div class="amy-leer">${deko('ribbon', 'gross')}<p><b>Noch keine Rezepte hier.</b></p><p>Schreib dein erstes – Zutaten und Schritte einfach Zeile für Zeile, die App macht den Rest.</p></div>`;
   }
-  return `${kopf}<div class="amy-raster">${alle.map(karte).join('')}</div>`;
+  const vorhanden = alleTags(app.stand.amyTags, new Set(alle.map((r) => r.id)));
+  // Ein gemerkter Filter-Tag, den es nicht mehr gibt, filtert nichts weg
+  const gewaehlt = filter.tags.filter((t) => vorhanden.some(([x]) => gleicherTag(x, t)));
+  const passend = alle.filter((r) => hatTags(tagsVon(r.id), gewaehlt));
+  const werkzeuge = werkzeugeHTML(alle, vorhanden, gewaehlt, passend.length);
+  if (!passend.length) return `${kopf}${werkzeuge}<div class="amy-leer"><p><b>Kein Rezept hat alle diese Tags.</b></p><button type="button" class="btn" data-amy-filter="">Alle zeigen</button></div>`;
+  const inhalt = filter.sort === 'tags' && vorhanden.length ? nachTagsHTML(passend, gewaehlt) : `<div class="amy-raster">${sortiert(passend, filter.sort).map(karte).join('')}</div>`;
+  return `${kopf}${werkzeuge}${inhalt}`;
 }
 
 /* --------------------------------------------------------------- Rezept */
@@ -123,7 +191,7 @@ function detailHTML(r) {
   const x = alsR(r.id) || alsRezept(r, daten());
   const t = zeitVon(r);
   x.zeit = t.z;
-  const zut = zutatenVon(r, app.katalog);
+  const zut = zutatenVon(r, app.katalog, daten());
   const nw = amyNaehrwerte(r, daten());
   const ko = amyKosten(r, daten());
   const st = aufListe(r);
@@ -142,9 +210,10 @@ function detailHTML(r) {
   let n = 0;
   const phasen = x.ablauf.map((p) => `${x.ablauf.length > 1 ? `<h3 class="phase"><span class="phase-name">${esc(p.t)}</span></h3>` : ''}<ol class="steps">${p.schritte.map((s) => schrittZeile(x, s, n++)).join('')}</ol>`).join('');
   const von = r.by ? `von ${r.by === app.name() ? 'dir' : esc(r.by)}` : '';
+  const tags = tagsVon(r.id);
   return `<button type="button" class="back" data-act="amy-liste">${ZURUECK}${HERZ}Amys Rezepte</button>
 <header class="amy-d-kopf"><span class="amy-d-bild"><img src="${bildPfad(r.bild)}" alt="" width="72" height="72" decoding="async"></span>
-<div><h1 class="amy-d-titel" id="amy-d-titel">${esc(r.name)}</h1><p class="amy-d-fakten">${fakten.map(esc).join(' · ')}</p>${von ? `<p class="amy-d-von">${von}</p>` : ''}</div></header>
+<div><h1 class="amy-d-titel" id="amy-d-titel">${esc(r.name)}</h1><p class="amy-d-fakten">${fakten.map(esc).join(' · ')}</p>${von ? `<p class="amy-d-von">${von}</p>` : ''}${tags.length ? `<div class="amy-tags amy-d-tags" role="group" aria-label="Tags">${tags.map((t) => `<button type="button" class="amy-tag tf${tagFarbe(t)}" data-amy-tag-filter="${esc(t)}" aria-label="Alle Rezepte mit „${esc(t)}“">${esc(t)}</button>`).join('')}</div>` : ''}</div></header>
 ${nw.bekannt ? `<div class="amy-etikett" role="group" aria-label="Nährwerte pro Portion"><span><b>${nfi(nw.kcal)}</b> kcal</span><span class="m-p">P ${nf1(nw.p)}</span><span class="m-kh">KH ${nf1(nw.kh)}</span><span class="m-f">F ${nf1(nw.f)}</span><small>pro Portion, ungefähr${nw.unbekannt.length ? ` – ohne ${esc(nw.unbekannt.slice(0, 3).join(', '))}${nw.unbekannt.length > 3 ? ' …' : ''}` : ''}</small></div>` : ''}
 <div class="actions amy-actions">${aktion}<button type="button" class="btn" data-act="amy-bearbeiten"${gesperrt}>Bearbeiten</button>${loeschen}</div>
 <section class="sec amy-sec"><h2>Zutaten <small>für ${r.portionen} ${r.portionen === 1 ? 'Portion' : 'Portionen'}</small></h2>
@@ -172,22 +241,52 @@ function haekchenZeichnen(id) {
 
 /* --------------------------------------------------------------- Editor */
 
-const leererEntwurf = () => ({ id: null, name: '', bild: AMY_BILDER[0], portionen: 4, zeit: '', zutaten: '', schritte: '', notiz: '' });
-const ausRezept = (r) => ({ id: r.id, name: r.name, bild: r.bild, portionen: r.portionen, zeit: r.zeit || '', zutaten: r.zutaten.join('\n'), schritte: r.schritte.join('\n'), notiz: r.notiz || '' });
+const leererEntwurf = () => ({ id: null, name: '', bild: AMY_BILDER[0], portionen: 4, zeit: '', zutaten: '', schritte: '', notiz: '', tags: [] });
+const ausRezept = (r) => ({ id: r.id, name: r.name, bild: r.bild, portionen: r.portionen, zeit: r.zeit || '', zutaten: r.zutaten.join('\n'), schritte: r.schritte.join('\n'), notiz: r.notiz || '', tags: [...tagsVon(r.id)] });
 
 /** Was die App aus den Zutaten-Zeilen liest – als kleine Chips unter dem Feld. */
 function erkanntHTML(text) {
-  const z = String(text || '').split('\n').map((x) => x.trim()).filter(Boolean).slice(0, 40).map((x) => zutatLesen(x, app.katalog));
+  const z = String(text || '').split('\n').map((x) => x.trim()).filter(Boolean).slice(0, 40).map((x) => zutatLesen(x, app.katalog, daten()));
   if (!z.length) return '';
   return `<p class="amy-erkannt-k">So liest die App deine Zutaten</p><ul>${z.map((x) => {
-    const art = !x.kaufen ? 'nie' : x.gewuerz ? 'gewuerz' : x.k.startsWith('amyz-') ? 'eigen' : 'katalog';
-    const was = art === 'katalog' ? esc(x.kat.n) : art === 'eigen' ? `${esc(x.name)} <small>neu</small>` : art === 'gewuerz' ? `${esc(x.name)} <small>Gewürz</small>` : `${esc(x.name)} <small>nicht einkaufen</small>`;
+    const art = !x.kaufen ? 'nie' : x.gewuerz ? 'gewuerz' : app.katalog[x.k] || x.zusammen ? 'katalog' : 'eigen';
+    // Auf der Liste zusammengelegt: „leckere Dino nuggies = Dino nuggets“
+    const zeile = x.zusammen && !app.katalog[x.k] ? app.stand.items[x.k] : null;
+    const was = art === 'katalog' ? (zeile ? `${esc(x.name)} <small>= ${esc(zeile.name)}</small>` : esc(app.katalog[x.k] ? x.kat.n : x.name)) : art === 'eigen' ? `${esc(x.name)} <small>neu</small>` : art === 'gewuerz' ? `${esc(x.name)} <small>Gewürz</small>` : `${esc(x.name)} <small>nicht einkaufen</small>`;
     return `<li class="ak-${art}">${art === 'katalog' ? HAKEN : HERZ}<span>${x.a ? `<b>${esc(x.a)}</b> ` : ''}${was}</span></li>`;
   }).join('')}</ul>`;
 }
 
+/** Die Tags im Editor: was dran ist (mit ×) und was die App vorschlägt – ihre eigenen zuerst. */
+function tagsEditorHTML(tags) {
+  const schon = new Set(tags.map((t) => t.toLowerCase()));
+  const vorschlaege = [...alleTags(app.stand.amyTags).map(([t]) => t), ...TAG_VORSCHLAEGE]
+    .filter((t, i, a) => !schon.has(t.toLowerCase()) && a.findIndex((x) => gleicherTag(x, t)) === i)
+    .slice(0, 10);
+  const dran = tags.length ? `<ul class="amy-tags-dran" aria-label="Tags von diesem Rezept">${tags.map((t, i) => `<li class="amy-tag tf${tagFarbe(t)}">${esc(t)}<button type="button" class="amy-tag-x" data-amy-tag-weg="${i}" aria-label="Tag „${esc(t)}“ entfernen">${KREUZ}</button></li>`).join('')}</ul>` : '';
+  if (tags.length >= MAX_TAGS) return `${dran}<p class="fine">Mehr als ${MAX_TAGS} Tags gehen nicht.</p>`;
+  return `${dran}${vorschlaege.length ? `<div class="amy-tag-vorschlaege" role="group" aria-label="Tag dazunehmen">${vorschlaege.map((t) => `<button type="button" class="amy-chip" data-amy-tag-dazu="${esc(t)}">${PLUS}${esc(t)}</button>`).join('')}</div>` : ''}`;
+}
+
+/** Nach einer Änderung an den Tags nur diesen Teil des Editors neu – das Getippte bleibt. */
+function tagsNeuZeichnen() {
+  const tags = entwurf?.tags || [];
+  const w = $('#amy-tags-wahl');
+  if (w) w.innerHTML = tagsEditorHTML(tags);
+  const neu = $('#view-amy .amy-tag-neu');
+  if (neu) neu.hidden = tags.length >= MAX_TAGS;
+}
+
+function tagDazu(roh) {
+  if (!entwurf) return;
+  entwurf.tags = tagsBereinigen([...(entwurf.tags || []), ...tagsAusText(roh)]);
+  schreibe(ENTWURF, entwurf);
+  tagsNeuZeichnen();
+}
+
 function editorHTML() {
   const e = entwurf || leererEntwurf();
+  const tags = e.tags || [];
   const neu = !e.id;
   return `<button type="button" class="back" data-act="amy-abbrechen">${ZURUECK}${HERZ}Amys Rezepte</button>
 <form class="amy-form" id="amy-form" autocomplete="off" novalidate>
@@ -197,6 +296,10 @@ function editorHTML() {
 <div class="amy-zwei">
 <label class="amy-feld"><span>Portionen</span><input id="amy-portionen" type="number" inputmode="numeric" min="1" max="30" step="1" value="${esc(e.portionen)}"></label>
 <label class="amy-feld"><span>Dauer <small>Min., optional</small></span><input id="amy-zeit" type="number" inputmode="numeric" min="0" max="1440" step="5" placeholder="z. B. 45" value="${esc(e.zeit)}"></label>
+</div>
+<div class="amy-feld amy-tags-feld"><span id="amy-tags-k">Tags <small>z. B. gesund, bauchfreundlich – danach filtern und sortieren</small></span>
+<div class="amy-tags-wahl" id="amy-tags-wahl">${tagsEditorHTML(tags)}</div>
+<div class="amy-tag-neu"${tags.length >= MAX_TAGS ? ' hidden' : ''}><input id="amy-tag-text" type="text" maxlength="24" placeholder="Eigener Tag …" enterkeyhint="done" autocomplete="off" aria-labelledby="amy-tags-k"><button type="button" class="amy-chip" data-act="amy-tag-neu">${PLUS}Dazu</button></div>
 </div>
 <label class="amy-feld"><span>Zutaten <small>eine pro Zeile, Menge vorne</small></span><textarea id="amy-zutaten" rows="7" maxlength="4000" placeholder="500 g Hähnchenbrust&#10;2 Zwiebeln&#10;1 Dose Kokosmilch&#10;1 EL Currypaste&#10;Salz, Pfeffer">${esc(e.zutaten)}</textarea></label>
 <div class="amy-erkannt" id="amy-erkannt" aria-live="polite">${erkanntHTML(e.zutaten)}</div>
@@ -218,6 +321,7 @@ function entwurfAusFormular() {
     zutaten: v('amy-zutaten'),
     schritte: v('amy-schritte'),
     notiz: v('amy-notiz'),
+    tags: entwurf?.tags || [],
   };
   schreibe(ENTWURF, entwurf);
 }
@@ -310,9 +414,25 @@ export function klickAmy(el) {
   if (d.amyOpen) { amyOeffnen(d.amyOpen); return true; }
   if (!el.closest('#view-amy') && !d.act?.startsWith('amy-')) return false;
   const r = rezept(zustand.id);
+  if ('amyFilter' in d) { filterUmschalten(d.amyFilter); return true; }
+  if ('amyTagFilter' in d) {
+    filter = { ...filter, tags: tagsBereinigen([d.amyTagFilter]) };
+    filterMerken();
+    zeige('liste');
+    return true;
+  }
+  if ('amyTagWeg' in d) {
+    if (!entwurf) return true;
+    entwurf.tags = (entwurf.tags || []).filter((_, i) => i !== Number(d.amyTagWeg));
+    schreibe(ENTWURF, entwurf);
+    tagsNeuZeichnen();
+    $('#amy-tag-text')?.focus({ preventScroll: true });
+    return true;
+  }
+  if ('amyTagDazu' in d) { tagDazu(d.amyTagDazu); return true; }
   if ('amyTog' in d) {
     if (!r) return true;
-    const z = zutatenVon(r, app.katalog)[Number(d.amyTog)];
+    const z = zutatenVon(r, app.katalog, daten())[Number(d.amyTog)];
     if (!z) return true;
     if (hatTeil(app.stand, z.k, r.id)) app.aendern(opTeilWeg(z.k, r.id));
     else app.aendern(opTeil(z.k, r.id, teilFuer(z, daten()), z.kat));
@@ -362,6 +482,12 @@ export function klickAmy(el) {
       if (id && rezept(id)) zeige('detail', id); else zeige('liste');
       return true;
     }
+    case 'amy-tag-neu': {
+      const f = $('#amy-tag-text');
+      if (f?.value.trim()) tagDazu(f.value);
+      if (f) { f.value = ''; f.focus(); }
+      return true;
+    }
     case 'amy-alle-dazu': if (r) alleDazu(r); return true;
     case 'amy-alle-weg': if (r) alleWeg(r); return true;
     case 'amy-loeschen': loeschenFragen = true; amyZeichnen(); return true;
@@ -370,9 +496,10 @@ export function klickAmy(el) {
       if (!r) return true;
       const teile = [];
       for (const [k, x] of Object.entries(app.stand.items)) if (x.parts?.[r.id]) teile.push(opTeilWeg(k, r.id));
+      const tags = tagsVon(r.id);
       app.aendern([...teile, opAmyWeg(r.id)]);
       zeige('liste');
-      melde(`„${r.name}“ gelöscht`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opAmy(r, r.by)) });
+      melde(`„${r.name}“ gelöscht`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern([opAmy(r, r.by), ...(tags.length ? [opAmyTags(r.id, tags)] : [])]) });
       return true;
     }
     case 'amy-schritte-zurueck':
@@ -386,12 +513,50 @@ export function klickAmy(el) {
   }
 }
 
+/** Ein Filter-Tag an oder aus („Alle“: keiner). Mehrere zusammen: Rezepte mit allen. */
+function filterUmschalten(t) {
+  if (!t) filter = { ...filter, tags: [] };
+  else if (filter.tags.some((g) => gleicherTag(g, t))) filter = { ...filter, tags: filter.tags.filter((g) => !gleicherTag(g, t)) };
+  else filter = { ...filter, tags: tagsBereinigen([...filter.tags, t]) };
+  filterMerken();
+  amyZeichnen();
+  document.querySelector(`#view-amy [data-amy-filter="${window.CSS.escape(t)}"]`)?.focus({ preventScroll: true });
+}
+
+/** Sortierung der Liste (change). true, wenn es hierher gehörte. */
+export function aenderungAmy(ziel) {
+  if (ziel.id !== 'amy-sort') return false;
+  filter = { ...filter, sort: SORTEN.some(([k]) => k === ziel.value) ? ziel.value : 'neu' };
+  filterMerken();
+  amyZeichnen();
+  $('#amy-sort')?.focus({ preventScroll: true });
+  return true;
+}
+
 /** Eingaben im Editor: Entwurf merken, erkannte Zutaten zeigen. true, wenn es hierher gehörte. */
 export function eingabeAmy(ziel) {
   if (!ziel.closest?.('#amy-form')) return false;
+  // „gesund, schnell“ – mit dem Komma ist ein Tag fertig
+  if (ziel.id === 'amy-tag-text') {
+    if (/[,;]/.test(ziel.value)) {
+      const teile = ziel.value.split(/[,;]/);
+      const rest = teile.pop();
+      tagDazu(teile.join(','));
+      ziel.value = rest.trimStart();
+    }
+    return true;
+  }
   entwurfAusFormular();
   if (ziel.id === 'amy-zutaten') { const e = $('#amy-erkannt'); if (e) e.innerHTML = erkanntHTML(ziel.value); }
   if (ziel.id === 'amy-name') { const f = $('#amy-fehler'); if (f) f.hidden = true; }
+  return true;
+}
+
+/** Enter im Tag-Feld: den Tag anlegen (app.js verhindert dann das Absenden). true, wenn es hierher gehörte. */
+export function tasteAmy(ziel) {
+  if (ziel?.id !== 'amy-tag-text') return false;
+  if (ziel.value.trim()) tagDazu(ziel.value);
+  ziel.value = '';
   return true;
 }
 
@@ -400,6 +565,9 @@ export function absendenAmy(ev) {
   if (ev.target.id !== 'amy-form') return false;
   ev.preventDefault();
   entwurfAusFormular();
+  // Ein getippter, noch nicht angelegter Tag kommt mit
+  const tagFeld = $('#amy-tag-text');
+  if (tagFeld?.value.trim()) { tagDazu(tagFeld.value); tagFeld.value = ''; }
   const e = entwurf;
   const name = String(e.name || '').trim();
   if (!name) {
@@ -410,7 +578,8 @@ export function absendenAmy(ev) {
   }
   const alt = e.id ? rezept(e.id) : null;
   const id = alt ? alt.id : neueAmyId(name);
-  app.aendern(opAmy({
+  const tags = tagsBereinigen(e.tags);
+  app.aendern([opAmy({
     id,
     name,
     bild: e.bild,
@@ -421,7 +590,7 @@ export function absendenAmy(ev) {
     notiz: e.notiz,
     by: alt?.by || app.name() || null,
     at: alt?.at,
-  }, app.name()));
+  }, app.name()), ...(tags.length || tagsVon(id).length ? [opAmyTags(id, tags)] : [])]);
   entwurf = null;
   try { localStorage.removeItem(ENTWURF); } catch { /* egal */ }
   zeige('detail', id);

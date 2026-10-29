@@ -20,7 +20,8 @@ import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, 
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
 import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
-import { amyZeichnen, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, absendenAmy } from './ansicht-amy.js';
+import { amyZeichnen, amyVorbereiten, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, aenderungAmy, absendenAmy, tasteAmy } from './ansicht-amy.js';
+import { tabletPruefen, klickTablet } from './ansicht-tablet.js';
 
 const apiBasis = () => lese('__api', null) || API;
 /** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
@@ -34,11 +35,13 @@ function beiAenderung(stand) {
   app.stand = stand;
   app.listeDa = true;
   kiAbgleichen();
+  amyVorbereiten();
   listeZeichnen();
   zahlZeichnen();
   angeboteZeichnen();
   angeboteZahl();
   amyZeichnen();
+  tabletPruefen();
   // Ein Rezept aus der Resteverwertung kann auf dem anderen Handy gelöscht worden sein.
   if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
   if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
@@ -67,7 +70,7 @@ app.verbinden = async (token, name) => {
   app.zugang = { token, name };
   speichereZugang(app.zugang);
   nimmSpeicher(github({ token, name, api: apiBasis(), takt: takt() }));
-  if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || Object.keys(bisher.amy || {}).length)) app.aendern(opZusammen(bisher.items, bisher.ki, bisher.amy));
+  if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || Object.keys(bisher.amy || {}).length)) app.aendern(opZusammen(bisher.items, bisher.ki, { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege }));
   lokalLoeschen();
   statusZeichnen();
   privateAngebote();
@@ -105,6 +108,7 @@ document.addEventListener('click', (ev) => {
   if (el.dataset.tab) { zeigeReiter(el.dataset.tab); return; }
   if (klickLob(el)) return;
   if (klickTimer(el)) return;
+  if (klickTablet(el)) return;
   if (klickAmy(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
@@ -123,9 +127,11 @@ document.addEventListener('error', (ev) => {
 }, true);
 document.addEventListener('keydown', (ev) => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target?.matches?.('[data-timer-zu]')) { ev.preventDefault(); zumTimerSchritt(ev.target); }
+  // Enter im Tag-Feld legt den Tag an, statt das Rezept zu speichern
+  if (ev.key === 'Enter' && !ev.isComposing && tasteAmy(ev.target)) ev.preventDefault();
 });
 document.addEventListener('input', (ev) => { if (!eingabeAmy(ev.target) && !eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
 // Ein Einkauf, der lange ruht, ist vorbei – auch wenn die App zwischendurch zu war
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wegPruefen(); });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase

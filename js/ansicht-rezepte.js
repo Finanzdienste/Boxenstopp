@@ -96,13 +96,14 @@ const PFADE = {
 /*
  * Daumen: ein gemeinsamer pro Gericht (liste.js). Hoch und runter sind
  * dasselbe Bild, gedreht; zur Seite hat ein eigenes (gedreht sah es aus wie
- * ein Fäustling): Faust über dem Handgelenk, Daumen nach links.
+ * ein Fäustling): die Faust von der Seite mit zwei Fingern, der Daumen oben
+ * nach links, rechts der Ärmel – so dick wie bei hoch und runter.
  */
 export const DAUMEN_TEXT = { hoch: 'Daumen hoch', mittel: 'Geht so', runter: 'Daumen runter' };
 const HOCH = '<rect x="2.5" y="10" width="4.5" height="10.5" rx="1.2"/><path d="M7 11.2l3.6-7.1c1.6-.2 2.9 1.2 2.6 2.8L12.6 10H19a2 2 0 0 1 2 2.3l-1.2 6.4a2.2 2.2 0 0 1-2.2 1.8H7"/>';
 const DAUMEN_SVG = {
   hoch: HOCH,
-  mittel: '<rect x="9.5" y="17" width="10.5" height="4.5" rx="1.2"/><path d="M10.5 17v-5.5a3 3 0 0 1 3-3h3.5a3 3 0 0 1 3 3V17"/><path d="M13 8.5H4.6a1.9 1.9 0 0 0 0 3.8h6"/>',
+  mittel: '<rect x="17" y="8" width="4.5" height="12.5" rx="1.2"/><path d="M17 9.6h-5.4L5.6 8.2a1.8 1.8 0 0 0-.9 3.5L10 13"/><path d="M17 13h-7a1.75 1.75 0 0 0 0 3.5h7"/><path d="M11.5 16.5a1.75 1.75 0 0 0 0 3.5H17"/>',
   runter: `<g transform="rotate(180 12 12)">${HOCH}</g>`,
 };
 export const daumenIc = (wert) => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${DAUMEN_SVG[wert] || ''}</svg>`;

@@ -6,8 +6,8 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
-import { zutatLesen, listenMenge, amyEinkauf, amyNaehrwerte, amyKosten, amyAblauf, alsRezept, amyBereinigen, slug, neueAmyId, schrittMinuten, AMY_ID } from '../js/amy.js';
-import { leer, anwenden, bereinigen, opAmy, opAmyWeg, opZusammen, opTeil } from '../js/liste.js';
+import { zutatLesen, listenMenge, amyEinkauf, amyNaehrwerte, amyKosten, amyAblauf, alsRezept, amyBereinigen, slug, neueAmyId, schrittMinuten, AMY_ID, tagsBereinigen, tagsAusText, alleTags, hatTags, tagFarbe, MAX_TAGS } from '../js/amy.js';
+import { leer, anwenden, bereinigen, opAmy, opAmyWeg, opAmyTags, opZusammen, opTeil } from '../js/liste.js';
 import { timerPlan } from '../js/zeiten.js';
 
 const { check, ende } = pruefer();
@@ -48,6 +48,40 @@ z = lies('1 Bund Koriander');
 check(z.q === 1 && z.u === 'Bund' && z.kat.c === 'obst', '1 Bund Koriander kommt zu Obst & Gemüse');
 check(lies('3 Eier').k === 'eier' && lies('3 Eier').u === 'Stk', '3 Eier');
 check(lies('2 TL Paprikapulver').k !== 'paprika', 'Paprikapulver ist keine Paprika');
+// So schreibt Amy wirklich: Größe vor der Einheit, Klammer mitten im Namen
+z = lies('1 kleine Flasche Ceasar Salad Dressing');
+check(z.q === 1 && z.u === 'Flasche' && z.name === 'Ceasar Salad Dressing' && z.h === 'klein' && z.a === '1 kleine Flasche' && z.kat.c === 'vorrat', `„1 kleine Flasche Ceasar Salad Dressing“: Flasche erkannt, „klein“ als Zusatz (${z.q} ${z.u} ${z.name} | ${z.h} | ${z.kat.c})`);
+z = lies('1 großen (Dürüm)Wrap');
+check(z.q === 1 && z.name === 'Wrap' && z.h === 'Dürüm, groß' && z.kat.c === 'trocken', `„1 großen (Dürüm)Wrap“ → Wrap (Dürüm, groß) (${z.name} | ${z.h} | ${z.kat.c})`);
+z = lies('5 Dino Nuggies');
+check(z.q === 5 && z.u === 'Stk' && z.k === 'amyz-dino-nuggies' && z.kat.c === 'fleisch', `Nuggets gehören zu Fleisch, nicht zu Sonstiges (${z.kat.c})`);
+z = lies('2 große Zwiebeln');
+check(z.k === 'zwiebeln' && z.q === 2 && z.h === 'groß', '„2 große Zwiebeln“ sind Zwiebeln');
+// Auf der Liste zusammengelegt oder verschoben – gilt auch hier
+z = zutatLesen('leckere Dino nuggies', D.katalog, { gleich: { 'amyz-leckere-dino-nuggies': 'amyz-dino-nuggets' } });
+check(z.k === 'amyz-dino-nuggets' && z.zusammen && z.name === 'Leckere Dino nuggies', `zusammengelegt: „leckere Dino nuggies“ landet bei „Dino nuggets“ (${z.k})`);
+z = zutatLesen('Nuggets', D.katalog, { gleich: { 'n:nuggets': 'amyz-dino-nuggies' } });
+check(z.k === 'amyz-dino-nuggies' && z.zusammen, 'auch über den Namen („n:nuggets“)');
+z = zutatLesen('300 g Hühnchenbrustwürfel', D.katalog, { gleich: { 'amyz-huehnchenbrustwuerfel': 'haehnchenbrust' } });
+check(z.k === 'haehnchenbrust' && z.kat.n === 'Hähnchenbrustfilet' && amyNaehrwerte({ zutaten: ['300 g Hühnchenbrustwürfel'], portionen: 1 }, { ...daten, gleich: { 'amyz-huehnchenbrustwuerfel': 'haehnchenbrust' } }).bekannt === 1, `mit einer Katalog-Zutat zusammengelegt: dann auch mit Nährwerten (${z.k})`);
+z = zutatLesen('5 Dino Nuggies', D.katalog, { abteilungen: { 'amyz-dino-nuggies': 'tk' } });
+check(z.kat.c === 'tk', 'verschoben (Tiefkühl): Amys Zutat steht dann auch dort');
+check(amyEinkauf({ zutaten: ['leckere Dino nuggies'] }, { ...daten, gleich: { 'amyz-leckere-dino-nuggies': 'amyz-dino-nuggets' } })[0].k === 'amyz-dino-nuggets', '„Alles auf die Liste“ legt es gleich in die zusammengelegte Zeile');
+
+// --- Tags
+check(JSON.stringify(tagsBereinigen(['#gesund', 'Gesund', '  bauch   freundlich ', 'x'.repeat(40), '', 7, '<b>'])) === JSON.stringify(['gesund', 'bauch freundlich', 'x'.repeat(24), 'b']), `Tags: ohne #, doppelt (groß/klein egal), zu lang, Unsinn (${JSON.stringify(tagsBereinigen(['#gesund', 'Gesund', '  bauch   freundlich ', 'x'.repeat(40), '', 7, '<b>']))})`);
+check(tagsBereinigen(Array.from({ length: 12 }, (_, i) => `t${i}`)).length === MAX_TAGS && MAX_TAGS === 8, 'höchstens acht Tags');
+check(JSON.stringify(tagsAusText('gesund, schnell;süß\n')) === JSON.stringify(['gesund', 'schnell', 'süß']), '„gesund, schnell“ sind zwei Tags');
+check(JSON.stringify(alleTags({ 'amy-a': ['gesund', 'schnell'], 'amy-b': ['Gesund'], 'amy-c': ['süß'] })) === JSON.stringify([['gesund', 2], ['schnell', 1], ['süß', 1]]), 'alle Tags, die häufigsten zuerst');
+check(JSON.stringify(alleTags({ 'amy-a': ['gesund'], 'amy-b': ['süß'] }, new Set(['amy-b']))) === JSON.stringify([['süß', 1]]), '… oder nur für bestimmte Rezepte');
+check(hatTags(['Gesund', 'schnell'], ['gesund']) && hatTags(['a'], []) && !hatTags(['gesund'], ['gesund', 'schnell']) && !hatTags(undefined, ['x']), 'Filter: alle gewählten Tags müssen dran sein');
+check(tagFarbe('gesund') === tagFarbe('Gesund') && [...'abcdefghij'].every((c) => tagFarbe(c) >= 0 && tagFarbe(c) < 6), 'derselbe Tag hat immer dieselbe von sechs Farben');
+let st = anwenden(leer(), [opAmy({ id: 'amy-t-1', name: 'T', zutaten: [], schritte: [] }, 'Amy'), opAmyTags('amy-t-1', ['gesund', 'Gesund', 'bauchfreundlich'])]);
+check(JSON.stringify(st.amyTags['amy-t-1']) === JSON.stringify(['gesund', 'bauchfreundlich']), 'opAmyTags: die Tags eines Rezepts (bereinigt)');
+check(JSON.stringify(bereinigen(JSON.parse(JSON.stringify(st))).amyTags) === JSON.stringify(st.amyTags) && !bereinigen({ amyTags: { quatsch: ['a'], 'amy-x-1': [] } }).amyTags.quatsch, 'übersteht Speichern und Bereinigen, Unsinn fällt weg');
+check(!anwenden(st, opAmyTags('amy-t-1', [])).amyTags['amy-t-1'] && !anwenden(st, opAmyWeg('amy-t-1')).amyTags['amy-t-1'], 'leer oder Rezept gelöscht: die Tags sind weg');
+st = anwenden(st, opZusammen({}, {}, { amyTags: { 'amy-t-1': ['anders'], 'amy-t-2': ['süß'] } }));
+check(st.amyTags['amy-t-1'][0] === 'gesund' && st.amyTags['amy-t-2'][0] === 'süß', 'zusammen: Vorhandenes bleibt, Fehlendes kommt dazu');
 
 // --- Mengen passend zur Zeile auf der Liste
 check(JSON.stringify(listenMenge(lies('2 Zwiebeln'), daten)) === JSON.stringify({ q: 200, u: 'g' }), `2 Zwiebeln → 200 g, wie bei den festen Rezepten (${JSON.stringify(listenMenge(lies('2 Zwiebeln'), daten))})`);
@@ -96,7 +130,7 @@ for (let i = 0; i < 70; i++) viele[`amy-r${i}`] = { name: `R ${i}`, geaendert: `
 check(Object.keys(bereinigen({ amy: viele }).amy).length === 60, 'höchstens 60 Rezepte');
 s = anwenden(s, opAmyWeg(R.id));
 check(!s.amy[R.id], 'opAmyWeg löscht');
-const z2 = anwenden(anwenden(leer(), opAmy({ ...R, id: 'amy-a-1', name: 'A' })), opZusammen({}, {}, { 'amy-a-1': { ...R, id: 'amy-a-1', name: 'B' }, 'amy-b-2': { ...R, id: 'amy-b-2', name: 'C' } }));
+const z2 = anwenden(anwenden(leer(), opAmy({ ...R, id: 'amy-a-1', name: 'A' })), opZusammen({}, {}, { amy: { 'amy-a-1': { ...R, id: 'amy-a-1', name: 'B' }, 'amy-b-2': { ...R, id: 'amy-b-2', name: 'C' } } }));
 check(z2.amy['amy-a-1'].name === 'A' && z2.amy['amy-b-2'].name === 'C', 'zusammen: Vorhandenes bleibt, Neues kommt dazu');
 
 // --- Im Browser: zwei Handys, eine GitHub-Attrappe
@@ -179,19 +213,61 @@ await a.click('#timerleiste .tm');
 check(await bis(async () => (await a.locator('#amy-d-titel').isVisible())) && await a.evaluate(() => document.documentElement.dataset.tab) === 'amy', 'Tipp auf den Timer: zurück zu ihrem Rezept');
 await a.click('#timerleiste [data-timer-stopp]');
 
-// Bearbeiten, löschen, rückgängig
+// Bearbeiten (mit Tags), löschen, rückgängig
 await a.click('[data-act="amy-bearbeiten"]');
 await a.fill('#amy-name', 'Kokos-Curry deluxe');
+const vorschlag = await a.locator('[data-amy-tag-dazu]').allInnerTexts();
+check(['gesund', 'bauchfreundlich', 'schnell'].every((x) => vorschlag.includes(x)), `Tags: die App schlägt welche vor (${vorschlag.join(', ')})`);
+await a.click('[data-amy-tag-dazu="gesund"]');
+await a.fill('#amy-tag-text', 'bauchfreundlich');
+await a.press('#amy-tag-text', 'Enter');
+check(await bis(async () => JSON.stringify(await a.locator('.amy-tags-dran li').allInnerTexts()) === JSON.stringify(['gesund', 'bauchfreundlich'])) && await a.locator('#amy-form').count() === 1 && (await a.inputValue('#amy-tag-text')) === '', 'Enter im Tag-Feld legt den Tag an – gespeichert wird noch nicht');
+await a.type('#amy-tag-text', 'Schnell,');
+check(await bis(async () => (await a.locator('.amy-tags-dran li').count()) === 3) && (await a.inputValue('#amy-tag-text')) === '', 'ein Komma macht den Tag auch fertig');
+await a.click('[data-amy-tag-weg="2"]');
+check(await a.locator('.amy-tags-dran li').count() === 2 && (await a.locator('[data-amy-tag-dazu]').allInnerTexts()).includes('schnell'), '× nimmt ihn wieder weg');
 await a.click('#amy-speichern');
 check(await bis(async () => (await a.locator('#amy-d-titel').innerText()) === 'Kokos-Curry deluxe') && await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe'), 'bearbeitet: neuer Name, auch in GitHub');
-check(await bis(async () => (await t.locator('#amy-d-titel').innerText().catch(() => '')) === 'Kokos-Curry deluxe'), 'Tobi sieht die Änderung');
+check(await bis(() => JSON.stringify(gh.liste()?.amyTags?.[amyId]) === JSON.stringify(['gesund', 'bauchfreundlich'])) && !('tags' in gh.liste().amy[amyId]), 'die Tags liegen in GitHub unter amyTags, nicht im Rezept');
+check(JSON.stringify(await a.locator('.amy-d-tags .amy-tag').allInnerTexts()) === JSON.stringify(['gesund', 'bauchfreundlich']), 'im Rezept stehen die Tags');
+check(await bis(async () => (await t.locator('#amy-d-titel').innerText().catch(() => '')) === 'Kokos-Curry deluxe') && await bis(async () => (await t.locator('.amy-d-tags .amy-tag').count()) === 2), 'Tobi sieht die Änderung, mit Tags');
 await a.click('[data-act="amy-loeschen"]');
 check((await a.locator('.amy-actions .confirm').innerText()).includes('Wirklich löschen?'), 'Löschen fragt nach');
 await a.click('[data-act="amy-loeschen-ja"]');
 check(await bis(() => !gh.liste()?.amy?.[amyId] && !Object.keys(gh.liste()?.items?.haehnchenbrust?.parts || {}).includes(amyId)), 'gelöscht – mitsamt den Zutaten auf der Liste');
 check(await bis(async () => (await t.locator('#amy-d-titel').count()) === 0 && (await t.locator('.amy-leer').count()) === 1), 'bei Tobi auch weg');
 await a.click('#toast button');
-check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe'), 'Rückgängig: wieder da');
+check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe' && gh.liste()?.amyTags?.[amyId]?.length === 2), 'Rückgängig: wieder da, mit ihren Tags');
+
+// Ein zweites Rezept – dann filtern und sortieren
+await a.click('[data-act="amy-neu"]');
+await a.fill('#amy-name', 'Bananen-Porridge');
+await a.fill('#amy-zutaten', '2 Bananen\n100 g Haferflocken');
+await a.click('[data-amy-tag-dazu="schnell"]');
+await a.click('#amy-speichern');
+check(await bis(async () => (await a.locator('#amy-d-titel').innerText().catch(() => '')) === 'Bananen-Porridge'), 'zweites Rezept, mit „schnell“');
+await a.click('[data-act="amy-liste"]');
+const chipsF = async () => (await a.locator('[data-amy-filter]').allInnerTexts()).map((x) => x.replace(/\s+/g, ' ').trim());
+check(JSON.stringify(await chipsF()) === JSON.stringify(['Alle', 'bauchfreundlich 1', 'gesund 1', 'schnell 1']), `über den Karten: die Tags zum Filtern (${(await chipsF()).join(' | ')})`);
+const karten = () => a.locator('#view-amy .amy-karte b').allInnerTexts();
+await a.click('[data-amy-filter="schnell"]');
+check(await bis(async () => JSON.stringify(await karten()) === JSON.stringify(['Bananen-Porridge'])) && (await a.locator('#amy-treffer').innerText()).includes('1 Rezept mit „schnell“'), '„schnell“ gewählt: nur das Porridge');
+await a.click('[data-amy-filter="gesund"]');
+check(await bis(async () => (await a.locator('#view-amy .amy-leer').innerText().catch(() => '')).includes('Kein Rezept hat alle diese Tags')), 'zwei Tags: nur Rezepte mit beiden – hier keins');
+await a.click('#view-amy .amy-leer [data-amy-filter=""]');
+check(await bis(async () => (await karten()).length === 2), '„Alle zeigen“');
+await a.selectOption('#amy-sort', 'name');
+check(JSON.stringify(await karten()) === JSON.stringify(['Bananen-Porridge', 'Kokos-Curry deluxe']), 'sortiert nach Name');
+await a.selectOption('#amy-sort', 'tags');
+const gruppen = async () => (await a.locator('.amy-gruppe-t .amy-tag').allInnerTexts());
+check(JSON.stringify(await gruppen()) === JSON.stringify(['bauchfreundlich', 'gesund', 'schnell']), `„Nach Tags“: ein Abschnitt je Tag (${(await gruppen()).join(', ')})`);
+await a.reload({ waitUntil: 'load' });
+check(await bis(async () => (await a.locator('#amy-sort').count()) === 1) && (await a.inputValue('#amy-sort')) === 'tags', 'die Sortierung merkt sich das Handy');
+await a.click('#view-amy .amy-gruppe [data-amy-open] >> nth=0');
+await a.click('.amy-d-tags [data-amy-tag-filter="gesund"]');
+check(await bis(async () => JSON.stringify(await karten()) === JSON.stringify(['Kokos-Curry deluxe'])) && (await a.getAttribute('[data-amy-filter="gesund"]', 'aria-pressed')) === 'true', 'Tipp auf einen Tag im Rezept: alle Rezepte damit');
+await a.click('[data-amy-filter=""]');
+await a.selectOption('#amy-sort', 'neu');
 
 // Amy kauft bei Aldi ein: der Weg durch den Laden liegt danach auch in GitHub
 await a.click('.tab[data-tab="einkauf"]');
@@ -200,15 +276,16 @@ for (const k of await a.$$eval('#list-body .grp:not(.grp-done) [data-check]', (x
 await a.selectOption('#l-laden-wahl', '');
 check(await bis(() => gh.liste()?.wege?.Aldi?.n === 1), 'drei Haken bei Aldi, dann ein anderer Laden: der Weg liegt in GitHub');
 
-// Eine ältere App-Fassung schreibt liste.json ohne `amy` und `wege`: Amys Handy legt beides wieder dazu
+// Eine ältere App-Fassung schreibt liste.json ohne `amy`, `amyTags` und `wege`: Amys Handy legt alles wieder dazu
 const roh = gh.liste();
 delete roh.amy;
+delete roh.amyTags;
 delete roh.wege;
 roh.rev += 1;
 gh.zustand.datei = `${JSON.stringify(roh, null, 1)}\n`;
 gh.zustand.version += 1;
 gh.zustand.sha = `sha${gh.zustand.version}`;
-check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe' && gh.liste()?.wege?.Aldi?.n === 1, 8000), 'ältere Fassung ließ `amy` und `wege` weg – Amys Handy schreibt beides zurück');
+check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe' && gh.liste()?.wege?.Aldi?.n === 1 && gh.liste()?.amyTags?.[amyId]?.length === 2, 8000), 'ältere Fassung ließ `amy`, `amyTags` und `wege` weg – Amys Handy schreibt alles zurück');
 
 check(tobi.fehler.length === 0 && amy.fehler.length === 0, `keine Fehler in der Konsole${[...tobi.fehler, ...amy.fehler].length ? `: ${[...tobi.fehler, ...amy.fehler].slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();

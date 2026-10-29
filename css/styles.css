@@ -502,6 +502,23 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .l-tipp small{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
 .l-tipp .linkbtn{flex:none}
 /* Wo du einkaufst – dann sortiert sich die Liste nach eurem Weg durch den Laden */
+/* Eine Zeile aufklappen: in welche Abteilung, dasselbe wie … */
+.item-main{display:block;min-width:0;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.item-main:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.item.is-auf .item-name{color:var(--accent)}
+.l-mehr{grid-column:1 / -1;display:grid;gap:8px;padding:12px 12px 10px;border-radius:14px;background:var(--surface-2)}
+.l-mehr-k{margin:0;font:600 11.5px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.l-abts{display:flex;flex-wrap:wrap;gap:6px}
+.l-abts .chip{height:32px;padding:0 12px;font-size:13.5px}
+.l-gleich-wahl{width:100%;max-width:340px}
+.l-mehr-fein{margin:0;font-size:12px;color:var(--muted)}
+.l-gleich{display:grid;gap:10px;margin-top:12px;padding:12px 14px;border-radius:14px;border:1.5px dashed var(--accent);background:var(--surface)}
+.l-gleich[hidden]{display:none}
+.l-gleich p{margin:0;font-size:14.5px;line-height:1.45}
+.l-gleich p small{color:var(--muted);font-size:12.5px}
+.l-gleich-k{display:block;font:600 11.5px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.l-gleich-mehr{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
+.l-gleich-btns{display:flex;flex-wrap:wrap;gap:8px}
 .l-laden{display:grid;gap:6px;margin-top:12px}
 .l-laden-sel{width:100%;max-width:340px}
 .l-laden-info{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
@@ -754,7 +771,7 @@ a.btn{text-decoration:none;color:inherit}
  * Schriften: Pacifico für Überschriften, Fredoka für den Text (beide OFL,
  * schrift/LIZENZ-*.txt).
  */
-html[data-tab="amy"]{
+html[data-tab="amy"],.amy-thema{
   --bg:#FFF1F7;--surface:#FFFFFF;--surface-2:#FFE8F1;--line:#F9D2E2;--line-strong:#EFA3C3;
   --ink:#4A1631;--muted:#93587A;--accent:#E0457F;--accent-ink:#FFFFFF;--accent-soft:#FFDDEB;
   --tape:#FFCAE0;--tape-ink:#6B1440;--ok:#C83C84;
@@ -770,7 +787,7 @@ html[data-tab="amy"]{
   --amy-kreis:radial-gradient(circle at 35% 30%,#FFFFFF 0%,#FFDCEB 72%);
 }
 @media (prefers-color-scheme:dark){
-  html[data-tab="amy"]{
+  html[data-tab="amy"],.amy-thema{
     --bg:#231019;--surface:#331624;--surface-2:#3D1B2C;--line:#562640;--line-strong:#7E3A5E;
     --ink:#FCE8F2;--muted:#D6A3BF;--accent:#FF7FB5;--accent-ink:#2A0C1B;--accent-soft:#4D1C35;
     --tape:#F4A9C9;--tape-ink:#3A0C22;--ok:#FF8FC0;
@@ -875,3 +892,78 @@ html[data-tab="amy"] .btn{border-radius:999px}
 .amy-erkannt .ak-katalog{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
 .amy-erkannt .ak-nie,.amy-erkannt .ak-gewuerz{opacity:.75}
 .amy-knoepfe{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.amy-ipad{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-weight:600}
+.amy-ipad .ic{width:17px;height:17px}
+
+/* Popup: die App aufs iPad (ansicht-tablet.js) – immer in Amys Rosa */
+.tablet-dlg{width:min(460px,calc(100% - 32px));max-height:min(88vh,760px);margin:auto;padding:22px 20px 20px;border:2px solid var(--line);border-radius:28px;background:var(--amy-karte);background-color:var(--surface);color:var(--ink);font:500 15px/1.5 var(--f-body);box-shadow:0 24px 60px -20px rgba(94,18,56,.55);overflow:auto;overscroll-behavior:contain}
+.tablet-dlg::backdrop{background:rgba(74,22,49,.45);backdrop-filter:blur(3px)}
+.tablet-dlg[open]{display:grid;gap:12px}
+.tablet-zu{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:var(--surface-2);color:var(--ink)}
+.tablet-zu .ic{width:16px;height:16px}
+.tablet-dlg .amy-eyebrow{justify-content:center}
+.tablet-titel{margin:0;padding:0 34px;font:400 clamp(25px,6.5vw,31px)/1.2 var(--f-script);color:var(--accent);text-align:center;letter-spacing:0}
+.tablet-lead{margin:0;color:var(--muted);text-align:center}
+.tablet-schritte{list-style:none;counter-reset:s;display:grid;gap:10px;margin:4px 0 0;padding:0}
+.tablet-schritte li{counter-increment:s;position:relative;display:grid;gap:5px;padding:12px 14px 12px 52px;border-radius:20px;background:var(--surface);border:2px solid var(--line)}
+.tablet-schritte li::before{content:counter(s);position:absolute;left:12px;top:11px;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--amy-verlauf);color:#fff;font:600 15px/1 var(--f-body)}
+.tablet-schritte b{font-weight:600}
+.tablet-schritte span{color:var(--ink)}
+.tablet-schritte small{color:var(--muted);font-size:13px;line-height:1.45}
+.tablet-schritte .ic{width:17px;height:17px;vertical-align:-3px;color:var(--accent)}
+.tablet-kopieren{min-height:42px;padding:0 18px;font-size:15px}
+.tablet-adresse{font:600 15px/1.3 var(--f-mono);overflow-wrap:anywhere;color:var(--accent)!important}
+.tablet-fein{margin:0;font-size:13px;color:var(--muted)}
+.tablet-knoepfe{display:flex;justify-content:center}
+
+/* Tags: sechs Pastellfarben, derselbe Tag immer in derselben (amy.js tagFarbe) */
+.tf0{--tag-bg:#FFDDEB;--tag-ink:#A3245B}
+.tf1{--tag-bg:#ECE0FF;--tag-ink:#5B34A8}
+.tf2{--tag-bg:#D6F3E6;--tag-ink:#1D6B4F}
+.tf3{--tag-bg:#FFE4D1;--tag-ink:#9A4511}
+.tf4{--tag-bg:#DCEBFF;--tag-ink:#235791}
+.tf5{--tag-bg:#FFF1BF;--tag-ink:#725300}
+@media (prefers-color-scheme:dark){
+  .tf0{--tag-bg:#5A2440;--tag-ink:#FFC4DD}
+  .tf1{--tag-bg:#3E2D63;--tag-ink:#DCCBFF}
+  .tf2{--tag-bg:#1D463A;--tag-ink:#A9EBCF}
+  .tf3{--tag-bg:#55311D;--tag-ink:#FFD2B3}
+  .tf4{--tag-bg:#223D5C;--tag-ink:#C2DEFF}
+  .tf5{--tag-bg:#4B3E0E;--tag-ink:#FFE68C}
+}
+.amy-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.amy-tag{display:inline-flex;align-items:center;gap:3px;min-height:22px;padding:2px 9px;border-radius:999px;border:1.5px solid transparent;background:var(--tag-bg,var(--accent-soft));color:var(--tag-ink,var(--accent));font:600 12px/1.2 var(--f-body);white-space:nowrap}
+.amy-tag.ohne{--tag-bg:var(--surface-2);--tag-ink:var(--muted)}
+button.amy-tag{cursor:pointer}
+button.amy-tag:hover{border-color:var(--tag-ink)}
+.amy-d-tags{margin-top:8px}
+.amy-d-tags .amy-tag{min-height:26px;padding:3px 11px;font-size:13px}
+.amy-chip{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:600 14px/1 var(--f-body)}
+.amy-chip .ic{width:14px;height:14px;flex:none}
+.amy-chip .n{font:500 12px/1 var(--f-body);color:var(--muted)}
+.amy-chip[class*=" tf"]::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--tag-ink);flex:none}
+.amy-chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.amy-chip[aria-pressed="true"]::before{background:var(--accent-ink)}
+.amy-chip[aria-pressed="true"] .n{color:inherit;opacity:.8}
+.amy-werkzeuge{display:grid;gap:10px}
+.amy-filter{display:flex;flex-wrap:wrap;gap:7px}
+.amy-werkzeuge-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.amy-sort{max-width:240px;border-width:1.5px;border-color:var(--line)}
+.amy-treffer{margin:0;font-size:13.5px;color:var(--muted)}
+.amy-gruppe{display:grid;gap:10px}
+.amy-gruppe+.amy-gruppe{margin-top:6px}
+.amy-gruppe-t{display:flex;align-items:center;gap:8px;font:500 13px/1.2 var(--f-body);color:var(--muted)}
+.amy-gruppe-t .amy-tag{min-height:30px;padding:4px 13px;font-size:15px}
+.amy-tags-wahl{display:grid;gap:8px}
+.amy-tags-wahl:empty{display:none}
+.amy-tags-dran{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.amy-tags-dran .amy-tag{min-height:32px;padding:3px 3px 3px 12px;font-size:14px}
+.amy-tag-x{display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit}
+.amy-tag-x .ic{width:13px;height:13px}
+.amy-tag-x:hover{background:color-mix(in srgb,var(--tag-ink) 14%,transparent)}
+.amy-tag-vorschlaege{display:flex;flex-wrap:wrap;gap:6px}
+.amy-tag-vorschlaege .amy-chip{min-height:30px;padding:0 11px;font-size:13.5px;border-style:dashed;color:var(--muted)}
+.amy-tag-neu{display:flex;gap:8px;align-items:center}
+.amy-tag-neu[hidden]{display:none}
+.amy-tag-neu input{flex:1;min-width:0}
+.amy-tag-neu .amy-chip{min-height:44px;flex:none}

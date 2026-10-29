@@ -114,7 +114,9 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
 
 /**
  * Ein „Handy“: eigener Browser-Kontext mit leerem Speicher. `attrappe` hängt
- * die GitHub-Attrappe davor; `takt` ist der Abgleich in ms (in der App sonst 8 s).
+ * die GitHub-Attrappe davor; `takt` ist der Abgleich in ms (in der App sonst 8 s);
+ * `userAgent` macht daraus etwa ein iPhone oder iPad, `skript` läuft vor jeder
+ * Seite (etwa um navigator.maxTouchPoints wie auf einem iPad zu setzen).
  */
 /** Die Tierquellen der Belohnung (js/lob.js) – in den Tests nie das echte Netz. */
 export const TIER_HOSTS = /random\.dog|dog\.ceo|thecatapi|cataas|randomfox|bunnies|capy\.lol|bilder\.test/;
@@ -139,8 +141,9 @@ export function tierAttrappe() {
   };
 }
 
-export async function handy(browser, { attrappe = null, tiere = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true } = {}) {
-  const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow' });
+export async function handy(browser, { attrappe = null, tiere = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null } = {}) {
+  const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow', ...(userAgent ? { userAgent } : {}) });
+  if (skript) await ctx.addInitScript(skript);
   if (attrappe) await ctx.route('https://api.github.com/**', attrappe.route);
   else await ctx.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
   await ctx.route(TIER_HOSTS, tiere ? tiere.route : (r) => r.abort('blockedbyclient'));

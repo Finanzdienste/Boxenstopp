@@ -16,7 +16,7 @@
  * Einkäufen passt es.
  */
 import { erledigt } from './liste.js';
-import { abteilungVon } from './bereiche.js';
+import { abteilungVon, nameSchluessel } from './bereiche.js';
 
 /** Die übliche Reihenfolge der Abteilungen (wie bereiche.js), für Läden ohne Messung. */
 export const REIHE = ['obst', 'fleisch', 'kuehl', 'trocken', 'konserven', 'vorrat', 'tk', 'gewuerz', 'haushalt', 'sonstiges'];
@@ -29,10 +29,8 @@ export const MIN_HAKEN = 3;
 export const PAUSE_MS = 45 * 60 * 1000;
 export const MAX_MESSUNGEN = 5;
 
-const slug = (t) => String(t || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
-
 /** Woran sich eine Zeile wiedererkennt: Katalog-Schlüssel, bei eigenen Einträgen der Name. */
-export const wegSchluessel = (k, d) => (d?.custom || String(k).startsWith('c-') ? `n:${slug(d?.name || k)}` : String(k));
+export const wegSchluessel = (k, d) => (d?.custom || String(k).startsWith('c-') ? nameSchluessel(d?.name || k) : String(k));
 
 /**
  * Aus den Haken eines Einkaufs [[schlüssel, abteilung, zeit], …] die Stellen
@@ -75,7 +73,7 @@ export function nachWeg(stand, katalog = {}, weg = null) {
   const gruppen = new Map();
   for (const [k, d] of Object.entries(stand.items)) {
     if (erledigt(d)) continue;
-    const c = abteilungVon(k, d, katalog);
+    const c = abteilungVon(k, d, katalog, stand.abteilungen);
     const id = ABTEILUNG_NAME[c] ? c : 'sonstiges';
     if (!gruppen.has(id)) gruppen.set(id, []);
     gruppen.get(id).push([k, d]);

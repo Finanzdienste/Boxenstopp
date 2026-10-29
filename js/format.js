@@ -68,15 +68,15 @@ export function ungefaehr(k, summen) {
  * trifft, steht unter „Sonstiges“ (bereiche.js).
  */
 const STICHWORT = [
-  ['haushalt', ['zahn', 'shampoo', 'duschgel', 'klopapier', 'toilettenpapier', 'spülmittel', 'waschmittel', 'müllbeutel', 'küchenrolle', 'alufolie', 'backpapier', 'frischhaltefolie', 'gefrierbeutel', 'deo', 'seife', 'batterie', 'boxen', 'döschen', 'spieß', 'spiess', 'schaschlik', 'schwamm', 'servietten', 'kerze', 'grillkohle', 'anzünder', 'zahnstocher', 'tüten']],
+  ['haushalt', ['zahn', 'shampoo', 'duschgel', 'klopapier', 'toilettenpapier', 'spülmittel', 'waschmittel', 'müllbeutel', 'küchenrolle', 'alufolie', 'backpapier', 'frischhaltefolie', 'gefrierbeutel', 'deo', 'seife', 'batterie', 'boxen', 'döschen', 'spieß', 'spiess', 'schaschlik', 'schwamm', 'servietten', 'kerze', 'grillkohle', 'anzünder', 'zahnstocher', 'tüten', 'bürste', 'reiniger', 'putzmittel', 'lappen', 'taschentücher', 'feuchttücher', 'weichspüler', 'spültabs', 'tabs']],
   ['tk', ['tk', 'tiefkühl', 'eis', 'pommes', 'pizza']],
   ['gewuerz', ['salz', 'pfeffer', 'gewürz', 'paprikapulver', 'zimt', 'kümmel', 'oregano', 'thymian', 'rosmarin', 'majoran', 'kurkuma', 'muskat', 'cayenne', 'lorbeer', 'brühe', 'garam', 'chiliflocken', 'chilipulver', 'currypulver', 'vanillezucker']],
-  ['vorrat', ['öl', 'essig', 'zucker', 'honig', 'sauce', 'soße', 'senf', 'ketchup', 'mayo', 'kaffee', 'tee', 'kakao', 'backpulver', 'hefe', 'stärke']],
-  ['fleisch', ['hähnchen', 'huhn', 'hühnchen', 'pute', 'rind', 'hack', 'schwein', 'steak', 'schnitzel', 'wurst', 'würstchen', 'schinken', 'speck', 'salami', 'chicken', 'fleisch', 'lamm', 'filet']],
+  ['vorrat', ['öl', 'essig', 'zucker', 'honig', 'sauce', 'soße', 'senf', 'ketchup', 'mayo', 'kaffee', 'tee', 'kakao', 'backpulver', 'hefe', 'stärke', 'dressing', 'sirup']],
+  ['fleisch', ['hähnchen', 'huhn', 'hühnchen', 'pute', 'rind', 'hack', 'schwein', 'steak', 'schnitzel', 'wurst', 'würstchen', 'schinken', 'speck', 'salami', 'chicken', 'fleisch', 'lamm', 'filet', 'nugg', 'frikadelle', 'bulette', 'cevapcici', 'gyros', 'döner', 'bacon', 'chorizo']],
   ['konserven', ['dose', 'bohnen', 'mais', 'passata', 'tomatenmark', 'kokosmilch', 'kichererbsen', 'linsen', 'pesto', 'ajvar', 'erdnussbutter', 'marmelade', 'konfitüre', 'nutella']],
   ['kuehl', ['milch', 'joghurt', 'quark', 'skyr', 'käse', 'sahne', 'butter', 'ei', 'frischkäse', 'mozzarella', 'feta', 'schmand', 'tofu', 'hummus', 'margarine']],
   ['obst', ['apfel', 'äpfel', 'banane', 'melone', 'beere', 'traube', 'birne', 'orange', 'mandarine', 'zitrone', 'limette', 'salat', 'gurke', 'tomate', 'paprika', 'zwiebel', 'knoblauch', 'kartoffel', 'möhre', 'karotte', 'brokkoli', 'zucchini', 'pilz', 'champignon', 'spinat', 'kräuter', 'avocado', 'ingwer', 'lauch', 'kohl', 'kiwi', 'mango', 'ananas', 'obst', 'gemüse', 'rucola', 'petersilie', 'basilikum', 'koriander']],
-  ['trocken', ['reis', 'nudel', 'pasta', 'spaghetti', 'penne', 'gnocchi', 'mehl', 'hafer', 'müsli', 'cornflakes', 'brot', 'toast', 'wrap', 'tortilla', 'nüsse', 'mandeln', 'crunch', 'chips', 'whey', 'protein']],
+  ['trocken', ['reis', 'nudel', 'pasta', 'spaghetti', 'penne', 'gnocchi', 'mehl', 'hafer', 'müsli', 'cornflakes', 'brot', 'toast', 'wrap', 'tortilla', 'nüsse', 'mandeln', 'crunch', 'chips', 'whey', 'protein', 'crouton', 'cracker', 'zwieback', 'knäcke', 'brötchen']],
 ];
 export function abteilung(text, katalog = {}) {
   const klein = String(text).toLowerCase().trim();
@@ -93,6 +93,20 @@ export function abteilung(text, katalog = {}) {
     }
   }
   return 'sonstiges';
+}
+
+/** Woran die App eine Zutat über ihren Namen wiedererkennt: „Chicken Nuggets“ → „n:chicken-nuggets“. */
+export const nameSchluessel = (name) => `n:${String(name || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60)}`;
+
+/**
+ * Wohin ein Schlüssel nach dem Zusammenlegen zeigt (liste.js `gleich`):
+ * „amyz-leckere-dino-nuggies“ → „amyz-dino-nuggets“. Höchstens sechs
+ * Sprünge, damit ein Kreis im Stand nie hängen bleibt.
+ */
+export function umleiten(gleich, k) {
+  let x = String(k);
+  for (let i = 0; i < 6 && gleich && typeof gleich === 'object' && typeof gleich[x] === 'string' && gleich[x] !== x; i++) x = gleich[x];
+  return x;
 }
 
 /** Heute als JJJJ-MM-TT in der Zeitzone des Handys. */

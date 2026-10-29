@@ -11,7 +11,11 @@
  *     notizen:   { <Rezept-id>: [{ id, text, by, at }, …] },
  *     gepinnt:   { <Rezept-id>: { by: 'Tobi', at } },
  *     amy:       { <amy-…>: Amys eigenes Rezept (amy.js) },
- *     wege:      { <Laden>: { n: 3, at, k: { <Schlüssel>: { c: 'obst', p: [0.1, 0.05] } } } } }
+ *     amyTags:   { <amy-…>: ['gesund', 'bauchfreundlich'] },
+ *     wege:      { <Laden>: { n: 3, at, k: { <Schlüssel>: { c: 'obst', p: [0.1, 0.05] } } } },
+ *     abteilungen: { <Schlüssel oder n:name>: 'fleisch' },
+ *     gleich:    { <Schlüssel oder n:name>: <Schlüssel> },  zusammengelegt: dasselbe Produkt
+ *     ungleich:  ['<a>|<b>', …] }                           „Nein, verschieden“
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -20,9 +24,17 @@
  * laufen (Lesezeichen, höchstens vier) – sie stehen bei beiden oben. Unter
  * `amy` liegen die Rezepte, die Amy selbst schreibt (höchstens 60), so wie
  * sie sie getippt hat; ihre Zutaten kommen über dieselben Teile auf die
- * Liste wie die der festen Rezepte (Teil-Schlüssel ist die amy-id). `wege`
+ * Liste wie die der festen Rezepte (Teil-Schlüssel ist die amy-id); ihre
+ * Tags stehen daneben unter `amyTags` – eigener Schlüssel, damit eine ältere
+ * App-Version sie nicht stillschweigend mit dem Rezept überschreibt. `wege`
  * ist der Weg durch einen Laden (weg.js): je Zutat, an welcher Stelle sie
- * bei den letzten Einkäufen abgehakt wurde (0 vorn, 1 hinten).
+ * bei den letzten Einkäufen abgehakt wurde (0 vorn, 1 hinten). In
+ * `abteilungen` steht, was jemand auf der Liste in eine andere Abteilung
+ * verschoben hat – das gilt für beide und auch beim nächsten Mal. `gleich`
+ * sind zusammengelegte Zeilen („leckere Dino nuggies“ ist dasselbe wie „Dino
+ * nuggets“): Jedes Teil, das danach unter dem alten Schlüssel kommt, landet
+ * in der Zeile des neuen (aufloesen). `ungleich` sind Paare, die jemand als
+ * verschieden markiert hat – die schlägt die App nicht noch einmal vor.
  *
  * Ein Eintrag:
  *
@@ -33,7 +45,10 @@
  *
  * Zutaten aus dem Katalog haben ihren Katalog-Schlüssel (`haehnchenbrust`),
  * damit Butter Chicken und Teriyaki sich eine Zeile teilen. Eigene Einträge
- * heißen `c-…`, haben keine Teile und merken sich `checked` selbst.
+ * heißen `c-…`, haben keine Teile und merken sich `checked` selbst. Tippt
+ * jemand einen Namen ein, der schon einmal zusammengelegt wurde, steht der
+ * eigene Eintrag gleich unter dem Schlüssel dieser Zeile – kommen dann Teile
+ * aus einem Rezept dazu, zählen beim Abhaken die Teile.
  *
  * Änderungen sind Objekte mit `typ`, keine Funktionen: Dann lassen sie sich
  * speichern, solange das Handy offline ist, und nach einem Konflikt auf den
@@ -46,9 +61,15 @@
 
 import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
-import { amyBereinigen, AMY_ID, MAX_AMY } from './amy.js';
+import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
+import { umleiten } from './format.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, wege: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [] });
+const MAX_GLEICH = 300;
+const MAX_UNGLEICH = 200;
+/** Die Abteilungen, in die man eine Zeile verschieben kann (weg.js REIHE). */
+export const ABTEILUNGEN = ['obst', 'fleisch', 'kuehl', 'trocken', 'konserven', 'vorrat', 'tk', 'gewuerz', 'haushalt', 'sonstiges'];
+const MAX_ABTEILUNGEN = 400;
 const MAX_LAEDEN_WEG = 12;
 const MAX_WEG_ZUTATEN = 300;
 const MAX_WEG_MESSUNGEN = 5;
@@ -77,7 +98,11 @@ export function erledigt(d) {
   return t.length ? t.every(([, p]) => p.done === true) : d.checked === true;
 }
 
-export const hatTeil = (stand, k, rid) => istObj(stand.items[k]?.parts?.[rid]);
+/** Der Schlüssel, unter dem eine Zutat wirklich auf der Liste steht – nach dem Zusammenlegen der neue. */
+export const aufloesen = (stand, k) => umleiten(stand?.gleich, k);
+
+/** Steht das Teil eines Rezepts auf der Liste – unter dem Schlüssel selbst oder in der Zeile, mit der er zusammengelegt wurde? */
+export const hatTeil = (stand, k, rid) => istObj(stand.items[k]?.parts?.[rid]) || istObj(stand.items[aufloesen(stand, k)]?.parts?.[rid]);
 
 /** Was „Alles auf die Einkaufsliste“ einträgt: Zutaten mit Menge, ohne Vorrat und Optionales. */
 export const einkaufsZutaten = (r) => (r.items || []).filter((it) => it.k && typeof it.q === 'number' && !it.pantry && !it.opt && !it.da);
@@ -191,14 +216,29 @@ export function bereinigen(roh) {
     const a = Object.entries(roh.amy).filter(([id]) => AMY_ID.test(id)).map(([id, r]) => amyBereinigen({ ...(istObj(r) ? r : {}), id })).filter(Boolean);
     s.amy = Object.fromEntries(neuesteAmy(a).map((r) => [r.id, r]));
   }
+  if (istObj(roh.amyTags)) {
+    s.amyTags = Object.fromEntries(Object.entries(roh.amyTags).filter(([id]) => AMY_ID.test(id)).map(([id, t]) => [id, tagsBereinigen(t)]).filter(([, t]) => t.length).slice(-MAX_AMY));
+  }
   if (istObj(roh.wege)) {
     for (const [laden, w] of Object.entries(roh.wege).slice(0, MAX_LAEDEN_WEG)) {
       const b = wegBereinigen(laden, w);
       if (b) s.wege[laden] = b;
     }
   }
+  if (istObj(roh.abteilungen)) {
+    s.abteilungen = Object.fromEntries(Object.entries(roh.abteilungen).filter(([k, c]) => SCHLUESSEL.test(k) && ABTEILUNGEN.includes(c)).slice(-MAX_ABTEILUNGEN));
+  }
+  if (istObj(roh.gleich)) {
+    s.gleich = Object.fromEntries(Object.entries(roh.gleich).filter(([k, z]) => SCHLUESSEL.test(k) && SCHLUESSEL.test(String(z)) && k !== z).slice(-MAX_GLEICH));
+  }
+  if (Array.isArray(roh.ungleich)) {
+    s.ungleich = [...new Set(roh.ungleich.filter((x) => typeof x === 'string' && x.split('|').length === 2 && x.split('|').every((k) => SCHLUESSEL.test(k))))].slice(-MAX_UNGLEICH);
+  }
   return s;
 }
+
+/** Ein Paar, egal in welcher Reihenfolge: „a|b“. */
+export const paar = (a, b) => [String(a), String(b)].sort().join('|');
 
 /** Der Weg durch einen Laden aus beliebigem JSON – oder null. */
 function wegBereinigen(laden, w) {
@@ -240,15 +280,37 @@ export function opEigener(id, name, cat) {
 export const opErledigteWeg = () => ({ typ: 'erledigteWeg' });
 export const opLeeren = () => ({ typ: 'leeren' });
 export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || null });
-/** Einträge (behaltene KI-Rezepte, Amys Rezepte, Wege) von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
-export const opZusammen = (items, ki = {}, amy = {}, wege = {}) => ({ typ: 'zusammen', items: klon(items), ki: klon(ki || {}), amy: klon(amy || {}), wege: klon(wege || {}) });
+/**
+ * Einträge und behaltene KI-Rezepte von einem anderen Stand dazunehmen, ohne
+ * Vorhandenes zu überschreiben – dazu, was sonst noch fehlt:
+ * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich }.
+ */
+export const opZusammen = (items, ki = {}, mehr = {}) => ({
+  typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
+  amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []),
+});
+/**
+ * Zwei Zeilen sind dasselbe: von kommt zu nach, und alles, was künftig unter
+ * von (oder den Namen) kommt, auch. ziel { name, cat } ist die Zeile nach,
+ * wie sie beim Tippen aussah – falls das andere Handy sie inzwischen
+ * gelöscht hat, entsteht sie so neu.
+ */
+export const opGleich = (von, nach, namen = [], ziel = {}) => ({ typ: 'gleich', von, nach, namen: klon(namen), ziel: { name: text(ziel.name, 120), cat: text(ziel.cat, 20) } });
+/** Zusammenlegen zurücknehmen: diese Schlüssel nicht mehr umleiten. */
+export const opGleichWeg = (schluessel) => ({ typ: 'gleichWeg', schluessel: klon(schluessel) });
+/** „Nein, verschieden“ – das Paar nicht noch einmal vorschlagen. */
+export const opUngleich = (a, b) => ({ typ: 'ungleich', paar: paar(a, b) });
 /** Ein Einkauf im Laden ist vorbei: die Stellen der Zutaten auf dem Weg dazulegen (weg.js wegStellen). */
 export const opWeg = (laden, stellen, by) => ({ typ: 'weg', laden, stellen: klon(stellen), by: by || null, at: jetzt() });
 /** Den Weg durch einen Laden vergessen. */
 export const opWegVergessen = (laden) => ({ typ: 'wegWeg', laden });
+/** Zeilen in eine andere Abteilung verschieben und es sich merken: { <Schlüssel>: 'fleisch' | null } (null vergisst). */
+export const opAbteilung = (werte) => ({ typ: 'abteilung', werte: klon(werte) });
 /** Amys Rezept anlegen oder ändern (ganz ersetzen) – für beide; wegwerfen mit opAmyWeg. */
 export const opAmy = (r, by) => ({ typ: 'amy', r: klon(r), by: by || null, at: jetzt() });
 export const opAmyWeg = (id) => ({ typ: 'amyWeg', id });
+/** Amys Tags für ein Rezept setzen (ganz ersetzen; leer nimmt sie weg). */
+export const opAmyTags = (id, tags) => ({ typ: 'amyTags', id, tags: klon(Array.isArray(tags) ? tags : []) });
 /** Ein Rezept aus der Resteverwertung für beide behalten – oder wieder wegwerfen. */
 export const opKiBehalten = (id, r, by) => ({ typ: 'kiBehalten', id, r: klon(r), by: by || null, at: jetzt() });
 export const opKiWeg = (id) => ({ typ: 'kiWeg', id });
@@ -270,24 +332,29 @@ function aendere(s, op) {
   switch (op.typ) {
     case 'teil': {
       if (!SCHLUESSEL.test(String(op.k)) || !SCHLUESSEL.test(String(op.rid)) || !istObj(op.teil)) return;
-      const e = d || { name: op.name, cat: op.cat, parts: {}, custom: false, checked: false, by: null, at: op.at, added: op.at };
+      // Zusammengelegt? Dann in die Zeile, zu der die Zutat jetzt gehört
+      const k = aufloesen(s, op.k);
+      const e = s.items[k] || { name: op.name, cat: op.cat, parts: {}, custom: false, checked: false, by: null, at: op.at, added: op.at };
       if (!istObj(e.parts)) e.parts = {};
       e.parts[op.rid] = klon(op.teil);
       e.at = op.at;
-      s.items[op.k] = e;
+      s.items[k] = e;
       return;
     }
     case 'teilWeg': {
-      if (!d || !istObj(d.parts)) return;
-      delete d.parts[op.rid];
-      if (!teileVon(d).length && !d.custom) delete s.items[op.k];
+      // Hängt das Teil noch unter dem alten Schlüssel (von einer älteren App-Fassung), dort wegnehmen
+      const k = istObj(s.items[op.k]?.parts?.[op.rid]) ? op.k : aufloesen(s, op.k);
+      const x = s.items[k];
+      if (!x || !istObj(x.parts)) return;
+      delete x.parts[op.rid];
+      if (!teileVon(x).length && !x.custom) delete s.items[k];
       return;
     }
     case 'haken': {
       if (!d) return;
       const rids = Array.isArray(op.rids) ? op.rids : [];
+      for (const rid of rids) if (istObj(d.parts?.[rid])) d.parts[rid].done = op.done === true;
       if (d.custom || !rids.length) d.checked = op.done === true;
-      else for (const rid of rids) if (istObj(d.parts?.[rid])) d.parts[rid].done = op.done === true;
       d.by = op.done ? op.by : null;
       d.at = op.at;
       return;
@@ -303,7 +370,7 @@ function aendere(s, op) {
         const t = teileVon(e);
         if (!t.length) { if (e.checked === true) delete s.items[k]; continue; }
         for (const [rid, p] of t) if (p.done === true) delete e.parts[rid];
-        if (!teileVon(e).length && !e.custom) delete s.items[k];
+        if (!teileVon(e).length && (!e.custom || e.checked === true)) delete s.items[k];
       }
       return;
     case 'leeren':
@@ -320,8 +387,14 @@ function aendere(s, op) {
       return;
     case 'zusammen':
       if (!istObj(op.items)) return;
-      for (const [k, e] of Object.entries(op.items)) {
-        if (!SCHLUESSEL.test(k) || !istObj(e)) continue;
+      // Zusammengelegtes gilt auch hier: was unter dem alten Schlüssel kommt, landet in der neuen Zeile
+      if (istObj(op.gleich)) {
+        if (!istObj(s.gleich)) s.gleich = {};
+        for (const [k, z] of Object.entries(op.gleich)) if (SCHLUESSEL.test(k) && SCHLUESSEL.test(String(z)) && k !== z && !s.gleich[k]) s.gleich[k] = z;
+      }
+      for (const [k0, e] of Object.entries(op.items)) {
+        if (!SCHLUESSEL.test(k0) || !istObj(e)) continue;
+        const k = s.items[k0] ? k0 : aufloesen(s, k0);
         const da = s.items[k];
         if (!da) { s.items[k] = klon(e); continue; }
         for (const [rid, p] of teileVon(e)) if (!istObj(da.parts?.[rid])) { da.parts = da.parts || {}; da.parts[rid] = klon(p); }
@@ -344,6 +417,20 @@ function aendere(s, op) {
           const b = !s.wege[laden] && Object.keys(s.wege).length < MAX_LAEDEN_WEG ? wegBereinigen(laden, w) : null;
           if (b) s.wege[laden] = b;
         }
+      }
+      if (istObj(op.abteilungen)) {
+        if (!istObj(s.abteilungen)) s.abteilungen = {};
+        for (const [k, c] of Object.entries(op.abteilungen)) if (SCHLUESSEL.test(k) && ABTEILUNGEN.includes(c) && !s.abteilungen[k]) s.abteilungen[k] = c;
+      }
+      if (istObj(op.amyTags)) {
+        if (!istObj(s.amyTags)) s.amyTags = {};
+        for (const [id, t] of Object.entries(op.amyTags)) {
+          const b = AMY_ID.test(id) && !s.amyTags[id] ? tagsBereinigen(t) : [];
+          if (b.length) s.amyTags[id] = b;
+        }
+      }
+      if (Array.isArray(op.ungleich)) {
+        s.ungleich = [...new Set([...(Array.isArray(s.ungleich) ? s.ungleich : []), ...op.ungleich.filter((x) => typeof x === 'string' && x.includes('|'))])].slice(-MAX_UNGLEICH);
       }
       return;
     case 'kiBehalten': {
@@ -421,8 +508,73 @@ function aendere(s, op) {
     case 'wegWeg':
       if (istObj(s.wege)) delete s.wege[op.laden];
       return;
+    case 'gleich': {
+      const von = String(op.von);
+      const nach = aufloesen(s, op.nach);
+      if (!SCHLUESSEL.test(von) || !SCHLUESSEL.test(nach) || von === nach) return;
+      const a = s.items[von];
+      const b = s.items[nach];
+      if (a && b) {
+        const teile = teileVon(a);
+        if (teile.length) {
+          // Die Teile wandern mit; kommt dasselbe Rezept zweimal vor, zählen gleiche Einheiten zusammen
+          if (!istObj(b.parts)) b.parts = {};
+          for (const [rid, p] of teile) {
+            const da = b.parts[rid];
+            if (!istObj(da)) b.parts[rid] = klon(p);
+            else if (typeof da.q === 'number' && typeof p.q === 'number' && da.u === p.u) {
+              da.q = Math.round((da.q + p.q) * 100) / 100;
+              da.done = da.done === true && p.done === true;
+            }
+          }
+        } else if (!teileVon(b).length) {
+          // Zwei eigene Einträge: offen, solange einer offen ist
+          b.checked = b.checked === true && a.checked === true;
+        }
+        delete s.items[von];
+      } else if (a) {
+        const z = istObj(op.ziel) ? op.ziel : {};
+        s.items[nach] = { ...a, name: text(z.name, 120) || a.name, cat: text(z.cat, 20) || a.cat };
+        delete s.items[von];
+      }
+      if (!istObj(s.gleich)) s.gleich = {};
+      for (const k of [von, ...(Array.isArray(op.namen) ? op.namen : [])]) {
+        if (SCHLUESSEL.test(String(k)) && k !== nach && !String(k).startsWith('c-')) s.gleich[k] = nach;
+      }
+      delete s.gleich[nach];
+      const alle = Object.keys(s.gleich);
+      for (const k of alle.slice(0, Math.max(0, alle.length - MAX_GLEICH))) delete s.gleich[k];
+      return;
+    }
+    case 'gleichWeg':
+      if (istObj(s.gleich) && Array.isArray(op.schluessel)) for (const k of op.schluessel) delete s.gleich[k];
+      return;
+    case 'ungleich':
+      if (typeof op.paar !== 'string' || !op.paar.includes('|')) return;
+      s.ungleich = [...new Set([...(Array.isArray(s.ungleich) ? s.ungleich : []), op.paar])].slice(-MAX_UNGLEICH);
+      return;
+    case 'abteilung': {
+      if (!istObj(op.werte)) return;
+      if (!istObj(s.abteilungen)) s.abteilungen = {};
+      for (const [k, c] of Object.entries(op.werte)) {
+        if (!SCHLUESSEL.test(k)) continue;
+        delete s.abteilungen[k];
+        if (ABTEILUNGEN.includes(c)) s.abteilungen[k] = c;
+      }
+      const alle = Object.keys(s.abteilungen);
+      for (const k of alle.slice(0, Math.max(0, alle.length - MAX_ABTEILUNGEN))) delete s.abteilungen[k];
+      return;
+    }
+    case 'amyTags': {
+      if (!AMY_ID.test(String(op.id))) return;
+      if (!istObj(s.amyTags)) s.amyTags = {};
+      const t = tagsBereinigen(op.tags);
+      if (t.length) s.amyTags[op.id] = t; else delete s.amyTags[op.id];
+      return;
+    }
     case 'amyWeg':
       if (istObj(s.amy)) delete s.amy[op.id];
+      if (istObj(s.amyTags)) delete s.amyTags[op.id];
       if (istObj(s.notizen)) delete s.notizen[op.id];
       if (istObj(s.gepinnt)) delete s.gepinnt[op.id];
       return;

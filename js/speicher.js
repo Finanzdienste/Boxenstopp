@@ -183,13 +183,16 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
         const etag = r.headers.get('ETag');
         if (j.sha !== remote.sha) {
           if (!remote.sha || stand.rev >= remote.stand.rev) {
-            // Eine ältere App-Fassung kennt `amy` und `wege` nicht und lässt sie beim
+            // Eine ältere App-Fassung kennt die neueren Teile (Amys Rezepte und Tags,
+            // Wege, verschobene und zusammengelegte Zeilen) nicht und lässt sie beim
             // Schreiben weg. Dann kommt, was dieses Handy davon kannte, wieder dazu.
-            const amy = roh && typeof roh === 'object' && !('amy' in roh) ? remote.stand?.amy || {} : {};
-            const wege = roh && typeof roh === 'object' && !('wege' in roh) ? remote.stand?.wege || {} : {};
-            if (Object.keys(amy).length || Object.keys(wege).length) {
-              stand = anwenden(stand, opZusammen({}, {}, amy, wege));
-              offen.push(opZusammen({}, {}, amy, wege));
+            const fehlt = (k) => roh && typeof roh === 'object' && !(k in roh);
+            const mehr = {};
+            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
+            if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
+            if (Object.keys(mehr).length) {
+              stand = anwenden(stand, opZusammen({}, {}, mehr));
+              offen.push(opZusammen({}, {}, mehr));
               merkeOffen();
               plane(700);
             }

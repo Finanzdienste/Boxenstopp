@@ -11,18 +11,27 @@
  * merkt sich das Handy die Reihenfolge der Haken (weg.js) – nach dem Einkauf
  * steht die Liste beim nächsten Mal in der Reihenfolge eures Wegs durch
  * diesen Laden. Die Wahl teilt sich der Reiter mit den Angeboten.
+ *
+ * Eine Zeile antippen klappt sie auf: Dort kommt sie in eine andere
+ * Abteilung („Nuggets“ gehört zu Fleisch) oder wird mit einer anderen Zeile
+ * zusammengelegt („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“).
+ * Beides merkt sich die App für beide und fürs nächste Mal (liste.js
+ * `abteilungen`, `gleich`). Sieht sie zwei Zeilen, die dasselbe sein
+ * könnten, fragt sie über der Liste (gleich.js).
  */
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { lobKlein } from './lob.js';
 import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
-import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen } from './liste.js';
-import { nachWeg, wegSchluessel, wegStellen, PAUSE_MS } from './weg.js';
+import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, aufloesen, ABTEILUNGEN } from './liste.js';
+import { nachWeg, wegSchluessel, wegStellen, PAUSE_MS, ABTEILUNG_NAME } from './weg.js';
+import { aehnlich, vorschlaege, richtung, merkName } from './gleich.js';
+import { istIpad } from './ansicht-tablet.js';
 
-const opZusammenWeg = (laden, w) => opZusammen({}, {}, {}, { [laden]: w });
+const opZusammenWeg = (laden, w) => opZusammen({}, {}, { wege: { [laden]: w } });
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
-import { nachBereichen, alsText, abteilungVon } from './bereiche.js';
+import { nachBereichen, alsText, abteilungVon, merkSchluessel, nameSchluessel } from './bereiche.js';
 import { zutatImg } from './bilder.js';
 import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, GUENSTIG_AB, LAEDEN } from './angebote.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
@@ -31,6 +40,9 @@ let leerenFragen = false;
 let trennenFragen = false;
 let formular = null; // null | { token, name, fehler } – token kann aus einem Link kommen
 let angebotJe = new Map(); // je Zutat die Angebote aller Läden, das günstigste zuerst – neu bei jedem Zeichnen
+let offenZeile = null; // die aufgeklappte Zeile: Abteilung wählen, zusammenlegen
+const klon = (x) => JSON.parse(JSON.stringify(x));
+const abteilungHier = (k, d) => abteilungVon(k, d, app.katalog, app.stand.abteilungen);
 
 /* ---------------------------------------------- Der Weg durch den Laden */
 
@@ -52,7 +64,7 @@ function wegHaken(laden, k, d, an, jetzt = Date.now()) {
   if (!lauf) lauf = { laden, h: [] };
   const key = wegSchluessel(k, d);
   lauf.h = lauf.h.filter((x) => x[0] !== key);
-  if (an) lauf.h.push([key, abteilungVon(k, d, app.katalog), jetzt]);
+  if (an) lauf.h.push([key, abteilungHier(k, d), jetzt]);
   schreibe(LAUF, lauf);
 }
 
@@ -143,6 +155,76 @@ const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || (a
 const istIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const vomHomeBildschirm = () => navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches === true;
 
+/* ---------------------------------------- Abteilung und Zusammenlegen */
+
+/** Unter einer aufgeklappten Zeile: in welche Abteilung sie gehört, und ob sie dasselbe ist wie eine andere. */
+function mehrHTML(k, d) {
+  const jetzt = abteilungHier(k, d);
+  const andere = Object.entries(app.stand.items)
+    .filter(([x]) => x !== k)
+    .map(([x, e]) => [x, e, aehnlich(d.name, e.name)])
+    .sort((a, b) => b[2] - a[2] || String(a[1].name).localeCompare(String(b[1].name), 'de'));
+  return `<div class="l-mehr" id="l-mehr">
+<p class="l-mehr-k">Gehört zu</p>
+<div class="l-abts" role="group" aria-label="Abteilung für ${esc(d.name)}">${ABTEILUNGEN.map((c) => `<button type="button" class="chip" data-abt="${c}" aria-pressed="${c === jetzt}">${esc(ABTEILUNG_NAME[c])}</button>`).join('')}</div>
+${andere.length ? `<p class="l-mehr-k">Ist dasselbe wie</p><label class="sel l-gleich-wahl"><select data-gleich-mit="${esc(k)}" aria-label="${esc(d.name)} ist dasselbe wie …"><option value="">Andere Zeile wählen …</option>${andere.map(([x, e]) => `<option value="${esc(x)}">${esc(e.name)}${erledigt(e) ? ' (im Wagen)' : ''}</option>`).join('')}</select></label>` : ''}
+<p class="l-mehr-fein">Das merkt sich die App – für euch beide und beim nächsten Mal.</p>
+</div>`;
+}
+
+/** Eine Zeile in eine andere Abteilung – gemerkt für ihren Schlüssel und ihren Namen. */
+function verschieben(k, c) {
+  const d = app.stand.items[k];
+  if (!d || !ABTEILUNGEN.includes(c) || abteilungHier(k, d) === c) return;
+  const keys = merkSchluessel(k, d);
+  const vorher = Object.fromEntries(keys.map((x) => [x, app.stand.abteilungen?.[x] || null]));
+  offenZeile = null;
+  app.aendern(opAbteilung(Object.fromEntries(keys.map((x) => [x, c]))));
+  melde(`„${d.name}“ steht jetzt bei ${ABTEILUNG_NAME[c]} – auch beim nächsten Mal`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opAbteilung(vorher)) });
+}
+
+/** Zwei Zeilen zu einer – in die, die mehr weiß (gleich.js richtung); bei Gleichstand in die gewählte. */
+function zusammenlegen(k1, k2, wunsch = null) {
+  const a = app.stand.items[k1];
+  const b = app.stand.items[k2];
+  if (!a || !b || k1 === k2) return;
+  const [von, nach] = richtung([k1, a], [k2, b], app.katalog, wunsch);
+  const alt = { von: klon(app.stand.items[von]), nach: klon(app.stand.items[nach]) };
+  const namen = [nameSchluessel(alt.von.name)];
+  const keys = [...new Set([von, ...namen])].filter((x) => x !== nach && !x.startsWith('c-'));
+  const frueher = Object.fromEntries(keys.filter((x) => app.stand.gleich?.[x]).map((x) => [x, app.stand.gleich[x]]));
+  offenZeile = null;
+  app.aendern(opGleich(von, nach, namen, { name: alt.nach.name, cat: alt.nach.cat }));
+  melde(`Zusammengelegt: „${alt.nach.name}“ – merkt sich die App`, {
+    knopf: 'Rückgängig',
+    beiKnopf: () => app.aendern([opGleichWeg(keys), ...(Object.keys(frueher).length ? [opZusammen({}, {}, { gleich: frueher })] : []), opSetzen(von, alt.von), opSetzen(nach, alt.nach)]),
+  });
+}
+
+/** „Nein, verschieden“: das Paar nicht noch einmal vorschlagen. */
+function verschieden(k1, k2) {
+  const a = app.stand.items[k1];
+  const b = app.stand.items[k2];
+  if (!a || !b) return;
+  app.aendern(opUngleich(merkName(k1, a), merkName(k2, b)));
+  melde(`Okay – „${a.name}“ und „${b.name}“ bleiben getrennt`);
+}
+
+/** Über der Liste: zwei Zeilen, die dasselbe sein könnten. */
+function gleichZeichnen() {
+  const el = $('#l-gleich');
+  if (!el) return;
+  const v = app.listeDa ? vorschlaege(app.stand, app.katalog) : [];
+  el.hidden = !v.length;
+  if (!v.length) { el.innerHTML = ''; return; }
+  const { von, nach } = v[0];
+  const a = app.stand.items[von];
+  const b = app.stand.items[nach];
+  const woher = (d) => (d.custom ? 'eigener Eintrag' : teileVon(d).map(([rid]) => kurzName(rid)).slice(0, 2).join(', '));
+  el.innerHTML = `<p><span class="l-gleich-k">Dasselbe?</span>„${esc(a.name)}“ <small>${esc(woher(a))}</small> und „${esc(b.name)}“ <small>${esc(woher(b))}</small>${v.length > 1 ? `<span class="l-gleich-mehr">noch ${v.length - 1} ${v.length === 2 ? 'Vorschlag' : 'Vorschläge'}</span>` : ''}</p>
+<div class="l-gleich-btns"><button type="button" class="btn btn-primary" data-gleich-ja="${esc(von)}" data-nach="${esc(nach)}">Zusammenlegen</button><button type="button" class="btn btn-quiet" data-gleich-nein="${esc(von)}" data-nach="${esc(nach)}">Nein, verschieden</button></div>`;
+}
+
 /* -------------------------------------------------------------- Einträge */
 
 function zeile([k, d]) {
@@ -162,13 +244,15 @@ function zeile([k, d]) {
   const von = fertig && d.by ? `<span class="item-by">abgehakt von ${d.by === app.name() ? 'dir' : esc(d.by)}</span>` : '';
   // Gerade im Angebot, und wo am günstigsten? Eigene Einträge über den Namen („Hähnchenbrust“)
   const angebot = fertig ? '' : angebotZeilen(angebotJe.get(d.custom ? schluesselRaten(d.name, app.katalog) : k));
-  return `<li class="item${fertig ? ' is-done' : ''}">
+  const auf = offenZeile === k;
+  return `<li class="item${fertig ? ' is-done' : ''}${auf ? ' is-auf' : ''}">
 <button type="button" class="cb" role="checkbox" aria-checked="${fertig}" data-check="${esc(k)}" aria-label="${esc(d.name)}">${ic('check')}</button>
-${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungVon(k, d, app.katalog) })}
-<div class="item-main"><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${von}</div>
+${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungHier(k, d) })}
+<button type="button" class="item-main" data-mehr="${esc(k)}" aria-expanded="${auf}"${auf ? ' aria-controls="l-mehr"' : ''}><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${von}</button>
 <span class="item-qty">${esc(mengeText)}${etwa ? `<small>${esc(etwa)}</small>` : ''}</span>
 <button type="button" class="x" data-del="${esc(k)}" aria-label="${esc(d.name)} löschen">${X}</button>
 ${angebot ? `<div class="l-angebote">${angebot}</div>` : ''}
+${auf ? mehrHTML(k, d) : ''}
 </li>`;
 }
 
@@ -184,9 +268,11 @@ export function listeZeichnen() {
     return;
   }
   const eintraege = Object.entries(app.stand.items);
+  if (offenZeile && !app.stand.items[offenZeile]) offenZeile = null;
   angebotJe = angeboteJeZutat(app.angeboteJetzt(), app);
   tippZeichnen();
   ladenZeichnen();
+  gleichZeichnen();
   // Im gewählten Laden mit gelerntem Weg: Abteilungen in dessen Reihenfolge
   const weg = app.ladenJetzt() ? app.stand.wege?.[app.ladenJetzt()] : null;
   const gruppen = weg?.n ? nachWeg(app.stand, app.katalog, weg) : nachBereichen(app.stand, app.katalog);
@@ -199,7 +285,9 @@ export function listeZeichnen() {
   } else {
     if (!offen) html += '<div class="alldone"><b>Alles im Wagen.</b> Erledigtes könnt ihr unten entfernen.</div>';
     for (const { bereich, eintraege: g } of gruppen) {
-      html += `<section class="grp" data-bereich="${bereich.id}"><h3><span class="grp-name">${esc(bereich.name)}${bereich.hinweis ? ` <small>${esc(bereich.hinweis)}</small>` : ''}</span><span class="num">${g.length}</span></h3><ul class="items">${g.map(zeile).join('')}</ul></section>`;
+      // Was die App nicht zuordnen konnte: Hier merkt man am ehesten, dass man einsortieren kann
+      const hinweis = bereich.id === 'sonstiges' ? 'antippen zum Einsortieren' : bereich.hinweis;
+      html += `<section class="grp" data-bereich="${bereich.id}"><h3><span class="grp-name">${esc(bereich.name)}${hinweis ? ` <small>${esc(hinweis)}</small>` : ''}</span><span class="num">${g.length}</span></h3><ul class="items">${g.map(zeile).join('')}</ul></section>`;
     }
     if (fertig.length) {
       html += `<section class="grp grp-done"><h3><span>Im Wagen</span><span class="num">${fertig.length}</span></h3><ul class="items">${fertig.sort(nachName).map(zeile).join('')}</ul></section>`;
@@ -288,7 +376,7 @@ function teilenZeichnen(zuletzt) {
   const link = einladungsLink(app.zugang.token, ki);
   const wa = `https://wa.me/?text=${encodeURIComponent(`Unsere Einkaufsliste in Boxenstopp: ${link}`)}`;
   el.innerHTML = `<p><b>Gemeinsame Liste</b>${wer}${wann}</p>
-<div class="zugang-btns"><button type="button" class="btn" data-act="z-link">Link fürs zweite Handy kopieren</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a><button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
+<div class="zugang-btns"><button type="button" class="btn" data-act="z-link">Link fürs zweite Handy kopieren</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a>${istIpad() ? '' : '<button type="button" class="btn" data-act="tablet-zeigen">Aufs iPad oder Tablet</button>'}<button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
 <input class="z-linkfeld" id="z-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>
 <p class="fine">Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal „Einrichten“ antippen und diesen Link ins Feld „Schlüssel“ einfügen.</p>' : ''}`;
 }
@@ -382,6 +470,17 @@ export function klickListe(el) {
     return true;
   }
   if (d.rmrec) { rezeptVonListe(d.rmrec); return true; }
+  if (d.mehr !== undefined) {
+    const k = d.mehr;
+    offenZeile = offenZeile === k ? null : k;
+    listeZeichnen();
+    // Neu gezeichnet: den Fokus dorthin zurück, wo er war
+    document.querySelector(`#list-body [data-mehr="${window.CSS.escape(k)}"]`)?.focus({ preventScroll: true });
+    return true;
+  }
+  if (d.abt) { if (offenZeile) verschieben(offenZeile, d.abt); return true; }
+  if (d.gleichJa) { zusammenlegen(d.gleichJa, d.nach); return true; }
+  if (d.gleichNein) { verschieden(d.gleichNein, d.nach); return true; }
   switch (d.act) {
     case 'fruehstueck':
       if (rezeptStand(app.stand, app.extras.fruehstueck).drauf) rezeptVonListe('fruehstueck');
@@ -435,6 +534,11 @@ export function klickListe(el) {
 
 /** Der Laden über der Liste (change). true, wenn es hierher gehörte. */
 export function aenderungListe(ziel) {
+  if (ziel.dataset?.gleichMit) {
+    // Ausdrücklich gewählt: bei Gleichstand wird die gewählte Zeile das Ziel
+    if (ziel.value) zusammenlegen(ziel.dataset.gleichMit, ziel.value, ziel.value);
+    return true;
+  }
   if (ziel.id !== 'l-laden-wahl') return false;
   // Ein anderer Laden: der Einkauf im alten ist vorbei
   const lauf = lese(LAUF, null);
@@ -450,9 +554,22 @@ export function absendenListe(ev) {
     const name = feld.value.trim().replace(/\s+/g, ' ').slice(0, 80);
     if (!name) return true;
     feld.value = '';
-    const id = `c-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
-    app.aendern(opEigener(id, name, abteilung(name, app.katalog)));
     feld.focus();
+    const nk = nameSchluessel(name);
+    const cat = app.stand.abteilungen?.[nk] || abteilung(name, app.katalog);
+    // Schon einmal zusammengelegt („Nuggets“ ist „Dino Nuggets“)? Dann gehört der Eintrag in diese Zeile
+    const ziel = app.stand.gleich?.[nk] ? aufloesen(app.stand, nk) : null;
+    const da = ziel ? app.stand.items[ziel] : null;
+    if (da && !erledigt(da)) { melde(`Steht schon drauf: „${da.name}“`); return true; }
+    if (ziel && !da) {
+      const t = new Date().toISOString();
+      const kat = app.katalog[ziel];
+      app.aendern(opSetzen(ziel, { name: kat?.n || name, cat: app.stand.abteilungen?.[ziel] || kat?.c || cat, parts: {}, custom: true, checked: false, by: null, at: t, added: t }));
+      if (kat && kat.n !== name) melde(`„${name}“ steht als „${kat.n}“ drauf – wie beim letzten Mal`);
+      return true;
+    }
+    const id = `c-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+    app.aendern(opEigener(id, name, cat));
     return true;
   }
   if (ev.target.id === 'z-form') {

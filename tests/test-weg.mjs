@@ -42,7 +42,7 @@ for (let i = 0; i < 6; i++) s = anwenden(s, opWeg('Aldi', [{ k: 'kidney', c: 'ko
 check(s.wege.Aldi.n === 7 && s.wege.Aldi.k.kidney.p.length === 5 && s.wege.Aldi.k.kidney.p.at(-1) === 0.5, `sieben Einkäufe, je Zutat die letzten fünf (${JSON.stringify(s.wege.Aldi.k.kidney.p)})`);
 check(JSON.stringify(bereinigen(JSON.parse(JSON.stringify(s))).wege) === JSON.stringify(s.wege), 'übersteht Speichern und Bereinigen');
 check(!bereinigen({ wege: { '<script>': { n: 1, k: {} }, Lidl: { n: 1, k: { 'a b': { c: 'x', p: [0.2] }, ok: { c: 'obst', p: [2, 0.3] } } } } }).wege['<script>'] && JSON.stringify(bereinigen({ wege: { Lidl: { n: 1, k: { 'a b': { c: 'x', p: [0.2] }, ok: { c: 'obst', p: [2, 0.3] } } } } }).wege.Lidl.k) === JSON.stringify({ ok: { c: 'obst', p: [0.3] } }), 'Unsinn fällt weg');
-const wieder = anwenden(anwenden(s, opWegVergessen('Aldi')), opZusammen({}, {}, {}, { Aldi: s.wege.Aldi }));
+const wieder = anwenden(anwenden(s, opWegVergessen('Aldi')), opZusammen({}, {}, { wege: { Aldi: s.wege.Aldi } }));
 check(JSON.stringify(wieder.wege.Aldi) === JSON.stringify(s.wege.Aldi) && !anwenden(s, opWegVergessen('Aldi')).wege.Aldi, 'vergessen – und mit zusammen wieder da (Rückgängig)');
 
 // --- Im Browser

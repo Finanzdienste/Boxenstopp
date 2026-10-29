@@ -10,13 +10,18 @@
  *   Sonstiges    nur, wenn die App einen eigenen Eintrag nicht zuordnen kann
  *
  * Die Abteilung einer Zutat steht im Katalog (daten/rezepte.json); bei
- * eigenen Einträgen hat die App sie beim Eintippen geraten. Einträge mit den
- * älteren, feineren Abteilungen („konserven“, „tk“ …) landen weiter richtig.
+ * eigenen Einträgen hat die App sie beim Eintippen geraten. Hat jemand eine
+ * Zeile verschoben („Nuggets“ gehört zu Fleisch), steht das in
+ * `stand.abteilungen` – nach Schlüssel und nach Name – und gilt vor allem
+ * anderen, auch beim nächsten Mal. Einträge mit den älteren, feineren
+ * Abteilungen („konserven“, „tk“ …) landen weiter richtig.
  *
  * Ohne DOM, damit tests/test-liste.mjs Reihenfolge und Text direkt prüft.
  */
 import { erledigt, summen } from './liste.js';
-import { menge, ungefaehr } from './format.js';
+import { menge, ungefaehr, nameSchluessel } from './format.js';
+
+export { nameSchluessel };
 
 export const BEREICHE = [
   { id: 'frisch', name: 'Frisches', hinweis: 'Obst & Gemüse', teile: ['obst'] },
@@ -30,9 +35,12 @@ export const BEREICHE = [
 const PLATZ = {};
 BEREICHE.forEach((b, i) => b.teile.forEach((t, j) => { PLATZ[t] = [i, j]; }));
 
-/** Abteilung eines Eintrags: Katalog vor dem, was beim Anlegen gespeichert wurde. */
-export const abteilungVon = (k, d, katalog = {}) => katalog[k]?.c || d.cat || 'sonstiges';
-const platz = (k, d, katalog) => PLATZ[abteilungVon(k, d, katalog)] || PLATZ.sonstiges;
+/** Die Schlüssel, unter denen das Verschieben einer Zeile gemerkt wird: ihr eigener und der Name. */
+export const merkSchluessel = (k, d) => [...new Set([String(k).startsWith('c-') ? '' : String(k), nameSchluessel(d?.name || k)].filter(Boolean))];
+
+/** Abteilung eines Eintrags: Verschobenes zuerst, dann der Katalog, dann was beim Anlegen geraten wurde. */
+export const abteilungVon = (k, d, katalog = {}, eigene = {}) => eigene?.[k] || eigene?.[nameSchluessel(d?.name)] || katalog[k]?.c || d?.cat || 'sonstiges';
+const platz = (k, d, katalog, eigene) => PLATZ[abteilungVon(k, d, katalog, eigene)] || PLATZ.sonstiges;
 
 /**
  * Die offenen Einträge nach Bereichen, in Einkaufsreihenfolge:
@@ -42,10 +50,10 @@ export function nachBereichen(stand, katalog = {}) {
   const gruppen = BEREICHE.map((bereich) => ({ bereich, eintraege: [] }));
   for (const [k, d] of Object.entries(stand.items)) {
     if (erledigt(d)) continue;
-    gruppen[platz(k, d, katalog)[0]].eintraege.push([k, d]);
+    gruppen[platz(k, d, katalog, stand.abteilungen)[0]].eintraege.push([k, d]);
   }
   for (const g of gruppen) {
-    g.eintraege.sort(([ka, a], [kb, b]) => (platz(ka, a, katalog)[1] - platz(kb, b, katalog)[1])
+    g.eintraege.sort(([ka, a], [kb, b]) => (platz(ka, a, katalog, stand.abteilungen)[1] - platz(kb, b, katalog, stand.abteilungen)[1])
       || String(a.name).localeCompare(String(b.name), 'de'));
   }
   return gruppen.filter((g) => g.eintraege.length);

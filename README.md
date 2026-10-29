@@ -12,8 +12,8 @@ Vier Reiter:
 | Reiter | Inhalt |
 | --- | --- |
 | **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
-| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
-| **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt (siehe unten). Ihre Zutaten kommen auf dieselbe gemeinsame Liste |
+| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
+| **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, und welche Rezepte davon profitieren (siehe unten) |
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
@@ -100,6 +100,35 @@ Messung zählt, die übliche Reihenfolge wie eine – nach zwei, drei Einkäufen
 passt es. „Reihenfolge vergessen“ (mit Rückgängig) fängt neu an. Eigene
 Einträge erkennt der Weg am Namen („Bananen“).
 
+### Abteilung und Zusammenlegen
+
+Eine Zeile antippen klappt sie auf:
+
+- **Gehört zu:** die zehn Abteilungen (Obst & Gemüse, Fleisch, Kühlregal,
+  Nudeln/Reis, Konserven, Öl/Saucen/Vorrat, Tiefkühl, Gewürze, Haushalt,
+  Sonstiges). Die Wahl steht in `liste.json` unter `abteilungen`, je
+  Schlüssel und je Name (`n:kackbuerste`) – sie gilt vor dem Katalog und dem
+  Geratenen, für beide Handys, für neu eingetippte Einträge mit dem Namen und
+  für Amys Rezepte. Was die App gar nicht zuordnen kann, steht bei
+  „Sonstiges – antippen zum Einsortieren“. Beim Eintippen rät sie außerdem
+  mehr als früher (Bürsten und Reiniger → Haushalt, Nuggets und Frikadellen
+  → Fleisch, Croutons → Trockenes, Dressing → Vorrat).
+- **Ist dasselbe wie:** eine andere Zeile wählen, die ähnlichsten zuerst.
+  Zusammengelegt wird in die Zeile, die mehr weiß (Katalog vor
+  Resteverwertung vor Amys Zutaten vor eigenen Einträgen), mit allen Teilen;
+  der alte Schlüssel und Name zeigen danach unter `gleich` auf sie
+  (`"amyz-leckere-dino-nuggies": "amyz-dino-nuggets"`). Was später unter dem
+  alten Schlüssel kommt – das Rezept wieder auf der Liste –, landet gleich in
+  dieser Zeile; Amys Editor zeigt „leckere Dino nuggies = Dino nuggets“.
+  Rückgängig nimmt beides zurück.
+- **Vorschläge** (`js/gleich.js`): Die App vergleicht die Namen Wort für
+  Wort, ohne Füllwörter („lecker“, „groß“, „Bio“), mit Einzahl und Mehrzahl,
+  Koseformen und kleinen Tippfehlern („Nuggies“ – „Nuggets“, „Mozarella“ –
+  „Mozzarella“), aber Milch bleibt kein Milchreis. Über der Liste fragt sie
+  „Dasselbe?“ mit **Zusammenlegen** oder **Nein, verschieden** – das Nein
+  steht unter `ungleich` und kommt nicht wieder. Zwei Zutaten aus dem Katalog
+  schlägt sie nie vor (Paprika und Paprikapulver sind mit Absicht zwei).
+
 ### Kosten
 
 Jedes Rezept zeigt, was es ungefähr kostet – auf der Karte pro Box, im
@@ -144,10 +173,29 @@ in Pflaume und Rosa.
   (Zeiten im Text), das Tempo lernt mit, zum Schluss das Tier. Bearbeiten,
   Löschen (mit Rückfrage und Rückgängig – ihre Zutaten gehen mit von der
   Liste). Auf der Liste steht als Herkunft „♡ Kokos-Curry“, antippen öffnet es.
+- **Tags:** Im Editor vergibt sie eigene Tags („bauchfreundlich“,
+  „gesund“ …) – antippen aus Vorschlägen (ihre schon benutzten zuerst) oder
+  eintippen, Enter oder Komma macht den Tag fertig, × nimmt ihn weg,
+  höchstens acht. Jeder Tag hat immer dieselbe von sechs Pastellfarben. Über
+  ihren Rezepten filtert sie danach (mehrere Tags: Rezepte mit allen) und
+  sortiert: neueste, Name, schnellste, günstigste oder **nach Tags** (ein
+  Abschnitt je Tag). Ein Tag im Rezept antippen zeigt alle Rezepte damit.
+  Filter und Sortierung merkt sich das Handy.
 - **Gespeichert** in `liste.json` unter `amy` (für beide, höchstens 60), so
-  wie sie es getippt hat. Schreibt eine ältere App-Fassung die Liste ohne
-  `amy`, legt das Handy, das die Rezepte kennt, sie wieder dazu
-  (`js/speicher.js`).
+  wie sie es getippt hat, die Tags daneben unter `amyTags`. Schreibt eine
+  ältere App-Fassung die Liste ohne diese Teile, legt das Handy, das sie
+  kennt, sie wieder dazu (`js/speicher.js`).
+- **Zeilen lesen** versteht auch, wie sie wirklich schreibt: „1 kleine
+  Flasche Ceasar Salad Dressing“ (Flasche erkannt, „klein“ als Zusatz), „1
+  großen (Dürüm)Wrap“ (Wrap, Zusatz „Dürüm, groß“).
+- **Aufs iPad:** Die Anleitung kommt bei ihr auf dem iPhone einmal von
+  selbst, danach über „Auch auf dem iPad ♡“ in ihrem Reiter (und „Aufs iPad
+  oder Tablet“ unter der Liste): Link kopieren (mit derselben Apple-ID gleich
+  auf dem iPad einsetzen), auf dem iPad in Safari öffnen, über Teilen „Zum
+  Home-Bildschirm“ mit „Als Web-App öffnen“, dort einmal einrichten – Name
+  und den Link ins Feld „Schlüssel“. Dann zeigen beide dasselbe; nur die
+  Haken beim Kochen, laufende Timer und ein ungespeicherter Entwurf bleiben
+  auf dem Gerät (`js/ansicht-tablet.js`).
 
 ### Angebote der Woche
 
@@ -501,7 +549,11 @@ das älteste fällt raus). `angebote` sind die Angebote der Woche (höchstens 12
 ist der Katalog-Schlüssel der Zutat, wenn es eine ist. `amy` sind Amys Rezepte
 (`{ "amy-kokos-curry-x7k2": { "name", "bild", "portionen", "zeit", "zutaten": ["500 g Hähnchenbrust", …], "schritte": […], "notiz", "by", "at", "geaendert" } }`);
 ihre Zutaten liegen auf der Liste unter dem Katalog-Schlüssel oder als
-`amyz-<zutat>`, mit der amy-id als Teil. `wege` ist je Laden der Weg durch
+`amyz-<zutat>`, mit der amy-id als Teil; ihre Tags stehen unter `amyTags`
+(`{ "amy-kokos-curry-x7k2": ["gesund", "bauchfreundlich"] }`). `abteilungen`
+sind verschobene Zeilen (`{ "amyz-dino-nuggets": "tk", "n:kackbuerste": "haushalt" }`),
+`gleich` zusammengelegte (`{ "amyz-leckere-dino-nuggies": "amyz-dino-nuggets" }`),
+`ungleich` die Paare mit „Nein, verschieden“ (`["n:hafermilch|n:hafermilch-barista"]`). `wege` ist je Laden der Weg durch
 den Markt: `{ "Aldi": { "n": 3, "at": "…", "k": { "zwiebeln": { "c": "obst", "p": [0.1, 0.05] }, "n:bananen": { "c": "obst", "p": [0.2] } } } }`
 – `p` die Stellen (0 vorn, 1 hinten) der letzten Einkäufe, `n` wie viele es waren. Von Hand bearbeiten
 geht, die App bereinigt beim Lesen alles, was nicht passt.
@@ -559,7 +611,9 @@ die Action „Rezeptfotos“.
 | `js/zugang.js` | Schlüssel und Name, Einladungslink |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
 | `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten, Schritte – ohne DOM |
-| `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste, Rezept, Editor |
+| `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor |
+| `js/ansicht-tablet.js` | Popup: die App aufs iPad oder Tablet |
+| `js/gleich.js` | dasselbe Produkt unter zwei Namen: Namen vergleichen, Vorschläge, wohin zusammenlegen – ohne DOM |
 | `js/tempo.js` | euer Tempo: aus den Haken lernen, Zeiten umrechnen – ohne DOM |
 | `js/weg.js` | der Weg durch den Laden: Stellen aus den Haken, Liste in dieser Reihenfolge – ohne DOM |
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
@@ -602,7 +656,13 @@ jede Zutat ein Bildchen hat und jedes Foto zu seinem Rezept passt
 Timer bekommen, und spielt einen Kochabend mit vorgestellter Uhr durch.
 `test-amy.mjs` liest Amys Zeilen in Node und spielt ihren Reiter dann auf
 zwei Handys durch (Editor, Entwurf, Liste zusammen mit einem festen Rezept,
-Timer, Löschen, eine ältere App-Fassung ohne `amy` und `wege`). `test-weg.mjs` lernt
+Timer, Tags mit Filter und Sortierung, Löschen, eine ältere App-Fassung ohne
+`amy`, `amyTags` und `wege`). `test-gleich.mjs` vergleicht Namen und legt in
+Node zusammen, dann im Browser auf zwei Handys (Kackbürste zum Haushalt,
+„leckere Dino nuggies“ und „Dino nuggets“ zusammen, Rückgängig, von Hand,
+gemerkt fürs nächste Mal, „Nein, verschieden“). `test-tablet.mjs` spielt das
+iPad-Popup durch (von selbst nur bei Amy auf dem iPhone, Link kopieren,
+damit ein iPad einrichten, hin und her). `test-weg.mjs` lernt
 den Weg durch Aldi in Node und im Browser (abhaken, nächster Einkauf
 sortiert, vergessen, lange Pause). Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.
