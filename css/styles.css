@@ -501,6 +501,11 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .l-tipp-k{display:block;font:600 11.5px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--ok)}
 .l-tipp small{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
 .l-tipp .linkbtn{flex:none}
+/* Wo du einkaufst – dann sortiert sich die Liste nach eurem Weg durch den Laden */
+.l-laden{display:grid;gap:6px;margin-top:12px}
+.l-laden-sel{width:100%;max-width:340px}
+.l-laden-info{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
+.l-laden-info .linkbtn{min-height:0;padding:0;font-size:13px}
 .l-angebot b{display:inline-block;margin-right:1px;padding:1px 5px;border-radius:5px;background:var(--ok);color:var(--surface);font:700 11.5px/1.35 var(--f-mono)}
 .a-ohne{color:var(--muted)}
 .a-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}

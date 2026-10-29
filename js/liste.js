@@ -10,7 +10,8 @@
  *     ki:        { <ki-…>: { r: Rezept aus der Resteverwertung, by, at } },
  *     notizen:   { <Rezept-id>: [{ id, text, by, at }, …] },
  *     gepinnt:   { <Rezept-id>: { by: 'Tobi', at } },
- *     amy:       { <amy-…>: Amys eigenes Rezept (amy.js) } }
+ *     amy:       { <amy-…>: Amys eigenes Rezept (amy.js) },
+ *     wege:      { <Laden>: { n: 3, at, k: { <Schlüssel>: { c: 'obst', p: [0.1, 0.05] } } } } }
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -19,7 +20,9 @@
  * laufen (Lesezeichen, höchstens vier) – sie stehen bei beiden oben. Unter
  * `amy` liegen die Rezepte, die Amy selbst schreibt (höchstens 60), so wie
  * sie sie getippt hat; ihre Zutaten kommen über dieselben Teile auf die
- * Liste wie die der festen Rezepte (Teil-Schlüssel ist die amy-id).
+ * Liste wie die der festen Rezepte (Teil-Schlüssel ist die amy-id). `wege`
+ * ist der Weg durch einen Laden (weg.js): je Zutat, an welcher Stelle sie
+ * bei den letzten Einkäufen abgehakt wurde (0 vorn, 1 hinten).
  *
  * Ein Eintrag:
  *
@@ -45,7 +48,11 @@ import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 import { amyBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, wege: {} });
+const MAX_LAEDEN_WEG = 12;
+const MAX_WEG_ZUTATEN = 300;
+const MAX_WEG_MESSUNGEN = 5;
+const LADEN_NAME = /^[\p{L}\p{N} &'.-]{1,24}$/u;
 const MAX_NOTIZEN = 20;
 export const MAX_GEPINNT = 4;
 export const DAUMEN = ['hoch', 'mittel', 'runter'];
@@ -184,7 +191,25 @@ export function bereinigen(roh) {
     const a = Object.entries(roh.amy).filter(([id]) => AMY_ID.test(id)).map(([id, r]) => amyBereinigen({ ...(istObj(r) ? r : {}), id })).filter(Boolean);
     s.amy = Object.fromEntries(neuesteAmy(a).map((r) => [r.id, r]));
   }
+  if (istObj(roh.wege)) {
+    for (const [laden, w] of Object.entries(roh.wege).slice(0, MAX_LAEDEN_WEG)) {
+      const b = wegBereinigen(laden, w);
+      if (b) s.wege[laden] = b;
+    }
+  }
   return s;
+}
+
+/** Der Weg durch einen Laden aus beliebigem JSON – oder null. */
+function wegBereinigen(laden, w) {
+  if (!LADEN_NAME.test(String(laden)) || !istObj(w) || !istObj(w.k)) return null;
+  const k = {};
+  for (const [key, e] of Object.entries(w.k).slice(-MAX_WEG_ZUTATEN)) {
+    if (!SCHLUESSEL.test(key) || !istObj(e) || !Array.isArray(e.p)) continue;
+    const p = e.p.filter((x) => typeof x === 'number' && x >= 0 && x <= 1).slice(-MAX_WEG_MESSUNGEN);
+    if (p.length) k[key] = { c: text(e.c, 20) || 'sonstiges', p };
+  }
+  return { n: Number.isInteger(w.n) && w.n >= 0 ? w.n : 0, at: text(w.at, 40) || '', k };
 }
 
 /** Die neuesten MAX_AMY Rezepte (nach letzter Änderung). */
@@ -215,8 +240,12 @@ export function opEigener(id, name, cat) {
 export const opErledigteWeg = () => ({ typ: 'erledigteWeg' });
 export const opLeeren = () => ({ typ: 'leeren' });
 export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || null });
-/** Einträge (behaltene KI-Rezepte, Amys Rezepte) von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
-export const opZusammen = (items, ki = {}, amy = {}) => ({ typ: 'zusammen', items: klon(items), ki: klon(ki || {}), amy: klon(amy || {}) });
+/** Einträge (behaltene KI-Rezepte, Amys Rezepte, Wege) von einem anderen Stand dazunehmen, ohne Vorhandenes zu überschreiben. */
+export const opZusammen = (items, ki = {}, amy = {}, wege = {}) => ({ typ: 'zusammen', items: klon(items), ki: klon(ki || {}), amy: klon(amy || {}), wege: klon(wege || {}) });
+/** Ein Einkauf im Laden ist vorbei: die Stellen der Zutaten auf dem Weg dazulegen (weg.js wegStellen). */
+export const opWeg = (laden, stellen, by) => ({ typ: 'weg', laden, stellen: klon(stellen), by: by || null, at: jetzt() });
+/** Den Weg durch einen Laden vergessen. */
+export const opWegVergessen = (laden) => ({ typ: 'wegWeg', laden });
 /** Amys Rezept anlegen oder ändern (ganz ersetzen) – für beide; wegwerfen mit opAmyWeg. */
 export const opAmy = (r, by) => ({ typ: 'amy', r: klon(r), by: by || null, at: jetzt() });
 export const opAmyWeg = (id) => ({ typ: 'amyWeg', id });
@@ -309,6 +338,13 @@ function aendere(s, op) {
         }
         s.amy = Object.fromEntries(neuesteAmy(Object.values(s.amy)).map((r) => [r.id, r]));
       }
+      if (istObj(op.wege)) {
+        if (!istObj(s.wege)) s.wege = {};
+        for (const [laden, w] of Object.entries(op.wege)) {
+          const b = !s.wege[laden] && Object.keys(s.wege).length < MAX_LAEDEN_WEG ? wegBereinigen(laden, w) : null;
+          if (b) s.wege[laden] = b;
+        }
+      }
       return;
     case 'kiBehalten': {
       if (!KI_ID.test(String(op.id))) return;
@@ -363,6 +399,28 @@ function aendere(s, op) {
       s.amy = Object.fromEntries(neuesteAmy(Object.values(s.amy)).map((x) => [x.id, x]));
       return;
     }
+    case 'weg': {
+      if (!LADEN_NAME.test(String(op.laden)) || !Array.isArray(op.stellen)) return;
+      if (!istObj(s.wege)) s.wege = {};
+      if (!s.wege[op.laden] && Object.keys(s.wege).length >= MAX_LAEDEN_WEG) return;
+      const w = s.wege[op.laden] || { n: 0, at: '', k: {} };
+      for (const x of op.stellen) {
+        if (!istObj(x) || !SCHLUESSEL.test(String(x.k)) || typeof x.p !== 'number' || x.p < 0 || x.p > 1) continue;
+        const e = w.k[x.k] || { c: 'sonstiges', p: [] };
+        // Neu dazugekommen: ans Ende, damit beim Kürzen das am längsten Ungesehene rausfällt
+        delete w.k[x.k];
+        w.k[x.k] = { c: text(x.c, 20) || e.c, p: [...e.p, Math.round(x.p * 100) / 100].slice(-MAX_WEG_MESSUNGEN) };
+      }
+      const keys = Object.keys(w.k);
+      for (const k of keys.slice(0, Math.max(0, keys.length - MAX_WEG_ZUTATEN))) delete w.k[k];
+      w.n += 1;
+      w.at = op.at || jetzt();
+      s.wege[op.laden] = w;
+      return;
+    }
+    case 'wegWeg':
+      if (istObj(s.wege)) delete s.wege[op.laden];
+      return;
     case 'amyWeg':
       if (istObj(s.amy)) delete s.amy[op.id];
       if (istObj(s.notizen)) delete s.notizen[op.id];

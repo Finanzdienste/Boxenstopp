@@ -183,12 +183,13 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
         const etag = r.headers.get('ETag');
         if (j.sha !== remote.sha) {
           if (!remote.sha || stand.rev >= remote.stand.rev) {
-            // Eine ältere App-Fassung kennt `amy` nicht und lässt es beim Schreiben
-            // weg. Dann kommen Amys Rezepte, die dieses Handy kannte, wieder dazu.
-            const bekannt = remote.stand?.amy || {};
-            if (roh && typeof roh === 'object' && !('amy' in roh) && Object.keys(bekannt).length) {
-              stand = anwenden(stand, opZusammen({}, {}, bekannt));
-              offen.push(opZusammen({}, {}, bekannt));
+            // Eine ältere App-Fassung kennt `amy` und `wege` nicht und lässt sie beim
+            // Schreiben weg. Dann kommt, was dieses Handy davon kannte, wieder dazu.
+            const amy = roh && typeof roh === 'object' && !('amy' in roh) ? remote.stand?.amy || {} : {};
+            const wege = roh && typeof roh === 'object' && !('wege' in roh) ? remote.stand?.wege || {} : {};
+            if (Object.keys(amy).length || Object.keys(wege).length) {
+              stand = anwenden(stand, opZusammen({}, {}, amy, wege));
+              offen.push(opZusammen({}, {}, amy, wege));
               merkeOffen();
               plane(700);
             }

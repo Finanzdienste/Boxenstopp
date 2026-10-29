@@ -27,7 +27,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v23';
+const VERSION = 'v24';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 
@@ -40,6 +40,7 @@ const SHELL = [
   './js/format.js',
   './js/liste.js',
   './js/bereiche.js',
+  './js/weg.js',
   './js/zeiten.js',
   './js/tempo.js',
   './js/amy.js',

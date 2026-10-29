@@ -15,7 +15,7 @@ import { opZusammen } from './liste.js';
 import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
-import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe } from './ansicht-liste.js';
+import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
@@ -125,7 +125,9 @@ document.addEventListener('keydown', (ev) => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target?.matches?.('[data-timer-zu]')) { ev.preventDefault(); zumTimerSchritt(ev.target); }
 });
 document.addEventListener('input', (ev) => { if (!eingabeAmy(ev.target) && !eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungRezepte(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
+// Ein Einkauf, der lange ruht, ist vorbei – auch wenn die App zwischendurch zu war
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wegPruefen(); });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
 document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
 document.addEventListener('submit', (ev) => { if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenRezepte(ev)) absendenListe(ev); });
@@ -195,6 +197,7 @@ async function start() {
 
   if (ausLink && ausLink !== app.zugang?.token) formularMitSchluessel(ausLink);
   else zugangZeichnen();
+  wegPruefen();
 }
 
 start();

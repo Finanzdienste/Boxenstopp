@@ -193,14 +193,22 @@ check(await bis(async () => (await t.locator('#amy-d-titel').count()) === 0 && (
 await a.click('#toast button');
 check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe'), 'Rückgängig: wieder da');
 
-// Eine ältere App-Fassung schreibt liste.json ohne `amy`: Amys Handy legt die Rezepte wieder dazu
+// Amy kauft bei Aldi ein: der Weg durch den Laden liegt danach auch in GitHub
+await a.click('.tab[data-tab="einkauf"]');
+await a.selectOption('#l-laden-wahl', 'Aldi');
+for (const k of await a.$$eval('#list-body .grp:not(.grp-done) [data-check]', (xs) => xs.slice(0, 3).map((x) => x.dataset.check))) await a.click(`[data-check="${k}"]`);
+await a.selectOption('#l-laden-wahl', '');
+check(await bis(() => gh.liste()?.wege?.Aldi?.n === 1), 'drei Haken bei Aldi, dann ein anderer Laden: der Weg liegt in GitHub');
+
+// Eine ältere App-Fassung schreibt liste.json ohne `amy` und `wege`: Amys Handy legt beides wieder dazu
 const roh = gh.liste();
 delete roh.amy;
+delete roh.wege;
 roh.rev += 1;
 gh.zustand.datei = `${JSON.stringify(roh, null, 1)}\n`;
 gh.zustand.version += 1;
 gh.zustand.sha = `sha${gh.zustand.version}`;
-check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe', 8000), 'ältere Fassung ließ `amy` weg – Amys Handy schreibt die Rezepte zurück');
+check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe' && gh.liste()?.wege?.Aldi?.n === 1, 8000), 'ältere Fassung ließ `amy` und `wege` weg – Amys Handy schreibt beides zurück');
 
 check(tobi.fehler.length === 0 && amy.fehler.length === 0, `keine Fehler in der Konsole${[...tobi.fehler, ...amy.fehler].length ? `: ${[...tobi.fehler, ...amy.fehler].slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();

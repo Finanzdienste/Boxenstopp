@@ -117,6 +117,7 @@ const anzahlIn = (l) => eigene().filter((a) => a.laden === l).length + automatis
 // Für die Einkaufsliste: was diese Woche gilt und wohin man geht (ansicht-liste.js zeigt daraus die Angebote an)
 app.angeboteJetzt = () => [...eigeneIn(woche('diese')), ...autoIn(woche('diese'))];
 app.ladenJetzt = () => laden;
+app.ladenSetzen = (l) => { laden = String(l || '').slice(0, 24); schreibe(LADEN, laden); angeboteZeichnen(); app.listeNeu(); };
 
 /** Von app.js nach dem Laden von daten/angebote.json – oder, mit privat: true, von angebote-privat.json. */
 export function angeboteAutoSetzen(daten, { privat = false } = {}) {

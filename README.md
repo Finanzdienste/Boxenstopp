@@ -12,7 +12,7 @@ Vier Reiter:
 | Reiter | Inhalt |
 | --- | --- |
 | **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
-| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
+| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 | **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt (siehe unten). Ihre Zutaten kommen auf dieselbe gemeinsame Liste |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, und welche Rezepte davon profitieren (siehe unten) |
 
@@ -82,6 +82,23 @@ ein Rezept als „läuft gerade“: Es steht dann bei euch beiden ganz oben bei 
 Rezepten, mit Foto und dem Fortschritt beim Kochen („5 von 26 Schritten“ – die
 Haken dieses Handys), auf seiner Karte steht „Läuft gerade“. Höchstens vier,
 für beide in `liste.json` unter `gepinnt`.
+
+### Der Weg durch den Laden
+
+Öffentliche Marktpläne gibt es nicht – also lernt die Liste den Weg selbst
+(`js/weg.js`). Über der Liste wählt man, wo man einkauft (dieselbe Wahl wie
+bei den Angeboten). Jeder Haken in dem Laden wird mit der Uhrzeit gemerkt;
+der Einkauf ist vorbei, wenn alles im Wagen ist, ein anderer Laden gewählt
+wird oder 45 Minuten kein Haken mehr kam. Ab drei Haken bekommt jede Zutat
+ihre Stelle auf dem Weg (0 am Anfang, 1 am Ende), höchstens die letzten
+fünf je Zutat, in `liste.json` unter `wege` – für beide Handys, „unser
+Aldi“. Beim nächsten Einkauf dort steht die Liste nach Abteilungen (Obst &
+Gemüse, Fleisch, Kühlregal, Konserven …) in der Reihenfolge des Wegs, darin
+nach den Zutaten; was noch nie gekauft wurde, steht bei seiner Abteilung,
+und eine Abteilung ohne Messung da, wo sie üblicherweise steht. Jede
+Messung zählt, die übliche Reihenfolge wie eine – nach zwei, drei Einkäufen
+passt es. „Reihenfolge vergessen“ (mit Rückgängig) fängt neu an. Eigene
+Einträge erkennt der Weg am Namen („Bananen“).
 
 ### Kosten
 
@@ -484,7 +501,9 @@ das älteste fällt raus). `angebote` sind die Angebote der Woche (höchstens 12
 ist der Katalog-Schlüssel der Zutat, wenn es eine ist. `amy` sind Amys Rezepte
 (`{ "amy-kokos-curry-x7k2": { "name", "bild", "portionen", "zeit", "zutaten": ["500 g Hähnchenbrust", …], "schritte": […], "notiz", "by", "at", "geaendert" } }`);
 ihre Zutaten liegen auf der Liste unter dem Katalog-Schlüssel oder als
-`amyz-<zutat>`, mit der amy-id als Teil. Von Hand bearbeiten
+`amyz-<zutat>`, mit der amy-id als Teil. `wege` ist je Laden der Weg durch
+den Markt: `{ "Aldi": { "n": 3, "at": "…", "k": { "zwiebeln": { "c": "obst", "p": [0.1, 0.05] }, "n:bananen": { "c": "obst", "p": [0.2] } } } }`
+– `p` die Stellen (0 vorn, 1 hinten) der letzten Einkäufe, `n` wie viele es waren. Von Hand bearbeiten
 geht, die App bereinigt beim Lesen alles, was nicht passt.
 
 ## Rezepte ändern
@@ -542,6 +561,7 @@ die Action „Rezeptfotos“.
 | `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten, Schritte – ohne DOM |
 | `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste, Rezept, Editor |
 | `js/tempo.js` | euer Tempo: aus den Haken lernen, Zeiten umrechnen – ohne DOM |
+| `js/weg.js` | der Weg durch den Laden: Stellen aus den Haken, Liste in dieser Reihenfolge – ohne DOM |
 | `js/format.js` | Mengen, Zahlen, Abteilung raten |
 | `js/zeiten.js` | Zeiten aus den Schritten: Abschnitte, Gesamtzeit, „währenddessen“; welcher Schritt einen Timer braucht |
 | `js/timer.js` | Küchentimer: starten, Stufen, Leiste oben, Alarm, überlebt Neuladen |
@@ -582,5 +602,7 @@ jede Zutat ein Bildchen hat und jedes Foto zu seinem Rezept passt
 Timer bekommen, und spielt einen Kochabend mit vorgestellter Uhr durch.
 `test-amy.mjs` liest Amys Zeilen in Node und spielt ihren Reiter dann auf
 zwei Handys durch (Editor, Entwurf, Liste zusammen mit einem festen Rezept,
-Timer, Löschen, eine ältere App-Fassung ohne `amy`). Der Workflow „Prüfung“ lässt
+Timer, Löschen, eine ältere App-Fassung ohne `amy` und `wege`). `test-weg.mjs` lernt
+den Weg durch Aldi in Node und im Browser (abhaken, nächster Einkauf
+sortiert, vergessen, lange Pause). Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

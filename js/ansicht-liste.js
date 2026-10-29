@@ -6,23 +6,92 @@
  * listeZeichnen() läuft bei jeder Änderung, auch wenn sie vom anderen Handy
  * kommt. Darum fasst sie die Eingabefelder (Eintrag hinzufügen, Einrichten)
  * nicht an – sonst wäre beim Tippen plötzlich der Text weg.
+ *
+ * Über der Liste: in welchem Laden du gerade einkaufst. Ist einer gewählt,
+ * merkt sich das Handy die Reihenfolge der Haken (weg.js) – nach dem Einkauf
+ * steht die Liste beim nächsten Mal in der Reihenfolge eures Wegs durch
+ * diesen Laden. Die Wahl teilt sich der Reiter mit den Angeboten.
  */
-import { app, $, melde } from './kern.js';
+import { app, $, melde, lese, schreibe } from './kern.js';
 import { lobKlein } from './lob.js';
 import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
-import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren } from './liste.js';
+import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen } from './liste.js';
+import { nachWeg, wegSchluessel, wegStellen, PAUSE_MS } from './weg.js';
+
+const opZusammenWeg = (laden, w) => opZusammen({}, {}, {}, { [laden]: w });
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
 import { nachBereichen, alsText, abteilungVon } from './bereiche.js';
 import { zutatImg } from './bilder.js';
-import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, GUENSTIG_AB } from './angebote.js';
+import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, GUENSTIG_AB, LAEDEN } from './angebote.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
 let leerenFragen = false;
 let trennenFragen = false;
 let formular = null; // null | { token, name, fehler } – token kann aus einem Link kommen
 let angebotJe = new Map(); // je Zutat die Angebote aller Läden, das günstigste zuerst – neu bei jedem Zeichnen
+
+/* ---------------------------------------------- Der Weg durch den Laden */
+
+const LAUF = 'boxenstopp.weg.lauf.v1'; // der Einkauf, der gerade läuft: { laden, h: [[schlüssel, abteilung, zeit]] }
+const letzterHaken = (lauf) => Math.max(0, ...(lauf?.h || []).map((x) => x[2] || 0));
+
+/** Ein Einkauf ist vorbei: die Reihenfolge seiner Haken als Weg durch den Laden speichern (für beide). */
+export function wegAbschliessen() {
+  const lauf = lese(LAUF, null);
+  try { localStorage.removeItem(LAUF); } catch { /* egal */ }
+  const stellen = wegStellen(lauf?.h);
+  if (lauf?.laden && stellen.length) app.aendern(opWeg(lauf.laden, stellen, app.name()));
+}
+
+/** Ein Haken im Laden: merken, wann welche Zutat in den Wagen kam (oder wieder raus). */
+function wegHaken(laden, k, d, an, jetzt = Date.now()) {
+  let lauf = lese(LAUF, null);
+  if (lauf && (lauf.laden !== laden || jetzt - letzterHaken(lauf) > PAUSE_MS)) { wegAbschliessen(); lauf = null; }
+  if (!lauf) lauf = { laden, h: [] };
+  const key = wegSchluessel(k, d);
+  lauf.h = lauf.h.filter((x) => x[0] !== key);
+  if (an) lauf.h.push([key, abteilungVon(k, d, app.katalog), jetzt]);
+  schreibe(LAUF, lauf);
+}
+
+/** Beim Öffnen und Zurückkommen: ein Einkauf, der seit 45 Minuten ruht, ist vorbei. */
+export function wegPruefen(jetzt = Date.now()) {
+  const lauf = lese(LAUF, null);
+  if (lauf && jetzt - letzterHaken(lauf) > PAUSE_MS) setTimeout(wegAbschliessen, 0);
+}
+
+const LADEN_IC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l1.5-5h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 11.5V20h13v-8.5M10 20v-5h4v5"/></svg>';
+
+/** Über der Liste: wo du einkaufst, und ob die Liste deinen Weg dort schon kennt. */
+function ladenZeichnen() {
+  const el = $('#l-laden');
+  if (!el) return;
+  el.hidden = !app.listeDa || !Object.keys(app.stand.items).length;
+  if (el.hidden) return;
+  const laden = app.ladenJetzt();
+  const weg = laden ? app.stand.wege?.[laden] : null;
+  const lauf = lese(LAUF, null);
+  const laeuft = laden && lauf?.laden === laden && lauf.h?.length;
+  const n = weg?.n || 0;
+  const info = !laden
+    ? 'Wähl den Laden, in dem du einkaufst – dann lernt die Liste euren Weg durch den Markt.'
+    : n ? `Sortiert wie euer ${esc(laden)}, gelernt aus ${n === 1 ? 'einem Einkauf' : `${n} Einkäufen`}.${laeuft ? ' Die App schaut wieder mit.' : ''} <button type="button" class="linkbtn" data-act="weg-vergessen">Reihenfolge vergessen</button>`
+      : laeuft ? `Einkauf bei ${esc(laden)} läuft – die App merkt sich, in welcher Reihenfolge du abhakst.`
+        : `Hak in der Reihenfolge ab, in der du durch den Laden gehst – dann steht die Liste beim nächsten Mal wie euer ${esc(laden)}.`;
+  const laeden = [...new Set([...LAEDEN, ...Object.keys(app.stand.wege || {}), laden].filter(Boolean))];
+  const wahl = el.querySelector('#l-laden-wahl');
+  const optionen = laeden.join('|');
+  // Das Auswahlfeld nur neu bauen, wenn sich die Läden ändern – sonst klappt es beim Abgleich zu
+  if (!wahl || wahl.dataset.laeden !== optionen) {
+    el.innerHTML = `<label class="sel l-laden-sel">${LADEN_IC}<select id="l-laden-wahl" data-laeden="${esc(optionen)}" aria-label="In welchem Laden kaufst du ein?"><option value="">Kein Laden gewählt</option>${laeden.map((l) => `<option value="${esc(l)}">Ich kaufe bei ${esc(l)}</option>`).join('')}</select></label><p class="l-laden-info" id="l-laden-info"></p>`;
+  }
+  const sel = el.querySelector('#l-laden-wahl');
+  if (sel.value !== laden) sel.value = laden;
+  sel.closest('.sel').classList.toggle('an', !!laden);
+  el.querySelector('#l-laden-info').innerHTML = info;
+}
 
 /* ------------------------------------------------- Angebote auf der Liste */
 
@@ -117,7 +186,10 @@ export function listeZeichnen() {
   const eintraege = Object.entries(app.stand.items);
   angebotJe = angeboteJeZutat(app.angeboteJetzt(), app);
   tippZeichnen();
-  const gruppen = nachBereichen(app.stand, app.katalog);
+  ladenZeichnen();
+  // Im gewählten Laden mit gelerntem Weg: Abteilungen in dessen Reihenfolge
+  const weg = app.ladenJetzt() ? app.stand.wege?.[app.ladenJetzt()] : null;
+  const gruppen = weg?.n ? nachWeg(app.stand, app.katalog, weg) : nachBereichen(app.stand, app.katalog);
   const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0);
   const fertig = eintraege.filter(([, d]) => erledigt(d));
   const nachName = (a, b) => String(a[1].name).localeCompare(String(b[1].name), 'de');
@@ -290,9 +362,14 @@ export function klickListe(el) {
     const e = app.stand.items[d.check];
     if (!e) return true;
     const wirdFertig = !erledigt(e);
+    const laden = app.ladenJetzt();
+    if (laden) wegHaken(laden, d.check, e, wirdFertig);
     app.aendern(opHaken(app.stand, d.check, wirdFertig, app.name()));
-    // Das letzte Häkchen auf der Liste: ein Satz dafür.
-    if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x))) lobKlein('einkauf');
+    // Das letzte Häkchen auf der Liste: ein Satz dafür – und der Weg durch den Laden ist gelernt.
+    if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x))) {
+      lobKlein('einkauf');
+      if (laden) wegAbschliessen();
+    }
     return true;
   }
   if (d.del) {
@@ -327,6 +404,14 @@ export function klickListe(el) {
       return true;
     }
     case 'erledigte-weg': app.aendern(opErledigteWeg()); melde('Erledigtes entfernt'); return true;
+    case 'weg-vergessen': {
+      const laden = app.ladenJetzt();
+      const alt = app.stand.wege?.[laden];
+      if (!laden || !alt) return true;
+      app.aendern(opWegVergessen(laden));
+      melde(`Reihenfolge bei ${laden} vergessen`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opZusammenWeg(laden, alt)) });
+      return true;
+    }
     case 'leeren': leerenFragen = true; listeZeichnen(); return true;
     case 'leeren-nein': leerenFragen = false; listeZeichnen(); return true;
     case 'leeren-ja': leerenFragen = false; app.aendern(opLeeren()); melde('Liste geleert'); return true;
@@ -346,6 +431,16 @@ export function klickListe(el) {
     case 'z-trennen-ja': trennenFragen = false; app.trennen(); return true;
     default: return false;
   }
+}
+
+/** Der Laden über der Liste (change). true, wenn es hierher gehörte. */
+export function aenderungListe(ziel) {
+  if (ziel.id !== 'l-laden-wahl') return false;
+  // Ein anderer Laden: der Einkauf im alten ist vorbei
+  const lauf = lese(LAUF, null);
+  if (lauf && lauf.laden !== ziel.value) wegAbschliessen();
+  app.ladenSetzen(ziel.value);
+  return true;
 }
 
 export function absendenListe(ev) {
