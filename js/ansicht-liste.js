@@ -18,22 +18,29 @@
  * Beides merkt sich die App für beide und fürs nächste Mal (liste.js
  * `abteilungen`, `gleich`). Sieht sie zwei Zeilen, die dasselbe sein
  * könnten, fragt sie über der Liste (gleich.js).
+ *
+ * In derselben Zeile: „Bei Aldi nicht bekommen“ (bleibt für den nächsten
+ * Einkauf offen, steht im selben Laden unten), was es gekostet hat (Bon –
+ * die Kosten rechnen dann damit) und ein Preisalarm (Bescheid, wenn es im
+ * Angebot höchstens so viel kostet), dazu der Preisverlauf der letzten Wochen.
  */
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { lobKlein } from './lob.js';
 import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
-import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, aufloesen, ABTEILUNGEN } from './liste.js';
+import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, aufloesen, ABTEILUNGEN } from './liste.js';
+import { verlaufHinweis, verlaufText, wochenSchluessel } from './preisverlauf.js';
 import { nachWeg, wegSchluessel, wegStellen, PAUSE_MS, ABTEILUNG_NAME } from './weg.js';
 import { aehnlich, vorschlaege, richtung, merkName } from './gleich.js';
 import { istIpad } from './ansicht-tablet.js';
+import { pushZeichnen } from './ansicht-push.js';
 
 const opZusammenWeg = (laden, w) => opZusammen({}, {}, { wege: { [laden]: w } });
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
 import { nachBereichen, alsText, abteilungVon, merkSchluessel, nameSchluessel } from './bereiche.js';
 import { zutatImg } from './bilder.js';
-import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, GUENSTIG_AB, LAEDEN } from './angebote.js';
+import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, einheitsPreis, preisJe, preisalarmTreffer, GUENSTIG_AB, LAEDEN } from './angebote.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
 let leerenFragen = false;
@@ -43,6 +50,20 @@ let angebotJe = new Map(); // je Zutat die Angebote aller Läden, das günstigst
 let offenZeile = null; // die aufgeklappte Zeile: Abteilung wählen, zusammenlegen
 const klon = (x) => JSON.parse(JSON.stringify(x));
 const abteilungHier = (k, d) => abteilungVon(k, d, app.katalog, app.stand.abteilungen);
+/** Woran Bon und Preisalarm eine Zeile erkennen: Katalog-Schlüssel, bei Eigenem geraten oder am Namen. */
+const produktSchluessel = (k, d) => (app.katalog[k] ? k : (d?.custom || String(k).startsWith('c-')) ? (schluesselRaten(d?.name, app.katalog) || nameSchluessel(d?.name || k)) : k);
+/** In welcher Einheit ein Wunschpreis gilt: je kg, je l oder je Stück – wie die Angebote der Zutat. */
+function alarmEinheit(k) {
+  const u = app.einheiten?.[k] || app.naehrwerte?.[k]?.u;
+  if (u === 'ml') return 'l';
+  if (u && u !== 'g') return 'Stk';
+  return 'kg';
+}
+/** „4,99“ und „4.99 €“ → 4.99 */
+const zahlAus = (t) => Number(String(t || '').replace(/\s|€/g, '').replace(',', '.'));
+const nf2 = (x) => String(Math.round(x * 100) / 100).replace('.', ',');
+/** Steht die Zeile im gewählten Laden unter „nicht bekommen“? */
+const fehltHier = (k) => { const l = app.ladenJetzt(); return !!l && app.stand.fehlt?.[k]?.laden === l; };
 
 /* ---------------------------------------------- Der Weg durch den Laden */
 
@@ -125,9 +146,13 @@ function angebotZeilen(liste) {
   const [best, ...rest] = liste;
   const gut = best.rabatt !== null && best.rabatt >= GUENSTIG_AB;
   const kommentar = best.rabatt === null || gut ? '' : best.rabatt < 0 ? ' – teurer als sonst' : ' – etwa wie sonst';
+  // Aus dem Preisverlauf: „Tiefstpreis seit 6 Wochen“ – nicht, wenn es teurer ist als das, was ihr sonst zahlt
+  const ep = einheitsPreis(best.a);
+  const hinweis = ep && best.a.k && !(best.rabatt !== null && best.rabatt < 0) ? verlaufHinweis(app.preisverlauf, best.a.k, ep.wert, ep.u, wochenSchluessel(new Date())) : null;
+  const zusatz = hinweis ? ` <span class="l-tief">${esc(hinweis.text)}</span>` : '';
   let html = gut
-    ? `<span class="l-angebot"><b>${esc(rabattText(best.rabatt))}</b> am günstigsten bei ${esc(best.a.laden)}: ${esc(preisText(best.a))}</span>`
-    : `<span class="l-angebot l-matt">Im Angebot bei ${esc(best.a.laden)}: ${esc(preisText(best.a))}${kommentar}</span>`;
+    ? `<span class="l-angebot"><b>${esc(rabattText(best.rabatt))}</b> am günstigsten bei ${esc(best.a.laden)}: ${esc(preisText(best.a))}${zusatz}</span>`
+    : `<span class="l-angebot l-matt">Im Angebot bei ${esc(best.a.laden)}: ${esc(preisText(best.a))}${kommentar}${zusatz}</span>`;
   const mein = app.ladenJetzt();
   const dort = mein && mein !== best.a.laden ? rest.find((x) => x.a.laden === mein) : null;
   if (dort) html += `<span class="l-dein">Bei ${esc(mein)}: ${esc(preisText(dort.a))}${dort.rabatt !== null && dort.rabatt >= GUENSTIG_AB ? ` <b>${esc(rabattText(dort.rabatt))}</b>` : ''}</span>`;
@@ -157,19 +182,102 @@ const vomHomeBildschirm = () => navigator.standalone === true || window.matchMed
 
 /* ---------------------------------------- Abteilung und Zusammenlegen */
 
-/** Unter einer aufgeklappten Zeile: in welche Abteilung sie gehört, und ob sie dasselbe ist wie eine andere. */
+/** Die Menge, mit der „Was hat's gekostet?“ vorbelegt ist: was auf der Liste steht, ab 1000 in kg bzw. l. */
+function bonVorschlag(d) {
+  const s = summen(d);
+  if (s.g) return s.g >= 1000 ? { q: s.g / 1000, u: 'kg' } : { q: s.g, u: 'g' };
+  if (s.ml) return s.ml >= 1000 ? { q: s.ml / 1000, u: 'l' } : { q: s.ml, u: 'ml' };
+  const [u, q] = Object.entries(s)[0] || [];
+  return u === 'Stk' || u === 'Pck' ? { q, u } : { q: 1, u: 'Stk' };
+}
+
+/** „Nicht bekommen“, Bon und Preisalarm einer Zeile: { fehlt, bon, alarm } als HTML. */
+function einkaufHTML(k, d) {
+  const fertig = erledigt(d);
+  const f = app.stand.fehlt?.[k];
+  const laden = app.ladenJetzt();
+  const fehlt = fertig ? '' : f
+    ? `<p class="l-fehlt-info">${f.laden ? `Bei ${esc(f.laden)} nicht bekommen` : 'Nicht bekommen'}${f.by ? ` (${f.by === app.name() ? 'du' : esc(f.by)})` : ''} – bleibt für den nächsten Einkauf drauf. <button type="button" class="linkbtn" data-fehlt-weg="${esc(k)}">Markierung weg</button></p>`
+    : `<button type="button" class="btn l-fehlt-btn" data-fehlt="${esc(k)}">${laden ? `Bei ${esc(laden)} nicht bekommen` : 'Nicht bekommen'}</button>`;
+  const pk = produktSchluessel(k, d);
+  const bons = app.stand.bons?.[pk] || [];
+  const letzter = bons[bons.length - 1];
+  const vor = bonVorschlag(d);
+  const einheiten = ['g', 'kg', 'ml', 'l', 'Stk', 'Pck'];
+  const bon = `<form class="l-bon" data-bon="${esc(k)}" novalidate><p class="l-mehr-k">Was hat's gekostet?</p>
+<div class="l-felder"><label class="l-eur"><input name="eur" type="text" inputmode="decimal" autocomplete="off" placeholder="4,99" aria-label="Bezahlt in Euro"><span>€</span></label><span>für</span><input class="l-menge" name="q" type="text" inputmode="decimal" autocomplete="off" value="${esc(nf2(vor.q))}" aria-label="Menge"><label class="sel l-einheit"><select name="u" aria-label="Einheit">${einheiten.map((u) => `<option value="${u}"${u === vor.u ? ' selected' : ''}>${u === 'Pck' ? 'Packung' : u}</option>`).join('')}</select></label><button type="submit" class="btn">Merken</button></div>
+<p class="l-mehr-fein">${letzter ? `Zuletzt ${esc(euro(letzter.eur))} für ${esc(menge(letzter.q, letzter.u))}${letzter.laden ? ` bei ${esc(letzter.laden)}` : ''}${bons.length > 1 ? ` · aus ${bons.length} Bons` : ''} – die Kosten rechnen damit. <button type="button" class="linkbtn" data-bon-weg="${esc(pk)}" data-at="${esc(letzter.at)}">Letzten löschen</button>` : 'Dann rechnen die Kosten mit eurem Preis statt mit dem Richtpreis.'}</p></form>`;
+  const au = alarmEinheit(pk);
+  const alarm = app.stand.preisalarm?.[pk];
+  const richt = app.richtpreise?.[pk]?.je_g;
+  const vorschlag = richt && au !== 'Stk' ? nf2(richt * 1000 * 0.85) : '';
+  const treffer = alarm ? preisalarmTreffer({ [pk]: alarm }, app.angeboteJetzt(), app.katalog)[0] : null;
+  const verlauf = verlaufText(app.preisverlauf, pk);
+  const alarmHTML = `<form class="l-alarm" data-alarm="${esc(k)}" novalidate><p class="l-mehr-k">Preisalarm</p>
+<div class="l-felder"><span>Bescheid, wenn im Angebot für höchstens</span><label class="l-eur"><input name="max" type="text" inputmode="decimal" autocomplete="off" value="${alarm ? esc(nf2(alarm.max)) : ''}" placeholder="${esc(vorschlag || '0,00')}" aria-label="Wunschpreis in Euro je ${au}"><span>€/${au}</span></label><button type="submit" class="btn">${alarm ? 'Ändern' : 'Setzen'}</button>${alarm ? `<button type="button" class="linkbtn" data-alarm-weg="${esc(pk)}">Aus</button>` : ''}</div>
+${treffer ? `<p class="l-alarm-treffer">Gerade: ${esc(preisJe(treffer.preis, au))} bei ${esc(treffer.a.laden)} – ${esc(treffer.a.name)}</p>` : ''}
+${verlauf ? `<p class="l-mehr-fein">Angebote zuletzt: ${esc(verlauf)}</p>` : ''}</form>`;
+  return { fehlt, bon, alarm: alarmHTML };
+}
+
+/** Unter einer aufgeklappten Zeile: in welche Abteilung sie gehört, ob sie dasselbe ist wie eine andere – und der Einkauf. */
 function mehrHTML(k, d) {
   const jetzt = abteilungHier(k, d);
   const andere = Object.entries(app.stand.items)
     .filter(([x]) => x !== k)
     .map(([x, e]) => [x, e, aehnlich(d.name, e.name)])
     .sort((a, b) => b[2] - a[2] || String(a[1].name).localeCompare(String(b[1].name), 'de'));
+  const einkauf = einkaufHTML(k, d);
   return `<div class="l-mehr" id="l-mehr">
+${einkauf.fehlt}
 <p class="l-mehr-k">Gehört zu</p>
 <div class="l-abts" role="group" aria-label="Abteilung für ${esc(d.name)}">${ABTEILUNGEN.map((c) => `<button type="button" class="chip" data-abt="${c}" aria-pressed="${c === jetzt}">${esc(ABTEILUNG_NAME[c])}</button>`).join('')}</div>
 ${andere.length ? `<p class="l-mehr-k">Ist dasselbe wie</p><label class="sel l-gleich-wahl"><select data-gleich-mit="${esc(k)}" aria-label="${esc(d.name)} ist dasselbe wie …"><option value="">Andere Zeile wählen …</option>${andere.map(([x, e]) => `<option value="${esc(x)}">${esc(e.name)}${erledigt(e) ? ' (im Wagen)' : ''}</option>`).join('')}</select></label>` : ''}
 <p class="l-mehr-fein">Das merkt sich die App – für euch beide und beim nächsten Mal.</p>
+${einkauf.bon}${einkauf.alarm}
 </div>`;
+}
+
+/** Im Laden nicht bekommen: bleibt drauf – und war es das Letzte, ist der Einkauf vorbei. */
+function nichtBekommen(k) {
+  const d = app.stand.items[k];
+  if (!d) return;
+  const laden = app.ladenJetzt();
+  offenZeile = null;
+  app.aendern(opFehlt(k, laden, app.name()));
+  melde(`„${d.name}“ bleibt für den nächsten Einkauf auf der Liste`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opFehltWeg(k)) });
+  if (laden && Object.entries(app.stand.items).every(([x, e]) => x === k || erledigt(e) || fehltHier(x))) wegAbschliessen();
+}
+
+/** Ein Bon aus dem Formular in der Zeile. */
+function bonMerken(form) {
+  const k = form.dataset.bon;
+  const d = app.stand.items[k];
+  if (!d) return;
+  const eur = zahlAus(form.elements.eur.value);
+  let q = zahlAus(form.elements.q.value);
+  let u = form.elements.u.value;
+  if (!(eur > 0 && eur <= 500) || !(q > 0)) { melde('Preis und Menge bitte als Zahl, z. B. 4,99 € für 1 kg'); (eur > 0 ? form.elements.q : form.elements.eur).focus(); return; }
+  if (u === 'kg') { q *= 1000; u = 'g'; }
+  if (u === 'l') { q *= 1000; u = 'ml'; }
+  const pk = produktSchluessel(k, d);
+  const at = new Date().toISOString();
+  app.aendern(opBon(pk, { eur, q, u, laden: app.ladenJetzt() || '', at }, app.name()));
+  melde(`Gemerkt: ${euro(eur)} für ${menge(q, u)} – die Kosten rechnen jetzt damit`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opBonWeg(pk, at)) });
+}
+
+/** Ein Wunschpreis aus dem Formular in der Zeile. */
+function alarmMerken(form) {
+  const k = form.dataset.alarm;
+  const d = app.stand.items[k];
+  if (!d) return;
+  const max = zahlAus(form.elements.max.value);
+  if (!(max > 0 && max <= 500)) { melde('Den Wunschpreis bitte als Zahl, z. B. 6,50'); form.elements.max.focus(); return; }
+  const pk = produktSchluessel(k, d);
+  const u = alarmEinheit(pk);
+  const vorher = app.stand.preisalarm?.[pk] || null;
+  app.aendern(opPreisalarm(pk, { max, u, name: app.katalog[pk]?.n || d.name }, app.name()));
+  melde(`Preisalarm: ${d.name} ab ${preisJe(max, u)} – die App sagt Bescheid`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opPreisalarm(pk, vorher, vorher?.by)) });
 }
 
 /** Eine Zeile in eine andere Abteilung – gemerkt für ihren Schlüssel und ihren Namen. */
@@ -242,13 +350,15 @@ function zeile([k, d]) {
     return `<span>${t}</span>`;
   }).join('');
   const von = fertig && d.by ? `<span class="item-by">abgehakt von ${d.by === app.name() ? 'dir' : esc(d.by)}</span>` : '';
+  // In der Gruppe „Bei Aldi nicht bekommen“ sagt es schon die Überschrift
+  const fehlt = !fertig && app.stand.fehlt?.[k] && !fehltHier(k) ? `<span class="item-fehlt">${app.stand.fehlt[k].laden ? `bei ${esc(app.stand.fehlt[k].laden)} nicht bekommen` : 'nicht bekommen'}</span>` : '';
   // Gerade im Angebot, und wo am günstigsten? Eigene Einträge über den Namen („Hähnchenbrust“)
   const angebot = fertig ? '' : angebotZeilen(angebotJe.get(d.custom ? schluesselRaten(d.name, app.katalog) : k));
   const auf = offenZeile === k;
   return `<li class="item${fertig ? ' is-done' : ''}${auf ? ' is-auf' : ''}">
 <button type="button" class="cb" role="checkbox" aria-checked="${fertig}" data-check="${esc(k)}" aria-label="${esc(d.name)}">${ic('check')}</button>
 ${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungHier(k, d) })}
-<button type="button" class="item-main" data-mehr="${esc(k)}" aria-expanded="${auf}"${auf ? ' aria-controls="l-mehr"' : ''}><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${von}</button>
+<button type="button" class="item-main" data-mehr="${esc(k)}" aria-expanded="${auf}"${auf ? ' aria-controls="l-mehr"' : ''}><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${fehlt}${von}</button>
 <span class="item-qty">${esc(mengeText)}${etwa ? `<small>${esc(etwa)}</small>` : ''}</span>
 <button type="button" class="x" data-del="${esc(k)}" aria-label="${esc(d.name)} löschen">${X}</button>
 ${angebot ? `<div class="l-angebote">${angebot}</div>` : ''}
@@ -273,9 +383,12 @@ export function listeZeichnen() {
   tippZeichnen();
   ladenZeichnen();
   gleichZeichnen();
+  // Was es in diesem Laden nicht gab, steht unten – beim nächsten Laden wieder an seinem Platz
+  const nichtHier = eintraege.filter(([k, d]) => !erledigt(d) && fehltHier(k));
+  const ohne = nichtHier.length ? { ...app.stand, items: Object.fromEntries(eintraege.filter(([k]) => !nichtHier.some(([x]) => x === k))) } : app.stand;
   // Im gewählten Laden mit gelerntem Weg: Abteilungen in dessen Reihenfolge
   const weg = app.ladenJetzt() ? app.stand.wege?.[app.ladenJetzt()] : null;
-  const gruppen = weg?.n ? nachWeg(app.stand, app.katalog, weg) : nachBereichen(app.stand, app.katalog);
+  const gruppen = weg?.n ? nachWeg(ohne, app.katalog, weg) : nachBereichen(ohne, app.katalog);
   const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0);
   const fertig = eintraege.filter(([, d]) => erledigt(d));
   const nachName = (a, b) => String(a[1].name).localeCompare(String(b[1].name), 'de');
@@ -288,6 +401,9 @@ export function listeZeichnen() {
       // Was die App nicht zuordnen konnte: Hier merkt man am ehesten, dass man einsortieren kann
       const hinweis = bereich.id === 'sonstiges' ? 'antippen zum Einsortieren' : bereich.hinweis;
       html += `<section class="grp" data-bereich="${bereich.id}"><h3><span class="grp-name">${esc(bereich.name)}${hinweis ? ` <small>${esc(hinweis)}</small>` : ''}</span><span class="num">${g.length}</span></h3><ul class="items">${g.map(zeile).join('')}</ul></section>`;
+    }
+    if (nichtHier.length) {
+      html += `<section class="grp grp-fehlt" data-bereich="fehlt"><h3><span class="grp-name">Bei ${esc(app.ladenJetzt())} nicht bekommen <small>bleibt für den nächsten Einkauf</small></span><span class="num">${nichtHier.length}</span></h3><ul class="items">${nichtHier.sort(nachName).map(zeile).join('')}</ul></section>`;
     }
     if (fertig.length) {
       html += `<section class="grp grp-done"><h3><span>Im Wagen</span><span class="num">${fertig.length}</span></h3><ul class="items">${fertig.sort(nachName).map(zeile).join('')}</ul></section>`;
@@ -378,7 +494,9 @@ function teilenZeichnen(zuletzt) {
   el.innerHTML = `<p><b>Gemeinsame Liste</b>${wer}${wann}</p>
 <div class="zugang-btns"><button type="button" class="btn" data-act="z-link">Link fürs zweite Handy kopieren</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a>${istIpad() ? '' : '<button type="button" class="btn" data-act="tablet-zeigen">Aufs iPad oder Tablet</button>'}<button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
 <input class="z-linkfeld" id="z-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>
-<p class="fine">Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal „Einrichten“ antippen und diesen Link ins Feld „Schlüssel“ einfügen.</p>' : ''}`;
+<p class="fine">Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal „Einrichten“ antippen und diesen Link ins Feld „Schlüssel“ einfügen.</p>' : ''}
+<div class="push-bereich" id="push-bereich"></div>`;
+  pushZeichnen();
 }
 
 export function zugangZeichnen() {
@@ -453,8 +571,8 @@ export function klickListe(el) {
     const laden = app.ladenJetzt();
     if (laden) wegHaken(laden, d.check, e, wirdFertig);
     app.aendern(opHaken(app.stand, d.check, wirdFertig, app.name()));
-    // Das letzte Häkchen auf der Liste: ein Satz dafür – und der Weg durch den Laden ist gelernt.
-    if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x))) {
+    // Das letzte Häkchen auf der Liste (was es hier nicht gab, zählt nicht): ein Satz dafür – und der Weg durch den Laden ist gelernt.
+    if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x) || fehltHier(k))) {
       lobKlein('einkauf');
       if (laden) wegAbschliessen();
     }
@@ -479,6 +597,20 @@ export function klickListe(el) {
     return true;
   }
   if (d.abt) { if (offenZeile) verschieben(offenZeile, d.abt); return true; }
+  if (d.fehlt) { nichtBekommen(d.fehlt); return true; }
+  if (d.fehltWeg) { app.aendern(opFehltWeg(d.fehltWeg)); return true; }
+  if (d.bonWeg) {
+    const b = (app.stand.bons?.[d.bonWeg] || []).find((x) => x.at === d.at);
+    app.aendern(opBonWeg(d.bonWeg, d.at));
+    if (b) melde('Bon gelöscht', { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opBon(d.bonWeg, b, b.by)) });
+    return true;
+  }
+  if (d.alarmWeg) {
+    const a = app.stand.preisalarm?.[d.alarmWeg];
+    app.aendern(opPreisalarm(d.alarmWeg, null));
+    if (a) melde('Preisalarm aus', { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opPreisalarm(d.alarmWeg, a, a.by)) });
+    return true;
+  }
   if (d.gleichJa) { zusammenlegen(d.gleichJa, d.nach); return true; }
   if (d.gleichNein) { verschieden(d.gleichNein, d.nach); return true; }
   switch (d.act) {
@@ -548,6 +680,8 @@ export function aenderungListe(ziel) {
 }
 
 export function absendenListe(ev) {
+  if (ev.target.matches?.('form[data-bon]')) { ev.preventDefault(); bonMerken(ev.target); return true; }
+  if (ev.target.matches?.('form[data-alarm]')) { ev.preventDefault(); alarmMerken(ev.target); return true; }
   if (ev.target.id === 'addform') {
     ev.preventDefault();
     const feld = $('#add-input');

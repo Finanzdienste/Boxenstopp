@@ -543,6 +543,46 @@ export function besteJeLaden(rezepte, angebote, daten) {
     .sort((a, b) => b.treffer.length - a.treffer.length || b.ersparnisBox - a.ersparnisBox || LAEDEN.indexOf(a.laden) - LAEDEN.indexOf(b.laden));
 }
 
+/** Preis je kg, l oder Stück: { wert, u } – null, wenn es sich nicht rechnen lässt. */
+export function einheitsPreis(a) {
+  if (!(a?.preis > 0) || !(a.menge > 0)) return null;
+  const f = MASSE[a.einheit];
+  if (f) return { wert: (a.preis / (a.menge * f)) * 1000, u: a.einheit === 'ml' || a.einheit === 'l' ? 'l' : 'kg' };
+  if (/^(?:stk|stück|st)\.?$/i.test(String(a.einheit))) return { wert: a.preis / a.menge, u: 'Stk' };
+  return null;
+}
+/** „5,99 €/kg“ */
+export const preisJe = (wert, u) => `${Number(wert).toFixed(2).replace('.', ',')} €/${u}`;
+
+const wortStaemme = (t) => String(t || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+  .split(/[^a-z0-9]+/).filter((w) => w.length > 2).map((w) => w.slice(0, Math.max(4, w.length - 2)));
+/**
+ * Passt ein Angebot zu einem Preisalarm? Katalog-Zutaten über den Schlüssel,
+ * Eigenes („Dino Nuggets“) über den Namen: Jedes Wort des Alarms steckt im
+ * Namen des Angebots.
+ */
+export function passtZumAlarm(a, k, alarm, katalog = {}) {
+  if (katalog[k]) return a?.k === k;
+  const woerter = wortStaemme(alarm?.name || '');
+  if (!woerter.length) return false;
+  const name = String(a?.name || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+  return woerter.every((w) => name.includes(w));
+}
+/** Die Treffer aller Preisalarme in den Angeboten: [{ k, alarm, a, preis }] – je Alarm das günstigste. */
+export function preisalarmTreffer(alarme, angebote, katalog = {}) {
+  const aus = [];
+  for (const [k, alarm] of Object.entries(alarme || {})) {
+    let best = null;
+    for (const a of angebote || []) {
+      const ep = einheitsPreis(a);
+      if (!ep || ep.u !== alarm.u || ep.wert > alarm.max + 1e-9 || !passtZumAlarm(a, k, alarm, katalog)) continue;
+      if (!best || ep.wert < best.preis) best = { k, alarm, a, preis: ep.wert };
+    }
+    if (best) aus.push(best);
+  }
+  return aus.sort((x, y) => x.preis / x.alarm.max - y.preis / y.alarm.max);
+}
+
 /** „1 kg 7,49 €“ */
 export function angebotMenge(a) {
   const preis = `${a.preis.toFixed(2).replace('.', ',')} €`;

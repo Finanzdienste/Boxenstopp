@@ -7,6 +7,10 @@
 # Lidl braucht einen Gemini-Schlüssel (Prospektseiten sind Bilder): als Secret
 # GEMINI_KEY unter Settings → Secrets and variables → Actions anlegen. Ohne ihn
 # läuft alles andere trotzdem.
+#
+# Danach kommt daten/preisverlauf.json dazu: je Zutat und Woche der günstigste
+# Preis aus allen eingecheckten Fassungen (werkzeug/preisverlauf.mjs – darum
+# die ganze Historie beim Auschecken).
 name: Angebote
 
 on:
@@ -38,6 +42,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -49,6 +55,9 @@ jobs:
           QUELLEN: ${{ inputs.quellen }}
         run: node werkzeug/angebote.mjs $QUELLEN
 
+      - name: Preisverlauf
+        run: node werkzeug/preisverlauf.mjs
+
       - name: Einchecken
         run: |
           git config user.name "Boxenstopp-Bot"
@@ -59,7 +68,7 @@ jobs:
           fi
           WOCHE=$(node -e "console.log(require('./daten/angebote.json').woche)")
           ANZAHL=$(node -e "console.log(require('./daten/angebote.json').angebote.length)")
-          git add daten/angebote.json
+          git add daten/angebote.json daten/preisverlauf.json
           git commit -m "Angebote KW ${WOCHE#*-}: ${ANZAHL} Einträge"
           git pull --rebase origin main
           git push origin HEAD:main

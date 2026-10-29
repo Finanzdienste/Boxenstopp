@@ -502,6 +502,58 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .l-tipp small{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
 .l-tipp .linkbtn{flex:none}
 /* Wo du einkaufst – dann sortiert sich die Liste nach eurem Weg durch den Laden */
+/* Kochmodus (js/kochmodus.js): ein Schritt groß, für Tablet und Herd */
+html.km-offen{overflow:hidden}
+.kochmodus{width:100vw;max-width:none;height:100vh;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:var(--bg);color:var(--ink);font-family:var(--f-body)}
+.kochmodus::backdrop{background:var(--bg)}
+.km-rahmen{height:100%}
+.km{display:flex;flex-direction:column;height:100%;max-width:1100px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 12px) 20px calc(env(safe-area-inset-bottom) + 14px);gap:12px}
+.km-kopf{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px}
+.km-titel{display:grid;gap:3px;min-width:0}
+.km-titel b{font:700 clamp(17px,2.4vw,22px)/1.2 var(--f-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.km-titel span{font-size:14px;color:var(--muted)}
+.km-wach{max-width:16ch;font-size:12.5px;line-height:1.3;color:var(--muted);text-align:right}
+.km-wach.an{color:var(--ok)}
+.km-zu{display:grid;place-items:center;width:48px;height:48px;padding:0;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.km-zu .ic{width:20px;height:20px}
+.km-fortschritt{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.km-fortschritt i{display:block;height:100%;border-radius:inherit;background:var(--accent);transition:width .3s ease}
+.km-timer{display:flex;flex-wrap:wrap;gap:8px}
+.km-timer:empty{display:none}
+.km-tm{display:inline-flex;align-items:center;border-radius:999px;border:1.5px solid color-mix(in srgb,var(--accent) 55%,var(--line));background:var(--surface);color:var(--accent);font-size:14px}
+.km-tm.fertig{border-color:var(--ok);color:var(--ok);animation:blink 1s steps(2) infinite}
+.km-tm-zu{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 4px 0 13px;border:0;background:none;color:inherit;font:inherit}
+.km-tm-zu b{font:600 15px/1 var(--f-mono);font-variant-numeric:tabular-nums}
+.km-tm-x{display:grid;place-items:center;width:38px;height:38px;padding:0;border:0;border-radius:50%;background:none;color:inherit}
+.km-tm-x .ic{width:14px;height:14px}
+.km-schritt{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;min-height:0;overflow:auto;padding:8px 2px}
+.km-k{align-self:flex-start;padding:5px 11px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:650;font-size:14px}
+.km-text{margin:0;font:600 clamp(26px,4.6vw,50px)/1.3 var(--f-display);letter-spacing:-.01em;overflow-wrap:anywhere}
+.km-text .mg{color:var(--accent)}
+.km-text .schale{font-size:.7em;vertical-align:.12em}
+.km-liste{margin:0;padding-left:1.1em;font-size:clamp(20px,3.2vw,34px);line-height:1.45}
+.km-unten{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.km-min{font:600 17px/1 var(--f-mono);color:var(--muted)}
+.km-timerknopf .step-timer{height:54px;padding:0 20px 0 16px;gap:8px;font-size:20px}
+.km-timerknopf .step-timer .ic{width:24px;height:24px}
+.km-ok{display:inline-flex;align-items:center;gap:6px;color:var(--ok);font-weight:650;font-size:17px}
+.km-ok .ic{width:20px;height:20px}
+.km-schritt.is-fertig .km-text{color:var(--muted)}
+.km-nav{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:12px}
+.km-nav button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:68px;border-radius:22px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:650 clamp(18px,2.6vw,23px)/1 var(--f-body)}
+.km-nav .km-los{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+html[data-tab="amy"] .km-nav .km-los{border:0;background:var(--amy-verlauf);color:#fff}
+.km-nav button[disabled]{opacity:.4}
+.km-nav .ic{width:24px;height:24px}
+.km-punkte{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin:0;padding:0}
+.km-punkte button{position:relative;width:26px;height:26px;padding:0;border:0;background:none}
+.km-punkte button::before{content:"";position:absolute;inset:7px;border-radius:50%;border:2px solid var(--line-strong);background:transparent}
+.km-punkte button.f::before{border-color:var(--accent);background:var(--accent)}
+.km-punkte button.jetzt::before{inset:5px;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.km-start{gap:7px}
+.km-start .ic{width:18px;height:18px}
+.amy-btn.km-start{min-height:42px;padding:0 18px;font-size:15px}
+
 /* Eine Zeile aufklappen: in welche Abteilung, dasselbe wie … */
 .item-main{display:block;min-width:0;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .item-main:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
@@ -519,6 +571,53 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .l-gleich-k{display:block;font:600 11.5px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
 .l-gleich-mehr{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
 .l-gleich-btns{display:flex;flex-wrap:wrap;gap:8px}
+/* Push-Nachrichten (unter „Gemeinsame Liste“) */
+.push-bereich{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.push-bereich:empty{display:none}
+.push-k-titel{margin:0}
+.push-an{display:flex;align-items:center;gap:6px;margin:0;font-weight:650;color:var(--ok)}
+.push-an .ic,.push-bereich .btn .ic{width:17px;height:17px}
+.push-was{display:flex;flex-wrap:wrap;gap:6px 16px}
+.push-k{display:inline-flex;align-items:center;gap:6px;font-size:14px}
+.push-k input{width:18px;height:18px;accent-color:var(--accent)}
+.push-schritte{margin:0;padding-left:1.2em;display:grid;gap:8px;font-size:14px;line-height:1.45}
+.push-schritte small{display:block;color:var(--danger);font-size:12.5px}
+.push-schritte code{font:600 12.5px/1 var(--f-mono);padding:1px 4px;border-radius:5px;background:var(--surface-2)}
+.btn-klein{min-height:32px;padding:0 10px;font-size:13px}
+.push-meldung{color:var(--ink)}
+
+/* Angebote: Preisalarm oben, Glocke je Angebot */
+.a-alarm{display:grid;gap:6px;margin-top:12px;padding:12px 14px;border-radius:14px;border:1.5px dashed var(--line-strong);background:var(--surface)}
+.a-alarm.hat{border-style:solid;border-color:var(--ok)}
+.a-alarm .a-tipp-k{display:inline-flex;align-items:center;gap:6px;margin:0}
+.a-alarm .a-tipp-k .ic{width:15px;height:15px}
+.a-alarm ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.a-alarm li{font-size:14.5px;line-height:1.4}
+.a-alarm li small{display:block;font-size:12.5px;color:var(--muted)}
+.a-alarm .fine{margin:0}
+.a-glocke{display:grid;place-items:center;width:32px;height:32px;margin-top:-5px;padding:0;border:0;border-radius:9px;background:none;color:var(--muted)}
+.a-glocke:hover:not([disabled]){background:var(--surface-2);color:var(--ink)}
+.a-glocke[disabled]{visibility:hidden}
+.a-glocke .ic{width:18px;height:18px}
+.a-glocke[aria-pressed="true"]{color:var(--ok)}
+.a-glocke[aria-pressed="true"] .ic{fill:currentColor}
+
+/* In der aufgeklappten Zeile: nicht bekommen, Bon, Preisalarm */
+.l-fehlt-btn{justify-self:start}
+.l-fehlt-info{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink)}
+.l-fehlt-info .linkbtn{min-height:0;padding:0;font-size:13.5px}
+.item-fehlt{display:block;margin-top:3px;font-size:12px;font-weight:650;color:var(--danger)}
+.grp-fehlt h3{border-bottom-color:var(--danger);color:var(--danger)}
+.l-bon,.l-alarm{display:grid;gap:6px;margin:0;padding-top:6px;border-top:1px solid var(--line)}
+.l-felder{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:14px}
+.l-eur{display:inline-flex;align-items:center;gap:4px}
+.l-eur input,.l-menge{width:6.2em;height:38px;padding:0 10px;border-radius:10px;border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);font:600 15px/1 var(--f-mono);font-variant-numeric:tabular-nums}
+.l-menge{width:5em}
+.l-einheit{height:38px;min-width:5.4em}
+.l-felder .btn{min-height:38px;padding:0 14px}
+.l-felder .linkbtn{min-height:0;padding:0 4px}
+.l-alarm-treffer{margin:0;font-size:13.5px;font-weight:650;color:var(--ok)}
+.l-tief{display:inline-block;margin-left:4px;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);font-size:11.5px;font-weight:700;white-space:nowrap}
 .l-laden{display:grid;gap:6px;margin-top:12px}
 .l-laden-sel{width:100%;max-width:340px}
 .l-laden-info{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
@@ -915,6 +1014,23 @@ html[data-tab="amy"] .btn{border-radius:999px}
 .tablet-adresse{font:600 15px/1.3 var(--f-mono);overflow-wrap:anywhere;color:var(--accent)!important}
 .tablet-fein{margin:0;font-size:13px;color:var(--muted)}
 .tablet-knoepfe{display:flex;justify-content:center}
+
+/* Rezept übernehmen (Foto, Link, Text) */
+.amy-import{border-radius:20px;border:2px dashed var(--line-strong);background:var(--surface)}
+.amy-import[open]{border-style:solid;border-color:var(--accent)}
+.amy-import summary{display:flex;align-items:center;gap:8px;padding:12px 14px;font:600 15.5px/1.2 var(--f-body);color:var(--accent);cursor:pointer;list-style:none}
+.amy-import summary::-webkit-details-marker{display:none}
+.amy-import summary small{display:block;margin-top:3px;font-weight:500;font-size:13px;line-height:1.3;color:var(--muted)}
+.amy-import-inhalt{display:grid;gap:10px;padding:0 14px 14px}
+.amy-import-fotos{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.amy-import-foto{position:relative;display:inline-block}
+.amy-import-foto img{display:block;width:56px;height:56px;object-fit:cover;border-radius:12px;border:2px solid var(--line)}
+.amy-import-foto .amy-tag-x{position:absolute;top:-8px;right:-8px;width:24px;height:24px;background:var(--surface);border:1.5px solid var(--line);color:var(--ink)}
+.amy-import-knopf{cursor:pointer}
+.amy-import-knopf input{display:none}
+.amy-import textarea{width:100%;padding:10px 12px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font:500 15px/1.45 var(--f-body);color:var(--ink);resize:vertical}
+.amy-import textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.amy-import-laeuft{font-weight:600;color:var(--accent);animation:blink 1.4s steps(2) infinite}
 
 /* Tags: sechs Pastellfarben, derselbe Tag immer in derselben (amy.js tagFarbe) */
 .tf0{--tag-bg:#FFDDEB;--tag-ink:#A3245B}

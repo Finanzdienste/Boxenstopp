@@ -15,7 +15,11 @@
  *     wege:      { <Laden>: { n: 3, at, k: { <Schlüssel>: { c: 'obst', p: [0.1, 0.05] } } } },
  *     abteilungen: { <Schlüssel oder n:name>: 'fleisch' },
  *     gleich:    { <Schlüssel oder n:name>: <Schlüssel> },  zusammengelegt: dasselbe Produkt
- *     ungleich:  ['<a>|<b>', …] }                           „Nein, verschieden“
+ *     ungleich:  ['<a>|<b>', …],                            „Nein, verschieden“
+ *     kochen:    { <name>: { at, schritte: { <rid>: [0, 2] }, tempo, timer: [] } },
+ *     fehlt:     { <Schlüssel>: { laden: 'Aldi', at, by } },   im Laden nicht bekommen
+ *     bons:      { <Schlüssel>: [{ eur: 4.99, q: 1000, u: 'g', laden, at, by }] },  was es gekostet hat
+ *     preisalarm: { <Schlüssel>: { max: 6.5, u: 'kg', by, at } } }   Bescheid, wenn ein Angebot so günstig ist
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -35,6 +39,13 @@
  * nuggets“): Jedes Teil, das danach unter dem alten Schlüssel kommt, landet
  * in der Zeile des neuen (aufloesen). `ungleich` sind Paare, die jemand als
  * verschieden markiert hat – die schlägt die App nicht noch einmal vor.
+ * `kochen` ist der Kochstand je Person (kochstand.js): abgehakte Schritte,
+ * gelerntes Tempo, laufende Timer – die neueste Fassung gewinnt. `fehlt`
+ * sind Zeilen, die es im Laden nicht gab – sie bleiben für den nächsten
+ * Einkauf offen; der Haken nimmt die Markierung weg. `bons` sind bezahlte
+ * Preise (die letzten fünf je Zutat): Die Kosten rechnen dann damit statt mit
+ * dem Richtpreis (kosten.js preiseMitBons). `preisalarm` ist ein Wunschpreis
+ * je Zutat (angebote.js preisalarmTreffer, Push im Daten-Repo).
  *
  * Ein Eintrag:
  *
@@ -64,7 +75,14 @@ import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 import { umleiten } from './format.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [] });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {} });
+const MAX_KOCHEN = 6;
+const MAX_BONS_JE = 5;
+const MAX_BONS = 200;
+const MAX_ALARME = 60;
+/** Einheiten für Bons und Wunschpreise. */
+export const BON_EINHEITEN = ['g', 'ml', 'Stk', 'Pck', 'Dose', 'Glas', 'Bund'];
+export const ALARM_EINHEITEN = ['kg', 'l', 'Stk'];
 const MAX_GLEICH = 300;
 const MAX_UNGLEICH = 200;
 /** Die Abteilungen, in die man eine Zeile verschieben kann (weg.js REIHE). */
@@ -122,6 +140,23 @@ export function rezepteAufListe(stand) {
 }
 
 export const offeneAnzahl = (stand) => Object.values(stand.items).filter((d) => !erledigt(d)).length;
+
+/**
+ * Ist eine Änderung eine Nachricht an die anderen wert (Push)? Neues auf der
+ * Liste, ein neues Rezept von Amy, eine neue Notiz – oder alles eingekauft.
+ * Abhaken, Kochstand, Wege und Ähnliches nicht.
+ */
+export function bescheidNoetig(vorher, nachher) {
+  const v = vorher || leer();
+  for (const [k, d] of Object.entries(nachher?.items || {})) {
+    const alt = v.items?.[k];
+    if (!alt) return true;
+    for (const rid of Object.keys(d.parts || {})) if (!alt.parts?.[rid]) return true;
+  }
+  for (const id of Object.keys(nachher?.amy || {})) if (!v.amy?.[id]) return true;
+  for (const [rid, ns] of Object.entries(nachher?.notizen || {})) for (const n of ns || []) if (!(v.notizen?.[rid] || []).some((x) => x.id === n.id)) return true;
+  return Object.keys(nachher?.items || {}).length > 0 && offeneAnzahl(v) > 0 && offeneAnzahl(nachher) === 0;
+}
 
 /**
  * Mengen eines Eintrags fürs Anzeigen: Solange etwas offen ist, zählen nur
@@ -234,7 +269,78 @@ export function bereinigen(roh) {
   if (Array.isArray(roh.ungleich)) {
     s.ungleich = [...new Set(roh.ungleich.filter((x) => typeof x === 'string' && x.split('|').length === 2 && x.split('|').every((k) => SCHLUESSEL.test(k))))].slice(-MAX_UNGLEICH);
   }
+  if (istObj(roh.kochen)) {
+    for (const [w, k] of Object.entries(roh.kochen).slice(0, MAX_KOCHEN)) {
+      const b = kochenName(w) ? kochenBereinigen(k) : null;
+      if (b) s.kochen[kochenName(w)] = b;
+    }
+  }
+  if (istObj(roh.fehlt)) {
+    for (const [k, f] of Object.entries(roh.fehlt)) {
+      if (SCHLUESSEL.test(k) && istObj(f) && s.items[k]) s.fehlt[k] = { laden: LADEN_NAME.test(String(f.laden || '')) ? f.laden : '', at: text(f.at, 40) || '', by: text(f.by, 40) };
+    }
+  }
+  if (istObj(roh.bons)) {
+    for (const [k, liste] of Object.entries(roh.bons).slice(-MAX_BONS)) {
+      const b = SCHLUESSEL.test(k) && Array.isArray(liste) ? liste.map(bonBereinigen).filter(Boolean).slice(-MAX_BONS_JE) : [];
+      if (b.length) s.bons[k] = b;
+    }
+  }
+  if (istObj(roh.preisalarm)) {
+    for (const [k, a] of Object.entries(roh.preisalarm).slice(-MAX_ALARME)) {
+      const b = SCHLUESSEL.test(k) ? alarmBereinigen(a) : null;
+      if (b) s.preisalarm[k] = b;
+    }
+  }
   return s;
+}
+
+const zahl = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+
+/** Der Kochstand einer Person aus beliebigem JSON – oder null. */
+export function kochenBereinigen(k) {
+  if (!istObj(k) || !text(k.at, 40)) return null;
+  const schritte = {};
+  if (istObj(k.schritte)) {
+    for (const [rid, xs] of Object.entries(k.schritte).slice(-60)) {
+      if (!SCHLUESSEL.test(rid) || !Array.isArray(xs)) continue;
+      const ix = [...new Set(xs.filter((i) => Number.isInteger(i) && i >= 0 && i < 300))];
+      if (ix.length) schritte[rid] = ix;
+    }
+  }
+  const t = istObj(k.tempo) ? k.tempo : {};
+  const offen = {};
+  if (istObj(t.offen)) {
+    for (const [rid, l] of Object.entries(t.offen).slice(-10)) {
+      if (SCHLUESSEL.test(rid) && istObj(l) && Array.isArray(l.h)) offen[rid] = { start: zahl(l.start), n: zahl(l.n), std: zahl(l.std), h: l.h.filter((h) => Array.isArray(h) && h.length >= 4 && h.length <= 8).slice(-200).map(klon) };
+    }
+  }
+  const proben = Array.isArray(t.proben) ? t.proben.filter((p) => Array.isArray(p) && p.length >= 4 && p.length <= 6 && typeof p[0] === 'string').slice(-300).map(klon) : [];
+  const gesamt = {};
+  if (istObj(t.gesamt)) {
+    for (const [rid, l] of Object.entries(t.gesamt).slice(-100)) {
+      if (SCHLUESSEL.test(rid) && Array.isArray(l)) gesamt[rid] = l.filter((x) => Array.isArray(x) && typeof x[0] === 'number').slice(-5).map((x) => [x[0], text(x[1], 10) || '']);
+    }
+  }
+  const timer = Array.isArray(k.timer) ? k.timer.filter((x) => istObj(x) && typeof x.id === 'string' && typeof x.ende === 'number').slice(-10).map((x) => ({
+    id: x.id.slice(0, 30), rid: text(x.rid, 120) || '', schritt: Number.isInteger(x.schritt) ? x.schritt : 0, label: text(x.label, 60) || '',
+    minuten: zahl(x.minuten), start: zahl(x.start), ende: x.ende, fertig: x.fertig === true, dann: text(x.dann, 80) || '',
+    folge: Array.isArray(x.folge) ? x.folge.filter(istObj).slice(0, 3).map((f) => ({ minuten: zahl(f.minuten), dann: text(f.dann, 80) || '' })) : [],
+    stufe: zahl(x.stufe) || 1, stufen: zahl(x.stufen) || 1,
+  })) : [];
+  return { at: k.at, schritte, tempo: { offen, proben, gesamt }, timer };
+}
+const kochenName = (w) => String(w || '').trim().toLowerCase().slice(0, 40);
+const preisOk = (x, max) => typeof x === 'number' && Number.isFinite(x) && x > 0 && x <= max;
+
+/** Ein bezahlter Preis aus beliebigem JSON – oder null. */
+function bonBereinigen(b) {
+  if (!istObj(b) || !preisOk(b.eur, 500) || !preisOk(b.q, 100000) || !BON_EINHEITEN.includes(b.u)) return null;
+  return { eur: Math.round(b.eur * 100) / 100, q: Math.round(b.q * 100) / 100, u: b.u, laden: LADEN_NAME.test(String(b.laden || '')) ? b.laden : '', at: text(b.at, 40) || '', by: text(b.by, 40) };
+}
+function alarmBereinigen(a) {
+  if (!istObj(a) || !preisOk(a.max, 500) || !ALARM_EINHEITEN.includes(a.u)) return null;
+  return { max: Math.round(a.max * 100) / 100, u: a.u, name: text(a.name, 80) || '', by: text(a.by, 40), at: text(a.at, 40) || '' };
 }
 
 /** Ein Paar, egal in welcher Reihenfolge: „a|b“. */
@@ -283,11 +389,12 @@ export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || 
 /**
  * Einträge und behaltene KI-Rezepte von einem anderen Stand dazunehmen, ohne
  * Vorhandenes zu überschreiben – dazu, was sonst noch fehlt:
- * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich }.
+ * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich, kochen, fehlt, bons, preisalarm }.
  */
 export const opZusammen = (items, ki = {}, mehr = {}) => ({
   typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
-  amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []),
+  amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
+  fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}),
 });
 /**
  * Zwei Zeilen sind dasselbe: von kommt zu nach, und alles, was künftig unter
@@ -309,6 +416,16 @@ export const opAbteilung = (werte) => ({ typ: 'abteilung', werte: klon(werte) })
 /** Amys Rezept anlegen oder ändern (ganz ersetzen) – für beide; wegwerfen mit opAmyWeg. */
 export const opAmy = (r, by) => ({ typ: 'amy', r: klon(r), by: by || null, at: jetzt() });
 export const opAmyWeg = (id) => ({ typ: 'amyWeg', id });
+/** Der Kochstand einer Person (kochstand.js) – ersetzt einen älteren; eine noch nicht gesendete Fassung ersetzt die vorige (ersetzt). */
+export const opKochen = (wer, stand, at) => ({ typ: 'kochen', wer: kochenName(wer), stand: klon(stand), at, ersetzt: `kochen:${kochenName(wer)}` });
+/** Im Laden nicht bekommen: bleibt für den nächsten Einkauf offen (mit dem Laden, in dem es fehlte). */
+export const opFehlt = (k, laden, by) => ({ typ: 'fehlt', k, laden: laden || '', by: by || null, at: jetzt() });
+export const opFehltWeg = (k) => ({ typ: 'fehltWeg', k });
+/** Was es gekostet hat: { eur, q, u, laden } – die letzten fünf je Zutat zählen. */
+export const opBon = (k, bon, by) => ({ typ: 'bon', k, bon: { ...klon(bon), by: by || null, at: bon?.at || jetzt() } });
+export const opBonWeg = (k, at) => ({ typ: 'bonWeg', k, at });
+/** Wunschpreis je Zutat (max in Euro je u: kg, l oder Stk); null löscht ihn. */
+export const opPreisalarm = (k, alarm, by) => ({ typ: 'preisalarm', k, alarm: alarm ? { ...klon(alarm), by: by || null, at: jetzt() } : null });
 /** Amys Tags für ein Rezept setzen (ganz ersetzen; leer nimmt sie weg). */
 export const opAmyTags = (id, tags) => ({ typ: 'amyTags', id, tags: klon(Array.isArray(tags) ? tags : []) });
 /** Ein Rezept aus der Resteverwertung für beide behalten – oder wieder wegwerfen. */
@@ -357,11 +474,49 @@ function aendere(s, op) {
       if (d.custom || !rids.length) d.checked = op.done === true;
       d.by = op.done ? op.by : null;
       d.at = op.at;
+      // Doch bekommen: die Markierung „nicht bekommen“ ist erledigt
+      if (op.done && istObj(s.fehlt)) delete s.fehlt[op.k];
       return;
     }
     case 'loeschen':
       delete s.items[op.k];
+      if (istObj(s.fehlt)) delete s.fehlt[op.k];
       return;
+    case 'fehlt':
+      if (!d || !SCHLUESSEL.test(String(op.k))) return;
+      if (!istObj(s.fehlt)) s.fehlt = {};
+      s.fehlt[op.k] = { laden: LADEN_NAME.test(String(op.laden || '')) ? op.laden : '', at: op.at, by: op.by || null };
+      return;
+    case 'fehltWeg':
+      if (istObj(s.fehlt)) delete s.fehlt[op.k];
+      return;
+    case 'bon': {
+      const b = SCHLUESSEL.test(String(op.k)) ? bonBereinigen(op.bon) : null;
+      if (!b) return;
+      if (!istObj(s.bons)) s.bons = {};
+      const liste = (s.bons[op.k] || []).filter((x) => x.at !== b.at);
+      delete s.bons[op.k];
+      s.bons[op.k] = [...liste, b].slice(-MAX_BONS_JE);
+      const alle = Object.keys(s.bons);
+      for (const k of alle.slice(0, Math.max(0, alle.length - MAX_BONS))) delete s.bons[k];
+      return;
+    }
+    case 'bonWeg': {
+      if (!istObj(s.bons) || !Array.isArray(s.bons[op.k])) return;
+      const rest = s.bons[op.k].filter((x) => x.at !== op.at);
+      if (rest.length) s.bons[op.k] = rest; else delete s.bons[op.k];
+      return;
+    }
+    case 'preisalarm': {
+      if (!SCHLUESSEL.test(String(op.k))) return;
+      if (!istObj(s.preisalarm)) s.preisalarm = {};
+      const a = op.alarm ? alarmBereinigen(op.alarm) : null;
+      delete s.preisalarm[op.k];
+      if (a) s.preisalarm[op.k] = a;
+      const alle = Object.keys(s.preisalarm);
+      for (const k of alle.slice(0, Math.max(0, alle.length - MAX_ALARME))) delete s.preisalarm[k];
+      return;
+    }
     case 'setzen':
       if (SCHLUESSEL.test(String(op.k)) && istObj(op.item)) s.items[op.k] = klon(op.item);
       return;
@@ -372,9 +527,11 @@ function aendere(s, op) {
         for (const [rid, p] of t) if (p.done === true) delete e.parts[rid];
         if (!teileVon(e).length && (!e.custom || e.checked === true)) delete s.items[k];
       }
+      if (istObj(s.fehlt)) for (const k of Object.keys(s.fehlt)) if (!s.items[k]) delete s.fehlt[k];
       return;
     case 'leeren':
       s.items = {};
+      s.fehlt = {};
       return;
     case 'bewerten':
       if (!SCHLUESSEL.test(String(op.rid))) return;
@@ -431,6 +588,28 @@ function aendere(s, op) {
       }
       if (Array.isArray(op.ungleich)) {
         s.ungleich = [...new Set([...(Array.isArray(s.ungleich) ? s.ungleich : []), ...op.ungleich.filter((x) => typeof x === 'string' && x.includes('|'))])].slice(-MAX_UNGLEICH);
+      }
+      if (istObj(op.kochen)) {
+        if (!istObj(s.kochen)) s.kochen = {};
+        for (const [w, k] of Object.entries(op.kochen)) {
+          const b = kochenName(w) && !s.kochen[kochenName(w)] && Object.keys(s.kochen).length < MAX_KOCHEN ? kochenBereinigen(k) : null;
+          if (b) s.kochen[kochenName(w)] = b;
+        }
+      }
+      if (istObj(op.fehlt)) {
+        if (!istObj(s.fehlt)) s.fehlt = {};
+        for (const [k, f] of Object.entries(op.fehlt)) if (SCHLUESSEL.test(k) && istObj(f) && s.items[k] && !s.fehlt[k]) s.fehlt[k] = { laden: LADEN_NAME.test(String(f.laden || '')) ? f.laden : '', at: text(f.at, 40) || '', by: text(f.by, 40) };
+      }
+      if (istObj(op.bons)) {
+        if (!istObj(s.bons)) s.bons = {};
+        for (const [k, liste] of Object.entries(op.bons)) {
+          const b = SCHLUESSEL.test(k) && !s.bons[k] && Array.isArray(liste) ? liste.map(bonBereinigen).filter(Boolean).slice(-MAX_BONS_JE) : [];
+          if (b.length) s.bons[k] = b;
+        }
+      }
+      if (istObj(op.preisalarm)) {
+        if (!istObj(s.preisalarm)) s.preisalarm = {};
+        for (const [k, a] of Object.entries(op.preisalarm)) { const b = SCHLUESSEL.test(k) && !s.preisalarm[k] ? alarmBereinigen(a) : null; if (b) s.preisalarm[k] = b; }
       }
       return;
     case 'kiBehalten': {
@@ -537,6 +716,10 @@ function aendere(s, op) {
         s.items[nach] = { ...a, name: text(z.name, 120) || a.name, cat: text(z.cat, 20) || a.cat };
         delete s.items[von];
       }
+      if (istObj(s.fehlt) && s.fehlt[von]) {
+        if (!s.fehlt[nach] && s.items[nach]) s.fehlt[nach] = s.fehlt[von];
+        delete s.fehlt[von];
+      }
       if (!istObj(s.gleich)) s.gleich = {};
       for (const k of [von, ...(Array.isArray(op.namen) ? op.namen : [])]) {
         if (SCHLUESSEL.test(String(k)) && k !== nach && !String(k).startsWith('c-')) s.gleich[k] = nach;
@@ -563,6 +746,18 @@ function aendere(s, op) {
       }
       const alle = Object.keys(s.abteilungen);
       for (const k of alle.slice(0, Math.max(0, alle.length - MAX_ABTEILUNGEN))) delete s.abteilungen[k];
+      return;
+    }
+    case 'kochen': {
+      const w = kochenName(op.wer);
+      if (!w || !istObj(op.stand) || !text(op.at, 40)) return;
+      if (!istObj(s.kochen)) s.kochen = {};
+      const alt = s.kochen[w];
+      // Wer zuletzt etwas geändert hat, gewinnt – eine ältere Fassung kommt nicht mehr drüber
+      if (alt && String(alt.at) > String(op.at)) return;
+      if (!alt && Object.keys(s.kochen).length >= MAX_KOCHEN) return;
+      const b = kochenBereinigen({ ...op.stand, at: op.at });
+      if (b) s.kochen[w] = b;
       return;
     }
     case 'amyTags': {

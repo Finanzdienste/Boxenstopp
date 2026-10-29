@@ -23,16 +23,17 @@
  * höchstens 45 Minuten). Was innerhalb von 20 Sekunden abgehakt wird, hat
  * man zusammen gemacht – solche Bündel zählen nur für den Faktor.
  *
- * Nur auf diesem Handy (localStorage): Wer kocht, hat sein Handy in der Hand,
- * und jeder kocht in seinem Tempo. Ohne DOM, damit die Tests es direkt
- * prüfen; die Uhr kommt als Zahl herein.
+ * Jeder kocht in seinem Tempo: Die Arbeitskopie liegt im localStorage, mit
+ * der gemeinsamen Liste geht sie je Person auf ihre anderen Geräte
+ * (kochstand.js – tempoRoh, tempoUebernehmen, tempoBeobachten). Ohne DOM,
+ * damit die Tests es direkt prüfen; die Uhr kommt als Zahl herein.
  */
 import { lese, schreibe } from './kern.js';
 import { phasenMinuten, runden5, zeitVon, hatGarzeit } from './zeiten.js';
 
 const SPEICHER = 'boxenstopp.tempo.v1';
 const BUENDEL_S = 20;
-const MAX_PROBEN = 500;
+const MAX_PROBEN = 300;
 const MAX_LAEUFE = 5;
 const ALT_MS = 8 * 3600 * 1000;
 const FEST = 1;
@@ -41,6 +42,7 @@ const RUHE = 4;
 
 let daten = null;
 let gelernt = null;
+let beobachter = () => {};
 
 /* -------------------------------------------------------------- Speicher */
 
@@ -57,6 +59,18 @@ function laden() {
 function merken() {
   gelernt = null;
   schreibe(SPEICHER, daten);
+  beobachter();
+}
+
+/** Für kochstand.js: wer von jeder Änderung hören will, … */
+export const tempoBeobachten = (fn) => { beobachter = typeof fn === 'function' ? fn : () => {}; };
+/** … der ganze Stand als Kopie … */
+export const tempoRoh = () => JSON.parse(JSON.stringify(laden()));
+/** … und ein Stand von einem anderen Gerät, ohne dass es als eigene Änderung zählt. */
+export function tempoUebernehmen(roh) {
+  schreibe(SPEICHER, roh && typeof roh === 'object' ? roh : { offen: {}, proben: [], gesamt: {} });
+  daten = null;
+  gelernt = null;
 }
 
 /* ----------------------------------------------------------------- Hilfe */

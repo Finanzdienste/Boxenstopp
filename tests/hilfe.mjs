@@ -53,7 +53,7 @@ const CORS = {
 
 export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste', repo = 'Boxenstopp-Daten', pfad = 'liste.json' } = {}) {
   // dateien: weitere Dateien im Repo, die die App nur liest (z. B. angebote-privat.json) – Pfad → Inhalt (Text)
-  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, lesen: {} };
+  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, shas: {}, lesen: {} };
   const basis = `https://api.github.com/repos/${owner}/${repo}`;
   let alt = null; // für staleEinmal: die Fassung vor dem letzten Schreiben
 
@@ -71,7 +71,18 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
       const inhalt = zustand.dateien[weitere];
       if (inhalt === undefined) return antwort(404, { message: 'Not Found' });
       if (/raw/.test(req.headers().accept || '')) return r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/vnd.github.raw+json; charset=utf-8' }, body: inhalt });
-      return antwort(200, { sha: 'weitere', encoding: 'base64', content: Buffer.from(inhalt).toString('base64') });
+      return antwort(200, { sha: zustand.shas[weitere] || 'weitere', encoding: 'base64', content: Buffer.from(inhalt).toString('base64') });
+    }
+    // Andere Dateien schreiben (push.json): mit sha wie bei GitHub, 409 bei einer veralteten
+    if (weitere && weitere !== pfad && req.method() === 'PUT') {
+      const body = JSON.parse(req.postData() || '{}');
+      const da = zustand.dateien[weitere] !== undefined;
+      const sha = zustand.shas[weitere] || 'weitere';
+      if ((da && body.sha !== sha) || (!da && body.sha)) { zustand.konflikte++; return antwort(409, { message: `${weitere} does not match ${body.sha}` }); }
+      zustand.dateien[weitere] = Buffer.from(body.content, 'base64').toString('utf8');
+      zustand.shas[weitere] = `w${(zustand.wVersion = (zustand.wVersion || 0) + 1)}`;
+      zustand.nachrichten.push(body.message);
+      return antwort(da ? 200 : 201, { content: { sha: zustand.shas[weitere], path: weitere } });
     }
     if (url === `${basis}/contents/${pfad}`) {
       if (req.method() === 'GET') {
@@ -141,14 +152,17 @@ export function tierAttrappe() {
   };
 }
 
-export async function handy(browser, { attrappe = null, tiere = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null } = {}) {
+export async function handy(browser, { attrappe = null, tiere = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null } = {}) {
   const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow', ...(userAgent ? { userAgent } : {}) });
   if (skript) await ctx.addInitScript(skript);
+  // z. B. ['notifications', 'clipboard-read', 'clipboard-write'] – Headless-Chromium verweigert Mitteilungen sonst
+  if (rechte) await ctx.grantPermissions(rechte, { origin: new URL(APP_URL).origin });
   if (attrappe) await ctx.route('https://api.github.com/**', attrappe.route);
   else await ctx.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
   await ctx.route(TIER_HOSTS, tiere ? tiere.route : (r) => r.abort('blockedbyclient'));
   // Die Angebote der Woche: in den Tests immer dieselben (tests/daten/angebote.json), nie das echte Feld
   await ctx.route('**/daten/angebote.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote.json'), 'utf8') }));
+  await ctx.route('**/daten/preisverlauf.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'preisverlauf.json'), 'utf8') }));
   const page = await ctx.newPage();
   const fehler = [];
   page.on('pageerror', (e) => fehler.push(`PAGEERROR: ${e.message}`));
@@ -166,4 +180,5 @@ export async function handy(browser, { attrappe = null, tiere = null, takt = 400
   return { ctx, page, fehler };
 }
 
-export const starteBrowser = () => chromium.launch();
+/** voll: das ganze Chromium statt der Headless-Shell – nur dort lassen sich Mitteilungen erlauben (Push). */
+export const starteBrowser = ({ voll = false } = {}) => chromium.launch(voll ? { channel: 'chromium' } : {});

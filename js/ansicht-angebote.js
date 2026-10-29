@@ -38,10 +38,12 @@
  */
 import { app, $, melde, zeigeReiter, lese, schreibe } from './kern.js';
 import { esc, tagKurz, heute } from './format.js';
-import { angeboteBereinigen, zeileLesen, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN, angebotRabatt, nachRabatt, grundpreis, istHaehnchen, ladenWahl, rabattText, GUENSTIG_AB, woche, inWoche, abText, besteJeLaden } from './angebote.js';
+import { angeboteBereinigen, zeileLesen, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN, angebotRabatt, nachRabatt, grundpreis, istHaehnchen, ladenWahl, rabattText, GUENSTIG_AB, woche, inWoche, abText, besteJeLaden, einheitsPreis, preisJe, preisalarmTreffer } from './angebote.js';
+import { verlaufHinweis, wochenSchluessel } from './preisverlauf.js';
+import { nameSchluessel } from './format.js';
 import { kiAnfragen, anbieterVon, ANBIETER, KI_FEHLER } from './ki.js';
 import { ladeKi } from './zugang.js';
-import { opAngeboteDazu, opAngebote, opAngebotWeg } from './liste.js';
+import { opAngeboteDazu, opAngebote, opAngebotWeg, opPreisalarm } from './liste.js';
 import { oeffneRezept, rezeptAufListe } from './ansicht-rezepte.js';
 import { rezeptStand } from './liste.js';
 import { fotoVorbereiten, resteMitAngeboten, oeffneEinrichten } from './ansicht-ki.js';
@@ -53,6 +55,7 @@ const KAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentC
 const BILD = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l4.5-4.5 3.5 3.5 2.5-2.5L20 17"/><circle cx="15.5" cy="9.5" r="1.4"/></svg>';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+const GLOCKE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>';
 const RUNTER = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5"/></svg>';
 
 const AUTO = 'boxenstopp.angebote.auto.v1'; // daten/angebote.json
@@ -101,6 +104,10 @@ const automatisch = () => autoIn(W());
 const eigene = () => eigeneIn(W());
 /** Alles, was in der gewählten Woche gilt – eigene zuerst, damit sie bei gleichem Namen gewinnen. */
 const eintraege = () => [...eigene(), ...automatisch()];
+/** Alle Angebote, egal welche Woche – für die Glocke und den Preisalarm. */
+const eintraegeAlle = () => [...(app.listeDa ? app.stand.angebote?.eintraege || [] : []), ...(auto?.angebote || [])];
+/** Für die Liste und den Push: alle Treffer der Preisalarme, diese und nächste Woche. */
+export const alarmTrefferJetzt = () => preisalarmTreffer(app.stand.preisalarm || {}, [...inWoche(eintraegeAlle(), woche('diese')), ...inWoche(eintraegeAlle(), woche('naechste'))], app.katalog);
 /** Nur die Angebote des gewählten Ladens – oder alle, wenn keiner gewählt ist. */
 const imLaden = (liste) => (laden ? liste.filter((a) => a.laden === laden) : liste);
 /** Die Läden, die der Abruf kennt (daten/angebote.json) – die stehen immer zur Wahl, auch wenn gerade nichts da ist. */
@@ -188,15 +195,24 @@ function bildHTML(a) {
   return `<span class="a-bild a-bild-zb"><img src="${esc(ersatz)}" alt="" loading="lazy" decoding="async"></span>`;
 }
 
+/** Woran ein Preisalarm das Angebot erkennt: die Rezeptzutat, sonst der Name. */
+const alarmSchluessel = (a) => (a.k && app.katalog[a.k] ? a.k : nameSchluessel(a.name));
+
 function zeileHTML(a, { eigen = false, mitLaden = false } = {}) {
   const r = angebotRabatt(a, app);
   const gp = grundpreis(a);
+  const ep = einheitsPreis(a);
+  // Der Preisverlauf („Tiefstpreis seit 8 Wochen“) – nicht, wenn es teurer ist als das, was ihr sonst zahlt
+  const hinweis = ep && a.k && !(r !== null && r < 0) ? verlaufHinweis(app.preisverlauf, a.k, ep.wert, ep.u, wochenSchluessel(new Date())) : null;
+  const ak = alarmSchluessel(a);
+  const alarm = app.stand.preisalarm?.[ak];
   const sub = [
     mitLaden ? `<span class="a-ladenname">${esc(a.laden)}</span>` : '',
     a.k && app.katalog[a.k] ? `<span>→ ${esc(app.katalog[a.k].n)}</span>` : '<span class="a-ohne">keine Rezeptzutat</span>',
     gp ? `<span>${esc(gp)}</span>` : '',
     abText(a, W()) ? `<span class="a-ab">${esc(abText(a, W()))}</span>` : '',
     bisText(a) ? `<span>${esc(bisText(a))}</span>` : '',
+    hinweis ? `<span class="l-tief">${esc(hinweis.text)}</span>` : '',
   ].join('');
   // Die Plakette: wie viel günstiger als der übliche Discounter-Preis (Richtpreis) – nur, wenn es das ist
   const plakette = r !== null && r >= GUENSTIG_AB ? `<span class="a-rabatt" title="günstiger als der übliche Preis">${rabattText(r)}</span>` : '';
@@ -204,7 +220,18 @@ function zeileHTML(a, { eigen = false, mitLaden = false } = {}) {
 ${bildHTML(a)}
 <div class="item-main"><span class="item-name">${esc(a.name)}</span><span class="item-sub">${sub}</span></div>
 <span class="item-qty">${esc(angebotMenge(a))}${plakette}</span>
-${eigen ? `<button type="button" class="x" data-a-weg="${esc(a.id)}" aria-label="${esc(a.name)} entfernen">${X}</button>` : '<span></span>'}</li>`;
+${eigen ? `<button type="button" class="x" data-a-weg="${esc(a.id)}" aria-label="${esc(a.name)} entfernen">${X}</button>` : ep ? `<button type="button" class="a-glocke" data-a-alarm="${esc(a.id)}" aria-pressed="${!!alarm}" aria-label="${alarm ? `Preisalarm für ${esc(a.name)} aus` : `Bescheid sagen, wenn ${esc(a.name)} wieder so günstig ist`}"${app.listeDa ? '' : ' disabled'}>${GLOCKE}</button>` : '<span></span>'}</li>`;
+}
+
+/** Oben: Angebote, die zu einem Preisalarm passen – diese und nächste Woche. */
+function alarmHTML() {
+  const alarme = app.stand.preisalarm || {};
+  const n = Object.keys(alarme).length;
+  if (!n) return '';
+  const alle = [...inWoche(eintraegeAlle(), woche('diese')), ...inWoche(eintraegeAlle(), woche('naechste'))];
+  const treffer = preisalarmTreffer(alarme, alle, app.katalog);
+  const zeile = (t) => `<li><b>${esc(app.katalog[t.k]?.n || t.alarm.name || t.a.name)}</b> ${esc(preisJe(t.preis, t.alarm.u))} bei ${esc(t.a.laden)}${abText(t.a, woche('diese')) ? ` <span class="a-ab">${esc(abText(t.a, woche('diese')))}</span>` : t.a.von && t.a.von > woche('diese').bis ? ' <span class="a-ab">nächste Woche</span>' : ''}<small>${esc(t.a.name)} · Wunsch höchstens ${esc(preisJe(t.alarm.max, t.alarm.u))}</small></li>`;
+  return `<section class="a-alarm${treffer.length ? ' hat' : ''}" aria-label="Preisalarm"><p class="a-tipp-k">${GLOCKE}Preisalarm</p>${treffer.length ? `<ul>${treffer.map(zeile).join('')}</ul>` : `<p class="fine">Gerade nichts unter eurem Wunschpreis (${n} ${n === 1 ? 'Alarm' : 'Alarme'}).</p>`}</section>`;
 }
 
 function gruppenHTML(liste, { eigen = false } = {}) {
@@ -424,6 +451,7 @@ export function angeboteZeichnen() {
   el.innerHTML = `<button type="button" class="back nur-breit" data-act="angebote-zu">${ZURUECK}Alle Rezepte</button>
 <div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : wahlWoche === 'naechste' ? 'Angebote nächste Woche' : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
 ${wocheHTML()}
+${alarmHTML()}
 ${sprung}
 ${empfehlungHTML()}
 ${laedenHTML()}
@@ -540,6 +568,22 @@ const ladenAusText = (t) => { const m = t.match(new RegExp(`\\b(${LAEDEN.join('|
 
 export function klickAngebote(el) {
   const d = el.dataset;
+  if (d.aAlarm) {
+    const a = eintraegeAlle().find((x) => x.id === d.aAlarm);
+    const ep = a && einheitsPreis(a);
+    if (!ep) return true;
+    const k = alarmSchluessel(a);
+    const vorher = app.stand.preisalarm?.[k] || null;
+    if (vorher) {
+      app.aendern(opPreisalarm(k, null));
+      melde('Preisalarm aus', { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opPreisalarm(k, vorher, vorher.by)) });
+    } else {
+      const name = app.katalog[k]?.n || a.name;
+      app.aendern(opPreisalarm(k, { max: Math.ceil(ep.wert * 100) / 100, u: ep.u, name }, app.name()));
+      melde(`Preisalarm: ${name} ab ${preisJe(ep.wert, ep.u)} – die App sagt Bescheid, wenn es wieder so günstig ist`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opPreisalarm(k, null)) });
+    }
+    return true;
+  }
   if (d.aFotoWeg !== undefined) { fotoWeg(Number(d.aFotoWeg)); return true; }
   if (d.aWeg) {
     const a = (app.stand.angebote?.eintraege || []).find((x) => x.id === d.aWeg);

@@ -22,8 +22,9 @@ import { euro, kostenRezept } from './kosten.js';
 import { zutatImg, rezeptBildchen, bildPfad } from './bilder.js';
 import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, opAnpinnen, DAUMEN } from './liste.js';
+import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
+import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
 
-const SCHRITTE = 'boxenstopp.schritte.v2';
 const TOPF = 'boxenstopp.topf.v1';
 const ZUGEKLAPPT = 'boxenstopp.zugeklappt.v1';
 
@@ -115,7 +116,6 @@ let zeilen = [];
 /** Die Bereiche im Rezept, die zugeklappt sind (Zutaten, Zubereitung …) – das Handy merkt sie sich für alle Rezepte. */
 const zugeklappt = new Set((lese(ZUGEKLAPPT, []) || []).filter((x) => typeof x === 'string'));
 let rasterScroll = 0;
-const schritte = lese(SCHRITTE, {}) || {};
 
 export const offenesRezept = () => aktuell;
 
@@ -468,6 +468,7 @@ function zubereitungHTML(r) {
   <p class="sec-lead" id="d-tempo">${tempoText(zeit)}</p>
   ${schalen ? `<div class="mise"><h3 class="sub-h">Stell dir bereit</h3><ul class="schalen">${schalen}</ul>${r.geraete?.length ? `<p class="geraete"><b>Außerdem:</b> ${r.geraete.map(esc).join(', ')}, Waage</p>` : ''}</div>` : ''}
   <div class="steps-tools">
+    <button type="button" class="btn km-start" data-act="kochmodus">${KOCHMODUS_IC}Kochmodus</button>
     <button type="button" class="switch" id="wake" role="switch" aria-checked="false" data-act="wach" hidden><span class="sw" aria-hidden="true"></span>Bildschirm anlassen</button>
     <button type="button" class="linkbtn" id="reset-steps" data-act="schritte-zurueck" hidden>Haken zurücksetzen</button>
   </div>
@@ -683,16 +684,7 @@ export function klickRezepte(el) {
   }
   if ('step' in d) {
     const i = Number(d.step);
-    const vorher = new Set(schritte[aktuell] || []);
-    const s = new Set(vorher);
-    if (s.has(i)) s.delete(i); else s.add(i);
-    schritte[aktuell] = [...s];
-    schreibe(SCHRITTE, schritte);
-    schritteZeichnen();
-    // Die Zeit zwischen den Haken ist das Tempo (tempo.js)
-    tempoHaken(app.nachId[aktuell], i, s.has(i));
-    // Phase fertig? Alles fertig? Dann gibt es Lob – und zum Schluss ein Tier.
-    lobPruefen(app.nachId[aktuell], s, vorher, { name: app.name() });
+    schrittUmschalten(aktuell, i, !schritteVon(aktuell).has(i));
     return true;
   }
   if ('timer' in d && el.closest('#detail')) {
@@ -721,7 +713,21 @@ export function klickRezepte(el) {
       app.aendern(opGekocht(aktuell, heute(), app.name()));
       lobGross({ rezept: app.nachId[aktuell], name: app.name(), grund: 'gekocht' }).then((da) => { if (!da) melde('Eingetragen: heute gekocht'); });
       return true;
-    case 'schritte-zurueck': schritte[aktuell] = []; schreibe(SCHRITTE, schritte); schritteZeichnen(); tempoZurueck(aktuell); return true;
+    case 'schritte-zurueck': schritteSetzen(aktuell, []); schritteZeichnen(); tempoZurueck(aktuell); return true;
+    case 'kochmodus': {
+      const r = app.nachId[aktuell];
+      if (!r) return true;
+      kochmodusOeffnen({
+        rezept: r,
+        text: (s) => schrittText(s.d, r),
+        minuten: (i) => { const s = r.ablauf.flatMap((p) => p.schritte)[i]; return s && !planVon(s) ? zeitFuer(r).schritte[i]?.min ?? s.min : null; },
+        umschalten: (i, an) => schrittUmschalten(r.id, i, an),
+        timerKnopf,
+        timerUmschalten,
+        beimSchliessen: () => { if (aktuell === r.id) { schritteZeichnen(); timerZeichnen(); } },
+      });
+      return true;
+    }
     case 'tempo-weg': {
       const alt = tempoLoeschen();
       tempoNeu();
@@ -745,6 +751,33 @@ export function klickRezepte(el) {
     case 'wach': setzeWach(!wachSperre); return true;
     default: return false;
   }
+}
+
+/**
+ * Einen Schritt abhaken oder wieder öffnen – aus der Liste und aus dem
+ * Kochmodus. Die Zeit zwischen den Haken ist das Tempo (tempo.js); ist eine
+ * Phase oder alles fertig, gibt es Lob und zum Schluss ein Tier.
+ */
+export function schrittUmschalten(rid, i, an) {
+  const r = app.nachId[rid];
+  if (!r) return;
+  const vorher = schritteVon(rid);
+  if (vorher.has(i) === an) return;
+  const s = new Set(vorher);
+  if (an) s.add(i); else s.delete(i);
+  schritteSetzen(rid, s);
+  if (rid === aktuell) schritteZeichnen();
+  tempoHaken(r, i, an);
+  lobPruefen(r, s, vorher, { name: app.name() });
+}
+
+/** Der Kochstand kam von einem anderen Gerät: Haken und Zeiten im offenen Rezept neu, sonst das Raster. */
+export function kochstandZeichnen() {
+  if (aktuell && app.nachId[aktuell]) {
+    const y = window.scrollY;
+    oeffneRezept(aktuell, { still: true });
+    window.scrollTo(0, y);
+  } else rasterZeichnen();
 }
 
 /** Nach „Tempo vergessen“: Zeiten im offenen Rezept und im Raster neu. */

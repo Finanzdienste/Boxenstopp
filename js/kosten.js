@@ -4,7 +4,9 @@
  * Einkaufsliste und für eigene Rezepte aus der Resteverwertung, die noch
  * keine Kosten mitbringen. Die festen Rezepte haben `kosten` schon drin.
  *
- * Richtwerte, keine Tagespreise: In der App steht immer „≈“ davor.
+ * Richtwerte, keine Tagespreise: In der App steht immer „≈“ davor. Habt
+ * ihr auf der Liste eingetippt, was etwas wirklich gekostet hat (Bon), gilt
+ * dafür euer Preis – der Median der letzten fünf (preiseMitBons).
  */
 
 /** „2,30 €“, unter 10 € mit zwei Stellen, darüber gerundet. */
@@ -20,6 +22,35 @@ function gramm(k, q, u, naehrwerte) {
   if (u === 'g' || u === 'ml') return q;
   const n = naehrwerte?.[k];
   return n && n.u === u && n.je ? q * n.je : 0;
+}
+
+const median = (xs) => {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+
+/**
+ * Die Richtpreise mit euren Bons: { <Schlüssel>: { je_g, eur, menge, u, bon: n } }.
+ * Gramm und Milliliter direkt, Stückware über das Stückgewicht aus den
+ * Nährwerten (je), sonst je Einheit.
+ */
+export function preiseMitBons(preise = {}, bons = {}, naehrwerte = {}) {
+  const neu = { ...preise };
+  for (const [k, liste] of Object.entries(bons || {})) {
+    if (!Array.isArray(liste) || !liste.length) continue;
+    const n = naehrwerte?.[k];
+    const jeG = liste.map((b) => (b.u === 'g' || b.u === 'ml' ? b.eur / b.q : n?.u === b.u && n.je ? b.eur / (b.q * n.je) : null)).filter((x) => x !== null && Number.isFinite(x));
+    if (jeG.length) {
+      const m = median(jeG);
+      neu[k] = { ...(preise?.[k] || {}), je_g: m, eur: m * 1000, menge: 1000, u: 'g', bon: jeG.length };
+      continue;
+    }
+    const u = liste[liste.length - 1].u;
+    const je = liste.filter((b) => b.u === u).map((b) => b.eur / b.q);
+    if (je.length) neu[k] = { ...(preise?.[k] || {}), je_g: preise?.[k]?.je_g, eur: median(je), menge: 1, u, bon: je.length };
+  }
+  return neu;
 }
 
 /** Euro für eine Menge einer Katalogzutat – null, wenn kein Preis bekannt ist. */

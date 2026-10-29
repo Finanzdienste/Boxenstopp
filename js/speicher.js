@@ -32,7 +32,7 @@
  *   jetzt()   sofort abgleichen
  *   stop()
  */
-import { leer, anwenden, bereinigen, opZusammen } from './liste.js';
+import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig } from './liste.js';
 
 export const API = 'https://api.github.com';
 export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: 'liste.json' };
@@ -68,6 +68,33 @@ export async function privatLesen(pfad, { token, api = API, ort = DATEN } = {}) 
   } catch {
     return null;
   }
+}
+
+/**
+ * Eine weitere JSON-Datei im Daten-Repo ändern (push.json): holen,
+ * aendern(alt) → neu, mit der sha zurückschreiben; war jemand schneller,
+ * noch einmal. Wirft mit einem Satz für die Anzeige, wenn es nicht geht.
+ */
+export async function privatSchreiben(pfad, aendern, { token, api = API, ort = DATEN, nachricht = '' } = {}) {
+  if (!token) throw new Error('Erst die gemeinsame Liste einrichten.');
+  const url = `${api}/repos/${ort.owner}/${ort.repo}/contents/${pfad}`;
+  const kopf = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
+  for (let versuch = 0; versuch < 4; versuch++) {
+    let r;
+    try { r = await fetch(url, { headers: kopf, cache: 'no-store' }); } catch { throw new Error('Keine Verbindung zu GitHub.'); }
+    if (r.status !== 404 && !r.ok) throw new Error('GitHub antwortet gerade nicht.');
+    const j = r.status === 404 ? null : await r.json();
+    let alt = null;
+    try { alt = j?.content ? JSON.parse(ausB64(j.content)) : null; } catch { alt = null; }
+    const neu = aendern(alt);
+    const body = { message: nachricht || `${pfad} geändert`, content: zuB64(`${JSON.stringify(neu, null, 1)}\n`), ...(j?.sha ? { sha: j.sha } : {}) };
+    let w;
+    try { w = await fetch(url, { method: 'PUT', headers: { ...kopf, 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' }); } catch { throw new Error('Keine Verbindung zu GitHub.'); }
+    if (w.ok) return neu;
+    if (w.status !== 409 && w.status !== 422) throw new Error('GitHub hat das nicht gespeichert.');
+    await warte(300 * (versuch + 1));
+  }
+  throw new Error('GitHub hat das nicht gespeichert – gleich nochmal versuchen.');
 }
 
 /** Was nur auf diesem Handy steht – zum Übernehmen in die gemeinsame Liste. */
@@ -123,6 +150,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
   const g = lese(GITHUB, null);
   let remote = { sha: g?.sha || null, etag: g?.etag || null, stand: bereinigen(g?.stand) };
   let offen = (() => { const o = lese(OFFEN, []); return Array.isArray(o) ? o : []; })();
+  let imFlug = 0; // so viele Änderungen vorn in `offen` sind gerade unterwegs zu GitHub
 
   let melden = () => {};
   let meldeStatus = () => {};
@@ -188,7 +216,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
             // Schreiben weg. Dann kommt, was dieses Handy davon kannte, wieder dazu.
             const fehlt = (k) => roh && typeof roh === 'object' && !(k in roh);
             const mehr = {};
-            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
+            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
             if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
             if (Object.keys(mehr).length) {
               stand = anwenden(stand, opZusammen({}, {}, mehr));
@@ -220,9 +248,15 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
     sendeTimer = setTimeout(() => { sendeTimer = null; senden(); }, ms);
   };
 
-  function nachricht(paket) {
+  /*
+   * „Amy: Einkaufsliste, 3 Änderungen“ – mit „· Bescheid“ am Ende, wenn es
+   * eine Nachricht an die anderen wert ist (Neues auf der Liste, ein neues
+   * Rezept, eine Notiz, alles eingekauft): Daran erkennt der Push im
+   * Daten-Repo, dass er laufen soll (.github/workflows/benachrichtigen.yml).
+   */
+  function nachricht(paket, vorher, nachher) {
     const wer = name ? `${name}: ` : '';
-    return `${wer}Einkaufsliste, ${paket.length} ${paket.length === 1 ? 'Änderung' : 'Änderungen'}`;
+    return `${wer}Einkaufsliste, ${paket.length} ${paket.length === 1 ? 'Änderung' : 'Änderungen'}${bescheidNoetig(vorher, nachher) ? ' · Bescheid' : ''}`;
   }
 
   async function senden() {
@@ -233,9 +267,10 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
     try {
       for (let versuch = 0; versuch < 6 && offen.length; versuch++) {
         const paket = offen.slice();
+        imFlug = paket.length;
         const neu = anwenden(remote.stand, paket);
         neu.rev = (remote.stand.rev || 0) + 1;
-        const body = { message: nachricht(paket), content: zuB64(`${JSON.stringify(neu, null, 1)}\n`) };
+        const body = { message: nachricht(paket, remote.stand, neu), content: zuB64(`${JSON.stringify(neu, null, 1)}\n`) };
         if (remote.sha) body.sha = remote.sha;
         let r;
         try {
@@ -272,6 +307,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
       else status('ok');
     } finally {
       sendet = false;
+      imFlug = 0;
       if (offen.length && !sendeTimer && zustand !== 'zugang' && zustand !== 'offline') plane(400);
       else if (!offen.length && zustand === 'sendet') status('ok');
     }
@@ -294,7 +330,11 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
       window.addEventListener('online', wiederOnline);
     },
     aendern(op) {
-      offen.push(...alsListe(op));
+      for (const o of alsListe(op)) {
+        // Eine neuere Fassung (Kochstand) ersetzt die noch nicht gesendete – was schon unterwegs ist, bleibt
+        if (o?.ersetzt) offen = [...offen.slice(0, imFlug), ...offen.slice(imFlug).filter((x) => x?.ersetzt !== o.ersetzt)];
+        offen.push(o);
+      }
       merkeOffen();
       zeige();
       if (zustand !== 'zugang') status(zustand === 'offline' ? 'offline' : 'sendet');

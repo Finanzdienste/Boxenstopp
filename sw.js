@@ -27,7 +27,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v25';
+const VERSION = 'v26';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 
@@ -44,8 +44,14 @@ const SHELL = [
   './js/gleich.js',
   './js/zeiten.js',
   './js/tempo.js',
+  './js/kochstand.js',
+  './js/kochmodus.js',
   './js/amy.js',
   './js/ansicht-amy.js',
+  './js/amy-import.js',
+  './js/push.js',
+  './js/ansicht-push.js',
+  './js/preisverlauf.js',
   './js/ansicht-tablet.js',
   './js/ki-rezept.js',
   './js/ki.js',
@@ -111,6 +117,35 @@ self.addEventListener('activate', (event) => {
         .map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
+});
+
+/*
+ * Push-Nachrichten (werkzeug/push.mjs im Daten-Repo schickt sie): jede zeigt
+ * sich als Mitteilung – auf iPhone und iPad muss das so sein. Antippen holt
+ * die App nach vorn, am richtigen Reiter.
+ */
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch { d = { text: event.data ? event.data.text() : '' }; }
+  const titel = String(d.titel || 'Boxenstopp').slice(0, 80);
+  event.waitUntil(self.registration.showNotification(titel, {
+    body: String(d.text || '').slice(0, 240),
+    tag: String(d.tag || 'boxenstopp').slice(0, 40),
+    renotify: true,
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    data: { ziel: String(d.ziel || '').replace(/[^\w#-]/g, '').slice(0, 60) },
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const ziel = event.notification.data?.ziel || '';
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((fenster) => {
+    const da = fenster.find((c) => c.url.startsWith(self.registration.scope));
+    if (da) { da.postMessage({ boxenstopp: 'zeige', ziel }); return da.focus(); }
+    return self.clients.openWindow(`./index.html${ziel ? `#${ziel.replace(/^#/, '')}` : ''}`);
+  }));
 });
 
 self.addEventListener('fetch', (event) => {

@@ -12,8 +12,9 @@
 import { app, $, ansicht, zeigeReiter, melde, lese } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, API } from './speicher.js';
 import { opZusammen } from './liste.js';
+import { preiseMitBons } from './kosten.js';
 import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
-import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt } from './ansicht-rezepte.js';
+import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
@@ -22,6 +23,9 @@ import { lobStart, klickLob } from './lob.js';
 import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
 import { amyZeichnen, amyVorbereiten, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, aenderungAmy, absendenAmy, tasteAmy } from './ansicht-amy.js';
 import { tabletPruefen, klickTablet } from './ansicht-tablet.js';
+import { kochstandAbgleichen, kochstandStart } from './kochstand.js';
+import { klickPush, aenderungPush } from './ansicht-push.js';
+import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus, tasteKochmodus, wischStart, wischEnde } from './kochmodus.js';
 
 const apiBasis = () => lese('__api', null) || API;
 /** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
@@ -34,6 +38,10 @@ const takt = () => Number(lese('__takt', 0)) || 8000;
 function beiAenderung(stand) {
   app.stand = stand;
   app.listeDa = true;
+  // Was ihr wirklich bezahlt habt (Bons auf der Liste), gilt vor dem Richtpreis
+  app.preise = preiseMitBons(app.richtpreise, stand.bons, app.naehrwerte);
+  // Hat dieselbe Person auf einem anderen Gerät weitergekocht? Dann gilt hier ihr Stand (kochstand.js)
+  const kochNeu = kochstandAbgleichen(stand);
   kiAbgleichen();
   amyVorbereiten();
   listeZeichnen();
@@ -45,6 +53,7 @@ function beiAenderung(stand) {
   // Ein Rezept aus der Resteverwertung kann auf dem anderen Handy gelöscht worden sein.
   if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
   if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
+  if (kochNeu) { kochstandZeichnen(); kochmodusNeu(); }
 }
 function beiStatus(s) {
   app.status = s;
@@ -105,10 +114,12 @@ document.addEventListener('click', (ev) => {
     return;
   }
   if (el.disabled) return;
+  if (klickKochmodus(el)) return;
   if (el.dataset.tab) { zeigeReiter(el.dataset.tab); return; }
   if (klickLob(el)) return;
   if (klickTimer(el)) return;
   if (klickTablet(el)) return;
+  if (klickPush(el)) return;
   if (klickAmy(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
@@ -126,12 +137,16 @@ document.addEventListener('error', (ev) => {
   img.parentElement?.classList.add('a-bild-zb');
 }, true);
 document.addEventListener('keydown', (ev) => {
+  if (tasteKochmodus(ev)) { ev.preventDefault(); return; }
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target?.matches?.('[data-timer-zu]')) { ev.preventDefault(); zumTimerSchritt(ev.target); }
   // Enter im Tag-Feld legt den Tag an, statt das Rezept zu speichern
   if (ev.key === 'Enter' && !ev.isComposing && tasteAmy(ev.target)) ev.preventDefault();
 });
 document.addEventListener('input', (ev) => { if (!eingabeAmy(ev.target) && !eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungPush(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
+// Im Kochmodus: wischen zum Blättern
+document.addEventListener('touchstart', wischStart, { passive: true });
+document.addEventListener('touchend', wischEnde, { passive: true });
 // Ein Einkauf, der lange ruht, ist vorbei – auch wenn die App zwischendurch zu war
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wegPruefen(); });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
@@ -154,7 +169,8 @@ async function start() {
   app.katalog = daten.katalog;
   app.extras = daten.extras || {};
   app.naehrwerte = daten.naehrwerte || {};
-  app.preise = daten.preise || {};
+  app.richtpreise = daten.preise || {};
+  app.preise = app.richtpreise;
   app.preiseStand = daten.preise_stand || '';
   if (daten.ziel) app.ziel = daten.ziel;
   for (const r of app.rezepte) app.nachId[r.id] = r;
@@ -178,7 +194,10 @@ async function start() {
     leiste.hidden = !html;
     timerZeichnen();
     amyTimerZeichnen();
+    kochmodusTimerZeichnen();
   });
+  kochstandStart();
+  kochmodusAnmelden();
   filterZeichnen();
   rasterZeichnen();
   listeZeichnen();
@@ -186,6 +205,10 @@ async function start() {
   amyStart();
   // Die Angebote der Woche kommen nebenbei – ohne Netz bleibt der letzte Stand aus dem Speicher.
   fetch('daten/angebote.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((a) => { if (a) angeboteAutoSetzen(a); }).catch(() => {});
+  // Wie günstig es in den letzten Wochen war (werkzeug/preisverlauf.mjs)
+  fetch('daten/preisverlauf.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((v) => {
+    if (v && typeof v === 'object' && v.je) { app.preisverlauf = v; listeZeichnen(); angeboteZeichnen(); }
+  }).catch(() => {});
 
   if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
   if (hash === 'angebote') ansicht.tab = 'angebote';
@@ -214,6 +237,12 @@ start();
  * schon ein Worker da war – beim allerersten Besuch nicht.
  */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  // Eine Push-Mitteilung angetippt, die App war schon offen: an den passenden Reiter
+  navigator.serviceWorker.addEventListener('message', (ev) => {
+    if (ev.data?.boxenstopp !== 'zeige') return;
+    const ziel = String(ev.data.ziel || '');
+    if (app.nachId[ziel]) { zeigeReiter('rezepte'); oeffneRezept(ziel); } else zeigeReiter(['einkauf', 'angebote', 'amy'].includes(ziel) ? ziel : 'rezepte');
+  });
   const eigenerWorker = new URL('./sw.js', location.href).href;
   const hatteWorker = navigator.serviceWorker.controller?.scriptURL === eigenerWorker;
   navigator.serviceWorker.addEventListener('controllerchange', () => {

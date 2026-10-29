@@ -18,6 +18,10 @@
  * (mehrere Tags: Rezepte mit allen) und sortiert: neueste, Name, schnellste,
  * günstigste oder nach Tags gruppiert. Filter und Sortierung merkt sich das
  * Handy; die Tags selbst stehen in liste.json unter `amyTags`.
+ *
+ * Oben im Editor: „Rezept übernehmen“ – ein Foto (Kochbuch), ein Link oder
+ * kopierter Text, die KI füllt die Felder (amy-import.js) mit dem Schlüssel
+ * der Resteverwertung. Gespeichert wird erst mit „Speichern“.
  */
 import { app, $, $$, melde, zeigeReiter, lese, schreibe, istSchmal, ansicht } from './kern.js';
 import { esc, nf1, nfi } from './format.js';
@@ -30,9 +34,14 @@ import { timerKnopf, timerUmschalten, mengenHervor } from './ansicht-rezepte.js'
 import { tempoHaken, tempoZurueck, tempoZeit } from './tempo.js';
 import { lobPruefen, tierVorladen } from './lob.js';
 import { istIpad, TABLET_IC } from './ansicht-tablet.js';
+import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
+import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
+import { rumpfImport, importBereinigen, jsonAus, linkAus } from './amy-import.js';
+import { kiAnfragen, anbieterVon } from './ki.js';
+import { ladeKi } from './zugang.js';
+import { fotoVorbereiten, oeffneEinrichten } from './ansicht-ki.js';
 
 const ANSICHT = 'boxenstopp.amy.ansicht.v1';
-const SCHRITTE = 'boxenstopp.amy.schritte.v1';
 const ENTWURF = 'boxenstopp.amy.entwurf.v1';
 const FILTER = 'boxenstopp.amy.filter.v1'; // { tags: ['gesund'], sort: 'neu' } – nur auf diesem Handy
 const ARTEN = ['liste', 'detail', 'editor'];
@@ -44,7 +53,9 @@ let zustand = (() => {
 })();
 let entwurf = lese(ENTWURF, null);
 let loeschenFragen = false;
-const schritte = lese(SCHRITTE, {}) || {};
+let importFotos = []; // { url, b64 } – Fotos fürs Übernehmen, nur bis es geklappt hat
+let importLauf = null; // { controller } während die KI liest
+let importFehler = '';
 let filter = (() => {
   const f = lese(FILTER, null);
   return { tags: tagsBereinigen(f?.tags), sort: SORTEN.some(([k]) => k === f?.sort) ? f.sort : 'neu' };
@@ -221,7 +232,7 @@ ${einkaufen.length ? `<ul class="ings">${einkaufen.map(([z, i]) => zutatZeile(z,
 ${sonst.length ? `<h3 class="sub-h">Gewürze &amp; was da ist</h3><ul class="ings">${sonst.map(([z, i]) => zutatZeile(z, i, r.id)).join('')}</ul>` : ''}
 </section>
 <section class="sec amy-sec" id="amy-zubereitung"><h2>So geht's <small>${esc(zeitText(t))}</small></h2>
-${x.ablauf.length ? `<p class="sec-lead">${t.art === 'gemessen' ? 'Die Zeit ist gemessen – so lange hat es beim letzten Mal gedauert.' : 'Hak die Schritte beim Kochen ab, dann lernt das Handy, wie lange du wirklich brauchst.'}</p>${phasen}<div class="steps-tools"><button type="button" class="linkbtn" id="amy-reset" data-act="amy-schritte-zurueck" hidden>Haken zurücksetzen</button></div>` : '<p class="fine">Noch keine Schritte.</p>'}
+${x.ablauf.length ? `<p class="sec-lead">${t.art === 'gemessen' ? 'Die Zeit ist gemessen – so lange hat es beim letzten Mal gedauert.' : 'Hak die Schritte beim Kochen ab, dann lernt das Handy, wie lange du wirklich brauchst.'}</p><div class="steps-tools"><button type="button" class="amy-btn km-start" data-act="amy-kochmodus">${KOCHMODUS_IC}Kochmodus</button></div>${phasen}<div class="steps-tools"><button type="button" class="linkbtn" id="amy-reset" data-act="amy-schritte-zurueck" hidden>Haken zurücksetzen</button></div>` : '<p class="fine">Noch keine Schritte.</p>'}
 </section>
 ${r.notiz ? `<section class="sec amy-sec"><h2>Notiz</h2><p class="amy-notiz">${esc(r.notiz)}</p></section>` : ''}`;
 }
@@ -268,6 +279,73 @@ function tagsEditorHTML(tags) {
   return `${dran}${vorschlaege.length ? `<div class="amy-tag-vorschlaege" role="group" aria-label="Tag dazunehmen">${vorschlaege.map((t) => `<button type="button" class="amy-chip" data-amy-tag-dazu="${esc(t)}">${PLUS}${esc(t)}</button>`).join('')}</div>` : ''}`;
 }
 
+const KAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg>';
+const MAX_IMPORT_FOTOS = 3;
+
+/** „Rezept übernehmen“: Fotos, Link oder Text – und was gerade passiert. */
+function importInnenHTML() {
+  const fotos = importFotos.map((f, i) => `<span class="amy-import-foto"><img src="${f.url}" alt="Foto ${i + 1}" width="56" height="56"><button type="button" class="amy-tag-x" data-amy-import-weg="${i}" aria-label="Foto ${i + 1} weg">${KREUZ}</button></span>`).join('');
+  const kann = importFotos.length < MAX_IMPORT_FOTOS;
+  return `<div class="amy-import-fotos">${fotos}${kann ? `<label class="amy-chip amy-import-knopf">${KAMERA}${importFotos.length ? 'Noch ein Foto' : 'Foto vom Rezept'}<input type="file" id="amy-import-foto" accept="image/*" multiple hidden${importLauf ? ' disabled' : ''}></label>` : ''}</div>
+<textarea id="amy-import-text" rows="3" maxlength="20000" placeholder="Oder einen Link einfügen (z. B. von Chefkoch) – oder den Rezepttext"${importLauf ? ' disabled' : ''}></textarea>
+${importFehler ? `<p class="zugang-fehler">${esc(importFehler)}${/Schlüssel/.test(importFehler) ? ' <button type="button" class="linkbtn" data-act="amy-import-einrichten">Schlüssel eintragen</button>' : ''}</p>` : ''}
+<div class="amy-knoepfe">${importLauf
+    ? '<span class="amy-import-laeuft" role="status">Die KI liest dein Rezept …</span><button type="button" class="btn btn-quiet" data-act="amy-import-stopp">Abbrechen</button>'
+    : `<button type="button" class="amy-btn" data-act="amy-import-los">${deko('sparkles')}Übernehmen</button>`}</div>`;
+}
+function importZeichnen() {
+  const el = $('#amy-import-inhalt');
+  if (!el) return;
+  const text = $('#amy-import-text')?.value || '';
+  el.innerHTML = importInnenHTML();
+  const t = $('#amy-import-text');
+  if (t) t.value = text;
+}
+
+async function importFotosDazu(dateien) {
+  const neu = [...dateien].filter((d) => /^image\//.test(d.type) || !d.type).slice(0, MAX_IMPORT_FOTOS - importFotos.length);
+  for (const d of neu) {
+    try { importFotos.push(await fotoVorbereiten(d)); } catch { importFehler = 'Ein Bild ließ sich nicht lesen.'; }
+  }
+  importZeichnen();
+}
+
+async function importieren() {
+  const schluessel = ladeKi();
+  const text = $('#amy-import-text')?.value || '';
+  importFehler = '';
+  if (!schluessel) { importFehler = 'Dafür braucht die App euren KI-Schlüssel – denselben wie bei der Resteverwertung.'; importZeichnen(); return; }
+  if (!text.trim() && !importFotos.length) { importFehler = 'Mach ein Foto vom Rezept, oder füg einen Link oder den Text ein.'; importZeichnen(); return; }
+  const anbieter = anbieterVon(schluessel);
+  if (linkAus(text) && anbieter !== 'gemini') { importFehler = 'Links liest die App nur mit dem Google-Schlüssel – kopier hier den Rezepttext rein.'; importZeichnen(); return; }
+  const lauf = { controller: new AbortController() };
+  importLauf = lauf;
+  importZeichnen();
+  try {
+    const rumpf = rumpfImport({ anbieter, text, fotos: importFotos.map((f) => f.b64), tags: alleTags(app.stand.amyTags).map(([t]) => t) });
+    const antwort = await kiAnfragen(rumpf, { schluessel, signal: lauf.controller.signal, roh: true });
+    const neu = importBereinigen(jsonAus(antwort.text));
+    if (neu.fehler) throw new Error(neu.fehler);
+    entwurfAusFormular();
+    const vorher = { ...entwurf };
+    entwurf = { ...entwurf, ...neu, tags: tagsBereinigen([...(entwurf.tags || []), ...neu.tags]) };
+    schreibe(ENTWURF, entwurf);
+    for (const f of importFotos) URL.revokeObjectURL(f.url);
+    importFotos = [];
+    importLauf = null;
+    // Neu bauen: Die Felder bekommen die übernommenen Werte
+    $('#view-amy').innerHTML = '';
+    amyZeichnen();
+    $('#amy-name')?.focus({ preventScroll: true });
+    melde('Übernommen ♡ Schau drüber, dann speichern', { knopf: 'Rückgängig', beiKnopf: () => { entwurf = vorher; schreibe(ENTWURF, entwurf); $('#view-amy').innerHTML = ''; amyZeichnen(); } });
+  } catch (e) {
+    importFehler = e?.art === 'abbruch' ? '' : (e?.message || 'Das hat nicht geklappt. Versuch es nochmal.');
+  } finally {
+    if (importLauf === lauf) importLauf = null;
+    importZeichnen();
+  }
+}
+
 /** Nach einer Änderung an den Tags nur diesen Teil des Editors neu – das Getippte bleibt. */
 function tagsNeuZeichnen() {
   const tags = entwurf?.tags || [];
@@ -291,6 +369,7 @@ function editorHTML() {
   return `<button type="button" class="back" data-act="amy-abbrechen">${ZURUECK}${HERZ}Amys Rezepte</button>
 <form class="amy-form" id="amy-form" autocomplete="off" novalidate>
 <h1 class="amy-titel amy-titel-klein">${neu ? 'Neues Rezept' : 'Rezept bearbeiten'} ${deko('sparkles')}</h1>
+<details class="amy-import"${neu && !e.name && !e.zutaten ? ' open' : ''}><summary>${deko('sparkles')}<span>Rezept übernehmen<small>aus einem Foto, einem Link oder Text – die KI füllt die Felder</small></span></summary><div class="amy-import-inhalt" id="amy-import-inhalt">${importInnenHTML()}</div></details>
 <label class="amy-feld"><span>Wie heißt es?</span><input id="amy-name" type="text" maxlength="80" required placeholder="z. B. Omas Pfannkuchen" value="${esc(e.name)}" enterkeyhint="next"></label>
 <fieldset class="amy-bilder"><legend>Ein Bildchen dazu</legend>${AMY_BILDER.map((b) => `<label class="amy-bild"><input type="radio" name="amy-bild" value="${b}"${b === e.bild ? ' checked' : ''}><img src="${bildPfad(b)}" alt="${esc(b)}" width="36" height="36" decoding="async"></label>`).join('')}</fieldset>
 <div class="amy-zwei">
@@ -430,6 +509,12 @@ export function klickAmy(el) {
     return true;
   }
   if ('amyTagDazu' in d) { tagDazu(d.amyTagDazu); return true; }
+  if ('amyImportWeg' in d) {
+    const [f] = importFotos.splice(Number(d.amyImportWeg), 1);
+    if (f) URL.revokeObjectURL(f.url);
+    importZeichnen();
+    return true;
+  }
   if ('amyTog' in d) {
     if (!r) return true;
     const z = zutatenVon(r, app.katalog, daten())[Number(d.amyTog)];
@@ -441,15 +526,7 @@ export function klickAmy(el) {
   if ('amyStep' in d) {
     if (!r) return true;
     const i = Number(d.amyStep);
-    const vorher = new Set(schritte[r.id] || []);
-    const s = new Set(vorher);
-    if (s.has(i)) s.delete(i); else s.add(i);
-    schritte[r.id] = [...s];
-    schreibe(SCHRITTE, schritte);
-    haekchenZeichnen(r.id);
-    const x = alsR(r.id);
-    tempoHaken(x, i, s.has(i));
-    lobPruefen(x, s, vorher, { name: app.name() });
+    amySchrittUmschalten(r.id, i, !schritteVon(r.id).has(i));
     return true;
   }
   if ('timer' in d) {
@@ -482,10 +559,28 @@ export function klickAmy(el) {
       if (id && rezept(id)) zeige('detail', id); else zeige('liste');
       return true;
     }
+    case 'amy-import-los': importieren(); return true;
+    case 'amy-import-stopp': importLauf?.controller.abort(); return true;
+    case 'amy-import-einrichten': oeffneEinrichten(); zeigeReiter('rezepte'); return true;
     case 'amy-tag-neu': {
       const f = $('#amy-tag-text');
       if (f?.value.trim()) tagDazu(f.value);
       if (f) { f.value = ''; f.focus(); }
+      return true;
+    }
+    case 'amy-kochmodus': {
+      const x = r && alsR(r.id);
+      if (!x) return true;
+      x.zeit = zeitVon(r).z;
+      kochmodusOeffnen({
+        rezept: x,
+        text: (s) => mengenHervor(esc(s.d)),
+        minuten: (i) => { const s = x.ablauf.flatMap((p) => p.schritte)[i]; return s && !timerKnopf(x.id, s, i) ? x.zeit?.schritte?.[i]?.min ?? s.min : null; },
+        umschalten: (i, an) => amySchrittUmschalten(x.id, i, an),
+        timerKnopf,
+        timerUmschalten,
+        beimSchliessen: () => { if (zustand.art === 'detail' && zustand.id === x.id) { haekchenZeichnen(x.id); amyTimerZeichnen(); } },
+      });
       return true;
     }
     case 'amy-alle-dazu': if (r) alleDazu(r); return true;
@@ -504,13 +599,26 @@ export function klickAmy(el) {
     }
     case 'amy-schritte-zurueck':
       if (!r) return true;
-      schritte[r.id] = [];
-      schreibe(SCHRITTE, schritte);
+      schritteSetzen(r.id, []);
       haekchenZeichnen(r.id);
       tempoZurueck(r.id);
       return true;
     default: return false;
   }
+}
+
+/** Einen ihrer Schritte abhaken oder öffnen – aus der Liste und aus dem Kochmodus (Tempo und Lob wie bei den festen). */
+function amySchrittUmschalten(rid, i, an) {
+  const x = alsR(rid);
+  if (!x) return;
+  const vorher = schritteVon(rid);
+  if (vorher.has(i) === an) return;
+  const s = new Set(vorher);
+  if (an) s.add(i); else s.delete(i);
+  schritteSetzen(rid, s);
+  if (zustand.art === 'detail' && zustand.id === rid) haekchenZeichnen(rid);
+  tempoHaken(x, i, an);
+  lobPruefen(x, s, vorher, { name: app.name() });
 }
 
 /** Ein Filter-Tag an oder aus („Alle“: keiner). Mehrere zusammen: Rezepte mit allen. */
@@ -523,8 +631,9 @@ function filterUmschalten(t) {
   document.querySelector(`#view-amy [data-amy-filter="${window.CSS.escape(t)}"]`)?.focus({ preventScroll: true });
 }
 
-/** Sortierung der Liste (change). true, wenn es hierher gehörte. */
+/** Sortierung der Liste und Fotos fürs Übernehmen (change). true, wenn es hierher gehörte. */
 export function aenderungAmy(ziel) {
+  if (ziel.id === 'amy-import-foto') { if (ziel.files?.length) importFotosDazu(ziel.files); return true; }
   if (ziel.id !== 'amy-sort') return false;
   filter = { ...filter, sort: SORTEN.some(([k]) => k === ziel.value) ? ziel.value : 'neu' };
   filterMerken();
@@ -536,6 +645,7 @@ export function aenderungAmy(ziel) {
 /** Eingaben im Editor: Entwurf merken, erkannte Zutaten zeigen. true, wenn es hierher gehörte. */
 export function eingabeAmy(ziel) {
   if (!ziel.closest?.('#amy-form')) return false;
+  if (ziel.id === 'amy-import-text') { if (importFehler) { importFehler = ''; const f = $('#amy-import-inhalt .zugang-fehler'); if (f) f.remove(); } return true; }
   // „gesund, schnell“ – mit dem Komma ist ein Tag fertig
   if (ziel.id === 'amy-tag-text') {
     if (/[,;]/.test(ziel.value)) {

@@ -11,10 +11,14 @@ Vier Reiter:
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
-| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
-| **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
-| **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, und welche Rezepte davon profitieren (siehe unten) |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
+| **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
+| **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
+
+Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
+Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat oder ein
+Preisalarm zuschlägt (siehe unten).
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
 15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein Schwein,
@@ -49,10 +53,11 @@ nach 12 Min. mit „Jetzt: 10 Min. ruhen lassen“ und läuft weiter, genauso
 „35 Min. backen, nach 20 Min. wenden“ und „je Seite 5 Min.“. Mehrere Timer
 laufen nebeneinander oben unter der Kopfzeile mit (antippen springt zum
 Schritt), überleben ein Neuladen und melden sich mit Ton, Vibration und
-Benachrichtigung (`js/timer.js`, nur auf dem Handy, das kocht).
+Benachrichtigung (`js/timer.js`) – auf jedem Gerät der Person, die kocht
+(siehe Kochstand).
 
-**Die Zeiten lernen euer Tempo** (`js/tempo.js`, nur auf diesem Handy –
-jeder kocht in seinem Tempo): Die Zeit zwischen zwei Haken ist, was ein
+**Die Zeiten lernen euer Tempo** (`js/tempo.js`, je Person – jeder kocht
+in seinem Tempo, auf iPad und iPhone dasselbe): Die Zeit zwischen zwei Haken ist, was ein
 Schritt gedauert hat. Gemessen wird nur, wo man selbst arbeitet; feste
 Garzeiten („15 Min. köcheln“) bleiben, wie sie sind, und unsaubere Messungen
 fallen weg (nach einer Wartezeit, „währenddessen“, über 45 Min., weniger als
@@ -80,8 +85,33 @@ Zubereitung, Portionieren, Aufbewahren, Tipps – klappt mit einem Tipp auf die
 im nächsten Rezept (localStorage). **Anpinnen** (bei „Heute gekocht“) markiert
 ein Rezept als „läuft gerade“: Es steht dann bei euch beiden ganz oben bei den
 Rezepten, mit Foto und dem Fortschritt beim Kochen („5 von 26 Schritten“ – die
-Haken dieses Handys), auf seiner Karte steht „Läuft gerade“. Höchstens vier,
+eigenen Haken), auf seiner Karte steht „Läuft gerade“. Höchstens vier,
 für beide in `liste.json` unter `gepinnt`.
+
+### Kochmodus
+
+Im Rezept neben „Bildschirm anlassen“ (und in Amys Rezepten über den
+Schritten): **Kochmodus** zeigt einen Schritt nach dem anderen, groß genug
+fürs iPad neben dem Herd (`js/kochmodus.js`). „Erledigt ✓“ hakt ab und
+springt zum nächsten offenen Schritt, „‹ Zurück“ und „Weiter ›“ blättern,
+Wischen geht auch (nach links weiter, nach rechts zurück), mit Tastatur
+Pfeile, Leertaste und Esc. Unten die Punkte aller Schritte (antippen springt
+hin), bei einem Schritt mit Zeit ein großer Timer-Knopf; laufende Timer
+stehen oben. Der Bildschirm bleibt an, solange der Kochmodus offen ist (Wake
+Lock – auf iPhone und iPad ab iOS/iPadOS 18.4 auch in der App vom
+Home-Bildschirm; geht es nicht, steht das oben). Die Haken sind dieselben wie
+im Rezept, Tempo und Belohnung laufen mit; der letzte Haken schließt ihn.
+
+### Kochstand pro Person
+
+Haken, Tempo und laufende Timer gehören der Person, nicht dem Gerät
+(`js/kochstand.js`): Amy fängt auf dem iPad an und kocht auf dem iPhone
+weiter – dort sind dieselben Schritte abgehakt und der Timer läuft mit. Jedes
+Gerät arbeitet mit seiner Kopie im localStorage und schickt Änderungen
+gebündelt (nach 1,5 s, ohne eigene Push-Nachricht) nach `liste.json` unter
+`kochen.<name>`; die neueste Fassung gewinnt, das andere Gerät übernimmt sie
+beim nächsten Abgleich. Tobi und Amy haben je ihren eigenen Stand. Ohne
+gemeinsame Liste bleibt alles auf dem Gerät.
 
 ### Der Weg durch den Laden
 
@@ -100,9 +130,25 @@ Messung zählt, die übliche Reihenfolge wie eine – nach zwei, drei Einkäufen
 passt es. „Reihenfolge vergessen“ (mit Rückgängig) fängt neu an. Eigene
 Einträge erkennt der Weg am Namen („Bananen“).
 
-### Abteilung und Zusammenlegen
+### Abteilung, Zusammenlegen, im Laden
 
 Eine Zeile antippen klappt sie auf:
+
+- **Bei Aldi nicht bekommen** (der Laden, der über der Liste gewählt ist):
+  Die Zeile bleibt offen und steht bei Aldi unten unter „Bei Aldi nicht
+  bekommen – bleibt für den nächsten Einkauf“; der Einkauf zählt trotzdem als
+  fertig, wenn alles andere im Wagen ist. In jedem anderen Laden steht sie
+  wieder an ihrem Platz, mit „bei Aldi nicht bekommen“. Abhaken, Löschen oder
+  „Markierung weg“ nimmt sie weg (`fehlt` in `liste.json`).
+- **Was hat's gekostet?** Preis vom Bon und Menge (vorbelegt mit der Menge
+  von der Liste): Ab dann rechnen die Kosten – Liste, Rezepte, Ersparnis –
+  mit eurem Preis statt mit dem Richtpreis, aus den letzten fünf Bons je
+  Zutat der Median je Gramm (Stückware über das Stückgewicht; `bons` in
+  `liste.json`, `preiseMitBons` in `js/kosten.js`). „Letzten löschen“ nimmt
+  einen falschen wieder raus.
+- **Preisalarm:** ein Wunschpreis je kg, l oder Stück. Darunter der Verlauf
+  der letzten Wochen („KW 40 8,99 · KW 42 9,49 €/kg“) und, wenn gerade ein
+  Angebot darunter liegt, „Gerade: 8,65 €/kg bei Aldi“. Siehe Angebote.
 
 - **Gehört zu:** die zehn Abteilungen (Obst & Gemüse, Fleisch, Kühlregal,
   Nudeln/Reis, Konserven, Öl/Saucen/Vorrat, Tiefkühl, Gewürze, Haushalt,
@@ -140,6 +186,9 @@ Gewürze pauschal nach Gramm. `werkzeug/rezepte.py` schreibt sie je Rezept
 (`kosten`) und je Zutat (`eur`) nach `daten/rezepte.json`, dazu `preise`
 (Euro je Gramm je Schlüssel) für die Liste und für Rezepte aus der
 Resteverwertung (`js/kosten.js`; Zutaten ohne Richtpreis → „mindestens“).
+Wer beim Einkaufen eintippt, was es gekostet hat, ersetzt den Richtpreis
+dieser Zutat durch den eigenen (siehe oben) – auch als Maßstab dafür, ob ein
+Angebot günstig ist.
 
 ### Amys Rezepte
 
@@ -181,6 +230,15 @@ in Pflaume und Rosa.
   sortiert: neueste, Name, schnellste, günstigste oder **nach Tags** (ein
   Abschnitt je Tag). Ein Tag im Rezept antippen zeigt alle Rezepte damit.
   Filter und Sortierung merkt sich das Handy.
+- **Rezept übernehmen** (oben im Editor, bei einem neuen Rezept gleich
+  offen): ein Foto einer Kochbuchseite (bis zu drei), ein Link (Chefkoch &
+  Co.) oder kopierter Text – die KI (derselbe Schlüssel wie bei der
+  Resteverwertung) überträgt es in ihr Format: eine Zutat je Zeile mit der
+  Menge vorn, ein Schritt je Zeile mit „20 Min.“, Abschnitte mit
+  Doppelpunkt, Portionen, Dauer, Notiz, bis zu drei Tags (`js/amy-import.js`).
+  Gespeichert ist erst, was sie sich angeschaut hat; „Rückgängig“ in der
+  Meldung holt den Editor zurück. Links liest nur Gemini selbst (Werkzeug
+  `url_context`); mit einem Claude-Schlüssel gehen Fotos und Text.
 - **Gespeichert** in `liste.json` unter `amy` (für beide, höchstens 60), so
   wie sie es getippt hat, die Tags daneben unter `amyTags`. Schreibt eine
   ältere App-Fassung die Liste ohne diese Teile, legt das Handy, das sie
@@ -193,9 +251,9 @@ in Pflaume und Rosa.
   oder Tablet“ unter der Liste): Link kopieren (mit derselben Apple-ID gleich
   auf dem iPad einsetzen), auf dem iPad in Safari öffnen, über Teilen „Zum
   Home-Bildschirm“ mit „Als Web-App öffnen“, dort einmal einrichten – Name
-  und den Link ins Feld „Schlüssel“. Dann zeigen beide dasselbe; nur die
-  Haken beim Kochen, laufende Timer und ein ungespeicherter Entwurf bleiben
-  auf dem Gerät (`js/ansicht-tablet.js`).
+  und den Link ins Feld „Schlüssel“. Dann zeigen beide dasselbe – auch die
+  Haken beim Kochen und laufende Timer (Kochstand pro Person); nur ein
+  ungespeicherter Entwurf bleibt auf dem Gerät (`js/ansicht-tablet.js`).
 
 ### Angebote der Woche
 
@@ -292,6 +350,26 @@ teurer als sonst“), beim gewählten Laden, wenn der ihn auch im Angebot hat
 Edeka 9,90 €/kg · Rewe 9,99 €/kg“). Eigene Einträge erkennt die App am
 Namen („Hähnchenbrust“). „Passt zu euren Rezepten“ rechnet mit demselben
 Vergleich.
+
+**Preisalarm:** Die Glocke an einem Angebot setzt einen Wunschpreis – den
+Preis dieses Angebots je kg, l oder Stück; in der aufgeklappten Zeile der
+Einkaufsliste lässt er sich eintippen. Rezeptzutaten erkennt der Alarm am
+Katalog-Schlüssel, Eigenes am Namen („Dino Nuggets“). Oben im Reiter stehen
+die Angebote dieser und der nächsten Woche, die darunter liegen, je Alarm
+das günstigste („Hähnchenbrustfilet 8,65 €/kg bei Aldi · Wunsch höchstens
+9,00 €/kg“); kommen neue, gibt es eine Push-Nachricht (siehe unten).
+Gespeichert für beide unter `preisalarm` (höchstens 60, `preisalarmTreffer`
+in `js/angebote.js`).
+
+**Preisverlauf:** Bei jedem Angebots-Lauf schreibt
+`werkzeug/preisverlauf.mjs` aus der Git-Historie von `daten/angebote.json`
+nach `daten/preisverlauf.json`, wie günstig jede Rezeptzutat in jeder
+Kalenderwoche im Angebot war (je kg, l oder Stück, das günstigste, die
+letzten 26 Wochen – nur die öffentlichen Angebote, nichts von kaufDA). Daraus
+steht am Angebot und auf der Liste „Tiefstpreis seit 8 Wochen“ oder „so
+günstig wie seit 5 Wochen nicht“ (`js/preisverlauf.js`; ab drei Wochen, und
+nicht, wenn es teurer ist als das, was ihr sonst zahlt). Der Verlauf
+wächst mit jeder Woche – am Anfang steht dort noch nichts.
 
 Getränke, Süßes, Drogerie,
 Schwein und Fisch fliegen raus; jedes Angebot bekommt, wenn es eine
@@ -508,6 +586,50 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
 - `rev` zählt jeden Commit hoch. Eine Antwort mit kleinerem `rev` ist eine
   veraltete Kopie von GitHub und wird ignoriert.
 
+### Push-Nachrichten
+
+Bescheid aufs Handy oder iPad, auch wenn die App zu ist: „Amy hat 6 Sachen
+auf die Liste gesetzt: …“, „Tobi hat alles eingekauft ✓“, „Neues Rezept von
+Amy: Kokos-Curry ♡“, eine neue Notiz zu einem Rezept, „Preisalarm:
+Hähnchenbrustfilet 8,65 €/kg bei Aldi“ – nie an den, der es war. Antippen
+öffnet den passenden Reiter.
+
+Verschickt werden sie nicht vom Handy, sondern von GitHub Actions im
+privaten Daten-Repo (`werkzeug/push.mjs` aus diesem Repo, Web Push mit
+VAPID über das npm-Paket `web-push`):
+
+- **Liste:** Die App hängt an die Commit-Nachricht „· Bescheid“, wenn eine
+  Änderung eine Nachricht wert ist (`bescheidNoetig` in `js/liste.js`: etwas
+  Neues auf der Liste, ein neues Rezept von Amy, eine Notiz, das Letzte im
+  Wagen) – abhaken, kochen, verschieben nicht. Nur dann läuft
+  `benachrichtigen.yml` im Daten-Repo; es liest, was diese Commits gebracht
+  haben, und merkt sich in `push.json`, bis wohin gemeldet ist (nichts
+  doppelt, beim ersten Lauf nur, was höchstens zwei Stunden alt ist).
+- **Preisalarm:** nach jedem privaten Angebots-Lauf (`angebote.yml` im
+  Daten-Repo) mit den öffentlichen und den privaten Angeboten; was gemeldet
+  ist, steht in `push.json` und kommt nicht noch einmal.
+- Wer was bekommt, steht in `push.json` im Daten-Repo: der öffentliche
+  Schlüssel und je Person ihre Geräte (Adresse beim Push-Dienst von Google
+  oder Apple, Gerät, was ankommen soll). Ein Gerät, das sich abgemeldet hat
+  (410), fällt beim nächsten Senden raus. Die Läufe geben nie Schlüssel oder
+  Adressen aus.
+
+**Einmal einrichten** (einer von euch):
+
+1. In der App: Einkaufsliste → unten „Gemeinsame Liste“ → Push-Nachrichten →
+   **Einrichten**. Das Gerät erzeugt ein Schlüsselpaar (WebCrypto, P-256).
+2. Auf GitHub: Boxenstopp-Daten → Settings → Secrets and variables → Actions
+   → New repository secret: `VAPID_PUBLIC_KEY` mit dem öffentlichen
+   Schlüssel („Öffentlichen kopieren“), dann `VAPID_PRIVATE_KEY` mit dem
+   privaten („Privaten kopieren“). Der private gehört nur dorthin – nicht in
+   einen Chat, nicht ins Repo; die App behält ihn nicht.
+3. „Fertig – Push einschalten“: Der öffentliche Schlüssel kommt nach
+   `push.json`, dieses Gerät meldet sich an.
+4. Jedes weitere Gerät: dort „Push-Nachrichten einschalten“. Auf iPhone und
+   iPad geht das nur in der App vom Home-Bildschirm (iOS 16.4 oder neuer).
+   Häkchen wählen, was ankommt (Einkaufsliste, Amys Rezepte, Preisalarm);
+   „Probe schicken“ lässt den Lauf eine Probe schicken (ca. eine Minute).
+
 ### `liste.json`
 
 ```json
@@ -531,7 +653,11 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
  "notizen": { "chili": [{ "id": "n-mh9x…", "text": "Nächstes Mal weniger Chili", "by": "Amy", "at": "…" }] },
  "gepinnt": { "chili": { "by": "Tobi", "at": "2026-10-28T19:20:00.000Z" } },
  "amy": { "amy-kokos-curry-x7k2": { "name": "Kokos-Curry", "bild": "curry-rice", "portionen": 4, "zeit": 0, "zutaten": ["500 g Hähnchenbrust", "2 Zwiebeln"], "schritte": ["Zwiebeln würfeln", "15 Min. köcheln"], "notiz": "", "by": "Amy", "at": "…", "geaendert": "…" } },
- "angebote": { "stand": "…", "von": "Tobi", "eintraege": [{ "id": "a-mh9x…", "laden": "Aldi", "name": "Hähnchenbrustfilet", "preis": 7.49, "menge": 1, "einheit": "kg", "bis": "2026-11-01", "k": "haehnchenbrust" }] }
+ "angebote": { "stand": "…", "von": "Tobi", "eintraege": [{ "id": "a-mh9x…", "laden": "Aldi", "name": "Hähnchenbrustfilet", "preis": 7.49, "menge": 1, "einheit": "kg", "bis": "2026-11-01", "k": "haehnchenbrust" }] },
+ "kochen": { "amy": { "at": "2026-10-29T18:05:00.000Z", "schritte": { "chili": [0, 1, 2] }, "tempo": { "offen": {}, "proben": […], "gesamt": {} }, "timer": [{ "id": "t-…", "rid": "chili", "schritt": 5, "label": "Chili: köcheln", "minuten": 20, "ende": 1793304000000, "…": "…" }] } },
+ "fehlt": { "haehnchenbrust": { "laden": "Aldi", "by": "Amy", "at": "…" } },
+ "bons": { "haehnchenbrust": [{ "eur": 5.49, "q": 1000, "u": "g", "laden": "Aldi", "by": "Amy", "at": "…" }] },
+ "preisalarm": { "haehnchenbrust": { "max": 7.5, "u": "kg", "name": "Hähnchenbrustfilet", "by": "Tobi", "at": "…" } }
 }
 ```
 
@@ -555,8 +681,16 @@ sind verschobene Zeilen (`{ "amyz-dino-nuggets": "tk", "n:kackbuerste": "haushal
 `gleich` zusammengelegte (`{ "amyz-leckere-dino-nuggies": "amyz-dino-nuggets" }`),
 `ungleich` die Paare mit „Nein, verschieden“ (`["n:hafermilch|n:hafermilch-barista"]`). `wege` ist je Laden der Weg durch
 den Markt: `{ "Aldi": { "n": 3, "at": "…", "k": { "zwiebeln": { "c": "obst", "p": [0.1, 0.05] }, "n:bananen": { "c": "obst", "p": [0.2] } } } }`
-– `p` die Stellen (0 vorn, 1 hinten) der letzten Einkäufe, `n` wie viele es waren. Von Hand bearbeiten
-geht, die App bereinigt beim Lesen alles, was nicht passt.
+– `p` die Stellen (0 vorn, 1 hinten) der letzten Einkäufe, `n` wie viele es waren. `kochen` ist der
+Kochstand je Person (Name klein, höchstens sechs; die neueste Fassung `at` gewinnt), `fehlt` was in einem
+Laden nicht da war, `bons` die letzten fünf Preise je Zutat (höchstens 200 Zutaten), `preisalarm` die
+Wunschpreise (`u`: kg, l oder Stk). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
+nicht passt; schreibt eine ältere App-Fassung die Liste ohne die neueren Teile, legt das Handy, das sie
+kennt, sie wieder dazu (`js/speicher.js`).
+
+Daneben liegen im Daten-Repo `angebote-privat.json` (Rewe und Edeka über
+kaufDA) und `push.json` (Push-Nachrichten: `schluessel`, `abos` je Person,
+`zuletzt`, `gemeldet`, eine bestellte Probe `test`).
 
 ## Rezepte ändern
 
@@ -613,6 +747,11 @@ die Action „Rezeptfotos“.
 | `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten, Schritte – ohne DOM |
 | `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor |
 | `js/ansicht-tablet.js` | Popup: die App aufs iPad oder Tablet |
+| `js/amy-import.js` | Rezept übernehmen: Anfrage aus Foto, Link oder Text, Antwort als Entwurf – ohne DOM |
+| `js/kochmodus.js` | Kochmodus: ein Schritt groß, Wischen, Tasten, Timer, Bildschirm an |
+| `js/kochstand.js` | Haken, Tempo und Timer je Person über ihre Geräte (`kochen` in liste.json) |
+| `js/push.js`, `js/ansicht-push.js` | Push-Nachrichten: Schlüsselpaar, An- und Abmelden in push.json, die Einstellungen unter der Liste |
+| `js/preisverlauf.js` | Preisverlauf je Zutat und Woche, „Tiefstpreis seit …“ – ohne DOM |
 | `js/gleich.js` | dasselbe Produkt unter zwei Namen: Namen vergleichen, Vorschläge, wohin zusammenlegen – ohne DOM |
 | `js/tempo.js` | euer Tempo: aus den Haken lernen, Zeiten umrechnen – ohne DOM |
 | `js/weg.js` | der Weg durch den Laden: Stellen aus den Haken, Liste in dieser Reihenfolge – ohne DOM |
@@ -627,7 +766,9 @@ die Action „Rezeptfotos“.
 | `werkzeug/bilder.mjs`, `.github/workflows/bilder.yml` | Rezeptfotos per KI (Cloudflare Workers AI) → bilder/rezepte |
 | `werkzeug/zutaten-bilder.mjs` | Bildchen aus Fluent Emoji → bilder/zutaten (mit alle.json für den Offline-Vorrat) |
 | `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny, Lidl per Gemini) → daten/angebote.json |
-| `.github/workflows/angebote.yml` | Montag, Donnerstag und Sonntag: Angebote holen und einchecken |
+| `.github/workflows/angebote.yml` | Montag, Donnerstag und Sonntag: Angebote holen, Preisverlauf rechnen, einchecken |
+| `werkzeug/preisverlauf.mjs` | aus der Git-Historie von daten/angebote.json → daten/preisverlauf.json |
+| `werkzeug/push.mjs` | Push-Nachrichten verschicken (läuft im Daten-Repo: `benachrichtigen.yml`, `angebote.yml`) |
 | `werkzeug/preise.py` | Richtpreise je Katalogschlüssel (Packung, Menge, Einheit) |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
@@ -664,5 +805,14 @@ gemerkt fürs nächste Mal, „Nein, verschieden“). `test-tablet.mjs` spielt d
 iPad-Popup durch (von selbst nur bei Amy auf dem iPhone, Link kopieren,
 damit ein iPad einrichten, hin und her). `test-weg.mjs` lernt
 den Weg durch Aldi in Node und im Browser (abhaken, nächster Einkauf
-sortiert, vergessen, lange Pause). Der Workflow „Prüfung“ lässt
+sortiert, vergessen, lange Pause). `test-kochen.mjs` spielt den Kochmodus auf
+dem iPad durch und den Kochstand über iPad, iPhone und Tobis Handy.
+`test-einkauf.mjs` prüft „nicht bekommen“, Bons, Preisalarm und Preisverlauf
+in Node (auch `werkzeug/preisverlauf.mjs` auf einer Git-Historie) und im
+Browser. `test-push.mjs` lässt `werkzeug/push.mjs` auf einem Daten-Repo zum
+Probieren laufen (an wen, nichts doppelt, Preisalarm, Probe, Nachtragen,
+Senden über eine web-push-Attrappe) und spielt dann im ganzen Chromium
+(nur dort lassen sich Mitteilungen erlauben) Einrichten, An/Aus und die
+Mitteilung aus dem Service Worker durch. `test-import.mjs` prüft den
+Rezept-Import mit einer nachgebauten Gemini-API. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

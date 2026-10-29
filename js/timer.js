@@ -10,8 +10,8 @@
  * Nach der ersten meldet er sich mit dem, was jetzt zu tun ist, und läuft
  * von selbst mit der nächsten weiter.
  *
- * Nur auf diesem Handy: Wer kocht, hat das Handy in der Hand; das andere
- * braucht die Timer nicht.
+ * Die Timer gehören dem, der kocht: Mit der gemeinsamen Liste laufen sie auf
+ * seinen anderen Geräten mit (kochstand.js), Tobis und Amys bleiben getrennt.
  *
  * Grenzen: Die Uhr läuft im Browser. Mit ausgeschaltetem Bildschirm kann
  * Android die Seite einschlafen lassen, dann kommt der Alarm erst beim
@@ -21,12 +21,23 @@ import { lese, schreibe, melde } from './kern.js';
 import { esc } from './format.js';
 
 const SPEICHER = 'boxenstopp.timer.v1';
-let timer = (lese(SPEICHER, []) || []).filter((t) => t && typeof t.ende === 'number' && typeof t.id === 'string');
+const gueltig = (t) => t && typeof t.ende === 'number' && typeof t.id === 'string';
+let timer = (lese(SPEICHER, []) || []).filter(gueltig);
 let takt = null;
 let zeichnen = () => {};
 let audio = null;
+let beobachter = () => {};
 
-const merken = () => schreibe(SPEICHER, timer);
+const merken = () => { schreibe(SPEICHER, timer); beobachter(); };
+
+/** Für kochstand.js: von jeder Änderung hören, alle Timer als Kopie, Timer von einem anderen Gerät übernehmen. */
+export const timerBeobachten = (fn) => { beobachter = typeof fn === 'function' ? fn : () => {}; };
+export const timerRoh = () => JSON.parse(JSON.stringify(timer));
+export function timerUebernehmen(liste) {
+  timer = (Array.isArray(liste) ? liste : []).filter(gueltig).map((t) => ({ ...t }));
+  schreibe(SPEICHER, timer);
+  tick();
+}
 const neueId = () => `t${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
 export const alleTimer = () => timer;

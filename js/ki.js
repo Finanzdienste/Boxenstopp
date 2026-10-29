@@ -200,12 +200,13 @@ export function kostenCent(usage, anbieter = 'anthropic') {
 
 /*
  * Die Anfrage abschicken und den Strom lesen (server-sent events). Gibt
- * { eingabe, usage, anbieter } zurück: eingabe ist das Rezept als JSON.
+ * { eingabe, usage, anbieter } zurück: eingabe ist das Rezept als JSON – mit
+ * roh: true stattdessen { text, usage, anbieter }.
  * beiFortschritt({ zeichen, schritte }) meldet, wie weit die Antwort ist.
  * Der Anbieter ergibt sich aus dem Schlüssel; `api` übersteuert die Adresse
  * (für die Tests).
  */
-export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiFortschritt = () => {} }) {
+export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiFortschritt = () => {}, roh: alsText = false }) {
   const anbieter = anbieterVon(schluessel) || 'anthropic';
   const gemini = anbieter === 'gemini';
   const fehler = (art, detail) => kiFehler(art, detail, anbieter);
@@ -231,7 +232,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     if (gemini && res.status === 400 && /thinking/i.test(text) && rumpf.generation_config?.thinking_level) {
       const ohne = { ...rumpf.generation_config };
       delete ohne.thinking_level;
-      return kiAnfragen({ ...rumpf, generation_config: ohne }, { schluessel, api, signal, beiFortschritt });
+      return kiAnfragen({ ...rumpf, generation_config: ohne }, { schluessel, api, signal, beiFortschritt, roh: alsText });
     }
     throw fehler(artVonStatus(res.status, info), text);
   }
@@ -310,6 +311,8 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   if (gemini && stopp && /safety|prohibited|blocklist|recitation|block/i.test(stopp)) throw fehler('sicherheit', stopp);
   if (gemini && stopp) throw fehler('antwort', stopp);
   if (!werkzeug || !json.trim()) throw fehler('antwort', 'keine Antwort');
+  // Ohne festes Schema (etwa mit url_context): den Text zurück, das JSON sucht sich der Aufrufer
+  if (alsText) return { text: json, usage, anbieter };
   // Zur Sicherheit: Gemini packt JSON hin und wieder in ```json … ```.
   const roh = json.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
   try {
