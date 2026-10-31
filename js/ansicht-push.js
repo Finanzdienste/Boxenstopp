@@ -3,8 +3,12 @@
  * ausschalten, was ankommt (Einkaufsliste, Amys Rezepte, Preisalarm), eine
  * Probe schicken – und das einmalige Einrichten mit dem Schlüsselpaar
  * (push.js).
+ *
+ * Dazu einmal je Gerät ein Hinweis (#push-dlg): Ist Push eingerichtet und
+ * könnte dieses Gerät, ist aber noch nicht angemeldet, fragt die App von
+ * selbst – mit „Einschalten“ gleich im Hinweis.
  */
-import { app, $, melde, ansicht } from './kern.js';
+import { app, $, melde, ansicht, lese, schreibe } from './kern.js';
 import { esc } from './format.js';
 import { ARTEN, pushStand, pushEinschalten, pushAusschalten, pushWas, pushTest, schluesselErzeugen, schluesselAblegen, geraetArt } from './push.js';
 
@@ -31,6 +35,9 @@ const paarMerken = (p) => {
 let einrichten = paarLesen(); // { oeffentlich, privat } – nur, solange das Einrichten offen ist
 let meldung = '';
 
+const HINWEIS = 'boxenstopp.push.hinweis.v1'; // true: der Hinweis war auf diesem Gerät schon da
+let hinweisGeprueft = false; // je App-Start einmal
+const KREUZ = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 const GLOCKE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>';
 
 function einrichtenHTML() {
@@ -128,9 +135,88 @@ async function mit(fn, gut = '') {
 
 const gewaehlt = () => ARTEN.map(([k]) => k).filter((k) => $(`#push-bereich [data-push-was="${k}"]`)?.checked ?? true);
 
+/* ------------------------------------------------- Hinweis, einmal je Gerät */
+
+function hinweisHTML({ arbeitet: laeuft = false, fehler = '', fertig = false } = {}) {
+  const knoepfe = fertig
+    ? '<button type="button" class="btn btn-primary" data-act="push-hinweis-probe">Probe schicken</button><button type="button" class="btn btn-quiet" data-act="push-hinweis-zu">Fertig</button>'
+    : fehler
+      ? '<button type="button" class="btn" data-act="push-hinweis-zu">Schließen</button>'
+      : `<button type="button" class="btn btn-primary" data-act="push-hinweis-an"${laeuft ? ' disabled' : ''}>${laeuft ? 'Wird eingeschaltet …' : 'Einschalten'}</button><button type="button" class="btn btn-quiet" data-act="push-hinweis-zu"${laeuft ? ' disabled' : ''}>Nicht jetzt</button>`;
+  return `<button type="button" class="tablet-zu" data-act="push-hinweis-zu" aria-label="Schließen">${KREUZ}</button>
+<p class="push-dlg-ic" aria-hidden="true">${GLOCKE}</p>
+<h2 class="push-dlg-titel" id="push-dlg-titel">Neu: Push-Nachrichten</h2>
+<p class="tablet-lead">Bekomm Bescheid, auch wenn die App zu ist: wenn etwas Neues auf die Liste kommt, alles eingekauft ist, ein neues Rezept oder eine Notiz da ist oder ein Preisalarm zuschlägt.</p>
+${fertig ? '<p class="push-dlg-ok" role="status">Eingeschaltet ✓</p>' : ''}${fehler ? `<p class="zugang-fehler" role="alert">${esc(fehler)}</p>` : ''}
+<div class="tablet-knoepfe">${knoepfe}</div>
+<p class="tablet-fein">Was ankommt und auf welchem Gerät, stellst du unter Einstellungen → Push-Nachrichten ein – dort geht es auch wieder aus.</p>`;
+}
+
+function hinweisZeichnen(o) {
+  const dlg = $('#push-dlg');
+  if (!dlg) return;
+  dlg.innerHTML = hinweisHTML(o);
+  dlg.querySelector('.btn-primary:not([disabled]), .btn:not([disabled])')?.focus();
+}
+
+function hinweisZeigen() {
+  const dlg = $('#push-dlg');
+  if (!dlg || dlg.open) return;
+  // Bei Amy in ihrem Rosa
+  dlg.classList.toggle('amy-thema', /^amy$/i.test(String(app.name() || '').trim()));
+  dlg.innerHTML = hinweisHTML();
+  schreibe(HINWEIS, true);
+  if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  dlg.querySelector('[data-act="push-hinweis-an"]')?.focus();
+}
+
+function hinweisZu() {
+  const dlg = $('#push-dlg');
+  if (dlg?.open) { if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open'); }
+}
+
+/** Erst, wenn kein anderes Fenster offen ist (iPad-Popup, Kochmodus) – sonst etwas später noch einmal. */
+function hinweisWennFrei(n = 0) {
+  if (document.querySelector('dialog[open]')) { if (n < 30) setTimeout(() => hinweisWennFrei(n + 1), 4000); return; }
+  hinweisZeigen();
+}
+
+/**
+ * Einmal je App-Start (von app.js, sobald die Liste abgeglichen ist): Ist
+ * Push eingerichtet, kann dieses Gerät es und ist es noch nicht angemeldet,
+ * kommt der Hinweis – auf jedem Gerät nur einmal.
+ */
+export async function pushHinweisPruefen() {
+  if (hinweisGeprueft || !app.zugang || !app.listeDa) return;
+  hinweisGeprueft = true;
+  // Gab es ihn schon, oder geht Push hier gar nicht (Safari statt Home-Bildschirm, Mitteilungen verboten)?
+  if (lese(HINWEIS, false) || geraetArt()) return;
+  let neu;
+  try { neu = await pushStand(); } catch { return; }
+  stand = neu;
+  geholt = Date.now();
+  if (neu.art === 'aus') hinweisWennFrei();
+}
+
 /** Klicks. true, wenn es hierher gehörte. */
 export function klickPush(el) {
   switch (el.dataset.act) {
+    case 'push-hinweis-an':
+      hinweisZeichnen({ arbeitet: true });
+      // Die Erlaubnis fragt pushEinschalten sofort – noch im Tipp
+      pushEinschalten().then((neu) => {
+        stand = neu;
+        geholt = Date.now();
+        hinweisZeichnen({ fertig: true });
+        pushZeichnen();
+      }, (e) => { hinweisZeichnen({ fehler: e?.message || 'Das hat nicht geklappt.' }); pushZeichnen(true); });
+      return true;
+    case 'push-hinweis-probe':
+      hinweisZu();
+      mit(async () => { await pushTest(); return stand; }, 'Probe ist unterwegs – sie kommt in etwa einer Minute.');
+      melde('Probe ist unterwegs – sie kommt in etwa einer Minute.');
+      return true;
+    case 'push-hinweis-zu': hinweisZu(); return true;
     case 'push-an': mit(() => pushEinschalten(), 'Eingeschaltet. Mit „Probe schicken“ siehst du, ob es ankommt.'); return true;
     case 'push-aus': mit(() => pushAusschalten(), 'Ausgeschaltet.'); return true;
     case 'push-test': mit(async () => { await pushTest(); return stand; }, 'Probe ist unterwegs – sie kommt in etwa einer Minute.'); return true;

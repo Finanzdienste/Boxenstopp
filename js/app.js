@@ -24,7 +24,7 @@ import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeic
 import { amyZeichnen, amyVorbereiten, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, aenderungAmy, absendenAmy, tasteAmy } from './ansicht-amy.js';
 import { tabletPruefen, klickTablet } from './ansicht-tablet.js';
 import { kochstandAbgleichen, kochstandStart } from './kochstand.js';
-import { klickPush, aenderungPush, pushAnmelden, pushZeichnen } from './ansicht-push.js';
+import { klickPush, aenderungPush, pushAnmelden, pushZeichnen, pushHinweisPruefen } from './ansicht-push.js';
 import { einstellungenStart, einstellungenZeichnen, klickEinstellungen, aenderungEinstellungen, absendenEinstellungen, tabbarAnpassen } from './ansicht-einstellungen.js';
 import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus, tasteKochmodus, wischStart, wischEnde } from './kochmodus.js';
 
@@ -61,6 +61,8 @@ function beiAenderung(stand) {
 function beiStatus(s) {
   app.status = s;
   statusZeichnen();
+  // Abgeglichen: Ist Push eingerichtet, aber hier noch aus, fragt die App einmal (ansicht-push.js)
+  if (s.zustand === 'ok') setTimeout(pushHinweisPruefen, 2500);
 }
 
 function nimmSpeicher(neu) {

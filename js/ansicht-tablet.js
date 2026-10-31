@@ -45,7 +45,7 @@ function inhalt() {
 <li><b>Zum Home-Bildschirm legen</b><span>Tipp auf ${TEILEN} <i>Teilen</i> (oben rechts, manchmal hinter „…“) → „Zum Home-Bildschirm“ → „Als Web-App öffnen“ an lassen → „Hinzufügen“.</span></li>
 <li><b>Dort einmal einrichten</b><span>Boxenstopp vom Home-Bildschirm öffnen → <i>Einstellungen</i> → „Gemeinsame Liste“. Name: <b>${esc(name || 'dein Name')}</b>, beim Schlüssel den Link einsetzen → „Verbinden“. Fertig ♡</span></li>
 </ol>
-<p class="tablet-fein">Gut zu wissen: Die Haken beim Kochen, laufende Timer und ein Rezept, das du gerade schreibst und noch nicht gespeichert hast, bleiben auf dem Gerät, auf dem du gerade bist. Ein Android-Tablet geht genauso – dort in Chrome über ⋮ → „Zum Startbildschirm hinzufügen“.</p>
+<p class="tablet-fein">Gut zu wissen: Auch die Haken beim Kochen und laufende Timer wandern mit – nur ein Rezept, das du gerade schreibst und noch nicht gespeichert hast, bleibt auf dem Gerät, auf dem du gerade bist. Push-Nachrichten schaltest du auf dem iPad unter Einstellungen extra ein. Ein Android-Tablet geht genauso – dort in Chrome über ⋮ → „Zum Startbildschirm hinzufügen“.</p>
 <div class="tablet-knoepfe"><button type="button" class="amy-btn" data-act="tablet-zu">Alles klar ♡</button></div>`;
 }
 

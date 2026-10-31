@@ -666,7 +666,11 @@ VAPID über das npm-Paket `web-push`):
    einen Chat, nicht ins Repo; die App behält ihn nicht.
 3. „Fertig – Push einschalten“: Der öffentliche Schlüssel kommt nach
    `push.json`, dieses Gerät meldet sich an.
-4. Jedes weitere Gerät: dort „Push-Nachrichten einschalten“. Auf iPhone und
+4. Jedes weitere Gerät: dort „Push-Nachrichten einschalten“ – die App fragt
+   von selbst einmal danach („Neu: Push-Nachrichten“ mit „Einschalten“ und
+   „Nicht jetzt“, bei Amy in Rosa), sobald Push eingerichtet ist und das
+   Gerät es könnte, aber noch nicht angemeldet ist
+   (`boxenstopp.push.hinweis.v1`). Auf iPhone und
    iPad geht das nur in der App vom Home-Bildschirm (iOS 16.4 oder neuer).
    Sind Mitteilungen für Boxenstopp verboten, sagt die App, wo man sie
    erlaubt (Android: Symbol lange drücken → App-Info → Benachrichtigungen;
@@ -858,8 +862,9 @@ in Node (auch `werkzeug/preisverlauf.mjs` auf einer Git-Historie) und im
 Browser. `test-push.mjs` lässt `werkzeug/push.mjs` auf einem Daten-Repo zum
 Probieren laufen (an wen, nichts doppelt, Preisalarm, Probe, Nachtragen,
 Senden über eine web-push-Attrappe) und spielt dann im ganzen Chromium
-(nur dort lassen sich Mitteilungen erlauben) Einrichten, An/Aus und die
-Mitteilung aus dem Service Worker durch. `test-import.mjs` prüft den
+(nur dort lassen sich Mitteilungen erlauben) Einrichten, An/Aus, den
+einmaligen Hinweis auf weiteren Geräten und die Mitteilung aus dem
+Service Worker durch. `test-import.mjs` prüft den
 Rezept-Import mit einer nachgebauten Gemini-API. `test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
 ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,

@@ -1096,6 +1096,17 @@ html[data-tab="amy"] .btn{border-radius:999px}
 .tablet-adresse{font:600 15px/1.3 var(--f-mono);overflow-wrap:anywhere;color:var(--accent)!important}
 .tablet-fein{margin:0;font-size:13px;color:var(--muted)}
 .tablet-knoepfe{display:flex;justify-content:center}
+/* Der einmalige Hinweis auf Push (ansicht-push.js) – im Stil des iPad-Popups, bei Amy in Rosa */
+.push-dlg:not(.amy-thema)::backdrop{background:rgba(14,20,18,.5)}
+.push-dlg:not(.amy-thema){box-shadow:0 24px 60px -20px rgba(0,0,0,.45)}
+.push-dlg-ic{display:grid;place-items:center;width:64px;height:64px;margin:6px auto 0;border-radius:50%;background:var(--accent-soft);color:var(--accent)}
+.push-dlg-ic .ic{width:32px;height:32px}
+.push-dlg-titel{margin:0;padding:0 34px;font-size:clamp(23px,6vw,28px);line-height:1.15;text-align:center;letter-spacing:-.01em}
+.push-dlg.amy-thema .push-dlg-titel{font:400 clamp(25px,6.5vw,31px)/1.2 var(--f-script);color:var(--accent);letter-spacing:0}
+.push-dlg .tablet-knoepfe{flex-wrap:wrap;gap:8px}
+.push-dlg .tablet-fein{text-align:center}
+.push-dlg-ok{margin:0;text-align:center;font-weight:700;color:var(--ok)}
+.push-dlg .zugang-fehler{margin:0;text-align:center}
 
 /* Rezept übernehmen (Foto, Link, Text) */
 .amy-import{border-radius:20px;border:2px dashed var(--line-strong);background:var(--surface)}

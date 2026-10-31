@@ -165,6 +165,9 @@ n = gh.zustand.nachrichten.length;
 for (const k of await t.$$eval('#list-body .grp:not(.grp-done) [data-check]', (xs) => xs.map((x) => x.dataset.check))) await t.click(`#list-body [data-check="${k}"]`);
 check(await bis(() => gh.liste() && offeneAnzahl(gh.liste()) === 0 && gh.zustand.nachrichten.length > n, 10000) && gh.zustand.nachrichten.slice(-1)[0].endsWith('· Bescheid'), `das Letzte im Wagen: wieder mit (${gh.zustand.nachrichten.slice(-1)[0]})`);
 
+// Dieses Handy hat seine Arbeit getan – zu, damit es nicht als Tobis zweites Gerät mitkocht (Kochstand pro Person, Timer unten)
+await tobi.ctx.close();
+
 // Einrichten und An/Aus – mit einem nachgebauten Push-Dienst (Headless-Chromium hat keinen)
 const fakePush = () => {
   let abo = null;
@@ -240,8 +243,35 @@ await s.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0
 const timerMitteilung = await bis(() => s.evaluate(async () => { const r = await navigator.serviceWorker.ready; const ns = await r.getNotifications({ tag: 't-probe' }); return ns.length ? [ns[0].title, ns[0].body, ns[0].data?.ziel] : null; }), 10000);
 check(JSON.stringify(timerMitteilung) === JSON.stringify(['Timer fertig', 'Chili: köcheln', 'chili#5']), `Timer fertig: Mitteilung über den Service Worker (${JSON.stringify(timerMitteilung)})`);
 
-// Echtes Headless-Chromium: Der Push-Dienst fehlt – eine Meldung, kein Hängen
-const echt = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, rechte: ['notifications'] });
+// Ein weiteres Gerät: Push ist eingerichtet, hier noch aus – der Hinweis kommt einmal von selbst
+const hw = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, skript: fakePush, rechte: ['notifications'] });
+const h = hw.page;
+check(await verbinden(h, 'Amy'), 'Amys iPad (nachgebaut): eingerichtet');
+check(await bis(async () => (await h.locator('#push-dlg[open]').count()) === 1, 12000), 'der Hinweis „Neu: Push-Nachrichten“ kommt von selbst');
+check(await h.locator('#push-dlg').evaluate((d) => d.classList.contains('amy-thema')) && (await h.locator('#push-dlg-titel').innerText()) === 'Neu: Push-Nachrichten', 'bei Amy in Rosa');
+await h.click('#push-dlg [data-act="push-hinweis-an"]');
+check(await bis(() => pj()?.abos?.amy?.length === 1, 8000) && await bis(async () => (await h.locator('#push-dlg .push-dlg-ok').count()) === 1), '„Einschalten“: Amy steht in push.json, im Hinweis „Eingeschaltet ✓“');
+await h.click('#push-dlg [data-act="push-hinweis-probe"]');
+check(await bis(() => pj()?.test?.an === 'amy', 8000) && (await h.locator('#push-dlg[open]').count()) === 0, '„Probe schicken“: bestellt, der Hinweis ist zu');
+await h.click('.tab[data-tab="einstellungen"]');
+check(await bis(async () => (await h.locator('#push-bereich .push-an').count()) === 1, 8000), 'in den Einstellungen: „Push ist an“');
+await h.reload({ waitUntil: 'load' });
+await h.waitForTimeout(5000);
+check(await h.locator('#push-dlg[open]').count() === 0, 'nach dem Neuladen: kein Hinweis mehr');
+// Noch ein Gerät: „Nicht jetzt“ – und dann kommt er dort nicht wieder
+const hw2 = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, skript: fakePush, rechte: ['notifications'] });
+const h2 = hw2.page;
+check(await verbinden(h2, 'Tobi'), 'Tobis Tablet (nachgebaut): eingerichtet');
+check(await bis(async () => (await h2.locator('#push-dlg[open]').count()) === 1, 12000) && !(await h2.locator('#push-dlg').evaluate((d) => d.classList.contains('amy-thema'))), 'auch hier der Hinweis – bei Tobi nicht rosa');
+const tobiVorher = pj()?.abos?.tobi?.length || 0;
+await h2.click('#push-dlg .tablet-knoepfe [data-act="push-hinweis-zu"]');
+check(await h2.locator('#push-dlg[open]').count() === 0 && (pj()?.abos?.tobi?.length || 0) === tobiVorher, '„Nicht jetzt“: zu, nichts angemeldet');
+await h2.reload({ waitUntil: 'load' });
+await h2.waitForTimeout(5000);
+check(await h2.locator('#push-dlg[open]').count() === 0, 'nach dem Neuladen: kommt nicht wieder');
+
+// Echtes Headless-Chromium: Der Push-Dienst fehlt – eine Meldung, kein Hängen (der Hinweis war hier schon)
+const echt = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, rechte: ['notifications'], skript: () => { try { localStorage.setItem('boxenstopp.push.hinweis.v1', 'true'); } catch { /* egal */ } } });
 const e = echt.page;
 check(await verbinden(e, 'Amy'), 'Amy: eingerichtet');
 await e.click('.tab[data-tab="einstellungen"]');
@@ -278,7 +308,7 @@ await ios.page.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await ios.page.locator('#push-bereich').innerText()).includes('nur in der App vom Home-Bildschirm')), 'iPhone im Browser: „nur in der App vom Home-Bildschirm“');
 
 // Chromium meldet beim echten Anmelden im Test-Profil (wie privates Surfen) selbst einen Fehler – der gehört dazu
-const alleFehler = [...tobi.fehler, ...pg.fehler, ...echt.fehler, ...ios.fehler, ...android.fehler].filter((f) => !/Push API in incognito/.test(f));
+const alleFehler = [...tobi.fehler, ...pg.fehler, ...hw.fehler, ...hw2.fehler, ...echt.fehler, ...ios.fehler, ...android.fehler].filter((f) => !/Push API in incognito/.test(f));
 check(alleFehler.length === 0, `keine Fehler in der Konsole${alleFehler.length ? `: ${alleFehler.slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();
