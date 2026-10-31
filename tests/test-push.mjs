@@ -196,12 +196,19 @@ check(!!oeffentlich && (await s.locator('#toast').innerText()).includes('VAPID_P
 await s.click('#push-bereich [data-act="push-kopieren"][data-was="privat"]');
 const privat = await bis(async () => { const x = await s.evaluate(() => navigator.clipboard.readText()); return /^[A-Za-z0-9_-]{43}$/.test(x) ? x : null; });
 check(!!privat && (await s.locator('#toast').innerText()).includes('VAPID_PRIVATE_KEY'), 'privater Schlüssel kopiert (43 Zeichen)');
-check(!(await s.evaluate(() => JSON.stringify({ ...localStorage }))).includes(privat), 'der private Schlüssel liegt nicht im Speicher des Geräts');
+// Zum Kopieren zu GitHub gewechselt, Android hat die App geschlossen: Die Schritte sind noch da, mit demselben Paar
+await s.reload({ waitUntil: 'load' });
+await s.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await s.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await s.locator('#push-bereich .push-schritte li').count()) === 4, 8000), 'nach dem Neuladen: die Schritte stehen noch da');
+await s.click('#push-bereich [data-act="push-kopieren"][data-was="oeffentlich"]');
+check(await bis(async () => (await s.evaluate(() => navigator.clipboard.readText())) === oeffentlich), 'und es ist dasselbe Schlüsselpaar');
 await s.click('#push-bereich [data-act="push-ablegen"]');
 check(await bis(async () => (await s.locator('#push-bereich .push-an').count()) === 1, 10000), `eingeschaltet: „${await s.locator('#push-bereich .push-an').innerText().catch(() => '')}“`);
 const pj = () => JSON.parse(gh.zustand.dateien['push.json'] || 'null');
 check(pj()?.schluessel === oeffentlich && pj()?.abos?.tobi?.[0]?.endpoint === 'https://push.example/test-1' && pj().abos.tobi[0].was.join() === 'liste,rezepte,preise', 'push.json: der öffentliche Schlüssel und Tobis Gerät mit allem');
 check(!gh.zustand.dateien['push.json'].includes(privat) && !gh.zustand.nachrichten.some((m) => m.includes(privat)), 'der private Schlüssel geht nicht nach GitHub');
+check(!(await s.evaluate(() => JSON.stringify({ ...localStorage }))).includes(privat), 'nach „Fertig“ ist der private Schlüssel auch auf dem Gerät weg');
 check(gh.zustand.nachrichten.includes('Push: neuer Schlüssel') && gh.zustand.nachrichten.some((m) => /^Push: Tobi meldet \w+ an$/.test(m)), 'Commits: „Push: neuer Schlüssel“, „Push: Tobi meldet … an“');
 await s.click('#push-bereich [data-push-was="preise"]');
 check(await bis(() => pj()?.abos?.tobi?.[0]?.was.join() === 'liste,rezepte', 8000), 'Häkchen „Preisalarm“ weg: kommt in push.json an');
@@ -226,6 +233,13 @@ check(await bis(() => !pj()?.abos?.tobi, 8000) && await bis(async () => (await s
 await s.click('#push-bereich [data-act="push-an"]');
 check(await bis(() => pj()?.abos?.tobi?.[0]?.endpoint === 'https://push.example/test-2', 8000) && await bis(async () => (await s.locator('#push-bereich .push-an').count()) === 1), 'wieder eingeschaltet: neues Abo');
 
+// Ein Timer läuft ab: die Mitteilung kommt über den Service Worker (auf Android geht nur das), antippen führt zum Schritt
+await s.evaluate(() => localStorage.setItem('boxenstopp.timer.v1', JSON.stringify([{ id: 't-probe', rid: 'chili', schritt: 5, label: 'Chili: köcheln', minuten: 1, start: Date.now(), ende: Date.now() + 2500, fertig: false, dann: '', folge: [], stufe: 1, stufen: 1 }])));
+await s.reload({ waitUntil: 'load' });
+await s.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+const timerMitteilung = await bis(() => s.evaluate(async () => { const r = await navigator.serviceWorker.ready; const ns = await r.getNotifications({ tag: 't-probe' }); return ns.length ? [ns[0].title, ns[0].body, ns[0].data?.ziel] : null; }), 10000);
+check(JSON.stringify(timerMitteilung) === JSON.stringify(['Timer fertig', 'Chili: köcheln', 'chili#5']), `Timer fertig: Mitteilung über den Service Worker (${JSON.stringify(timerMitteilung)})`);
+
 // Echtes Headless-Chromium: Der Push-Dienst fehlt – eine Meldung, kein Hängen
 const echt = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, rechte: ['notifications'] });
 const e = echt.page;
@@ -240,6 +254,23 @@ const ausgang = await bis(async () => {
 }, 30000);
 check(ausgang === 'an' || /Push-Dienst|eingerichtet/.test(ausgang || ''), `ohne Push-Dienst: ${ausgang}`);
 
+// Android, Mitteilungen für Boxenstopp verboten: Einrichten geht trotzdem, dazu, wie man sie erlaubt
+const gh2 = githubAttrappe();
+const shell = await starteBrowser(); // Headless-Shell: Mitteilungen sind dort immer verboten
+const android = await handy(shell, { attrappe: gh2, adresse: mitLink, userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36', rechte: ['clipboard-read', 'clipboard-write'] });
+const a = android.page;
+check(await verbinden(a, 'Tobi'), 'Android: eingerichtet');
+check(await a.evaluate(() => Notification.permission) === 'denied', 'Mitteilungen sind auf diesem Gerät verboten');
+await a.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await a.locator('#push-bereich [data-act="push-paar"]').count()) === 1, 8000), 'trotzdem: „Einrichten“');
+await a.click('#push-bereich [data-act="push-paar"]');
+check(await bis(async () => (await a.locator('#push-bereich [data-act="push-ablegen"]').innerText().catch(() => '')) === 'Fertig'), 'der letzte Knopf heißt nur „Fertig“ (einschalten geht hier noch nicht)');
+await a.click('#push-bereich [data-act="push-ablegen"]');
+check(await bis(() => JSON.parse(gh2.zustand.dateien['push.json'] || 'null')?.schluessel?.length === 87, 8000), 'der öffentliche Schlüssel liegt in push.json');
+check(await bis(async () => (await a.locator('#push-bereich .push-aus').count()) === 1) && (await a.locator('#push-bereich .push-hilfe').innerText()).includes('Benachrichtigungen') && (await a.locator('#push-bereich .push-meldung').innerText()).includes('Eingerichtet'), `danach: „Eingerichtet ✓“ und wie man Mitteilungen erlaubt (${await a.locator('#push-bereich .push-hilfe').innerText().catch(() => '')})`);
+check(await a.locator('#push-bereich [data-act="push-pruefen"]').count() === 1, '„Erlaubt – nochmal prüfen“');
+await shell.close();
+
 // iPhone im Browser (nicht vom Home-Bildschirm): der Hinweis
 const ios = await handy(browser, { attrappe: gh, adresse: mitLink, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1', skript: () => { delete window.PushManager; } });
 check(await verbinden(ios.page, 'Amy'), 'iPhone: eingerichtet');
@@ -247,7 +278,7 @@ await ios.page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await ios.page.locator('#push-bereich').innerText()).includes('nur in der App vom Home-Bildschirm')), 'iPhone im Browser: „nur in der App vom Home-Bildschirm“');
 
 // Chromium meldet beim echten Anmelden im Test-Profil (wie privates Surfen) selbst einen Fehler – der gehört dazu
-const alleFehler = [...tobi.fehler, ...pg.fehler, ...echt.fehler, ...ios.fehler].filter((f) => !/Push API in incognito/.test(f));
+const alleFehler = [...tobi.fehler, ...pg.fehler, ...echt.fehler, ...ios.fehler, ...android.fehler].filter((f) => !/Push API in incognito/.test(f));
 check(alleFehler.length === 0, `keine Fehler in der Konsole${alleFehler.length ? `: ${alleFehler.slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();

@@ -24,7 +24,7 @@ import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeic
 import { amyZeichnen, amyVorbereiten, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, aenderungAmy, absendenAmy, tasteAmy } from './ansicht-amy.js';
 import { tabletPruefen, klickTablet } from './ansicht-tablet.js';
 import { kochstandAbgleichen, kochstandStart } from './kochstand.js';
-import { klickPush, aenderungPush } from './ansicht-push.js';
+import { klickPush, aenderungPush, pushAnmelden } from './ansicht-push.js';
 import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus, tasteKochmodus, wischStart, wischEnde } from './kochmodus.js';
 
 const apiBasis = () => lese('__api', null) || API;
@@ -198,6 +198,7 @@ async function start() {
   });
   kochstandStart();
   kochmodusAnmelden();
+  pushAnmelden();
   filterZeichnen();
   rasterZeichnen();
   listeZeichnen();
@@ -240,8 +241,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   // Eine Push-Mitteilung angetippt, die App war schon offen: an den passenden Reiter
   navigator.serviceWorker.addEventListener('message', (ev) => {
     if (ev.data?.boxenstopp !== 'zeige') return;
-    const ziel = String(ev.data.ziel || '');
-    if (app.nachId[ziel]) { zeigeReiter('rezepte'); oeffneRezept(ziel); } else zeigeReiter(['einkauf', 'angebote', 'amy'].includes(ziel) ? ziel : 'rezepte');
+    // „chili#5“: ein Timer – zum Schritt; sonst ein Reiter oder ein Rezept
+    const [ziel, schritt] = String(ev.data.ziel || '').split('#');
+    if (schritt && ziel.startsWith('amy-')) amyZuSchritt(ziel, Number(schritt));
+    else if (schritt && app.nachId[ziel]) { zeigeReiter('rezepte'); zuSchritt(ziel, Number(schritt)); } else if (app.nachId[ziel]) { zeigeReiter('rezepte'); oeffneRezept(ziel); } else zeigeReiter(['einkauf', 'angebote', 'amy'].includes(ziel) ? ziel : 'rezepte');
   });
   const eigenerWorker = new URL('./sw.js', location.href).href;
   const hatteWorker = navigator.serviceWorker.controller?.scriptURL === eigenerWorker;

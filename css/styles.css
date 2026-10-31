@@ -585,6 +585,8 @@ html[data-tab="amy"] .km-nav .km-los{border:0;background:var(--amy-verlauf);colo
 .push-schritte code{font:600 12.5px/1 var(--f-mono);padding:1px 4px;border-radius:5px;background:var(--surface-2)}
 .btn-klein{min-height:32px;padding:0 10px;font-size:13px}
 .push-meldung{color:var(--ink)}
+.push-aus{color:var(--ink)}
+.push-hilfe{padding:8px 10px;border-radius:10px;background:var(--surface-2);line-height:1.45}
 
 /* Angebote: Preisalarm oben, Glocke je Angebot */
 .a-alarm{display:grid;gap:6px;margin-top:12px;padding:12px 14px;border-radius:14px;border:1.5px dashed var(--line-strong);background:var(--surface)}

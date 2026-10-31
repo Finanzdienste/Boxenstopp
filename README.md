@@ -53,8 +53,9 @@ nach 12 Min. mit „Jetzt: 10 Min. ruhen lassen“ und läuft weiter, genauso
 „35 Min. backen, nach 20 Min. wenden“ und „je Seite 5 Min.“. Mehrere Timer
 laufen nebeneinander oben unter der Kopfzeile mit (antippen springt zum
 Schritt), überleben ein Neuladen und melden sich mit Ton, Vibration und
-Benachrichtigung (`js/timer.js`) – auf jedem Gerät der Person, die kocht
-(siehe Kochstand).
+Benachrichtigung (`js/timer.js`, über den Service Worker – auf Android geht
+es nur so; antippen springt zum Schritt) – auf jedem Gerät der Person, die
+kocht (siehe Kochstand).
 
 **Die Zeiten lernen euer Tempo** (`js/tempo.js`, je Person – jeder kocht
 in seinem Tempo, auf iPad und iPhone dasselbe): Die Zeit zwischen zwei Haken ist, was ein
@@ -618,6 +619,10 @@ VAPID über das npm-Paket `web-push`):
 
 1. In der App: Einkaufsliste → unten „Gemeinsame Liste“ → Push-Nachrichten →
    **Einrichten**. Das Gerät erzeugt ein Schlüsselpaar (WebCrypto, P-256).
+   Das geht auf jedem Gerät, auch wenn es selbst gerade keine Mitteilungen
+   darf. Bis „Fertig“ oder „Abbrechen“ liegt das Paar im Speicher des
+   Geräts (höchstens zwei Stunden) – falls Android die App schließt, während
+   man zum Kopieren bei GitHub ist.
 2. Auf GitHub: Boxenstopp-Daten → Settings → Secrets and variables → Actions
    → New repository secret: `VAPID_PUBLIC_KEY` mit dem öffentlichen
    Schlüssel („Öffentlichen kopieren“), dann `VAPID_PRIVATE_KEY` mit dem
@@ -627,6 +632,10 @@ VAPID über das npm-Paket `web-push`):
    `push.json`, dieses Gerät meldet sich an.
 4. Jedes weitere Gerät: dort „Push-Nachrichten einschalten“. Auf iPhone und
    iPad geht das nur in der App vom Home-Bildschirm (iOS 16.4 oder neuer).
+   Sind Mitteilungen für Boxenstopp verboten, sagt die App, wo man sie
+   erlaubt (Android: Symbol lange drücken → App-Info → Benachrichtigungen;
+   im Chrome-Tab über die Website-Einstellungen; iPhone/iPad: Einstellungen →
+   Mitteilungen → Boxenstopp), und merkt es, sobald man zurückkommt.
    Häkchen wählen, was ankommt (Einkaufsliste, Amys Rezepte, Preisalarm);
    „Probe schicken“ lässt den Lauf eine Probe schicken (ca. eine Minute).
 

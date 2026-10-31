@@ -27,7 +27,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v26';
+const VERSION = 'v27';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 
@@ -144,7 +144,9 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((fenster) => {
     const da = fenster.find((c) => c.url.startsWith(self.registration.scope));
     if (da) { da.postMessage({ boxenstopp: 'zeige', ziel }); return da.focus(); }
-    return self.clients.openWindow(`./index.html${ziel ? `#${ziel.replace(/^#/, '')}` : ''}`);
+    // Ein Timer („chili#5“) öffnet das Rezept
+    const anker = ziel.split('#')[0];
+    return self.clients.openWindow(`./index.html${anker ? `#${anker}` : ''}`);
   }));
 });
 

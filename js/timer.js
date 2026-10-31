@@ -120,19 +120,31 @@ function piepen() {
   } catch { /* dann eben ohne Ton */ }
 }
 
-function benachrichtigen(titel, text, tag) {
+/**
+ * Eine Mitteilung, wenn sie erlaubt ist – über den Service Worker (auf
+ * Android geht nur der Weg; new Notification wirft dort), sonst direkt.
+ * ziel: „chili#5“ – antippen springt zum Schritt (sw.js, app.js).
+ */
+function benachrichtigen(titel, text, tag, ziel = '') {
   try {
-    if ('Notification' in window && Notification.permission === 'granted') {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const direkt = () => {
       const n = new Notification(titel, { body: text, tag, renotify: true });
       n.onclick = () => { window.focus(); n.close(); };
-    }
+    };
+    if (!navigator.serviceWorker?.getRegistration) { direkt(); return; }
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg?.showNotification) return reg.showNotification(titel, { body: text, tag, renotify: true, icon: './icon-192.png', badge: './icon-192.png', data: { ziel } });
+      direkt();
+      return null;
+    }).catch(() => {});
   } catch { /* egal */ }
 }
 
 function alarm(t) {
   piepen();
   try { navigator.vibrate?.([400, 150, 400, 150, 600]); } catch { /* egal */ }
-  benachrichtigen('Timer fertig', t.label || `${t.minuten} Min. sind um`, t.id);
+  benachrichtigen('Timer fertig', t.label || `${t.minuten} Min. sind um`, t.id, `${t.rid}#${t.schritt}`);
   melde(`Fertig: ${t.label || `${t.minuten} Min.`}`, { knopf: 'Aus', beiKnopf: () => timerStoppen(t.id) });
 }
 
@@ -141,7 +153,7 @@ function zwischenAlarm(t, was) {
   piepen();
   try { navigator.vibrate?.([400, 150, 400]); } catch { /* egal */ }
   const text = `Jetzt: ${was || 'weiter'} – der Timer läuft weiter`;
-  benachrichtigen(t.label || 'Timer', text, t.id);
+  benachrichtigen(t.label || 'Timer', text, t.id, `${t.rid}#${t.schritt}`);
   melde(text, { knopf: 'Aus', beiKnopf: () => timerStoppen(t.id) });
 }
 

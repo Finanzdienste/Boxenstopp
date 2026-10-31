@@ -65,16 +65,30 @@ export function schluesselAblegen(oeffentlich) {
   return pushAendern((alt) => ({ ...(alt || {}), schluessel: oeffentlich, abos: alt?.schluessel === oeffentlich ? alt?.abos || {} : {} }), 'Push: neuer Schlüssel');
 }
 
-/** Wie es auf diesem Gerät steht: { art, abo, push } – art: geht-nicht, home, aus, verboten, kein-schluessel, an */
-export async function pushStand() {
-  if (!app.zugang) return { art: 'geht-nicht' };
-  if (!pushMoeglich()) return { art: istApple() && !vomHomeBildschirm() ? 'home' : 'geht-nicht' };
-  if (Notification.permission === 'denied') return { art: 'verboten' };
-  const [reg, push] = await Promise.all([navigator.serviceWorker.getRegistration(), pushLesen()]);
-  if (!push?.schluessel) return { art: 'kein-schluessel', push };
+/** Was dieses Gerät kann, ohne Netz: geht-nicht, home, verboten – oder '' (dann kommt es aufs Abo an). */
+export function geraetArt() {
+  if (!pushMoeglich()) return istApple() && !vomHomeBildschirm() ? 'home' : 'geht-nicht';
+  if (Notification.permission === 'denied') return 'verboten';
+  return '';
+}
+
+/**
+ * Wie es steht: { art, eingerichtet, abo, push }. eingerichtet: Es gibt das
+ * Schlüsselpaar (für alle Geräte). art – dieses Gerät: geht-nicht, home,
+ * verboten, kein-schluessel, aus, an. push: schon gelesene push.json (sonst
+ * wird sie geholt).
+ */
+export async function pushStand(push) {
+  if (!app.zugang) return { art: 'geht-nicht', eingerichtet: false };
+  const p = push === undefined ? await pushLesen() : push;
+  const eingerichtet = !!p?.schluessel;
+  const art = geraetArt();
+  if (art) return { art, eingerichtet, push: p };
+  if (!eingerichtet) return { art: 'kein-schluessel', eingerichtet, push: p };
+  const reg = await navigator.serviceWorker.getRegistration();
   const abo = await reg?.pushManager.getSubscription().catch(() => null);
-  const meins = abo && (push.abos?.[wer()] || []).find((x) => x.endpoint === abo.endpoint);
-  return { art: meins ? 'an' : 'aus', abo: meins || null, push };
+  const meins = abo && (p.abos?.[wer()] || []).find((x) => x.endpoint === abo.endpoint);
+  return { art: meins ? 'an' : 'aus', eingerichtet, abo: meins || null, push: p };
 }
 
 /**
@@ -110,7 +124,7 @@ export async function pushEinschalten(was = ['liste', 'rezepte', 'preise'], { sc
     return { ...(alt || {}), abos };
   }, `Push: ${app.name() || ich} meldet ${eintrag.geraet} an`);
   // Den Stand aus dem Geschriebenen – frisch gelesen wäre er bei GitHub evtl. noch der alte
-  return { art: 'an', abo: eintrag, push: neu };
+  return { art: 'an', eingerichtet: true, abo: eintrag, push: neu };
 }
 
 /** Ausschalten: Abo beenden und aus push.json nehmen. */
@@ -127,7 +141,7 @@ export async function pushAusschalten() {
     if (!abos[ich].length) delete abos[ich];
     return { ...(alt || {}), abos };
   }, `Push: ${app.name() || ich} meldet ${geraet()} ab`);
-  return { art: 'aus', abo: null, push: neu };
+  return { art: 'aus', eingerichtet: !!neu?.schluessel, abo: null, push: neu };
 }
 
 /** Was dieses Gerät bekommt (Einkaufsliste, Amys Rezepte, Preisalarm). */
@@ -142,7 +156,7 @@ export async function pushWas(was) {
     return { ...(alt || {}), abos };
   }, `Push: ${app.name() || ich} ändert, was ankommt`);
   const meins = (neu?.abos?.[ich] || []).find((x) => x.endpoint === abo.endpoint);
-  return meins ? { art: 'an', abo: meins, push: neu } : pushStand();
+  return meins ? { art: 'an', eingerichtet: true, abo: meins, push: neu } : pushStand();
 }
 
 /** Eine Probe an dieses Gerät (und die anderen derselben Person) – der Lauf im Daten-Repo schickt sie. */
