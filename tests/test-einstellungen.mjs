@@ -27,7 +27,7 @@ await p.setViewportSize({ width: 430, height: 900 });
 check(await bis(async () => (await abgeschnitten(p)).length === 0), '430 px: alles lesbar');
 await p.setViewportSize({ width: 360, height: 780 });
 await p.click('.tab[data-tab="einstellungen"]');
-check(await tab(p) === 'einstellungen' && JSON.stringify(await p.$$eval('#view-einstellungen .e-karte > h2', (xs) => xs.map((x) => x.textContent))) === JSON.stringify(['Gemeinsame Liste', 'Push-Nachrichten', 'KI-Schlüssel', 'Reiter unten', 'Gelernt und gemerkt', 'Über die App']), 'Einstellungen: sechs Bereiche');
+check(await tab(p) === 'einstellungen' && JSON.stringify(await p.$$eval('#view-einstellungen .e-karte > h2', (xs) => xs.map((x) => x.textContent))) === JSON.stringify(['Gemeinsame Liste', 'Push-Nachrichten', 'KI-Schlüssel', 'Darstellung', 'Reiter unten', 'Gelernt und gemerkt', 'Über die App']), 'Einstellungen: sieben Bereiche');
 check(await p.locator('#e-zugang #z-form').isVisible() && !(await p.locator('#e-zugang [data-act="z-abbrechen"]').count()), 'nicht geteilt: hier gleich das Formular (ohne Abbrechen)');
 check((await p.locator('#push-bereich').innerText()).includes('sobald die gemeinsame Liste eingerichtet ist'), 'Push: erst nach dem Einrichten');
 // Über der Liste der Hinweis – „Einrichten“ führt hierher
@@ -60,6 +60,43 @@ check(await tab(p) === 'einkauf', 'stand man zuletzt auf einem ausgeblendeten Re
 await p.click('.tab[data-tab="einstellungen"]');
 for (const t of ['rezepte', 'amy', 'angebote']) await p.click(`#e-reiter [data-reiter="${t}"]`);
 check((await sichtbareReiter(p)).length === 5, 'alle wieder an');
+
+// Reihenfolge: die Angebote nach vorn
+for (let n = 0; n < 3; n++) await p.click('#e-reiter [data-reiter-hoch="angebote"]');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'rezepte', 'amy', 'einkauf', 'einstellungen']), 'dreimal ↑: die Angebote stehen unten ganz links');
+check(await p.locator('#e-reiter [data-reiter-hoch="angebote"]').isDisabled() && await p.evaluate(() => document.activeElement?.dataset.reiterRunter) === 'angebote', 'ganz vorn: ↑ geht nicht mehr, der Fokus springt auf ↓');
+check(JSON.stringify(await p.$$eval('#e-reiter [data-reiter]', (xs) => xs.map((x) => x.dataset.reiter))) === JSON.stringify(['angebote', 'rezepte', 'amy', 'einkauf']) && await p.locator('#e-reiter [data-reiter-runter="einkauf"]').isDisabled(), 'in den Einstellungen in derselben Reihenfolge, ganz hinten kein ↓');
+await p.click('#e-reiter [data-reiter-runter="rezepte"]');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'amy', 'rezepte', 'einkauf', 'einstellungen']), '↓ bei den Rezepten: einen nach rechts');
+await p.reload({ waitUntil: 'load' });
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'amy', 'rezepte', 'einkauf', 'einstellungen']), 'nach dem Neuladen: gleich in dieser Reihenfolge');
+await p.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await p.click('.tab[data-tab="einstellungen"]');
+for (let i = 0; i < 2; i++) await p.click('#e-reiter [data-reiter-hoch="rezepte"]');
+await p.click('#e-reiter [data-reiter-runter="angebote"]');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'angebote', 'einkauf', 'einstellungen']), 'zurückgeschoben');
+await p.click('#e-reiter [data-reiter-runter="angebote"]');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'einstellungen']), 'wieder wie am Anfang');
+
+// Hell oder dunkel
+const hintergrund = () => p.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
+const leiste = () => p.$$eval('meta[name="theme-color"]', (ms) => ms.map((m) => m.content).join());
+await p.emulateMedia({ colorScheme: 'light' });
+check(await p.locator('#e-design input[value="auto"]').isChecked() && await hintergrund() === 'rgb(237, 241, 239)', 'Darstellung: „Wie das Gerät“, hell');
+await p.click('#e-design .e-wahl:has(input[value="dunkel"])');
+check(await p.evaluate(() => document.documentElement.dataset.design) === 'dunkel' && await hintergrund() === 'rgb(14, 20, 18)' && await leiste() === '#0E1412,#0E1412', '„Dunkel“: dunkel, auch wenn das Gerät hell ist – oben die dunkle Leiste');
+await p.reload({ waitUntil: 'load' });
+check(await p.evaluate(() => document.documentElement.dataset.design) === 'dunkel' && await hintergrund() === 'rgb(14, 20, 18)', 'nach dem Neuladen: gleich dunkel');
+await p.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await p.click('.tab[data-tab="amy"]');
+check(await hintergrund() === 'rgb(35, 16, 25)', 'Amys Reiter: in ihrem dunklen Rosa');
+await p.click('.tab[data-tab="einstellungen"]');
+await p.emulateMedia({ colorScheme: 'dark' });
+await p.click('#e-design .e-wahl:has(input[value="hell"])');
+check(await hintergrund() === 'rgb(237, 241, 239)' && await leiste() === '#EDF1EF,#EDF1EF', '„Hell“: hell, auch wenn das Gerät dunkel ist');
+await p.click('#e-design .e-wahl:has(input[value="auto"])');
+check(await p.evaluate(() => document.documentElement.dataset.design === undefined && localStorage.getItem('boxenstopp.design.v1') === null) && await hintergrund() === 'rgb(14, 20, 18)', '„Wie das Gerät“: folgt wieder dem Gerät (hier dunkel)');
+await p.emulateMedia({ colorScheme: 'light' });
 // Der Punkt oben führt auch her
 await p.click('.tab[data-tab="rezepte"]');
 await p.click('#sync');

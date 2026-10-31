@@ -108,13 +108,25 @@ const beimReiter = [];
 export const reiterBeobachten = (fn) => { beimReiter.push(fn); };
 /* Die Farbe der Leiste oben im Browser: rosa bei Amy (siehe css, html[data-tab="amy"]). */
 const LEISTE = { hell: ['#EDF1EF', '#FFEAF3'], dunkel: ['#0E1412', '#2A1120'] };
+/**
+ * Beide theme-color-Angaben setzen: je nach Gerät hell oder dunkel – ist in
+ * den Einstellungen hell oder dunkel fest gewählt (html[data-design]), beide
+ * in dieser Farbe.
+ */
+export function leisteFaerben() {
+  const amy = ansicht.tab === 'amy' ? 1 : 0;
+  const fest = document.documentElement.dataset.design;
+  for (const m of $$('meta[name="theme-color"]')) {
+    const dunkel = fest ? fest === 'dunkel' : /dark/.test(m.media || '');
+    m.setAttribute('content', dunkel ? LEISTE.dunkel[amy] : LEISTE.hell[amy]);
+  }
+}
 export function zeigeReiter(t, scrollBehalten = false) {
   if (istSchmal()) scrollPos[ansicht.tab] = window.scrollY;
   ansicht.tab = REITER.includes(t) ? t : 'rezepte';
   $('#app').dataset.tab = ansicht.tab;
   document.documentElement.dataset.tab = ansicht.tab;
-  const amy = ansicht.tab === 'amy' ? 1 : 0;
-  for (const m of $$('meta[name="theme-color"]')) m.setAttribute('content', /dark/.test(m.media || '') ? LEISTE.dunkel[amy] : LEISTE.hell[amy]);
+  leisteFaerben();
   if (ansicht.tab === 'einkauf' && meldungArt === 'zur-liste') meldungWeg();
   for (const b of $$('.tab')) {
     if (b.dataset.tab === ansicht.tab) b.setAttribute('aria-current', 'page');

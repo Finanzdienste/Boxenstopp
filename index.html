@@ -12,6 +12,8 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="css/styles.css">
+<!-- Hell oder dunkel, wenn fest gewählt (Einstellungen → Darstellung) – vor dem ersten Bild, sonst flackert es -->
+<script>try{var d=JSON.parse(localStorage.getItem('boxenstopp.design.v1'));if(d==='hell'||d==='dunkel')document.documentElement.setAttribute('data-design',d)}catch(e){}</script>
 </head>
 <body>
 <div id="app" data-tab="rezepte">
@@ -93,6 +95,7 @@
       <section class="e-karte" id="e-liste" aria-labelledby="e-liste-t"><h2 id="e-liste-t">Gemeinsame Liste</h2><div class="e-zugang" id="e-zugang"></div><div class="teilen" id="teilen" hidden></div></section>
       <section class="e-karte" aria-labelledby="e-push-t"><h2 id="e-push-t">Push-Nachrichten</h2><div class="push-bereich" id="push-bereich"></div></section>
       <section class="e-karte" aria-labelledby="e-ki-t"><h2 id="e-ki-t">KI-Schlüssel</h2><div id="e-ki"></div></section>
+      <section class="e-karte" aria-labelledby="e-design-t"><h2 id="e-design-t">Darstellung</h2><div id="e-design"></div></section>
       <section class="e-karte" aria-labelledby="e-reiter-t"><h2 id="e-reiter-t">Reiter unten</h2><div id="e-reiter"></div></section>
       <section class="e-karte" aria-labelledby="e-gemerkt-t"><h2 id="e-gemerkt-t">Gelernt und gemerkt</h2><div id="e-gemerkt"></div></section>
       <section class="e-karte" aria-labelledby="e-ueber-t"><h2 id="e-ueber-t">Über die App</h2><div id="e-ueber"></div></section>
@@ -123,6 +126,8 @@
       <span>Einstellungen</span>
     </button>
   </nav>
+  <!-- Reihenfolge und ausgeblendete Reiter (Einstellungen → Reiter unten) gleich hier, damit unten nichts springt; ansicht-einstellungen.js macht es danach noch einmal richtig -->
+  <script>try{var r=JSON.parse(localStorage.getItem('boxenstopp.reiter.v1'))||{},n=document.querySelector('.tabbar'),t=function(k){return n.querySelector('.tab[data-tab="'+k+'"]')},a=(r.aus||[]).filter(function(k){return k!=='einstellungen'&&t(k)});(r.reihe||[]).concat('einstellungen').forEach(function(k){var b=t(k);if(b)n.appendChild(b)});if(a.length<4){a.forEach(function(k){t(k).hidden=true});document.documentElement.setAttribute('data-reiter-aus',a.join(' '))}}catch(e){}</script>
   <div class="lob" id="lob" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>

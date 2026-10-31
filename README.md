@@ -7,7 +7,7 @@ fürs Handy, für Tobi und seine Freundin.
 (in Chrome öffnen, dann Menü ⋮ → „App installieren“; auf dem iPhone in
 Safari: Teilen → „Zum Home-Bildschirm“).
 
-Fünf Reiter (welche davon unten stehen, wählt jedes Gerät in den Einstellungen):
+Fünf Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes Gerät in den Einstellungen):
 
 | Reiter | Inhalt |
 | --- | --- |
@@ -15,7 +15,7 @@ Fünf Reiter (welche davon unten stehen, wählt jedes Gerät in den Einstellunge
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 | **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
-| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), Push-Nachrichten, KI-Schlüssel, welche Reiter unten stehen, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), Push-Nachrichten, KI-Schlüssel, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
 Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat oder ein
@@ -462,9 +462,15 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   Einstellungen öffnet.
 - **KI-Schlüssel:** welcher eingetragen ist (Google oder Anthropic, Modell),
   ändern, entfernen (mit Rückgängig).
+- **Darstellung:** wie das Gerät, hell oder dunkel – je Gerät
+  (`boxenstopp.design.v1`, ein kleines Skript im Kopf von `index.html` setzt
+  `html[data-design]` schon vor dem ersten Bild, damit nichts flackert; jeder
+  dunkle Farbsatz in `css/styles.css` gilt für „wie das Gerät“ und „dunkel“).
 - **Reiter unten:** Rezepte, Amys Rezepte, Einkaufsliste und Angebote lassen
-  sich ausblenden, einer bleibt, die Einstellungen sind immer da – je Gerät
-  (`boxenstopp.reiter.v1`). Ist „Amys Rezepte“ aus, steht ihre Karte auch
+  sich ausblenden (einer bleibt) und mit ↑ ↓ umsortieren – oben in der
+  Liste heißt links in der Leiste; die Einstellungen sind immer da, ganz
+  rechts. Je Gerät (`boxenstopp.reiter.v1`: `aus`, `reihe`; ein Skript
+  gleich hinter der Leiste in `index.html` ordnet sie vor dem ersten Bild). Ist „Amys Rezepte“ aus, steht ihre Karte auch
   auf dem Handy bei den Rezepten. Passen die Beschriftungen nicht
   nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
@@ -856,6 +862,6 @@ Senden über eine web-push-Attrappe) und spielt dann im ganzen Chromium
 Mitteilung aus dem Service Worker durch. `test-import.mjs` prüft den
 Rezept-Import mit einer nachgebauten Gemini-API. `test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
-ausblenden und merken, Einrichten über Hinweis und Link, KI-Schlüssel,
+ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,
 Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Fassung). Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

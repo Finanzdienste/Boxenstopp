@@ -5,7 +5,10 @@
  *                      zeichnet ansicht-liste.js in #e-zugang und #teilen
  *   Push-Nachrichten   ansicht-push.js in #push-bereich
  *   KI-Schlüssel       ansehen, ändern, entfernen (zugang.js)
- *   Reiter unten       welche Reiter die Leiste zeigt – nur dieses Gerät
+ *   Darstellung        hell, dunkel oder wie das Gerät – nur dieses Gerät
+ *                      (html[data-design], gesetzt schon im Kopf von index.html)
+ *   Reiter unten       welche Reiter die Leiste zeigt, in welcher
+ *                      Reihenfolge – nur dieses Gerät
  *   Gelernt und gemerkt  Tempo, Wege durch die Läden, Preisalarme, Preise
  *                      vom Bon – mit Vergessen und Löschen
  *   Über die App       Fassung, nach Updates suchen
@@ -14,7 +17,7 @@
  * mehr zurück); breit gibt es oben das Zahnrad, und der Punkt „Geteilt“ oben
  * führt auch hierher.
  */
-import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal } from './kern.js';
+import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal, leisteFaerben } from './kern.js';
 import { esc, tagKurz, menge } from './format.js';
 import { euro } from './kosten.js';
 import { ladeKi, speichereKi, loescheKi, kiAus } from './zugang.js';
@@ -27,16 +30,24 @@ import { statusZeichnen } from './ansicht-liste.js';
 
 /* ------------------------------------------------------------ Reiter */
 
-const REITER_AUS = 'boxenstopp.reiter.v1'; // { aus: ['amy'] } – welche Reiter unten fehlen, nur dieses Gerät
-/** Die Reiter, die sich ausblenden lassen – die Einstellungen bleiben immer. */
+const REITER_AUS = 'boxenstopp.reiter.v1'; // { aus: ['amy'], reihe: ['einkauf', 'rezepte', …] } – nur dieses Gerät
+/** Die Reiter, die sich ausblenden und verschieben lassen – die Einstellungen bleiben immer, ganz rechts. */
 export const REITER_WAHL = [['rezepte', 'Rezepte'], ['amy', 'Amys Rezepte'], ['einkauf', 'Einkaufsliste'], ['angebote', 'Angebote']];
+const ALLE = REITER_WAHL.map(([k]) => k);
 
 /** Welche Reiter ausgeblendet sind – mindestens einer bleibt. */
 export function reiterAus() {
   const x = lese(REITER_AUS, null);
-  const aus = Array.isArray(x?.aus) ? [...new Set(x.aus.filter((t) => REITER_WAHL.some(([k]) => k === t)))] : [];
-  return aus.length >= REITER_WAHL.length ? [] : aus;
+  const aus = Array.isArray(x?.aus) ? [...new Set(x.aus.filter((t) => ALLE.includes(t)))] : [];
+  return aus.length >= ALLE.length ? [] : aus;
 }
+/** In welcher Reihenfolge die Reiter stehen (ohne die Einstellungen); was fehlt, hinten dran. */
+export function reiterReihe() {
+  const x = lese(REITER_AUS, null);
+  const reihe = Array.isArray(x?.reihe) ? [...new Set(x.reihe.filter((t) => ALLE.includes(t)))] : [];
+  return [...reihe, ...ALLE.filter((k) => !reihe.includes(k))];
+}
+const reiterMerken = ({ aus = reiterAus(), reihe = reiterReihe() } = {}) => schreibe(REITER_AUS, { aus, reihe });
 
 /**
  * Die Leiste unten nach der Wahl: Ausgeblendetes weg, die Karte „Amys
@@ -46,9 +57,13 @@ export function reiterAus() {
  */
 export function reiterAnwenden({ wechseln = false } = {}) {
   const aus = reiterAus();
+  const reihe = reiterReihe();
+  const bar = $('.tabbar');
+  // In der gewählten Reihenfolge, die Einstellungen ganz rechts
+  if (bar) for (const k of [...reihe, 'einstellungen']) { const b = bar.querySelector(`.tab[data-tab="${k}"]`); if (b) bar.append(b); }
   for (const b of $$('.tabbar .tab')) b.hidden = aus.includes(b.dataset.tab);
   document.documentElement.dataset.reiterAus = aus.join(' ');
-  if (wechseln && aus.includes(ansicht.tab)) zeigeReiter(REITER_WAHL.map(([k]) => k).find((k) => !aus.includes(k)) || 'einstellungen', true);
+  if (wechseln && aus.includes(ansicht.tab)) zeigeReiter(reihe.find((k) => !aus.includes(k)) || 'einstellungen', true);
   tabbarAnpassen();
 }
 
@@ -62,17 +77,49 @@ export function tabbarAnpassen() {
   bar.classList.toggle('kurz', eng);
 }
 
+const HOCH = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
+const RUNTER = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
 function reiterHTML() {
   const aus = reiterAus();
+  const reihe = reiterReihe();
+  const namen = Object.fromEntries(REITER_WAHL);
   const symbol = (t) => $(`.tabbar .tab[data-tab="${t}"] .ic`)?.outerHTML || '';
-  const an = REITER_WAHL.filter(([k]) => !aus.includes(k)).length;
-  const zeilen = REITER_WAHL.map(([k, name]) => {
+  const an = ALLE.filter((k) => !aus.includes(k)).length;
+  const zeilen = reihe.map((k, i) => {
     const sichtbar = !aus.includes(k);
     const letzter = sichtbar && an === 1;
-    return `<label class="e-schalter">${symbol(k)}<span>${esc(name)}${letzter ? ' <small>– einer bleibt</small>' : ''}</span><input type="checkbox" data-reiter="${k}"${sichtbar ? ' checked' : ''}${letzter ? ' disabled' : ''}></label>`;
+    const name = namen[k];
+    return `<li class="e-zeile"><label class="e-schalter"><input type="checkbox" data-reiter="${k}"${sichtbar ? ' checked' : ''}${letzter ? ' disabled' : ''}>${symbol(k)}<span>${esc(name)}${letzter ? ' <small>– einer bleibt</small>' : ''}</span></label>`
+      + `<button type="button" class="e-pfeil" data-reiter-hoch="${k}" aria-label="${esc(name)} weiter nach vorn"${i === 0 ? ' disabled' : ''}>${HOCH}</button>`
+      + `<button type="button" class="e-pfeil" data-reiter-runter="${k}" aria-label="${esc(name)} weiter nach hinten"${i === reihe.length - 1 ? ' disabled' : ''}>${RUNTER}</button></li>`;
   }).join('');
-  return `<div class="e-reiter" role="group" aria-label="Reiter unten">${zeilen}<label class="e-schalter fest">${symbol('einstellungen')}<span>Einstellungen <small>– immer da</small></span><input type="checkbox" checked disabled></label></div>
-<p class="fine">Gilt für die Leiste unten auf diesem Gerät. Amys Rezepte und die Angebote bleiben auch ausgeblendet über ihre Karte bei den Rezepten erreichbar.</p>`;
+  return `<ol class="e-reiter" aria-label="Reiter unten, von links nach rechts">${zeilen}<li class="e-zeile fest"><label class="e-schalter"><input type="checkbox" checked disabled>${symbol('einstellungen')}<span>Einstellungen <small>– immer da, ganz rechts</small></span></label></li></ol>
+<p class="fine">Häkchen weg blendet einen Reiter aus, die Pfeile ändern die Reihenfolge – von oben nach unten heißt in der Leiste von links nach rechts. Gilt für dieses Gerät. Amys Rezepte und die Angebote bleiben auch ausgeblendet über ihre Karte bei den Rezepten erreichbar.</p>`;
+}
+
+/* --------------------------------------------------------- Darstellung */
+
+const DESIGN = 'boxenstopp.design.v1'; // 'hell' | 'dunkel' – fehlt: wie das Gerät (index.html liest ihn vor dem ersten Bild)
+/** Hell, dunkel oder wie das Gerät ('auto') – für dieses Gerät merken und gleich anwenden. */
+export function designSetzen(wert) {
+  const w = ['hell', 'dunkel'].includes(wert) ? wert : 'auto';
+  if (w === 'auto') {
+    try { localStorage.removeItem(DESIGN); } catch { /* ohne Speicher */ }
+    delete document.documentElement.dataset.design;
+  } else {
+    schreibe(DESIGN, w);
+    document.documentElement.dataset.design = w;
+  }
+  leisteFaerben();
+}
+const designJetzt = () => document.documentElement.dataset.design || 'auto';
+
+function designHTML() {
+  const jetzt = designJetzt();
+  const wahl = [['auto', 'Wie das Gerät'], ['hell', 'Hell'], ['dunkel', 'Dunkel']];
+  return `<div class="e-design" role="radiogroup" aria-label="Hell oder dunkel">${wahl.map(([w, name]) => `<label class="e-wahl${w === jetzt ? ' an' : ''}"><input type="radio" name="e-design" value="${w}"${w === jetzt ? ' checked' : ''}><span>${esc(name)}</span></label>`).join('')}</div>
+<p class="fine">Gilt für dieses Gerät. „Wie das Gerät“ folgt dem hellen oder dunklen Modus von Handy oder Tablet.</p>`;
 }
 
 /* -------------------------------------------------------- KI-Schlüssel */
@@ -173,6 +220,8 @@ export function einstellungenZeichnen() {
   if (ki && !(ki.contains(document.activeElement) && document.activeElement.matches('input'))) ki.innerHTML = kiHTML();
   const r = $('#e-reiter');
   if (r) r.innerHTML = reiterHTML();
+  const dsg = $('#e-design');
+  if (dsg) dsg.innerHTML = designHTML();
   const g = $('#e-gemerkt');
   if (g) g.innerHTML = gemerktHTML();
   const u = $('#e-ueber');
@@ -188,6 +237,22 @@ export function einstellungenZeichnen() {
 
 export function klickEinstellungen(el) {
   const d = el.dataset;
+  if (d.reiterHoch || d.reiterRunter) {
+    const k = d.reiterHoch || d.reiterRunter;
+    const hoch = !!d.reiterHoch;
+    const reihe = reiterReihe();
+    const i = reihe.indexOf(k);
+    const j = hoch ? i - 1 : i + 1;
+    if (i < 0 || j < 0 || j >= reihe.length) return true;
+    [reihe[i], reihe[j]] = [reihe[j], reihe[i]];
+    reiterMerken({ reihe });
+    reiterAnwenden();
+    einstellungenZeichnen();
+    // Der Fokus bleibt am Pfeil (mehrmals tippen) – ist der jetzt am Rand, am anderen
+    const gleich = $(`#e-reiter [data-reiter-${hoch ? 'hoch' : 'runter'}="${k}"]`);
+    (gleich && !gleich.disabled ? gleich : $(`#e-reiter [data-reiter-${hoch ? 'runter' : 'hoch'}="${k}"]`))?.focus({ preventScroll: true });
+    return true;
+  }
   if (d.eBonsWeg) {
     const k = d.eBonsWeg;
     const alt = (app.stand.bons?.[k] || []).map((b) => ({ ...b }));
@@ -224,12 +289,19 @@ export function klickEinstellungen(el) {
 
 /** Häkchen bei den Reitern (change). true, wenn es hierher gehörte. */
 export function aenderungEinstellungen(ziel) {
+  if (ziel.name === 'e-design') {
+    designSetzen(ziel.value);
+    const el = $('#e-design');
+    if (el) el.innerHTML = designHTML();
+    $(`#e-design input[value="${designJetzt()}"]`)?.focus({ preventScroll: true });
+    return true;
+  }
   const t = ziel.dataset?.reiter;
   if (!t) return false;
   const aus = new Set(reiterAus());
   if (ziel.checked) aus.delete(t); else aus.add(t);
-  if (aus.size >= REITER_WAHL.length) { ziel.checked = true; return true; }
-  schreibe(REITER_AUS, { aus: [...aus] });
+  if (aus.size >= ALLE.length) { ziel.checked = true; return true; }
+  reiterMerken({ aus: [...aus] });
   reiterAnwenden();
   einstellungenZeichnen();
   return true;
