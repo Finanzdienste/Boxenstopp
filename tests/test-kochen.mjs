@@ -75,7 +75,7 @@ await i.click('#kochmodus [data-km-timer]');
 check(await bis(async () => (await i.locator('#km-timer .km-tm').count()) === 1), 'Timer im Kochmodus gestartet – oben läuft er mit');
 check(await i.evaluate(() => document.querySelector('#kochmodus #toast') !== null), 'die Meldungen liegen im Kochmodus mit (sonst wären sie verdeckt)');
 await i.keyboard.press('Escape');
-check(await bis(async () => (await i.locator('#kochmodus[open]').count()) === 0) && await i.evaluate(() => document.querySelector('#app #toast') !== null), 'Escape beendet ihn – die Meldung ist wieder an ihrem Platz');
+check(await bis(async () => (await i.locator('#kochmodus[open]').count()) === 0 && i.evaluate(() => document.querySelector('#app #toast') !== null)), 'Escape beendet ihn – die Meldung ist wieder an ihrem Platz');
 check(await i.locator('#detail .step[aria-pressed="true"]').count() === 2, 'im Rezept: dieselben zwei Haken');
 
 // Auf dem iPhone: dieselben Haken, derselbe Timer

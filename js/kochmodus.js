@@ -220,8 +220,12 @@ export function wischEnde(ev) {
 /** Von außen (Haken auf dem anderen Gerät, Liste neu): neu zeichnen, wenn offen. */
 export function kochmodusNeu() { if (km) zeichnen(); }
 
-/** Esc und das Schließen über den Browser: aufräumen. */
+/**
+ * Esc und das Schließen über den Browser: aufräumen. „cancel“ kommt bei Esc
+ * sofort, „close“ erst einen Moment später – das Erste räumt auf.
+ */
 export function kochmodusAnmelden() {
   const dlg = $('#kochmodus');
+  dlg?.addEventListener('cancel', aufraeumen);
   dlg?.addEventListener('close', aufraeumen);
 }
