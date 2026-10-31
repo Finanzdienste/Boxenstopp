@@ -41,7 +41,7 @@ check(await verbinden(a, 'Amy'), 'Amy: eingerichtet');
 check(await bis(async () => (await offen(a)) === 1, 5000), 'bei Amy auf dem iPhone: das Popup kommt von selbst');
 const text = await a.locator('#tablet-dlg').innerText();
 check(text.includes('Boxenstopp auch auf deinem iPad') && (await a.locator('.tablet-schritte li').count()) === 4, 'Titel und vier Schritte');
-check(text.includes('Zum Home-Bildschirm') && text.includes('Als Web-App öffnen') && text.includes('Einrichten') && text.includes('Amy') && text.includes('127.0.0.1:8099'), 'mit Home-Bildschirm, Einrichten, ihrem Namen und der Adresse');
+check(text.includes('Zum Home-Bildschirm') && text.includes('Als Web-App öffnen') && text.includes('Einstellungen') && text.includes('Amy') && text.includes('127.0.0.1:8099'), 'mit Home-Bildschirm, Einstellungen, ihrem Namen und der Adresse');
 check(await a.evaluate(() => document.activeElement?.dataset.act) === 'tablet-link', 'der Fokus steht auf „Link kopieren“');
 await a.click('[data-act="tablet-link"]');
 const link = await bis(async () => { const x = await a.evaluate(() => navigator.clipboard.readText()); return x.includes('#zugang=') ? x : ''; });
@@ -58,9 +58,9 @@ await a.click('#view-amy [data-act="tablet-zeigen"]');
 check(await bis(async () => (await offen(a)) === 1), 'in ihrem Reiter: „Auch auf dem iPad“ öffnet es wieder');
 await a.click('#tablet-dlg .tablet-knoepfe [data-act="tablet-zu"]');
 check(await bis(async () => (await offen(a)) === 0), '„Alles klar“ schließt');
-await a.click('.tab[data-tab="einkauf"]');
+await a.click('.tab[data-tab="einstellungen"]');
 await a.click('#teilen [data-act="tablet-zeigen"]');
-check(await bis(async () => (await offen(a)) === 1), 'unter der Liste: „Aufs iPad oder Tablet“');
+check(await bis(async () => (await offen(a)) === 1), 'in den Einstellungen: „Aufs iPad oder Tablet“');
 await a.click('#tablet-dlg .tablet-zu');
 
 // Das iPad: mit dem kopierten Link einrichten (so wie in der App vom Home-Bildschirm)

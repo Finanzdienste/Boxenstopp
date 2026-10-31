@@ -9,7 +9,7 @@
  * Für die Tests lassen sich zwei Dinge über den localStorage verstellen:
  * __api (statt https://api.github.com) und __takt (Abgleich in ms).
  */
-import { app, $, ansicht, zeigeReiter, melde, lese } from './kern.js';
+import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, API } from './speicher.js';
 import { opZusammen } from './liste.js';
 import { preiseMitBons } from './kosten.js';
@@ -24,7 +24,8 @@ import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeic
 import { amyZeichnen, amyVorbereiten, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, aenderungAmy, absendenAmy, tasteAmy } from './ansicht-amy.js';
 import { tabletPruefen, klickTablet } from './ansicht-tablet.js';
 import { kochstandAbgleichen, kochstandStart } from './kochstand.js';
-import { klickPush, aenderungPush, pushAnmelden } from './ansicht-push.js';
+import { klickPush, aenderungPush, pushAnmelden, pushZeichnen } from './ansicht-push.js';
+import { einstellungenStart, einstellungenZeichnen, klickEinstellungen, aenderungEinstellungen, absendenEinstellungen, tabbarAnpassen } from './ansicht-einstellungen.js';
 import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus, tasteKochmodus, wischStart, wischEnde } from './kochmodus.js';
 
 const apiBasis = () => lese('__api', null) || API;
@@ -54,6 +55,8 @@ function beiAenderung(stand) {
   if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
   if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
   if (kochNeu) { kochstandZeichnen(); kochmodusNeu(); }
+  // Preisalarme, Bons, Wege: was dort steht, kann sich geändert haben
+  if (ansicht.tab === 'einstellungen') einstellungenZeichnen();
 }
 function beiStatus(s) {
   app.status = s;
@@ -68,8 +71,13 @@ function nimmSpeicher(neu) {
 
 // Angebote oder Laden geändert (ansicht-angebote.js): die Hinweise auf der Liste mitziehen
 app.listeNeu = () => listeZeichnen();
-// Tempo vergessen (ansicht-rezepte.js): auch die Zeiten bei Amy
-app.tempoNeu = () => amyZeichnen();
+// Tempo vergessen (ansicht-rezepte.js, auch aus den Einstellungen): die Zeiten bei Amy und die Einstellungen
+app.tempoNeu = () => { amyZeichnen(); einstellungenZeichnen(); };
+// In die Einstellungen: dort frisch zeichnen und Push nachsehen; die Leiste unten passt ihre Beschriftungen an
+reiterBeobachten((t) => {
+  if (t === 'einstellungen') { einstellungenZeichnen(); pushZeichnen(); }
+  tabbarAnpassen();
+});
 
 app.verbinden = async (token, name) => {
   const ergebnis = await pruefeSchluessel(token, { api: apiBasis() });
@@ -120,6 +128,7 @@ document.addEventListener('click', (ev) => {
   if (klickTimer(el)) return;
   if (klickTablet(el)) return;
   if (klickPush(el)) return;
+  if (klickEinstellungen(el)) return;
   if (klickAmy(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
@@ -143,7 +152,7 @@ document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Enter' && !ev.isComposing && tasteAmy(ev.target)) ev.preventDefault();
 });
 document.addEventListener('input', (ev) => { if (!eingabeAmy(ev.target) && !eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungPush(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungPush(ev.target) && !aenderungEinstellungen(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
 // Im Kochmodus: wischen zum Blättern
 document.addEventListener('touchstart', wischStart, { passive: true });
 document.addEventListener('touchend', wischEnde, { passive: true });
@@ -151,7 +160,7 @@ document.addEventListener('touchend', wischEnde, { passive: true });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wegPruefen(); });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
 document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
-document.addEventListener('submit', (ev) => { if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenRezepte(ev)) absendenListe(ev); });
+document.addEventListener('submit', (ev) => { if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenEinstellungen(ev) && !absendenRezepte(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */
 
@@ -211,10 +220,16 @@ async function start() {
     if (v && typeof v === 'object' && v.je) { app.preisverlauf = v; listeZeichnen(); angeboteZeichnen(); }
   }).catch(() => {});
 
-  if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
+  // Ein Link mit einem neuen Schlüssel: das Einrichten steht in den Einstellungen
+  const neuerSchluessel = !!ausLink && ausLink !== ladeZugang()?.token;
+  if (neuerSchluessel) ansicht.tab = 'einstellungen';
+  else if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
   if (hash === 'angebote') ansicht.tab = 'angebote';
   if (hash === 'amy') ansicht.tab = 'amy';
+  if (hash === 'einstellungen') ansicht.tab = 'einstellungen';
   zeigeReiter(ansicht.tab, true);
+  // Welche Reiter unten stehen – stand der gemerkte auf einem ausgeblendeten, zum ersten sichtbaren
+  einstellungenStart({ wechseln: !hash && !ausLink });
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
   if (hash === 'reste' || (kiLink && !ausLink)) kiStart({ oeffnen: true });
   else if (rezept) oeffneRezept(rezept, { still: true });

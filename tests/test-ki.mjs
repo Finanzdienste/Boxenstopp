@@ -586,7 +586,7 @@ await a.reload({ waitUntil: 'load' });
 await a.waitForFunction(() => document.querySelector('.tab[data-tab="angebote"]'));
 await a.click('.tab[data-tab="angebote"]');
 check(await bis(async () => (await a.locator('[data-a-laden="Rewe"]').count()) === 1), 'Amy sieht Rewe auch (mit ihrem Schlüssel)');
-await a.click('.tab[data-tab="einkauf"]');
+await a.click('.tab[data-tab="einstellungen"]');
 await a.click('[data-act="z-trennen"]');
 await a.click('[data-act="z-trennen-ja"]');
 await a.click('.tab[data-tab="angebote"]');

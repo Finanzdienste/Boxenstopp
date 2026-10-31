@@ -11,7 +11,7 @@
  *
  * Von selbst kommt das Popup einmal: bei Amy auf dem iPhone, wenn die
  * gemeinsame Liste eingerichtet ist. Danach über „Auch aufs iPad“ in ihrem
- * Reiter und unter der Einkaufsliste.
+ * Reiter und in den Einstellungen (Gemeinsame Liste).
  */
 import { app, $, lese, schreibe } from './kern.js';
 import { esc } from './format.js';
@@ -43,7 +43,7 @@ function inhalt() {
 <small>Mit derselben Apple-ID setzt du ihn auf dem iPad einfach ein. Sonst schick ihn dir per AirDrop oder Nachricht.</small></li>
 <li><b>Auf dem iPad in Safari öffnen</b><span class="tablet-adresse">${esc(adresse())}</span></li>
 <li><b>Zum Home-Bildschirm legen</b><span>Tipp auf ${TEILEN} <i>Teilen</i> (oben rechts, manchmal hinter „…“) → „Zum Home-Bildschirm“ → „Als Web-App öffnen“ an lassen → „Hinzufügen“.</span></li>
-<li><b>Dort einmal einrichten</b><span>Boxenstopp vom Home-Bildschirm öffnen → <i>Einkaufsliste</i> → „Einrichten“. Name: <b>${esc(name || 'dein Name')}</b>, beim Schlüssel den Link einsetzen → „Verbinden“. Fertig ♡</span></li>
+<li><b>Dort einmal einrichten</b><span>Boxenstopp vom Home-Bildschirm öffnen → <i>Einstellungen</i> → „Gemeinsame Liste“. Name: <b>${esc(name || 'dein Name')}</b>, beim Schlüssel den Link einsetzen → „Verbinden“. Fertig ♡</span></li>
 </ol>
 <p class="tablet-fein">Gut zu wissen: Die Haken beim Kochen, laufende Timer und ein Rezept, das du gerade schreibst und noch nicht gespeichert hast, bleiben auf dem Gerät, auf dem du gerade bist. Ein Android-Tablet geht genauso – dort in Chrome über ⋮ → „Zum Startbildschirm hinzufügen“.</p>
 <div class="tablet-knoepfe"><button type="button" class="amy-btn" data-act="tablet-zu">Alles klar ♡</button></div>`;

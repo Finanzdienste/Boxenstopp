@@ -189,7 +189,7 @@ function einrichtenHTML(schluessel) {
 <p class="zugang-fehler" id="k-schluessel-fehler"${fehler && einrichten ? '' : ' hidden'}>${esc(einrichten ? fehler || '' : '')}</p>
 <div class="zugang-btns"><button type="submit" class="btn btn-primary">Speichern</button>${schluessel ? '<button type="button" class="btn btn-quiet" data-act="k-einrichten-zu">Abbrechen</button><button type="button" class="btn btn-quiet" data-act="k-schluessel-weg">Schlüssel entfernen</button>' : ''}</div>
 ${da ? `<p class="fine">Eingetragen ist ein Schlüssel von ${esc(ANBIETER[da].name)} (${esc(ANBIETER[da].modell)}).</p>` : ''}
-<p class="fine">Gratis heißt bei Google: Was ihr schickt (Fotos, Zutaten), darf Google zum Verbessern seiner Produkte nutzen. Schick also nichts Privates mit aufs Foto. Der Schlüssel bleibt nur auf diesem Handy. Aufs zweite Handy kommt er mit dem Link unter der Einkaufsliste${schluessel ? ' oder mit diesem: <button type="button" class="linkbtn" data-act="k-link">Link fürs zweite Handy kopieren</button>' : ''}.</p>
+<p class="fine">Gratis heißt bei Google: Was ihr schickt (Fotos, Zutaten), darf Google zum Verbessern seiner Produkte nutzen. Schick also nichts Privates mit aufs Foto. Der Schlüssel bleibt nur auf diesem Handy. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy (Einstellungen)${schluessel ? ' oder mit diesem: <button type="button" class="linkbtn" data-act="k-link">Link fürs zweite Handy kopieren</button>' : ''}.</p>
 <p class="fine">Wer lieber Claude nimmt: Ein Anthropic-Schlüssel (sk-ant-…, console.anthropic.com, kostet ein paar Cent pro Rezept) geht hier genauso.</p>
 ${link ? `<input class="z-linkfeld" id="k-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>` : ''}
 </form>`;

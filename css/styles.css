@@ -80,7 +80,12 @@ p{margin:0}
 .brand{display:flex;align-items:center;gap:10px;min-width:0;margin-right:auto}
 .brand-name{font:800 23px/1 var(--f-display);letter-spacing:-.03em;font-variation-settings:"opsz" 48}
 .brand-tag{font:400 13px/1 var(--f-marker);color:var(--tape-ink);background:var(--tape);padding:5px 9px 4px;transform:rotate(-2.5deg);clip-path:var(--torn);white-space:nowrap}
-.sync{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.sync{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font:600 13px/1 var(--f-body);color:var(--muted);white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sync:hover{border-color:var(--line-strong);color:var(--ink)}
+.kopf-einst{align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted)}
+.kopf-einst .ic{width:19px;height:19px}
+.kopf-einst:hover{border-color:var(--line-strong);color:var(--ink)}
+html[data-tab="einstellungen"] .kopf-einst{border-color:var(--accent);color:var(--accent)}
 .sync .dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong)}
 .sync[data-state="ok"] .dot{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
 .timerleiste{max-width:1240px;margin:0 auto;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 max(16px,env(safe-area-inset-left,0px)) 8px}
@@ -107,12 +112,14 @@ p{margin:0}
   #app[data-tab="rezepte"] #view-list,#app[data-tab="rezepte"] #view-angebote,#app[data-tab="rezepte"] #view-amy{display:none}
   #app[data-tab="angebote"] #view-list,#app[data-tab="angebote"] #view-recipes,#app[data-tab="angebote"] #view-amy{display:none}
   #app[data-tab="amy"] #view-list,#app[data-tab="amy"] #view-recipes,#app[data-tab="amy"] #view-angebote{display:none}
+  #app[data-tab="einstellungen"] #view-list,#app[data-tab="einstellungen"] #view-recipes,#app[data-tab="einstellungen"] #view-angebote,#app[data-tab="einstellungen"] #view-amy{display:none}
 }
+#app:not([data-tab="einstellungen"]) #view-einstellungen{display:none}
 @media (min-width:980px){
-  #app[data-tab="angebote"] #view-recipes,#app[data-tab="amy"] #view-recipes{display:none}
+  #app[data-tab="angebote"] #view-recipes,#app[data-tab="amy"] #view-recipes,#app[data-tab="einstellungen"] #view-recipes{display:none}
   #app:not([data-tab="angebote"]) #view-angebote{display:none}
   #app:not([data-tab="amy"]) #view-amy{display:none}
-  #view-recipes,#view-angebote,#view-amy{grid-column:1;grid-row:1}
+  #view-recipes,#view-angebote,#view-amy,#view-einstellungen{grid-column:1;grid-row:1}
   #view-list{grid-column:2;grid-row:1}
 }
 
@@ -422,6 +429,11 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .angebote-pane{display:grid;gap:14px;align-content:start}
 .nur-breit{display:none}
 @media (min-width:980px){.nur-breit{display:inline-flex}}
+/* Die Karte „Amys Rezepte“ bei den Rezepten: breit immer, schmal nur, wenn ihr Reiter unten ausgeblendet ist */
+@media (max-width:979.98px){
+  .reste-karte.nur-breit{display:none}
+  html[data-reiter-aus~="amy"] .reste-karte.amy-link{display:grid}
+}
 .angebote-karte{margin-top:10px}
 .a-lead{margin:0;color:var(--muted);font-size:15px}
 .a-laeden{display:grid;gap:2px;margin-top:2px}
@@ -572,9 +584,7 @@ html[data-tab="amy"] .km-nav .km-los{border:0;background:var(--amy-verlauf);colo
 .l-gleich-mehr{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
 .l-gleich-btns{display:flex;flex-wrap:wrap;gap:8px}
 /* Push-Nachrichten (unter „Gemeinsame Liste“) */
-.push-bereich{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.push-bereich:empty{display:none}
-.push-k-titel{margin:0}
+.push-bereich{display:grid;gap:8px}
 .push-an{display:flex;align-items:center;gap:6px;margin:0;font-weight:650;color:var(--ok)}
 .push-an .ic,.push-bereich .btn .ic{width:17px;height:17px}
 .push-was{display:flex;flex-wrap:wrap;gap:6px 16px}
@@ -603,6 +613,38 @@ html[data-tab="amy"] .km-nav .km-los{border:0;background:var(--amy-verlauf);colo
 .a-glocke .ic{width:18px;height:18px}
 .a-glocke[aria-pressed="true"]{color:var(--ok)}
 .a-glocke[aria-pressed="true"] .ic{fill:currentColor}
+
+/* Einstellungen */
+.einst-pane{display:grid;gap:14px;align-content:start}
+.e-titel{font-size:clamp(27px,5.2vw,36px);line-height:1.06;letter-spacing:-.025em;font-weight:760}
+.e-karte{display:grid;gap:10px;padding:16px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);font-size:14.5px;line-height:1.45}
+.e-karte>h2{font-size:19px;letter-spacing:-.01em}
+.e-karte .fine{margin-top:0}
+.e-karte p{margin:0}
+.e-zugang:empty{display:none}
+.e-zugang .zugang-form{padding:0;border:0;background:none}
+.e-status{font-size:14px}
+#e-gemerkt{display:grid;gap:12px}
+.e-reiter{display:grid;gap:2px}
+.e-schalter{display:flex;align-items:center;gap:12px;min-height:46px;padding:0 4px;border-bottom:1px solid var(--line);font-weight:650;cursor:pointer}
+.e-schalter:last-child{border-bottom:0}
+.e-schalter .ic{width:22px;height:22px;color:var(--muted)}
+.e-schalter span{flex:1;min-width:0}
+.e-schalter small{font-weight:500;color:var(--muted)}
+.e-schalter input{width:22px;height:22px;accent-color:var(--accent)}
+.e-schalter.fest{cursor:default}
+.e-liste{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.e-liste li{display:flex;align-items:center;gap:8px;min-height:40px;border-bottom:1px solid var(--line)}
+.e-liste li:last-child{border-bottom:0}
+.e-liste li>span{flex:1;min-width:0}
+.e-liste small{display:block;font-size:12.5px;color:var(--muted)}
+.e-gruppe{display:grid;gap:6px}
+.e-gruppe+.e-gruppe{padding-top:14px;border-top:1px solid var(--line)}
+.e-gruppe h3{font:700 13px/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.e-ki-form{display:grid;gap:8px}
+.e-ki-form input{height:48px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line-strong);background:var(--bg);font:500 16px/1 var(--f-body);color:var(--ink);min-width:0;width:100%}
+.e-ki-form input:focus{outline:none;border-color:var(--accent)}
+.e-ok{color:var(--ok);font-weight:650}
 
 /* In der aufgeklappten Zeile: nicht bekommen, Bon, Preisalarm */
 .l-fehlt-btn{justify-self:start}
@@ -690,8 +732,13 @@ body.lob-offen{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.lob-tier,.lob-karte,.lob,.lob-emoji{animation:none}.lob-konfetti{display:none}}
 
 /* tab bar + toast */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;height:var(--tabbar-h);padding:0;border:0;background:none;font-weight:700;font-size:12px;color:var(--muted)}
+/* Die Reiter teilen sich die Breite – längere Beschriftungen bekommen mehr; wird es zu eng, gibt es die Kurzform (ansicht-einstellungen.js) */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:2px;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.tab{position:relative;flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;height:var(--tabbar-h);padding:0 3px;border:0;background:none;font-weight:700;font-size:12px;color:var(--muted)}
+.tab[hidden]{display:none}
+.tab-k{display:none}
+.tabbar.kurz .tab-l{display:none}
+.tabbar.kurz .tab-k{display:inline}
 .tab span:not(.badge){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab .ic{width:24px;height:24px}
 .tab[aria-current]{color:var(--accent)}
@@ -717,7 +764,7 @@ body.lob-offen{overflow:hidden}
 .zugang-fehler{font-size:13.5px;font-weight:650;color:var(--danger)}
 .zugang-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 a.btn{text-decoration:none;color:inherit}
-.teilen{display:grid;gap:10px;margin-top:22px;padding:14px;border-radius:14px;background:var(--surface-2);font-size:14px}
+.teilen{display:grid;gap:10px;font-size:14px}
 .teilen .fine{margin-top:0}
 .z-linkfeld{width:100%;min-width:0;height:44px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line-strong);background:var(--surface);font:500 13px/1 var(--f-mono);color:var(--ink)}
 .sync[data-state="sendet"] .dot{background:var(--kh)}

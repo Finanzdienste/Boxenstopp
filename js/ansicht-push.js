@@ -1,10 +1,10 @@
 /*
- * Unter der Einkaufsliste, bei „Gemeinsame Liste“: Push-Nachrichten an
- * diesem Gerät ein- und ausschalten, was ankommt (Einkaufsliste, Amys
- * Rezepte, Preisalarm), eine Probe schicken – und das einmalige Einrichten
- * mit dem Schlüsselpaar (push.js).
+ * In den Einstellungen, „Push-Nachrichten“: an diesem Gerät ein- und
+ * ausschalten, was ankommt (Einkaufsliste, Amys Rezepte, Preisalarm), eine
+ * Probe schicken – und das einmalige Einrichten mit dem Schlüsselpaar
+ * (push.js).
  */
-import { app, $, melde } from './kern.js';
+import { app, $, melde, ansicht } from './kern.js';
 import { esc } from './format.js';
 import { ARTEN, pushStand, pushEinschalten, pushAusschalten, pushWas, pushTest, schluesselErzeugen, schluesselAblegen, geraetArt } from './push.js';
 
@@ -81,11 +81,12 @@ function geraetHTML(art, abo) {
 }
 
 function inhalt() {
-  if (!stand) return '<p class="fine">Push-Nachrichten: wird geprüft …</p>';
+  if (!app.zugang) return '<p class="fine">Bekomm Bescheid, wenn der andere etwas auf die Liste setzt, ein neues Rezept da ist oder ein Preisalarm zuschlägt. Das geht, sobald die gemeinsame Liste eingerichtet ist.</p>';
+  if (!stand) return '<p class="fine">Wird geprüft …</p>';
   const { art, abo } = stand;
   // Einrichten (das Schlüsselpaar für alle) geht auf jedem Gerät – auch wenn es selbst gerade keine Mitteilungen darf
   const html = einrichten || !stand.eingerichtet ? einrichtenHTML() : geraetHTML(art, abo);
-  return `<p class="push-k-titel"><b>Push-Nachrichten</b></p>${html}${meldung ? `<p class="fine push-meldung" role="status">${esc(meldung)}</p>` : ''}`;
+  return `${html}${meldung ? `<p class="fine push-meldung" role="status">${esc(meldung)}</p>` : ''}`;
 }
 
 /** Zeichnen – den Stand höchstens alle fünf Minuten neu holen, außer frisch. */
@@ -94,6 +95,8 @@ export async function pushZeichnen(frisch = false) {
   if (!el) return;
   el.innerHTML = inhalt();
   if (!app.zugang || arbeitet) return;
+  // GitHub nur fragen, wenn man die Einstellungen auch sieht
+  if (!frisch && ansicht.tab !== 'einstellungen') return;
   // Mitteilungen inzwischen in den Einstellungen erlaubt (oder verboten): gleich neu, nicht erst in fünf Minuten
   const erlaubnisAnders = stand && typeof Notification !== 'undefined' && (stand.art === 'verboten') !== (Notification.permission === 'denied');
   if (!frisch && !erlaubnisAnders && stand && Date.now() - geholt < 5 * 60 * 1000) return;

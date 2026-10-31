@@ -7,7 +7,7 @@ fürs Handy, für Tobi und seine Freundin.
 (in Chrome öffnen, dann Menü ⋮ → „App installieren“; auf dem iPhone in
 Safari: Teilen → „Zum Home-Bildschirm“).
 
-Vier Reiter:
+Fünf Reiter (welche davon unten stehen, wählt jedes Gerät in den Einstellungen):
 
 | Reiter | Inhalt |
 | --- | --- |
@@ -15,6 +15,7 @@ Vier Reiter:
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 | **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), Push-Nachrichten, KI-Schlüssel, welche Reiter unten stehen, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
 Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat oder ein
@@ -128,7 +129,7 @@ Gemüse, Fleisch, Kühlregal, Konserven …) in der Reihenfolge des Wegs, darin
 nach den Zutaten; was noch nie gekauft wurde, steht bei seiner Abteilung,
 und eine Abteilung ohne Messung da, wo sie üblicherweise steht. Jede
 Messung zählt, die übliche Reihenfolge wie eine – nach zwei, drei Einkäufen
-passt es. „Reihenfolge vergessen“ (mit Rückgängig) fängt neu an. Eigene
+passt es. „Reihenfolge vergessen“ (mit Rückgängig, über der Liste oder je Laden in den Einstellungen) fängt neu an. Eigene
 Einträge erkennt der Weg am Namen („Bananen“).
 
 ### Abteilung, Zusammenlegen, im Laden
@@ -249,7 +250,7 @@ in Pflaume und Rosa.
   großen (Dürüm)Wrap“ (Wrap, Zusatz „Dürüm, groß“).
 - **Aufs iPad:** Die Anleitung kommt bei ihr auf dem iPhone einmal von
   selbst, danach über „Auch auf dem iPad ♡“ in ihrem Reiter (und „Aufs iPad
-  oder Tablet“ unter der Liste): Link kopieren (mit derselben Apple-ID gleich
+  oder Tablet“ in den Einstellungen): Link kopieren (mit derselben Apple-ID gleich
   auf dem iPad einsetzen), auf dem iPad in Safari öffnen, über Teilen „Zum
   Home-Bildschirm“ mit „Als Web-App öffnen“, dort einmal einrichten – Name
   und den Link ins Feld „Schlüssel“. Dann zeigen beide dasselbe – auch die
@@ -444,6 +445,34 @@ vollständig ist. Rezeptfotos landen beim ersten Ansehen in einem eigenen
 Vorrat, der Updates der App übersteht; ein neues Foto hat eine neue
 Adresse, das alte fliegt raus.
 
+### Einstellungen
+
+Der fünfte Reiter, ganz rechts (breit: das Regler-Symbol oben; der Punkt
+„Geteilt“ / „Nur lokal“ oben führt auch hin) – alles, was man einmal
+einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
+
+- **Gemeinsame Liste:** nicht eingerichtet gleich das Formular (Name,
+  Schlüssel), sonst wer du bist, der Stand, „Link fürs zweite Handy
+  kopieren“, „Per WhatsApp schicken“, „Aufs iPad oder Tablet“, „Trennen“.
+  Über der Einkaufsliste steht nur noch ein Hinweis, solange sie nicht
+  eingerichtet ist oder der Schlüssel klemmt – sein „Einrichten“ führt
+  hierher. Ein Link mit Schlüssel öffnet die Einstellungen, nach dem
+  Verbinden geht es zur Liste.
+- **Push-Nachrichten:** siehe unten; GitHub wird erst gefragt, wenn man die
+  Einstellungen öffnet.
+- **KI-Schlüssel:** welcher eingetragen ist (Google oder Anthropic, Modell),
+  ändern, entfernen (mit Rückgängig).
+- **Reiter unten:** Rezepte, Amys Rezepte, Einkaufsliste und Angebote lassen
+  sich ausblenden, einer bleibt, die Einstellungen sind immer da – je Gerät
+  (`boxenstopp.reiter.v1`). Ist „Amys Rezepte“ aus, steht ihre Karte auch
+  auf dem Handy bei den Rezepten. Passen die Beschriftungen nicht
+  nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
+- **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
+  die Läden (je Laden „Vergessen“), die Preisalarme und eure Preise vom Bon
+  (je löschen) – alles mit Rückgängig.
+- **Über die App:** die laufende Fassung (aus dem Vorrat des Service Workers)
+  und „Nach Updates suchen“.
+
 ## Resteverwertung
 
 Oben im Reiter Rezepte: aufschreiben oder fotografieren, was im Kühlschrank
@@ -529,12 +558,12 @@ API-Schlüssel, den der Anfang des Schlüssels einem Anbieter zuordnet:
 Der normale Weg ist Google: auf
 [aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem
 Google-Konto anmelden, „Create API key“, den Schlüssel in der App unter
-Resteverwertung einfügen. Beide Antworten werden gestreamt, die Leiste zeigt
+Einstellungen → KI-Schlüssel (oder gleich in der Resteverwertung) einfügen. Beide Antworten werden gestreamt, die Leiste zeigt
 Modell und Kosten der Anfrage.
 
 Der Schlüssel steht nur im localStorage (`boxenstopp.ki.v1`), nirgends im Code
-oder im Repo. Aufs zweite Handy kommt er mit dem Link unter der Einkaufsliste
-(`…#zugang=<GitHub>&ki=<KI>`) oder mit „Link fürs zweite Handy kopieren“ im
+oder im Repo. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy in den
+Einstellungen (`…#zugang=<GitHub>&ki=<KI>`) oder mit „Link fürs zweite Handy kopieren“ im
 Einrichten. Fotos werden vorher auf 1280 px verkleinert und gehen nur mit der
 einen Anfrage an den Anbieter, gespeichert werden sie nicht.
 
@@ -555,11 +584,12 @@ Liste nur auf dem einen Handy („Nur lokal“).
    - Repository access: *Only select repositories* → nur **Boxenstopp-Daten**
    - Permissions → Repository permissions → **Contents: Read and write**
    - Ablauf so lange wie möglich
-3. In der App: Einkaufsliste → **Einrichten** → Name und Schlüssel → Verbinden.
-   Was schon lokal auf der Liste stand, kommt mit.
-4. Zweites Handy: unter der Liste **„Link fürs zweite Handy kopieren“** (oder
-   „Per WhatsApp schicken“). Der Link öffnet die App mit eingetragenem
-   Schlüssel, dort fehlt nur noch der Name.
+3. In der App: Einstellungen → **Gemeinsame Liste** (oder über der Liste
+   „Einrichten“) → Name und Schlüssel → Verbinden. Was schon lokal auf der
+   Liste stand, kommt mit; danach zeigt die App die Liste.
+4. Zweites Handy: in den Einstellungen **„Link fürs zweite Handy kopieren“**
+   (oder „Per WhatsApp schicken“). Der Link öffnet die App in den
+   Einstellungen mit eingetragenem Schlüssel, dort fehlt nur noch der Name.
    - iPhone: Eine App auf dem Home-Bildschirm hat dort einen eigenen Speicher,
      getrennt von Safari, und Links öffnen immer Safari. Also erst zum
      Home-Bildschirm hinzufügen, die App von dort öffnen und den ganzen Link
@@ -617,8 +647,8 @@ VAPID über das npm-Paket `web-push`):
 
 **Einmal einrichten** (einer von euch):
 
-1. In der App: Einkaufsliste → unten „Gemeinsame Liste“ → Push-Nachrichten →
-   **Einrichten**. Das Gerät erzeugt ein Schlüsselpaar (WebCrypto, P-256).
+1. In der App: Einstellungen → Push-Nachrichten → **Einrichten**. Das Gerät
+   erzeugt ein Schlüsselpaar (WebCrypto, P-256).
    Das geht auf jedem Gerät, auch wenn es selbst gerade keine Mitteilungen
    darf. Bis „Fertig“ oder „Abbrechen“ liegt das Paar im Speicher des
    Geräts (höchstens zwei Stunden) – falls Android die App schließt, während
@@ -759,7 +789,8 @@ die Action „Rezeptfotos“.
 | `js/amy-import.js` | Rezept übernehmen: Anfrage aus Foto, Link oder Text, Antwort als Entwurf – ohne DOM |
 | `js/kochmodus.js` | Kochmodus: ein Schritt groß, Wischen, Tasten, Timer, Bildschirm an |
 | `js/kochstand.js` | Haken, Tempo und Timer je Person über ihre Geräte (`kochen` in liste.json) |
-| `js/push.js`, `js/ansicht-push.js` | Push-Nachrichten: Schlüsselpaar, An- und Abmelden in push.json, die Einstellungen unter der Liste |
+| `js/push.js`, `js/ansicht-push.js` | Push-Nachrichten: Schlüsselpaar, An- und Abmelden in push.json, der Bereich in den Einstellungen |
+| `js/ansicht-einstellungen.js` | Reiter Einstellungen: welche Reiter unten stehen, KI-Schlüssel, Gelerntes vergessen, Fassung und Updates |
 | `js/preisverlauf.js` | Preisverlauf je Zutat und Woche, „Tiefstpreis seit …“ – ohne DOM |
 | `js/gleich.js` | dasselbe Produkt unter zwei Namen: Namen vergleichen, Vorschläge, wohin zusammenlegen – ohne DOM |
 | `js/tempo.js` | euer Tempo: aus den Haken lernen, Zeiten umrechnen – ohne DOM |
@@ -823,5 +854,8 @@ Probieren laufen (an wen, nichts doppelt, Preisalarm, Probe, Nachtragen,
 Senden über eine web-push-Attrappe) und spielt dann im ganzen Chromium
 (nur dort lassen sich Mitteilungen erlauben) Einrichten, An/Aus und die
 Mitteilung aus dem Service Worker durch. `test-import.mjs` prüft den
-Rezept-Import mit einer nachgebauten Gemini-API. Der Workflow „Prüfung“ lässt
+Rezept-Import mit einer nachgebauten Gemini-API. `test-einstellungen.mjs`
+spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
+ausblenden und merken, Einrichten über Hinweis und Link, KI-Schlüssel,
+Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Fassung). Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

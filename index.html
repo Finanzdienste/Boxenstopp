@@ -18,7 +18,8 @@
   <header class="top">
     <div class="top-in">
       <div class="brand"><span class="brand-name">Boxenstopp</span><span class="brand-tag">Meal Prep</span></div>
-      <span class="sync" id="sync" data-state="lokal"><span class="dot" aria-hidden="true"></span><span id="sync-text">Nur lokal</span></span>
+      <button type="button" class="sync" id="sync" data-state="lokal" data-tab="einstellungen" title="Gemeinsame Liste – in den Einstellungen"><span class="dot" aria-hidden="true"></span><span id="sync-text">Nur lokal</span></button>
+      <button type="button" class="kopf-einst nur-breit" data-tab="einstellungen" aria-label="Einstellungen" title="Einstellungen"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17.5 7H20M4 17h2.5M11 17h9"/><circle cx="15.2" cy="7" r="2.3"/><circle cx="8.8" cy="17" r="2.3"/></svg></button>
     </div>
     <div class="timerleiste" id="timerleiste" role="status" aria-live="polite" hidden></div>
   </header>
@@ -79,12 +80,23 @@
       <div id="list-body"><p class="loading">Liste wird geladen…</p></div>
       <div class="l-foot" id="l-foot"></div>
       <p class="note" id="l-note" hidden></p>
-      <div class="teilen" id="teilen" hidden></div>
     </aside>
 
     <section id="view-angebote" class="pane angebote-pane" aria-labelledby="a-title"><p class="loading">Angebote werden geladen…</p></section>
 
     <section id="view-amy" class="pane amy-pane" aria-label="Amys Rezepte"><p class="loading">Amys Rezepte werden geladen…</p></section>
+
+    <!-- Einstellungen: das Gerüst steht hier, den Inhalt zeichnen ansicht-einstellungen.js, ansicht-liste.js (Gemeinsame Liste) und ansicht-push.js -->
+    <section id="view-einstellungen" class="pane einst-pane" aria-labelledby="e-titel">
+      <button type="button" class="back nur-breit" data-tab="rezepte"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Alle Rezepte</button>
+      <h1 id="e-titel" class="e-titel">Einstellungen</h1>
+      <section class="e-karte" id="e-liste" aria-labelledby="e-liste-t"><h2 id="e-liste-t">Gemeinsame Liste</h2><div class="e-zugang" id="e-zugang"></div><div class="teilen" id="teilen" hidden></div></section>
+      <section class="e-karte" aria-labelledby="e-push-t"><h2 id="e-push-t">Push-Nachrichten</h2><div class="push-bereich" id="push-bereich"></div></section>
+      <section class="e-karte" aria-labelledby="e-ki-t"><h2 id="e-ki-t">KI-Schlüssel</h2><div id="e-ki"></div></section>
+      <section class="e-karte" aria-labelledby="e-reiter-t"><h2 id="e-reiter-t">Reiter unten</h2><div id="e-reiter"></div></section>
+      <section class="e-karte" aria-labelledby="e-gemerkt-t"><h2 id="e-gemerkt-t">Gelernt und gemerkt</h2><div id="e-gemerkt"></div></section>
+      <section class="e-karte" aria-labelledby="e-ueber-t"><h2 id="e-ueber-t">Über die App</h2><div id="e-ueber"></div></section>
+    </section>
   </div>
 
   <!-- Die Reiter stehen fest im HTML, damit die App auch mit einem Skript aus
@@ -96,15 +108,19 @@
     </button>
     <button type="button" class="tab tab-amy" data-tab="amy" aria-label="Amys Rezepte">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>
-      <span>Amys Rezepte</span>
+      <span class="tab-l">Amys Rezepte</span><span class="tab-k">Amy</span>
     </button>
     <button type="button" class="tab" data-tab="einkauf">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M3.8 6.6l1.3 1.3L7.6 5.4M3.8 12.1l1.3 1.3 2.5-2.5M3.8 17.6l1.3 1.3 2.5-2.5"/></svg>
-      <span>Einkaufsliste</span><span class="badge" id="badge" hidden>0</span>
+      <span class="tab-l">Einkaufsliste</span><span class="tab-k">Liste</span><span class="badge" id="badge" hidden>0</span>
     </button>
     <button type="button" class="tab" data-tab="angebote">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/><path d="M8.5 7.5V6a3.5 3.5 0 0 1 7 0v1.5"/><path d="M9.5 12.5l1.8 1.8 3.5-3.5"/></svg>
       <span>Angebote</span><span class="badge" id="a-badge" hidden>0</span>
+    </button>
+    <button type="button" class="tab" data-tab="einstellungen">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17.5 7H20M4 17h2.5M11 17h9"/><circle cx="15.2" cy="7" r="2.3"/><circle cx="8.8" cy="17" r="2.3"/></svg>
+      <span>Einstellungen</span>
     </button>
   </nav>
   <div class="lob" id="lob" hidden></div>

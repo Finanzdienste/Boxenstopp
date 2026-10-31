@@ -185,7 +185,7 @@ const fakePush = () => {
 const pg = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, skript: fakePush, rechte: ['notifications', 'clipboard-read', 'clipboard-write'] });
 const s = pg.page;
 check(await verbinden(s, 'Tobi'), 'zweites Gerät (mit Service Worker): eingerichtet');
-await s.click('.tab[data-tab="einkauf"]');
+await s.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await s.locator('#push-bereich [data-act="push-paar"]').count()) === 1, 8000), 'Push: „noch nicht eingerichtet“ mit „Einrichten“');
 await s.click('#push-bereich [data-act="push-paar"]');
 check(await bis(async () => (await s.locator('#push-bereich .push-schritte li').count()) === 4), 'Einrichten: vier Schritte mit dem Link zu den Secrets');
@@ -199,7 +199,7 @@ check(!!privat && (await s.locator('#toast').innerText()).includes('VAPID_PRIVAT
 // Zum Kopieren zu GitHub gewechselt, Android hat die App geschlossen: Die Schritte sind noch da, mit demselben Paar
 await s.reload({ waitUntil: 'load' });
 await s.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
-await s.click('.tab[data-tab="einkauf"]');
+await s.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await s.locator('#push-bereich .push-schritte li').count()) === 4, 8000), 'nach dem Neuladen: die Schritte stehen noch da');
 await s.click('#push-bereich [data-act="push-kopieren"][data-was="oeffentlich"]');
 check(await bis(async () => (await s.evaluate(() => navigator.clipboard.readText())) === oeffentlich), 'und es ist dasselbe Schlüsselpaar');
@@ -244,7 +244,7 @@ check(JSON.stringify(timerMitteilung) === JSON.stringify(['Timer fertig', 'Chili
 const echt = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, rechte: ['notifications'] });
 const e = echt.page;
 check(await verbinden(e, 'Amy'), 'Amy: eingerichtet');
-await e.click('.tab[data-tab="einkauf"]');
+await e.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await e.locator('#push-bereich [data-act="push-an"]').count()) === 1, 8000), 'Amy: Push ist eingerichtet, hier noch aus');
 await e.click('#push-bereich [data-act="push-an"]');
 const ausgang = await bis(async () => {
@@ -261,7 +261,7 @@ const android = await handy(shell, { attrappe: gh2, adresse: mitLink, userAgent:
 const a = android.page;
 check(await verbinden(a, 'Tobi'), 'Android: eingerichtet');
 check(await a.evaluate(() => Notification.permission) === 'denied', 'Mitteilungen sind auf diesem Gerät verboten');
-await a.click('.tab[data-tab="einkauf"]');
+await a.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await a.locator('#push-bereich [data-act="push-paar"]').count()) === 1, 8000), 'trotzdem: „Einrichten“');
 await a.click('#push-bereich [data-act="push-paar"]');
 check(await bis(async () => (await a.locator('#push-bereich [data-act="push-ablegen"]').innerText().catch(() => '')) === 'Fertig'), 'der letzte Knopf heißt nur „Fertig“ (einschalten geht hier noch nicht)');
@@ -274,7 +274,7 @@ await shell.close();
 // iPhone im Browser (nicht vom Home-Bildschirm): der Hinweis
 const ios = await handy(browser, { attrappe: gh, adresse: mitLink, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1', skript: () => { delete window.PushManager; } });
 check(await verbinden(ios.page, 'Amy'), 'iPhone: eingerichtet');
-await ios.page.click('.tab[data-tab="einkauf"]');
+await ios.page.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await ios.page.locator('#push-bereich').innerText()).includes('nur in der App vom Home-Bildschirm')), 'iPhone im Browser: „nur in der App vom Home-Bildschirm“');
 
 // Chromium meldet beim echten Anmelden im Test-Profil (wie privates Surfen) selbst einen Fehler – der gehört dazu

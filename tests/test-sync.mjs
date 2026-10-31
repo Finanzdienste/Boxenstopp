@@ -44,14 +44,15 @@ check(gh.zustand.nachrichten.every((m) => m.startsWith('Tobi: Einkaufsliste')), 
 
 // --- Amy: über den Link
 const link = await t.evaluate(() => document.querySelector('#z-linkfeld')?.value || '');
-check(/#zugang=github_pat_/.test(link), 'unter der Liste steht der Link fürs zweite Handy');
+check(/#zugang=github_pat_/.test(link), 'in den Einstellungen steht der Link fürs zweite Handy');
 const amy = await handy(browser, { attrappe: gh, adresse: `${APP_URL}#zugang=${encodeURIComponent(SCHLUESSEL)}` });
 const a = amy.page;
 check(!(await a.evaluate(() => location.hash)).includes('zugang'), 'der Schlüssel verschwindet sofort aus der Adresse');
-check(await a.evaluate(() => document.querySelector('#app').dataset.tab) === 'einkauf', 'der Link öffnet die Einkaufsliste');
+check(await a.evaluate(() => document.querySelector('#app').dataset.tab) === 'einstellungen', 'der Link öffnet die Einstellungen – dort steht das Einrichten');
 check((await a.inputValue('#z-token')) === SCHLUESSEL, 'Schlüssel aus dem Link ist eingetragen');
 await a.fill('#z-name', 'Amy');
 await a.click('#z-los');
+check(await bis(async () => (await a.evaluate(() => document.querySelector('#app').dataset.tab)) === 'einkauf'), 'verbunden: weiter zur gemeinsamen Liste');
 check(await bis(async () => (await zeile(a, 'Rinderhackfleisch').count()) === 1), 'Amy sieht Tobis Chili-Zutaten');
 check(await zeile(a, 'Kaffee').count() === 1, 'und Tobis Kaffee');
 
@@ -142,8 +143,8 @@ await fremd.page.click('#z-los');
 check(await bis(async () => (await fremd.page.locator('#z-fehler').innerText()).includes('lehnt den Schlüssel ab')), 'falscher Schlüssel: GitHub lehnt ab, Hinweis auf die Rechte');
 check((await status(fremd.page)) === 'Nur lokal', 'und das Handy bleibt lokal');
 
-// --- trennen
-await a.click('.tab[data-tab="einkauf"]');
+// --- trennen (in den Einstellungen)
+await a.click('.tab[data-tab="einstellungen"]');
 const vorherAnzahl = Object.keys(gh.liste().items).length;
 await a.click('[data-act="z-trennen"]');
 await a.click('[data-act="z-trennen-ja"]');
