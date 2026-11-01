@@ -1,13 +1,13 @@
 /*
  * Push-Nachrichten: „Amy hat 4 Sachen auf die Liste gesetzt“, „Neues Rezept
  * von Amy“, „Tobi hat alles eingekauft“, „Preisalarm: Hähnchenbrust 5,99 €/kg
- * bei Aldi“. Verschickt werden sie nicht vom Handy, sondern von GitHub
+ * bei Aldi“, „Heute ist Küche dran“. Verschickt werden sie nicht vom Handy, sondern von GitHub
  * Actions im privaten Daten-Repo (.github/workflows/benachrichtigen.yml,
  * werkzeug/push.mjs) – dafür meldet sich jedes Gerät hier an:
  *
  *   push.json im Daten-Repo
  *   { schluessel: <öffentlicher VAPID-Schlüssel>,
- *     abos: { tobi: [{ endpoint, keys: { p256dh, auth }, geraet, was: ['liste', 'rezepte', 'preise'], at }] },
+ *     abos: { tobi: [{ endpoint, keys: { p256dh, auth }, geraet, was: ['liste', 'rezepte', 'preise', 'haushalt'], kennt: […], at }] },
  *     zuletzt: { sha }, gemeldet: [...], test: { an, at } }
  *
  * Das Schlüsselpaar entsteht einmal auf einem Gerät (WebCrypto, P-256): Der
@@ -23,7 +23,15 @@ import { app, lese } from './kern.js';
 import { privatLesen, privatSchreiben, API } from './speicher.js';
 
 export const PUSH_DATEI = 'push.json';
-export const ARTEN = [['liste', 'Einkaufsliste'], ['rezepte', 'Amys Rezepte'], ['preise', 'Preisalarm']];
+export const ARTEN = [['liste', 'Einkaufsliste'], ['rezepte', 'Amys Rezepte'], ['preise', 'Preisalarm'], ['haushalt', 'Putzplan']];
+/**
+ * Was ein Abo bekommt: was es gewählt hat – und jede Art, die es beim Wählen
+ * noch nicht gab (kennt; Abos von vor dem Putzplan kannten nur die ersten
+ * drei). Dieselbe Rechnung steht in werkzeug/push.mjs.
+ */
+const ALTE_ARTEN = ['liste', 'rezepte', 'preise'];
+export const bekommt = (abo, art) => (Array.isArray(abo?.was) ? abo.was : ALTE_ARTEN).includes(art) || !(Array.isArray(abo?.kennt) ? abo.kennt : ALTE_ARTEN).includes(art);
+const KENNT = () => ARTEN.map(([k]) => k);
 const api = () => lese('__api', null) || API;
 
 const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -97,7 +105,7 @@ export async function pushStand(push) {
  * schluessel: gerade erst abgelegt – GitHub liefert ihn beim Lesen evtl.
  * noch nicht, darum nicht erst nachsehen.
  */
-export async function pushEinschalten(was = ['liste', 'rezepte', 'preise'], { schluessel = '' } = {}) {
+export async function pushEinschalten(was = ARTEN.map(([k]) => k), { schluessel = '' } = {}) {
   if (!pushMoeglich()) throw new Error('Auf diesem Gerät gehen keine Push-Nachrichten.');
   const erlaubnis = await Notification.requestPermission();
   if (erlaubnis !== 'granted') throw new Error('Ohne Erlaubnis geht es nicht – in den Einstellungen des Geräts Mitteilungen für Boxenstopp erlauben.');
@@ -116,7 +124,7 @@ export async function pushEinschalten(was = ['liste', 'rezepte', 'preise'], { sc
     }
   }
   const j = abo.toJSON();
-  const eintrag = { endpoint: j.endpoint, keys: { p256dh: j.keys?.p256dh, auth: j.keys?.auth }, geraet: geraet(), was, at: new Date().toISOString() };
+  const eintrag = { endpoint: j.endpoint, keys: { p256dh: j.keys?.p256dh, auth: j.keys?.auth }, geraet: geraet(), was, kennt: KENNT(), at: new Date().toISOString() };
   const ich = wer();
   const neu = await pushAendern((alt) => {
     const abos = { ...(alt?.abos || {}) };
@@ -144,7 +152,7 @@ export async function pushAusschalten() {
   return { art: 'aus', eingerichtet: !!neu?.schluessel, abo: null, push: neu };
 }
 
-/** Was dieses Gerät bekommt (Einkaufsliste, Amys Rezepte, Preisalarm). */
+/** Was dieses Gerät bekommt (Einkaufsliste, Amys Rezepte, Preisalarm, Putzplan). */
 export async function pushWas(was) {
   const reg = await navigator.serviceWorker.getRegistration();
   const abo = await reg?.pushManager.getSubscription().catch(() => null);
@@ -152,7 +160,7 @@ export async function pushWas(was) {
   const ich = wer();
   const neu = await pushAendern((alt) => {
     const abos = { ...(alt?.abos || {}) };
-    abos[ich] = (abos[ich] || []).map((x) => (x.endpoint === abo.endpoint ? { ...x, was } : x));
+    abos[ich] = (abos[ich] || []).map((x) => (x.endpoint === abo.endpoint ? { ...x, was, kennt: KENNT() } : x));
     return { ...(alt || {}), abos };
   }, `Push: ${app.name() || ich} ändert, was ankommt`);
   const meins = (neu?.abos?.[ich] || []).find((x) => x.endpoint === abo.endpoint);

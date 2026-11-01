@@ -13,6 +13,7 @@ import { kiAus } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
 import { euro, kostenMenge, kostenRezept, kostenListe } from '../js/kosten.js';
+import { woche } from '../js/angebote.js';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -431,7 +432,8 @@ await t.click('[data-act="zurueck"]');
 await t.click('.tab[data-tab="angebote"]');
 // die automatisch geholten Angebote (tests/daten/angebote.json über die Attrappe)
 check(await bis(async () => (await t.locator('#a-auto .a-item').count()) === 7), `automatisch geholt: 7 Rezeptzutaten von Aldi, Kaufland, Penny, abgelaufene nicht (${await t.locator('#a-auto .a-item').count()})`);
-check((await t.locator('#a-auto .a-stand').innerText()).includes('KW 44') && (await t.locator('.a-quelle', { hasText: 'Aldi 4' }).count()) === 1 && (await t.locator('.a-quelle-aus', { hasText: 'Lidl' }).count()) === 1 && (await t.locator('.a-quelle-aus', { hasText: 'Rewe' }).count()) === 1, 'Stand und Quellen: KW, Aldi 4, Lidl fehlt, Rewe gesperrt');
+// Sonntags zeigt „diese Woche“ schon die kommende (angebote.js woche) – darum dieselbe Rechnung wie die App
+check((await t.locator('#a-auto .a-stand').innerText()).includes(`KW ${woche('diese').kw}`) && (await t.locator('.a-quelle', { hasText: 'Aldi 4' }).count()) === 1 && (await t.locator('.a-quelle-aus', { hasText: 'Lidl' }).count()) === 1 && (await t.locator('.a-quelle-aus', { hasText: 'Rewe' }).count()) === 1, 'Stand und Quellen: KW, Aldi 4, Lidl fehlt, Rewe gesperrt');
 check((await t.locator('#a-auto .a-lidl').innerText()).includes('GEMINI_KEY'), 'ohne Lidl steht dran, welches Secret fehlt');
 check((await t.locator('#a-badge').innerText()) === '7' && (await t.locator('[data-a-filter="zutaten"] .n').innerText()) === '7' && (await t.locator('[data-a-filter="alle"] .n').innerText()) === '8', 'Zahl am Reiter: die Rezeptzutaten; Chips: 7 Zutaten, 8 Lebensmittel');
 await t.click('[data-a-filter="alle"]');

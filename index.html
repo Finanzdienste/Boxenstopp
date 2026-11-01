@@ -46,6 +46,11 @@
           <span class="reste-txt"><b>Amys Rezepte</b><span>Eigene Rezepte schreiben – die Zutaten kommen auf die gemeinsame Liste.</span></span>
           <svg class="ic reste-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
         </button>
+        <button type="button" class="reste-karte haus-link nur-breit" data-tab="haushalt">
+          <span class="reste-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 11L12 4.2l8.2 6.8"/><path d="M6 9.4v9.4a1.2 1.2 0 0 0 1.2 1.2h9.6a1.2 1.2 0 0 0 1.2-1.2V9.4"/><path d="M10 20v-4.6h4V20"/></svg></span>
+          <span class="reste-txt"><b>Haushalt</b><span id="haus-karte-text">Putzplan zum Abhaken und was ihr im Haushalt braucht – mit einem Tipp auf die Einkaufsliste.</span></span>
+          <svg class="ic reste-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
         <button type="button" class="reste-karte angebote-karte" data-act="angebote">
           <span class="reste-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/><path d="M8.5 7.5V6a3.5 3.5 0 0 1 7 0v1.5"/><path d="M9.5 12.5l1.8 1.8 3.5-3.5"/></svg></span>
           <span class="reste-txt"><b>Angebote der Woche</b><span id="angebote-karte-text">Prospekt fotografieren oder Angebote eintippen – welche Rezepte davon profitieren, und ein neues aus den Angeboten.</span></span>
@@ -89,11 +94,14 @@
     <section id="view-amy" class="pane amy-pane" aria-label="Amys Rezepte"><p class="loading">Amys Rezepte werden geladen…</p></section>
 
     <!-- Einstellungen: das Gerüst steht hier, den Inhalt zeichnen ansicht-einstellungen.js, ansicht-liste.js (Gemeinsame Liste) und ansicht-push.js -->
+    <section id="view-haushalt" class="pane haus-pane" aria-labelledby="h-titel"><p class="loading">Haushalt wird geladen…</p></section>
+
     <section id="view-einstellungen" class="pane einst-pane" aria-labelledby="e-titel">
       <button type="button" class="back nur-breit" data-tab="rezepte"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Alle Rezepte</button>
       <h1 id="e-titel" class="e-titel">Einstellungen</h1>
       <section class="e-karte" id="e-liste" aria-labelledby="e-liste-t"><h2 id="e-liste-t">Gemeinsame Liste</h2><div class="e-zugang" id="e-zugang"></div><div class="teilen" id="teilen" hidden></div></section>
       <section class="e-karte" aria-labelledby="e-push-t"><h2 id="e-push-t">Push-Nachrichten</h2><div class="push-bereich" id="push-bereich"></div></section>
+      <section class="e-karte" id="e-todo" aria-labelledby="e-todo-t"><h2 id="e-todo-t">Microsoft To Do</h2><div class="todo-bereich" id="todo-bereich"></div></section>
       <section class="e-karte" aria-labelledby="e-ki-t"><h2 id="e-ki-t">KI-Schlüssel</h2><div id="e-ki"></div></section>
       <section class="e-karte" aria-labelledby="e-design-t"><h2 id="e-design-t">Darstellung</h2><div id="e-design"></div></section>
       <section class="e-karte" aria-labelledby="e-reiter-t"><h2 id="e-reiter-t">Reiter unten</h2><div id="e-reiter"></div></section>
@@ -121,13 +129,17 @@
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/><path d="M8.5 7.5V6a3.5 3.5 0 0 1 7 0v1.5"/><path d="M9.5 12.5l1.8 1.8 3.5-3.5"/></svg>
       <span>Angebote</span><span class="badge" id="a-badge" hidden>0</span>
     </button>
+    <button type="button" class="tab" data-tab="haushalt">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.8 11L12 4.2l8.2 6.8"/><path d="M6 9.4v9.4a1.2 1.2 0 0 0 1.2 1.2h9.6a1.2 1.2 0 0 0 1.2-1.2V9.4"/><path d="M10 20v-4.6h4V20"/></svg>
+      <span>Haushalt</span><span class="badge" id="h-badge" hidden>0</span>
+    </button>
     <button type="button" class="tab" data-tab="einstellungen">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17.5 7H20M4 17h2.5M11 17h9"/><circle cx="15.2" cy="7" r="2.3"/><circle cx="8.8" cy="17" r="2.3"/></svg>
       <span>Einstellungen</span>
     </button>
   </nav>
   <!-- Reihenfolge und ausgeblendete Reiter (Einstellungen → Reiter unten) gleich hier, damit unten nichts springt; ansicht-einstellungen.js macht es danach noch einmal richtig -->
-  <script>try{var r=JSON.parse(localStorage.getItem('boxenstopp.reiter.v1'))||{},n=document.querySelector('.tabbar'),t=function(k){return n.querySelector('.tab[data-tab="'+k+'"]')},a=(r.aus||[]).filter(function(k){return k!=='einstellungen'&&t(k)});(r.reihe||[]).concat('einstellungen').forEach(function(k){var b=t(k);if(b)n.appendChild(b)});if(a.length<4){a.forEach(function(k){t(k).hidden=true});document.documentElement.setAttribute('data-reiter-aus',a.join(' '))}}catch(e){}</script>
+  <script>try{var r=JSON.parse(localStorage.getItem('boxenstopp.reiter.v1'))||{},n=document.querySelector('.tabbar'),t=function(k){return n.querySelector('.tab[data-tab="'+k+'"]')},w=r.reihe||[],a=(r.aus||[]).filter(function(k){return k!=='einstellungen'&&t(k)}),h=[].map.call(n.querySelectorAll('.tab'),function(b){return b.dataset.tab}).filter(function(k){return w.indexOf(k)<0&&k!=='einstellungen'});w.concat(h,'einstellungen').forEach(function(k){var b=t(k);if(b)n.appendChild(b)});if(a.length<5){a.forEach(function(k){t(k).hidden=true});document.documentElement.setAttribute('data-reiter-aus',a.join(' '))}}catch(e){}</script>
   <div class="lob" id="lob" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>

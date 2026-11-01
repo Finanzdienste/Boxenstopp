@@ -1,5 +1,5 @@
 /*
- * Reiter „Einstellungen“: die Leiste unten (fünf Reiter, Kurzform, wenn es
+ * Reiter „Einstellungen“: die Leiste unten (sechs Reiter, Kurzform, wenn es
  * eng wird; Reiter ausblenden, einer bleibt, gemerkt), die gemeinsame Liste
  * (Einrichten über den Hinweis oder einen Link, danach zur Liste), der
  * KI-Schlüssel, was die App gelernt hat (Tempo, Wege, Preisalarme, Bons),
@@ -20,14 +20,14 @@ const abgeschnitten = (p) => p.$$eval('.tabbar .tab:not([hidden]) span:not(.badg
 // --- Ein Handy, schmal, noch nicht geteilt
 const h = await handy(browser, { viewport: { width: 360, height: 780 } });
 const p = h.page;
-check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'einstellungen']), 'unten fünf Reiter, die Einstellungen ganz rechts');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'unten sechs Reiter, die Einstellungen ganz rechts');
 check(await p.evaluate(() => document.querySelector('.tabbar').classList.contains('kurz')) && (await p.locator('.tab[data-tab="amy"]').innerText()).trim() === 'Amy' && (await p.locator('.tab[data-tab="einkauf"]').innerText()).includes('Liste'), '360 px breit: die Kurzform („Amy“, „Liste“)');
 check((await abgeschnitten(p)).length === 0, `keine Beschriftung abgeschnitten (${(await abgeschnitten(p)).join(', ')})`);
 await p.setViewportSize({ width: 430, height: 900 });
 check(await bis(async () => (await abgeschnitten(p)).length === 0), '430 px: alles lesbar');
 await p.setViewportSize({ width: 360, height: 780 });
 await p.click('.tab[data-tab="einstellungen"]');
-check(await tab(p) === 'einstellungen' && JSON.stringify(await p.$$eval('#view-einstellungen .e-karte > h2', (xs) => xs.map((x) => x.textContent))) === JSON.stringify(['Gemeinsame Liste', 'Push-Nachrichten', 'KI-Schlüssel', 'Darstellung', 'Reiter unten', 'Gelernt und gemerkt', 'Über die App']), 'Einstellungen: sieben Bereiche');
+check(await tab(p) === 'einstellungen' && JSON.stringify(await p.$$eval('#view-einstellungen .e-karte > h2', (xs) => xs.map((x) => x.textContent))) === JSON.stringify(['Gemeinsame Liste', 'Push-Nachrichten', 'Microsoft To Do', 'KI-Schlüssel', 'Darstellung', 'Reiter unten', 'Gelernt und gemerkt', 'Über die App']), 'Einstellungen: acht Bereiche');
 check(await p.locator('#e-zugang #z-form').isVisible() && !(await p.locator('#e-zugang [data-act="z-abbrechen"]').count()), 'nicht geteilt: hier gleich das Formular (ohne Abbrechen)');
 check((await p.locator('#push-bereich').innerText()).includes('sobald die gemeinsame Liste eingerichtet ist'), 'Push: erst nach dem Einrichten');
 // Über der Liste der Hinweis – „Einrichten“ führt hierher
@@ -39,14 +39,14 @@ check(await tab(p) === 'einstellungen' && await p.evaluate(() => document.active
 
 // Reiter ausblenden
 await p.click('#e-reiter [data-reiter="amy"]');
-check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'einkauf', 'angebote', 'einstellungen']), 'Amys Rezepte ausgeblendet: vier Reiter');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'Amys Rezepte ausgeblendet: fünf Reiter');
 check(await bis(async () => !(await p.evaluate(() => document.querySelector('.tabbar').classList.contains('kurz')))), 'jetzt passt die lange Beschriftung wieder');
 await p.click('.tab[data-tab="rezepte"]');
 check(await p.locator('#browse .amy-link').isVisible(), 'dafür steht bei den Rezepten die Karte „Amys Rezepte“');
 await p.click('#browse .amy-link');
 check(await tab(p) === 'amy', '…und sie führt hin');
 await p.click('.tab[data-tab="einstellungen"]');
-for (const t of ['rezepte', 'angebote']) await p.click(`#e-reiter [data-reiter="${t}"]`);
+for (const t of ['rezepte', 'angebote', 'haushalt']) await p.click(`#e-reiter [data-reiter="${t}"]`);
 check(await p.locator('#e-reiter [data-reiter="einkauf"]').isDisabled() && (await p.locator('#e-reiter').innerText()).includes('einer bleibt'), 'nur noch die Einkaufsliste: die lässt sich nicht auch noch ausblenden');
 check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['einkauf', 'einstellungen']), 'unten: Einkaufsliste und Einstellungen');
 await p.click('.tab[data-tab="einkauf"]');
@@ -58,25 +58,25 @@ await p.reload({ waitUntil: 'load' });
 await p.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
 check(await tab(p) === 'einkauf', 'stand man zuletzt auf einem ausgeblendeten Reiter: es geht beim ersten sichtbaren los');
 await p.click('.tab[data-tab="einstellungen"]');
-for (const t of ['rezepte', 'amy', 'angebote']) await p.click(`#e-reiter [data-reiter="${t}"]`);
-check((await sichtbareReiter(p)).length === 5, 'alle wieder an');
+for (const t of ['rezepte', 'amy', 'angebote', 'haushalt']) await p.click(`#e-reiter [data-reiter="${t}"]`);
+check((await sichtbareReiter(p)).length === 6, 'alle wieder an');
 
 // Reihenfolge: die Angebote nach vorn
 for (let n = 0; n < 3; n++) await p.click('#e-reiter [data-reiter-hoch="angebote"]');
-check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'rezepte', 'amy', 'einkauf', 'einstellungen']), 'dreimal ↑: die Angebote stehen unten ganz links');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'rezepte', 'amy', 'einkauf', 'haushalt', 'einstellungen']), 'dreimal ↑: die Angebote stehen unten ganz links');
 check(await p.locator('#e-reiter [data-reiter-hoch="angebote"]').isDisabled() && await p.evaluate(() => document.activeElement?.dataset.reiterRunter) === 'angebote', 'ganz vorn: ↑ geht nicht mehr, der Fokus springt auf ↓');
-check(JSON.stringify(await p.$$eval('#e-reiter [data-reiter]', (xs) => xs.map((x) => x.dataset.reiter))) === JSON.stringify(['angebote', 'rezepte', 'amy', 'einkauf']) && await p.locator('#e-reiter [data-reiter-runter="einkauf"]').isDisabled(), 'in den Einstellungen in derselben Reihenfolge, ganz hinten kein ↓');
+check(JSON.stringify(await p.$$eval('#e-reiter [data-reiter]', (xs) => xs.map((x) => x.dataset.reiter))) === JSON.stringify(['angebote', 'rezepte', 'amy', 'einkauf', 'haushalt']) && await p.locator('#e-reiter [data-reiter-runter="haushalt"]').isDisabled(), 'in den Einstellungen in derselben Reihenfolge, ganz hinten kein ↓');
 await p.click('#e-reiter [data-reiter-runter="rezepte"]');
-check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'amy', 'rezepte', 'einkauf', 'einstellungen']), '↓ bei den Rezepten: einen nach rechts');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'amy', 'rezepte', 'einkauf', 'haushalt', 'einstellungen']), '↓ bei den Rezepten: einen nach rechts');
 await p.reload({ waitUntil: 'load' });
-check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'amy', 'rezepte', 'einkauf', 'einstellungen']), 'nach dem Neuladen: gleich in dieser Reihenfolge');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['angebote', 'amy', 'rezepte', 'einkauf', 'haushalt', 'einstellungen']), 'nach dem Neuladen: gleich in dieser Reihenfolge');
 await p.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
 await p.click('.tab[data-tab="einstellungen"]');
 for (let i = 0; i < 2; i++) await p.click('#e-reiter [data-reiter-hoch="rezepte"]');
 await p.click('#e-reiter [data-reiter-runter="angebote"]');
-check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'angebote', 'einkauf', 'einstellungen']), 'zurückgeschoben');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'angebote', 'einkauf', 'haushalt', 'einstellungen']), 'zurückgeschoben');
 await p.click('#e-reiter [data-reiter-runter="angebote"]');
-check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'einstellungen']), 'wieder wie am Anfang');
+check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'wieder wie am Anfang');
 
 // Hell oder dunkel
 const hintergrund = () => p.evaluate(() => window.getComputedStyle(document.body).backgroundColor);

@@ -209,12 +209,13 @@ check(await bis(async () => (await s.evaluate(() => navigator.clipboard.readText
 await s.click('#push-bereich [data-act="push-ablegen"]');
 check(await bis(async () => (await s.locator('#push-bereich .push-an').count()) === 1, 10000), `eingeschaltet: „${await s.locator('#push-bereich .push-an').innerText().catch(() => '')}“`);
 const pj = () => JSON.parse(gh.zustand.dateien['push.json'] || 'null');
-check(pj()?.schluessel === oeffentlich && pj()?.abos?.tobi?.[0]?.endpoint === 'https://push.example/test-1' && pj().abos.tobi[0].was.join() === 'liste,rezepte,preise', 'push.json: der öffentliche Schlüssel und Tobis Gerät mit allem');
+check(pj()?.schluessel === oeffentlich && pj()?.abos?.tobi?.[0]?.endpoint === 'https://push.example/test-1' && pj().abos.tobi[0].was.join() === 'liste,rezepte,preise,haushalt' && pj().abos.tobi[0].kennt.join() === 'liste,rezepte,preise,haushalt', 'push.json: der öffentliche Schlüssel und Tobis Gerät mit allem (auch Putzplan; kennt: welche Arten es beim Wählen gab)');
 check(!gh.zustand.dateien['push.json'].includes(privat) && !gh.zustand.nachrichten.some((m) => m.includes(privat)), 'der private Schlüssel geht nicht nach GitHub');
 check(!(await s.evaluate(() => JSON.stringify({ ...localStorage }))).includes(privat), 'nach „Fertig“ ist der private Schlüssel auch auf dem Gerät weg');
 check(gh.zustand.nachrichten.includes('Push: neuer Schlüssel') && gh.zustand.nachrichten.some((m) => /^Push: Tobi meldet \w+ an$/.test(m)), 'Commits: „Push: neuer Schlüssel“, „Push: Tobi meldet … an“');
 await s.click('#push-bereich [data-push-was="preise"]');
-check(await bis(() => pj()?.abos?.tobi?.[0]?.was.join() === 'liste,rezepte', 8000), 'Häkchen „Preisalarm“ weg: kommt in push.json an');
+check(await bis(() => pj()?.abos?.tobi?.[0]?.was.join() === 'liste,rezepte,haushalt', 8000), 'Häkchen „Preisalarm“ weg: kommt in push.json an');
+check(await s.locator('#push-bereich [data-push-was="haushalt"]').isChecked() && (await s.locator('#push-bereich .push-was').innerText()).includes('Putzplan'), 'Häkchen „Putzplan“ ist da und an');
 await s.click('#push-bereich [data-act="push-test"]');
 check(await bis(() => pj()?.test?.an === 'tobi', 8000) && gh.zustand.nachrichten.slice(-1)[0].endsWith('· Test') && (await s.locator('#push-bereich .push-meldung').innerText()).includes('unterwegs'), 'Probe: push.json bestellt sie, Commit mit „· Test“');
 
@@ -237,10 +238,11 @@ await s.click('#push-bereich [data-act="push-an"]');
 check(await bis(() => pj()?.abos?.tobi?.[0]?.endpoint === 'https://push.example/test-2', 8000) && await bis(async () => (await s.locator('#push-bereich .push-an').count()) === 1), 'wieder eingeschaltet: neues Abo');
 
 // Ein Timer läuft ab: die Mitteilung kommt über den Service Worker (auf Android geht nur das), antippen führt zum Schritt
-await s.evaluate(() => localStorage.setItem('boxenstopp.timer.v1', JSON.stringify([{ id: 't-probe', rid: 'chili', schritt: 5, label: 'Chili: köcheln', minuten: 1, start: Date.now(), ende: Date.now() + 2500, fertig: false, dann: '', folge: [], stufe: 1, stufen: 1 }])));
+await s.evaluate(() => localStorage.setItem('boxenstopp.timer.v1', JSON.stringify([{ id: 't-probe', rid: 'chili', schritt: 5, label: 'Chili: köcheln', minuten: 1, start: Date.now(), ende: Date.now() + 6000, fertig: false, dann: '', folge: [], stufe: 1, stufen: 1 }])));
 await s.reload({ waitUntil: 'load' });
 await s.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
-const timerMitteilung = await bis(() => s.evaluate(async () => { const r = await navigator.serviceWorker.ready; const ns = await r.getNotifications({ tag: 't-probe' }); return ns.length ? [ns[0].title, ns[0].body, ns[0].data?.ziel] : null; }), 10000);
+// Mit Luft: Ist der Timer schon beim Laden abgelaufen (voller Testlauf, langsames Neuladen), klingelt er nur in der App
+const timerMitteilung = await bis(() => s.evaluate(async () => { const r = await navigator.serviceWorker.ready; const ns = await r.getNotifications({ tag: 't-probe' }); return ns.length ? [ns[0].title, ns[0].body, ns[0].data?.ziel] : null; }), 15000);
 check(JSON.stringify(timerMitteilung) === JSON.stringify(['Timer fertig', 'Chili: köcheln', 'chili#5']), `Timer fertig: Mitteilung über den Service Worker (${JSON.stringify(timerMitteilung)})`);
 
 // Ein weiteres Gerät: Push ist eingerichtet, hier noch aus – der Hinweis kommt einmal von selbst

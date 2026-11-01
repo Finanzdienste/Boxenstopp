@@ -125,13 +125,15 @@ html[data-tab="einstellungen"] .kopf-einst{border-color:var(--accent);color:var(
   #app[data-tab="angebote"] #view-list,#app[data-tab="angebote"] #view-recipes,#app[data-tab="angebote"] #view-amy{display:none}
   #app[data-tab="amy"] #view-list,#app[data-tab="amy"] #view-recipes,#app[data-tab="amy"] #view-angebote{display:none}
   #app[data-tab="einstellungen"] #view-list,#app[data-tab="einstellungen"] #view-recipes,#app[data-tab="einstellungen"] #view-angebote,#app[data-tab="einstellungen"] #view-amy{display:none}
+  #app[data-tab="haushalt"] #view-list,#app[data-tab="haushalt"] #view-recipes,#app[data-tab="haushalt"] #view-angebote,#app[data-tab="haushalt"] #view-amy{display:none}
 }
 #app:not([data-tab="einstellungen"]) #view-einstellungen{display:none}
+#app:not([data-tab="haushalt"]) #view-haushalt{display:none}
 @media (min-width:980px){
-  #app[data-tab="angebote"] #view-recipes,#app[data-tab="amy"] #view-recipes,#app[data-tab="einstellungen"] #view-recipes{display:none}
+  #app[data-tab="angebote"] #view-recipes,#app[data-tab="amy"] #view-recipes,#app[data-tab="einstellungen"] #view-recipes,#app[data-tab="haushalt"] #view-recipes{display:none}
   #app:not([data-tab="angebote"]) #view-angebote{display:none}
   #app:not([data-tab="amy"]) #view-amy{display:none}
-  #view-recipes,#view-angebote,#view-amy,#view-einstellungen{grid-column:1;grid-row:1}
+  #view-recipes,#view-angebote,#view-amy,#view-einstellungen,#view-haushalt{grid-column:1;grid-row:1}
   #view-list{grid-column:2;grid-row:1}
 }
 
@@ -445,7 +447,10 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 @media (max-width:979.98px){
   .reste-karte.nur-breit{display:none}
   html[data-reiter-aus~="amy"] .reste-karte.amy-link{display:grid}
+  html[data-reiter-aus~="haushalt"] .reste-karte.haus-link{display:grid}
 }
+.haus-link{margin-top:10px}
+.haus-link .reste-ic{background:#DDF3EA;color:#0B7764}
 .angebote-karte{margin-top:10px}
 .a-lead{margin:0;color:var(--muted);font-size:15px}
 .a-laeden{display:grid;gap:2px;margin-top:2px}
@@ -1182,3 +1187,122 @@ button.amy-tag:hover{border-color:var(--tag-ink)}
 .amy-tag-neu[hidden]{display:none}
 .amy-tag-neu input{flex:1;min-width:0}
 .amy-tag-neu .amy-chip{min-height:44px;flex:none}
+
+/* Haushalt: Putzplan und Haushaltssachen (ansicht-haushalt.js) */
+.haus-pane{display:grid;gap:14px;align-content:start}
+.haus-pane>.back{justify-self:start}
+.haus-pane .back .ic{width:20px;height:20px}
+.h-kopf{display:grid;gap:8px}
+.h-naechstes{margin:-2px 0 0;color:var(--muted);font-size:15px}
+.h-plan,.h-editor{scroll-margin-top:calc(env(safe-area-inset-top,0px) + var(--header-h) + 14px);scroll-margin-bottom:calc(var(--tabbar-h) + 20px)}
+.h-teile{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:4px;padding:4px;border-radius:14px;background:var(--surface-2);max-width:460px}
+.h-teil{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 8px;border:0;border-radius:10px;background:none;font-weight:650;font-size:14.5px;color:var(--muted)}
+.h-teil[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+.h-putz{display:grid;gap:14px}
+#h-plaene{display:grid;gap:18px}
+.h-gruppe{display:grid;gap:10px}
+.h-gruppe-t{display:flex;align-items:center;gap:7px;font:600 12px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.h-gruppe-t img{width:18px;height:18px}
+.h-plan{display:grid;gap:10px;padding:12px 14px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.h-plan-kopf{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:0;padding:0;border:0;background:none;color:inherit;text-align:left}
+.h-raum-bild{flex:none;width:36px;height:36px;object-fit:contain}
+.h-plan-name{flex:1;min-width:0;display:grid;gap:2px}
+.h-plan-name b{font:720 17px/1.2 var(--f-display);letter-spacing:-.01em}
+.h-plan-name small{font-size:13px;line-height:1.35;color:var(--muted)}
+.h-zahl,.h-wann{flex:none;font:600 13.5px/1 var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.h-wann{padding:6px 9px;border-radius:999px;background:var(--surface-2);font-family:var(--f-body);font-weight:700}
+.h-ok{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ok);color:var(--surface)}
+.h-ok .ic{width:18px;height:18px}
+.h-balken{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.h-balken span{display:block;height:100%;border-radius:3px;background:var(--accent);transition:width .25s ease}
+.h-heute{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.h-offen{border-color:color-mix(in srgb,var(--kh) 55%,var(--line))}
+.h-offen .h-plan-name small{color:var(--kh)}
+.h-erledigt .h-plan-name b{color:var(--muted)}
+.h-bald:not(.ist-auf),.h-erledigt:not(.ist-auf){box-shadow:none;background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.h-aufgaben{list-style:none;margin:0;padding:0;display:grid}
+.h-aufgabe{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:46px;margin:0;padding:9px 2px;border:0;border-top:1px solid var(--line);background:none;color:inherit;text-align:left;font-size:15.5px;line-height:1.35}
+.h-aufgabe .cb{flex:none;margin-top:-3px}
+.h-aufgabe[aria-checked="true"] .cb{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.h-aufgabe[aria-checked="true"] .h-aufgabe-t{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px}
+.h-aufgabe-t{flex:1;min-width:0;padding-top:2px;overflow-wrap:anywhere}
+.h-plan-fuss{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.h-plan-fuss .btn .ic{width:16px;height:16px}
+.h-zuletzt,.h-vorab,.h-ohne{margin:0;font-size:12.5px;color:var(--muted)}
+.h-leer .h-start{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.h-raum-chip{position:relative;display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px 0 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:650;font-size:14px;color:var(--ink);cursor:pointer}
+.h-raum-chip .ic{width:16px;height:16px}
+.h-raum-chip img{width:22px;height:22px}
+.h-raum-chip small{font-weight:500;color:var(--muted)}
+.h-raum-chip input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.h-raum-chip:has(input:checked){background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.h-raum-chip:has(input:checked) small{color:inherit;opacity:.7}
+.h-raum-chip:has(input:focus-visible),.h-tag:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.h-neu-zeile{display:flex}
+.h-neu-zeile .btn .ic{width:18px;height:18px}
+.h-todo,.h-drauf{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0;font-size:13.5px;color:var(--muted)}
+.h-todo .ic,.h-drauf .ic{width:18px;height:18px;flex:none}
+.h-todo .linkbtn,.h-drauf .linkbtn{min-height:32px;font-size:13.5px}
+.h-drauf{padding:10px 12px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+/* Editor */
+.h-editor{gap:14px}
+.h-feld{display:grid;gap:8px;margin:0;padding:0;border:0;min-width:0}
+.h-feld legend,.h-feld-t{padding:0;margin-bottom:8px;font:700 13px/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+label.h-feld .h-feld-t{margin-bottom:0}
+.h-input{height:46px;padding:0 12px;border-radius:12px;border:1.5px solid var(--line-strong);background:var(--bg);font:500 16px/1 var(--f-body);color:var(--ink);min-width:0;width:100%}
+.h-input:focus{outline:none;border-color:var(--accent)}
+select.h-input{width:auto;padding-right:28px}
+.h-raeume,.h-wahl{display:flex;flex-wrap:wrap;gap:6px}
+.h-aufg-edit{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.h-aufg-edit li{display:flex;align-items:center;gap:4px}
+.h-aufg-edit .x{margin-top:0;flex:none;width:40px;height:40px}
+.h-aufg-mehr{display:flex}
+.h-aufg-mehr .btn .ic{width:15px;height:15px}
+.h-vorschlaege{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.h-vorschlaege:empty{display:none}
+.h-vorschlaege-t{font-size:12.5px;color:var(--muted);margin-right:2px}
+.h-vorschlag-btn{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:0 11px 0 8px;border-radius:999px;border:1.5px dashed var(--line-strong);background:none;font-weight:600;font-size:13px;color:var(--ink)}
+.h-vorschlag-btn .ic{width:14px;height:14px;color:var(--muted)}
+.h-tage{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;max-width:440px}
+.h-tag{position:relative;display:grid;place-items:center;min-height:44px;border-radius:12px;border:1.5px solid var(--line-strong);background:var(--surface);font-weight:700;font-size:14px;cursor:pointer}
+.h-tag input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
+.h-tag:has(input:checked){background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.h-wochen{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.h-ab{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.h-ab[hidden]{display:none}
+.h-ab input{width:auto}
+.h-fehler{margin:0;color:var(--danger);font-weight:650;font-size:14px}
+.h-edit-btns{display:flex;flex-wrap:wrap;gap:8px}
+.h-loeschen{margin-left:auto;color:var(--danger)}
+/* Haushaltssachen */
+.h-sachen-teil{display:grid;gap:16px}
+.h-sach-form{margin-top:0}
+#h-sachen{display:grid;gap:16px}
+.h-bereich{display:grid;gap:8px}
+.h-sachen{display:flex;flex-wrap:wrap;gap:7px}
+.h-sache{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 12px 0 8px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:650;font-size:14px;color:var(--ink)}
+.h-sache-bild{width:22px;height:22px;object-fit:contain}
+.h-sache.h-vorschlag{border-style:dashed;border-color:var(--line-strong);background:none;color:var(--muted)}
+.h-sache.h-vorschlag .h-sache-bild{opacity:.75}
+.h-sache[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);border-style:solid;color:var(--accent-ink)}
+.h-sache .h-sache-ok{width:16px;height:16px}
+.h-sache.h-weg{border-color:var(--danger);color:var(--danger)}
+.h-sache.h-weg .ic{width:15px;height:15px}
+.h-sachen-fuss{display:flex}
+@media (min-width:980px){
+  .haus-pane{max-width:760px}
+}
+
+/* Einstellungen → Microsoft To Do (ansicht-todo.js) */
+.todo-bereich{display:grid;gap:10px}
+.todo-code{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 14px;border-radius:14px;border:1.5px dashed var(--accent);background:var(--accent-soft)}
+.todo-code b{font:600 26px/1.1 var(--f-mono);letter-spacing:.08em;color:var(--ink);user-select:all}
+.todo-warte{display:flex;align-items:center;gap:10px;margin:0;font-weight:600}
+.todo-warte::before{content:"";flex:none;width:16px;height:16px;border-radius:50%;border:2.5px solid var(--line-strong);border-top-color:var(--accent);animation:todo-dreh 1s linear infinite}
+@keyframes todo-dreh{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.todo-warte::before{animation:none}}
+.todo-fehler{margin:0;color:var(--danger);font-weight:650}
+.todo-anleitung summary{cursor:pointer;font-weight:650;color:var(--accent)}
+.todo-anleitung ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.todo-fuss .linkbtn{min-height:32px;padding:0;font-size:12.5px}
+.todo-bereich a.btn{text-decoration:none}

@@ -32,7 +32,7 @@
  *   jetzt()   sofort abgleichen
  *   stop()
  */
-import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig } from './liste.js';
+import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt } from './liste.js';
 
 export const API = 'https://api.github.com';
 export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: 'liste.json' };
@@ -218,6 +218,8 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
             const mehr = {};
             for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
             if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
+            if (fehlt('haushalt') && hatHaushalt(remote.stand?.haushalt)) mehr.haushalt = remote.stand.haushalt;
+            if (fehlt('leute') && Object.keys(remote.stand?.leute || {}).length) mehr.leute = remote.stand.leute;
             if (Object.keys(mehr).length) {
               stand = anwenden(stand, opZusammen({}, {}, mehr));
               offen.push(opZusammen({}, {}, mehr));
@@ -253,10 +255,11 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
    * eine Nachricht an die anderen wert ist (Neues auf der Liste, ein neues
    * Rezept, eine Notiz, alles eingekauft): Daran erkennt der Push im
    * Daten-Repo, dass er laufen soll (.github/workflows/benachrichtigen.yml).
+   * „· To Do“, wenn Microsoft To Do nachziehen muss (haushalt.yml).
    */
   function nachricht(paket, vorher, nachher) {
     const wer = name ? `${name}: ` : '';
-    return `${wer}Einkaufsliste, ${paket.length} ${paket.length === 1 ? 'Änderung' : 'Änderungen'}${bescheidNoetig(vorher, nachher) ? ' · Bescheid' : ''}`;
+    return `${wer}Einkaufsliste, ${paket.length} ${paket.length === 1 ? 'Änderung' : 'Änderungen'}${bescheidNoetig(vorher, nachher) ? ' · Bescheid' : ''}${todoNoetig(vorher, nachher) ? ' · To Do' : ''}`;
   }
 
   async function senden() {

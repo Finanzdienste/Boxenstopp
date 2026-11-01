@@ -7,7 +7,9 @@
  *   node app/werkzeug/push.mjs --daten daten --liste    # was sich auf der Liste getan hat
  *   node app/werkzeug/push.mjs --daten daten --preise   # Preisalarme in den Angeboten
  *   node app/werkzeug/push.mjs --daten daten --test     # die bestellte Probe
+ *   node app/werkzeug/push.mjs --daten daten --haushalt # „Heute ist Küche dran“ (haushalt.yml)
  *   … --trocken   nur zeigen, was rausginge (ohne Schlüssel, ohne Senden)
+ *   … --jetzt 2026-11-02T06:30:00Z   so tun, als wäre es dann (für die Tests)
  *   … --angebote datei.json   andere öffentliche Angebote (für die Tests)
  *   … --delta datei.json      was dieser Lauf an push.json ändert, dorthin
  *   node app/werkzeug/push.mjs --daten daten --nachtragen datei.json
@@ -18,7 +20,12 @@
  * markiert hat (speicher.js): Neues auf der Liste, ein neues Rezept von Amy,
  * eine Notiz, alles eingekauft – je an die anderen, nie an den, der es war.
  * Wer bis wohin benachrichtigt ist, merkt sich push.json (zuletzt.sha), welche
- * Preisalarme schon gemeldet sind, auch (gemeldet).
+ * Preisalarme und Putztage schon gemeldet sind, auch (gemeldet).
+ *
+ * Im Putzplan zählt die Tageszeit, die bei einem Putztag eingestellt ist
+ * (morgens, mittags, abends – Berliner Zeit): Ist er heute dran und noch
+ * nicht erledigt, kommt „Heute ist Küche dran“ an den, der eingetragen ist
+ * (sonst an beide), einmal am Tag.
  *
  * Gibt nie Schlüssel oder die Adressen der Abos aus.
  */
@@ -29,6 +36,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { bereinigen, offeneAnzahl, leer } from '../js/liste.js';
 import { preisalarmTreffer, preisJe } from '../js/angebote.js';
+import { faellig, termin, zustaendig } from '../js/haushalt.js';
 
 const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (name) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : null; };
@@ -92,12 +100,20 @@ function senderBauen() {
 }
 const senden = senderBauen();
 
+/*
+ * Was ein Abo bekommt: was es gewählt hat – und jede Art, die es beim Wählen
+ * noch nicht gab (kennt; Abos von vor dem Putzplan kannten nur die ersten
+ * drei). Dieselbe Rechnung steht in js/push.js.
+ */
+const ALTE_ARTEN = ['liste', 'rezepte', 'preise'];
+const bekommt = (abo, art) => (Array.isArray(abo?.was) ? abo.was : ALTE_ARTEN).includes(art) || !(Array.isArray(abo?.kennt) ? abo.kennt : ALTE_ARTEN).includes(art);
+
 /** An alle Geräte einer Person, die diese Art haben wollen. */
 async function an(name, art, nutzlast) {
   if (!senden) return;
   for (const abo of push.abos[name] || []) {
     if (!abo?.endpoint || abgelaufen.has(abo.endpoint)) continue;
-    if (art !== 'test' && !(Array.isArray(abo.was) ? abo.was : ['liste', 'rezepte', 'preise']).includes(art)) continue;
+    if (art !== 'test' && !bekommt(abo, art)) continue;
     const r = await senden(name, abo, nutzlast, art);
     if (r.ok) zaehler.gesendet++;
     else if (r.weg) { abgelaufen.add(abo.endpoint); zaehler.abgelaufen++; } else { zaehler.fehler++; console.log(`Push: an ${name} ging nicht (HTTP ${r.status}).`); }
@@ -190,6 +206,55 @@ async function preise() {
   delta.gemeldet = neu.map((t) => `${t.a.id}|${t.k}`);
 }
 
+/* ----------------------------------------------------------- Haushalt */
+
+// Je Tageszeit die Stunden (Berliner Zeit), in denen die Erinnerung rausgeht.
+// haushalt.yml läuft je Tageszeit zweimal (für Sommer- und Winterzeit) – es
+// schickt der erste Lauf, der in die Stunden fällt; gemeldet merkt es sich.
+const SCHICHTEN = { morgens: [7, 11], mittags: [12, 16], abends: [17, 22] };
+function berlin(d) {
+  const t = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' }).formatToParts(d).map((x) => [x.type, x.value]));
+  return { tag: `${t.year}-${t.month}-${t.day}`, stunde: Number(t.hour) };
+}
+const und = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} und ${xs[xs.length - 1]}`);
+
+/** „Heute ist Küche dran“ – mit den Aufgaben, die noch offen sind. */
+function putzNutzlast(liste) {
+  const offen = ({ p, t }) => p.aufgaben.filter((a) => !t.haken.includes(a.id));
+  if (liste.length === 1) {
+    const x = liste[0];
+    const rest = offen(x);
+    const n = x.p.aufgaben.length;
+    const anfang = rest.slice(0, 3).map((a) => a.t).join(', ') + (rest.length > 3 ? ' …' : '');
+    const text = !n ? 'Zum Abhaken in Boxenstopp.' : rest.length === n ? `${n} ${n === 1 ? 'Aufgabe' : 'Aufgaben'}: ${anfang}` : `Noch ${rest.length} von ${n}: ${anfang}`;
+    return { titel: `Heute ist ${x.p.name} dran`, text: text.slice(0, 200), tag: 'putzplan', ziel: 'haushalt' };
+  }
+  const namen = liste.map((x) => x.p.name);
+  const titel = liste.length <= 3 ? `Heute sind ${und(namen)} dran` : `Heute sind ${liste.length} Putztage dran`;
+  const text = liste.map((x) => `${x.p.name}${x.p.aufgaben.length ? ` (${offen(x).length})` : ''}`).join(' · ');
+  return { titel, text: text.slice(0, 200), tag: 'putzplan', ziel: 'haushalt' };
+}
+
+async function haushalt() {
+  const stand = bereinigen(lies(path.join(DATEN, 'liste.json'), {}));
+  const h = stand.haushalt;
+  const plaene = Object.entries(h?.plaene || {});
+  if (!plaene.length) return;
+  const { tag, stunde } = berlin(arg('--jetzt') ? new Date(arg('--jetzt')) : new Date());
+  const schicht = Object.entries(SCHICHTEN).find(([, [von, bis]]) => stunde >= von && stunde <= bis)?.[0];
+  if (!schicht) { console.log(`Putzplan: ${stunde} Uhr – keine Zeit für Erinnerungen.`); return; }
+  const gemeldet = new Set(Array.isArray(push.gemeldet) ? push.gemeldet : []);
+  const dran = plaene
+    .map(([id, p]) => ({ id, p, t: termin(p, h.stand[id], tag) }))
+    .filter(({ id, p, t }) => p.erinnern === schicht && faellig(p, tag) && t.art === 'heute' && !gemeldet.has(`putz|${id}|${tag}`));
+  if (!dran.length) return;
+  for (const name of Object.keys(push.abos)) {
+    const meine = dran.filter(({ p }) => zustaendig(p, name));
+    if (meine.length) await an(name, 'haushalt', putzNutzlast(meine));
+  }
+  delta.gemeldet = [...delta.gemeldet, ...dran.map(({ id }) => `putz|${id}|${tag}`)];
+}
+
 /* --------------------------------------------------------------- Test */
 
 async function test() {
@@ -202,6 +267,7 @@ async function test() {
 if (hat('--test')) await test();
 if (hat('--liste')) await liste();
 if (hat('--preise')) await preise();
+if (hat('--haushalt')) await haushalt();
 
 // Abgelaufene Abos (Gerät gewechselt, Push ausgeschaltet) fallen weg
 delta.weg = [...abgelaufen];

@@ -64,7 +64,7 @@ export const schreibe = (k, v) => {
 const ANSICHT = 'boxenstopp.ansicht.v1';
 const gemerkt = lese(ANSICHT, {}) || {};
 /** Alle Reiter – die Einstellungen sind immer da, die anderen lassen sich unten ausblenden (ansicht-einstellungen.js). */
-export const REITER = ['rezepte', 'amy', 'einkauf', 'angebote', 'einstellungen'];
+export const REITER = ['rezepte', 'amy', 'einkauf', 'angebote', 'haushalt', 'einstellungen'];
 export const ansicht = {
   tab: REITER.includes(gemerkt.tab) ? gemerkt.tab : 'rezepte',
   filter: typeof gemerkt.filter === 'string' ? gemerkt.filter : 'alle',
@@ -102,7 +102,7 @@ export function meldungWeg() { $('#toast').classList.remove('show'); meldungArt 
 
 /* ---------------------------------------------------------------- Reiter */
 
-const scrollPos = { rezepte: 0, einkauf: 0, angebote: 0, amy: 0, einstellungen: 0 };
+const scrollPos = { rezepte: 0, einkauf: 0, angebote: 0, amy: 0, haushalt: 0, einstellungen: 0 };
 const beimReiter = [];
 /** Wer wissen will, wenn der Reiter wechselt (die Einstellungen zeichnen sich dann neu). */
 export const reiterBeobachten = (fn) => { beimReiter.push(fn); };
@@ -134,7 +134,7 @@ export function zeigeReiter(t, scrollBehalten = false) {
   }
   ansichtMerken();
   if (istSchmal() && !scrollBehalten) window.requestAnimationFrame(() => window.scrollTo(0, scrollPos[ansicht.tab] || 0));
-  // Breit stehen die Einstellungen links wie Angebote und Amy – nach oben, damit man sie sieht
-  else if (!istSchmal() && ansicht.tab === 'einstellungen' && !scrollBehalten) window.scrollTo(0, 0);
+  // Breit stehen Einstellungen und Haushalt links wie Angebote und Amy – nach oben, damit man sie sieht
+  else if (!istSchmal() && ['einstellungen', 'haushalt'].includes(ansicht.tab) && !scrollBehalten) window.scrollTo(0, 0);
   beimReiter.forEach((fn) => fn(ansicht.tab));
 }

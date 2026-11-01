@@ -27,12 +27,13 @@ import { preisJe } from './angebote.js';
 import { opBon, opBonWeg } from './liste.js';
 import { nameSchluessel } from './bereiche.js';
 import { statusZeichnen } from './ansicht-liste.js';
+import { todoZeichnen } from './ansicht-todo.js';
 
 /* ------------------------------------------------------------ Reiter */
 
 const REITER_AUS = 'boxenstopp.reiter.v1'; // { aus: ['amy'], reihe: ['einkauf', 'rezepte', …] } – nur dieses Gerät
 /** Die Reiter, die sich ausblenden und verschieben lassen – die Einstellungen bleiben immer, ganz rechts. */
-export const REITER_WAHL = [['rezepte', 'Rezepte'], ['amy', 'Amys Rezepte'], ['einkauf', 'Einkaufsliste'], ['angebote', 'Angebote']];
+export const REITER_WAHL = [['rezepte', 'Rezepte'], ['amy', 'Amys Rezepte'], ['einkauf', 'Einkaufsliste'], ['angebote', 'Angebote'], ['haushalt', 'Haushalt']];
 const ALLE = REITER_WAHL.map(([k]) => k);
 
 /** Welche Reiter ausgeblendet sind – mindestens einer bleibt. */
@@ -95,7 +96,7 @@ function reiterHTML() {
       + `<button type="button" class="e-pfeil" data-reiter-runter="${k}" aria-label="${esc(name)} weiter nach hinten"${i === reihe.length - 1 ? ' disabled' : ''}>${RUNTER}</button></li>`;
   }).join('');
   return `<ol class="e-reiter" aria-label="Reiter unten, von links nach rechts">${zeilen}<li class="e-zeile fest"><label class="e-schalter"><input type="checkbox" checked disabled>${symbol('einstellungen')}<span>Einstellungen <small>– immer da, ganz rechts</small></span></label></li></ol>
-<p class="fine">Häkchen weg blendet einen Reiter aus, die Pfeile ändern die Reihenfolge – von oben nach unten heißt in der Leiste von links nach rechts. Gilt für dieses Gerät. Amys Rezepte und die Angebote bleiben auch ausgeblendet über ihre Karte bei den Rezepten erreichbar.</p>`;
+<p class="fine">Häkchen weg blendet einen Reiter aus, die Pfeile ändern die Reihenfolge – von oben nach unten heißt in der Leiste von links nach rechts. Gilt für dieses Gerät. Amys Rezepte, die Angebote und der Haushalt bleiben auch ausgeblendet über ihre Karte bei den Rezepten erreichbar.</p>`;
 }
 
 /* --------------------------------------------------------- Darstellung */
@@ -226,6 +227,8 @@ export function einstellungenZeichnen() {
   if (g) g.innerHTML = gemerktHTML();
   const u = $('#e-ueber');
   if (u) u.innerHTML = ueberHTML();
+  // Microsoft To Do: was in liste.json steht (App-ID, Wünsche), kann sich geändert haben
+  todoZeichnen();
   // Beim ersten Besuch ist der Service Worker evtl. erst nach dem Start fertig – dann jetzt nachsehen
   if (!fassung && ansicht.tab === 'einstellungen' && !fassungLaeuft) {
     fassungLaeuft = true;

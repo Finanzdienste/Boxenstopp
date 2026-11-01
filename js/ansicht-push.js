@@ -10,7 +10,7 @@
  */
 import { app, $, melde, ansicht, lese, schreibe } from './kern.js';
 import { esc } from './format.js';
-import { ARTEN, pushStand, pushEinschalten, pushAusschalten, pushWas, pushTest, schluesselErzeugen, schluesselAblegen, geraetArt } from './push.js';
+import { ARTEN, bekommt, pushStand, pushEinschalten, pushAusschalten, pushWas, pushTest, schluesselErzeugen, schluesselAblegen, geraetArt } from './push.js';
 
 const SECRETS = 'https://github.com/Finanzdienste/Boxenstopp-Daten/settings/secrets/actions/new';
 let stand = null; // zuletzt gesehen: { art, abo, push }
@@ -77,18 +77,17 @@ function geraetHTML(art, abo) {
 <p class="fine push-hilfe">${esc(erlaubenHilfe())}</p>
 <div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="push-pruefen"${arbeitet ? ' disabled' : ''}>Erlaubt – nochmal prüfen</button></div>`;
   }
-  if (art === 'aus') return `<p class="fine">Bekomm Bescheid, wenn der andere etwas auf die Liste setzt, ein neues Rezept da ist, alles eingekauft ist oder ein Preisalarm zuschlägt.</p><div class="zugang-btns"><button type="button" class="btn" data-act="push-an"${arbeitet ? ' disabled' : ''}>${GLOCKE}Push-Nachrichten einschalten</button></div>`;
+  if (art === 'aus') return `<p class="fine">Bekomm Bescheid, wenn der andere etwas auf die Liste setzt, ein neues Rezept da ist, alles eingekauft ist, ein Preisalarm zuschlägt oder im Putzplan etwas dran ist.</p><div class="zugang-btns"><button type="button" class="btn" data-act="push-an"${arbeitet ? ' disabled' : ''}>${GLOCKE}Push-Nachrichten einschalten</button></div>`;
   if (art === 'an') {
-    const was = new Set(abo?.was || []);
     return `<p class="push-an">${GLOCKE}Push ist an auf diesem ${esc(abo?.geraet || 'Gerät')}.</p>
-<div class="push-was" role="group" aria-label="Was ankommt">${ARTEN.map(([k, name]) => `<label class="push-k"><input type="checkbox" data-push-was="${k}"${was.has(k) ? ' checked' : ''}${arbeitet ? ' disabled' : ''}> ${esc(name)}</label>`).join('')}</div>
+<div class="push-was" role="group" aria-label="Was ankommt">${ARTEN.map(([k, name]) => `<label class="push-k"><input type="checkbox" data-push-was="${k}"${bekommt(abo, k) ? ' checked' : ''}${arbeitet ? ' disabled' : ''}> ${esc(name)}</label>`).join('')}</div>
 <div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="push-test"${arbeitet ? ' disabled' : ''}>Probe schicken</button><button type="button" class="btn btn-quiet" data-act="push-aus"${arbeitet ? ' disabled' : ''}>Ausschalten</button></div>`;
   }
   return '';
 }
 
 function inhalt() {
-  if (!app.zugang) return '<p class="fine">Bekomm Bescheid, wenn der andere etwas auf die Liste setzt, ein neues Rezept da ist oder ein Preisalarm zuschlägt. Das geht, sobald die gemeinsame Liste eingerichtet ist.</p>';
+  if (!app.zugang) return '<p class="fine">Bekomm Bescheid, wenn der andere etwas auf die Liste setzt, ein neues Rezept da ist, ein Preisalarm zuschlägt oder im Putzplan etwas dran ist. Das geht, sobald die gemeinsame Liste eingerichtet ist.</p>';
   if (!stand) return '<p class="fine">Wird geprüft …</p>';
   const { art, abo } = stand;
   // Einrichten (das Schlüsselpaar für alle) geht auf jedem Gerät – auch wenn es selbst gerade keine Mitteilungen darf
@@ -146,7 +145,7 @@ function hinweisHTML({ arbeitet: laeuft = false, fehler = '', fertig = false } =
   return `<button type="button" class="tablet-zu" data-act="push-hinweis-zu" aria-label="Schließen">${KREUZ}</button>
 <p class="push-dlg-ic" aria-hidden="true">${GLOCKE}</p>
 <h2 class="push-dlg-titel" id="push-dlg-titel">Neu: Push-Nachrichten</h2>
-<p class="tablet-lead">Bekomm Bescheid, auch wenn die App zu ist: wenn etwas Neues auf die Liste kommt, alles eingekauft ist, ein neues Rezept oder eine Notiz da ist oder ein Preisalarm zuschlägt.</p>
+<p class="tablet-lead">Bekomm Bescheid, auch wenn die App zu ist: wenn etwas Neues auf die Liste kommt, alles eingekauft ist, ein neues Rezept oder eine Notiz da ist, ein Preisalarm zuschlägt oder im Putzplan etwas dran ist.</p>
 ${fertig ? '<p class="push-dlg-ok" role="status">Eingeschaltet ✓</p>' : ''}${fehler ? `<p class="zugang-fehler" role="alert">${esc(fehler)}</p>` : ''}
 <div class="tablet-knoepfe">${knoepfe}</div>
 <p class="tablet-fein">Was ankommt und auf welchem Gerät, stellst du unter Einstellungen → Push-Nachrichten ein – dort geht es auch wieder aus.</p>`;
@@ -270,7 +269,7 @@ export function aenderungPush(ziel) {
   if (!ziel.dataset?.pushWas) return false;
   // Erst lesen, dann neu zeichnen (mit() zeichnet sofort – sonst stünde das alte Häkchen wieder da)
   const was = gewaehlt();
-  if (stand?.abo) stand = { ...stand, abo: { ...stand.abo, was } };
+  if (stand?.abo) stand = { ...stand, abo: { ...stand.abo, was, kennt: ARTEN.map(([k]) => k) } };
   mit(() => pushWas(was), 'Gemerkt.');
   return true;
 }

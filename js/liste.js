@@ -19,7 +19,9 @@
  *     kochen:    { <name>: { at, schritte: { <rid>: [0, 2] }, tempo, timer: [] } },
  *     fehlt:     { <Schlüssel>: { laden: 'Aldi', at, by } },   im Laden nicht bekommen
  *     bons:      { <Schlüssel>: [{ eur: 4.99, q: 1000, u: 'g', laden, at, by }] },  was es gekostet hat
- *     preisalarm: { <Schlüssel>: { max: 6.5, u: 'kg', by, at } } }   Bescheid, wenn ein Angebot so günstig ist
+ *     preisalarm: { <Schlüssel>: { max: 6.5, u: 'kg', by, at } },   Bescheid, wenn ein Angebot so günstig ist
+ *     haushalt:  { sachen, plaene, stand, todoApp, todoWunsch, todoAn },   Haushaltssachen und Putzplan (haushalt.js)
+ *     leute:     { amy: 'Amy', tobi: 'Tobi' } }   wer die Liste teilt (für „Wer“ im Putzplan)
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -74,8 +76,10 @@ import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 import { umleiten } from './format.js';
+import { RAUM, SACH_BEREICH } from './haushalt.js';
 
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {} });
+export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {} });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
 const MAX_BONS = 200;
@@ -84,6 +88,16 @@ const MAX_ALARME = 60;
 export const BON_EINHEITEN = ['g', 'ml', 'Stk', 'Pck', 'Dose', 'Glas', 'Bund'];
 export const ALARM_EINHEITEN = ['kg', 'l', 'Stk'];
 const MAX_GLEICH = 300;
+const MAX_SACHEN = 150;
+const MAX_PLAENE = 40;
+const MAX_AUFGABEN = 30;
+const SACHE_ID = /^hs-[a-z0-9-]{1,40}$/;
+const PLAN_ID = /^pp-[a-z0-9-]{1,40}$/;
+const AUFGABE_ID = /^a-[a-z0-9-]{1,40}$/;
+const PERSON = /^[\p{L}\p{N} ._-]{1,40}$/u;
+const TODO_WUENSCHE = ['verbinden', 'trennen', 'abgleichen'];
+/** Die App bei Microsoft (Anwendungs-ID, eine GUID) – kein Geheimnis. */
+export const TODO_APP_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_UNGLEICH = 200;
 /** Die Abteilungen, in die man eine Zeile verschieben kann (weg.js REIHE). */
 export const ABTEILUNGEN = ['obst', 'fleisch', 'kuehl', 'trocken', 'konserven', 'vorrat', 'tk', 'gewuerz', 'haushalt', 'sonstiges'];
@@ -156,6 +170,19 @@ export function bescheidNoetig(vorher, nachher) {
   for (const id of Object.keys(nachher?.amy || {})) if (!v.amy?.[id]) return true;
   for (const [rid, ns] of Object.entries(nachher?.notizen || {})) for (const n of ns || []) if (!(v.notizen?.[rid] || []).some((x) => x.id === n.id)) return true;
   return Object.keys(nachher?.items || {}).length > 0 && offeneAnzahl(v) > 0 && offeneAnzahl(nachher) === 0;
+}
+
+/**
+ * Muss der Abgleich mit Microsoft To Do laufen (Commit mit „· To Do“)? Wenn
+ * jemand verbinden oder trennen will – oder To Do eingerichtet ist und sich am
+ * Putzplan oder an den Haken etwas geändert hat.
+ */
+export function todoNoetig(vorher, nachher) {
+  const v = vorher?.haushalt || leerHaushalt();
+  const n = nachher?.haushalt || leerHaushalt();
+  if (JSON.stringify(v.todoWunsch || {}) !== JSON.stringify(n.todoWunsch || {})) return true;
+  if (!n.todoApp || !Object.keys(n.todoAn || {}).length) return false;
+  return JSON.stringify(v.plaene || {}) !== JSON.stringify(n.plaene || {}) || JSON.stringify(v.stand || {}) !== JSON.stringify(n.stand || {});
 }
 
 /**
@@ -292,7 +319,115 @@ export function bereinigen(roh) {
       if (b) s.preisalarm[k] = b;
     }
   }
+  if (istObj(roh.haushalt)) s.haushalt = haushaltBereinigen(roh.haushalt);
+  if (istObj(roh.leute)) {
+    for (const [k, n] of Object.entries(roh.leute).slice(0, 8)) if (PERSON.test(String(n)) && k === String(n).toLowerCase()) s.leute[k] = n;
+  }
   return s;
+}
+
+/* ------------------------------------------------------------- Haushalt */
+
+const sauber = (v, max) => (typeof v === 'string' ? v.replace(/[\p{Cc}<>]/gu, '').replace(/\s+/g, ' ').trim().slice(0, max) : '');
+function sacheBereinigen(x) {
+  if (!istObj(x)) return null;
+  const name = sauber(x.name, 60);
+  if (!name) return null;
+  return { name, bereich: SACH_BEREICH[x.bereich] ? x.bereich : 'sonstiges', by: text(x.by, 40), at: text(x.at, 40) || '' };
+}
+/** Ein Putztag aus beliebigem JSON – oder null. */
+export function planBereinigen(p) {
+  if (!istObj(p)) return null;
+  const name = sauber(p.name, 40);
+  if (!name) return null;
+  const ids = new Set();
+  const aufgaben = [];
+  for (const a of Array.isArray(p.aufgaben) ? p.aufgaben : []) {
+    const t = istObj(a) ? sauber(a.t, 120) : '';
+    if (!t || !AUFGABE_ID.test(String(a.id)) || ids.has(a.id)) continue;
+    ids.add(a.id);
+    aufgaben.push({ id: a.id, t });
+    if (aufgaben.length >= MAX_AUFGABEN) break;
+  }
+  const w = istObj(p.wdh) ? p.wdh : {};
+  const tage = [...new Set((Array.isArray(w.tage) ? w.tage : []).filter((t) => Number.isInteger(t) && t >= 1 && t <= 7))].sort((a, b) => a - b);
+  const wer = sauber(p.wer, 40);
+  return {
+    name,
+    raum: RAUM[p.raum] ? p.raum : 'sonstiges',
+    aufgaben,
+    wdh: { tage, wochen: [1, 2, 3, 4].includes(w.wochen) ? w.wochen : 1, ab: TAG.test(String(w.ab)) ? w.ab : '' },
+    wer: PERSON.test(wer) ? wer : '',
+    erinnern: ['morgens', 'mittags', 'abends', ''].includes(p.erinnern) ? p.erinnern : 'morgens',
+    by: text(p.by, 40),
+    at: text(p.at, 40) || '',
+  };
+}
+function putzStandBereinigen(x, plan) {
+  if (!istObj(x) || !TAG.test(String(x.datum))) return null;
+  const da = new Set((plan?.aufgaben || []).map((a) => a.id));
+  const haken = [...new Set((Array.isArray(x.haken) ? x.haken : []).filter((id) => typeof id === 'string' && da.has(id)))];
+  const fertig = istObj(x.fertig) && text(x.fertig.at, 40) ? { at: x.fertig.at, by: text(x.fertig.by, 40) } : null;
+  const verlauf = (Array.isArray(x.verlauf) ? x.verlauf : []).filter((v) => Array.isArray(v) && TAG.test(String(v[0]))).map((v) => [v[0], text(v[1], 40) || '']).slice(-6);
+  return { datum: x.datum, haken, fertig, verlauf };
+}
+function haushaltBereinigen(roh) {
+  const h = leerHaushalt();
+  if (istObj(roh.sachen)) {
+    for (const [id, x] of Object.entries(roh.sachen).slice(-MAX_SACHEN)) {
+      const b = SACHE_ID.test(id) ? sacheBereinigen(x) : null;
+      if (b) h.sachen[id] = b;
+    }
+  }
+  if (istObj(roh.plaene)) {
+    for (const [id, p] of Object.entries(roh.plaene).slice(-MAX_PLAENE)) {
+      const b = PLAN_ID.test(id) ? planBereinigen(p) : null;
+      if (b) h.plaene[id] = b;
+    }
+  }
+  if (istObj(roh.stand)) {
+    for (const [id, x] of Object.entries(roh.stand)) {
+      const b = h.plaene[id] ? putzStandBereinigen(x, h.plaene[id]) : null;
+      if (b) h.stand[id] = b;
+    }
+  }
+  h.todoApp = TODO_APP_ID.test(String(roh.todoApp || '')) ? roh.todoApp : '';
+  if (istObj(roh.todoWunsch)) {
+    for (const [n, w] of Object.entries(roh.todoWunsch).slice(0, 6)) {
+      if (PERSON.test(n) && n === n.toLowerCase() && istObj(w) && TODO_WUENSCHE.includes(w.art) && text(w.at, 40)) h.todoWunsch[n] = { art: w.art, at: w.at, name: PERSON.test(String(w.name || '')) ? w.name : n };
+    }
+  }
+  if (istObj(roh.todoAn)) {
+    for (const [n, at] of Object.entries(roh.todoAn).slice(0, 6)) if (PERSON.test(n) && n === n.toLowerCase() && text(at, 40)) h.todoAn[n] = at;
+  }
+  return h;
+}
+const hausVon = (s) => {
+  if (!istObj(s.haushalt)) s.haushalt = leerHaushalt();
+  const h = s.haushalt;
+  for (const k of ['sachen', 'plaene', 'stand', 'todoWunsch', 'todoAn']) if (!istObj(h[k])) h[k] = {};
+  if (typeof h.todoApp !== 'string') h.todoApp = '';
+  return h;
+};
+const kappen = (o, max) => { const ks = Object.keys(o); for (const k of ks.slice(0, Math.max(0, ks.length - max))) delete o[k]; };
+/** Der Stand eines Putztags für den Tag datum – ein neuer Tag fängt frisch an (der Verlauf bleibt); ein älterer zählt nicht mehr. */
+function putzTag(h, planId, datum) {
+  const st = h.stand[planId];
+  if (st && st.datum === datum) return st;
+  if (st && st.datum > datum) return null;
+  return { datum, haken: [], fertig: null, verlauf: st?.verlauf || [] };
+}
+function putzSetzen(h, planId, st, plan, at, by) {
+  const alle = plan.aufgaben.length > 0 && plan.aufgaben.every((a) => st.haken.includes(a.id));
+  if (alle && !st.fertig) {
+    st.fertig = { at, by };
+    st.verlauf = [...st.verlauf.filter((v) => v[0] !== st.datum), [st.datum, by || '']].slice(-6);
+  }
+  if (!alle && st.fertig && plan.aufgaben.length) {
+    st.fertig = null;
+    st.verlauf = st.verlauf.filter((v) => v[0] !== st.datum);
+  }
+  h.stand[planId] = st;
 }
 
 const zahl = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
@@ -394,8 +529,10 @@ export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || 
 export const opZusammen = (items, ki = {}, mehr = {}) => ({
   typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
   amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
-  fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}),
+  fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}),
 });
+/** Hat ein Stand etwas im Haushalt (sonst muss beim Zusammenlegen nichts mit)? */
+export const hatHaushalt = (h) => !!h && (Object.keys(h.sachen || {}).length > 0 || Object.keys(h.plaene || {}).length > 0 || !!h.todoApp || Object.keys(h.todoAn || {}).length > 0);
 /**
  * Zwei Zeilen sind dasselbe: von kommt zu nach, und alles, was künftig unter
  * von (oder den Namen) kommt, auch. ziel { name, cat } ist die Zeile nach,
@@ -424,6 +561,22 @@ export const opFehltWeg = (k) => ({ typ: 'fehltWeg', k });
 /** Was es gekostet hat: { eur, q, u, laden } – die letzten fünf je Zutat zählen. */
 export const opBon = (k, bon, by) => ({ typ: 'bon', k, bon: { ...klon(bon), by: by || null, at: bon?.at || jetzt() } });
 export const opBonWeg = (k, at) => ({ typ: 'bonWeg', k, at });
+/** Eine Haushaltssache merken, ändern – oder mit null vergessen. */
+export const opSache = (id, sache, by) => ({ typ: 'sache', id, sache: sache ? { ...klon(sache), by: by || null, at: jetzt() } : null });
+/** Einen Putztag anlegen oder ändern (ganz ersetzen) – oder mit null löschen (sein Stand geht mit). */
+export const opPlan = (id, plan, by) => ({ typ: 'plan', id, plan: plan ? { ...klon(plan), by: by || null, at: jetzt() } : null });
+/** Eine Aufgabe eines Putztags am Tag datum abhaken (an) oder wieder auf; alle: erledigt. */
+export const opPutzHaken = (planId, datum, aufgabe, an, by) => ({ typ: 'putzHaken', planId, datum, aufgabe, an: !!an, by: by || null, at: jetzt() });
+/** Den ganzen Tag als erledigt (alle Aufgaben) – oder wieder offen. */
+export const opPutzFertig = (planId, datum, an, by) => ({ typ: 'putzFertig', planId, datum, an: !!an, by: by || null, at: jetzt() });
+/** Die App-ID bei Microsoft für To Do (leer: keine). */
+export const opTodoApp = (app) => ({ typ: 'todoApp', app: String(app || '').trim() });
+/** Mit To Do verbinden, trennen oder gleich abgleichen wollen (der Lauf im Daten-Repo macht es); art null: Wunsch vergessen. */
+export const opTodoWunsch = (name, art) => ({ typ: 'todoWunsch', name: String(name || '').trim().toLowerCase(), wie: String(name || '').trim(), art, at: jetzt() });
+/** Wer die Liste teilt – jedes Gerät trägt seinen Namen einmal ein (app.js). */
+export const opPerson = (name) => ({ typ: 'person', name: String(name || '').trim() });
+/** Wer mit To Do verbunden ist – das schreibt nur der Lauf im Daten-Repo (werkzeug/todo.mjs). */
+export const opTodoAn = (name, an) => ({ typ: 'todoAn', name: String(name || '').trim().toLowerCase(), an: !!an, at: jetzt() });
 /** Wunschpreis je Zutat (max in Euro je u: kg, l oder Stk); null löscht ihn. */
 export const opPreisalarm = (k, alarm, by) => ({ typ: 'preisalarm', k, alarm: alarm ? { ...klon(alarm), by: by || null, at: jetzt() } : null });
 /** Amys Tags für ein Rezept setzen (ganz ersetzen; leer nimmt sie weg). */
@@ -515,6 +668,76 @@ function aendere(s, op) {
       if (a) s.preisalarm[op.k] = a;
       const alle = Object.keys(s.preisalarm);
       for (const k of alle.slice(0, Math.max(0, alle.length - MAX_ALARME))) delete s.preisalarm[k];
+      return;
+    }
+    case 'sache': {
+      if (!SACHE_ID.test(String(op.id))) return;
+      const h = hausVon(s);
+      const x = op.sache ? sacheBereinigen(op.sache) : null;
+      delete h.sachen[op.id];
+      if (x) h.sachen[op.id] = x;
+      kappen(h.sachen, MAX_SACHEN);
+      return;
+    }
+    case 'plan': {
+      if (!PLAN_ID.test(String(op.id))) return;
+      const h = hausVon(s);
+      const p = op.plan ? planBereinigen(op.plan) : null;
+      if (!p) { delete h.plaene[op.id]; delete h.stand[op.id]; return; }
+      h.plaene[op.id] = p;
+      // Aufgaben, die es nicht mehr gibt, fallen aus den Haken
+      const st = h.stand[op.id];
+      if (st) putzSetzen(h, op.id, { ...st, haken: st.haken.filter((id) => p.aufgaben.some((a) => a.id === id)) }, p, op.plan.at || jetzt(), op.plan.by || null);
+      kappen(h.plaene, MAX_PLAENE);
+      return;
+    }
+    case 'putzHaken': {
+      const h = hausVon(s);
+      const p = h.plaene[op.planId];
+      if (!p || !TAG.test(String(op.datum)) || !p.aufgaben.some((a) => a.id === op.aufgabe)) return;
+      const st = putzTag(h, op.planId, op.datum);
+      if (!st) return;
+      const haken = new Set(st.haken);
+      if (op.an) haken.add(op.aufgabe); else haken.delete(op.aufgabe);
+      putzSetzen(h, op.planId, { ...st, haken: p.aufgaben.map((a) => a.id).filter((id) => haken.has(id)) }, p, op.at, op.by);
+      return;
+    }
+    case 'putzFertig': {
+      const h = hausVon(s);
+      const p = h.plaene[op.planId];
+      if (!p || !TAG.test(String(op.datum))) return;
+      const st = putzTag(h, op.planId, op.datum);
+      if (!st) return;
+      if (op.an) {
+        h.stand[op.planId] = { ...st, haken: p.aufgaben.map((a) => a.id), fertig: st.fertig || { at: op.at, by: op.by }, verlauf: [...st.verlauf.filter((v) => v[0] !== op.datum), [op.datum, op.by || '']].slice(-6) };
+      } else {
+        h.stand[op.planId] = { ...st, haken: [], fertig: null, verlauf: st.verlauf.filter((v) => v[0] !== op.datum) };
+      }
+      return;
+    }
+    case 'todoApp': {
+      const h = hausVon(s);
+      h.todoApp = TODO_APP_ID.test(String(op.app)) ? op.app : '';
+      return;
+    }
+    case 'todoWunsch': {
+      const h = hausVon(s);
+      if (!PERSON.test(String(op.name))) return;
+      if (TODO_WUENSCHE.includes(op.art)) h.todoWunsch[op.name] = { art: op.art, at: op.at, name: PERSON.test(String(op.wie || '')) ? op.wie : op.name };
+      else delete h.todoWunsch[op.name];
+      return;
+    }
+    case 'person': {
+      if (!PERSON.test(String(op.name))) return;
+      if (!istObj(s.leute)) s.leute = {};
+      const k = op.name.toLowerCase();
+      if (!s.leute[k] && Object.keys(s.leute).length < 8) s.leute[k] = op.name;
+      return;
+    }
+    case 'todoAn': {
+      const h = hausVon(s);
+      if (!PERSON.test(String(op.name))) return;
+      if (op.an) h.todoAn[op.name] = op.at; else delete h.todoAn[op.name];
       return;
     }
     case 'setzen':
@@ -610,6 +833,22 @@ function aendere(s, op) {
       if (istObj(op.preisalarm)) {
         if (!istObj(s.preisalarm)) s.preisalarm = {};
         for (const [k, a] of Object.entries(op.preisalarm)) { const b = SCHLUESSEL.test(k) && !s.preisalarm[k] ? alarmBereinigen(a) : null; if (b) s.preisalarm[k] = b; }
+      }
+      if (istObj(op.leute)) {
+        if (!istObj(s.leute)) s.leute = {};
+        for (const [k, n] of Object.entries(op.leute)) if (PERSON.test(String(n)) && k === String(n).toLowerCase() && !s.leute[k] && Object.keys(s.leute).length < 8) s.leute[k] = n;
+      }
+      if (istObj(op.haushalt) && hatHaushalt(op.haushalt)) {
+        // Was es hier schon gibt, bleibt; Neues aus dem eigenen Stand kommt dazu
+        const h = hausVon(s);
+        const neu = haushaltBereinigen(op.haushalt);
+        for (const [id, x] of Object.entries(neu.sachen)) if (!h.sachen[id] && Object.keys(h.sachen).length < MAX_SACHEN) h.sachen[id] = x;
+        for (const [id, p] of Object.entries(neu.plaene)) {
+          if (h.plaene[id] || Object.keys(h.plaene).length >= MAX_PLAENE) continue;
+          h.plaene[id] = p;
+          if (neu.stand[id]) h.stand[id] = neu.stand[id];
+        }
+        if (!h.todoApp && neu.todoApp) h.todoApp = neu.todoApp;
       }
       return;
     case 'kiBehalten': {

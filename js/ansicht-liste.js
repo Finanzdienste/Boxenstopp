@@ -709,6 +709,44 @@ export function aenderungListe(ziel) {
   return true;
 }
 
+const gleichName = (a) => String(a || '').toLowerCase().replace(/\s+/g, ' ').trim();
+/** Die offene Zeile mit diesem Namen auf der Liste (oder dorthin zusammengelegt) – oder null. */
+export function aufListe(name, stand = app.stand) {
+  const nk = nameSchluessel(name);
+  const ziel = stand.gleich?.[nk] ? aufloesen(stand, nk) : null;
+  if (ziel && stand.items[ziel] && !erledigt(stand.items[ziel])) return ziel;
+  const n = gleichName(name);
+  for (const [k, d] of Object.entries(stand.items)) if (!erledigt(d) && gleichName(d.name) === n) return k;
+  return null;
+}
+
+/**
+ * Einen eigenen Eintrag auf die Liste setzen – vom Feld unter der Liste und
+ * aus dem Haushalt. { art: 'neu' | 'schon', k, name, umbenannt }; 'schon':
+ * steht offen drauf (auch unter dem Namen, mit dem er zusammengelegt ist).
+ * cat: die Abteilung, wenn die App sie nicht kennt (Haushalt).
+ */
+export function aufDieListe(name, { cat: sonst = '' } = {}) {
+  const nk = nameSchluessel(name);
+  const geraten = abteilung(name, app.katalog);
+  const cat = app.stand.abteilungen?.[nk] || (sonst && geraten === 'sonstiges' ? sonst : geraten);
+  // Schon einmal zusammengelegt („Nuggets“ ist „Dino Nuggets“)? Dann gehört der Eintrag in diese Zeile
+  const ziel = app.stand.gleich?.[nk] ? aufloesen(app.stand, nk) : null;
+  const da = ziel ? app.stand.items[ziel] : null;
+  if (da && !erledigt(da)) return { art: 'schon', k: ziel, name: da.name };
+  const offen = aufListe(name);
+  if (offen) return { art: 'schon', k: offen, name: app.stand.items[offen].name };
+  if (ziel && !da) {
+    const t = new Date().toISOString();
+    const kat = app.katalog[ziel];
+    app.aendern(opSetzen(ziel, { name: kat?.n || name, cat: app.stand.abteilungen?.[ziel] || kat?.c || cat, parts: {}, custom: true, checked: false, by: null, at: t, added: t }));
+    return { art: 'neu', k: ziel, name: kat?.n || name, umbenannt: kat && kat.n !== name ? kat.n : '' };
+  }
+  const id = `c-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+  app.aendern(opEigener(id, name, cat));
+  return { art: 'neu', k: id, name, umbenannt: '' };
+}
+
 export function absendenListe(ev) {
   if (ev.target.matches?.('form[data-bon]')) { ev.preventDefault(); bonMerken(ev.target); return true; }
   if (ev.target.matches?.('form[data-alarm]')) { ev.preventDefault(); alarmMerken(ev.target); return true; }
@@ -719,21 +757,9 @@ export function absendenListe(ev) {
     if (!name) return true;
     feld.value = '';
     feld.focus();
-    const nk = nameSchluessel(name);
-    const cat = app.stand.abteilungen?.[nk] || abteilung(name, app.katalog);
-    // Schon einmal zusammengelegt („Nuggets“ ist „Dino Nuggets“)? Dann gehört der Eintrag in diese Zeile
-    const ziel = app.stand.gleich?.[nk] ? aufloesen(app.stand, nk) : null;
-    const da = ziel ? app.stand.items[ziel] : null;
-    if (da && !erledigt(da)) { melde(`Steht schon drauf: „${da.name}“`); return true; }
-    if (ziel && !da) {
-      const t = new Date().toISOString();
-      const kat = app.katalog[ziel];
-      app.aendern(opSetzen(ziel, { name: kat?.n || name, cat: app.stand.abteilungen?.[ziel] || kat?.c || cat, parts: {}, custom: true, checked: false, by: null, at: t, added: t }));
-      if (kat && kat.n !== name) melde(`„${name}“ steht als „${kat.n}“ drauf – wie beim letzten Mal`);
-      return true;
-    }
-    const id = `c-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
-    app.aendern(opEigener(id, name, cat));
+    const r = aufDieListe(name);
+    if (r.art === 'schon') melde(`Steht schon drauf: „${r.name}“`);
+    else if (r.umbenannt) melde(`„${name}“ steht als „${r.umbenannt}“ drauf – wie beim letzten Mal`);
     return true;
   }
   if (ev.target.id === 'z-form') {

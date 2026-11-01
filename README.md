@@ -7,7 +7,7 @@ fürs Handy, für Tobi und seine Freundin.
 (in Chrome öffnen, dann Menü ⋮ → „App installieren“; auf dem iPhone in
 Safari: Teilen → „Zum Home-Bildschirm“).
 
-Fünf Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes Gerät in den Einstellungen):
+Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes Gerät in den Einstellungen):
 
 | Reiter | Inhalt |
 | --- | --- |
@@ -15,11 +15,12 @@ Fünf Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 | **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
-| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), Push-Nachrichten, KI-Schlüssel, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
+| **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt; auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
-Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat oder ein
-Preisalarm zuschlägt (siehe unten).
+Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat, ein
+Preisalarm zuschlägt oder im Putzplan etwas dran ist (siehe unten).
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
 15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein Schwein,
@@ -445,9 +446,111 @@ vollständig ist. Rezeptfotos landen beim ersten Ansehen in einem eigenen
 Vorrat, der Updates der App übersteht; ein neues Foto hat eine neue
 Adresse, das alte fliegt raus.
 
+### Haushalt
+
+> „Lass uns unten noch nen tab "Haushalt" einbauen wo sie sagen kann was sie
+> so für haushaltssachen brauch und auf die Einkaufsliste packen kann, dann je
+> Raum oder je putztag oder so ne abhakbare Auflistung was man alles machen
+> muss und regelmäßige Wiederholung der putztage mit Push Nachricht zb "heute
+> ist Küche dran" und Verbindung mit ihrem Microsoft to do"
+
+Der Reiter `js/ansicht-haushalt.js`, die Rechnung ohne DOM in `js/haushalt.js`
+(welcher Tag dran ist – dieselbe für die App, die Push-Nachricht und To Do).
+
+**Putzplan.** Ein Putztag hat einen Namen, einen Raum (mit Bildchen und
+Aufgaben zum Anfangen: Küche, Bad, Wohnzimmer, Schlafzimmer, Flur,
+Arbeitszimmer, Wäsche, Balkon, ganze Wohnung, Sonstiges), seine Aufgaben,
+die Wochentage, wie oft (jede Woche, alle 2, 3 oder 4 Wochen – ab dem ersten
+Mal), wer ihn macht (ihr beide oder einer; die Namen kommen aus `leute` in
+liste.json, jedes Gerät trägt sich einmal ein) und wann die Erinnerung
+kommt (morgens gegen 7:30, mittags gegen 12, abends gegen 17:30 oder
+keine). Ohne Wochentag steht er unter „Zwischendurch“ – eine Liste zum
+Abhaken, wann es passt; erledigt bleibt sie, bis jemand neu anfängt.
+
+| oben | was |
+| --- | --- |
+| **Heute** | was heute dran ist, aufgeklappt zum Abhaken, mit Fortschritt; „Alles erledigt“ (mit Rückgängig); erledigt mit Haken und von wem |
+| **Noch offen** | dran gewesen, nicht fertig („seit Do offen“) – bis der nächste Tag kommt, dann fängt er frisch an |
+| **Demnächst** | wann als Nächstes („morgen“, „Mi“, „So 8.11.“); aufgeklappt geht abhaken schon vorher – das gilt dann für den nächsten Tag |
+| **Zwischendurch** | ohne festen Tag |
+
+Der Titel sagt, was los ist: „Heute ist Küche dran“, „Heute sind Küche und
+Bad dran“, „Für heute ist alles geputzt“, „Heute ist nichts dran“ mit „Als
+Nächstes: Bad am Sa“. Unten am Reiter die Zahl der Putztage, die bei dir
+heute dran oder offen sind. Das letzte Häkchen bringt ein Tier mit eigenen
+Sprüchen („Blitzblank. Du bist ein Profi.“, `PUTZ_SPRUECHE` in
+`js/lob.js`), je Putztag und Tag einmal. Leer gibt es zum Anfangen die
+Räume und **einen Vorschlag** (Küche Mo und Do, Wohnzimmer Mi, Bad Sa,
+Schlafzimmer alle 2 Wochen So, ganze Wohnung alle 4 Wochen Sa – ab morgen,
+alles änderbar).
+
+Abhaken gilt für den Tag, der gerade dran ist (`stand` je Putztag in
+liste.json: `datum`, `haken`, `fertig`, `verlauf` der letzten sechs
+erledigten Tage). Ein neuer Tag fängt frisch an, ein älterer ändert nichts
+mehr; fallen Aufgaben im Editor weg, fallen ihre Haken mit.
+
+**Haushaltssachen.** Nach Bereichen (Küche, Bad & Pflege, Putzen, Wäsche,
+Sonstiges) eure eigenen und Vorschläge (gestrichelt). Antippen setzt es auf
+die Einkaufsliste (Abteilung Haushalt, wenn die App sie nicht besser kennt),
+nochmal antippen nimmt es wieder runter – ein Vorschlag wird dabei zu einer
+eigenen Sache. Oben ein Feld für Neues („Kackbürste“ landet unter Putzen),
+„Eigene bearbeiten“ vergisst einzelne. Steht etwas schon offen auf der
+Liste, kommt es nicht doppelt – das gilt jetzt auch für das Feld unter der
+Einkaufsliste („Steht schon drauf“).
+
+**Erinnerung „Heute ist Küche dran“** – eine Push-Nachricht (Art
+„Putzplan“) an den, der eingetragen ist, sonst an beide, mit dem, was noch
+offen ist; antippen öffnet den Reiter. Sie kommt aus `haushalt.yml` im
+Daten-Repo (`werkzeug/push.mjs --haushalt`): je Tageszeit zwei Läufe (einer
+für Sommer-, einer für Winterzeit), es schickt der erste, der in die
+Berliner Stunden fällt (morgens 7–11, mittags 12–16, abends 17–22); was
+gemeldet ist, steht in `push.json` (`putz|<id>|<tag>`). Schon vorher
+erledigt: keine Erinnerung. Ältere Abos (vor dem Putzplan gewählt)
+bekommen sie mit (`kennt` in push.json: die Arten, die es beim Wählen gab).
+
+**Microsoft To Do** (`werkzeug/todo.mjs`, `js/ansicht-todo.js`). Je Person,
+die das will, eine Liste „Haushalt“ in ihrem To Do: Ist ein Putztag bei
+ihr dran (heute oder noch offen), steht er dort als Aufgabe, fällig an
+seinem Tag (Mitternacht UTC – To Do zeigt den Tag ohne Umrechnung), seine
+Aufgaben als Schritte. Abhaken geht in beide Richtungen, auch die ganze
+Aufgabe; was beide zugleich ändern, kommt beides an.
+
+| Fall | in To Do |
+| --- | --- |
+| Putztag dran | eine Aufgabe mit Schritten – „Zwischendurch“ und „demnächst“ nicht |
+| in der App abgehakt | der Schritt hakt sich ab, erledigt: die Aufgabe |
+| in To Do abgehakt | kommt in die App, mit Namen; erledigt: der Putztag ist erledigt (auch beim anderen und in seinem To Do) |
+| nächster Tag, erledigt | eine neue Aufgabe; die erledigte bleibt |
+| nächster Tag, nicht fertig | dieselbe Aufgabe rückt weiter und fängt frisch an |
+| in To Do gelöscht | bleibt an diesem Tag weg, am nächsten kommt sie wieder |
+| Liste gelöscht | wird neu angelegt, mit dem, was gerade dran ist |
+| Putztag geändert, gelöscht, jetzt beim anderen | Titel und Schritte ziehen nach; offen weg |
+| Microsoft bremst oder ist weg | nichts kaputt, der nächste Lauf holt es nach |
+| Anmeldung gilt nicht mehr | „abgelaufen“ – kein Aufruf mehr, bis neu verbunden |
+| Trennen | offene Aufgaben weg, erledigte und die Liste bleiben |
+
+Abgeglichen wird in `haushalt.yml` (sechsmal am Tag, mit den Erinnerungen)
+und gleich, wenn die App „· To Do“ an die Commit-Nachricht hängt
+(`todoNoetig` in `js/liste.js`: jemand will verbinden, trennen oder
+abgleichen, oder am Putzplan hat sich etwas getan und jemand ist
+verbunden). Wie bei der Workout-App: Anmeldung mit Gerätecode, nur
+persönliche Konten (`consumers`), eine eigene App-Registrierung bei
+Microsoft mit öffentlichen Clientflows und `Tasks.ReadWrite` – ihre App-ID
+trägt einer von euch einmal in den Einstellungen ein (`haushalt.todoApp`,
+kein Geheimnis). „Verbinden“ schreibt den Wunsch in liste.json; der Lauf holt
+einen Code, legt ihn mit der Adresse in `todo.json` (die App zeigt ihn, mit
+„Kopieren“ und „Code bei Microsoft eingeben“) und wartet, bis die Anmeldung
+durch ist (höchstens 15 Minuten). Der Erneuerungs-Token – Microsoft gibt
+bei jedem Gebrauch einen neuen aus – steht nur verschlüsselt in `todo.json`
+(AES-256-GCM, Schlüssel per HKDF aus dem Secret `VAPID_PRIVATE_KEY`, das nur
+Actions kennt); den Gerätecode und die Zugänge sieht nie jemand, auch nicht
+das Protokoll. Was aus To Do kommt, legt der Lauf wie die App auf
+liste.json (`rev` + 1), `todoAn` sagt der App, wer verbunden ist. Ohne
+Wunsch und ohne Verbundene ruft er Microsoft gar nicht erst.
+
 ### Einstellungen
 
-Der fünfte Reiter, ganz rechts (breit: das Regler-Symbol oben; der Punkt
+Der sechste Reiter, ganz rechts (breit: das Regler-Symbol oben; der Punkt
 „Geteilt“ / „Nur lokal“ oben führt auch hin) – alles, was man einmal
 einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
 
@@ -460,18 +563,23 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   Verbinden geht es zur Liste.
 - **Push-Nachrichten:** siehe unten; GitHub wird erst gefragt, wenn man die
   Einstellungen öffnet.
+- **Microsoft To Do:** einmal die App-ID von Microsoft (mit Anleitung), dann
+  je Person „Mit Microsoft To Do verbinden“ → Code → „Verbunden“, „Jetzt
+  abgleichen“, „Trennen“ (siehe Haushalt). Solange ein Code kommt oder
+  angezeigt wird, sieht die App alle paar Sekunden in `todo.json` nach.
 - **KI-Schlüssel:** welcher eingetragen ist (Google oder Anthropic, Modell),
   ändern, entfernen (mit Rückgängig).
 - **Darstellung:** wie das Gerät, hell oder dunkel – je Gerät
   (`boxenstopp.design.v1`, ein kleines Skript im Kopf von `index.html` setzt
   `html[data-design]` schon vor dem ersten Bild, damit nichts flackert; jeder
   dunkle Farbsatz in `css/styles.css` gilt für „wie das Gerät“ und „dunkel“).
-- **Reiter unten:** Rezepte, Amys Rezepte, Einkaufsliste und Angebote lassen
-  sich ausblenden (einer bleibt) und mit ↑ ↓ umsortieren – oben in der
+- **Reiter unten:** Rezepte, Amys Rezepte, Einkaufsliste, Angebote und
+  Haushalt lassen sich ausblenden (einer bleibt) und mit ↑ ↓ umsortieren – oben in der
   Liste heißt links in der Leiste; die Einstellungen sind immer da, ganz
   rechts. Je Gerät (`boxenstopp.reiter.v1`: `aus`, `reihe`; ein Skript
-  gleich hinter der Leiste in `index.html` ordnet sie vor dem ersten Bild). Ist „Amys Rezepte“ aus, steht ihre Karte auch
-  auf dem Handy bei den Rezepten. Passen die Beschriftungen nicht
+  gleich hinter der Leiste in `index.html` ordnet sie vor dem ersten Bild; ein neuer Reiter kommt hinten
+  dazu). Ist „Amys Rezepte“ oder „Haushalt“ aus, steht die Karte auch
+  auf dem Handy bei den Rezepten (breit stehen sie immer da). Passen die Beschriftungen nicht
   nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
   die Läden (je Laden „Vergessen“), die Preisalarme und eure Preise vom Bon
@@ -628,8 +736,8 @@ App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert 
 Bescheid aufs Handy oder iPad, auch wenn die App zu ist: „Amy hat 6 Sachen
 auf die Liste gesetzt: …“, „Tobi hat alles eingekauft ✓“, „Neues Rezept von
 Amy: Kokos-Curry ♡“, eine neue Notiz zu einem Rezept, „Preisalarm:
-Hähnchenbrustfilet 8,65 €/kg bei Aldi“ – nie an den, der es war. Antippen
-öffnet den passenden Reiter.
+Hähnchenbrustfilet 8,65 €/kg bei Aldi“, „Heute ist Küche dran“ – nie an den,
+der es war. Antippen öffnet den passenden Reiter.
 
 Verschickt werden sie nicht vom Handy, sondern von GitHub Actions im
 privaten Daten-Repo (`werkzeug/push.mjs` aus diesem Repo, Web Push mit
@@ -645,6 +753,8 @@ VAPID über das npm-Paket `web-push`):
 - **Preisalarm:** nach jedem privaten Angebots-Lauf (`angebote.yml` im
   Daten-Repo) mit den öffentlichen und den privaten Angeboten; was gemeldet
   ist, steht in `push.json` und kommt nicht noch einmal.
+- **Putzplan:** `haushalt.yml` im Daten-Repo, zur Tageszeit des Putztags
+  (siehe Haushalt).
 - Wer was bekommt, steht in `push.json` im Daten-Repo: der öffentliche
   Schlüssel und je Person ihre Geräte (Adresse beim Push-Dienst von Google
   oder Apple, Gerät, was ankommen soll). Ein Gerät, das sich abgemeldet hat
@@ -676,7 +786,7 @@ VAPID über das npm-Paket `web-push`):
    erlaubt (Android: Symbol lange drücken → App-Info → Benachrichtigungen;
    im Chrome-Tab über die Website-Einstellungen; iPhone/iPad: Einstellungen →
    Mitteilungen → Boxenstopp), und merkt es, sobald man zurückkommt.
-   Häkchen wählen, was ankommt (Einkaufsliste, Amys Rezepte, Preisalarm);
+   Häkchen wählen, was ankommt (Einkaufsliste, Amys Rezepte, Preisalarm, Putzplan);
    „Probe schicken“ lässt den Lauf eine Probe schicken (ca. eine Minute).
 
 ### `liste.json`
@@ -706,7 +816,14 @@ VAPID über das npm-Paket `web-push`):
  "kochen": { "amy": { "at": "2026-10-29T18:05:00.000Z", "schritte": { "chili": [0, 1, 2] }, "tempo": { "offen": {}, "proben": […], "gesamt": {} }, "timer": [{ "id": "t-…", "rid": "chili", "schritt": 5, "label": "Chili: köcheln", "minuten": 20, "ende": 1793304000000, "…": "…" }] } },
  "fehlt": { "haehnchenbrust": { "laden": "Aldi", "by": "Amy", "at": "…" } },
  "bons": { "haehnchenbrust": [{ "eur": 5.49, "q": 1000, "u": "g", "laden": "Aldi", "by": "Amy", "at": "…" }] },
- "preisalarm": { "haehnchenbrust": { "max": 7.5, "u": "kg", "name": "Hähnchenbrustfilet", "by": "Tobi", "at": "…" } }
+ "preisalarm": { "haehnchenbrust": { "max": 7.5, "u": "kg", "name": "Hähnchenbrustfilet", "by": "Tobi", "at": "…" } },
+ "haushalt": {
+  "sachen": { "hs-mh9x…": { "name": "Spülmittel", "bereich": "kueche", "by": "Amy", "at": "…" } },
+  "plaene": { "pp-mh9x…": { "name": "Küche", "raum": "kueche", "aufgaben": [{ "id": "a-mh9x…", "t": "Arbeitsflächen abwischen" }], "wdh": { "tage": [1, 4], "wochen": 1, "ab": "2026-11-02" }, "wer": "", "erinnern": "morgens", "by": "Tobi", "at": "…" } },
+  "stand": { "pp-mh9x…": { "datum": "2026-11-02", "haken": ["a-mh9x…"], "fertig": null, "verlauf": [["2026-10-29", "Amy"]] } },
+  "todoApp": "<App-ID bei Microsoft>", "todoWunsch": { "amy": { "art": "verbinden", "at": "…", "name": "Amy" } }, "todoAn": { "amy": "…" }
+ },
+ "leute": { "amy": "Amy", "tobi": "Tobi" }
 }
 ```
 
@@ -733,13 +850,18 @@ den Markt: `{ "Aldi": { "n": 3, "at": "…", "k": { "zwiebeln": { "c": "obst", "
 – `p` die Stellen (0 vorn, 1 hinten) der letzten Einkäufe, `n` wie viele es waren. `kochen` ist der
 Kochstand je Person (Name klein, höchstens sechs; die neueste Fassung `at` gewinnt), `fehlt` was in einem
 Laden nicht da war, `bons` die letzten fünf Preise je Zutat (höchstens 200 Zutaten), `preisalarm` die
-Wunschpreise (`u`: kg, l oder Stk). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
+Wunschpreise (`u`: kg, l oder Stk), `haushalt` Haushaltssachen und Putzplan (Wochentage 1 = Mo … 7 = So,
+`wer` leer: beide; siehe Haushalt), `leute` wer die Liste teilt. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
 nicht passt; schreibt eine ältere App-Fassung die Liste ohne die neueren Teile, legt das Handy, das sie
 kennt, sie wieder dazu (`js/speicher.js`).
 
 Daneben liegen im Daten-Repo `angebote-privat.json` (Rewe und Edeka über
-kaufDA) und `push.json` (Push-Nachrichten: `schluessel`, `abos` je Person,
-`zuletzt`, `gemeldet`, eine bestellte Probe `test`).
+kaufDA), `push.json` (Push-Nachrichten: `schluessel`, `abos` je Person,
+`zuletzt`, `gemeldet`, eine bestellte Probe `test`) und – sobald jemand To
+Do will – `todo.json` (je Person `status`: code, verbunden, abgelaufen,
+fehler, getrennt; der Code zum Anmelden mit Adresse und Frist, der
+verschlüsselte Erneuerungs-Token, die Liste und je Putztag die Aufgabe in To
+Do mit ihren Schritten; schreibt nur `werkzeug/todo.mjs`).
 
 ## Rezepte ändern
 
@@ -801,6 +923,10 @@ die Action „Rezeptfotos“.
 | `js/kochstand.js` | Haken, Tempo und Timer je Person über ihre Geräte (`kochen` in liste.json) |
 | `js/push.js`, `js/ansicht-push.js` | Push-Nachrichten: Schlüsselpaar, An- und Abmelden in push.json, der Bereich in den Einstellungen |
 | `js/ansicht-einstellungen.js` | Reiter Einstellungen: welche Reiter unten stehen, KI-Schlüssel, Gelerntes vergessen, Fassung und Updates |
+| `js/haushalt.js` | Haushalt: Räume, Vorlagen, Vorschläge, welcher Tag dran ist, Wiederholung in Worten – ohne DOM |
+| `js/ansicht-haushalt.js` | Reiter Haushalt: Putzplan (Heute, Offen, Demnächst, Zwischendurch, Editor) und Haushaltssachen |
+| `js/ansicht-todo.js` | Einstellungen → Microsoft To Do: App-ID, verbinden, Code, trennen |
+| `werkzeug/todo.mjs` | Microsoft To Do abgleichen (läuft im Daten-Repo: `haushalt.yml`) |
 | `js/preisverlauf.js` | Preisverlauf je Zutat und Woche, „Tiefstpreis seit …“ – ohne DOM |
 | `js/gleich.js` | dasselbe Produkt unter zwei Namen: Namen vergleichen, Vorschläge, wohin zusammenlegen – ohne DOM |
 | `js/tempo.js` | euer Tempo: aus den Haken lernen, Zeiten umrechnen – ohne DOM |
@@ -818,7 +944,7 @@ die Action „Rezeptfotos“.
 | `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny, Lidl per Gemini) → daten/angebote.json |
 | `.github/workflows/angebote.yml` | Montag, Donnerstag und Sonntag: Angebote holen, Preisverlauf rechnen, einchecken |
 | `werkzeug/preisverlauf.mjs` | aus der Git-Historie von daten/angebote.json → daten/preisverlauf.json |
-| `werkzeug/push.mjs` | Push-Nachrichten verschicken (läuft im Daten-Repo: `benachrichtigen.yml`, `angebote.yml`) |
+| `werkzeug/push.mjs` | Push-Nachrichten verschicken (läuft im Daten-Repo: `benachrichtigen.yml`, `angebote.yml`, `haushalt.yml`) |
 | `werkzeug/preise.py` | Richtpreise je Katalogschlüssel (Packung, Menge, Einheit) |
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
@@ -868,5 +994,16 @@ Service Worker durch. `test-import.mjs` prüft den
 Rezept-Import mit einer nachgebauten Gemini-API. `test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
 ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,
-Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Fassung). Der Workflow „Prüfung“ lässt
+Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Fassung).
+`test-haushalt.mjs` rechnet den Putzplan in Node (Wochentage, jede 2. Woche,
+ohne festen Tag, abhaken, neuer Tag, bereinigen, „· To Do“), lässt die
+Erinnerung trocken laufen (wann, an wen, nichts doppelt, schon erledigt)
+und spielt den Reiter im Browser durch (Vorschlag, Editor, Lob, Rückgängig,
+Haushaltssachen auf die Liste, ausgeblendet, breit, zu zweit mit „Wer“).
+`test-todo.mjs` lässt `werkzeug/todo.mjs` gegen eine Attrappe von Microsoft
+laufen (`tests/microsoft-attrappe.mjs`: Gerätecode, Erneuerungs-Token, die
+nur einmal gelten, To Do je Konto) – verbinden, hin und her, erledigt,
+nächster Tag, verpasst, gelöscht, Liste weg, geändert, 429, abgelaufen,
+zwei Personen, trennen, ohne Secret; kein Token im Protokoll – und die
+Karte in den Einstellungen. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

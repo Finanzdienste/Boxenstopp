@@ -11,7 +11,7 @@
  */
 import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, API } from './speicher.js';
-import { opZusammen } from './liste.js';
+import { opZusammen, opPerson } from './liste.js';
 import { preiseMitBons } from './kosten.js';
 import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
@@ -27,6 +27,8 @@ import { kochstandAbgleichen, kochstandStart } from './kochstand.js';
 import { klickPush, aenderungPush, pushAnmelden, pushZeichnen, pushHinweisPruefen } from './ansicht-push.js';
 import { einstellungenStart, einstellungenZeichnen, klickEinstellungen, aenderungEinstellungen, absendenEinstellungen, tabbarAnpassen } from './ansicht-einstellungen.js';
 import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus, tasteKochmodus, wischStart, wischEnde } from './kochmodus.js';
+import { haushaltStart, haushaltZeichnen, haushaltGezeigt, klickHaushalt, aenderungHaushalt, absendenHaushalt, tasteHaushalt } from './ansicht-haushalt.js';
+import { todoHolen, klickTodo, absendenTodo } from './ansicht-todo.js';
 
 const apiBasis = () => lese('__api', null) || API;
 /** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
@@ -39,6 +41,9 @@ const takt = () => Number(lese('__takt', 0)) || 8000;
 function beiAenderung(stand) {
   app.stand = stand;
   app.listeDa = true;
+  // Wer die Liste teilt, steht einmal drin – damit man im Putzplan „Wer“ wählen kann
+  const ich = app.zugang?.name?.trim();
+  if (ich && !stand.leute?.[ich.toLowerCase()]) setTimeout(() => { if (app.zugang?.name?.trim() === ich && !app.stand.leute?.[ich.toLowerCase()]) app.aendern(opPerson(ich)); }, 0);
   // Was ihr wirklich bezahlt habt (Bons auf der Liste), gilt vor dem Richtpreis
   app.preise = preiseMitBons(app.richtpreise, stand.bons, app.naehrwerte);
   // Hat dieselbe Person auf einem anderen Gerät weitergekocht? Dann gilt hier ihr Stand (kochstand.js)
@@ -55,6 +60,8 @@ function beiAenderung(stand) {
   if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
   if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
   if (kochNeu) { kochstandZeichnen(); kochmodusNeu(); }
+  // Putzplan und Haushaltssachen (zeichnet nur, wenn der Reiter offen ist – sonst beim Hinwechseln)
+  haushaltZeichnen();
   // Preisalarme, Bons, Wege: was dort steht, kann sich geändert haben
   if (ansicht.tab === 'einstellungen') einstellungenZeichnen();
 }
@@ -77,7 +84,8 @@ app.listeNeu = () => listeZeichnen();
 app.tempoNeu = () => { amyZeichnen(); einstellungenZeichnen(); };
 // In die Einstellungen: dort frisch zeichnen und Push nachsehen; die Leiste unten passt ihre Beschriftungen an
 reiterBeobachten((t) => {
-  if (t === 'einstellungen') { einstellungenZeichnen(); pushZeichnen(); }
+  if (t === 'einstellungen') { einstellungenZeichnen(); pushZeichnen(); todoHolen(); }
+  if (t === 'haushalt') haushaltGezeigt();
   tabbarAnpassen();
 });
 
@@ -130,7 +138,9 @@ document.addEventListener('click', (ev) => {
   if (klickTimer(el)) return;
   if (klickTablet(el)) return;
   if (klickPush(el)) return;
+  if (klickTodo(el)) return;
   if (klickEinstellungen(el)) return;
+  if (klickHaushalt(el)) return;
   if (klickAmy(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
@@ -152,9 +162,11 @@ document.addEventListener('keydown', (ev) => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target?.matches?.('[data-timer-zu]')) { ev.preventDefault(); zumTimerSchritt(ev.target); }
   // Enter im Tag-Feld legt den Tag an, statt das Rezept zu speichern
   if (ev.key === 'Enter' && !ev.isComposing && tasteAmy(ev.target)) ev.preventDefault();
+  // Enter in einer Aufgabe des Putzplans: die nächste Zeile, nicht speichern
+  if (ev.key === 'Enter' && !ev.isComposing && tasteHaushalt(ev.target)) ev.preventDefault();
 });
 document.addEventListener('input', (ev) => { if (!eingabeAmy(ev.target) && !eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungPush(ev.target) && !aenderungEinstellungen(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungPush(ev.target) && !aenderungEinstellungen(ev.target) && !aenderungHaushalt(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
 // Im Kochmodus: wischen zum Blättern
 document.addEventListener('touchstart', wischStart, { passive: true });
 document.addEventListener('touchend', wischEnde, { passive: true });
@@ -162,7 +174,7 @@ document.addEventListener('touchend', wischEnde, { passive: true });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wegPruefen(); });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
 document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
-document.addEventListener('submit', (ev) => { if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenEinstellungen(ev) && !absendenRezepte(ev)) absendenListe(ev); });
+document.addEventListener('submit', (ev) => { if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenEinstellungen(ev) && !absendenTodo(ev) && !absendenHaushalt(ev) && !absendenRezepte(ev)) absendenListe(ev); });
 
 /* ----------------------------------------------------------------- Start */
 
@@ -215,6 +227,7 @@ async function start() {
   listeZeichnen();
   angeboteZeichnen();
   amyStart();
+  haushaltStart();
   // Die Angebote der Woche kommen nebenbei – ohne Netz bleibt der letzte Stand aus dem Speicher.
   fetch('daten/angebote.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((a) => { if (a) angeboteAutoSetzen(a); }).catch(() => {});
   // Wie günstig es in den letzten Wochen war (werkzeug/preisverlauf.mjs)
@@ -229,6 +242,7 @@ async function start() {
   if (hash === 'angebote') ansicht.tab = 'angebote';
   if (hash === 'amy') ansicht.tab = 'amy';
   if (hash === 'einstellungen') ansicht.tab = 'einstellungen';
+  if (hash === 'haushalt') ansicht.tab = 'haushalt';
   zeigeReiter(ansicht.tab, true);
   // Welche Reiter unten stehen – stand der gemerkte auf einem ausgeblendeten, zum ersten sichtbaren
   einstellungenStart({ wechseln: !hash && !ausLink });
@@ -261,7 +275,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     // „chili#5“: ein Timer – zum Schritt; sonst ein Reiter oder ein Rezept
     const [ziel, schritt] = String(ev.data.ziel || '').split('#');
     if (schritt && ziel.startsWith('amy-')) amyZuSchritt(ziel, Number(schritt));
-    else if (schritt && app.nachId[ziel]) { zeigeReiter('rezepte'); zuSchritt(ziel, Number(schritt)); } else if (app.nachId[ziel]) { zeigeReiter('rezepte'); oeffneRezept(ziel); } else zeigeReiter(['einkauf', 'angebote', 'amy'].includes(ziel) ? ziel : 'rezepte');
+    else if (schritt && app.nachId[ziel]) { zeigeReiter('rezepte'); zuSchritt(ziel, Number(schritt)); } else if (app.nachId[ziel]) { zeigeReiter('rezepte'); oeffneRezept(ziel); } else zeigeReiter(['einkauf', 'angebote', 'amy', 'haushalt'].includes(ziel) ? ziel : 'rezepte');
   });
   const eigenerWorker = new URL('./sw.js', location.href).href;
   const hatteWorker = navigator.serviceWorker.controller?.scriptURL === eigenerWorker;

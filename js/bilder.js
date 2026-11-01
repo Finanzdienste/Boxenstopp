@@ -63,6 +63,8 @@ const WORTE = [
   // Haushalt zuerst – „Zahnpasta“ ist keine Pasta
   [/klopapier|toilettenpapier|küchenrolle|taschentücher|backpapier/, 'roll-of-paper'], [/schwamm/, 'sponge'], [/müll/, 'wastebasket'],
   [/zahn/, 'toothbrush'], [/spül|seife|duschgel|shampoo|waschmittel|reiniger/, 'soap'],
+  [/batterie/, 'battery'], [/kerze/, 'candle'], [/glühbirne|leuchtmittel/, 'light-bulb'], [/besen|handfeger|kehrblech/, 'broom'],
+  [/handschuh/, 'gloves'], [/eimer|wischmopp|\bmopp/, 'bucket'], [/\bdeo|bodylotion|handcreme|sonnencreme/, 'lotion-bottle'],
   [/erdnuss|erdnüss/, 'peanuts'], [/banane/, 'banana'], [/äpfel|apfel/, 'red-apple'], [/birne/, 'pear'], [/traube/, 'grapes'], [/erdbeer/, 'strawberry'],
   [/heidelbeer|blaubeer/, 'blueberries'], [/kirsche/, 'cherries'], [/mango/, 'mango'], [/melone/, 'melon'], [/orange|mandarine|clementine/, 'tangerine'],
   [/kiwi/, 'kiwi-fruit'], [/ananas/, 'pineapple'], [/avocado/, 'avocado'], [/zitrone/, 'lemon'], [/limette/, 'lime'], [/pfirsich|nektarine/, 'peach'],
@@ -97,9 +99,11 @@ export function zutatImg(k, { name = '', cat = '', katalog = null, klasse = 'zb'
 /* Für Amys Rezepte: ein Bildchen je Rezept zum Aussuchen, dazu Herzchen und Glitzer zum Schmücken. */
 export const AMY_BILDER = ['shortcake', 'pancakes', 'green-salad', 'steaming-bowl', 'curry-rice', 'spaghetti', 'taco', 'burrito', 'sandwich', 'cooking', 'pot-of-food', 'strawberry', 'peach', 'bubble-tea', 'cookie', 'avocado'];
 export const AMY_DEKO = ['sparkles', 'ribbon', 'pink-heart'];
+/* Für den Haushalt: Räume und Bereiche (js/haushalt.js). */
+export const HAUS_BILDER = ['fork-and-knife-with-plate', 'bathtub', 'couch-and-lamp', 'bed', 'door', 'books', 't-shirt', 'potted-plant', 'house', 'sparkles', 'lotion-bottle', 'bucket', 'light-bulb'];
 
 /** Alle Bildchen, die die App braucht – für werkzeug/zutaten-bilder.mjs und die Tests. */
-export const ALLE_BILDER = [...new Set([...Object.values(ZUTAT_BILD), ...Object.values(KAT_BILD), ...WORTE.map(([, b]) => b), ...AMY_BILDER, ...AMY_DEKO])].sort();
+export const ALLE_BILDER = [...new Set([...Object.values(ZUTAT_BILD), ...Object.values(KAT_BILD), ...WORTE.map(([, b]) => b), ...AMY_BILDER, ...AMY_DEKO, ...HAUS_BILDER])].sort();
 
 /*
  * Bis zu drei Bildchen, die ein Rezept ausmachen – fürs Ersatzbild ohne Foto:

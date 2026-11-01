@@ -27,7 +27,7 @@ const MAX_BYTES = 7 * 1024 * 1024; // Clips bis 7 MB, mehr lohnt sich auf dem Ha
 
 const gemerkt = () => {
   const g = lese(SPEICHER, {}) || {};
-  return { rezepte: g.rezepte || {}, phasen: g.phasen || {}, sprueche: g.sprueche || [], tiere: g.tiere || [], klein: g.klein || [] };
+  return { rezepte: g.rezepte || {}, phasen: g.phasen || {}, sprueche: g.sprueche || [], putz: g.putz || [], tiere: g.tiere || [], klein: g.klein || [] };
 };
 const merken = (g) => schreibe(SPEICHER, g);
 
@@ -92,6 +92,22 @@ export const SPRUECHE = [
   'Großes Kino. Abspann läuft.',
 ];
 
+/** Für einen fertigen Putztag (grund 'geputzt'). */
+export const PUTZ_SPRUECHE = [
+  'Blitzblank. Du bist ein Profi, {name}.',
+  'Glänzt wie neu – und das warst du.',
+  'Sauber gemacht. Jetzt Füße hoch.',
+  'Alles abgehakt. Die Wohnung sagt Danke.',
+  'Picobello, {name}. Das darf so bleiben.',
+  'Staub hat gegen dich keine Chance.',
+  'Ordnung geschafft, Kopf frei.',
+  'Sauberer wird’s heute nicht mehr.',
+  'So riecht Feierabend: frisch geputzt.',
+  'Eine Sorge weniger. Stark, {name}.',
+  'Glanzleistung. Im wahrsten Sinne.',
+  'Erledigt! Der Rest des Tages gehört dir.',
+];
+
 const KLEIN = {
   Vorbereiten: [
     'Mise en place steht – ab jetzt wird’s entspannt.',
@@ -119,12 +135,14 @@ const KLEIN = {
 };
 
 /** Ein Spruch, der zuletzt nicht dran war; {name} wird eingesetzt oder weggelassen. */
-export function spruch(name, g = gemerkt()) {
-  const frei = SPRUECHE.map((_, i) => i).filter((i) => !g.sprueche.includes(i));
-  const pool = frei.length ? frei : SPRUECHE.map((_, i) => i);
+export function spruch(name, g = gemerkt(), { putzen = false } = {}) {
+  const liste = putzen ? PUTZ_SPRUECHE : SPRUECHE;
+  const fach = putzen ? 'putz' : 'sprueche';
+  const frei = liste.map((_, i) => i).filter((i) => !g[fach].includes(i));
+  const pool = frei.length ? frei : liste.map((_, i) => i);
   const i = pool[Math.floor(Math.random() * pool.length)];
-  g.sprueche = [...g.sprueche.filter((x) => x !== i), i].slice(-MERKE_SPRUECHE);
-  return mitName(SPRUECHE[i], name);
+  g[fach] = [...g[fach].filter((x) => x !== i), i].slice(putzen ? -6 : -MERKE_SPRUECHE);
+  return mitName(liste[i], name);
 }
 
 function mitName(text, name) {
@@ -268,7 +286,8 @@ function tierHTML(t) {
 }
 
 /**
- * Der große Moment. grund: 'fertig' (alle Schritte) oder 'gekocht'.
+ * Der große Moment. grund: 'fertig' (alle Schritte), 'gekocht' oder
+ * 'geputzt' (ein Putztag – rezept ist dann { id, short } des Tages).
  * Gibt true zurück, wenn gezeigt wurde.
  */
 export async function lobGross({ rezept, name, grund = 'fertig', erzwingen = false } = {}) {
@@ -276,7 +295,9 @@ export async function lobGross({ rezept, name, grund = 'fertig', erzwingen = fal
   const rid = rezept?.id || '';
   if (!erzwingen && rid && g.rezepte[rid] && Date.now() - g.rezepte[rid] < WIEDER_NACH) return false;
   if (rid) g.rezepte[rid] = Date.now();
-  const text = spruch(name, g);
+  // Nicht endlos merken: Putztage kommen jede Woche mit neuer Kennung
+  for (const [k, t] of Object.entries(g.rezepte)) if (Date.now() - t > 14 * 86400000) delete g.rezepte[k];
+  const text = spruch(name, g, { putzen: grund === 'geputzt' });
   merken(g);
   const wrapper = document.getElementById('lob');
   if (!wrapper) return false;
@@ -295,7 +316,7 @@ function zeigen(wrapper, { t, text, rezept, grund }) {
   g.tiere = [...g.tiere.filter((x) => x !== tier.art), tier.art].slice(-MERKE_TIERE);
   merken(g);
   const satz = TIER_SAETZE[Math.floor(Math.random() * TIER_SAETZE.length)].replace('{artikel}', TIER[tier.art].artikel);
-  const eyebrow = grund === 'gekocht' ? 'Heute gekocht' : 'Alle Schritte abgehakt';
+  const eyebrow = grund === 'gekocht' ? 'Heute gekocht' : grund === 'geputzt' ? 'Alles geputzt' : 'Alle Schritte abgehakt';
   wrapper.innerHTML = `<div class="lob-konfetti" aria-hidden="true">${konfettiHTML()}</div>
 <div class="lob-karte" role="dialog" aria-modal="true" aria-labelledby="lob-titel">
   <div class="lob-tier${tier.offline ? ' lob-offline' : ''}" data-lob-tier="${tier.art}">${tier.html}<span class="tape">${esc(TIER[tier.art].name)}</span></div>
