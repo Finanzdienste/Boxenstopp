@@ -287,6 +287,32 @@ gh.zustand.version += 1;
 gh.zustand.sha = `sha${gh.zustand.version}`;
 check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe' && gh.liste()?.wege?.Aldi?.n === 1 && gh.liste()?.amyTags?.[amyId]?.length === 2, 8000), 'ältere Fassung ließ `amy`, `amyTags` und `wege` weg – Amys Handy schreibt alles zurück');
 
+// So ging am 29.10. Amys Chicken Ceasar Wrap verloren: Tobis Handy hatte die Liste gelesen, als seine App-Fassung
+// Amys Rezepte noch nicht kannte – zwischengespeichert ohne sie, mit derselben Datei-Kennung. Nach dem Update
+// setzte er etwas auf die Liste und schrieb dabei auf dem alten Stand weiter. (Das Format bleibt hier gleich – so
+// wäre es bei neuen Feldern innerhalb von Einträgen, die der Format-Abgleich nicht bemerkt.) Amys Handy ist
+// dabei zu, wie an dem Abend – es soll nicht dazwischenschreiben.
+await amy.ctx.close();
+let zuletztSha = gh.zustand.sha;
+await bis(async () => { await new Promise((ok) => { setTimeout(ok, 1500); }); const ruhig = gh.zustand.sha === zuletztSha; zuletztSha = gh.zustand.sha; return ruhig; }, 20000);
+const tobiKennt = () => t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.liste.github.v1') || 'null')?.sha);
+check(await bis(async () => (await tobiKennt()) === gh.zustand.sha && gh.liste()?.amy?.[amyId], 10000), 'Tobis Handy kennt den neuesten Stand');
+await t.evaluate(() => {
+  const k = 'boxenstopp.liste.github.v1';
+  const g = JSON.parse(localStorage.getItem(k));
+  g.stand.amy = {};
+  g.stand.amyTags = {};
+  localStorage.setItem(k, JSON.stringify(g));
+});
+await t.reload({ waitUntil: 'load' });
+await t.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await t.click('.tab[data-tab="einkauf"]');
+await t.fill('#add-input', 'Kaminholz');
+await t.press('#add-input', 'Enter');
+check(await bis(() => Object.values(gh.liste()?.items || {}).some((d) => d.name === 'Kaminholz'), 8000), 'Tobi setzt nach dem „Update“ etwas auf die Liste');
+check(gh.liste().amy?.[amyId]?.name === 'Kokos-Curry deluxe' && gh.liste().amyTags?.[amyId]?.length === 2, 'Amys Rezept und seine Tags sind noch da – der Start liest die Datei erst frisch, bevor er schreibt');
+check(await t.evaluate((id) => !!JSON.parse(localStorage.getItem('boxenstopp.liste.github.v1'))?.stand?.amy?.[id], amyId), 'und Tobis Handy hat es wieder');
+
 check(tobi.fehler.length === 0 && amy.fehler.length === 0, `keine Fehler in der Konsole${[...tobi.fehler, ...amy.fehler].length ? `: ${[...tobi.fehler, ...amy.fehler].slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();

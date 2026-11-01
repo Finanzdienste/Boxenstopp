@@ -910,7 +910,10 @@ Laden nicht da war, `bons` die letzten fünf Preise je Zutat (höchstens 200 Zut
 Wunschpreise (`u`: kg, l oder Stk), `haushalt` Haushaltssachen und Putzplan (Wochentage 1 = Mo … 7 = So,
 `wer` leer: beide; siehe Haushalt), `leute` wer die Liste teilt. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
 nicht passt; schreibt eine ältere App-Fassung die Liste ohne die neueren Teile, legt das Handy, das sie
-kennt, sie wieder dazu (`js/speicher.js`).
+kennt, sie wieder dazu (`js/speicher.js`). Jeder Start liest die Datei einmal ganz frisch, bevor er
+schreibt: Der zwischengespeicherte Stand kann von einer älteren App-Fassung stammen, die beim Lesen
+weggeräumt hat, was sie nicht kannte – darauf weiterzuschreiben löschte es (so ging am 29.10. Amys
+„Chicken Ceasar Wrap“ verloren; am 1.11. wiederhergestellt).
 
 Daneben liegen im Daten-Repo `angebote-privat.json` (Rewe und Edeka über
 kaufDA), `push.json` (Push-Nachrichten: `schluessel`, `abos` je Person,

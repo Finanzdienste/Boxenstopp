@@ -42,7 +42,9 @@ const GITHUB = 'boxenstopp.liste.github.v1';
 /*
  * Woran man sieht, welche App-Fassung den zwischengespeicherten Stand gelesen
  * hat: das Gerüst eines leeren Stands. Bekommt liste.json neue Teile (wie
- * `haushalt`), ändert es sich von selbst.
+ * `haushalt`), ändert es sich von selbst. Neue Felder innerhalb von Einträgen
+ * sieht man daran nicht – darum liest jede Sitzung die Datei ohnehin einmal
+ * frisch, bevor sie schreibt (frischGelesen in github()).
  */
 const FORMAT = JSON.stringify(leer());
 const OFFEN = 'boxenstopp.offen.v1';
@@ -162,6 +164,15 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
   // für To Do verloren).
   const gleicheFassung = g?.format === FORMAT;
   let remote = { sha: gleicheFassung ? g?.sha || null : null, etag: gleicheFassung ? g?.etag || null : null, stand: bereinigen(g?.stand) };
+  // Bis die Datei in dieser Sitzung einmal ganz gelesen ist, zählt der
+  // zwischengespeicherte Stand nur fürs Anzeigen: Ihn kann eine ältere
+  // App-Fassung gelesen haben, und die hat dabei weggeräumt, was sie nicht
+  // kannte – auch innerhalb von Einträgen. Weil die Datei-Kennung (sha) noch
+  // stimmte, schrieb die neue Fassung darauf weiter und löschte es (so ging am
+  // 29.10. Amys Chicken Ceasar Wrap verloren). Darum: der erste Abruf je Start
+  // ohne „If-None-Match“, sein Stand ersetzt den zwischengespeicherten, und
+  // geschrieben wird erst danach.
+  let frischGelesen = false;
   let offen = (() => { const o = lese(OFFEN, []); return Array.isArray(o) ? o : []; })();
   let imFlug = 0; // so viele Änderungen vorn in `offen` sind gerade unterwegs zu GitHub
 
@@ -199,7 +210,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
           if (!r.ok) { status('offline'); return; }
           repoOk = true;
         }
-        const extra = !frisch && remote.etag ? { 'If-None-Match': remote.etag } : {};
+        const extra = !frisch && frischGelesen && remote.etag ? { 'If-None-Match': remote.etag } : {};
         const r = await fetch(datei, { headers: kopf(extra), cache: 'no-store' });
         if (r.status === 304) {
           zuletzt = new Date();
@@ -209,6 +220,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
         if (r.status === 404) {
           // Die Datei gibt es noch nicht: Der erste Commit legt sie an.
           if (remote.sha) { remote = { sha: null, etag: null, stand: leer() }; merkeRemote(); zeige(); }
+          frischGelesen = true;
           zuletzt = new Date();
           if (!sendet) status(offen.length ? 'sendet' : 'ok');
           return;
@@ -244,7 +256,14 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
             remote = { sha: j.sha, etag, stand };
             merkeRemote();
             zeige();
+            frischGelesen = true;
           }
+        } else if (!frischGelesen) {
+          // Dieselbe Datei wie zwischengespeichert – der Stand dazu kommt jetzt trotzdem frisch aus ihr (s. o.)
+          remote = { sha: j.sha, etag, stand };
+          merkeRemote();
+          zeige();
+          frischGelesen = true;
         } else if (etag && etag !== remote.etag) {
           remote.etag = etag;
           merkeRemote();
@@ -283,6 +302,11 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
     sendet = true;
     status('sendet');
     try {
+      // Geschrieben wird erst, wenn die Datei in dieser Sitzung einmal frisch gelesen ist (s. o.)
+      if (!frischGelesen) {
+        await holen(true);
+        if (!frischGelesen) { if (zustand !== 'zugang') plane(zustand === 'offline' ? 15000 : 5000); return; }
+      }
       for (let versuch = 0; versuch < 6 && offen.length; versuch++) {
         const paket = offen.slice();
         imFlug = paket.length;
