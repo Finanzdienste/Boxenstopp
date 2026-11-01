@@ -39,6 +39,12 @@ export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: '
 
 const LOKAL = 'boxenstopp.liste.lokal.v1';
 const GITHUB = 'boxenstopp.liste.github.v1';
+/*
+ * Woran man sieht, welche App-Fassung den zwischengespeicherten Stand gelesen
+ * hat: das Gerüst eines leeren Stands. Bekommt liste.json neue Teile (wie
+ * `haushalt`), ändert es sich von selbst.
+ */
+const FORMAT = JSON.stringify(leer());
 const OFFEN = 'boxenstopp.offen.v1';
 
 const lese = (k, d) => {
@@ -148,7 +154,14 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
   const kopf = (mehr = {}) => ({ Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...mehr });
 
   const g = lese(GITHUB, null);
-  let remote = { sha: g?.sha || null, etag: g?.etag || null, stand: bereinigen(g?.stand) };
+  // Hat eine ältere Fassung den Stand zwischengespeichert, fehlt darin, was sie
+  // nicht kannte (sie hat es beim Lesen weggeräumt). Dann zählt er nur noch
+  // fürs Anzeigen: ohne sha liest der nächste Abruf die Datei ganz neu – sonst
+  // schriebe diese Fassung auf dem lückenhaften Stand weiter und löschte dabei,
+  // was die ältere nicht kannte (so ging nach dem Update auf v33 die App-ID
+  // für To Do verloren).
+  const gleicheFassung = g?.format === FORMAT;
+  let remote = { sha: gleicheFassung ? g?.sha || null : null, etag: gleicheFassung ? g?.etag || null : null, stand: bereinigen(g?.stand) };
   let offen = (() => { const o = lese(OFFEN, []); return Array.isArray(o) ? o : []; })();
   let imFlug = 0; // so viele Änderungen vorn in `offen` sind gerade unterwegs zu GitHub
 
@@ -169,7 +182,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
   };
   const ansicht = () => anwenden(remote.stand, offen);
   const zeige = () => melden(ansicht());
-  const merkeRemote = () => schreibe(GITHUB, remote);
+  const merkeRemote = () => schreibe(GITHUB, { ...remote, format: FORMAT });
   const merkeOffen = () => schreibe(OFFEN, offen);
   // 403 heißt bei GitHub entweder „darf nicht“ oder „zu viele Anfragen“.
   const begrenzt = (r) => r.status === 429 || (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0');

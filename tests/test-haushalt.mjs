@@ -299,6 +299,29 @@ await amy.page.click('.h-jetzt .h-aufgabe >> nth=0');
 check(await bis(async () => (await t.locator('.h-jetzt .h-aufgabe[aria-checked="true"]').count()) === 1, 8000), 'Amy hakt ab – Tobi sieht es');
 check((await t.locator('.h-todo').innerText()).includes('Microsoft To Do'), 'unten: auch in Microsoft To Do? → Einstellungen');
 check(amy.fehler.length === 0 && tobi.fehler.length === 0, `keine Fehler im Browser (${[...amy.fehler, ...tobi.fehler].join(' | ')})`);
+
+// Nach einem Update: Die alte Fassung hat den Stand zwischengespeichert – ohne das, was sie nicht kannte
+// (so ging die App-ID verloren). Die neue darf darauf nicht weiterschreiben, sondern liest die Datei neu.
+await t.click('.tab[data-tab="einstellungen"]');
+await t.fill('#todo-app-input', 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+await t.click('#todo-app-form button[type="submit"]');
+check(await bis(() => gh.liste()?.haushalt?.todoApp === 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 8000), 'App-ID steht in liste.json');
+await amy.page.waitForTimeout(1500);
+await amy.page.evaluate(() => {
+  const k = 'boxenstopp.liste.github.v1';
+  const g = JSON.parse(localStorage.getItem(k));
+  delete g.format;
+  delete g.stand.haushalt;
+  delete g.stand.leute;
+  localStorage.setItem(k, JSON.stringify(g));
+});
+await amy.page.reload({ waitUntil: 'load' });
+await amy.page.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await amy.page.click('.tab[data-tab="einkauf"]');
+await amy.page.fill('#add-input', 'Batterien');
+await amy.page.press('#add-input', 'Enter');
+check(await bis(() => Object.values(gh.liste()?.items || {}).some((d) => d.name === 'Batterien'), 8000), 'nach dem „Update“ schreibt Amys Handy wieder');
+check(gh.liste().haushalt?.todoApp === 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' && Object.keys(gh.liste().haushalt.plaene).length === 1 && gh.liste().leute?.tobi, 'App-ID, Putzplan und Namen sind noch da – der lückenhafte Zwischenstand wurde nicht weitergeschrieben');
 await amy.ctx.close();
 await tobi.ctx.close();
 await browser.close();
