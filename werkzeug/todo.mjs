@@ -193,7 +193,7 @@ async function anmeldenLauf() {
     const j = a.json || {};
     if (a.code !== 200 || typeof j.user_code !== 'string' || typeof j.device_code !== 'string') {
       const grund = typeof j.error === 'string' ? j.error : String(a.code || 'kein Netz');
-      Object.assign(p, { status: 'fehler', fehler: /client|application/i.test(grund) ? 'Microsoft kennt die App-ID nicht – in den Einstellungen prüfen.' : `Microsoft gab keinen Code (${grund}) – gleich noch einmal verbinden.` });
+      Object.assign(p, { status: 'fehler', fehler: /client|application/i.test(grund) ? 'Microsoft nimmt die App-ID nicht an – stimmt sie (Einstellungen → Microsoft To Do), und ist die App bei Microsoft für persönliche Konten registriert?' : `Microsoft gab keinen Code (${grund}) – gleich noch einmal verbinden.` });
       console.log(`To Do: ${n} – kein Code (${grund}).`);
       continue;
     }
@@ -243,7 +243,9 @@ async function wartenLauf() {
       }
       const satz = fehler === 'authorization_declined' ? 'Die Anmeldung bei Microsoft wurde abgelehnt – noch einmal verbinden, wenn du willst.'
         : fehler === 'expired_token' || fehler === 'code_expired' ? 'Der Code ist abgelaufen, bevor die Anmeldung fertig war – noch einmal verbinden.'
-          : `Microsoft hat die Anmeldung nicht angenommen (${fehler || a.code}) – noch einmal verbinden.`;
+          // Ohne „Öffentliche Clientflows“ will Microsoft ein App-Geheimnis (AADSTS7000218) – das gibt es hier mit Absicht nicht
+          : fehler === 'invalid_client' ? 'Bei Microsoft ist die Anmeldung mit Code noch aus: in der App-Registrierung unter „Authentifizierung“ „Öffentliche Clientflows zulassen“ auf Ja stellen – dann noch einmal verbinden.'
+            : `Microsoft hat die Anmeldung nicht angenommen (${fehler || a.code}) – noch einmal verbinden.`;
       Object.assign(p, { status: 'fehler', fehler: satz, code: null, url: null, bis: null });
       console.log(`To Do: ${n} – Anmeldung nicht durch (${fehler || a.code}).`);
     }

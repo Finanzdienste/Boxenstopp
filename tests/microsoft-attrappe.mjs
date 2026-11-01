@@ -21,6 +21,7 @@ export async function microsoftAttrappe({ app = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeee
     naechste: [], // [{ konto, warten, art: 'ok' | 'abgelehnt' }]
     gesperrt: new Set(),
     bremse: 0,
+    oeffentlich: true, // „Öffentliche Clientflows zulassen“ in der App-Registrierung
     aufrufe: [], // { methode, pfad, konto }
     anmeldungen: [], // { endpunkt, grant, scope, client }
     ausgegeben: [], // alle Tokens und Codes, die rausgingen – damit der Test sie im Protokoll suchen kann
@@ -60,6 +61,7 @@ export async function microsoftAttrappe({ app = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeee
     if (form.grant_type === 'urn:ietf:params:oauth:grant-type:device_code') {
       const g = z.geraete[form.device_code];
       if (!g) return antwort(400, { error: 'expired_token' });
+      if (!z.oeffentlich) return antwort(401, { error: 'invalid_client', error_description: "AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'." });
       if (g.warten > 0) { g.warten--; return antwort(400, { error: 'authorization_pending' }); }
       delete z.geraete[form.device_code];
       if (g.art === 'abgelehnt') return antwort(400, { error: 'authorization_declined' });
