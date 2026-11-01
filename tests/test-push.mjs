@@ -237,12 +237,18 @@ check(await bis(() => !pj()?.abos?.tobi, 8000) && await bis(async () => (await s
 await s.click('#push-bereich [data-act="push-an"]');
 check(await bis(() => pj()?.abos?.tobi?.[0]?.endpoint === 'https://push.example/test-2', 8000) && await bis(async () => (await s.locator('#push-bereich .push-an').count()) === 1), 'wieder eingeschaltet: neues Abo');
 
-// Ein Timer läuft ab: die Mitteilung kommt über den Service Worker (auf Android geht nur das), antippen führt zum Schritt
-await s.evaluate(() => localStorage.setItem('boxenstopp.timer.v1', JSON.stringify([{ id: 't-probe', rid: 'chili', schritt: 5, label: 'Chili: köcheln', minuten: 1, start: Date.now(), ende: Date.now() + 6000, fertig: false, dann: '', folge: [], stufe: 1, stufen: 1 }])));
+// Ein Timer läuft ab: die Mitteilung kommt über den Service Worker (auf Android geht nur das), antippen führt zum Schritt.
+// Der Timer kommt erst beim Laden der Seite in den Speicher (8 s danach fällig) – so hängt die Probe nicht davon ab,
+// wie lange das Neuladen dauert (ist er beim Start schon abgelaufen, klingelt er in der App, die Mitteilung fehlt dann manchmal)
+await s.addInitScript(() => {
+  if (sessionStorage.getItem('probe.timer')) return;
+  sessionStorage.setItem('probe.timer', '1');
+  localStorage.setItem('boxenstopp.timer.v1', JSON.stringify([{ id: 't-probe', rid: 'chili', schritt: 5, label: 'Chili: köcheln', minuten: 1, start: Date.now(), ende: Date.now() + 8000, fertig: false, dann: '', folge: [], stufe: 1, stufen: 1 }]));
+});
 await s.reload({ waitUntil: 'load' });
 await s.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
-// Mit Luft: Ist der Timer schon beim Laden abgelaufen (voller Testlauf, langsames Neuladen), klingelt er nur in der App
-const timerMitteilung = await bis(() => s.evaluate(async () => { const r = await navigator.serviceWorker.ready; const ns = await r.getNotifications({ tag: 't-probe' }); return ns.length ? [ns[0].title, ns[0].body, ns[0].data?.ziel] : null; }), 15000);
+check(await s.evaluate(() => { const t = JSON.parse(localStorage.getItem('boxenstopp.timer.v1') || '[]').find((x) => x.id === 't-probe'); return !!t && !t.fertig; }), 'der Timer läuft nach dem Laden noch');
+const timerMitteilung = await bis(() => s.evaluate(async () => { const r = await navigator.serviceWorker.ready; const ns = await r.getNotifications({ tag: 't-probe' }); return ns.length ? [ns[0].title, ns[0].body, ns[0].data?.ziel] : null; }), 20000);
 check(JSON.stringify(timerMitteilung) === JSON.stringify(['Timer fertig', 'Chili: köcheln', 'chili#5']), `Timer fertig: Mitteilung über den Service Worker (${JSON.stringify(timerMitteilung)})`);
 
 // Ein weiteres Gerät: Push ist eingerichtet, hier noch aus – der Hinweis kommt einmal von selbst
