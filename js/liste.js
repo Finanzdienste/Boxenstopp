@@ -76,7 +76,7 @@ import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 import { umleiten } from './format.js';
-import { RAUM, SACH_BEREICH } from './haushalt.js';
+import { RAUM, SACH_BEREICH, aufgabenAm } from './haushalt.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
 export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {} });
@@ -347,8 +347,16 @@ export function planBereinigen(p) {
     const t = istObj(a) ? sauber(a.t, 120) : '';
     if (!t || !AUFGABE_ID.test(String(a.id)) || ids.has(a.id)) continue;
     ids.add(a.id);
-    aufgaben.push({ id: a.id, t });
+    // „jedes 2./3./4. Mal“ – jedes Mal steht nicht extra drin
+    const jedes = [2, 3, 4].includes(Number(a.jedes)) ? Number(a.jedes) : 0;
+    aufgaben.push(jedes ? { id: a.id, t, jedes } : { id: a.id, t });
     if (aufgaben.length >= MAX_AUFGABEN) break;
+  }
+  const material = [];
+  for (const m of Array.isArray(p.material) ? p.material : []) {
+    const t = sauber(m, 60);
+    if (t && !material.some((x) => x.toLowerCase() === t.toLowerCase())) material.push(t);
+    if (material.length >= 20) break;
   }
   const w = istObj(p.wdh) ? p.wdh : {};
   const tage = [...new Set((Array.isArray(w.tage) ? w.tage : []).filter((t) => Number.isInteger(t) && t >= 1 && t <= 7))].sort((a, b) => a - b);
@@ -357,6 +365,7 @@ export function planBereinigen(p) {
     name,
     raum: RAUM[p.raum] ? p.raum : 'sonstiges',
     aufgaben,
+    material,
     wdh: { tage, wochen: [1, 2, 3, 4].includes(w.wochen) ? w.wochen : 1, ab: TAG.test(String(w.ab)) ? w.ab : '' },
     wer: PERSON.test(wer) ? wer : '',
     erinnern: ['morgens', 'mittags', 'abends', ''].includes(p.erinnern) ? p.erinnern : 'morgens',
@@ -430,12 +439,14 @@ function putzTag(h, planId, datum) {
   return { datum, haken: [], fertig: null, verlauf: st?.verlauf || [] };
 }
 function putzSetzen(h, planId, st, plan, at, by) {
-  const alle = plan.aufgaben.length > 0 && plan.aufgaben.every((a) => st.haken.includes(a.id));
+  // Erledigt, wenn alles abgehakt ist, was an diesem Tag dran ist („jedes 2. Mal“ zählt nur, wenn es dran ist)
+  const dran = aufgabenAm(plan, st.datum);
+  const alle = dran.length > 0 && dran.every((a) => st.haken.includes(a.id));
   if (alle && !st.fertig) {
     st.fertig = { at, by };
     st.verlauf = [...st.verlauf.filter((v) => v[0] !== st.datum), [st.datum, by || '']].slice(-6);
   }
-  if (!alle && st.fertig && plan.aufgaben.length) {
+  if (!alle && st.fertig && dran.length) {
     st.fertig = null;
     st.verlauf = st.verlauf.filter((v) => v[0] !== st.datum);
   }
@@ -543,6 +554,27 @@ export const opZusammen = (items, ki = {}, mehr = {}) => ({
   amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
   fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}),
 });
+/**
+ * Eine ältere App-Fassung kennt Material und „jedes 2. Mal“ der Putztage
+ * nicht und lässt beides beim Schreiben weg (sie schreibt dann gar kein
+ * „material“). Was dieses Handy davon kannte, kommt wieder dazu – als opPlan
+ * je Putztag. roh: die Datei, wie sie kam; stand: bereinigt; bekannt: der
+ * Stand, den dieses Handy zuletzt kannte.
+ */
+export function planNachtrag(roh, stand, bekannt) {
+  const rohPlaene = istObj(roh) && istObj(roh.haushalt) && istObj(roh.haushalt.plaene) ? roh.haushalt.plaene : null;
+  if (!rohPlaene) return [];
+  const ops = [];
+  for (const [id, p] of Object.entries(stand?.haushalt?.plaene || {})) {
+    const r = rohPlaene[id];
+    const k = bekannt?.haushalt?.plaene?.[id];
+    if (!k || !istObj(r) || 'material' in r) continue;
+    const jedes = new Map((k.aufgaben || []).filter((a) => a.jedes > 1).map((a) => [a.id, a.jedes]));
+    if (!(k.material || []).length && !jedes.size) continue;
+    ops.push(opPlan(id, { ...p, material: k.material || [], aufgaben: p.aufgaben.map((a) => (jedes.has(a.id) ? { ...a, jedes: jedes.get(a.id) } : a)) }, p.by));
+  }
+  return ops;
+}
 /** Hat ein Stand etwas im Haushalt (sonst muss beim Zusammenlegen nichts mit)? */
 export const hatHaushalt = (h) => !!h && (Object.keys(h.sachen || {}).length > 0 || Object.keys(h.plaene || {}).length > 0 || !!h.todoApp || Object.keys(h.todoAn || {}).length > 0);
 /**
@@ -727,7 +759,8 @@ function aendere(s, op) {
       const st = putzTag(h, op.planId, op.datum);
       if (!st) return;
       if (op.an) {
-        h.stand[op.planId] = { ...st, haken: p.aufgaben.map((a) => a.id), fertig: st.fertig || { at: op.at, by: op.by }, verlauf: [...st.verlauf.filter((v) => v[0] !== op.datum), [op.datum, op.by || '']].slice(-6) };
+        const dran = new Set([...st.haken, ...aufgabenAm(p, op.datum).map((a) => a.id)]);
+        h.stand[op.planId] = { ...st, haken: p.aufgaben.map((a) => a.id).filter((id) => dran.has(id)), fertig: st.fertig || { at: op.at, by: op.by }, verlauf: [...st.verlauf.filter((v) => v[0] !== op.datum), [op.datum, op.by || '']].slice(-6) };
       } else {
         h.stand[op.planId] = { ...st, haken: [], fertig: null, verlauf: st.verlauf.filter((v) => v[0] !== op.datum) };
       }

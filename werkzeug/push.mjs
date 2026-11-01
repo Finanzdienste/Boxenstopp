@@ -36,7 +36,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { bereinigen, offeneAnzahl, leer } from '../js/liste.js';
 import { preisalarmTreffer, preisJe } from '../js/angebote.js';
-import { faellig, termin, zustaendig } from '../js/haushalt.js';
+import { faellig, termin, zustaendig, aufgabenAm } from '../js/haushalt.js';
 
 const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (name) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : null; };
@@ -218,20 +218,21 @@ function berlin(d) {
 }
 const und = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} und ${xs[xs.length - 1]}`);
 
-/** „Heute ist Küche dran“ – mit den Aufgaben, die noch offen sind. */
+/** „Heute ist Küche dran“ – mit den Aufgaben, die heute dran und noch offen sind („jedes 2. Mal“ nur, wenn es dran ist). */
 function putzNutzlast(liste) {
-  const offen = ({ p, t }) => p.aufgaben.filter((a) => !t.haken.includes(a.id));
+  const dran = ({ p, t }) => aufgabenAm(p, t.datum);
+  const offen = (x) => dran(x).filter((a) => !x.t.haken.includes(a.id));
   if (liste.length === 1) {
     const x = liste[0];
     const rest = offen(x);
-    const n = x.p.aufgaben.length;
+    const n = dran(x).length;
     const anfang = rest.slice(0, 3).map((a) => a.t).join(', ') + (rest.length > 3 ? ' …' : '');
     const text = !n ? 'Zum Abhaken in Boxenstopp.' : rest.length === n ? `${n} ${n === 1 ? 'Aufgabe' : 'Aufgaben'}: ${anfang}` : `Noch ${rest.length} von ${n}: ${anfang}`;
     return { titel: `Heute ist ${x.p.name} dran`, text: text.slice(0, 200), tag: 'putzplan', ziel: 'haushalt' };
   }
   const namen = liste.map((x) => x.p.name);
   const titel = liste.length <= 3 ? `Heute sind ${und(namen)} dran` : `Heute sind ${liste.length} Putztage dran`;
-  const text = liste.map((x) => `${x.p.name}${x.p.aufgaben.length ? ` (${offen(x).length})` : ''}`).join(' · ');
+  const text = liste.map((x) => `${x.p.name}${dran(x).length ? ` (${offen(x).length})` : ''}`).join(' · ');
   return { titel, text: text.slice(0, 200), tag: 'putzplan', ziel: 'haushalt' };
 }
 

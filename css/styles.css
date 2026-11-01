@@ -1194,7 +1194,7 @@ button.amy-tag:hover{border-color:var(--tag-ink)}
 .haus-pane .back .ic{width:20px;height:20px}
 .h-kopf{display:grid;gap:8px}
 .h-naechstes{margin:-2px 0 0;color:var(--muted);font-size:15px}
-.h-plan,.h-editor{scroll-margin-top:calc(env(safe-area-inset-top,0px) + var(--header-h) + 14px);scroll-margin-bottom:calc(var(--tabbar-h) + 20px)}
+.h-plan{scroll-margin-top:calc(env(safe-area-inset-top,0px) + var(--header-h) + 14px);scroll-margin-bottom:calc(var(--tabbar-h) + 20px)}
 .h-teile{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:4px;padding:4px;border-radius:14px;background:var(--surface-2);max-width:460px}
 .h-teil{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 8px;border:0;border-radius:10px;background:none;font-weight:650;font-size:14.5px;color:var(--muted)}
 .h-teil[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
@@ -1203,8 +1203,10 @@ button.amy-tag:hover{border-color:var(--tag-ink)}
 .h-gruppe{display:grid;gap:10px}
 .h-gruppe-t{display:flex;align-items:center;gap:7px;font:600 12px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .h-gruppe-t img{width:18px;height:18px}
-.h-plan{display:grid;gap:10px;padding:12px 14px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
-.h-plan-kopf{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:0;padding:0;border:0;background:none;color:inherit;text-align:left}
+.h-plan{display:grid;gap:10px;width:100%;margin:0;padding:12px 14px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);color:inherit;font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.h-plan:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.h-plan-kopf{display:flex;align-items:center;gap:12px;min-height:44px}
+.h-pfeil{flex:none;width:18px;height:18px;margin-right:-4px;color:var(--muted)}
 .h-raum-bild{flex:none;width:36px;height:36px;object-fit:contain}
 .h-plan-name{flex:1;min-width:0;display:grid;gap:2px}
 .h-plan-name b{font:720 17px/1.2 var(--f-display);letter-spacing:-.01em}
@@ -1219,16 +1221,16 @@ button.amy-tag:hover{border-color:var(--tag-ink)}
 .h-offen{border-color:color-mix(in srgb,var(--kh) 55%,var(--line))}
 .h-offen .h-plan-name small{color:var(--kh)}
 .h-erledigt .h-plan-name b{color:var(--muted)}
-.h-bald:not(.ist-auf),.h-erledigt:not(.ist-auf){box-shadow:none;background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.h-bald,.h-erledigt{box-shadow:none;background:color-mix(in srgb,var(--surface) 70%,transparent)}
 .h-aufgaben{list-style:none;margin:0;padding:0;display:grid}
 .h-aufgabe{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:46px;margin:0;padding:9px 2px;border:0;border-top:1px solid var(--line);background:none;color:inherit;text-align:left;font-size:15.5px;line-height:1.35}
 .h-aufgabe .cb{flex:none;margin-top:-3px}
 .h-aufgabe[aria-checked="true"] .cb{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .h-aufgabe[aria-checked="true"] .h-aufgabe-t{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px}
 .h-aufgabe-t{flex:1;min-width:0;padding-top:2px;overflow-wrap:anywhere}
-.h-plan-fuss{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
-.h-plan-fuss .btn .ic{width:16px;height:16px}
-.h-zuletzt,.h-vorab,.h-ohne{margin:0;font-size:12.5px;color:var(--muted)}
+/* „jedes 2. Mal“ – als inline-block, sonst streicht der Haken es mit durch */
+.h-aufgabe-t small{display:inline-block;width:100%;margin-top:1px;font-size:12.5px;line-height:1.3;color:var(--muted)}
+.h-zuletzt{margin:0;font-size:12.5px;color:var(--muted)}
 .h-leer .h-start{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
 .h-raum-chip{position:relative;display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px 0 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:650;font-size:14px;color:var(--ink);cursor:pointer}
 .h-raum-chip .ic{width:16px;height:16px}
@@ -1244,8 +1246,8 @@ button.amy-tag:hover{border-color:var(--tag-ink)}
 .h-todo .ic,.h-drauf .ic{width:18px;height:18px;flex:none}
 .h-todo .linkbtn,.h-drauf .linkbtn{min-height:32px;font-size:13.5px}
 .h-drauf{padding:10px 12px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:600}
-/* Editor */
-.h-editor{gap:14px}
+/* Editor (im Fenster) */
+.h-editor{display:grid;gap:20px}
 .h-feld{display:grid;gap:8px;margin:0;padding:0;border:0;min-width:0}
 .h-feld legend,.h-feld-t{padding:0;margin-bottom:8px;font:700 13px/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 label.h-feld .h-feld-t{margin-bottom:0}
@@ -1253,9 +1255,24 @@ label.h-feld .h-feld-t{margin-bottom:0}
 .h-input:focus{outline:none;border-color:var(--accent)}
 select.h-input{width:auto;padding-right:28px}
 .h-raeume,.h-wahl{display:flex;flex-wrap:wrap;gap:6px}
-.h-aufg-edit{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.h-aufg-edit li{display:flex;align-items:center;gap:4px}
+.h-aufg-edit{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.h-aufg-edit>li{display:grid;gap:2px;padding:6px 4px 4px 6px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.h-aufg-zeile{display:flex;align-items:center;gap:4px}
 .h-aufg-edit .x{margin-top:0;flex:none;width:40px;height:40px}
+.h-aufg-wie{display:flex;align-items:center;gap:2px}
+.h-jedes{height:38px;margin-right:auto;padding:0 28px 0 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font:600 14px/1 var(--f-body);color:var(--muted)}
+.h-aufg-edit>li:has(.h-jedes option:not([value="1"]):checked) .h-jedes{border-color:color-mix(in srgb,var(--accent) 60%,var(--line));color:var(--accent)}
+.h-aufg-edit>li:first-child [data-act="h-aufg-hoch"],.h-aufg-edit>li:last-child [data-act="h-aufg-runter"]{opacity:.28;pointer-events:none}
+.h-mat-edit{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.h-mat-edit:empty{display:none}
+.h-mat{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 2px 0 9px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:650;font-size:14px}
+.h-mat .h-sache-bild{width:20px;height:20px}
+.h-mat-x{display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:none;color:var(--muted)}
+.h-mat-x .ic{width:15px;height:15px}
+.h-mat-x:hover{background:var(--surface-2);color:var(--danger)}
+.h-mat-neu{display:flex;gap:6px}
+.h-mat-neu .btn{flex:none;min-height:46px}
+.h-mat-neu .btn .ic,.h-aufg-mehr .btn .ic{width:15px;height:15px}
 .h-aufg-mehr{display:flex}
 .h-aufg-mehr .btn .ic{width:15px;height:15px}
 .h-vorschlaege{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
@@ -1271,7 +1288,6 @@ select.h-input{width:auto;padding-right:28px}
 .h-ab{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .h-ab[hidden]{display:none}
 .h-ab input{width:auto}
-.h-fehler{margin:0;color:var(--danger);font-weight:650;font-size:14px}
 .h-edit-btns{display:flex;flex-wrap:wrap;gap:8px}
 .h-loeschen{margin-left:auto;color:var(--danger)}
 /* Haushaltssachen */
@@ -1292,6 +1308,48 @@ select.h-input{width:auto;padding-right:28px}
 @media (min-width:980px){
   .haus-pane{max-width:760px}
 }
+/* Ein Putztag im eigenen Fenster: Material, Aufgaben, Bearbeiten (ansicht-haushalt.js) */
+html.pm-offen{overflow:hidden}
+.putzmodus{width:100vw;max-width:none;height:100vh;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:var(--bg);color:var(--ink);font-family:var(--f-body)}
+.putzmodus::backdrop{background:var(--bg)}
+.pm-rahmen{height:100%;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:minmax(0,720px);justify-content:center;align-content:start;gap:16px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.pm-kopf{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 12px) 0 10px;background:var(--bg)}
+.pm-kopf .h-raum-bild{width:44px;height:44px}
+.pm-titel{flex:1;display:grid;gap:3px;min-width:0}
+.pm-titel b{font:720 clamp(21px,5vw,27px)/1.15 var(--f-display);letter-spacing:-.01em;overflow-wrap:anywhere}
+.pm-titel span{font-size:14px;line-height:1.35;color:var(--muted)}
+.pm-zu{flex:none;display:grid;place-items:center;width:46px;height:46px;padding:0;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.pm-zu .ic{width:20px;height:20px}
+.pm-fortschritt{height:6px;margin-top:-6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.pm-fortschritt i{display:block;height:100%;border-radius:inherit;background:var(--accent);transition:width .3s ease}
+.pm-stand{margin:-6px 0 0;font-size:14px;line-height:1.4;color:var(--muted)}
+.pm-stand.pm-ok{display:flex;align-items:center;gap:6px;color:var(--ok);font-weight:650}
+.pm-stand .ic{width:18px;height:18px}
+.pm-teil{display:grid;gap:8px}
+.pm-teil h3{margin:0;font:600 12px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.pm-teil .fine{margin:0}
+.pm-teil .btn-klein .ic{width:15px;height:15px}
+.pm-material{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:6px}
+.pm-mat{display:flex;min-width:0;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.pm-mat-b{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:50px;margin:0;padding:6px 6px 6px 10px;border:0;background:none;color:inherit;text-align:left;font-weight:600;font-size:15px;line-height:1.3}
+.pm-mat-b .cb{flex:none;width:26px;height:26px;margin-top:0;border-radius:8px}
+.pm-mat-b .cb .ic{width:16px;height:16px}
+.pm-mat-bild{flex:none;width:24px;height:24px;object-fit:contain}
+.pm-mat-t{flex:1;min-width:0;overflow-wrap:anywhere}
+.pm-mat.bereit .cb{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.pm-mat.bereit .pm-mat-t{color:var(--muted)}
+.pm-wagen{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:50px;padding:0 10px;border:0;border-left:1px solid var(--line);border-radius:0 13px 13px 0;background:none;color:var(--muted);font-weight:700;font-size:12.5px}
+.pm-wagen .ic{width:20px;height:20px}
+.pm-wagen.drauf{background:var(--accent-soft);color:var(--accent)}
+.pm-aufgaben .h-aufgabe{min-height:52px;font-size:16.5px}
+.pm-nicht{padding:0 12px;border-radius:14px;border:1.5px dashed var(--line-strong)}
+.pm-nicht summary{display:flex;align-items:center;min-height:46px;cursor:pointer;font-weight:650;font-size:14.5px;color:var(--muted)}
+.pm-nicht .h-aufgabe-t{color:var(--muted)}
+.pm-fuss,.putzmodus .h-edit-btns{position:sticky;bottom:0;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:16px 0 calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(to bottom,transparent,var(--bg) 16px)}
+.pm-fuss .btn-primary{flex:1;min-height:54px;font-size:16.5px}
+.pm-fuss .btn .ic{width:19px;height:19px}
+.putzmodus .h-edit-btns .btn-primary{min-width:140px}
+.putzmodus .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 
 /* Einstellungen → Microsoft To Do (ansicht-todo.js) */
 .todo-bereich{display:grid;gap:10px}

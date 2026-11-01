@@ -182,6 +182,21 @@ appSchreibt(opPlan('pp-kueche', { ...KUECHE, name: 'Küchenputz', aufgaben: [...
 w = await workflow('2026-11-12T10:00:00Z');
 a = offene('amy')[0];
 check(a.title === 'Küchenputz' && a.schritte.map((x) => x.displayName).join('|') === 'Arbeitsflächen abwischen|Boden wischen|Kühlschrank', 'umbenannt, „Herd“ raus, „Kühlschrank“ dazu – in To Do genauso');
+// Material in die Notiz; „jedes 2. Mal“ nur als Schritt, wenn es dran ist. Ab dem 2.10. ist der 12.11. der
+// zwölfte Putztag (gezählt ab 0: 11 – ungerade), ab dem 1.10. der dreizehnte (12 – gerade)
+const MIT = { ...KUECHE, name: 'Küchenputz', aufgaben: [...KUECHE.aufgaben.filter((x) => x.id !== 'a-2'), { id: 'a-4', t: 'Kühlschrank', jedes: 2 }], material: ['Spülmittel', 'Schwamm'] };
+appSchreibt(opPlan('pp-kueche', { ...MIT, wdh: { ...KUECHE.wdh, ab: '2026-10-02' } }, 'Tobi'));
+w = await workflow('2026-11-12T10:20:00Z');
+a = offene('amy')[0];
+check(/^Das brauchst du: Spülmittel, Schwamm\n\nAus dem Putzplan in Boxenstopp/.test(a.body?.content || ''), 'Material dazu: steht oben in der Notiz der Aufgabe');
+check(a.schritte.map((x) => x.displayName).join('|') === 'Arbeitsflächen abwischen|Boden wischen', '„Kühlschrank jedes 2. Mal“, heute nicht dran: kein Schritt');
+appSchreibt(opPlan('pp-kueche', MIT, 'Tobi'));
+w = await workflow('2026-11-12T10:40:00Z');
+a = offene('amy')[0];
+check(a.schritte.map((x) => x.displayName).join('|') === 'Arbeitsflächen abwischen|Boden wischen|Kühlschrank' && /Spülmittel, Schwamm/.test(a.body?.content || ''), '… an einem Tag, an dem er dran ist: wieder ein Schritt');
+const patches = ms.z.aufrufe.filter((x) => x.methode === 'PATCH' && /tasks\/[^/]+$/.test(x.pfad)).length;
+w = await workflow('2026-11-12T10:50:00Z');
+check(ms.z.aufrufe.filter((x) => x.methode === 'PATCH' && /tasks\/[^/]+$/.test(x.pfad)).length === patches, 'nichts geändert: die Notiz bleibt, wie sie ist (kein Schreiben)');
 appSchreibt(opPlan('pp-kueche', { ...KUECHE, wer: 'Tobi' }, 'Tobi'));
 w = await workflow('2026-11-12T11:00:00Z');
 check(offene('amy').length === 0 && !todo().personen.amy.aufgaben['pp-kueche'], 'macht jetzt Tobi: aus Amys To Do weg');

@@ -15,7 +15,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 | **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
-| **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt; auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
+| **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
 | **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
@@ -457,11 +457,12 @@ Adresse, das alte fliegt raus.
 Der Reiter `js/ansicht-haushalt.js`, die Rechnung ohne DOM in `js/haushalt.js`
 (welcher Tag dran ist – dieselbe für die App, die Push-Nachricht und To Do).
 
-**Putzplan.** Ein Putztag hat einen Namen, einen Raum (mit Bildchen und
-Aufgaben zum Anfangen: Küche, Bad, Wohnzimmer, Schlafzimmer, Flur,
-Arbeitszimmer, Wäsche, Balkon, ganze Wohnung, Sonstiges), seine Aufgaben,
-die Wochentage, wie oft (jede Woche, alle 2, 3 oder 4 Wochen – ab dem ersten
-Mal), wer ihn macht (ihr beide oder einer; die Namen kommen aus `leute` in
+**Putzplan.** Ein Putztag hat einen Namen, einen Raum (mit Bildchen,
+Aufgaben und Material zum Anfangen: Küche, Bad, Wohnzimmer, Schlafzimmer,
+Flur, Arbeitszimmer, Wäsche, Balkon, ganze Wohnung, Sonstiges), seine
+Aufgaben (je Aufgabe: jedes Mal oder nur jedes 2., 3. oder 4. Mal), was man
+dafür braucht (Material), die Wochentage, wie oft (jede Woche, alle 2, 3
+oder 4 Wochen – ab dem ersten Mal), wer ihn macht (ihr beide oder einer; die Namen kommen aus `leute` in
 liste.json, jedes Gerät trägt sich einmal ein) und wann die Erinnerung
 kommt (morgens gegen 7:30, mittags gegen 12, abends gegen 17:30 oder
 keine). Ohne Wochentag steht er unter „Zwischendurch“ – eine Liste zum
@@ -469,10 +470,46 @@ Abhaken, wann es passt; erledigt bleibt sie, bis jemand neu anfängt.
 
 | oben | was |
 | --- | --- |
-| **Heute** | was heute dran ist, aufgeklappt zum Abhaken, mit Fortschritt; „Alles erledigt“ (mit Rückgängig); erledigt mit Haken und von wem |
+| **Heute** | was heute dran ist, mit Fortschritt (3/7); erledigt mit Haken und von wem |
 | **Noch offen** | dran gewesen, nicht fertig („seit Do offen“) – bis der nächste Tag kommt, dann fängt er frisch an |
-| **Demnächst** | wann als Nächstes („morgen“, „Mi“, „So 8.11.“); aufgeklappt geht abhaken schon vorher – das gilt dann für den nächsten Tag |
+| **Demnächst** | wann als Nächstes („morgen“, „Mi“, „So 8.11.“); abhaken geht schon vorher – das gilt dann für den nächsten Tag |
 | **Zwischendurch** | ohne festen Tag |
+
+> „Wenn man zb das bad machen will dann soll das als eigenes Fenster geöffnet
+> sein, nicht so eingebettet – man soll auch selbst einzige Bestandteile einer
+> Aufgabe hinzufügen können und austauschen usw – wenn man zb bad putzen macht
+> soll am anfang stehen was für Materialien man alle brauch – man soll
+> einstellen können dass bestimmte Bestandteile nur jedes zweite mal gemacht
+> werden müssen zb amatruren putzen oder so“
+
+Die Putztage stehen als Karten da; antippen öffnet den Putztag im **eigenen
+Fenster** (wie der Kochmodus, `dialog#putzmodus`):
+
+| im Fenster | was |
+| --- | --- |
+| **oben** | Raum, Name, wann („Heute · jeden Samstag · ihr beide“), Fortschritt, ×  |
+| **Das brauchst du** | das Material – antippen: liegt bereit (je Gerät und Putztag); der Wagen: fehlt, auf die Einkaufsliste (und unter die Haushaltssachen), nochmal: wieder runter. Ohne Material: „Vorschlag für Bad übernehmen“ |
+| **Aufgaben** | was an dem Tag dran ist, zum Abhaken; darunter eingeklappt „Diesmal nicht dran“ (jedes 2. Mal – wieder am Sa 15.11.), abhaken geht trotzdem |
+| **unten** | „Alles erledigt“ (bzw. „Doch nicht erledigt“, ohne festen Tag „Neu anfangen“) und „Bearbeiten“ |
+
+Das letzte Häkchen schließt das Fenster, dann kommt das Tier. **Bearbeiten**
+zeigt im selben Fenster den Editor (auch für einen neuen Putztag): Raum,
+Name, Material (✕ weg, Feld + „Dazu“, Vorschläge des Raums), Aufgaben (✕
+weg, „+ Aufgabe“, Enter springt in die nächste Zeile, ↑ ↓ umstellen, je
+Aufgabe „jedes Mal“ bis „jedes 4. Mal“, Vorschläge), Tage, Wer, Erinnerung.
+Ein anderer Raum tauscht Aufgaben und Material, solange sie noch die Vorlage
+sind. Abbrechen (und Esc) führt zurück zum Putztag; Speichern auch, ein
+neuer Putztag schließt das Fenster. Was das andere Handy abhakt, kommt im
+offenen Fenster an; der Editor bleibt dabei stehen.
+
+**Jedes 2. Mal** zählt nach dem Kalender (`durchgang` in `js/haushalt.js`:
+der wievielte Putztag seit dem ersten Mal, verpasste mit): beim ersten Mal
+alles, dann im Wechsel. Erledigt ist ein Tag, wenn abgehakt ist, was an ihm
+dran ist („Alles erledigt“ hakt genau das ab); die Erinnerung und To Do
+zählen ebenso nur, was dran ist. Eine ältere App-Fassung kennt Material und
+„jedes“ nicht und ließe beides beim Schreiben weg – die neue legt es dann
+wieder dazu (`planNachtrag` in `js/liste.js`, wie bei den anderen neueren
+Teilen von liste.json).
 
 Der Titel sagt, was los ist: „Heute ist Küche dran“, „Heute sind Küche und
 Bad dran“, „Für heute ist alles geputzt“, „Heute ist nichts dran“ mit „Als
@@ -512,7 +549,9 @@ bekommen sie mit (`kennt` in push.json: die Arten, die es beim Wählen gab).
 Putztag dran (heute oder noch offen), steht er in To Do als Aufgabe, fällig
 an seinem Tag (Mitternacht UTC – To Do zeigt den Tag ohne Umrechnung), seine
 Aufgaben als Schritte. Abhaken geht in beide Richtungen, auch die ganze
-Aufgabe; was beide zugleich ändern, kommt beides an.
+Aufgabe; was beide zugleich ändern, kommt beides an. Steht Material am
+Putztag, steht es oben in der Notiz der Aufgabe („Das brauchst du: …“);
+Schritte sind nur die Aufgaben, die an dem Tag dran sind.
 
 > „Wir haben ja gemeinsame to do Liste. Kann ich nicht also selbst machen und
 > es wird ihr immer zugeordnet oder so?“
@@ -541,7 +580,7 @@ neuen Verbinden.
 | nächster Tag, nicht fertig | dieselbe Aufgabe rückt weiter und fängt frisch an |
 | in To Do gelöscht | bleibt an diesem Tag weg, am nächsten kommt sie wieder |
 | Liste gelöscht | wird neu angelegt, mit dem, was gerade dran ist |
-| Putztag geändert, gelöscht, jetzt beim anderen | Titel und Schritte ziehen nach; offen weg |
+| Putztag geändert, gelöscht, jetzt beim anderen | Titel, Schritte und Notiz ziehen nach; offen weg |
 | Microsoft bremst oder ist weg | nichts kaputt, der nächste Lauf holt es nach |
 | Anmeldung gilt nicht mehr | „abgelaufen“ – kein Aufruf mehr, bis neu verbunden |
 | Trennen | offene Aufgaben weg, erledigte und die Liste bleiben |
@@ -836,7 +875,7 @@ VAPID über das npm-Paket `web-push`):
  "preisalarm": { "haehnchenbrust": { "max": 7.5, "u": "kg", "name": "Hähnchenbrustfilet", "by": "Tobi", "at": "…" } },
  "haushalt": {
   "sachen": { "hs-mh9x…": { "name": "Spülmittel", "bereich": "kueche", "by": "Amy", "at": "…" } },
-  "plaene": { "pp-mh9x…": { "name": "Küche", "raum": "kueche", "aufgaben": [{ "id": "a-mh9x…", "t": "Arbeitsflächen abwischen" }], "wdh": { "tage": [1, 4], "wochen": 1, "ab": "2026-11-02" }, "wer": "", "erinnern": "morgens", "by": "Tobi", "at": "…" } },
+  "plaene": { "pp-mh9x…": { "name": "Küche", "raum": "kueche", "aufgaben": [{ "id": "a-mh9x…", "t": "Arbeitsflächen abwischen" }, { "id": "a-mh9y…", "t": "Backofen putzen", "jedes": 2 }], "material": ["Spülmittel", "Schwamm"], "wdh": { "tage": [1, 4], "wochen": 1, "ab": "2026-11-02" }, "wer": "", "erinnern": "morgens", "by": "Tobi", "at": "…" } },
   "stand": { "pp-mh9x…": { "datum": "2026-11-02", "haken": ["a-mh9x…"], "fertig": null, "verlauf": [["2026-10-29", "Amy"]] } },
   "todoApp": "<App-ID bei Microsoft>", "todoWunsch": { "amy": { "art": "verbinden", "at": "…", "name": "Amy" } }, "todoAn": { "tobi": "…" },
   "todoZiel": { "tobi": { "id": "<Liste bei Microsoft> | neu", "name": "Wir zwei", "geteilt": true, "at": "…" } }

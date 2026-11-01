@@ -2,16 +2,19 @@
  * Haushalt – ohne DOM, damit die Tests es direkt prüfen (und werkzeug/push.mjs
  * und werkzeug/todo.mjs dieselbe Rechnung haben).
  *
- *   Räume       mit Bildchen und Aufgaben zum Anfangen (VORLAGEN)
+ *   Räume       mit Bildchen, Aufgaben und Material zum Anfangen (VORLAGEN, MATERIAL)
  *   Sachen      Vorschläge für Haushaltssachen, nach Bereich
  *   Wiederholung  an Wochentagen, jede oder jede 2./3./4. Woche, ab einem Tag
  *   Termin      welcher Tag gerade dran ist: heute, offen seit …, erledigt,
  *               bald – je Putztag
+ *   Durchgang   der wievielte Putztag ein Tag ist – eine Aufgabe „jedes 2.
+ *               Mal“ ist bei jedem zweiten dran (dranAm, aufgabenAm)
  *
  * In liste.json (liste.js `haushalt`):
  *
  *   { sachen: { <hs-…>: { name, bereich, by, at } },
- *     plaene: { <pp-…>: { name, raum, aufgaben: [{ id, t }], wdh: { tage: [1, 4], wochen: 1, ab },
+ *     plaene: { <pp-…>: { name, raum, aufgaben: [{ id, t, jedes? }], material: ['Badreiniger', …],
+ *                         wdh: { tage: [1, 4], wochen: 1, ab },
  *                         wer: 'Amy' | '', erinnern: 'morgens' | 'mittags' | 'abends' | '', by, at } },
  *     stand:  { <pp-…>: { datum, haken: [aufgaben-ids], fertig: { at, by } | null, verlauf: [[datum, wer]] } },
  *     todoApp: '<App-ID bei Microsoft>', todoWunsch: { <name>: { art: 'verbinden' | 'trennen', at } } }
@@ -36,7 +39,7 @@ export const RAUM = Object.fromEntries(RAEUME.map(([k, name, bild]) => [k, { nam
 /** Aufgaben zum Anfangen je Raum – im Editor änderbar. */
 export const VORLAGEN = {
   kueche: ['Arbeitsflächen abwischen', 'Herd und Backofen sauber machen', 'Spüle und Armatur putzen', 'Fronten und Griffe abwischen', 'Mikrowelle auswischen', 'Müll, Bio und Pfand rausbringen', 'Boden saugen und wischen'],
-  bad: ['Waschbecken und Armaturen putzen', 'Spiegel putzen', 'Toilette putzen', 'Dusche bzw. Wanne putzen', 'Handtücher wechseln', 'Mülleimer leeren', 'Boden wischen'],
+  bad: ['Waschbecken putzen', 'Armaturen putzen', 'Spiegel putzen', 'Toilette putzen', 'Dusche bzw. Wanne putzen', 'Handtücher wechseln', 'Mülleimer leeren', 'Boden wischen'],
   wohnzimmer: ['Staub wischen', 'Tisch und Oberflächen abwischen', 'Kissen und Decken ordnen', 'Pflanzen gießen', 'Boden saugen'],
   schlafzimmer: ['Bettwäsche wechseln', 'Staub wischen', 'Nachttische abwischen', 'Lüften', 'Boden saugen'],
   flur: ['Schuhe wegräumen', 'Garderobe ordnen', 'Spiegel putzen', 'Boden saugen und wischen'],
@@ -46,6 +49,22 @@ export const VORLAGEN = {
   wohnung: ['Fenster putzen', 'Kühlschrank auswischen', 'Backofen gründlich reinigen', 'Staub auf den Schränken wischen', 'Heizkörper abwischen'],
   sonstiges: [],
 };
+
+/** Was man je Raum zum Putzen braucht – steht im Putztag oben, im Editor änderbar. */
+export const MATERIAL = {
+  kueche: ['Spülmittel', 'Allzweckreiniger', 'Backofenreiniger', 'Schwamm', 'Mikrofasertücher', 'Müllbeutel', 'Bodenreiniger', 'Wischmopp und Eimer'],
+  bad: ['Badreiniger', 'WC-Reiniger', 'Glasreiniger', 'Entkalker', 'Mikrofasertücher', 'Schwamm', 'Gummihandschuhe', 'Bodenreiniger'],
+  wohnzimmer: ['Staubtuch', 'Mikrofasertücher', 'Allzweckreiniger', 'Staubsauger'],
+  schlafzimmer: ['Frische Bettwäsche', 'Staubtuch', 'Staubsauger'],
+  flur: ['Glasreiniger', 'Bodenreiniger', 'Wischmopp und Eimer', 'Staubsauger'],
+  arbeitszimmer: ['Staubtuch', 'Bildschirmreiniger', 'Staubsauger'],
+  waesche: ['Waschmittel', 'Weichspüler', 'Fleckenentferner', 'Wäscheklammern'],
+  balkon: ['Gießkanne', 'Besen', 'Allzweckreiniger'],
+  wohnung: ['Glasreiniger', 'Fensterabzieher', 'Backofenreiniger', 'Allzweckreiniger', 'Mikrofasertücher', 'Eimer'],
+  sonstiges: [],
+};
+/** Wie oft eine einzelne Aufgabe dran ist (je Putztag einstellbar). */
+export const JEDES = [[1, 'jedes Mal'], [2, 'jedes 2. Mal'], [3, 'jedes 3. Mal'], [4, 'jedes 4. Mal']];
 
 /** Bereiche der Haushaltssachen – mit Vorschlägen zum Antippen. */
 export const SACH_BEREICHE = [
@@ -144,6 +163,41 @@ export function termin(plan, st, heute) {
   const fertig = meiner && st.fertig ? st.fertig : alt ? { at: '', by: alt[1] || '' } : null;
   if (fertig) return { art: 'erledigt', datum: letzter, naechster, haken: meiner ? haken : (plan.aufgaben || []).map((a) => a.id), fertig };
   return { art: letzter === heute ? 'heute' : 'offen', datum: letzter, naechster, haken, fertig: null };
+}
+
+/**
+ * Der wievielte Putztag ein Tag ist: 0 = das erste Mal ab „ab“ (zählt die
+ * Tage, an denen er vorher dran war – nach dem Kalender, auch verpasste).
+ */
+export function durchgang(plan, tag) {
+  const w = plan?.wdh;
+  if (!w?.tage?.length || !w.ab || !tag || tag <= w.ab) return 0;
+  const wochen = Math.max(1, Math.min(4, Number(w.wochen) || 1));
+  let n = 0;
+  const ende = montag(tag);
+  let m = montag(w.ab);
+  for (let i = 0; m <= ende && i < 5300; i++, m = plusTage(m, 7)) {
+    if (i % wochen !== 0) continue;
+    for (const t of w.tage) {
+      const d = plusTage(m, t - 1);
+      if (d >= w.ab && d < tag) n++;
+    }
+  }
+  return n;
+}
+
+/** Ist eine Aufgabe an diesem Tag dran? „jedes 2. Mal“: beim ersten, dritten … Putztag. Ohne festen Tag immer. */
+export const dranAm = (a, plan, tag) => !(Number(a?.jedes) > 1) || !plan?.wdh?.tage?.length || !tag || durchgang(plan, tag) % Number(a.jedes) === 0;
+/** Die Aufgaben, die an diesem Tag dran sind. */
+export const aufgabenAm = (plan, tag) => (plan?.aufgaben || []).filter((a) => dranAm(a, plan, tag));
+/** Wann eine Aufgabe, die an diesem Tag nicht dran ist, wieder dran ist – oder null. */
+export function wiederAm(a, plan, tag) {
+  let t = tag;
+  for (let i = 0; i < 8 && t; i++) {
+    t = naechsterTermin(plan, t);
+    if (t && dranAm(a, plan, t)) return t;
+  }
+  return null;
 }
 
 /** „jeden Montag“, „jeden Mo und Do“, „alle 2 Wochen samstags“, „täglich“. */

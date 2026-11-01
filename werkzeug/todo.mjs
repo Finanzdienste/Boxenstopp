@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /*
  * Der Putzplan in Microsoft To Do: Ist ein Putztag dran (heute oder noch
- * offen), steht er dort als Aufgabe, fällig an seinem Tag, mit den Aufgaben
- * als Schritten. Abhaken geht in beide Richtungen: Was in der App abgehakt
- * ist, hakt sich in To Do ab; was in To Do abgehakt ist, kommt in die App.
+ * offen), steht er dort als Aufgabe, fällig an seinem Tag, mit den Aufgaben,
+ * die an dem Tag dran sind, als Schritten („jedes 2. Mal“ nur, wenn es dran
+ * ist) und dem Material in der Notiz. Abhaken geht in beide Richtungen: Was
+ * in der App abgehakt ist, hakt sich in To Do ab; was in To Do abgehakt ist,
+ * kommt in die App.
  *
  * Wohin, wählt jede Person nach dem Verbinden (liste.json haushalt.todoZiel):
  * eine eigene neue Liste „Haushalt“ – dann ihre Putztage – oder eine
@@ -44,7 +46,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, appendFileSync } fr
 import path from 'node:path';
 import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from 'node:crypto';
 import { bereinigen, anwenden, opPutzHaken, opPutzFertig, opTodoAn } from '../js/liste.js';
-import { termin, zustaendig } from '../js/haushalt.js';
+import { termin, zustaendig, aufgabenAm } from '../js/haushalt.js';
 
 const arg = (name) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : null; };
 const hat = (name) => process.argv.includes(name);
@@ -267,7 +269,9 @@ async function wartenLauf() {
 const enc = encodeURIComponent;
 const aufgabePfad = (l, id) => `lists/${enc(l)}/tasks/${enc(id)}`;
 const faelligAm = (tag) => ({ dateTime: `${tag}T00:00:00.0000000`, timeZone: 'UTC' });
-const text = () => ({ content: `Aus dem Putzplan in Boxenstopp – abhaken geht hier und in der App: ${APP_LINK}`, contentType: 'text' });
+/** Die Notiz der Aufgabe: was man braucht – und woher sie kommt (ohne Material: wie früher). */
+const notizVon = (plan) => `${plan?.material?.length ? `Das brauchst du: ${plan.material.join(', ')}\n\n` : ''}Aus dem Putzplan in Boxenstopp – abhaken geht hier und in der App: ${APP_LINK}`;
+const text = (notiz) => ({ content: notiz, contentType: 'text' });
 
 /** Alle Listen der Person (ohne „Gekennzeichnete E-Mail“): [{ id, name, geteilt, eigen, art }] – für die Wahl in der App. */
 async function alleListen(graph) {
@@ -330,19 +334,20 @@ const titelVon = (plan, p) => (p.geteilt && plan.wer ? `${plan.name} · ${plan.w
 async function anlegen(graph, p, plan, soll, z) {
   const titel = titelVon(plan, p);
   let l = await listeVon(graph, p);
-  let r = await graph('POST', `lists/${enc(l)}/tasks`, { title: titel, body: text(), dueDateTime: faelligAm(soll.datum) });
-  if (r.code === 404 && (!p.zielId || p.zielId === 'neu')) { p.liste = null; l = await listeVon(graph, p); r = await graph('POST', `lists/${enc(l)}/tasks`, { title: titel, body: text(), dueDateTime: faelligAm(soll.datum) }); }
+  const neu = { title: titel, body: text(soll.notiz), dueDateTime: faelligAm(soll.datum) };
+  let r = await graph('POST', `lists/${enc(l)}/tasks`, neu);
+  if (r.code === 404 && (!p.zielId || p.zielId === 'neu')) { p.liste = null; l = await listeVon(graph, p); r = await graph('POST', `lists/${enc(l)}/tasks`, neu); }
   if (!(r.code === 200 || r.code === 201) || typeof r.json?.id !== 'string') throw new Spaeter(`Aufgabe anlegen ${r.code}`);
-  const a = { id: r.json.id, datum: soll.datum, erledigt: false, weg: false, titel, punkte: {}, haken: [] };
+  const a = { id: r.json.id, datum: soll.datum, erledigt: false, weg: false, titel, notiz: soll.notiz, punkte: {}, haken: [] };
   z.neu++;
   await schritteAngleichen(graph, l, a, plan, soll, new Map(), z);
   return a;
 }
 
-/** Die Schritte so, wie die App sie hat (Text und Häkchen); was es nicht mehr gibt, kommt weg. */
+/** Die Schritte so, wie die App sie hat (Text und Häkchen); was es nicht mehr gibt oder diesmal nicht dran ist, kommt weg. */
 async function schritteAngleichen(graph, l, a, plan, soll, schritte, z) {
   const punkte = { ...(a.punkte || {}) };
-  for (const auf of plan.aufgaben) {
+  for (const auf of soll.dran) {
     const will = soll.haken.includes(auf.id);
     const sid = punkte[auf.id];
     const s = sid ? schritte.get(sid) : null;
@@ -360,12 +365,12 @@ async function schritteAngleichen(graph, l, a, plan, soll, schritte, z) {
     }
   }
   for (const [aid, sid] of Object.entries(punkte)) {
-    if (plan.aufgaben.some((x) => x.id === aid)) continue;
+    if (soll.dran.some((x) => x.id === aid)) continue;
     if (schritte.has(sid)) { await graph('DELETE', `${aufgabePfad(l, a.id)}/checklistItems/${enc(sid)}`); z.geaendert++; }
     delete punkte[aid];
   }
   a.punkte = punkte;
-  a.haken = plan.aufgaben.map((x) => x.id).filter((id) => soll.haken.includes(id) && punkte[id]);
+  a.haken = soll.dran.map((x) => x.id).filter((id) => soll.haken.includes(id) && punkte[id]);
   return true;
 }
 
@@ -378,6 +383,8 @@ async function angleichen(graph, l, a, plan, soll, z, { weiter = false, titel = 
   const aenderung = {};
   if (weiter) aenderung.dueDateTime = faelligAm(soll.datum);
   if (a.titel !== titel) aenderung.title = titel;
+  // Das Material hat sich geändert (Aufgaben von früher: ohne Material angelegt)
+  if ((a.notiz ?? notizVon(null)) !== soll.notiz) aenderung.body = text(soll.notiz);
   const fertigDort = a.dort ? a.dort.fertig : a.erledigt;
   if (soll.offen && fertigDort) aenderung.status = 'notStarted';
   if (!soll.offen && !fertigDort) aenderung.status = 'completed';
@@ -389,6 +396,7 @@ async function angleichen(graph, l, a, plan, soll, z, { weiter = false, titel = 
   }
   a.datum = soll.datum;
   a.titel = titel;
+  a.notiz = soll.notiz;
   a.erledigt = !soll.offen;
   if (!soll.offen) return true;
   const schritte = a.dort?.schritte || await schritteHolen(graph, l, a.id);
@@ -396,13 +404,15 @@ async function angleichen(graph, l, a, plan, soll, z, { weiter = false, titel = 
   return schritteAngleichen(graph, l, a, plan, soll, schritte, z);
 }
 
-/** Was die App für einen Putztag will: { datum, offen, haken } – oder null (gerade nichts dran). */
+/** Was die App für einen Putztag will: { datum, offen, haken, dran (die Aufgaben an dem Tag), notiz } – oder null (gerade nichts dran). */
 function sollVon(plan, st, heute) {
   if (!plan.wdh.tage.length) return null;
   const t = termin(plan, st, heute);
-  if (t.art === 'heute' || t.art === 'offen') return { datum: t.datum, offen: true, haken: t.haken };
-  if (t.art === 'erledigt') return { datum: t.datum, offen: false, haken: plan.aufgaben.map((x) => x.id) };
-  return null;
+  if (!['heute', 'offen', 'erledigt'].includes(t.art)) return null;
+  const dran = aufgabenAm(plan, t.datum);
+  const notiz = notizVon(plan);
+  if (t.art === 'erledigt') return { datum: t.datum, offen: false, haken: dran.map((x) => x.id), dran, notiz };
+  return { datum: t.datum, offen: true, haken: t.haken, dran, notiz };
 }
 
 /** 1. Was in To Do passiert ist, kommt in die App (für alle zuerst – dann sieht der zweite schon, was der erste abgehakt hat). */

@@ -32,7 +32,7 @@
  *   jetzt()   sofort abgleichen
  *   stop()
  */
-import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt } from './liste.js';
+import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt, planNachtrag } from './liste.js';
 
 export const API = 'https://api.github.com';
 export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: 'liste.json' };
@@ -233,9 +233,11 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
             if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
             if (fehlt('haushalt') && hatHaushalt(remote.stand?.haushalt)) mehr.haushalt = remote.stand.haushalt;
             if (fehlt('leute') && Object.keys(remote.stand?.leute || {}).length) mehr.leute = remote.stand.leute;
-            if (Object.keys(mehr).length) {
-              stand = anwenden(stand, opZusammen({}, {}, mehr));
-              offen.push(opZusammen({}, {}, mehr));
+            // Dasselbe in den Putztagen: Material und „jedes 2. Mal“
+            const nachtrag = planNachtrag(roh, stand, remote.stand);
+            if (Object.keys(mehr).length) nachtrag.unshift(opZusammen({}, {}, mehr));
+            if (nachtrag.length) {
+              for (const op of nachtrag) { stand = anwenden(stand, op); offen.push(op); }
               merkeOffen();
               plane(700);
             }
