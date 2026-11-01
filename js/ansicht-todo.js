@@ -156,6 +156,9 @@ function todoHTML() {
 export function todoZeichnen() {
   const el = $('#todo-bereich');
   if (!el) return;
+  // Noch nie geholt (die App ist gleich in den Einstellungen aufgegangen, bevor
+  // Schlüssel und Liste da waren): jetzt holen – sonst bliebe „Wird geprüft …“ stehen
+  if (!todo && !holt && app.zugang && app.stand.haushalt?.todoApp && ansicht.tab === 'einstellungen') { todoHolen(); return; }
   // Beim Tippen der App-ID nicht neu zeichnen
   if (el.contains(document.activeElement) && document.activeElement.matches('input')) return;
   const html = todoHTML();

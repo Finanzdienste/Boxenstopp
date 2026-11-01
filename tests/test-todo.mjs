@@ -344,6 +344,10 @@ gh.zustand.dateien['todo.json'] = JSON.stringify({ personen: { amy: { name: 'Amy
 check(await bis(async () => (await karte.innerText()).includes('Verbunden'), 8000), 'angemeldet: „✓ Verbunden“');
 check((await karte.innerText()).includes('Auch verbunden: Tobi') && (await karte.innerText()).includes('heute'), 'zeigt, wer noch verbunden ist und wann zuletzt abgeglichen');
 check(!(await p.content()).includes('v1.xyz'), 'den Token zeigt die App nirgends');
+// Neu laden, während die Einstellungen offen sind: Die App geht gleich dort auf – auch dann holt sie todo.json
+await p.reload({ waitUntil: 'load' });
+await p.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+check(await bis(async () => (await karte.innerText()).includes('Verbunden'), 8000) && !(await karte.innerText()).includes('Wird geprüft'), 'neu geladen in den Einstellungen: kein ewiges „Wird geprüft …“');
 gh.zustand.dateien['todo.json'] = JSON.stringify({ personen: { amy: { name: 'Amy', status: 'verbunden', token: 'v1.xyz', zuletzt: new Date().toISOString(), wunsch: at, wahl: true, listen: [{ id: 'L1', name: 'Aufgaben', geteilt: false, art: 'standard' }, { id: 'L2', name: 'Wir zwei', geteilt: true }] } } });
 // (sonst kommt es erst mit dem nächsten Nachsehen in einer Minute – in echt steht beides im selben Lauf)
 await p.click('.tab[data-tab="einkauf"]');
