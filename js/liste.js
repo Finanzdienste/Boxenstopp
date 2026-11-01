@@ -20,7 +20,7 @@
  *     fehlt:     { <Schlüssel>: { laden: 'Aldi', at, by } },   im Laden nicht bekommen
  *     bons:      { <Schlüssel>: [{ eur: 4.99, q: 1000, u: 'g', laden, at, by }] },  was es gekostet hat
  *     preisalarm: { <Schlüssel>: { max: 6.5, u: 'kg', by, at } },   Bescheid, wenn ein Angebot so günstig ist
- *     haushalt:  { sachen, plaene, stand, todoApp, todoWunsch, todoAn },   Haushaltssachen und Putzplan (haushalt.js)
+ *     haushalt:  { sachen, plaene, stand, todoApp, todoWunsch, todoAn, todoZiel },   Haushaltssachen und Putzplan (haushalt.js)
  *     leute:     { amy: 'Amy', tobi: 'Tobi' } }   wer die Liste teilt (für „Wer“ im Putzplan)
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
@@ -78,7 +78,7 @@ import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 import { umleiten } from './format.js';
 import { RAUM, SACH_BEREICH } from './haushalt.js';
 
-export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {} });
+export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
 export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {} });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
@@ -181,6 +181,7 @@ export function todoNoetig(vorher, nachher) {
   const v = vorher?.haushalt || leerHaushalt();
   const n = nachher?.haushalt || leerHaushalt();
   if (JSON.stringify(v.todoWunsch || {}) !== JSON.stringify(n.todoWunsch || {})) return true;
+  if (JSON.stringify(v.todoZiel || {}) !== JSON.stringify(n.todoZiel || {})) return true;
   if (!n.todoApp || !Object.keys(n.todoAn || {}).length) return false;
   return JSON.stringify(v.plaene || {}) !== JSON.stringify(n.plaene || {}) || JSON.stringify(v.stand || {}) !== JSON.stringify(n.stand || {});
 }
@@ -397,15 +398,26 @@ function haushaltBereinigen(roh) {
       if (PERSON.test(n) && n === n.toLowerCase() && istObj(w) && TODO_WUENSCHE.includes(w.art) && text(w.at, 40)) h.todoWunsch[n] = { art: w.art, at: w.at, name: PERSON.test(String(w.name || '')) ? w.name : n };
     }
   }
+  if (istObj(roh.todoZiel)) {
+    for (const [n, z] of Object.entries(roh.todoZiel).slice(0, 6)) {
+      const b = PERSON.test(n) && n === n.toLowerCase() ? zielBereinigen(z) : null;
+      if (b) h.todoZiel[n] = b;
+    }
+  }
   if (istObj(roh.todoAn)) {
     for (const [n, at] of Object.entries(roh.todoAn).slice(0, 6)) if (PERSON.test(n) && n === n.toLowerCase() && text(at, 40)) h.todoAn[n] = at;
   }
   return h;
 }
+/** Ein Ziel in To Do: { id, name, geteilt, at } – id 'neu' oder die Kennung einer Liste bei Microsoft. */
+function zielBereinigen(z) {
+  if (!istObj(z) || typeof z.id !== 'string' || !/^[\w=+/-]{1,600}$/.test(z.id) || !text(z.at, 40)) return null;
+  return { id: z.id, name: sauber(z.name, 120) || (z.id === 'neu' ? 'Haushalt' : 'Liste'), geteilt: z.geteilt === true, at: z.at };
+}
 const hausVon = (s) => {
   if (!istObj(s.haushalt)) s.haushalt = leerHaushalt();
   const h = s.haushalt;
-  for (const k of ['sachen', 'plaene', 'stand', 'todoWunsch', 'todoAn']) if (!istObj(h[k])) h[k] = {};
+  for (const k of ['sachen', 'plaene', 'stand', 'todoWunsch', 'todoAn', 'todoZiel']) if (!istObj(h[k])) h[k] = {};
   if (typeof h.todoApp !== 'string') h.todoApp = '';
   return h;
 };
@@ -573,6 +585,12 @@ export const opPutzFertig = (planId, datum, an, by) => ({ typ: 'putzFertig', pla
 export const opTodoApp = (app) => ({ typ: 'todoApp', app: String(app || '').trim() });
 /** Mit To Do verbinden, trennen oder gleich abgleichen wollen (der Lauf im Daten-Repo macht es); art null: Wunsch vergessen. */
 export const opTodoWunsch = (name, art) => ({ typ: 'todoWunsch', name: String(name || '').trim().toLowerCase(), wie: String(name || '').trim(), art, at: jetzt() });
+/**
+ * In welche Liste in To Do die Putztage einer Person kommen: id 'neu' (eine
+ * eigene Liste „Haushalt“) oder eine vorhandene – geteilt: eine gemeinsame
+ * Liste, dann stehen dort alle Putztage (werkzeug/todo.mjs).
+ */
+export const opTodoZiel = (name, id, liste, geteilt) => ({ typ: 'todoZiel', name: String(name || '').trim().toLowerCase(), ziel: { id: String(id || ''), name: String(liste || ''), geteilt: !!geteilt }, at: jetzt() });
 /** Wer die Liste teilt – jedes Gerät trägt seinen Namen einmal ein (app.js). */
 export const opPerson = (name) => ({ typ: 'person', name: String(name || '').trim() });
 /** Wer mit To Do verbunden ist – das schreibt nur der Lauf im Daten-Repo (werkzeug/todo.mjs). */
@@ -732,6 +750,13 @@ function aendere(s, op) {
       if (!istObj(s.leute)) s.leute = {};
       const k = op.name.toLowerCase();
       if (!s.leute[k] && Object.keys(s.leute).length < 8) s.leute[k] = op.name;
+      return;
+    }
+    case 'todoZiel': {
+      const h = hausVon(s);
+      if (!PERSON.test(String(op.name))) return;
+      const z = zielBereinigen({ ...op.ziel, at: op.at });
+      if (z) h.todoZiel[op.name] = z; else delete h.todoZiel[op.name];
       return;
     }
     case 'todoAn': {

@@ -205,10 +205,14 @@ function leerHTML() {
 function todoZeile(h) {
   const an = Object.keys(h.todoAn || {});
   const meins = an.includes(ich().toLowerCase());
+  const wartet = h.todoWunsch?.[ich().toLowerCase()]?.art === 'abgleichen';
+  const jetzt = meins ? `<button type="button" class="linkbtn" data-act="h-todo-jetzt"${wartet ? ' disabled' : ''}>${wartet ? 'Gleicht ab …' : 'Jetzt abgleichen'}</button>` : '';
   if (an.length) {
-    const wer = an.map((n) => (n === ich().toLowerCase() ? 'dir' : (namen().find((x) => x.toLowerCase() === n) || n))).join(' und ');
-    const wartet = h.todoWunsch?.[ich().toLowerCase()]?.art === 'abgleichen';
-    return `<p class="h-todo">${ic('list')}<span>In Microsoft To Do bei ${esc(wer)}, Liste „Haushalt“.</span>${meins ? `<button type="button" class="linkbtn" data-act="h-todo-jetzt"${wartet ? ' disabled' : ''}>${wartet ? 'Gleicht ab …' : 'Jetzt abgleichen'}</button>` : ''}</p>`;
+    // Eine gemeinsame Liste: dort steht alles, für beide
+    const gemeinsam = an.map((n) => h.todoZiel?.[n]).find((z) => z?.geteilt);
+    if (gemeinsam) return `<p class="h-todo">${ic('list')}<span>In Microsoft To Do: eure gemeinsame Liste „${esc(gemeinsam.name)}“.</span>${jetzt}</p>`;
+    const wer = an.map((n) => `${n === ich().toLowerCase() ? 'dir' : (namen().find((x) => x.toLowerCase() === n) || n)}${h.todoZiel?.[n] ? ` („${h.todoZiel[n].name}“)` : ''}`).join(' und ');
+    return `<p class="h-todo">${ic('list')}<span>In Microsoft To Do bei ${esc(wer)}.</span>${jetzt}</p>`;
   }
   return `<p class="h-todo">${ic('list')}<span>Auch in Microsoft To Do?</span><button type="button" class="linkbtn" data-act="h-todo-einst">In den Einstellungen verbinden</button></p>`;
 }

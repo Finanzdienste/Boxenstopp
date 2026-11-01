@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 /*
- * Der Putzplan in Microsoft To Do – je Person, die das will, eine Liste
- * „Haushalt“ in ihrem To Do: Ist ein Putztag dran (heute oder noch offen),
- * steht er dort als Aufgabe, fällig an seinem Tag, mit den Aufgaben als
- * Schritten. Abhaken geht in beide Richtungen: Was in der App abgehakt ist,
- * hakt sich in To Do ab; was in To Do abgehakt ist, kommt in die App.
+ * Der Putzplan in Microsoft To Do: Ist ein Putztag dran (heute oder noch
+ * offen), steht er dort als Aufgabe, fällig an seinem Tag, mit den Aufgaben
+ * als Schritten. Abhaken geht in beide Richtungen: Was in der App abgehakt
+ * ist, hakt sich in To Do ab; was in To Do abgehakt ist, kommt in die App.
+ *
+ * Wohin, wählt jede Person nach dem Verbinden (liste.json haushalt.todoZiel):
+ * eine eigene neue Liste „Haushalt“ – dann ihre Putztage – oder eine
+ * vorhandene. Ist die geteilt (isShared), stehen dort alle Putztage, und wer
+ * eingetragen ist, steht im Titel („Bad · Amy“): Zuweisen kann eine App in
+ * To Do nicht, Graph kennt kein „zugewiesen an“. Dann reicht eine Person –
+ * die andere sieht die gemeinsame Liste ohnehin.
  *
  * Läuft im privaten Daten-Repo (.github/workflows/haushalt.yml) – dreimal am
  * Tag und gleich, wenn die App in der Commit-Nachricht „· To Do“ schreibt
@@ -263,8 +269,29 @@ const aufgabePfad = (l, id) => `lists/${enc(l)}/tasks/${enc(id)}`;
 const faelligAm = (tag) => ({ dateTime: `${tag}T00:00:00.0000000`, timeZone: 'UTC' });
 const text = () => ({ content: `Aus dem Putzplan in Boxenstopp – abhaken geht hier und in der App: ${APP_LINK}`, contentType: 'text' });
 
+/** Alle Listen der Person (ohne „Gekennzeichnete E-Mail“): [{ id, name, geteilt, eigen, art }] – für die Wahl in der App. */
+async function alleListen(graph) {
+  const listen = [];
+  let pfad = 'lists';
+  for (let seite = 0; pfad && seite < 10; seite++) {
+    const r = await graph('GET', pfad);
+    if (r.code !== 200 || !Array.isArray(r.json?.value)) throw new Spaeter(`Listen ${r.code}`);
+    for (const l of r.json.value) {
+      if (typeof l?.id !== 'string' || l.wellknownListName === 'flaggedEmails') continue;
+      listen.push({ id: l.id, name: String(l.displayName || '').slice(0, 120), geteilt: l.isShared === true, eigen: l.isOwner !== false, art: l.wellknownListName === 'defaultList' ? 'standard' : '' });
+    }
+    pfad = typeof r.json['@odata.nextLink'] === 'string' ? r.json['@odata.nextLink'] : null;
+  }
+  return listen.slice(0, 40);
+}
+
 /** Die Liste „Haushalt“: die gemerkte; sonst eine eigene dieses Namens; sonst eine neue. */
 async function listeVon(graph, p) {
+  // Eine gewählte vorhandene Liste: die, sonst keine (nicht einfach eine neue anlegen)
+  if (p.zielId && p.zielId !== 'neu') {
+    if (p.liste === p.zielId) return p.liste;
+    throw new Spaeter('gewählte Liste fehlt');
+  }
   if (p.liste) {
     const r = await graph('GET', `lists/${enc(p.liste)}`);
     if (r.code === 200) return p.liste;
@@ -296,13 +323,17 @@ async function schritteHolen(graph, l, id) {
   return new Map(r.json.value.filter((x) => typeof x?.id === 'string').map((x) => [x.id, { isChecked: x.isChecked === true, displayName: String(x.displayName || '') }]));
 }
 
+/** Der Titel in To Do: in einer gemeinsamen Liste mit dem Namen, wer dran ist („Bad · Amy“). */
+const titelVon = (plan, p) => (p.geteilt && plan.wer ? `${plan.name} · ${plan.wer}` : plan.name);
+
 /** Eine Aufgabe neu anlegen – mit Schritten. */
 async function anlegen(graph, p, plan, soll, z) {
+  const titel = titelVon(plan, p);
   let l = await listeVon(graph, p);
-  let r = await graph('POST', `lists/${enc(l)}/tasks`, { title: plan.name, body: text(), dueDateTime: faelligAm(soll.datum) });
-  if (r.code === 404) { p.liste = null; l = await listeVon(graph, p); r = await graph('POST', `lists/${enc(l)}/tasks`, { title: plan.name, body: text(), dueDateTime: faelligAm(soll.datum) }); }
+  let r = await graph('POST', `lists/${enc(l)}/tasks`, { title: titel, body: text(), dueDateTime: faelligAm(soll.datum) });
+  if (r.code === 404 && (!p.zielId || p.zielId === 'neu')) { p.liste = null; l = await listeVon(graph, p); r = await graph('POST', `lists/${enc(l)}/tasks`, { title: titel, body: text(), dueDateTime: faelligAm(soll.datum) }); }
   if (!(r.code === 200 || r.code === 201) || typeof r.json?.id !== 'string') throw new Spaeter(`Aufgabe anlegen ${r.code}`);
-  const a = { id: r.json.id, datum: soll.datum, erledigt: false, weg: false, titel: plan.name, punkte: {}, haken: [] };
+  const a = { id: r.json.id, datum: soll.datum, erledigt: false, weg: false, titel, punkte: {}, haken: [] };
   z.neu++;
   await schritteAngleichen(graph, l, a, plan, soll, new Map(), z);
   return a;
@@ -343,10 +374,10 @@ async function schritteAngleichen(graph, l, a, plan, soll, schritte, z) {
  * fängt sie frisch an), Titel, erledigt oder offen, Schritte. false: in To Do
  * nicht mehr da.
  */
-async function angleichen(graph, l, a, plan, soll, z, { weiter = false } = {}) {
+async function angleichen(graph, l, a, plan, soll, z, { weiter = false, titel = plan.name } = {}) {
   const aenderung = {};
   if (weiter) aenderung.dueDateTime = faelligAm(soll.datum);
-  if (a.titel !== plan.name) aenderung.title = plan.name;
+  if (a.titel !== titel) aenderung.title = titel;
   const fertigDort = a.dort ? a.dort.fertig : a.erledigt;
   if (soll.offen && fertigDort) aenderung.status = 'notStarted';
   if (!soll.offen && !fertigDort) aenderung.status = 'completed';
@@ -357,7 +388,7 @@ async function angleichen(graph, l, a, plan, soll, z, { weiter = false } = {}) {
     z.geaendert++;
   }
   a.datum = soll.datum;
-  a.titel = plan.name;
+  a.titel = titel;
   a.erledigt = !soll.offen;
   if (!soll.offen) return true;
   const schritte = a.dort?.schritte || await schritteHolen(graph, l, a.id);
@@ -379,7 +410,32 @@ async function lesen(n, p, ctx, z) {
   const graph = graphFuer(p, n, ctx.app);
   const name = p.name || GROSS(n);
   p.aufgaben = p.aufgaben && typeof p.aufgaben === 'object' ? p.aufgaben : {};
+  p.listen = await alleListen(graph);
+  // Wohin? Erst, wenn gewählt – vorher nur die Listen zum Wählen
+  const ziel = ctx.stand.haushalt.todoZiel?.[n];
+  if (!ziel) { p.wahl = true; p.fehler = null; return null; }
+  if (ziel.at !== p.zielAt) {
+    // Neu gewählt: was offen in der alten Liste steht, kommt weg – dann alles in die neue
+    for (const a of Object.values(p.aufgaben)) {
+      if (p.liste && a.id && !a.erledigt && !a.weg) { await graph('DELETE', aufgabePfad(p.liste, a.id)); z.geaendert++; }
+    }
+    p.aufgaben = {};
+    p.liste = ziel.id === 'neu' ? null : ziel.id;
+    p.zielAt = ziel.at;
+  }
+  p.zielId = ziel.id;
+  if (ziel.id !== 'neu' && !p.listen.some((x) => x.id === ziel.id)) {
+    p.wahl = true;
+    p.fehler = `Die Liste „${ziel.name}“ gibt es in To Do nicht mehr – in den Einstellungen eine andere wählen.`;
+    return null;
+  }
+  p.wahl = false;
   const l = await listeVon(graph, p);
+  const info = p.listen.find((x) => x.id === l);
+  p.listeName = info?.name || ziel.name || LISTE;
+  p.geteilt = info?.geteilt === true;
+  // Wer es war: in der eigenen Liste die Person; in der gemeinsamen weiß Graph es nicht – dann, wer eingetragen ist
+  const wer = (planId) => (p.geteilt ? ctx.stand.haushalt.plaene[planId]?.wer || '' : name);
   for (const [planId, a] of Object.entries(p.aufgaben)) {
     delete a.dort;
     if (!a.id || a.erledigt || a.weg) continue;
@@ -391,11 +447,11 @@ async function lesen(n, p, ctx, z) {
     a.dort = { fertig: r.json?.status === 'completed', schritte };
     if (!ctx.stand.haushalt.plaene[planId]) continue;
     const ops = [];
-    if (a.dort.fertig) ops.push(opPutzFertig(planId, a.datum, true, name));
+    if (a.dort.fertig) ops.push(opPutzFertig(planId, a.datum, true, wer(planId)));
     else {
       for (const [aid, sid] of Object.entries(a.punkte || {})) {
         const sch = schritte.get(sid);
-        if (sch && sch.isChecked !== (a.haken || []).includes(aid)) ops.push(opPutzHaken(planId, a.datum, aid, sch.isChecked, name));
+        if (sch && sch.isChecked !== (a.haken || []).includes(aid)) ops.push(opPutzHaken(planId, a.datum, aid, sch.isChecked, wer(planId)));
       }
     }
     for (const op of ops) { ctx.stand = anwenden(ctx.stand, op); ctx.ops.push(op); z.geholt++; }
@@ -405,13 +461,14 @@ async function lesen(n, p, ctx, z) {
   return { graph, l };
 }
 
-/** 2. Die App in To Do: je Putztag, der bei dieser Person gerade dran ist, eine Aufgabe. */
+/** 2. Die App in To Do: je Putztag, der gerade dran ist, eine Aufgabe – in der eigenen Liste die der Person, in einer gemeinsamen alle. */
 async function schreiben(n, p, ctx, z, { graph, l }) {
   const h = ctx.stand.haushalt;
-  const meine = Object.entries(h.plaene).filter(([, plan]) => zustaendig(plan, n) && plan.wdh.tage.length);
+  const meine = Object.entries(h.plaene).filter(([, plan]) => (p.geteilt || zustaendig(plan, n)) && plan.wdh.tage.length);
   for (const [planId, plan] of meine) {
     const soll = sollVon(plan, h.stand[planId], ctx.heute);
     const a = p.aufgaben[planId];
+    const titel = titelVon(plan, p);
     if (!soll) {
       if (a?.id && !a.erledigt && !a.weg) { await graph('DELETE', aufgabePfad(l, a.id)); z.geaendert++; }
       delete p.aufgaben[planId];
@@ -420,13 +477,13 @@ async function schreiben(n, p, ctx, z, { graph, l }) {
     if (a && a.datum === soll.datum) {
       // Derselbe Tag: in To Do gelöscht bleibt gelöscht; sonst angleichen
       if (a.weg || !a.id || (a.erledigt && !soll.offen)) continue;
-      if (await angleichen(graph, l, a, plan, soll, z)) continue;
+      if (await angleichen(graph, l, a, plan, soll, z, { titel })) continue;
       a.weg = true;
       continue;
     }
     // Ein neuer Tag: die offene Aufgabe rückt weiter (frisch, ohne Häkchen) –
     // war sie erledigt oder gelöscht, kommt eine neue
-    if (a?.id && !a.erledigt && !a.weg && await angleichen(graph, l, a, plan, soll, z, { weiter: true })) continue;
+    if (a?.id && !a.erledigt && !a.weg && await angleichen(graph, l, a, plan, soll, z, { weiter: true, titel })) continue;
     p.aufgaben[planId] = soll.offen ? await anlegen(graph, p, plan, soll, z) : { id: null, datum: soll.datum, erledigt: true };
   }
   // 3. Putztage, die es nicht mehr gibt oder die jetzt jemand anderes macht
@@ -490,7 +547,12 @@ async function abgleichenLauf() {
     if (!h.todoAn?.[n]) ctx.ops.push(opTodoAn(n, true));
     const z = { neu: 0, geaendert: 0, geholt: 0 };
     try {
-      dabei.push({ n, p, z, g: await lesen(n, p, ctx, z) });
+      const g = await lesen(n, p, ctx, z);
+      if (g) dabei.push({ n, p, z, g });
+      else {
+        p.zuletzt = new Date().toISOString();
+        console.log(`To Do: ${n} – ${p.listen.length} Listen gelesen, wartet auf die Wahl der Liste.`);
+      }
     } catch (e) {
       schief(n, p, e);
     }

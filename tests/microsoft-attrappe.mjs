@@ -91,7 +91,7 @@ export async function microsoftAttrappe({ app = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeee
     // lists
     if (teile[0] !== 'lists') return antwort(404, { error: { code: 'NotFound' } });
     if (teile.length === 1) {
-      if (req.method === 'GET') return antwort(200, { value: Object.values(kt.listen).map(({ id, displayName, wellknownListName }) => ({ id, displayName, wellknownListName })) });
+      if (req.method === 'GET') return antwort(200, { value: Object.values(kt.listen).map(({ id, displayName, wellknownListName, besitzer, geteilt }) => ({ id, displayName, wellknownListName, isOwner: !besitzer || besitzer === k, isShared: !!geteilt })) });
       if (req.method === 'POST') { const id = neueId('liste'); kt.listen[id] = { id, displayName: j.displayName, wellknownListName: 'none', aufgaben: {} }; return antwort(201, { id, displayName: j.displayName, wellknownListName: 'none' }); }
     }
     const liste = kt.listen[teile[1]];
@@ -137,6 +137,16 @@ export async function microsoftAttrappe({ app = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeee
   await new Promise((ok) => { server.listen(0, '127.0.0.1', ok); });
   const port = server.address().port;
 
+  /** Eine gemeinsame Liste: dieselbe in beiden Konten (wie in To Do geteilt), besitzer legt sie an. */
+  function teilen(name, besitzer, mitglied) {
+    const id = neueId('geteilt');
+    const l = { id, displayName: name, wellknownListName: 'none', besitzer, geteilt: true, aufgaben: {} };
+    konto(besitzer).listen[id] = l;
+    konto(mitglied).listen[id] = l;
+    return l;
+  }
+  const aufgabenIn = (l) => Object.values(l?.aufgaben || {}).map((a) => ({ ...a, schritte: Object.values(a.schritte) }));
+
   /** Die Liste „Haushalt“ eines Kontos – ihre Aufgaben mit Schritten (oder null). */
   const haushalt = (n) => Object.values(konto(n).listen).find((l) => l.displayName === 'Haushalt') || null;
   const aufgaben = (n) => Object.values(haushalt(n)?.aufgaben || {}).map((a) => ({ ...a, schritte: Object.values(a.schritte) }));
@@ -148,6 +158,8 @@ export async function microsoftAttrappe({ app = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeee
     konto,
     haushalt,
     aufgaben,
+    teilen,
+    aufgabenIn,
     stop: () => new Promise((ok) => { server.close(ok); }),
   };
 }

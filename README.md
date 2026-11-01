@@ -508,16 +508,33 @@ gemeldet ist, steht in `push.json` (`putz|<id>|<tag>`). Schon vorher
 erledigt: keine Erinnerung. Ältere Abos (vor dem Putzplan gewählt)
 bekommen sie mit (`kennt` in push.json: die Arten, die es beim Wählen gab).
 
-**Microsoft To Do** (`werkzeug/todo.mjs`, `js/ansicht-todo.js`). Je Person,
-die das will, eine Liste „Haushalt“ in ihrem To Do: Ist ein Putztag bei
-ihr dran (heute oder noch offen), steht er dort als Aufgabe, fällig an
-seinem Tag (Mitternacht UTC – To Do zeigt den Tag ohne Umrechnung), seine
+**Microsoft To Do** (`werkzeug/todo.mjs`, `js/ansicht-todo.js`). Ist ein
+Putztag dran (heute oder noch offen), steht er in To Do als Aufgabe, fällig
+an seinem Tag (Mitternacht UTC – To Do zeigt den Tag ohne Umrechnung), seine
 Aufgaben als Schritte. Abhaken geht in beide Richtungen, auch die ganze
 Aufgabe; was beide zugleich ändern, kommt beides an.
 
+> „Wir haben ja gemeinsame to do Liste. Kann ich nicht also selbst machen und
+> es wird ihr immer zugeordnet oder so?“
+
+Wohin, wählt man nach dem Verbinden (`haushalt.todoZiel` je Person; der
+Lauf schreibt die Listen der Person nach `todo.json`, die App zeigt sie):
+**eine neue Liste „Haushalt“** – dann stehen dort die eigenen Putztage
+(eingetragen oder beide) – oder **eine vorhandene**. Ist die geteilt
+(`isShared`), stehen dort **alle** Putztage, und wer eingetragen ist, steht
+im Titel („Bad · Amy“, „Küche“ für beide): Zuweisen kann eine App in To Do
+nicht, Graph kennt kein „zugewiesen an“. Dann reicht es, wenn einer
+verbunden ist – die andere sieht die gemeinsame Liste in ihrem To Do und
+hakt dort ab; die App sagt ihr „für dich ist hier nichts zu tun“. Wer in
+der gemeinsamen Liste abgehakt hat, verrät Graph nicht: Die App nimmt den,
+der eingetragen ist (bei „beide“ ohne Namen). Eine andere Liste wählen
+räumt die offenen Aufgaben aus der alten; gibt es die gewählte nicht mehr,
+fragt die App neu, statt woanders anzulegen. Die Wahl gilt auch nach einem
+neuen Verbinden.
+
 | Fall | in To Do |
 | --- | --- |
-| Putztag dran | eine Aufgabe mit Schritten – „Zwischendurch“ und „demnächst“ nicht |
+| Putztag dran | eine Aufgabe mit Schritten (in der eigenen Liste die eigenen, in der gemeinsamen alle) – „Zwischendurch“ und „demnächst“ nicht |
 | in der App abgehakt | der Schritt hakt sich ab, erledigt: die Aufgabe |
 | in To Do abgehakt | kommt in die App, mit Namen; erledigt: der Putztag ist erledigt (auch beim anderen und in seinem To Do) |
 | nächster Tag, erledigt | eine neue Aufgabe; die erledigte bleibt |
@@ -540,7 +557,7 @@ trägt einer von euch einmal in den Einstellungen ein (`haushalt.todoApp`,
 kein Geheimnis). „Verbinden“ schreibt den Wunsch in liste.json; der Lauf holt
 einen Code, legt ihn mit der Adresse in `todo.json` (die App zeigt ihn, mit
 „Kopieren“ und „Code bei Microsoft eingeben“) und wartet, bis die Anmeldung
-durch ist (höchstens 15 Minuten). Der Erneuerungs-Token – Microsoft gibt
+durch ist (höchstens 15 Minuten); danach die Wahl der Liste. Der Erneuerungs-Token – Microsoft gibt
 bei jedem Gebrauch einen neuen aus – steht nur verschlüsselt in `todo.json`
 (AES-256-GCM, Schlüssel per HKDF aus dem Secret `VAPID_PRIVATE_KEY`, das nur
 Actions kennt); den Gerätecode und die Zugänge sieht nie jemand, auch nicht
@@ -821,7 +838,8 @@ VAPID über das npm-Paket `web-push`):
   "sachen": { "hs-mh9x…": { "name": "Spülmittel", "bereich": "kueche", "by": "Amy", "at": "…" } },
   "plaene": { "pp-mh9x…": { "name": "Küche", "raum": "kueche", "aufgaben": [{ "id": "a-mh9x…", "t": "Arbeitsflächen abwischen" }], "wdh": { "tage": [1, 4], "wochen": 1, "ab": "2026-11-02" }, "wer": "", "erinnern": "morgens", "by": "Tobi", "at": "…" } },
   "stand": { "pp-mh9x…": { "datum": "2026-11-02", "haken": ["a-mh9x…"], "fertig": null, "verlauf": [["2026-10-29", "Amy"]] } },
-  "todoApp": "<App-ID bei Microsoft>", "todoWunsch": { "amy": { "art": "verbinden", "at": "…", "name": "Amy" } }, "todoAn": { "amy": "…" }
+  "todoApp": "<App-ID bei Microsoft>", "todoWunsch": { "amy": { "art": "verbinden", "at": "…", "name": "Amy" } }, "todoAn": { "tobi": "…" },
+  "todoZiel": { "tobi": { "id": "<Liste bei Microsoft> | neu", "name": "Wir zwei", "geteilt": true, "at": "…" } }
  },
  "leute": { "amy": "Amy", "tobi": "Tobi" }
 }
@@ -860,8 +878,9 @@ kaufDA), `push.json` (Push-Nachrichten: `schluessel`, `abos` je Person,
 `zuletzt`, `gemeldet`, eine bestellte Probe `test`) und – sobald jemand To
 Do will – `todo.json` (je Person `status`: code, verbunden, abgelaufen,
 fehler, getrennt; der Code zum Anmelden mit Adresse und Frist, der
-verschlüsselte Erneuerungs-Token, die Liste und je Putztag die Aufgabe in To
-Do mit ihren Schritten; schreibt nur `werkzeug/todo.mjs`).
+verschlüsselte Erneuerungs-Token, ihre Listen zum Wählen (Name, geteilt), die
+gewählte und je Putztag die Aufgabe in To Do mit ihren Schritten; schreibt
+nur `werkzeug/todo.mjs`).
 
 ## Rezepte ändern
 
@@ -1002,8 +1021,10 @@ und spielt den Reiter im Browser durch (Vorschlag, Editor, Lob, Rückgängig,
 Haushaltssachen auf die Liste, ausgeblendet, breit, zu zweit mit „Wer“).
 `test-todo.mjs` lässt `werkzeug/todo.mjs` gegen eine Attrappe von Microsoft
 laufen (`tests/microsoft-attrappe.mjs`: Gerätecode, Erneuerungs-Token, die
-nur einmal gelten, To Do je Konto) – verbinden, hin und her, erledigt,
-nächster Tag, verpasst, gelöscht, Liste weg, geändert, 429, abgelaufen,
-zwei Personen, trennen, ohne Secret; kein Token im Protokoll – und die
-Karte in den Einstellungen. Der Workflow „Prüfung“ lässt
+nur einmal gelten, To Do je Konto, geteilte Listen) – verbinden, Liste wählen,
+hin und her, erledigt, nächster Tag, verpasst, gelöscht, Liste weg, geändert,
+429, abgelaufen, zwei Personen, trennen, ohne Secret, „Öffentliche
+Clientflows“ aus, Tobi allein mit der gemeinsamen Liste („Bad · Amy“, Amy
+hakt ab, umziehen); kein Token im Protokoll – und die Karte in den
+Einstellungen (Wahl, „für dich ist hier nichts zu tun“). Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

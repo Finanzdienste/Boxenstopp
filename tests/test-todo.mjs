@@ -15,7 +15,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, ROOT, APP_URL, SCHLUESSEL } from './hilfe.mjs';
 import { microsoftAttrappe } from './microsoft-attrappe.mjs';
-import { leer, anwenden, bereinigen, opPlan, opPutzHaken, opTodoApp, opTodoWunsch, todoNoetig } from '../js/liste.js';
+import { leer, anwenden, bereinigen, opPlan, opPutzHaken, opTodoApp, opTodoWunsch, opTodoZiel, todoNoetig } from '../js/liste.js';
 
 const { check, ende } = pruefer();
 const TODO = path.join(ROOT, 'werkzeug', 'todo.mjs');
@@ -109,6 +109,11 @@ check(t.personen.amy.status === 'verbunden' && t.personen.amy.name === 'Amy' && 
 check(/^v1\.[A-Za-z0-9_-]+$/.test(t.personen.amy.token) && !ms.z.ausgegeben.some((x) => JSON.stringify(t).includes(x)), 'der Erneuerungs-Token steht nur verschlüsselt drin – kein Token, kein Code im Klartext');
 check(!ms.z.ausgegeben.some((x) => protokoll.includes(x)), 'im Protokoll kein Token und kein Code');
 check(liste().haushalt.todoAn.amy && liste().rev >= 4, 'in liste.json: Amy ist verbunden (todoAn), rev hoch');
+check(t.personen.amy.wahl === true && t.personen.amy.listen.map((l) => l.name).join() === 'Aufgaben' && !ms.haushalt('amy'), 'erst die Wahl: Amys Listen stehen in todo.json (ihre Standardliste), angelegt ist noch nichts');
+check(appSchreibt(opTodoZiel('Amy', 'neu', 'Haushalt', false)) === true, 'Amy wählt „Neue Liste Haushalt“: „· To Do“');
+w = await workflow(MO);
+t = todo();
+check(t.personen.amy.wahl === false && t.personen.amy.listeName === 'Haushalt' && t.personen.amy.geteilt === false, 'übernommen: die Liste „Haushalt“, nicht geteilt');
 let a = amy();
 const alle = ms.aufgaben('amy');
 check(ms.haushalt('amy') && a.length === 1 && a[0].status === 'notStarted' && alle.map((x) => x.title).sort().join() === 'Bad,Küche', 'in Amys To Do: Liste „Haushalt“ mit der Küche (heute) und dem Bad (seit Samstag offen) – nicht Flur (Tobi), nicht Großputz (ohne Tag)');
@@ -213,6 +218,9 @@ check(todo().personen.amy.status === 'verbunden' && offene('amy').filter((x) => 
 appSchreibt(opTodoWunsch('Tobi', 'verbinden'));
 ms.z.naechste.push({ konto: 'tobi', warten: 1 });
 w = await workflow('2026-11-16T08:00:00Z');
+check(todo().personen.tobi.wahl === true && !ms.haushalt('tobi'), 'Tobi verbunden: erst die Wahl, noch nichts angelegt');
+appSchreibt(opTodoZiel('Tobi', 'neu', 'Haushalt', false));
+w = await workflow('2026-11-16T08:00:00Z');
 check(todo().personen.tobi.status === 'verbunden' && offene('tobi').map((x) => x.title).sort().join() === 'Flur,Küche', 'Tobi verbunden: bei ihm Küche (beide) und Flur (Tobi) – Montag');
 check(offene('amy').filter((x) => x.dueDateTime.dateTime.startsWith('2026-11-16')).length === 1, 'bei Amy die Küche für Montag');
 // Tobi hakt in seinem To Do die Küche ab → bei Amy im selben Lauf
@@ -258,6 +266,51 @@ await workflow('2026-11-19T13:00:00Z');
 check(liste().rev === revVor, 'ohne Änderung: liste.json unverändert');
 check(!ms.z.ausgegeben.some((x) => protokoll.includes(x)), 'im ganzen Protokoll kein Token und kein Code');
 
+/* ------------------------------------- eine gemeinsame Liste (Tobi allein) */
+
+const wir = ms.teilen('Wir zwei', 'tobi', 'amy');
+appSchreibt(opTodoWunsch('Tobi', 'verbinden'));
+ms.z.naechste.push({ konto: 'tobi', warten: 0 });
+const MO3 = '2026-11-23T08:00:00Z';
+w = await workflow(MO3);
+t = todo();
+const wirInfo = t.personen.tobi.listen.find((l) => l.name === 'Wir zwei');
+check(t.personen.tobi.status === 'verbunden' && wirInfo?.geteilt === true && wirInfo.eigen === true && t.personen.tobi.listen.some((l) => l.name === 'Haushalt' && !l.geteilt), 'Tobi verbunden: seine Listen, „Wir zwei“ als gemeinsame');
+// Seine Wahl von vorher („Haushalt“) gilt nach dem neuen Verbinden weiter – dort stehen jetzt Küche und Flur
+const vorherOffen = Object.values(t.personen.tobi.aufgaben || {}).filter((x) => x.id && !x.erledigt && !x.weg).map((x) => x.id);
+const inHaushalt = (id) => ms.aufgaben('tobi').some((x) => x.id === id && x.status !== 'completed');
+check(vorherOffen.length === 2 && vorherOffen.every(inHaushalt), 'die frühere Wahl gilt weiter: Küche und Flur in Tobis „Haushalt“');
+check(appSchreibt(opTodoZiel('Tobi', wirInfo.id, 'Wir zwei', true)) === true, 'Tobi wählt „Wir zwei“');
+w = await workflow(MO3);
+t = todo();
+check(t.personen.tobi.geteilt === true && t.personen.tobi.listeName === 'Wir zwei', 'übernommen: gemeinsame Liste');
+check(ms.aufgabenIn(wir).map((x) => x.title).sort().join() === 'Bad · Amy,Flur · Tobi,Küche', `in „Wir zwei“ alle Putztage, die dran sind – mit Namen, wer dran ist (${ms.aufgabenIn(wir).map((x) => x.title).join(', ')})`);
+check(!vorherOffen.some(inHaushalt), 'umgezogen: die offenen aus Tobis „Haushalt“ sind dort weg');
+check(Object.values(ms.konto('amy').listen).some((l) => l.id === wir.id) && ms.aufgabenIn(ms.konto('amy').listen[wir.id]).length === 3, 'Amy sieht dieselben Aufgaben in ihrem To Do (geteilte Liste) – ohne selbst verbunden zu sein');
+// Amy hakt in der gemeinsamen Liste ab
+const badWir = ms.aufgabenIn(wir).find((x) => x.title === 'Bad · Amy');
+wir.aufgaben[badWir.id].schritte[badWir.schritte[0].id].isChecked = true;
+const kuecheWir = ms.aufgabenIn(wir).find((x) => x.title === 'Küche');
+wir.aufgaben[kuecheWir.id].status = 'completed';
+w = await workflow('2026-11-23T09:00:00Z');
+const hs = liste().haushalt.stand;
+check(hs['pp-bad']?.fertig?.by === 'Amy' && hs['pp-bad'].datum === '2026-11-21', 'Amy hakt in der gemeinsamen Liste das Bad ab → in der App erledigt, von Amy (sie ist eingetragen)');
+check(hs['pp-kueche']?.fertig && !hs['pp-kueche'].fertig.by && hs['pp-kueche'].datum === '2026-11-23', 'die Küche (beide) erledigt – von wem, sagt Microsoft nicht');
+appSchreibt(opPlan('pp-flur', { name: 'Flur', raum: 'flur', aufgaben: [{ id: 'a-1', t: 'Saugen' }], wdh: { tage: [1], wochen: 1, ab: '2026-10-01' }, wer: 'Amy', erinnern: 'abends' }, 'Tobi'));
+w = await workflow('2026-11-23T10:00:00Z');
+check(ms.aufgabenIn(wir).some((x) => x.title === 'Flur · Amy' && x.status !== 'completed') && !ms.aufgabenIn(wir).some((x) => x.title === 'Flur · Tobi'), 'der Flur jetzt bei Amy: der Titel zieht nach („Flur · Amy“)');
+// Die Liste wird nicht mehr geteilt (oder gelöscht): Tobi soll neu wählen
+delete ms.konto('tobi').listen[wir.id];
+const idsVor = ms.aufgaben('tobi').map((x) => x.id).sort().join();
+w = await workflow('2026-11-23T11:00:00Z');
+t = todo();
+check(t.personen.tobi.wahl === true && /gibt es in To Do nicht mehr/.test(t.personen.tobi.fehler) && ms.aufgaben('tobi').map((x) => x.id).sort().join() === idsVor, `gemeinsame Liste weg: „gibt es nicht mehr – andere wählen“, nichts woanders angelegt (${t.personen.tobi.fehler})`);
+ms.konto('tobi').listen[wir.id] = wir;
+appSchreibt(opTodoZiel('Tobi', 'neu', 'Haushalt', false));
+w = await workflow('2026-11-23T12:00:00Z');
+check(!ms.aufgabenIn(wir).some((x) => x.status !== 'completed') && ms.aufgabenIn(wir).some((x) => x.status === 'completed'), 'zurück auf die eigene Liste: offene Aufgaben aus „Wir zwei“ weg, erledigte bleiben');
+check(offene('tobi').every((x) => !x.title.includes('·')) && !offene('tobi').some((x) => x.title === 'Bad'), 'in Tobis „Haushalt“ nur seine und die gemeinsamen Putztage, ohne Namen im Titel');
+
 await ms.stop();
 
 /* ------------------------------------------------- die Karte in den Einstellungen */
@@ -291,11 +344,27 @@ gh.zustand.dateien['todo.json'] = JSON.stringify({ personen: { amy: { name: 'Amy
 check(await bis(async () => (await karte.innerText()).includes('Verbunden'), 8000), 'angemeldet: „✓ Verbunden“');
 check((await karte.innerText()).includes('Auch verbunden: Tobi') && (await karte.innerText()).includes('heute'), 'zeigt, wer noch verbunden ist und wann zuletzt abgeglichen');
 check(!(await p.content()).includes('v1.xyz'), 'den Token zeigt die App nirgends');
+gh.zustand.dateien['todo.json'] = JSON.stringify({ personen: { amy: { name: 'Amy', status: 'verbunden', token: 'v1.xyz', zuletzt: new Date().toISOString(), wunsch: at, wahl: true, listen: [{ id: 'L1', name: 'Aufgaben', geteilt: false, art: 'standard' }, { id: 'L2', name: 'Wir zwei', geteilt: true }] } } });
+// (sonst kommt es erst mit dem nächsten Nachsehen in einer Minute – in echt steht beides im selben Lauf)
+await p.click('.tab[data-tab="einkauf"]');
+await p.click('.tab[data-tab="einstellungen"]');
+check(await bis(async () => (await p.locator('#todo-ziel-form').count()) === 1, 8000), 'nach dem Verbinden: „In welche Liste?“');
+check(await p.locator('#todo-ziel-form input[value="L2"]').isChecked() && (await karte.innerText()).includes('gemeinsame Liste – alle Putztage'), 'die gemeinsame Liste ist vorgewählt');
+const nVor = gh.zustand.nachrichten.length;
+await p.click('#todo-ziel-form button[type="submit"]');
+check(await bis(() => gh.liste()?.haushalt?.todoZiel?.amy?.id === 'L2', 8000) && gh.liste().haushalt.todoZiel.amy.geteilt === true && gh.zustand.nachrichten.slice(nVor).some((m) => /· To Do/.test(m)), 'gewählt: steht in liste.json, mit „· To Do“');
+check(await bis(async () => (await karte.innerText()).includes('Wird umgestellt')), '„Wird umgestellt …“');
+const zielAt = gh.liste().haushalt.todoZiel.amy.at;
+gh.zustand.dateien['todo.json'] = JSON.stringify({ personen: { amy: { name: 'Amy', status: 'verbunden', token: 'v1.xyz', zuletzt: new Date().toISOString(), wunsch: at, wahl: false, zielAt, listeName: 'Wir zwei', geteilt: true, listen: [] } } });
+check(await bis(async () => (await karte.innerText()).includes('alle Putztage stehen in eurer gemeinsamen Liste „Wir zwei“'), 8000), 'danach: „alle Putztage stehen in eurer gemeinsamen Liste“');
 await p.click('[data-act="todo-trennen"]');
 check((await karte.innerText()).includes('Offene Putz-Aufgaben verschwinden'), 'Trennen fragt erst');
 await p.click('[data-act="todo-trennen-ja"]');
 check(await bis(() => gh.liste()?.haushalt?.todoWunsch?.amy?.art === 'trennen', 8000), 'Trennen: der Wunsch steht in liste.json');
 check(await bis(async () => (await karte.innerText()).includes('Wird getrennt')), '„Wird getrennt …“');
+const trennAt = gh.liste().haushalt.todoWunsch.amy.at;
+gh.zustand.dateien['todo.json'] = JSON.stringify({ personen: { amy: { name: 'Amy', status: 'getrennt', wunsch: trennAt }, tobi: { name: 'Tobi', status: 'verbunden', geteilt: true, listeName: 'Wir zwei', zielAt: 'x' } } });
+check(await bis(async () => (await karte.innerText()).includes('für dich ist hier nichts zu tun'), 8000) && await p.locator('[data-act="todo-verbinden"]').count() === 0, 'Tobi hat die gemeinsame Liste: bei Amy „für dich ist hier nichts zu tun“, kein Verbinden');
 check(h.fehler.length === 0, `keine Fehler im Browser (${h.fehler.join(' | ')})`);
 await h.ctx.close();
 await browser.close();

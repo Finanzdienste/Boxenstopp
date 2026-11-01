@@ -1,7 +1,9 @@
 /*
- * Einstellungen → Microsoft To Do: der Putzplan als Aufgaben in To Do, je
- * Person, die das will (Liste „Haushalt“, die Aufgaben eines Putztags als
- * Schritte, abhaken geht dort und hier).
+ * Einstellungen → Microsoft To Do: der Putzplan als Aufgaben in To Do (die
+ * Aufgaben eines Putztags als Schritte, abhaken geht dort und hier). Nach dem
+ * Verbinden wählt man die Liste: eine eigene neue „Haushalt“ (die eigenen
+ * Putztage) oder eine vorhandene – in einer gemeinsamen stehen alle
+ * Putztage, mit Namen, und die andere Person muss nichts tun.
  *
  * Die Arbeit macht werkzeug/todo.mjs im Daten-Repo (haushalt.yml). Die App
  * schreibt nur Wünsche in liste.json – die App-ID von Microsoft (einmal,
@@ -13,13 +15,14 @@
 import { app, $, melde, lese, ansicht } from './kern.js';
 import { esc, uhrzeit } from './format.js';
 import { privatLesen, API } from './speicher.js';
-import { opTodoApp, opTodoWunsch, TODO_APP_ID } from './liste.js';
+import { opTodoApp, opTodoWunsch, opTodoZiel, TODO_APP_ID } from './liste.js';
 
 let todo = null; // todo.json, zuletzt gelesen
 let holt = false;
 let timer = null;
 let appIdOffen = false;
 let trennenFragen = false;
+let listeWaehlen = false;
 
 const api = () => lese('__api', null) || API;
 const ich = () => String(app.name() || '').trim().toLowerCase();
@@ -30,7 +33,15 @@ const schnell = () => Math.min(4000, Number(lese('__takt', 0)) || 4000);
 function wartet() {
   const w = app.stand.haushalt?.todoWunsch?.[ich()];
   const p = todo?.personen?.[ich()];
-  return w && (!p?.wunsch || p.wunsch < w.at) ? w : null;
+  if (w && (!p?.wunsch || p.wunsch < w.at)) return w;
+  // Eine neu gewählte Liste, die der Lauf noch nicht übernommen hat
+  const z = app.stand.haushalt?.todoZiel?.[ich()];
+  return z && p?.status === 'verbunden' && p.zielAt !== z.at ? { art: 'ziel', at: z.at } : null;
+}
+/** Wer schon über eine gemeinsame Liste verbunden ist (dann muss sonst niemand) – oder null. */
+function gemeinsamUeber() {
+  for (const [n, x] of Object.entries(todo?.personen || {})) if (n !== ich() && x?.status === 'verbunden' && x.geteilt && x.listeName) return { wer: x.name || n, liste: x.listeName };
+  return null;
 }
 const codeGilt = (p) => p?.status === 'code' && p.code && Date.parse(p.bis) > Date.now();
 
@@ -55,7 +66,7 @@ export async function todoHolen() {
   planen();
 }
 
-const WIE = 'Der Putzplan steht dann in deinem To Do in der Liste „Haushalt“: Ist ein Putztag dran, ist er dort eine Aufgabe, fällig an seinem Tag, mit den Aufgaben als Schritten. Abhaken geht dort und hier – abgeglichen wird dreimal am Tag und gleich, wenn sich hier etwas tut.';
+const WIE = 'Ist ein Putztag dran, steht er in To Do als Aufgabe, fällig an seinem Tag, mit den Aufgaben als Schritten – in einer neuen Liste „Haushalt“ oder in einer, die ihr schon habt (auch einer gemeinsamen). Abhaken geht dort und hier; abgeglichen wird dreimal am Tag und gleich, wenn sich hier etwas tut.';
 
 function appIdHTML(aktuell) {
   return `<p class="fine">Damit Boxenstopp an To Do darf, braucht es einmal eine App-ID von Microsoft – angelegt in ein paar Minuten, kostenlos, wie bei der Workout-App. Sie ist kein Geheimnis: Sie sagt Microsoft nur, wer fragt. Danach verbindet jeder sein eigenes To Do.</p>
@@ -87,15 +98,35 @@ function zuletztText(iso) {
   return `${gleich ? 'heute' : d.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric' })} ${uhrzeit(d)} Uhr`;
 }
 
+function wahlHTML(p) {
+  const listen = Array.isArray(p.listen) ? p.listen : [];
+  const jetzt = app.stand.haushalt?.todoZiel?.[ich()]?.id;
+  // Vorgewählt: die jetzige – sonst eine gemeinsame, wenn es eine gibt
+  const vor = jetzt || listen.find((l) => l.geteilt)?.id || 'neu';
+  const zeile = (id, name, klein) => `<label class="todo-wahl"><input type="radio" name="todo-ziel" value="${esc(id)}"${id === vor ? ' checked' : ''}><span><b>${esc(name)}</b><small>${esc(klein)}</small></span></label>`;
+  const andere = Object.entries(todo?.personen || {}).filter(([n, x]) => n !== ich() && x?.status === 'verbunden').map(([n, x]) => x.name || n);
+  return `<p>${p.wahl && !jetzt ? '✓ Verbunden. Noch eins: ' : ''}In welche Liste in To Do sollen die Putztage?</p>
+${p.fehler ? `<p class="todo-fehler" role="alert">${esc(p.fehler)}</p>` : ''}
+<form class="todo-ziel" id="todo-ziel-form">
+${zeile('neu', 'Neue Liste „Haushalt“', 'nur deine Putztage')}
+${listen.map((l) => zeile(l.id, l.name, l.geteilt ? 'gemeinsame Liste – alle Putztage, mit Namen' : 'nur deine Putztage')).join('')}
+<div class="zugang-btns"><button type="submit" class="btn btn-primary">Übernehmen</button>${jetzt ? '<button type="button" class="btn btn-quiet" data-act="todo-liste-zu">Abbrechen</button>' : ''}</div>
+</form>
+<p class="fine">In einer gemeinsamen Liste seht ihr beide alles und könnt beide abhaken – dann reicht es, wenn einer verbunden ist. Zuweisen lässt Microsoft Apps nicht: Dafür steht im Titel, wer dran ist („Bad · Amy“).${andere.length ? ` ${esc(andere.join(' und '))} ist auch verbunden – bei einer gemeinsamen Liste dort trennen, sonst steht es doppelt da.` : ''}</p>`;
+}
+
 function verbundenHTML(p, w) {
   const zuletzt = p.zuletzt ? zuletztText(p.zuletzt) : '';
+  if (w?.art === 'ziel') return '<p class="todo-warte" role="status">Wird umgestellt – gleich stehen die Putztage in der gewählten Liste …</p>';
+  if (listeWaehlen || (p.wahl && Array.isArray(p.listen))) return wahlHTML(p);
   if (trennenFragen) {
     return `<p>To Do trennen? Offene Putz-Aufgaben verschwinden aus deinem To Do, erledigte und die Liste „Haushalt“ bleiben.</p>
 <div class="zugang-btns"><button type="button" class="btn btn-danger" data-act="todo-trennen-ja">Ja, trennen</button><button type="button" class="btn btn-quiet" data-act="todo-trennen-nein">Abbrechen</button></div>`;
   }
-  return `<p class="e-ok todo-an">✓ Verbunden – der Putzplan steht in deinem To Do in der Liste „Haushalt“.</p>
+  const liste = p.listeName || app.stand.haushalt?.todoZiel?.[ich()]?.name || 'Haushalt';
+  return `<p class="e-ok todo-an">✓ Verbunden – ${p.geteilt ? `alle Putztage stehen in eurer gemeinsamen Liste „${esc(liste)}“.` : `deine Putztage stehen in der Liste „${esc(liste)}“.`}</p>
 <p class="fine">${zuletzt ? `Zuletzt abgeglichen: ${esc(zuletzt)}.` : 'Der erste Abgleich läuft gleich.'}${p.fehler ? ` ${esc(p.fehler)}` : ''}</p>
-<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="todo-jetzt"${w?.art === 'abgleichen' ? ' disabled' : ''}>${w?.art === 'abgleichen' ? 'Gleicht ab …' : 'Jetzt abgleichen'}</button><button type="button" class="btn btn-quiet" data-act="todo-trennen">Trennen</button></div>`;
+<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="todo-jetzt"${w?.art === 'abgleichen' ? ' disabled' : ''}>${w?.art === 'abgleichen' ? 'Gleicht ab …' : 'Jetzt abgleichen'}</button><button type="button" class="btn btn-quiet" data-act="todo-liste">Andere Liste</button><button type="button" class="btn btn-quiet" data-act="todo-trennen">Trennen</button></div>`;
 }
 
 function todoHTML() {
@@ -110,11 +141,14 @@ function todoHTML() {
   else if (w?.art === 'trennen') meins = '<p class="todo-warte" role="status">Wird getrennt …</p>';
   else if (codeGilt(p)) meins = codeHTML(p);
   else if (p?.status === 'verbunden') meins = verbundenHTML(p, w);
-  else {
+  else if (gemeinsamUeber()) {
+    const g = gemeinsamUeber();
+    meins = `<p class="e-ok todo-an">✓ Die Putztage stehen schon in eurer gemeinsamen Liste „${esc(g.liste)}“ (über ${esc(g.wer)}) – für dich ist hier nichts zu tun.</p>`;
+  } else {
     meins = `${p?.fehler ? `<p class="todo-fehler" role="alert">${esc(p.fehler)}</p>` : ''}<p class="fine">${esc(WIE)}</p>
 <div class="zugang-btns"><button type="button" class="btn" data-act="todo-verbinden">Mit Microsoft To Do verbinden</button></div>`;
   }
-  const andere = Object.entries(todo.personen || {}).filter(([n, x]) => n !== ich() && x?.status === 'verbunden').map(([n, x]) => x.name || n);
+  const andere = gemeinsamUeber() ? [] : Object.entries(todo.personen || {}).filter(([n, x]) => n !== ich() && x?.status === 'verbunden').map(([n, x]) => x.name || n);
   return `${meins}${andere.length ? `<p class="fine">Auch verbunden: ${esc(andere.join(', '))}.</p>` : ''}
 <p class="fine todo-fuss"><button type="button" class="linkbtn" data-act="todo-appid">App-ID von Microsoft ändern</button></p>`;
 }
@@ -150,6 +184,8 @@ export function klickTodo(el) {
       todoZeichnen();
       planen();
       return true;
+    case 'todo-liste': listeWaehlen = true; todoZeichnen(); return true;
+    case 'todo-liste-zu': listeWaehlen = false; todoZeichnen(); return true;
     case 'todo-trennen': trennenFragen = true; todoZeichnen(); return true;
     case 'todo-trennen-nein': trennenFragen = false; todoZeichnen(); return true;
     case 'todo-trennen-ja':
@@ -164,8 +200,21 @@ export function klickTodo(el) {
   }
 }
 
-/** Die App-ID speichern. */
+/** Die App-ID speichern – oder die Liste in To Do wählen. */
 export function absendenTodo(ev) {
+  if (ev.target.id === 'todo-ziel-form') {
+    ev.preventDefault();
+    const id = String(new window.FormData(ev.target).get('todo-ziel') || '');
+    if (!id) return true;
+    const l = (todo?.personen?.[ich()]?.listen || []).find((x) => x.id === id);
+    if (id !== 'neu' && !l) { melde('Die Liste gibt es nicht mehr – bitte eine andere wählen.'); return true; }
+    app.aendern(opTodoZiel(app.name(), id, id === 'neu' ? 'Haushalt' : l.name, !!l?.geteilt));
+    listeWaehlen = false;
+    melde(l?.geteilt ? `Gemerkt – alle Putztage kommen in „${l.name}“.` : 'Gemerkt – gleich stehen deine Putztage in To Do.');
+    todoZeichnen();
+    planen();
+    return true;
+  }
   if (ev.target.id !== 'todo-app-form') return false;
   ev.preventDefault();
   const feld = $('#todo-app-input');
