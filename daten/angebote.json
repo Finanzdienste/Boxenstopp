@@ -1,6 +1,6 @@
 {
- "stand": "2026-11-01T16:22:46.075Z",
- "woche": "2026-44",
+ "stand": "2026-11-02T12:48:43.261Z",
+ "woche": "2026-45",
  "gesperrt": [
   "Rewe",
   "Edeka"
@@ -11,29 +11,29 @@
    "ok": true,
    "anzahl": 208,
    "hinweis": "Aldi Nord, bundesweit, mit Vorschau auf nächste Woche (93)",
-   "stand": "2026-11-01T16:06:17.091Z"
+   "stand": "2026-11-02T12:36:33.967Z"
   },
   {
    "laden": "Lidl",
    "ok": true,
-   "anzahl": 92,
-   "hinweis": "aus dem Aktionsprospekt gelesen (02.11.–07.11., 09.11.–14.11.), Lesefehler möglich",
-   "stand": "2026-11-01T16:22:39.189Z",
-   "modell": "gemini-3.5-flash"
+   "anzahl": 54,
+   "hinweis": "aus dem Aktionsprospekt gelesen (02.11.–07.11.), Lesefehler möglich",
+   "stand": "2026-11-02T12:48:37.230Z",
+   "modell": "gemini-3.6-flash"
   },
   {
    "laden": "Kaufland",
    "ok": true,
    "anzahl": 191,
    "hinweis": "bundesweite Angebote, regional kann es abweichen; nächste Woche 2",
-   "stand": "2026-11-01T16:22:41.600Z"
+   "stand": "2026-11-02T12:48:38.618Z"
   },
   {
    "laden": "Penny",
    "ok": true,
    "anzahl": 50,
    "hinweis": "KW 45, bundesweit",
-   "stand": "2026-11-01T16:22:46.052Z"
+   "stand": "2026-11-02T12:48:43.220Z"
   }
  ],
  "angebote": [
@@ -901,17 +901,6 @@
    "k": "mehl"
   },
   {
-   "id": "a-0nuepsp",
-   "laden": "Lidl",
-   "name": "Alesto Cashewkerne",
-   "preis": 1.89,
-   "menge": 200,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "cashews"
-  },
-  {
    "id": "a-03zagvg",
    "laden": "Lidl",
    "name": "Alesto Mandeln",
@@ -923,67 +912,23 @@
    "k": "mandeln"
   },
   {
-   "id": "a-0u2rbyu",
+   "id": "a-1ht8t5r",
    "laden": "Lidl",
-   "name": "Almette Frischkäse",
-   "preis": 1.11,
-   "menge": 150,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "frischkaese"
-  },
-  {
-   "id": "a-14t90ji",
-   "laden": "Lidl",
-   "name": "Arla Buko Frischkäse",
+   "name": "Arla Skyr Natur",
    "preis": 1.49,
    "menge": null,
    "einheit": "",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "frischkaese"
-  },
-  {
-   "id": "a-1ihqktn",
-   "laden": "Lidl",
-   "name": "Arla Skyr",
-   "preis": 1.49,
-   "menge": 450,
-   "einheit": "g",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "skyr"
-  },
-  {
-   "id": "a-0i4qoti",
-   "laden": "Lidl",
-   "name": "Barilla Pasta",
-   "preis": 0.99,
-   "menge": 500,
-   "einheit": "g",
-   "bis": "2026-11-07",
-   "von": "2026-11-02",
-   "k": "spaghetti"
-  },
-  {
-   "id": "a-082jh3z",
-   "laden": "Lidl",
-   "name": "Barilla Pasta",
-   "preis": 1.89,
-   "menge": 1,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "spaghetti"
   },
   {
    "id": "a-00qjjkv",
    "laden": "Lidl",
    "name": "Barilla Pesto",
    "preis": 1.99,
-   "menge": 190,
-   "einheit": "g",
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "pesto"
@@ -993,6 +938,17 @@
    "laden": "Lidl",
    "name": "Belbake Mandeln",
    "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": "mandeln"
+  },
+  {
+   "id": "a-1bn4m5g",
+   "laden": "Lidl",
+   "name": "Belbake Mandeln",
+   "preis": 2.49,
    "menge": 200,
    "einheit": "g",
    "bis": "2026-11-07",
@@ -1011,39 +967,6 @@
    "k": "spinat"
   },
   {
-   "id": "a-14c8vdt",
-   "laden": "Lidl",
-   "name": "Bio Ingwer, lose",
-   "preis": 0.49,
-   "menge": 100,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "ingwer"
-  },
-  {
-   "id": "a-0lpi9oz",
-   "laden": "Lidl",
-   "name": "Bio Limetten",
-   "preis": 1.89,
-   "menge": 4,
-   "einheit": "Stk",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "limette"
-  },
-  {
-   "id": "a-17osqwq",
-   "laden": "Lidl",
-   "name": "BIOLAND Hirtenkäse",
-   "preis": 1.79,
-   "menge": 200,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "feta"
-  },
-  {
    "id": "a-1l4zttl",
    "laden": "Lidl",
    "name": "Braune Kultur Champignons",
@@ -1052,17 +975,6 @@
    "einheit": "g",
    "bis": "2026-11-07",
    "von": "2026-11-02",
-   "k": "champignons"
-  },
-  {
-   "id": "a-1qgnfbi",
-   "laden": "Lidl",
-   "name": "Deutsche Braune Bio Kulturchampignons",
-   "preis": 1.99,
-   "menge": 250,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
    "k": "champignons"
   },
   {
@@ -1075,28 +987,6 @@
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "aepfel"
-  },
-  {
-   "id": "a-1v8o5jg",
-   "laden": "Lidl",
-   "name": "Deutsche Süßkartoffeln, lose",
-   "preis": 3.99,
-   "menge": 1,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "suesskartoffel"
-  },
-  {
-   "id": "a-1jmj9ln",
-   "laden": "Lidl",
-   "name": "Deutsche Zwiebeln",
-   "preis": 1.99,
-   "menge": 1,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "zwiebeln"
   },
   {
    "id": "a-0eqav8z",
@@ -1132,114 +1022,59 @@
    "k": "zucker"
   },
   {
-   "id": "a-0oy1i7u",
-   "laden": "Lidl",
-   "name": "DOVGAN Körniger Frischkäse XXL",
-   "preis": 2.69,
-   "menge": 350,
-   "einheit": "g",
-   "bis": "2026-11-07",
-   "von": "2026-11-02",
-   "k": "frischkaese"
-  },
-  {
    "id": "a-0lbe5qn",
    "laden": "Lidl",
    "name": "Frische Hähnchen-Brustfilets",
    "preis": 5.19,
-   "menge": 600,
-   "einheit": "g",
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "haehnchenbrust"
-  },
-  {
-   "id": "a-1aaf2s1",
-   "laden": "Lidl",
-   "name": "Frische Hähnchen-Unterkeulen",
-   "preis": 4.39,
-   "menge": 1,
-   "einheit": "kg",
-   "bis": "2026-11-07",
-   "von": "2026-11-02",
-   "k": "haehnchenkeule"
   },
   {
    "id": "a-0es833g",
    "laden": "Lidl",
    "name": "Frisches Putenbrustfilet",
    "preis": 8.29,
-   "menge": 1,
-   "einheit": "kg",
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "putenbrust"
   },
   {
-   "id": "a-1kc7chw",
+   "id": "a-1goxvt3",
    "laden": "Lidl",
    "name": "Frisches Rinder-Hackfleisch",
-   "preis": 4.49,
-   "menge": 500,
-   "einheit": "g",
+   "preis": 4.99,
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "rinderhack"
   },
   {
-   "id": "a-02xjcw8",
+   "id": "a-0xj29e7",
    "laden": "Lidl",
-   "name": "Grafschafter Weizen Tortilla Wraps XXL",
-   "preis": 1.79,
-   "menge": 740,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "tortillas"
-  },
-  {
-   "id": "a-1dyfyx9",
-   "laden": "Lidl",
-   "name": "Grana Padano g.U.",
+   "name": "Giovanni Ferrari Grana Padano g.U.",
    "preis": 3.99,
-   "menge": 150,
-   "einheit": "g",
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "parmesan"
   },
   {
-   "id": "a-0wm67bc",
+   "id": "a-0hd45d7",
    "laden": "Lidl",
-   "name": "Gutfried Buffet Hähnchenbrust",
-   "preis": 1.59,
-   "menge": null,
-   "einheit": "",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "haehnchenbrust"
-  },
-  {
-   "id": "a-13m6l3s",
-   "laden": "Lidl",
-   "name": "HARVEST BASKET Herzoginkartoffeln",
-   "preis": 1.69,
-   "menge": 600,
+   "name": "Körniger Frischkäse XXL",
+   "preis": 2.69,
+   "menge": 350,
    "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "kartoffeln"
-  },
-  {
-   "id": "a-0c3we6j",
-   "laden": "Lidl",
-   "name": "Hausgemachter Ajvar",
-   "preis": 3.99,
-   "menge": 530,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "ajvar"
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": "frischkaese"
   },
   {
    "id": "a-0hhh9mj",
@@ -1253,59 +1088,15 @@
    "k": "milch"
   },
   {
-   "id": "a-1m26irn",
+   "id": "a-0aez3pb",
    "laden": "Lidl",
-   "name": "Meggle Feine Butter / Streichzart",
-   "preis": 1.49,
+   "name": "Milbona Creme zum Kochen",
+   "preis": 0.69,
    "menge": 250,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "butter"
-  },
-  {
-   "id": "a-006mzuy",
-   "laden": "Lidl",
-   "name": "METZGERFRISCH Frische Hähnchen-Mini-Steaks",
-   "preis": 6.99,
-   "menge": 800,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "haehnchenbrust"
-  },
-  {
-   "id": "a-1wtfnwu",
-   "laden": "Lidl",
-   "name": "METZGERFRISCH Frische Hähnchen-Minutschnitzel",
-   "preis": 8.99,
-   "menge": 1,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "haehnchenbrust"
-  },
-  {
-   "id": "a-1cer02m",
-   "laden": "Lidl",
-   "name": "METZGERFRISCH Frische Hähnchen-Schenkel",
-   "preis": 6.79,
-   "menge": 2,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "haehnchenkeule"
-  },
-  {
-   "id": "a-1fyv5oe",
-   "laden": "Lidl",
-   "name": "METZGERFRISCH Rindergulasch",
-   "preis": 12.99,
-   "menge": 1,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "rindergulasch"
+   "einheit": "ml",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": "kochsahne"
   },
   {
    "id": "a-0r7wrb0",
@@ -1317,6 +1108,17 @@
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "milch"
+  },
+  {
+   "id": "a-0s9layq",
+   "laden": "Lidl",
+   "name": "MILBONA Gouda Jung XXL",
+   "preis": 5.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": "cheddar"
   },
   {
    "id": "a-0pi7lko",
@@ -1341,32 +1143,43 @@
    "k": "schlagsahne"
   },
   {
-   "id": "a-1ehz42g",
+   "id": "a-0psklf7",
    "laden": "Lidl",
-   "name": "Milbona Haltbare Vollmilch",
-   "preis": 9.5,
-   "menge": 12,
-   "einheit": "Pck",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "milch"
+   "name": "MILBONA Mozzarella XXL",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": "mozzarella"
   },
   {
-   "id": "a-1r4ituq",
+   "id": "a-0zt19gn",
    "laden": "Lidl",
-   "name": "MILBONA Sandwich Scheiben",
-   "preis": 1.99,
-   "menge": 200,
+   "name": "MILBONA Original Feta XXL",
+   "preis": 2.59,
+   "menge": 240,
    "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "cheddar"
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": "feta"
   },
   {
    "id": "a-071we7g",
    "laden": "Lidl",
    "name": "Milbona Schlagsahne",
    "preis": 0.69,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": "schlagsahne"
+  },
+  {
+   "id": "a-0fyknez",
+   "laden": "Lidl",
+   "name": "Milbona Schlagsahne",
+   "preis": 0.79,
    "menge": 200,
    "einheit": "g",
    "bis": "2026-11-07",
@@ -1396,39 +1209,6 @@
    "k": "magerquark"
   },
   {
-   "id": "a-0htt187",
-   "laden": "Lidl",
-   "name": "Mini Gnocchi",
-   "preis": 1.49,
-   "menge": 500,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "gnocchi"
-  },
-  {
-   "id": "a-1ea5lsq",
-   "laden": "Lidl",
-   "name": "Pesto",
-   "preis": 1.49,
-   "menge": 190,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": "pesto"
-  },
-  {
-   "id": "a-0kz59bm",
-   "laden": "Lidl",
-   "name": "Philadelphia",
-   "preis": 1.11,
-   "menge": 175,
-   "einheit": "g",
-   "bis": "2026-11-07",
-   "von": "2026-11-02",
-   "k": "frischkaese"
-  },
-  {
    "id": "a-1jjlm1k",
    "laden": "Lidl",
    "name": "Romatomaten",
@@ -1437,7 +1217,7 @@
    "einheit": "g",
    "bis": "2026-11-07",
    "von": "2026-11-02",
-   "k": "kirschtomaten"
+   "k": "tomaten"
   },
   {
    "id": "a-0d11uwn",
@@ -1449,17 +1229,6 @@
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": "brokkoli"
-  },
-  {
-   "id": "a-0kokbnt",
-   "laden": "Lidl",
-   "name": "Tomatensauce",
-   "preis": 1.29,
-   "menge": 390,
-   "einheit": "g",
-   "bis": "2026-11-07",
-   "von": "2026-11-02",
-   "k": "passata"
   },
   {
    "id": "a-1vt581c",
@@ -4881,14 +4650,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/01125670a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
-   "id": "a-0qw86l7",
+   "id": "a-1uftqsu",
    "laden": "Lidl",
-   "name": "Alesto Nuss-Frucht-Mix XXL",
-   "preis": 3.99,
-   "menge": 300,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
+   "name": "Alesto Nuts Royal Naturbelassen",
+   "preis": 2.79,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": ""
+  },
+  {
+   "id": "a-0o0b4st",
+   "laden": "Lidl",
+   "name": "Alesto Walnusskerne",
+   "preis": 2.49,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
    "k": ""
   },
   {
@@ -4896,32 +4676,21 @@
    "laden": "Lidl",
    "name": "Alpenhain Back-Käse",
    "preis": 1.99,
-   "menge": 200,
-   "einheit": "g",
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": ""
   },
   {
-   "id": "a-0tcm73b",
+   "id": "a-0i4qoti",
    "laden": "Lidl",
-   "name": "Alpenhain Original Obazda",
-   "preis": 1.49,
+   "name": "Barilla Pasta",
+   "preis": 0.99,
    "menge": null,
    "einheit": "",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-1wasihy",
-   "laden": "Lidl",
-   "name": "Arla Kaergarden XXL",
-   "preis": 2.29,
-   "menge": null,
-   "einheit": "",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
    "k": ""
   },
   {
@@ -4947,124 +4716,25 @@
    "k": ""
   },
   {
-   "id": "a-09c9aqk",
+   "id": "a-0csi6g0",
    "laden": "Lidl",
-   "name": "Bio Birnen",
-   "preis": 1.99,
-   "menge": 500,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-0j70rz0",
-   "laden": "Lidl",
-   "name": "Bio Feldsalat",
-   "preis": 1.59,
-   "menge": 100,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-19jw7n5",
-   "laden": "Lidl",
-   "name": "BIOLAND Käse",
-   "preis": 1.89,
-   "menge": 200,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-19qc5vv",
-   "laden": "Lidl",
-   "name": "Birnen",
-   "preis": 1.95,
-   "menge": 1.5,
-   "einheit": "kg",
+   "name": "Frische Hähnchen-Unterkeulen",
+   "preis": 5.59,
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": ""
   },
   {
-   "id": "a-1b597ti",
+   "id": "a-1bwof71",
    "laden": "Lidl",
-   "name": "Cappelletti",
-   "preis": 1.49,
-   "menge": 250,
+   "name": "Frisches T-Bone Steak",
+   "preis": 9.79,
+   "menge": 445,
    "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-1rdwd8g",
-   "laden": "Lidl",
-   "name": "CHEF SELECT Seidenknödel",
-   "preis": 1.59,
-   "menge": 500,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-0ou9ssx",
-   "laden": "Lidl",
-   "name": "DELUXE Frische gefüllte Eierteigware",
-   "preis": 1.99,
-   "menge": 250,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-1kfzty3",
-   "laden": "Lidl",
-   "name": "DELUXE Frische Maishähnchenschenkel",
-   "preis": 8.99,
-   "menge": 2.5,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-1qxyp8z",
-   "laden": "Lidl",
-   "name": "DELUXE Käsespätzle",
-   "preis": 2.99,
-   "menge": 350,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-15ec7f5",
-   "laden": "Lidl",
-   "name": "Deutscher Speisekürbis \"Butternut\", lose",
-   "preis": 1.99,
-   "menge": 1,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-0ykp9yh",
-   "laden": "Lidl",
-   "name": "FRESHONA Premium-Gemüse",
-   "preis": 1.99,
-   "menge": 750,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
    "k": ""
   },
   {
@@ -5090,25 +4760,25 @@
    "k": ""
   },
   {
-   "id": "a-1kyafkm",
+   "id": "a-11p7q9s",
    "laden": "Lidl",
-   "name": "Grünländer Käsescheiben XXL",
-   "preis": 2.89,
-   "menge": null,
-   "einheit": "",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
+   "name": "Hähnchen-Hackfleisch",
+   "preis": 4.99,
+   "menge": 800,
+   "einheit": "g",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
    "k": ""
   },
   {
-   "id": "a-000vd0d",
+   "id": "a-0m7jvyz",
    "laden": "Lidl",
-   "name": "Iglo Schlemmer Filet",
-   "preis": 2.49,
-   "menge": 380,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
+   "name": "Kerrygold extra XXL",
+   "preis": 2.59,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
    "k": ""
   },
   {
@@ -5123,61 +4793,6 @@
    "k": ""
   },
   {
-   "id": "a-0p8bmrq",
-   "laden": "Lidl",
-   "name": "McCain Original 1-2-3 Frites",
-   "preis": 2.55,
-   "menge": 1.5,
-   "einheit": "kg",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-01be70o",
-   "laden": "Lidl",
-   "name": "Metzgerfrisch Frischer Tafelspitz",
-   "preis": 11.99,
-   "menge": null,
-   "einheit": "",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-0sa27z5",
-   "laden": "Lidl",
-   "name": "METZGERFRISCH Frisches Rinder-Cevapcici",
-   "preis": 7.99,
-   "menge": 800,
-   "einheit": "g",
-   "bis": "2026-11-07",
-   "von": "2026-11-02",
-   "k": ""
-  },
-  {
-   "id": "a-1hm0qe3",
-   "laden": "Lidl",
-   "name": "METZGERFRISCH Hähnchen-Hackfleisch",
-   "preis": 4.99,
-   "menge": 800,
-   "einheit": "g",
-   "bis": "2026-11-07",
-   "von": "2026-11-02",
-   "k": ""
-  },
-  {
-   "id": "a-1sia2mm",
-   "laden": "Lidl",
-   "name": "MILBONA Backkäse",
-   "preis": 2.49,
-   "menge": 300,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
    "id": "a-1lcmquu",
    "laden": "Lidl",
    "name": "Milbona Crème Fraîche",
@@ -5189,45 +4804,12 @@
    "k": ""
   },
   {
-   "id": "a-1pjggc8",
+   "id": "a-0e65d2t",
    "laden": "Lidl",
-   "name": "MILBONA Edamer",
-   "preis": 1.99,
-   "menge": 400,
+   "name": "Milbona Fettarmer Kefir",
+   "preis": 0.59,
+   "menge": 500,
    "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-0c1dnyf",
-   "laden": "Lidl",
-   "name": "MILBONA Emmentaler",
-   "preis": 2.79,
-   "menge": 400,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-04addht",
-   "laden": "Lidl",
-   "name": "MILBONA Gorgonzola DOP",
-   "preis": 2.49,
-   "menge": 200,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
-   "id": "a-10r196i",
-   "laden": "Lidl",
-   "name": "Milbona Kashkaval XXL",
-   "preis": 8.79,
-   "menge": null,
-   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": ""
@@ -5244,17 +4826,6 @@
    "k": ""
   },
   {
-   "id": "a-1p8g0wl",
-   "laden": "Lidl",
-   "name": "MILBONA Schmelzkäse",
-   "preis": 1.19,
-   "menge": 200,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
-   "k": ""
-  },
-  {
    "id": "a-07f5qhr",
    "laden": "Lidl",
    "name": "Orangen",
@@ -5266,47 +4837,58 @@
    "k": ""
   },
   {
-   "id": "a-133evgh",
+   "id": "a-0kz59bm",
    "laden": "Lidl",
-   "name": "Rama",
-   "preis": 1.79,
+   "name": "Philadelphia",
+   "preis": 1.11,
    "menge": null,
    "einheit": "",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
    "k": ""
   },
   {
-   "id": "a-10tbv73",
+   "id": "a-0shwcxp",
    "laden": "Lidl",
-   "name": "VEMONDO vegane Chunks",
-   "preis": 1.99,
-   "menge": 185,
+   "name": "Rinder-Cevapcici",
+   "preis": 7.99,
+   "menge": 800,
    "einheit": "g",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": ""
   },
   {
-   "id": "a-0dyddef",
+   "id": "a-052pyn2",
    "laden": "Lidl",
-   "name": "Walnuss-kerne",
-   "preis": 1.89,
-   "menge": 200,
-   "einheit": "g",
+   "name": "Südamerikanisches Rindersteak",
+   "preis": 3.89,
+   "menge": null,
+   "einheit": "",
    "bis": "2026-11-07",
    "von": "2026-11-02",
    "k": ""
   },
   {
-   "id": "a-096wtdy",
+   "id": "a-02j8dni",
    "laden": "Lidl",
-   "name": "Zott Sahnejoghurt",
-   "preis": 0.44,
-   "menge": 140,
-   "einheit": "g",
-   "bis": "2026-11-14",
-   "von": "2026-11-09",
+   "name": "Tomato al Gusto Tomatensauce",
+   "preis": 1.49,
+   "menge": null,
+   "einheit": "",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
+   "k": ""
+  },
+  {
+   "id": "a-0lt7t2n",
+   "laden": "Lidl",
+   "name": "XXL Birnen",
+   "preis": 1.95,
+   "menge": 1.5,
+   "einheit": "kg",
+   "bis": "2026-11-07",
+   "von": "2026-11-02",
    "k": ""
   },
   {
