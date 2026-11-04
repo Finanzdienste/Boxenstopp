@@ -8,16 +8,28 @@
  *
  * Vier Strategien:
  *
- *   Seitenaufrufe    erst Netz, bei Fehlschlag der Zwischenspeicher.
- *   daten/*.json     erst Netz, bei Fehlschlag der Zwischenspeicher – neue
- *                    Rezepte sollen sofort da sein, alte nur ohne Netz.
+ *   Seitenaufrufe    erst Netz, bei Fehlschlag (oder nach GEDULD ohne
+ *                    Antwort – schlechtes Netz im Laden) der Zwischenspeicher.
+ *   daten/*.json     genauso – neue Rezepte sollen sofort da sein, alte nur
+ *                    ohne Netz. In einem eigenen Vorrat (DATEN), der ein
+ *                    Update der App übersteht; gefragt wird mit „no-cache“
+ *                    (unverändert: nur ein kurzes 304 statt 600 KB).
  *   bilder/rezepte/  aus einem eigenen Vorrat (BILDER), der ein Update der
- *                    App übersteht; nur, was fehlt, kommt aus dem Netz. Ein
- *                    neues Rezeptfoto hat eine neue Adresse (?v=…), das alte
- *                    fliegt dann raus.
+ *                    App übersteht. Alle Fotos aus daten/rezepte.json holt
+ *                    der Worker von selbst (fotosVorrat) – ohne Netz soll
+ *                    jedes Rezept sein Foto haben, nicht nur die schon
+ *                    gesehenen. Ein neues Rezeptfoto hat eine neue Adresse
+ *                    (?v=…), das alte fliegt dann raus.
  *   Alles andere     sofort aus dem Zwischenspeicher, parallel erneuern –
  *                    auch die Zutaten-Bildchen, die schon beim Installieren
  *                    mitkommen (Liste in bilder/zutaten/alle.json).
+ *
+ * Ein Update gilt erst, wenn die ganze App (SHELL) geladen ist – sonst
+ * bleibt die alte Fassung, und der Browser versucht es später noch einmal.
+ * Auffrischen ohne Neustart: Kommt die App nach einer Weile wieder nach vorn,
+ * schickt sie „aktualisieren“; auf Android (installiert) ruft Chrome
+ * zusätzlich ab und zu „periodicsync“ – beides holt Daten und Fotos frisch
+ * und schaut nach einer neuen Fassung.
  *
  * Die Einkaufsliste geht an api.github.com und damit nie durch diesen Worker
  * (fremder Ursprung, siehe unten).
@@ -27,9 +39,13 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v39';
+const VERSION = 'v40';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
+const DATEN = 'boxenstopp-daten-v1';
+const DATEN_DATEIEN = ['daten/rezepte.json', 'daten/angebote.json', 'daten/preisverlauf.json'];
+/** So lange wartet die App aufs Netz, dann nimmt sie den Vorrat (die Antwort kommt trotzdem noch hinein). */
+const GEDULD = 4000;
 
 const SHELL = [
   './',
@@ -93,14 +109,22 @@ const SHELL = [
  */
 const frisch = (eingabe) => fetch(new Request(eingabe, { cache: 'reload' }));
 
+const gut = (res) => res && res.ok && !res.redirected && res.type === 'basic';
+
 self.addEventListener('install', (event) => {
   const holen = (cache, url) => frisch(url)
     .then((res) => (res && res.ok ? cache.put(url, res) : null))
     .catch(() => null);
+  // Die App selbst muss ganz da sein: Fehlt eine Datei (schlechtes Netz), gilt das Update nicht –
+  // sonst flöge beim Aktivieren die alte, vollständige Fassung weg, und ohne Netz fehlte ein Stück
+  const streng = (cache, url) => frisch(url).then((res) => {
+    if (!res || !res.ok) throw new Error(`${url}: ${res ? res.status : 'kein Netz'}`);
+    return cache.put(url, res);
+  });
   event.waitUntil(
     caches.open(CACHE)
       .then((cache) => Promise.all([
-        ...SHELL.map((url) => holen(cache, url)),
+        ...SHELL.map((url) => streng(cache, url)),
         // Die Zutaten-Bildchen gehören zur Einkaufsliste – die muss auch im Laden ohne Netz gehen
         frisch('./bilder/zutaten/alle.json')
           .then((res) => (res.ok ? res.json() : []))
@@ -114,13 +138,87 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys
-        .filter((k) => k.startsWith('boxenstopp-') && k !== CACHE && k !== BILDER)
-        .map((k) => caches.delete(k))))
-      .then(() => self.clients.claim()),
-  );
+  event.waitUntil((async () => {
+    const daten = await caches.open(DATEN);
+    const alte = (await caches.keys()).filter((k) => k.startsWith('boxenstopp-') && k !== CACHE && k !== BILDER && k !== DATEN);
+    for (const k of alte) {
+      // Früher lagen Rezepte & Co. im Vorrat der Fassung – erst retten, dann wegräumen
+      // (sonst wären sie ohne Netz weg, bis die App sie neu lädt)
+      try {
+        const alt = await caches.open(k);
+        for (const req of await alt.keys()) {
+          if (!new URL(req.url).pathname.includes('/daten/') || await daten.match(req, { ignoreSearch: true })) continue;
+          const res = await alt.match(req);
+          if (res) await daten.put(new URL(req.url).href.split('?')[0], res);
+        }
+      } catch { /* dann eben nicht */ }
+      await caches.delete(k);
+    }
+    await self.clients.claim();
+  })());
+});
+
+/*
+ * Alle Rezeptfotos aus daten/rezepte.json in den Vorrat (BILDER): Was schon
+ * da ist, bleibt; fehlende kommen aus dem Netz (je vier auf einmal), alte
+ * Fassungen (anderes ?v=) und Fotos von Rezepten, die es nicht mehr gibt,
+ * fliegen raus. Läuft nach jedem frischen daten/rezepte.json.
+ */
+let fotosLaeuft = null;
+function fotosVorrat() {
+  fotosLaeuft = fotosLaeuft || (async () => {
+    const res = await (await caches.open(DATEN)).match(new URL('daten/rezepte.json', self.registration.scope).href, { ignoreSearch: true });
+    if (!res) return;
+    let rezepte = [];
+    try { rezepte = (await res.json()).rezepte || []; } catch { return; }
+    const soll = new Map(); // Pfad → Adresse mit ?v=
+    for (const r of rezepte) {
+      if (typeof r?.bild !== 'string' || !/^bilder\/rezepte\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(r.bild)) continue;
+      const u = new URL(r.bild, self.registration.scope);
+      soll.set(u.pathname, u.href);
+    }
+    if (!soll.size) return;
+    const c = await caches.open(BILDER);
+    const da = new Set();
+    for (const k of await c.keys()) {
+      const u = new URL(k.url);
+      if (soll.get(u.pathname) === u.href) da.add(u.href);
+      else await c.delete(k);
+    }
+    const fehlt = [...soll.values()].filter((href) => !da.has(href));
+    for (let i = 0; i < fehlt.length; i += 4) {
+      await Promise.all(fehlt.slice(i, i + 4).map((href) => fetch(href)
+        .then((r) => (gut(r) ? c.put(href, r) : null))
+        .catch(() => null)));
+    }
+  })().catch(() => null).finally(() => { fotosLaeuft = null; });
+  return fotosLaeuft;
+}
+
+/** Daten und Fotos frisch in den Vorrat, und nachsehen, ob es eine neue App-Fassung gibt. */
+let auffrischenLaeuft = null;
+function auffrischen() {
+  auffrischenLaeuft = auffrischenLaeuft || (async () => {
+    const daten = await caches.open(DATEN);
+    await Promise.all(DATEN_DATEIEN.map(async (pfad) => {
+      const href = new URL(pfad, self.registration.scope).href;
+      try {
+        const res = await fetch(new Request(href, { cache: 'no-cache' }));
+        if (gut(res)) await daten.put(href, res);
+      } catch { /* ohne Netz: der Vorrat bleibt */ }
+    }));
+    await fotosVorrat();
+    await self.registration.update().catch(() => null);
+  })().catch(() => null).finally(() => { auffrischenLaeuft = null; });
+  return auffrischenLaeuft;
+}
+
+// Kommt die App nach einer Weile wieder nach vorn (app.js), und auf Android ab und zu im Hintergrund
+self.addEventListener('message', (event) => {
+  if (event.data?.boxenstopp === 'aktualisieren') event.waitUntil(auffrischen());
+});
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'boxenstopp-aktualisieren') event.waitUntil(auffrischen());
 });
 
 /*
@@ -162,23 +260,40 @@ self.addEventListener('fetch', (event) => {
   // GitHub-API und alles Fremde: nicht anfassen.
   if (url.origin !== self.location.origin) return;
 
-  const imVorrat = (req) => caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: true }));
-  const gut = (res) => res && res.ok && !res.redirected && res.type === 'basic';
+  const imVorrat = (req, name = CACHE) => caches.open(name).then((c) => c.match(req, { ignoreSearch: true }));
   const ablegen = (req, res) => { const kopie = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopie)); };
 
-  const erstNetz = (fallback) => frisch(request)
-    .then((res) => {
-      if (gut(res)) { ablegen(request, res); return res; }
-      return fallback().then((hit) => hit || res);
-    })
-    .catch(() => fallback().then((hit) => hit || Response.error()));
+  /*
+   * Erst das Netz – aber nicht ewig: Antwortet es nach GEDULD noch nicht, nimmt
+   * die Seite den Vorrat. Die Antwort aus dem Netz kommt trotzdem noch in den
+   * Vorrat (dann ist es beim nächsten Mal frisch); danach: was dann noch zu tun ist.
+   */
+  const erstNetz = (laden, name, fallback, danach = null) => {
+    let ablage = Promise.resolve();
+    const netz = laden().then((res) => {
+      if (gut(res)) {
+        const kopie = res.clone();
+        ablage = caches.open(name).then((c) => c.put(request, kopie)).then(() => danach?.()).catch(() => null);
+      }
+      return res;
+    });
+    event.waitUntil(netz.then(() => ablage, () => null));
+    const zuLange = new Promise((ok) => { setTimeout(() => ok(null), GEDULD); });
+    return Promise.race([netz.catch(() => null), zuLange]).then(async (res) => {
+      if (gut(res)) return res;
+      const hit = await fallback();
+      if (hit) return hit;
+      return res || netz.catch(() => Response.error());
+    });
+  };
 
   if (request.mode === 'navigate') {
-    event.respondWith(erstNetz(() => imVorrat(request).then((hit) => hit || imVorrat('./index.html'))));
+    event.respondWith(erstNetz(() => frisch(request), CACHE, () => imVorrat(request).then((hit) => hit || imVorrat('./index.html'))));
     return;
   }
   if (url.pathname.startsWith(new URL('./daten/', self.location).pathname)) {
-    event.respondWith(erstNetz(() => imVorrat(request)));
+    const rezepte = url.pathname.endsWith('/daten/rezepte.json');
+    event.respondWith(erstNetz(() => fetch(new Request(request, { cache: 'no-cache' })), DATEN, () => imVorrat(request, DATEN), rezepte ? fotosVorrat : null));
     return;
   }
   if (url.pathname.startsWith(new URL('./bilder/rezepte/', self.location).pathname)) {

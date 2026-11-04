@@ -440,11 +440,27 @@ werkzeug/zutaten-bilder.mjs`.
 Seitenbildern). Die App holt es direkt vom Bildserver des Ladens, ohne
 Referrer; fehlt es oder lädt es nicht, steht das Bildchen der Zutat da.
 
-Offline (`sw.js`): Die Bildchen kommen schon beim Installieren mit (Liste in
-`bilder/zutaten/alle.json`), damit die Liste auch im Laden ohne Netz
-vollständig ist. Rezeptfotos landen beim ersten Ansehen in einem eigenen
-Vorrat, der Updates der App übersteht; ein neues Foto hat eine neue
-Adresse, das alte fliegt raus.
+Offline (`sw.js`): Ohne Netz soll alles da sein, was man zuletzt sehen
+konnte.
+
+| was | wie |
+| --- | --- |
+| **die App** | beim Installieren ganz (SHELL); fehlt beim Update eine Datei (schlechtes Netz), gilt das Update nicht – die alte, vollständige Fassung bleibt, der Browser versucht es später noch einmal |
+| **Bildchen** | kommen schon beim Installieren mit (Liste in `bilder/zutaten/alle.json`), damit die Liste auch im Laden ohne Netz vollständig ist |
+| **Rezepte, Angebote, Preisverlauf** | `daten/*.json` in einem eigenen Vorrat, der Updates der App übersteht (bis v39 lagen sie im Vorrat der Fassung und waren nach einem Update weg, bis die App sie neu lud – beim Update ziehen sie um); gefragt wird mit „no-cache“: unverändert nur ein kurzes 304 statt 600 KB |
+| **Rezeptfotos** | alle 50 in einem eigenen Vorrat, der Updates übersteht – der Worker holt sie von selbst nach jedem frischen `rezepte.json`, nicht erst beim Ansehen (vorher fehlten ohne Netz 40 von 50); ein neues Foto hat eine neue Adresse, das alte fliegt raus; fehlt doch eins, steht das Ersatzbild aus den Zutaten-Bildchen da |
+| **schlechtes Netz** | Seite und Daten: erst das Netz, aber nach 4 s ohne Antwort aus dem Vorrat (die späte Antwort kommt trotzdem noch hinein) |
+| **die Liste** | wie zuletzt gesehen aus dem localStorage (`js/speicher.js`), Änderungen warten, bis wieder Netz da ist |
+
+Auffrischen: Beim Öffnen sowieso; kommt die App nach einer halben Stunde
+oder mehr wieder nach vorn, holt der Worker Rezepte, Angebote,
+Preisverlauf und fehlende Fotos frisch in den Vorrat und schaut nach einer
+neuen Fassung – fürs nächste Öffnen ohne Netz. Auf Android (Chrome, als App
+installiert) darf er das auch im Hintergrund (Periodic Background Sync,
+`boxenstopp-aktualisieren`, wie oft entscheidet Chrome – meist ein paarmal
+am Tag oder seltener); iPhone und iPad lassen das bei Web-Apps nicht zu.
+Die gemeinsame Liste frischt sich nicht im Hintergrund auf: Dafür bräuchte
+der Worker den GitHub-Schlüssel, und der bleibt im localStorage der Seite.
 
 ### Haushalt
 
@@ -1054,7 +1070,12 @@ Probieren laufen (an wen, nichts doppelt, Preisalarm, Probe, Nachtragen,
 Senden über eine web-push-Attrappe) und spielt dann im ganzen Chromium
 (nur dort lassen sich Mitteilungen erlauben) Einrichten, An/Aus, den
 einmaligen Hinweis auf weiteren Geräten und die Mitteilung aus dem
-Service Worker durch. `test-import.mjs` prüft den
+Service Worker durch. `test-offline.mjs` lädt die App einmal und
+schaltet dann den Server ab: alle Rezepte, alle Fotos (auch nie gesehene),
+das Ersatzbild für ein fehlendes; ein Update, während die Rezepte nicht zu
+holen sind (samt Umzug aus dem alten Vorrat), ein Update mit fehlender
+Datei (gilt nicht), Auffrischen ohne Neustart und schlechtes Netz (die
+Rezepte nach gut 4 s aus dem Vorrat statt nach 20 s). `test-import.mjs` prüft den
 Rezept-Import mit einer nachgebauten Gemini-API. `test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
 ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,

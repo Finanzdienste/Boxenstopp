@@ -144,6 +144,21 @@ function rezeptFoto(r, { gross = false } = {}) {
   return gross ? `<div class="d-foto d-foto-ersatz" aria-hidden="true">${bildchen}</div>` : `<span class="box-foto box-foto-ersatz" aria-hidden="true">${bildchen}</span>`;
 }
 
+/*
+ * Ein Rezeptfoto, das nicht lädt (ohne Netz und noch nicht im Vorrat): statt
+ * eines kaputten Bilds das Ersatzbild aus den Bildchen der Hauptzutaten.
+ * Fehlerereignisse steigen nicht auf – darum beim Herabsteigen abfangen.
+ */
+document.addEventListener('error', (ev) => {
+  const img = ev.target;
+  if (img?.tagName !== 'IMG' || !/(^|\/)bilder\/rezepte\//.test(img.getAttribute('src') || '')) return;
+  if (img.closest('.gepinnt-b')) { img.hidden = true; return; }
+  const huelle = img.closest('.box-foto:not(.box-foto-ersatz), .d-foto:not(.d-foto-ersatz)');
+  const gross = !!huelle?.classList.contains('d-foto');
+  const r = app.nachId[(gross ? aktuell : img.closest('[data-open]')?.dataset.open) || ''];
+  if (huelle && r) huelle.outerHTML = rezeptFoto({ ...r, bild: '' }, { gross });
+}, true);
+
 /** Die Zeit auf der Karte – in eurem Tempo hervorgehoben. */
 function zeitPille(r) {
   const z = zeitFuer(r);

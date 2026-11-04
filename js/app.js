@@ -289,5 +289,35 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => { /* dann ohne Offline-Betrieb */ });
+    hintergrundAnmelden();
   });
+  /*
+   * Auf dem neuesten Stand bleiben, ohne die App neu zu starten: Kommt sie nach
+   * einer halben Stunde oder mehr wieder nach vorn, holt der Service Worker
+   * Rezepte, Angebote, Preisverlauf und fehlende Fotos frisch in den Vorrat
+   * (unverändert kostet das nur ein kurzes Nachfragen) und schaut nach einer
+   * neuen Fassung – so ist es beim nächsten Öffnen ohne Netz aktuell.
+   */
+  let aufgefrischt = Date.now();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible' || Date.now() - aufgefrischt < 30 * 60 * 1000 || !navigator.onLine) return;
+    aufgefrischt = Date.now();
+    navigator.serviceWorker.controller?.postMessage({ boxenstopp: 'aktualisieren' });
+  });
+}
+
+/*
+ * Auf Android (Chrome, als App installiert) darf der Service Worker das auch
+ * im Hintergrund, ab und zu über den Tag – wie oft, entscheidet Chrome.
+ * iPhone und iPad lassen das bei Web-Apps nicht zu; dort frischt die App
+ * auf, sobald sie offen ist.
+ */
+async function hintergrundAnmelden() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (!reg.periodicSync) return;
+    const erlaubt = await navigator.permissions?.query({ name: 'periodic-background-sync' });
+    if (erlaubt?.state !== 'granted') return;
+    if (!(await reg.periodicSync.getTags()).includes('boxenstopp-aktualisieren')) await reg.periodicSync.register('boxenstopp-aktualisieren', { minInterval: 4 * 60 * 60 * 1000 });
+  } catch { /* geht hier nicht – dann eben beim Öffnen */ }
 }
