@@ -21,6 +21,11 @@ const abgeschnitten = (p) => p.$$eval('.tabbar .tab:not([hidden]) span:not(.badg
 const h = await handy(browser, { viewport: { width: 360, height: 780 } });
 const p = h.page;
 check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'unten sechs Reiter, die Einstellungen ganz rechts');
+// Bei den Rezepten keine großen Karten mehr – nur die Kachel „Reste“ (die hat keinen Reiter); was unten ein Reiter ist, steht nicht doppelt da
+const kacheln = () => p.$$eval('#browse .abk', (xs) => xs.filter((x) => x.offsetParent).map((x) => x.querySelector('.abk-t').innerText.trim()));
+check(JSON.stringify(await kacheln()) === JSON.stringify(['Reste']) && await p.locator('#browse .reste-karte').count() === 0, `bei den Rezepten nur „Reste“ – Amy, Haushalt und Angebote sind ja Reiter (${(await kacheln()).join(', ')})`);
+const kachelHoehe = await p.locator('#browse .abk-reste').evaluate((x) => x.getBoundingClientRect().height);
+check(kachelHoehe < 100, `eine kleine Kachel (${Math.round(kachelHoehe)} px hoch)`);
 check(await p.evaluate(() => document.querySelector('.tabbar').classList.contains('kurz')) && (await p.locator('.tab[data-tab="amy"]').innerText()).trim() === 'Amy' && (await p.locator('.tab[data-tab="einkauf"]').innerText()).includes('Liste'), '360 px breit: die Kurzform („Amy“, „Liste“)');
 check((await abgeschnitten(p)).length === 0, `keine Beschriftung abgeschnitten (${(await abgeschnitten(p)).join(', ')})`);
 await p.setViewportSize({ width: 430, height: 900 });
@@ -42,11 +47,12 @@ await p.click('#e-reiter [data-reiter="amy"]');
 check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'Amys Rezepte ausgeblendet: fünf Reiter');
 check(await bis(async () => !(await p.evaluate(() => document.querySelector('.tabbar').classList.contains('kurz')))), 'jetzt passt die lange Beschriftung wieder');
 await p.click('.tab[data-tab="rezepte"]');
-check(await p.locator('#browse .amy-link').isVisible(), 'dafür steht bei den Rezepten die Karte „Amys Rezepte“');
-await p.click('#browse .amy-link');
+check(await p.locator('#browse .abk-amy').isVisible() && JSON.stringify(await kacheln()) === JSON.stringify(['Reste', 'Amy']), 'dafür steht bei den Rezepten die Kachel „Amy“');
+await p.click('#browse .abk-amy');
 check(await tab(p) === 'amy', '…und sie führt hin');
 await p.click('.tab[data-tab="einstellungen"]');
 for (const t of ['rezepte', 'angebote', 'haushalt']) await p.click(`#e-reiter [data-reiter="${t}"]`);
+check(await p.evaluate(() => [...document.querySelectorAll('#browse .abk')].filter((x) => window.getComputedStyle(x).display !== 'none').length) === 4, 'alles außer der Liste ausgeblendet: bei den Rezepten vier Kacheln (Reste, Amy, Haushalt, Angebote)');
 check(await p.locator('#e-reiter [data-reiter="einkauf"]').isDisabled() && (await p.locator('#e-reiter').innerText()).includes('einer bleibt'), 'nur noch die Einkaufsliste: die lässt sich nicht auch noch ausblenden');
 check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['einkauf', 'einstellungen']), 'unten: Einkaufsliste und Einstellungen');
 await p.click('.tab[data-tab="einkauf"]');
@@ -170,6 +176,8 @@ check(await bis(() => gh.liste()?.bons?.haehnchenbrust?.length === 2 && gh.liste
 const b = await handy(browser, { viewport: { width: 1280, height: 860 } });
 const bp = b.page;
 check(await bp.locator('.tabbar').isHidden() && await bp.locator('.kopf-einst').isVisible(), 'breit: keine Leiste unten, oben das Zahnrad');
+const breitKacheln = await bp.$$eval('#browse .abk', (xs) => xs.filter((x) => x.offsetParent).map((x) => x.querySelector('.abk-t').innerText.trim()));
+check(JSON.stringify(breitKacheln) === JSON.stringify(['Resteverwertung', 'Amys Rezepte', 'Haushalt', 'Angebote']), `breit (ohne Leiste unten): alle vier Kacheln, ausgeschrieben (${breitKacheln.join(', ')})`);
 await bp.click('.kopf-einst');
 check(await bp.locator('#view-einstellungen').isVisible() && await bp.locator('#view-list').isVisible() && await bp.locator('#view-recipes').isHidden(), 'Einstellungen links, die Liste bleibt rechts');
 await bp.click('#view-einstellungen .back');

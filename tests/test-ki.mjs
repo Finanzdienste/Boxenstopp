@@ -273,7 +273,7 @@ await bis(async () => (await t.locator('#sync-text').innerText()) === 'Geteilt')
 await t.click('.tab[data-tab="rezepte"]');
 
 // --- einrichten
-await t.click('.reste-karte');
+await t.click('#browse .abk-reste');
 check(!(await t.locator('#reste').isHidden()) && await t.locator('#k-schluessel').count() === 1, 'Resteverwertung öffnet – ohne Schlüssel zuerst das Einrichten');
 await t.fill('#k-schluessel', 'falsch');
 await t.click('#k-schluessel-form button[type="submit"]');

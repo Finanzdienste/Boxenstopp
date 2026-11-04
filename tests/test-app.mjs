@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS, ROOT, APP_URL } from './hilfe.mjs';
 import { woche } from '../js/angebote.js';
+import { wochenAbstand, wochenSchluessel } from '../js/preisverlauf.js';
 
 const { check, ende } = pruefer();
 const browser = await starteBrowser();
@@ -162,10 +163,12 @@ check(/≈ \d+(,\d\d)? €/.test(await text('#l-count')), `die Liste summiert di
 check((await zeile('Knoblauch').locator('.item-qty').innerText()).replace(/\s+/g, ' ') === '10 Zehen ≈ 1 Knolle', 'Knoblauch: 10 Zehen, etwa 1 Knolle');
 check((await zeile('Öl, neutral').innerText()).includes('Butter Chicken: 10 g'), 'Öl mit Text statt Menge');
 check(await page.locator('#forrow .forchip').count() === 2, '„Für“: Butter Chicken und Teriyaki Bowl');
-// Angebote auf der Liste und die Empfehlung (tests/daten/angebote.json: das Aldi-Hähnchen, 600 g 5,19 € – 24 % unter dem Richtpreis)
+// Angebote auf der Liste und die Empfehlung (tests/daten/angebote.json: das Aldi-Hähnchen, 600 g 5,19 € – 24 % unter dem Richtpreis).
+// Der Verlauf (tests/daten/preisverlauf.json) fängt in KW 36 an; „seit … Wochen“ zählt bis zur Woche von heute
+const seitKw36 = wochenAbstand('2026-W36', wochenSchluessel(new Date()));
 const huhnAngebote = zeile('Hähnchenbrustfilet').locator('.l-angebote');
 const txt = async (loc) => (await loc.innerText().catch(() => '–')).replace(/\s+/g, ' ');
-check(await bis(async () => (await huhnAngebote.count()) === 1) && (await txt(huhnAngebote.locator('.l-angebot'))) === '−24 % am günstigsten bei Aldi: 600 g 5,19 € · 8,65 €/kg Tiefstpreis seit 8 Wochen', `auf der Liste: wo Hähnchen gerade am günstigsten ist – mit dem Preisverlauf (${await txt(huhnAngebote)})`);
+check(await bis(async () => (await huhnAngebote.count()) === 1) && (await txt(huhnAngebote.locator('.l-angebot'))) === `−24 % am günstigsten bei Aldi: 600 g 5,19 € · 8,65 €/kg Tiefstpreis seit ${seitKw36} Wochen`, `auf der Liste: wo Hähnchen gerade am günstigsten ist – mit dem Preisverlauf (${await txt(huhnAngebote)})`);
 check(await zeile('Basmati- oder Jasminreis').locator('.l-angebote').count() === 0, 'Reis nicht – der ist nirgends im Angebot');
 check(await bis(async () => (await page.locator('#l-tipp').isVisible()) && (await txt(page.locator('#l-tipp'))).includes('Aldi – 1 Sache im Angebot, ≈')), `oben über der Liste: am günstigsten einkaufen bei Aldi (${await txt(page.locator('#l-tipp'))})`);
 // Ein eigenes Angebot dazu: Lidl hat das Hähnchen auch, je Kilo etwas teurer

@@ -51,8 +51,8 @@ export function reiterReihe() {
 const reiterMerken = ({ aus = reiterAus(), reihe = reiterReihe() } = {}) => schreibe(REITER_AUS, { aus, reihe });
 
 /**
- * Die Leiste unten nach der Wahl: Ausgeblendetes weg, die Karte „Amys
- * Rezepte“ bei den Rezepten dafür auch schmal (CSS: data-reiter-aus).
+ * Die Leiste unten nach der Wahl: Ausgeblendetes weg, die Kacheln „Amy“,
+ * „Haushalt“, „Angebote“ bei den Rezepten dafür auch schmal (CSS: data-reiter-aus).
  * wechseln: Steht man gerade auf einem ausgeblendeten Reiter, zum ersten
  * sichtbaren.
  */
@@ -96,7 +96,7 @@ function reiterHTML() {
       + `<button type="button" class="e-pfeil" data-reiter-runter="${k}" aria-label="${esc(name)} weiter nach hinten"${i === reihe.length - 1 ? ' disabled' : ''}>${RUNTER}</button></li>`;
   }).join('');
   return `<ol class="e-reiter" aria-label="Reiter unten, von links nach rechts">${zeilen}<li class="e-zeile fest"><label class="e-schalter"><input type="checkbox" checked disabled>${symbol('einstellungen')}<span>Einstellungen <small>– immer da, ganz rechts</small></span></label></li></ol>
-<p class="fine">Häkchen weg blendet einen Reiter aus, die Pfeile ändern die Reihenfolge – von oben nach unten heißt in der Leiste von links nach rechts. Gilt für dieses Gerät. Amys Rezepte, die Angebote und der Haushalt bleiben auch ausgeblendet über ihre Karte bei den Rezepten erreichbar.</p>`;
+<p class="fine">Häkchen weg blendet einen Reiter aus, die Pfeile ändern die Reihenfolge – von oben nach unten heißt in der Leiste von links nach rechts. Gilt für dieses Gerät. Amys Rezepte, die Angebote und der Haushalt bleiben auch ausgeblendet über ihre Kachel bei den Rezepten erreichbar.</p>`;
 }
 
 /* --------------------------------------------------------- Darstellung */

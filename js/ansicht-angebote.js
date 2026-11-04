@@ -466,13 +466,12 @@ ${passtHTML(top)}
   zahlZeichnen();
 }
 
-/** Die Zahl am Reiter unten und der Text auf der Karte bei den Rezepten. */
+/** Die Zahl am Reiter unten und an der Kachel bei den Rezepten (wie viele Rezeptzutaten diese Woche im Angebot sind). */
 export function zahlZeichnen() {
   const n = angeboteAnzahl();
-  const b = $('#a-badge');
-  if (b) { b.textContent = String(n); b.hidden = !n; }
-  const k = $('#angebote-karte-text');
-  if (k) k.textContent = n ? `${n} Rezeptzutat${n === 1 ? '' : 'en'} diese Woche im Angebot – welche Rezepte davon profitieren, und ein neues aus den Angeboten.` : `${quellenText()} – was diese Woche günstig ist, welche Rezepte davon profitieren, und ein neues aus den Angeboten.`;
+  for (const b of [$('#a-badge'), $('#a-abk')]) if (b) { b.textContent = String(n); b.hidden = !n; }
+  const k = $('#browse .abk-angebote');
+  if (k) k.title = n ? `${n} Rezeptzutat${n === 1 ? '' : 'en'} diese Woche im Angebot` : quellenText();
 }
 
 /* ------------------------------------------------------------- Fotos */

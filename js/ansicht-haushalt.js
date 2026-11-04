@@ -78,11 +78,9 @@ export function haushaltOffen(stand = app.stand, name = ich(), tag = heute()) {
 }
 
 export function haushaltZahl() {
-  const b = $('#h-badge');
-  if (!b) return;
   const n = haushaltOffen();
-  b.hidden = n === 0;
-  b.textContent = String(n);
+  // Am Reiter unten und an der Kachel bei den Rezepten
+  for (const b of [$('#h-badge'), $('#h-abk')]) if (b) { b.hidden = n === 0; b.textContent = String(n); }
 }
 
 /* --------------------------------------------------------------- Zeichnen */

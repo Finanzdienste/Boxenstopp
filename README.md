@@ -196,7 +196,7 @@ Angebot günstig ist.
 ### Amys Rezepte
 
 Der Reiter, in dem Amy ihre eigenen Rezepte schreibt (am Rechner über die
-Karte bei den Rezepten, direkt mit `#amy` in der Adresse). Alles ist rosa
+Kachel bei den Rezepten, direkt mit `#amy` in der Adresse). Alles ist rosa
 und rund: das Thema hängt an `html[data-tab="amy"]` und färbt auch Kopf,
 Reiter und Liste um, Überschriften in Pacifico, Text in Fredoka (beide OFL),
 Pünktchen im Hintergrund, Herzchen und Glitzer aus den Fluent Emoji; dunkel
@@ -634,9 +634,12 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   Liste heißt links in der Leiste; die Einstellungen sind immer da, ganz
   rechts. Je Gerät (`boxenstopp.reiter.v1`: `aus`, `reihe`; ein Skript
   gleich hinter der Leiste in `index.html` ordnet sie vor dem ersten Bild; ein neuer Reiter kommt hinten
-  dazu). Ist „Amys Rezepte“ oder „Haushalt“ aus, steht die Karte auch
-  auf dem Handy bei den Rezepten (breit stehen sie immer da). Passen die Beschriftungen nicht
-  nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
+  dazu). Bei den Rezepten steht oben eine Reihe kleiner Kacheln: „Reste“
+  (die Resteverwertung hat keinen Reiter) immer, „Amy“, „Haushalt“ und
+  „Angebote“ auf dem Handy nur, wenn ihr Reiter unten aus ist – sonst
+  stünden sie doppelt da (breit, ohne Leiste unten, immer; die Zahlen wie
+  am Reiter). Passen die Beschriftungen nicht nebeneinander, zeigt die
+  Leiste die Kurzform („Amy“, „Liste“).
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
   die Läden (je Laden „Vergessen“), die Preisalarme und eure Preise vom Bon
   (je löschen) – alles mit Rückgängig.
