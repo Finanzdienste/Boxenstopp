@@ -51,10 +51,9 @@ export function reiterReihe() {
 const reiterMerken = ({ aus = reiterAus(), reihe = reiterReihe() } = {}) => schreibe(REITER_AUS, { aus, reihe });
 
 /**
- * Die Leiste unten nach der Wahl: Ausgeblendetes weg, die Kacheln „Amy“,
- * „Haushalt“, „Angebote“ bei den Rezepten dafür auch schmal (CSS: data-reiter-aus).
- * wechseln: Steht man gerade auf einem ausgeblendeten Reiter, zum ersten
- * sichtbaren.
+ * Die Leiste unten nach der Wahl: Ausgeblendetes weg (auf dem Handy dann ganz
+ * – zurück nur hier). wechseln: Steht man gerade auf einem ausgeblendeten
+ * Reiter, zum ersten sichtbaren.
  */
 export function reiterAnwenden({ wechseln = false } = {}) {
   const aus = reiterAus();
@@ -63,7 +62,6 @@ export function reiterAnwenden({ wechseln = false } = {}) {
   // In der gewählten Reihenfolge, die Einstellungen ganz rechts
   if (bar) for (const k of [...reihe, 'einstellungen']) { const b = bar.querySelector(`.tab[data-tab="${k}"]`); if (b) bar.append(b); }
   for (const b of $$('.tabbar .tab')) b.hidden = aus.includes(b.dataset.tab);
-  document.documentElement.dataset.reiterAus = aus.join(' ');
   if (wechseln && aus.includes(ansicht.tab)) zeigeReiter(reihe.find((k) => !aus.includes(k)) || 'einstellungen', true);
   tabbarAnpassen();
 }
@@ -96,7 +94,7 @@ function reiterHTML() {
       + `<button type="button" class="e-pfeil" data-reiter-runter="${k}" aria-label="${esc(name)} weiter nach hinten"${i === reihe.length - 1 ? ' disabled' : ''}>${RUNTER}</button></li>`;
   }).join('');
   return `<ol class="e-reiter" aria-label="Reiter unten, von links nach rechts">${zeilen}<li class="e-zeile fest"><label class="e-schalter"><input type="checkbox" checked disabled>${symbol('einstellungen')}<span>Einstellungen <small>– immer da, ganz rechts</small></span></label></li></ol>
-<p class="fine">Häkchen weg blendet einen Reiter aus, die Pfeile ändern die Reihenfolge – von oben nach unten heißt in der Leiste von links nach rechts. Gilt für dieses Gerät. Amys Rezepte, die Angebote und der Haushalt bleiben auch ausgeblendet über ihre Kachel bei den Rezepten erreichbar.</p>`;
+<p class="fine">Häkchen weg blendet einen Reiter aus, die Pfeile ändern die Reihenfolge – von oben nach unten heißt in der Leiste von links nach rechts. Gilt für dieses Gerät; was ausgeblendet ist, holst du hier wieder zurück.</p>`;
 }
 
 /* --------------------------------------------------------- Darstellung */

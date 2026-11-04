@@ -634,12 +634,12 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   Liste heißt links in der Leiste; die Einstellungen sind immer da, ganz
   rechts. Je Gerät (`boxenstopp.reiter.v1`: `aus`, `reihe`; ein Skript
   gleich hinter der Leiste in `index.html` ordnet sie vor dem ersten Bild; ein neuer Reiter kommt hinten
-  dazu). Bei den Rezepten steht oben eine Reihe kleiner Kacheln: „Reste“
-  (die Resteverwertung hat keinen Reiter) immer, „Amy“, „Haushalt“ und
-  „Angebote“ auf dem Handy nur, wenn ihr Reiter unten aus ist – sonst
-  stünden sie doppelt da (breit, ohne Leiste unten, immer; die Zahlen wie
-  am Reiter). Passen die Beschriftungen nicht nebeneinander, zeigt die
-  Leiste die Kurzform („Amy“, „Liste“).
+  dazu). Ausgeblendet heißt auf dem Handy weg – zurück geht es nur hier.
+  Bei den Rezepten steht auf dem Handy nur ein schmaler Knopf
+  „Resteverwertung“ (sie hat keinen Reiter); breit, ohne Leiste unten,
+  führen dort vier Kacheln zu Resteverwertung, Amys Rezepten, Haushalt und
+  Angeboten (mit den Zahlen wie am Reiter). Passen die Beschriftungen nicht
+  nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
   die Läden (je Laden „Vergessen“), die Preisalarme und eure Preise vom Bon
   (je löschen) – alles mit Rückgängig.

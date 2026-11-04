@@ -444,10 +444,12 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .nur-breit{display:none}
 @media (min-width:980px){.nur-breit{display:inline-flex}}
 /*
- * Die Abkürzungen bei den Rezepten: kleine Kacheln statt großer Karten.
- * Resteverwertung immer (sie hat keinen Reiter); Amys Rezepte, Haushalt und
- * Angebote breit immer (dort gibt es keine Leiste unten), schmal nur, wenn
- * ihr Reiter unten ausgeblendet ist – sonst stünden sie doppelt da.
+ * Die Abkürzungen bei den Rezepten. Breit gibt es keine Leiste unten – da
+ * führen vier Kacheln zu Resteverwertung, Amys Rezepten, Haushalt und
+ * Angeboten. Auf dem Handy nur die Resteverwertung (sie hat keinen Reiter),
+ * als schmaler Knopf: Der Rest ist unten ein Reiter – oder in den
+ * Einstellungen ausgeblendet, dann eben weg, bis man ihn dort wieder
+ * einschaltet.
  */
 .abk-leiste{display:flex;gap:8px;margin:18px 0 4px}
 .abk{position:relative;flex:1 1 0;min-width:0;max-width:136px;display:flex;flex-direction:column;align-items:center;gap:7px;margin:0;padding:11px 4px 10px;border-radius:16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:650 13px/1.15 var(--f-body);text-align:center;transition:transform .16s ease;-webkit-tap-highlight-color:transparent}
@@ -458,17 +460,15 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .abk-amy .abk-ic{background:#FFDDEB;color:#E0457F}
 .abk-haus .abk-ic{background:#DDF3EA;color:#0B7764}
 .abk-t{max-width:100%;overflow-wrap:anywhere}
-.abk .kurz{display:none}
 .abk-n{position:absolute;top:5px;right:6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:600 11.5px/20px var(--f-mono);text-align:center}
 /* Ein Vorschlag der Resteverwertung wartet: ein Punkt (der Text steht für Vorleser in #reste-letzter) */
 .abk-reste:has(#reste-letzter:not([hidden]))::after{content:'';position:absolute;top:9px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
 @media (max-width:979.98px){
   .abk-amy,.abk-haus,.abk-angebote{display:none}
-  html[data-reiter-aus~="amy"] .abk-amy,html[data-reiter-aus~="haushalt"] .abk-haus,html[data-reiter-aus~="angebote"] .abk-angebote{display:flex}
-}
-@media (max-width:560px){
-  .abk .lang{display:none}
-  .abk .kurz{display:inline}
+  .abk-reste{flex:0 0 auto;max-width:none;flex-direction:row;gap:10px;padding:5px 16px 5px 5px;border-radius:14px;font-size:14.5px}
+  .abk-reste .abk-ic{width:36px;height:36px;border-radius:10px}
+  .abk-reste .abk-ic .ic{width:20px;height:20px}
+  .abk-reste:has(#reste-letzter:not([hidden]))::after{top:5px;right:5px}
 }
 .a-lead{margin:0;color:var(--muted);font-size:15px}
 .a-laeden{display:grid;gap:2px;margin-top:2px}

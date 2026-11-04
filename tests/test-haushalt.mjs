@@ -350,15 +350,16 @@ check(await bis(async () => (await p.locator('.h-sache.h-weg').count()) === 2), 
 await p.click('[data-act="h-sachen-bearbeiten"]');
 await p.click('[data-teil="putzplan"]');
 
-// Ausblenden: die Kachel bei den Rezepten; breit: links der Haushalt, rechts die Liste
+// Ausblenden: dann ist er auf dem Handy weg (ein Link wie aus der Push-Nachricht führt trotzdem hin); breit: links der Haushalt, rechts die Liste
 await p.click('.tab[data-tab="einstellungen"]');
 check((await p.locator('#e-reiter').innerText()).includes('Haushalt'), 'Einstellungen → Reiter unten: Haushalt');
 await p.click('#e-reiter input[data-reiter="haushalt"]');
 check(await p.locator('.tab[data-tab="haushalt"]').isHidden(), 'ausgeblendet');
 await p.click('.tab[data-tab="rezepte"]');
-check(await p.locator('#browse .abk-haus').isVisible() && (await p.locator('#h-abk').innerText()) === (await p.locator('#h-badge').textContent()), 'dafür die Kachel „Haushalt“ bei den Rezepten, mit derselben Zahl wie der Reiter');
-await p.click('#browse .abk-haus');
-check(await p.locator('#view-haushalt').isVisible(), '… sie führt hin');
+check(await p.locator('#browse .abk-haus').isHidden(), 'auch bei den Rezepten keine Kachel „Haushalt“');
+await p.evaluate(() => { location.hash = 'haushalt'; });
+await p.reload({ waitUntil: 'load' });
+check(await bis(async () => p.locator('#view-haushalt').isVisible()) && await p.locator('.tab[data-tab="haushalt"]').isHidden(), '#haushalt (wie aus der Push-Nachricht) führt trotzdem hin – der Reiter bleibt aus');
 await p.setViewportSize({ width: 1200, height: 900 });
 check(await p.locator('#view-haushalt').isVisible() && await p.locator('#view-list').isVisible() && await p.locator('#view-recipes').isHidden(), 'breit: links der Haushalt, rechts die Liste');
 await p.click('.tab[data-tab="rezepte"]', { force: true }).catch(() => {});
