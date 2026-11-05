@@ -149,10 +149,21 @@ export function rezeptStand(stand, r) {
   return { gesamt: zut.length, n, drauf: n > 0, komplett: zut.length > 0 && n === zut.length };
 }
 
-/** Alle Rezepte, die gerade etwas auf der Liste haben – in der Reihenfolge ihres Auftauchens. */
+/**
+ * Was jemand selbst dazu will – 500 g Sahne für sich, zusätzlich zu den 250 g
+ * fürs Rezept: ein eigenes Teil der Zeile, je Person eins („x-amy“). Es zählt
+ * zur Menge, wird mit abgehakt und bleibt, wenn das Rezept runterkommt. Bei
+ * einem eigenen Eintrag (Bananen) ist es einfach die Menge.
+ */
+export const extraId = (name) => `x-${String(name || '').trim().toLowerCase()
+  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'ich'}`;
+export const istExtra = (rid) => /^x-/.test(String(rid));
+
+/** Alle Rezepte, die gerade etwas auf der Liste haben – in der Reihenfolge ihres Auftauchens (ohne das, was jemand selbst dazu will). */
 export function rezepteAufListe(stand) {
   const s = new Set();
-  for (const d of Object.values(stand.items)) for (const [rid] of teileVon(d)) s.add(rid);
+  for (const d of Object.values(stand.items)) for (const [rid] of teileVon(d)) if (!istExtra(rid)) s.add(rid);
   return [...s];
 }
 
@@ -194,8 +205,9 @@ export function beschreibung(vorher, nachher, name = () => '') {
   let fertig = 0;
   for (const [k, d] of Object.entries(n.items || {})) {
     const alt = v.items?.[k];
-    for (const [rid] of teileVon(d)) if (!alt?.parts?.[rid]) rezepte.add(rid);
-    if (!alt && !teileVon(d).length) eigene.push(d.name);
+    let mehr = false;
+    for (const [rid] of teileVon(d)) if (!alt?.parts?.[rid]) { if (istExtra(rid)) mehr = true; else rezepte.add(rid); }
+    if ((!alt && !teileVon(d).length) || (mehr && !eigene.includes(d.name))) eigene.push(d.name);
     if (alt && !erledigt(alt) && erledigt(d)) fertig++;
   }
   const dazu = [...[...rezepte].map(rn), ...eigene];

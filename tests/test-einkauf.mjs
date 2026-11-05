@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, ROOT } from './hilfe.mjs';
-import { leer, anwenden, bereinigen, erledigt, opTeil, opHaken, opLoeschen, opEigener, opErledigteWeg, opLeeren, opGleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm } from '../js/liste.js';
+import { leer, anwenden, bereinigen, erledigt, opTeil, opTeilWeg, opHaken, opLoeschen, opEigener, opErledigteWeg, opLeeren, opGleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, summen, extraId, istExtra, rezepteAufListe, beschreibung } from '../js/liste.js';
 import { preiseMitBons, kostenListe, kostenMenge } from '../js/kosten.js';
 import { einheitsPreis, passtZumAlarm, preisalarmTreffer, preisJe } from '../js/angebote.js';
 import { wochenSchluessel, wochenAbstand, wocheVon, verlaufDazu, verlaufKuerzen, verlaufHinweis, verlaufText } from '../js/preisverlauf.js';
@@ -99,6 +99,20 @@ const pv = JSON.parse(readFileSync(path.join(repo, 'daten', 'preisverlauf.json')
 check(JSON.stringify(pv.je.haehnchenbrust?.w) === JSON.stringify({ '2026-W38': [9.49, 'Aldi'], '2026-W40': [8.99, 'Aldi'], '2026-W42': [9.29, 'Aldi'], '2026-W44': [7.99, 'Lidl'] }) && /4 Fassungen/.test(out), `werkzeug/preisverlauf.mjs: alle Fassungen und die frische (${out.trim()})`);
 rmSync(repo, { recursive: true, force: true });
 
+// --- Mehr davon: was jemand selbst dazu will (Amy: 500 g Sahne für sich zu den 250 g fürs Rezept)
+check(extraId('Amy') === 'x-amy' && extraId('Jörg Müller') === 'x-joerg-mueller' && extraId('') === 'x-ich' && istExtra('x-amy') && !istExtra('chili'), 'Extra: eine id je Person');
+const SAHNE = { n: 'Schlagsahne 30 %', c: 'kuehl' };
+let ex = anwenden(leer(), opTeil('schlagsahne', 'chili', { q: 250, u: 'g', h: '1 Becher' }, SAHNE));
+const exVorher = ex;
+ex = anwenden(ex, opTeil('schlagsahne', extraId('Amy'), { q: 500, u: 'g', h: '' }, SAHNE));
+check(summen(ex.items.schlagsahne).g === 750 && rezepteAufListe(ex).join() === 'chili', 'Extra: 250 g + 500 g = 750 g – und es ist kein Rezept auf der Liste');
+check(beschreibung(exVorher, ex) === 'Schlagsahne 30 % auf die Liste', 'Extra: die Commit-Nachricht nennt die Sahne');
+ex = anwenden(ex, opHaken(ex, 'schlagsahne', true, 'Amy'));
+check(erledigt(ex.items.schlagsahne) && ex.items.schlagsahne.parts['x-amy'].done === true, 'Extra: wird mit abgehakt');
+ex = anwenden(ex, opTeilWeg('schlagsahne', 'chili'));
+check(ex.items.schlagsahne?.parts?.['x-amy']?.q === 500 && !ex.items.schlagsahne.parts.chili, 'Extra: bleibt, wenn das Rezept von der Liste kommt');
+check(bereinigen(JSON.parse(JSON.stringify(ex))).items.schlagsahne.parts['x-amy'].q === 500, 'Extra: übersteht das Bereinigen');
+
 // --- Im Browser (nur dieses Handy)
 const browser = await starteBrowser();
 const { page, fehler } = await handy(browser);
@@ -157,6 +171,49 @@ const id = await andere.getAttribute('data-a-alarm');
 await andere.click();
 check(await bis(async () => (await page.locator(`[data-a-alarm="${id}"]`).getAttribute('aria-pressed')) === 'true') && (await page.locator('#toast').innerText()).includes('wieder so günstig'), 'Glocke an einem anderen Angebot: Alarm zu seinem Preis');
 check(await page.locator('#view-angebote .l-tief').count() >= 1, 'auch bei den Angeboten: der Hinweis aus dem Verlauf');
+// Mehr davon: zur Sahne fürs Butter Chicken noch etwas dazu
+const lokalListe = () => page.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.liste.lokal.v1') || '{}'));
+await page.click('.tab[data-tab="einkauf"]');
+await page.selectOption('#l-laden-wahl', '');
+await page.click('#list-body [data-mehr="schlagsahne"]');
+check((await page.locator('#l-mehr form[data-extra]').innerText()).includes('Zusätzlich zu den 200 g für Butter Chicken'), 'Aufgeklappt: „Mehr davon“ – zusätzlich zu den 200 g fürs Butter Chicken');
+await page.fill('#l-mehr form[data-extra] input[name="q"]', '500');
+await page.click('#l-mehr form[data-extra] button[type="submit"]');
+check(await bis(async () => (await lokalListe()).items?.schlagsahne?.parts?.['x-ich']?.q === 500), 'Gespeichert: ein eigenes Teil mit 500 g');
+const sahneZeile = page.locator('#list-body li', { has: page.locator('[data-mehr="schlagsahne"]') });
+const zeileText = async () => [await sahneZeile.locator('.item-qty').innerText(), await sahneZeile.locator('.item-sub').innerText(), await sahneZeile.locator('[data-check]').getAttribute('aria-checked')];
+// Die Sahne fürs Butter Chicken ist oben schon abgehakt: dann fehlen nur noch die 500 g
+let zt = await bis(async () => { const t = await zeileText(); return t[0].startsWith('500 g') && t[1].includes('Butter Chicken 200 g') && t[1].includes('✓') && t[1].includes('Dazu 500 g') && t[2] === 'false' ? t : null; });
+check(zt, `Schon gekauft fürs Rezept: die Zeile ist wieder offen, mit 500 g und „Dazu 500 g“ (${zt ? '' : JSON.stringify(await zeileText())})`);
+check((await page.locator('#toast').innerText()).includes('dazu – noch 500 g zu kaufen'), 'Meldung: noch 500 g zu kaufen');
+await page.click('#list-body [data-check="schlagsahne"]');
+await page.click('#list-body [data-check="schlagsahne"]');
+zt = await bis(async () => { const t = await zeileText(); return t[0].startsWith('700 g') && !t[1].includes('✓') && t[2] === 'false' ? t : null; });
+check(zt, `Ab- und wieder aufgehakt: 700 g – 200 g fürs Rezept und 500 g dazu (${zt ? '' : JSON.stringify(await zeileText())})`);
+await page.click('#list-body [data-mehr="schlagsahne"]');
+check((await page.inputValue('#l-mehr form[data-extra] input[name="q"]')) === '500', 'Nochmal aufgeklappt: die 500 stehen drin');
+await page.fill('#l-mehr form[data-extra] input[name="q"]', '0,3');
+await page.selectOption('#l-mehr form[data-extra] select[name="u"]', 'kg');
+await page.click('#l-mehr form[data-extra] button[type="submit"]');
+check(await bis(async () => JSON.stringify((await lokalListe()).items?.schlagsahne?.parts?.['x-ich']) === JSON.stringify({ q: 300, u: 'g', h: '', done: false })), 'Geändert auf 0,3 kg: als 300 g, damit es sich addiert');
+check((await page.locator('#toast').innerText()).includes('dazu – insgesamt 500 g'), 'Meldung: insgesamt 500 g');
+await page.click('#forrow [data-rmrec="butter-chicken"]');
+check(await bis(async () => { const it = (await lokalListe()).items?.schlagsahne; return it && !it.parts['butter-chicken'] && it.parts['x-ich']?.q === 300; }), 'Butter Chicken von der Liste: die eigene Sahne bleibt');
+await page.click('#list-body [data-mehr="schlagsahne"]');
+await page.click('#l-mehr [data-extra-weg]');
+check(await bis(async () => !(await lokalListe()).items?.schlagsahne), 'Extra weg – ohne Rezept dazu ist die Zeile ganz weg');
+await page.click('#toast button');
+check(await bis(async () => (await lokalListe()).items?.schlagsahne?.parts?.['x-ich']?.q === 300), 'Rückgängig: wieder da');
+// Ein eigener Eintrag bekommt eine Menge
+await page.fill('#add-input', 'Bananen');
+await page.press('#add-input', 'Enter');
+const banane = await bis(async () => Object.entries((await lokalListe()).items || {}).find(([, d]) => d.name === 'Bananen')?.[0]);
+await page.click(`#list-body [data-mehr="${banane}"]`);
+check((await page.locator('#l-mehr form[data-extra] .l-mehr-k').innerText()).toLowerCase() === 'menge', 'Eigener Eintrag: „Menge“');
+await page.fill('#l-mehr form[data-extra] input[name="q"]', '6');
+await page.selectOption('#l-mehr form[data-extra] select[name="u"]', 'Stk');
+await page.click('#l-mehr form[data-extra] button[type="submit"]');
+check(await bis(async () => (await page.locator('#list-body li', { has: page.locator(`[data-mehr="${banane}"]`) }).locator('.item-qty').innerText()).startsWith('6 Stk')), 'Bananen: 6 Stk.');
 check(fehler.length === 0, `keine Fehler in der Konsole${fehler.length ? `: ${fehler.slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();

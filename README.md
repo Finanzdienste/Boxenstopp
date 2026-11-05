@@ -14,7 +14,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | Reiter | Inhalt |
 | --- | --- |
 | **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
-| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
+| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
 | **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
@@ -164,6 +164,16 @@ Einträge erkennt der Weg am Namen („Bananen“).
 
 Eine Zeile antippen klappt sie auf:
 
+- **Mehr davon:** was jemand zusätzlich zu den Rezepten will – Amy braucht
+  250 g Sahne für Tobis Rezept und will 500 g für sich. Das ist ein eigenes
+  Teil der Zeile je Person (`x-amy`; ohne Namen `x-ich`), in der Einheit der
+  Zeile (kg und l werden zu g und ml, damit es sich addiert): „Schlagsahne
+  750 g“, darunter „Butter Chicken 250 g · Amy dazu 500 g“. Ist das fürs
+  Rezept schon abgehakt, ist die Zeile wieder offen, mit dem, was noch fehlt.
+  Ändern, „Weg“ (mit Rückgängig) oder 0 nimmt es raus; kommt das Rezept von
+  der Liste, bleibt das Extra stehen – es ist kein Rezept, also zählt es auch
+  nicht als „auf der Liste“. Bei einem eigenen Eintrag („Bananen“) heißt das
+  Feld „Menge“ und steht dann neben dem Eintrag (6 Stk).
 - **Bei Aldi nicht bekommen** (der Laden, der über der Liste gewählt ist):
   Die Zeile bleibt offen und steht bei Aldi unten unter „Bei Aldi nicht
   bekommen – bleibt für den nächsten Einkauf“; der Einkauf zählt trotzdem als
@@ -970,7 +980,8 @@ VAPID über das npm-Paket `web-push`):
    "name": "Basmati- oder Jasminreis", "cat": "trocken",
    "parts": {
     "butter-chicken": { "q": 280, "u": "g", "h": "", "done": false },
-    "teriyaki": { "q": 240, "u": "g", "h": "", "done": true }
+    "teriyaki": { "q": 240, "u": "g", "h": "", "done": true },
+    "x-amy": { "q": 500, "u": "g", "h": "", "done": false }
    },
    "custom": false, "checked": false, "by": "Amy", "at": "2026-10-26T17:05:00.000Z", "added": "…"
   },
@@ -1003,7 +1014,9 @@ Schlüssel aus dem Katalog (`reis`, `haehnchenbrust` …) sorgen dafür, dass
 Rezepte sich eine Zeile teilen. Eigene Einträge heißen `c-…`. Ein Teil hat
 entweder eine Menge (`q`, `u`, Packungshinweis `h`) oder einen Text (`t`,
 z. B. „2 EL“ bei Vorrat und Gewürzen). Erledigt ist eine Zeile, wenn alle
-Teile `done` sind (eigene Einträge: `checked`). `by` ist der Name aus dem
+Teile `done` sind (eigene Einträge: `checked`). Teile `x-<name>` sind kein
+Rezept, sondern „Mehr davon“ einer Person (siehe Abteilung, Zusammenlegen, im
+Laden). `by` ist der Name aus dem
 Einrichten. `bewertung` hat pro Gericht einen Daumen (`hoch`, `mittel`,
 `runter`) – wer zuletzt drückt, überschreibt ihn für beide. Unter `ki` liegen
 die behaltenen Rezepte aus der Resteverwertung im KI-Format (ki-rezept.js);
@@ -1168,7 +1181,8 @@ damit ein iPad einrichten, hin und her). `test-weg.mjs` lernt
 den Weg durch Aldi in Node und im Browser (abhaken, nächster Einkauf
 sortiert, vergessen, lange Pause). `test-kochen.mjs` spielt den Kochmodus auf
 dem iPad durch und den Kochstand über iPad, iPhone und Tobis Handy.
-`test-einkauf.mjs` prüft „nicht bekommen“, Bons, Preisalarm und Preisverlauf
+`test-einkauf.mjs` prüft „nicht bekommen“, Bons, Preisalarm, Preisverlauf und
+„Mehr davon“ (addiert, abgehakt, bleibt ohne Rezept, kg → g, eigene Einträge)
 in Node (auch `werkzeug/preisverlauf.mjs` auf einer Git-Historie) und im
 Browser. `test-push.mjs` lässt `werkzeug/push.mjs` auf einem Daten-Repo zum
 Probieren laufen (an wen, nichts doppelt, Preisalarm, Probe, Nachtragen,

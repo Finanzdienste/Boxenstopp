@@ -30,7 +30,7 @@ import { app, $, melde, lese, schreibe, zeigeReiter } from './kern.js';
 import { lobKlein } from './lob.js';
 import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
-import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, aufloesen, ABTEILUNGEN } from './liste.js';
+import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, opTeil, opTeilWeg, extraId, istExtra, aufloesen, ABTEILUNGEN } from './liste.js';
 import { verlaufHinweis, verlaufText, wochenSchluessel } from './preisverlauf.js';
 import { nachWeg, wegSchluessel, wegStellen, PAUSE_MS, ABTEILUNG_NAME } from './weg.js';
 import { aehnlich, vorschlaege, richtung, merkName } from './gleich.js';
@@ -178,7 +178,15 @@ function tippZeichnen() {
   el.innerHTML = `<p><span class="l-tipp-k">Am günstigsten einkaufen</span><b>${esc(best.laden)}</b> – ${n === 1 ? '1 Sache' : `${n} Sachen`} im Angebot, ≈ ${esc(euro(best.ersparnis))} günstiger als sonst${danach ? `<small>Danach: ${danach}</small>` : ''}</p><button type="button" class="linkbtn" data-act="angebote">Angebote</button>`;
 }
 
-const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || (app.amyNach?.[rid] ? `♡ ${app.amyNach[rid].short}` : rid.startsWith('amy-') ? `♡ ${wessen(person())} Rezept` : rid);
+/** Wem ein Extra gehört (x-amy → „Amy“): wie in leute, sonst aus der id. */
+function werExtra(rid) {
+  const leute = Object.values(app.stand.leute || {});
+  const n = leute.find((x) => extraId(x) === rid) || (app.name() && extraId(app.name()) === rid ? app.name() : '');
+  if (n) return n;
+  const t = String(rid).slice(2).replace(/-/g, ' ');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+const kurzName = (rid) => (istExtra(rid) ? (rid === 'x-ich' ? 'Dazu' : `${werExtra(rid)} dazu`) : null) || app.nachId[rid]?.short || app.extras[rid]?.short || (app.amyNach?.[rid] ? `♡ ${app.amyNach[rid].short}` : rid.startsWith('amy-') ? `♡ ${wessen(person())} Rezept` : rid);
 
 /** iPhone oder iPad: Dort hat die App vom Home-Bildschirm einen eigenen Speicher, getrennt von Safari. */
 const istIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -224,6 +232,54 @@ ${verlauf ? `<p class="l-mehr-fein">Angebote zuletzt: ${esc(verlauf)}</p>` : ''}
   return { fehlt, bon, alarm: alarmHTML };
 }
 
+const EXTRA_EINHEITEN = ['g', 'kg', 'ml', 'l', 'Stk', 'Pck'];
+/**
+ * „Dazu“: was diese Person zusätzlich will (500 g Sahne für sich zu den 250 g
+ * fürs Rezept) – bei einem eigenen Eintrag einfach die Menge. In der Einheit
+ * der Zeile; kg und l werden zu g und ml, damit es sich addiert.
+ */
+function extraHTML(k, d) {
+  const rid = extraId(app.name());
+  const p = d.parts?.[rid];
+  const s = summen(d);
+  const einheit = p?.u || (s.g ? 'g' : s.ml ? 'ml' : Object.keys(s)[0]) || (d.custom ? 'Stk' : 'g');
+  const wert = typeof p?.q === 'number' ? nf2(p.q) : '';
+  const rezepte = teileVon(d).filter(([x]) => !istExtra(x));
+  const fuerRezept = rezepte.length && typeof rezepte[0][1].q === 'number' ? menge(rezepte.reduce((a, [, x]) => a + (x.u === einheit && typeof x.q === 'number' ? x.q : 0), 0), einheit) : '';
+  return `<form class="l-bon l-extra" data-extra="${esc(k)}" novalidate><p class="l-mehr-k">${d.custom ? 'Menge' : 'Mehr davon'}</p>
+<div class="l-felder"><span>${d.custom ? 'Wie viel' : app.name() ? `Dazu für dich (${esc(app.name())})` : 'Dazu'}</span><input class="l-menge" name="q" type="text" inputmode="decimal" autocomplete="off" value="${esc(wert)}" placeholder="${d.custom ? '1' : '500'}" aria-label="${d.custom ? 'Menge' : 'Wie viel dazu'}"><label class="sel l-einheit"><select name="u" aria-label="Einheit">${EXTRA_EINHEITEN.map((u) => `<option value="${u}"${u === einheit ? ' selected' : ''}>${u === 'Pck' ? 'Packung' : u}</option>`).join('')}</select></label><button type="submit" class="btn">${p ? 'Ändern' : d.custom ? 'Merken' : 'Dazu'}</button>${p ? `<button type="button" class="linkbtn" data-extra-weg="${esc(k)}">Weg</button>` : ''}</div>
+<p class="l-mehr-fein">${d.custom ? 'Steht dann neben dem Eintrag.' : `Zusätzlich zu ${fuerRezept ? `den ${esc(fuerRezept)} ` : 'dem, was '}${rezepte.length === 1 ? `für ${esc(kurzName(rezepte[0][0]))}` : 'die Rezepte brauchen'} – etwa noch etwas für dich allein. Bleibt, wenn das Rezept von der Liste kommt.`}</p></form>`;
+}
+
+/** „Dazu“ speichern (submit): als eigenes Teil der Zeile, 0 oder leer nimmt es weg. */
+function extraMerken(form) {
+  const k = form.dataset.extra;
+  const d = app.stand.items[k];
+  if (!d) return;
+  const rid = extraId(app.name());
+  let q = zahlAus(form.elements.q.value);
+  let u = form.elements.u.value;
+  if (!Number.isFinite(q) || !String(form.elements.q.value).trim() || q === 0) {
+    if (d.parts?.[rid]) { app.aendern(opTeilWeg(k, rid)); melde(`„${d.name}“: dein Extra ist weg`); }
+    offenZeile = null;
+    listeZeichnen();
+    return;
+  }
+  if (u === 'kg') { q *= 1000; u = 'g'; }
+  if (u === 'l') { q *= 1000; u = 'ml'; }
+  const grenze = u === 'g' || u === 'ml' ? 100000 : 100;
+  if (!(q > 0) || q > grenze || !EXTRA_EINHEITEN.includes(u)) { melde('Bitte eine Menge, z. B. 500 g oder 2 Stk.'); form.elements.q.focus(); return; }
+  q = Math.round(q * 100) / 100;
+  app.aendern(opTeil(k, rid, { q, u, h: '' }, { n: d.name, c: d.cat }));
+  offenZeile = null;
+  listeZeichnen();
+  // Ist das fürs Rezept schon gekauft, zählt nur noch, was fehlt
+  const neu = app.stand.items[aufloesen(app.stand, k)] || d;
+  const summe = Object.entries(summen(neu)).map(([e, x]) => menge(x, e)).join(' + ');
+  const schonGekauft = teileVon(neu).some(([, x]) => x.done === true);
+  melde(`${d.name}: ${menge(q, u)} ${d.custom ? 'gemerkt' : schonGekauft ? `dazu – noch ${summe} zu kaufen` : `dazu – insgesamt ${summe}`}`);
+}
+
 /** Unter einer aufgeklappten Zeile: in welche Abteilung sie gehört, ob sie dasselbe ist wie eine andere – und der Einkauf. */
 function mehrHTML(k, d) {
   const jetzt = abteilungHier(k, d);
@@ -234,6 +290,7 @@ function mehrHTML(k, d) {
   const einkauf = einkaufHTML(k, d);
   return `<div class="l-mehr" id="l-mehr">
 ${einkauf.fehlt}
+${extraHTML(k, d)}
 <p class="l-mehr-k">Gehört zu</p>
 <div class="l-abts" role="group" aria-label="Abteilung für ${esc(d.name)}">${ABTEILUNGEN.map((c) => `<button type="button" class="chip" data-abt="${c}" aria-pressed="${c === jetzt}">${esc(ABTEILUNG_NAME[c])}</button>`).join('')}</div>
 ${andere.length ? `<p class="l-mehr-k">Ist dasselbe wie</p><label class="sel l-gleich-wahl"><select data-gleich-mit="${esc(k)}" aria-label="${esc(d.name)} ist dasselbe wie …"><option value="">Andere Zeile wählen …</option>${andere.map(([x, e]) => `<option value="${esc(x)}">${esc(e.name)}${erledigt(e) ? ' (im Wagen)' : ''}</option>`).join('')}</select></label>` : ''}
@@ -346,7 +403,8 @@ function zeile([k, d]) {
   const mengeText = Object.entries(s).map(([u, q]) => menge(q, u)).join(' + ');
   const etwa = d.custom ? '' : ungefaehr(k, s);
   const herkunft = teile.map(([rid, p]) => {
-    let t = esc(kurzName(rid));
+    // Ein eigener Eintrag mit Menge: nur wessen sie ist; sonst „Amy dazu 500 g“
+    let t = esc(d.custom && istExtra(rid) ? (rid === 'x-ich' ? 'Menge' : werExtra(rid)) : kurzName(rid));
     if (typeof p.q === 'number') t += ` ${esc(menge(p.q, p.u))}`;
     else if (p.t) t += `: ${esc(p.t)}`;
     if (p.h) t += ` <span class="hint">(${esc(p.h)})</span>`;
@@ -654,6 +712,18 @@ export function klickListe(el) {
   if (d.abt) { if (offenZeile) verschieben(offenZeile, d.abt); return true; }
   if (d.fehlt) { nichtBekommen(d.fehlt); return true; }
   if (d.fehltWeg) { app.aendern(opFehltWeg(d.fehltWeg)); return true; }
+  if (d.extraWeg) {
+    const k = d.extraWeg;
+    const rid = extraId(app.name());
+    const alt = app.stand.items[k]?.parts?.[rid];
+    if (!alt) return true;
+    const name = app.stand.items[k].name;
+    app.aendern(opTeilWeg(k, rid));
+    offenZeile = null;
+    listeZeichnen();
+    melde(`„${name}“: dein Extra ist weg`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opTeil(k, rid, { q: alt.q, u: alt.u, h: alt.h || '' }, { n: name, c: app.stand.items[k]?.cat || 'sonstiges' })) });
+    return true;
+  }
   if (d.bonWeg) {
     const b = (app.stand.bons?.[d.bonWeg] || []).find((x) => x.at === d.at);
     app.aendern(opBonWeg(d.bonWeg, d.at));
@@ -783,6 +853,7 @@ export function aufDieListe(name, { cat: sonst = '' } = {}) {
 }
 
 export function absendenListe(ev) {
+  if (ev.target.matches?.('form[data-extra]')) { ev.preventDefault(); extraMerken(ev.target); return true; }
   if (ev.target.matches?.('form[data-bon]')) { ev.preventDefault(); bonMerken(ev.target); return true; }
   if (ev.target.matches?.('form[data-alarm]')) { ev.preventDefault(); alarmMerken(ev.target); return true; }
   if (ev.target.id === 'addform') {
