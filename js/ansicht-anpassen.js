@@ -6,8 +6,9 @@
  * die festen Rezepte, gespeicherte KI-Rezepte sind es schon). Jede Zutat hat
  * dort Werte pro 100 g und einen Bereich, in dem die App sie verschieben
  * darf. Was man selbst anfasst, ist damit fest; „Auf Ziel rechnen“ schiebt
- * die übrigen (Fleisch, Reis, Öl, Käse …), bis die Box wieder bei 443 kcal /
- * 33 P / 39 KH / 15,4 F liegt. Speichern legt das Ergebnis als eigenes
+ * die übrigen (Fleisch, Reis, Öl, Käse …), bis die Box wieder auf dem Ziel
+ * liegt (app.ziel: 443 kcal / 33 P / 39 KH / 15,4 F oder das eigene der
+ * Liste, ansicht-ziel.js). Speichern legt das Ergebnis als eigenes
  * Rezept für beide ab (liste.json unter ki, mit basis = das Original), die
  * Schritte bekommen die neuen Mengen, weggelassene Zutaten sind markiert.
  *
@@ -28,6 +29,7 @@ import { oeffneRezept, offenesRezept } from './ansicht-rezepte.js';
 import { kiQuelle, oeffneEinrichten } from './ansicht-ki.js';
 import { rumpfFuer, kiAnfragen, anbieterVon, KI_FEHLER } from './ki.js';
 import { ladeKi } from './zugang.js';
+import { fuerWen } from './profil.js';
 
 let zustand = null; // { rid, basis, k, gerechnet, ki: { wunsch, lauf, fehler, hinweis } }
 const klon = (x) => JSON.parse(JSON.stringify(x));
@@ -116,7 +118,7 @@ async function kiAendern() {
   zeichnen();
   const anbieter = anbieterVon(schluessel) || 'anthropic';
   try {
-    const rumpf = rumpfFuer(anbieter, { modus: 'aendern', rezept: alsVorlage(mein.k), wunsch, portionen: mein.k.portionen, ziel: app.ziel, katalog: app.katalog });
+    const rumpf = rumpfFuer(anbieter, { modus: 'aendern', rezept: alsVorlage(mein.k), wunsch, portionen: mein.k.portionen, ziel: app.ziel, katalog: app.katalog, wer: fuerWen() });
     const { eingabe: roh } = await kiAnfragen(rumpf, {
       schluessel,
       api: lese('__kiapi', null) || '',

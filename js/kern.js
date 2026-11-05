@@ -17,7 +17,11 @@ export const app = {
   preiseStand: '',
   katalog: {},
   extras: {},
+  /** Die Rezepte aus daten/rezepte.json, wie sie dort stehen – app.rezepte sind sie auf das Ziel gerechnet (ansicht-ziel.js). */
+  rezepteBasis: [],
+  /** Ziel pro Box: aus daten/rezepte.json oder das eigene der Liste (Einstellungen → Ziel pro Box). */
   ziel: { kcal: 443, p: 33, kh: 39, f: 15.4 },
+  zielStandard: { kcal: 443, p: 33, kh: 39, f: 15.4 },
   stand: leer(),
   listeDa: false,
   speicher: null,
@@ -106,8 +110,14 @@ const scrollPos = { rezepte: 0, einkauf: 0, angebote: 0, amy: 0, haushalt: 0, ei
 const beimReiter = [];
 /** Wer wissen will, wenn der Reiter wechselt (die Einstellungen zeichnen sich dann neu). */
 export const reiterBeobachten = (fn) => { beimReiter.push(fn); };
-/* Die Farbe der Leiste oben im Browser: rosa bei Amy (siehe css, html[data-tab="amy"]). */
-const LEISTE = { hell: ['#EDF1EF', '#FFEAF3'], dunkel: ['#0E1412', '#2A1120'] };
+/*
+ * Die Farbe der Leiste oben im Browser: rosa bei Amy (siehe css,
+ * html[data-tab="amy"]), in einer lila Liste lila (html[data-farbe]).
+ */
+const LEISTE = {
+  '': { hell: ['#EDF1EF', '#FFEAF3'], dunkel: ['#0E1412', '#2A1120'] },
+  lila: { hell: ['#F1EEF8', '#F7F0FF'], dunkel: ['#110D18', '#1A1027'] },
+};
 /**
  * Beide theme-color-Angaben setzen: je nach Gerät hell oder dunkel – ist in
  * den Einstellungen hell oder dunkel fest gewählt (html[data-design]), beide
@@ -116,9 +126,10 @@ const LEISTE = { hell: ['#EDF1EF', '#FFEAF3'], dunkel: ['#0E1412', '#2A1120'] };
 export function leisteFaerben() {
   const amy = ansicht.tab === 'amy' ? 1 : 0;
   const fest = document.documentElement.dataset.design;
+  const satz = LEISTE[document.documentElement.dataset.farbe || ''] || LEISTE[''];
   for (const m of $$('meta[name="theme-color"]')) {
     const dunkel = fest ? fest === 'dunkel' : /dark/.test(m.media || '');
-    m.setAttribute('content', dunkel ? LEISTE.dunkel[amy] : LEISTE.hell[amy]);
+    m.setAttribute('content', dunkel ? satz.dunkel[amy] : satz.hell[amy]);
   }
 }
 export function zeigeReiter(t, scrollBehalten = false) {

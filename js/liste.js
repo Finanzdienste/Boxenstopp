@@ -77,9 +77,10 @@ import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 import { umleiten } from './format.js';
 import { RAUM, SACH_BEREICH, aufgabenAm } from './haushalt.js';
+import { zielBereinigen as makrosBereinigen } from './zielrechner.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {} });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
 const MAX_BONS = 200;
@@ -95,6 +96,8 @@ const SACHE_ID = /^hs-[a-z0-9-]{1,40}$/;
 const PLAN_ID = /^pp-[a-z0-9-]{1,40}$/;
 const AUFGABE_ID = /^a-[a-z0-9-]{1,40}$/;
 const PERSON = /^[\p{L}\p{N} ._-]{1,40}$/u;
+/** Farben einer Liste (Einstellungen, Einladung) – ohne Angabe die blaue. */
+export const FARBEN = ['lila'];
 const TODO_WUENSCHE = ['verbinden', 'trennen', 'abgleichen'];
 /** Die App bei Microsoft (Anwendungs-ID, eine GUID) – kein Geheimnis. */
 export const TODO_APP_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -170,6 +173,69 @@ export function bescheidNoetig(vorher, nachher) {
   for (const id of Object.keys(nachher?.amy || {})) if (!v.amy?.[id]) return true;
   for (const [rid, ns] of Object.entries(nachher?.notizen || {})) for (const n of ns || []) if (!(v.notizen?.[rid] || []).some((x) => x.id === n.id)) return true;
   return Object.keys(nachher?.items || {}).length > 0 && offeneAnzahl(v) > 0 && offeneAnzahl(nachher) === 0;
+}
+
+/**
+ * Was ein Paket von Änderungen getan hat, in ein paar Worten – für die
+ * Commit-Nachricht (speicher.js) und damit für den Überblick des Gastgebers
+ * (gaeste.js): „Chili, Milch auf die Liste; 3 abgehakt“. name(rid) gibt den
+ * kurzen Namen eines Rezepts (sonst steht die id da). Leer, wenn es nichts
+ * Nennenswertes ist.
+ */
+export function beschreibung(vorher, nachher, name = () => '') {
+  const v = vorher || leer();
+  const n = nachher || leer();
+  const rn = (rid) => name(rid) || rid;
+  const teile = [];
+  const aufzaehlen = (xs, max = 3) => `${xs.slice(0, max).join(', ')}${xs.length > max ? ' …' : ''}`;
+  // Einkaufsliste
+  const rezepte = new Set();
+  const eigene = [];
+  let fertig = 0;
+  for (const [k, d] of Object.entries(n.items || {})) {
+    const alt = v.items?.[k];
+    for (const [rid] of teileVon(d)) if (!alt?.parts?.[rid]) rezepte.add(rid);
+    if (!alt && !teileVon(d).length) eigene.push(d.name);
+    if (alt && !erledigt(alt) && erledigt(d)) fertig++;
+  }
+  const dazu = [...[...rezepte].map(rn), ...eigene];
+  if (dazu.length) teile.push(`${aufzaehlen(dazu)} auf die Liste`);
+  const vorherOffen = offeneAnzahl(v);
+  if (fertig) teile.push(vorherOffen > 0 && offeneAnzahl(n) === 0 && Object.keys(n.items || {}).length ? 'alles eingekauft' : `${fertig} abgehakt`);
+  const weg = Object.keys(v.items || {}).filter((k) => !n.items?.[k]).length;
+  if (weg) teile.push(Object.keys(n.items || {}).length ? `${weg} von der Liste` : 'Liste geleert');
+  // Rezepte
+  const gekocht = Object.keys(n.cooked || {}).filter((rid) => n.cooked[rid]?.at !== v.cooked?.[rid]?.at);
+  if (gekocht.length) teile.push(`${aufzaehlen(gekocht.map(rn), 2)} gekocht`);
+  const bewertet = Object.keys({ ...(v.bewertung || {}), ...(n.bewertung || {}) }).filter((rid) => n.bewertung?.[rid]?.wert !== v.bewertung?.[rid]?.wert);
+  if (bewertet.length) teile.push(`${aufzaehlen(bewertet.map(rn), 2)} bewertet`);
+  const notiz = Object.keys(n.notizen || {}).filter((rid) => (n.notizen[rid] || []).some((x) => !(v.notizen?.[rid] || []).some((y) => y.id === x.id && y.text === x.text)));
+  if (notiz.length) teile.push(`Notiz zu ${aufzaehlen(notiz.map(rn), 2)}`);
+  const eigenNeu = Object.values(n.amy || {}).filter((r) => JSON.stringify(r) !== JSON.stringify(v.amy?.[r.id])).map((r) => r.name);
+  if (eigenNeu.length) teile.push(`Rezept ${aufzaehlen(eigenNeu.map((x) => `„${x}“`), 2)}`);
+  const kiNeu = Object.keys(n.ki || {}).filter((id) => !v.ki?.[id]).map((id) => n.ki[id]?.r?.name || id);
+  if (kiNeu.length) teile.push(`${aufzaehlen(kiNeu.map((x) => `„${x}“`), 2)} behalten`);
+  const kocht = new Set();
+  for (const [w, k] of Object.entries(n.kochen || {})) {
+    const alt = v.kochen?.[w];
+    if (alt?.at === k.at) continue;
+    for (const [rid, xs] of Object.entries(k.schritte || {})) if (JSON.stringify(xs) !== JSON.stringify(alt?.schritte?.[rid])) kocht.add(rid);
+  }
+  if (kocht.size) teile.push(`kocht ${aufzaehlen([...kocht].map(rn), 2)}`);
+  // Haushalt, Profil, der Rest
+  const hv = v.haushalt || leerHaushalt();
+  const hn = n.haushalt || leerHaushalt();
+  if (JSON.stringify(hv.stand || {}) !== JSON.stringify(hn.stand || {})) teile.push('Putzplan abgehakt');
+  if (JSON.stringify(hv.plaene || {}) !== JSON.stringify(hn.plaene || {})) teile.push('Putzplan geändert');
+  if (JSON.stringify(hv.sachen || {}) !== JSON.stringify(hn.sachen || {})) teile.push('Haushaltssachen');
+  if (JSON.stringify(v.profil?.ziel || null) !== JSON.stringify(n.profil?.ziel || null)) teile.push('Ziel pro Box geändert');
+  if (Object.keys(n.leute || {}).some((k) => !v.leute?.[k])) teile.push('zum ersten Mal dabei');
+  if (!teile.length) {
+    if (JSON.stringify(v.bons || {}) !== JSON.stringify(n.bons || {})) teile.push('Preis vom Bon');
+    else if (JSON.stringify(v.preisalarm || {}) !== JSON.stringify(n.preisalarm || {})) teile.push('Preisalarm');
+    else if (JSON.stringify(v.wege || {}) !== JSON.stringify(n.wege || {})) teile.push('Weg durch den Laden');
+  }
+  return teile.join('; ').replace(/[\n\r]+/g, ' ').slice(0, 140);
 }
 
 /**
@@ -324,7 +390,24 @@ export function bereinigen(roh) {
   if (istObj(roh.leute)) {
     for (const [k, n] of Object.entries(roh.leute).slice(0, 8)) if (PERSON.test(String(n)) && k === String(n).toLowerCase()) s.leute[k] = n;
   }
+  if (istObj(roh.profil)) s.profil = profilBereinigen(roh.profil);
   return s;
+}
+
+/**
+ * Was eine Liste für sich festlegt (liste.json unter profil, für alle, die sie
+ * teilen): person – wessen eigene Rezepte der rosa Reiter zeigt (bei einer
+ * eigenen Liste wie Marielles; bei Tobi und Amy fehlt es: Amy), farbe – die
+ * Farbe der App ('lila'; fehlt: blau), ziel – Makros pro Box mit by/at.
+ */
+export function profilBereinigen(x) {
+  const p = {};
+  if (!istObj(x)) return p;
+  if (PERSON.test(String(x.person || ''))) p.person = String(x.person).trim();
+  if (FARBEN.includes(x.farbe)) p.farbe = x.farbe;
+  const z = makrosBereinigen(x.ziel);
+  if (z) p.ziel = { ...z, by: text(x.ziel.by, 40), at: text(x.ziel.at, 40) || '' };
+  return p;
 }
 
 /* ------------------------------------------------------------- Haushalt */
@@ -552,7 +635,7 @@ export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || 
 export const opZusammen = (items, ki = {}, mehr = {}) => ({
   typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
   amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
-  fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}),
+  fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}), profil: klon(mehr.profil || {}),
 });
 /**
  * Eine ältere App-Fassung kennt Material und „jedes 2. Mal“ der Putztage
@@ -625,6 +708,11 @@ export const opTodoWunsch = (name, art) => ({ typ: 'todoWunsch', name: String(na
 export const opTodoZiel = (name, id, liste, geteilt) => ({ typ: 'todoZiel', name: String(name || '').trim().toLowerCase(), ziel: { id: String(id || ''), name: String(liste || ''), geteilt: !!geteilt }, at: jetzt() });
 /** Wer die Liste teilt – jedes Gerät trägt seinen Namen einmal ein (app.js). */
 export const opPerson = (name) => ({ typ: 'person', name: String(name || '').trim() });
+/**
+ * Am Profil der Liste etwas setzen: { ziel } (null: zurück zum Standard),
+ * { farbe } ('' : blau), { person } – was nicht drinsteht, bleibt.
+ */
+export const opProfil = (teil, by) => ({ typ: 'profil', teil: klon(teil || {}), by: by || null, at: jetzt() });
 /** Wer mit To Do verbunden ist – das schreibt nur der Lauf im Daten-Repo (werkzeug/todo.mjs). */
 export const opTodoAn = (name, an) => ({ typ: 'todoAn', name: String(name || '').trim().toLowerCase(), an: !!an, at: jetzt() });
 /** Wunschpreis je Zutat (max in Euro je u: kg, l oder Stk); null löscht ihn. */
@@ -785,6 +873,18 @@ function aendere(s, op) {
       if (!s.leute[k] && Object.keys(s.leute).length < 8) s.leute[k] = op.name;
       return;
     }
+    case 'profil': {
+      if (!istObj(op.teil)) return;
+      if (!istObj(s.profil)) s.profil = {};
+      const t = op.teil;
+      if ('person' in t) { if (PERSON.test(String(t.person || ''))) s.profil.person = String(t.person).trim(); else delete s.profil.person; }
+      if ('farbe' in t) { if (FARBEN.includes(t.farbe)) s.profil.farbe = t.farbe; else delete s.profil.farbe; }
+      if ('ziel' in t) {
+        const z = makrosBereinigen(t.ziel);
+        if (z) s.profil.ziel = { ...z, by: op.by || null, at: op.at }; else delete s.profil.ziel;
+      }
+      return;
+    }
     case 'todoZiel': {
       const h = hausVon(s);
       if (!PERSON.test(String(op.name))) return;
@@ -891,6 +991,11 @@ function aendere(s, op) {
       if (istObj(op.preisalarm)) {
         if (!istObj(s.preisalarm)) s.preisalarm = {};
         for (const [k, a] of Object.entries(op.preisalarm)) { const b = SCHLUESSEL.test(k) && !s.preisalarm[k] ? alarmBereinigen(a) : null; if (b) s.preisalarm[k] = b; }
+      }
+      if (istObj(op.profil)) {
+        // Was die Liste schon festlegt, bleibt; was fehlt (eine ältere Fassung hat es weggeräumt), kommt dazu
+        if (!istObj(s.profil)) s.profil = {};
+        for (const [k, v] of Object.entries(profilBereinigen(op.profil))) if (!(k in s.profil)) s.profil[k] = v;
       }
       if (istObj(op.leute)) {
         if (!istObj(s.leute)) s.leute = {};

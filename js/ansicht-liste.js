@@ -39,7 +39,8 @@ import { pushZeichnen } from './ansicht-push.js';
 
 const opZusammenWeg = (laden, w) => opZusammen({}, {}, { wege: { [laden]: w } });
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
-import { einladungsLink, schluesselAus, kiAus, ladeKi, speichereKi } from './zugang.js';
+import { schluesselAus, kiAus, ladeKi, speichereKi, linkExtras } from './zugang.js';
+import { istEigen, person, wessen, linkFuerGeraet } from './profil.js';
 import { nachBereichen, alsText, abteilungVon, merkSchluessel, nameSchluessel } from './bereiche.js';
 import { zutatImg } from './bilder.js';
 import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, einheitsPreis, preisJe, preisalarmTreffer, GUENSTIG_AB, LAEDEN } from './angebote.js';
@@ -47,7 +48,7 @@ const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 
 let leerenFragen = false;
 let trennenFragen = false;
-let formular = null; // null | { token, name, fehler } – token kann aus einem Link kommen
+let formular = null; // null | { token, name, fehler, daten, farbe } – token (und wo die Liste liegt) kann aus einem Link kommen
 let zugangGezeichnet = ''; // was im Einrichten-Bereich der Einstellungen steht – gleich: nicht neu zeichnen (Getipptes bleibt)
 let angebotJe = new Map(); // je Zutat die Angebote aller Läden, das günstigste zuerst – neu bei jedem Zeichnen
 let offenZeile = null; // die aufgeklappte Zeile: Abteilung wählen, zusammenlegen
@@ -177,7 +178,7 @@ function tippZeichnen() {
   el.innerHTML = `<p><span class="l-tipp-k">Am günstigsten einkaufen</span><b>${esc(best.laden)}</b> – ${n === 1 ? '1 Sache' : `${n} Sachen`} im Angebot, ≈ ${esc(euro(best.ersparnis))} günstiger als sonst${danach ? `<small>Danach: ${danach}</small>` : ''}</p><button type="button" class="linkbtn" data-act="angebote">Angebote</button>`;
 }
 
-const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || (app.amyNach?.[rid] ? `♡ ${app.amyNach[rid].short}` : rid.startsWith('amy-') ? '♡ Amys Rezept' : rid);
+const kurzName = (rid) => app.nachId[rid]?.short || app.extras[rid]?.short || (app.amyNach?.[rid] ? `♡ ${app.amyNach[rid].short}` : rid.startsWith('amy-') ? `♡ ${wessen(person())} Rezept` : rid);
 
 /** iPhone oder iPad: Dort hat die App vom Home-Bildschirm einen eigenen Speicher, getrennt von Safari. */
 const istIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -468,7 +469,7 @@ export function statusZeichnen() {
   const { zustand, offen, zuletzt } = app.status;
   const chip = $('#sync');
   chip.dataset.state = zustand;
-  $('#sync-text').textContent = STATUS_TEXT[zustand] || '';
+  $('#sync-text').textContent = zustand === 'ok' && istEigen() ? 'Gespeichert' : STATUS_TEXT[zustand] || '';
   const note = $('#l-note');
   let t = '';
   if (zustand === 'offline') t = `Gerade keine Verbindung zu GitHub.${offen ? ` ${offen} ${offen === 1 ? 'Änderung wird' : 'Änderungen werden'} gespeichert, sobald das Handy wieder online ist.` : ''}`;
@@ -486,20 +487,23 @@ function teilenZeichnen(zuletzt) {
   if (!el) return;
   if (!app.zugang || app.status.zustand === 'zugang' || formular) { el.hidden = true; el.innerHTML = ''; return; }
   el.hidden = false;
-  const wer = app.name() ? `Du bist <b>${esc(app.name())}</b>` : 'Verbunden';
+  const wer = app.name() ? `Du bist <b>${esc(app.name())}</b>${istEigen() ? ' · deine eigene Liste' : ''}` : 'Verbunden';
   const wann = zuletzt ? ` · abgeglichen ${uhrzeit(zuletzt)}` : '';
   if (trennenFragen) {
     const offen = app.status.offen;
-    el.innerHTML = `<div class="confirm" role="group" aria-label="Trennen"><span>Dieses Handy von der gemeinsamen Liste trennen? Die Liste bleibt in GitHub.${offen ? ` ${offen} ${offen === 1 ? 'Änderung ist' : 'Änderungen sind'} noch nicht gespeichert und gehen verloren.` : ''}</span><div class="confirm-btns"><button type="button" class="btn btn-danger" data-act="z-trennen-ja">Ja, trennen</button><button type="button" class="btn btn-quiet" data-act="z-trennen-nein">Abbrechen</button></div></div>`;
+    el.innerHTML = `<div class="confirm" role="group" aria-label="Trennen"><span>Dieses Handy von der ${istEigen() ? '' : 'gemeinsamen '}Liste trennen? Die Liste bleibt in GitHub.${offen ? ` ${offen} ${offen === 1 ? 'Änderung ist' : 'Änderungen sind'} noch nicht gespeichert und gehen verloren.` : ''}</span><div class="confirm-btns"><button type="button" class="btn btn-danger" data-act="z-trennen-ja">Ja, trennen</button><button type="button" class="btn btn-quiet" data-act="z-trennen-nein">Abbrechen</button></div></div>`;
     return;
   }
   const ki = ladeKi();
-  const link = einladungsLink(app.zugang.token, ki);
-  const wa = `https://wa.me/?text=${encodeURIComponent(`Unsere Einkaufsliste in Boxenstopp: ${link}`)}`;
+  const eigen = istEigen();
+  const link = linkFuerGeraet();
+  const wa = `https://wa.me/?text=${encodeURIComponent(`${eigen ? 'Meine Liste' : 'Unsere Einkaufsliste'} in Boxenstopp: ${link}`)}`;
   el.innerHTML = `<p class="e-status">${wer} · ${esc(STATUS_TEXT[app.status.zustand] || '')}${wann}</p>
-<div class="zugang-btns"><button type="button" class="btn" data-act="z-link">Link fürs zweite Handy kopieren</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a>${istIpad() ? '' : '<button type="button" class="btn" data-act="tablet-zeigen">Aufs iPad oder Tablet</button>'}<button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
-<input class="z-linkfeld" id="z-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>
-<p class="fine">Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal unter Einstellungen den Link ins Feld „Schlüssel“ einfügen.</p>' : ''}`;
+<div class="zugang-btns"><button type="button" class="btn" data-act="z-link">${eigen ? 'Link fürs zweite Gerät kopieren' : 'Link fürs zweite Handy kopieren'}</button>${eigen ? '' : `<a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a>`}${istIpad() ? '' : '<button type="button" class="btn" data-act="tablet-zeigen">Aufs iPad oder Tablet</button>'}<button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
+<input class="z-linkfeld" id="z-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Gerät" hidden>
+<p class="fine">${eigen
+    ? `Mit dem Link kommt deine Liste auch aufs iPad oder ein zweites Handy${ki ? ', samt KI-Schlüssel' : ''}. Behalt ihn für dich – wer ihn hat, kann deine Liste ändern.`
+    : `Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.`}</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal unter Einstellungen den Link ins Feld „Schlüssel“ einfügen.</p>' : ''}${eigen ? '<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="wk-einfuehrung">Einführung zeigen</button></div>' : ''}`;
 }
 
 /**
@@ -511,13 +515,15 @@ export function zugangZeichnen() {
   const el = $('#zugang');
   const kaputt = app.zugang && app.status.zustand === 'zugang';
   if (kaputt) {
-    el.innerHTML = `<div class="zugang-banner warn"><p><b>Der Schlüssel funktioniert nicht.</b> Er ist abgelaufen, gelöscht oder hat keine Rechte mehr für Boxenstopp-Daten. Änderungen bleiben vorgemerkt.</p><button type="button" class="btn" data-act="z-oeffnen">Neuen Schlüssel eintragen</button></div>`;
+    el.innerHTML = `<div class="zugang-banner warn"><p><b>Der Schlüssel funktioniert nicht.</b> Er ist abgelaufen, gelöscht oder hat keine Rechte mehr für ${istEigen() ? 'deine Liste – frag Tobi nach einem neuen Link' : 'Boxenstopp-Daten'}. Änderungen bleiben vorgemerkt.</p><button type="button" class="btn" data-act="z-oeffnen">Neuen Schlüssel eintragen</button></div>`;
   } else if (!app.zugang) {
     // Auf dem iPhone kommt, was in Safari eingerichtet ist, in der App vom Home-Bildschirm nicht an – und Links öffnen immer Safari
-    const text = istIos() && vomHomeBildschirm()
-      ? 'Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher – was in Safari eingerichtet ist, kommt hier nicht an. Kopier den Link vom ersten Handy (etwa aus WhatsApp) und füg ihn unter „Einrichten“ ins Feld „Schlüssel“ ein.'
+    const ios = istIos() && vomHomeBildschirm();
+    const text = ios
+      ? 'Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher – was in Safari eingerichtet ist, kommt hier nicht an. Kopier deinen Link (etwa aus WhatsApp oder vorhin aus Safari) und tipp auf „Einfügen“.'
       : 'Richte die gemeinsame Liste ein, dann seht ihr beide dasselbe.';
-    el.innerHTML = `<div class="zugang-banner"><p><b>Nur auf diesem Handy.</b> ${text}</p><button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>`;
+    const einfuegen = ios && navigator.clipboard?.readText ? '<button type="button" class="btn btn-primary" data-act="z-einfuegen">Einfügen</button>' : '';
+    el.innerHTML = `<div class="zugang-banner"><p><b>Nur auf diesem Handy.</b> ${text}</p>${einfuegen}<button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>`;
   } else el.innerHTML = '';
   formularZeichnen(kaputt);
 }
@@ -526,14 +532,14 @@ function formularZeichnen(kaputt) {
   const el = $('#e-zugang');
   if (!el) return;
   if (app.zugang && !kaputt && !formular) { zugangGezeichnet = ''; el.innerHTML = ''; return; }
-  const f = formular || { token: '', name: null, fehler: '' };
+  const f = formular || { token: '', name: null, fehler: '', daten: '', farbe: '' };
   const art = JSON.stringify([kaputt, !!app.zugang, f]);
   if (art === zugangGezeichnet && $('#z-form')) return;
   zugangGezeichnet = art;
   const ausLink = !!f.token;
   let text;
   if (ausLink) text = 'Der Schlüssel aus dem Link ist schon eingetragen. Es fehlt nur noch dein Name.';
-  else if (kaputt) text = '<b>Der Schlüssel funktioniert nicht.</b> Er ist abgelaufen, gelöscht oder hat keine Rechte mehr für Boxenstopp-Daten. Trag einen neuen ein – was noch nicht gespeichert ist, bleibt vorgemerkt.';
+  else if (kaputt) text = `<b>Der Schlüssel funktioniert nicht.</b> Er ist abgelaufen, gelöscht oder hat keine Rechte mehr für ${istEigen() ? 'deine Liste' : 'Boxenstopp-Daten'}. Trag einen neuen ein – was noch nicht gespeichert ist, bleibt vorgemerkt.`;
   else text = 'Gerade steht die Liste nur auf diesem Gerät. <b>Zweites Gerät?</b> Dann brauchst du keinen eigenen Schlüssel: Lass dir vom ersten den Link schicken (dort unter Einstellungen „Link fürs zweite Handy kopieren“) und füg den ganzen Link hier ins Schlüsselfeld ein. <b>Erstes Gerät?</b> Den Schlüssel legst du einmal bei GitHub an, die Anleitung steht im README.';
   // Abbrechen nur, wenn es schon eine funktionierende Liste gibt (ein Link mit einem anderen Schlüssel)
   const abbrechen = app.zugang && !kaputt ? '<button type="button" class="btn btn-quiet" data-act="z-abbrechen">Abbrechen</button>' : '';
@@ -548,36 +554,64 @@ function formularZeichnen(kaputt) {
 </form>`;
 }
 
-/** Vom Start aus: Ein Link mit Schlüssel wurde geöffnet – das Formular steht in den Einstellungen. */
-export function formularMitSchluessel(token) {
-  formular = { token, name: null, fehler: '' };
+/** Vom Start aus: Ein Link mit Schlüssel wurde geöffnet – das Formular steht in den Einstellungen. extras: daten, fuer, farbe aus dem Link. */
+export function formularMitSchluessel(token, extras = {}) {
+  formular = { token, name: extras.fuer || null, fehler: '', daten: extras.daten || '', farbe: extras.farbe || '' };
   zugangZeichnen();
   teilenZeichnen(app.status.zuletzt);
+}
+
+/** Ein Link ins Schlüsselfeld eingefügt: steht ein Name drin und das Namensfeld ist leer, dorthin (input). */
+export function eingabeZugang(ziel) {
+  if (ziel.id !== 'z-token') return false;
+  const { fuer } = linkExtras(ziel.value);
+  const name = $('#z-name');
+  if (fuer && name && !name.value.trim()) name.value = fuer;
+  return true;
+}
+
+/** „Einfügen“ (iPhone, App vom Home-Bildschirm): den Link aus der Zwischenablage nehmen – mit Namen gleich verbinden. */
+async function einfuegen() {
+  let text = '';
+  try { text = await navigator.clipboard.readText(); } catch { text = ''; }
+  const token = schluesselAus(text);
+  if (!token) { melde('In der Zwischenablage ist kein Link. Kopier ihn zuerst (etwa aus WhatsApp) und tipp dann nochmal auf „Einfügen“.'); return; }
+  const ex = linkExtras(text);
+  formular = { token: text.trim(), name: ex.fuer || null, fehler: '', daten: ex.daten, farbe: ex.farbe };
+  zeigeReiter('einstellungen');
+  zugangZeichnen();
+  teilenZeichnen(app.status.zuletzt);
+  if (ex.fuer) formularAbschicken(); else $('#z-name')?.focus();
 }
 
 async function formularAbschicken() {
   const name = $('#z-name').value.trim().replace(/\s+/g, ' ').slice(0, 30);
   const token = schluesselAus($('#z-token').value);
-  const fehler = (t) => { formular = { token: $('#z-token').value, name: $('#z-name').value, fehler: t }; zugangZeichnen(); };
+  const fehler = (t) => { formular = { ...(formular || {}), token: $('#z-token').value, name: $('#z-name').value, fehler: t }; zugangZeichnen(); };
   if (!name) { fehler('Trag deinen Namen ein, dann sieht der andere, wer was abgehakt hat.'); return; }
   if (!token) { fehler('Das sieht nicht nach einem Schlüssel aus. Er beginnt mit github_pat_.'); return; }
   const los = $('#z-los');
   los.disabled = true;
   los.textContent = 'Prüfe…';
   const ki = kiAus($('#z-token').value);
-  const ergebnis = await app.verbinden(token, name);
+  // Wo die Liste liegt (eine eigene Liste): aus dem eingefügten Link, sonst aus dem geöffneten
+  const ex = linkExtras($('#z-token').value);
+  const daten = ex.daten || (schluesselAus(formular?.token || '') === token ? formular?.daten || '' : '');
+  const farbe = ex.farbe || formular?.farbe || '';
+  const ergebnis = await app.verbinden(token, name, { daten, farbe });
   if (ergebnis === 'ok') {
     if (ki) speichereKi(ki);
     formular = null;
     zugangZeichnen();
     teilenZeichnen(app.status.zuletzt);
-    // Geschafft – jetzt die gemeinsame Liste zeigen
+    // Geschafft – bei einer eigenen Liste die Rezepte (das Willkommen erklärt den Rest), sonst die gemeinsame Liste
+    if (daten) { zeigeReiter('rezepte'); melde(`Verbunden – das ist deine Liste, ${name}.`); return; }
     zeigeReiter('einkauf');
     melde(`Verbunden. Ihr teilt jetzt eine Liste, ${name}.`);
     return;
   }
   fehler(ergebnis === 'falsch'
-    ? 'GitHub lehnt den Schlüssel ab. Er muss für Boxenstopp-Daten gelten und „Contents: Read and write“ haben.'
+    ? (daten ? 'GitHub lehnt den Schlüssel ab. Frag nach einem neuen Link.' : 'GitHub lehnt den Schlüssel ab. Er muss für Boxenstopp-Daten gelten und „Contents: Read and write“ haben.')
     : 'Keine Verbindung zu GitHub. Versuch es gleich nochmal.');
 }
 
@@ -670,7 +704,7 @@ export function klickListe(el) {
     case 'leeren-ja': leerenFragen = false; app.aendern(opLeeren()); melde('Liste geleert'); return true;
     case 'z-oeffnen':
       // Das Formular steht in den Einstellungen
-      if (!formular) formular = { token: '', name: null, fehler: '' };
+      if (!formular) formular = { token: '', name: null, fehler: '', daten: '', farbe: '' };
       zeigeReiter('einstellungen');
       zugangZeichnen();
       teilenZeichnen(app.status.zuletzt);
@@ -678,8 +712,9 @@ export function klickListe(el) {
       $('#e-liste')?.scrollIntoView({ block: 'start' });
       return true;
     case 'z-abbrechen': formular = null; zugangZeichnen(); teilenZeichnen(app.status.zuletzt); return true;
+    case 'z-einfuegen': einfuegen(); return true;
     case 'z-link': {
-      const link = einladungsLink(app.zugang.token, ladeKi());
+      const link = linkFuerGeraet();
       const feld = $('#z-linkfeld');
       const zeigen = () => { if (feld) { feld.hidden = false; feld.select(); } melde('Kopieren klappt hier nicht. Der Link steht jetzt im Feld darunter.'); };
       try {

@@ -24,6 +24,7 @@
  * der Resteverwertung. Gespeichert wird erst mit „Speichern“.
  */
 import { app, $, $$, melde, zeigeReiter, lese, schreibe, istSchmal, ansicht } from './kern.js';
+import { istEigen, person, wessen } from './profil.js';
 import { esc, nf1, nfi } from './format.js';
 import { dauer } from './zeiten.js';
 import { euro } from './kosten.js';
@@ -161,8 +162,8 @@ function listeHTML() {
   const kopf = `<button type="button" class="back nur-breit" data-act="amy-zu">${ZURUECK}Alle Rezepte</button>
 <header class="amy-kopf">
 <p class="amy-eyebrow">${deko('sparkles')} nur für dich ${deko('sparkles')}</p>
-<h1 class="amy-titel" id="amy-titel">Amys Rezepte</h1>
-<p class="amy-lead">Deine eigenen Lieblingsrezepte. Mit einem Tipp landen die Zutaten auf eurer gemeinsamen Einkaufsliste – und beim Kochen lernt das Handy, wie lange du brauchst.</p>
+<h1 class="amy-titel" id="amy-titel">${esc(wessen(person()))} Rezepte</h1>
+<p class="amy-lead">Deine eigenen Lieblingsrezepte. Mit einem Tipp landen die Zutaten auf ${istEigen() ? 'deiner' : 'eurer gemeinsamen'} Einkaufsliste – und beim Kochen lernt das Handy, wie lange du brauchst.</p>
 <button type="button" class="amy-btn amy-neu" data-act="amy-neu"${app.listeDa ? '' : ' disabled'}>${PLUS}Neues Rezept</button>
 ${app.zugang && !istIpad() ? `<button type="button" class="linkbtn amy-ipad" data-act="tablet-zeigen">${TABLET_IC}Auch auf dem iPad ♡</button>` : ''}
 </header>`;
@@ -222,7 +223,7 @@ function detailHTML(r) {
   const phasen = x.ablauf.map((p) => `${x.ablauf.length > 1 ? `<h3 class="phase"><span class="phase-name">${esc(p.t)}</span></h3>` : ''}<ol class="steps">${p.schritte.map((s) => schrittZeile(x, s, n++)).join('')}</ol>`).join('');
   const von = r.by ? `von ${r.by === app.name() ? 'dir' : esc(r.by)}` : '';
   const tags = tagsVon(r.id);
-  return `<button type="button" class="back" data-act="amy-liste">${ZURUECK}${HERZ}Amys Rezepte</button>
+  return `<button type="button" class="back" data-act="amy-liste">${ZURUECK}${HERZ}${esc(wessen(person()))} Rezepte</button>
 <header class="amy-d-kopf"><span class="amy-d-bild"><img src="${bildPfad(r.bild)}" alt="" width="72" height="72" decoding="async"></span>
 <div><h1 class="amy-d-titel" id="amy-d-titel">${esc(r.name)}</h1><p class="amy-d-fakten">${fakten.map(esc).join(' · ')}</p>${von ? `<p class="amy-d-von">${von}</p>` : ''}${tags.length ? `<div class="amy-tags amy-d-tags" role="group" aria-label="Tags">${tags.map((t) => `<button type="button" class="amy-tag tf${tagFarbe(t)}" data-amy-tag-filter="${esc(t)}" aria-label="Alle Rezepte mit „${esc(t)}“">${esc(t)}</button>`).join('')}</div>` : ''}</div></header>
 ${nw.bekannt ? `<div class="amy-etikett" role="group" aria-label="Nährwerte pro Portion"><span><b>${nfi(nw.kcal)}</b> kcal</span><span class="m-p">P ${nf1(nw.p)}</span><span class="m-kh">KH ${nf1(nw.kh)}</span><span class="m-f">F ${nf1(nw.f)}</span><small>pro Portion, ungefähr${nw.unbekannt.length ? ` – ohne ${esc(nw.unbekannt.slice(0, 3).join(', '))}${nw.unbekannt.length > 3 ? ' …' : ''}` : ''}</small></div>` : ''}
@@ -366,7 +367,7 @@ function editorHTML() {
   const e = entwurf || leererEntwurf();
   const tags = e.tags || [];
   const neu = !e.id;
-  return `<button type="button" class="back" data-act="amy-abbrechen">${ZURUECK}${HERZ}Amys Rezepte</button>
+  return `<button type="button" class="back" data-act="amy-abbrechen">${ZURUECK}${HERZ}${esc(wessen(person()))} Rezepte</button>
 <form class="amy-form" id="amy-form" autocomplete="off" novalidate>
 <h1 class="amy-titel amy-titel-klein">${neu ? 'Neues Rezept' : 'Rezept bearbeiten'} ${deko('sparkles')}</h1>
 <details class="amy-import"${neu && !e.name && !e.zutaten ? ' open' : ''}><summary>${deko('sparkles')}<span>Rezept übernehmen<small>aus einem Foto, einem Link oder Text – die KI füllt die Felder</small></span></summary><div class="amy-import-inhalt" id="amy-import-inhalt">${importInnenHTML()}</div></details>
@@ -704,7 +705,7 @@ export function absendenAmy(ev) {
   entwurf = null;
   try { localStorage.removeItem(ENTWURF); } catch { /* egal */ }
   zeige('detail', id);
-  melde(alt ? 'Gespeichert ♡' : `„${name}“ ist gespeichert – für euch beide ♡`);
+  melde(alt ? 'Gespeichert ♡' : `„${name}“ ist gespeichert${istEigen() ? '' : ' – für euch beide'} ♡`);
   return true;
 }
 

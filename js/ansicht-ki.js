@@ -24,6 +24,8 @@ import { rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, KI_FEHLER } f
 import { ladeKi, speichereKi, loescheKi, kiAus, einladungsLink } from './zugang.js';
 import { opKiBehalten, opKiWeg, opTeil, opTeilWeg } from './liste.js';
 import { oeffneRezept, schliesseRezept, offenesRezept, rasterZeichnen, ic } from './ansicht-rezepte.js';
+import { fuerWen, linkFuerGeraet, istEigen } from './profil.js';
+import { hatEigenesZiel } from './ansicht-ziel.js';
 
 const EINGABE = 'boxenstopp.ki.eingabe.v1';
 const ENTWURF = 'boxenstopp.ki.entwurf.v1';
@@ -71,7 +73,9 @@ const alsAppRezept = (id, k, von) => alsRezept(k, { id, katalog: app.katalog, ei
 export function kiAbgleichen() {
   const ki = app.stand.ki || {};
   if (entwurf && ki[entwurf.id]) { entwurf = null; entwurfMerken(); }
-  const neu = Object.entries(ki).map(([id, e]) => alsAppRezept(id, e.r, { by: e.by, at: e.at, gespeichert: true }));
+  // Gilt ein eigenes Ziel, rechnen auch die behaltenen Rezepte darauf (was man selbst angefasst hat, bleibt fest)
+  const zielR = (k) => (hatEigenesZiel() ? mengenAnpassen(k, app.ziel) : k);
+  const neu = Object.entries(ki).map(([id, e]) => alsAppRezept(id, zielR(e.r), { by: e.by, at: e.at, gespeichert: true }));
   if (entwurf) neu.push(alsAppRezept(entwurf.id, entwurf.r, { ...entwurf.von, gespeichert: false }));
   neu.sort((a, b) => String(b.ki.von?.at || '').localeCompare(String(a.ki.von?.at || '')));
   for (const r of app.kiRezepte) delete app.nachId[r.id];
@@ -143,7 +147,7 @@ function kiLeiste(r) {
   const titel = r.ki.herkunft
     ? `<b>Angepasst</b>${basis ? ` von <button type="button" class="linkbtn ki-basis" data-open="${esc(basis.id)}">${esc(basis.short)}</button>` : ''}`
     : `<b>${quelle}</b>`;
-  return `<p class="ki-k">${titel}${wer}${wann} · ${gespeichert ? 'für euch beide gespeichert' : 'noch nicht gespeichert'}${kosten}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>`;
+  return `<p class="ki-k">${titel}${wer}${wann} · ${gespeichert ? (istEigen() ? 'gespeichert' : 'für euch beide gespeichert') : 'noch nicht gespeichert'}${kosten}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>`;
 }
 
 /* ------------------------------------------------------ Ansicht */
@@ -174,7 +178,7 @@ function karteZeichnen() {
 }
 
 function einrichtenHTML(schluessel) {
-  const link = schluessel ? einladungsLink(app.zugang?.token || '', schluessel) : '';
+  const link = schluessel ? (app.zugang ? linkFuerGeraet() : einladungsLink('', schluessel)) : '';
   const da = anbieterVon(schluessel);
   return `<form class="ki-box" id="k-schluessel-form" novalidate>
 <h2>Resteverwertung einrichten</h2>
@@ -263,10 +267,10 @@ export function resteZeichnen() {
   const kopf = eingabe.modus === 'angebote'
     ? `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
 <div class="d-head"><span class="tape">Angebote</span><h1 id="k-titel">Rezept aus den Angeboten</h1>
-<p class="d-desc">Die KI macht aus den Angeboten der Woche ein Rezept für eure Boxen, und die App rechnet die Mengen auf ${ziele}. <button type="button" class="linkbtn" data-act="k-modus-reste">Lieber Resteverwertung</button></p></div>`
+<p class="d-desc">Die KI macht aus den Angeboten der Woche ein Rezept für ${istEigen() ? 'deine' : 'eure'} Boxen, und die App rechnet die Mengen auf ${ziele}. <button type="button" class="linkbtn" data-act="k-modus-reste">Lieber Resteverwertung</button></p></div>`
     : `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
 <div class="d-head"><span class="tape">Resteverwertung</span><h1 id="k-titel">Was ist noch da?</h1>
-<p class="d-desc">Schreib auf oder fotografier, was im Kühlschrank und im Vorrat liegt. Die KI macht daraus ein Rezept für eure Boxen, und die App rechnet die Mengen auf ${ziele}.</p></div>`;
+<p class="d-desc">Schreib auf oder fotografier, was im Kühlschrank und im Vorrat liegt. Die KI macht daraus ein Rezept für ${istEigen() ? 'deine' : 'eure'} Boxen, und die App rechnet die Mengen auf ${ziele}.</p></div>`;
   let rumpf;
   if (!schluessel || einrichten) rumpf = einrichtenHTML(schluessel);
   else if (lauf) rumpf = laufHTML();
@@ -276,7 +280,7 @@ export function resteZeichnen() {
 
 /* ------------------------------------------------------- Fotos */
 
-const blobZuB64 = (blob) => new Promise((ok, nein) => {
+export const blobZuB64 = (blob) => new Promise((ok, nein) => {
   const r = new FileReader();
   r.onload = () => ok(String(r.result).split(',')[1] || '');
   r.onerror = () => nein(r.error);
@@ -298,12 +302,12 @@ async function bildLaden(datei) {
   }
 }
 
-/** Auf höchstens 1280 px verkleinern und als JPEG – das spart Zeit und Geld. */
-export async function fotoVorbereiten(datei) {
+/** Auf höchstens 1280 px verkleinern und als JPEG – das spart Zeit und Geld (Speisekarten: größer, sonst ist die Schrift weg). */
+export async function fotoVorbereiten(datei, kante = KANTE) {
   const bild = await bildLaden(datei);
   const b = bild.width || bild.naturalWidth;
   const h = bild.height || bild.naturalHeight;
-  const s = Math.min(1, KANTE / Math.max(b, h));
+  const s = Math.min(1, kante / Math.max(b, h));
   const c = document.createElement('canvas');
   c.width = Math.max(1, Math.round(b * s));
   c.height = Math.max(1, Math.round(h * s));
@@ -380,6 +384,7 @@ async function rezeptMachen() {
       magNicht: namenMitDaumen('runter'),
       vermeiden: eingabe.vermeiden,
       modus: eingabe.modus,
+      wer: fuerWen(),
     });
     const { eingabe: roh, usage } = await kiAnfragen(rumpf, {
       schluessel,
@@ -408,7 +413,7 @@ async function rezeptMachen() {
 /* ------------------------------------------------------ Klicks */
 
 function linkKopieren() {
-  const link = einladungsLink(app.zugang?.token || '', ladeKi());
+  const link = app.zugang ? linkFuerGeraet() : einladungsLink('', ladeKi());
   const feld = $('#k-linkfeld');
   const zeigen = () => { if (feld) { feld.hidden = false; feld.select(); } melde('Kopieren klappt hier nicht. Der Link steht jetzt im Feld darunter.'); };
   try {

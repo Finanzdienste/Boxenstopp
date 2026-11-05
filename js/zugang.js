@@ -11,19 +11,64 @@
  * nimmt ihn sofort aus der Adresse und fragt nur noch nach dem Namen. Das
  * Schlüsselfeld nimmt auch den ganzen Link – fürs iPhone, wo die App auf dem
  * Home-Bildschirm einen eigenen Speicher hat und den Link selbst nicht sieht.
+ *
+ * Eine eigene Liste (ein Gast wie Marielle, ansicht-gaeste.js) liegt in einem
+ * eigenen privaten Repo; der Link sagt dann, welches, und für wen er ist:
+ * …#zugang=<Schlüssel>&daten=Finanzdienste/Boxenstopp-Marielle&fuer=Marielle&farbe=lila
+ * Der Schlüssel darf nur dieses Repo – an Tobis und Amys Liste kommt er nicht.
  */
+import { DATEN } from './speicher.js';
+
 const SPEICHER = 'boxenstopp.zugang.v1';
+const REPO = /^[A-Za-z0-9_.-]{1,100}\/[A-Za-z0-9_.-]{1,100}$/;
+const NAME = /^[\p{L}\p{N} ._-]{1,30}$/u;
+const FARBE = /^(?:lila|blau)$/;
+/** Die Liste von Tobi und Amy – „owner/repo“. */
+export const HAUPTLISTE = `${DATEN.owner}/${DATEN.repo}`;
 
 export function ladeZugang() {
   try {
     const z = JSON.parse(localStorage.getItem(SPEICHER) || 'null');
-    if (z && typeof z.token === 'string' && z.token) return { token: z.token, name: typeof z.name === 'string' ? z.name : '' };
+    if (z && typeof z.token === 'string' && z.token) {
+      const daten = typeof z.daten === 'string' && REPO.test(z.daten) && z.daten !== HAUPTLISTE ? z.daten : '';
+      return { token: z.token, name: typeof z.name === 'string' ? z.name : '', ...(daten ? { daten } : {}) };
+    }
   } catch { /* kein Zugang */ }
   return null;
 }
 
 export function speichereZugang(z) {
-  try { localStorage.setItem(SPEICHER, JSON.stringify({ token: z.token, name: z.name || '' })); return true; } catch { return false; }
+  const daten = typeof z.daten === 'string' && REPO.test(z.daten) && z.daten !== HAUPTLISTE ? z.daten : '';
+  try { localStorage.setItem(SPEICHER, JSON.stringify({ token: z.token, name: z.name || '', ...(daten ? { daten } : {}) })); return true; } catch { return false; }
+}
+
+/** Wo die Liste liegt: { owner, repo, pfad } – die eigene eines Gasts oder die von Tobi und Amy. */
+export function ortVon(z) {
+  if (z?.daten && REPO.test(z.daten) && z.daten !== HAUPTLISTE) {
+    const [owner, repo] = z.daten.split('/');
+    return { owner, repo, pfad: DATEN.pfad };
+  }
+  return DATEN;
+}
+/** Eine eigene Liste (Gast), nicht die von Tobi und Amy? */
+export const eigeneListe = (z) => ortVon(z) !== DATEN;
+
+/** Was ein Link (oder eingefügter Text) außer den Schlüsseln mitbringt: { daten, fuer, farbe }. */
+export function linkExtras(text) {
+  const t = String(text || '');
+  const wert = (k) => {
+    const m = new RegExp(`[#&]${k}=([^&\\s]+)`).exec(t);
+    if (!m) return '';
+    try { return decodeURIComponent(m[1]).trim(); } catch { return ''; }
+  };
+  const daten = wert('daten');
+  const fuer = wert('fuer');
+  const farbe = wert('farbe');
+  return {
+    daten: REPO.test(daten) ? daten : '',
+    fuer: NAME.test(fuer) ? fuer : '',
+    farbe: FARBE.test(farbe) ? farbe : '',
+  };
 }
 
 export function loescheZugang() {
@@ -39,13 +84,20 @@ export function schluesselAus(text) {
   return /^[A-Za-z0-9_]{20,255}$/.test(roh) ? roh : '';
 }
 
-/** Steht ein Schlüssel in der Adresse? Dann herausnehmen und zurückgeben. */
-export function schluesselAusAdresse() {
-  if (!/[#&](?:zugang|ki)=/.test(location.hash)) return '';
-  const s = /[#&]zugang=/.test(location.hash) ? schluesselAus(location.hash) : '';
+/**
+ * Steht ein Schlüssel in der Adresse? Dann herausnehmen und zurückgeben –
+ * mit dem, was der Link sonst mitbringt (linkExtras): { token, daten, fuer, farbe }.
+ */
+export function linkAusAdresse() {
+  const leer = { token: '', daten: '', fuer: '', farbe: '' };
+  if (!/[#&](?:zugang|ki)=/.test(location.hash)) return leer;
+  const token = /[#&]zugang=/.test(location.hash) ? schluesselAus(location.hash) : '';
+  const extras = linkExtras(location.hash);
   try { history.replaceState(null, '', location.pathname + location.search); } catch { /* egal */ }
-  return s;
+  return { token, ...extras };
 }
+/** Nur der Schlüssel aus der Adresse (wie linkAusAdresse). */
+export const schluesselAusAdresse = () => linkAusAdresse().token;
 
 /*
  * Der Schlüssel für die Resteverwertung: ein API-Schlüssel von Google
@@ -81,9 +133,16 @@ export function kiAus(text) {
 /** Steht ein KI-Schlüssel in der Adresse? Zurückgeben – herausgenommen wird er mit schluesselAusAdresse(). */
 export const kiAusAdresse = () => kiAus(location.hash);
 
-export function einladungsLink(token, ki = '') {
+/**
+ * Der Link zum Teilen: Schlüssel, KI-Schlüssel und bei einer eigenen Liste,
+ * wo sie liegt (daten); fuer und farbe nur in der Einladung eines Gasts.
+ */
+export function einladungsLink(token, ki = '', { daten = '', fuer = '', farbe = '' } = {}) {
   const teile = [];
   if (token) teile.push(`zugang=${encodeURIComponent(token)}`);
+  if (daten && REPO.test(daten) && daten !== HAUPTLISTE) teile.push(`daten=${encodeURIComponent(daten)}`);
+  if (fuer && NAME.test(fuer)) teile.push(`fuer=${encodeURIComponent(fuer)}`);
+  if (farbe && FARBE.test(farbe) && farbe !== 'blau') teile.push(`farbe=${encodeURIComponent(farbe)}`);
   if (ki) teile.push(`ki=${encodeURIComponent(ki)}`);
   return `${location.origin}${location.pathname.replace(/index\.html$/, '')}#${teile.join('&')}`;
 }

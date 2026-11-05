@@ -39,7 +39,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v40';
+const VERSION = 'v41';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -87,6 +87,14 @@ const SHELL = [
   './js/zugang.js',
   './js/ansicht-rezepte.js',
   './js/ansicht-liste.js',
+  './js/zielrechner.js',
+  './js/ansicht-ziel.js',
+  './js/profil.js',
+  './js/speisekarte.js',
+  './js/ansicht-speisekarte.js',
+  './js/gaeste.js',
+  './js/ansicht-gaeste.js',
+  './js/ansicht-willkommen.js',
   './schrift/bricolage-grotesque.woff2',
   './schrift/figtree.woff2',
   './schrift/ibm-plex-mono-400.woff2',
@@ -100,6 +108,11 @@ const SHELL = [
   './icon-512.png',
   './icon-maskable-512.png',
   './manifest.webmanifest',
+  './icon-lila.svg',
+  './icon-lila-192.png',
+  './icon-lila-512.png',
+  './icon-lila-maskable-512.png',
+  './manifest-lila.webmanifest',
 ];
 
 /*

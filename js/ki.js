@@ -44,7 +44,7 @@ export const KI_API = ANBIETER.anthropic.api;
 export const MODELL = ANBIETER.anthropic.modell;
 const WERKZEUG = 'rezept_ausgeben';
 
-export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'anthropic', modus = 'reste' }) {
+export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'anthropic', modus = 'reste', wer = 'Tobi und Amy' }) {
   const kat = Object.entries(katalog || {})
     .filter(([, v]) => v.c !== 'haushalt')
     .map(([k, v]) => `${k}=${v.n}`)
@@ -53,11 +53,11 @@ export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'a
   const angebote = modus === 'angebote';
   const aendern = modus === 'aendern';
   const auftrag = aendern
-    ? `Du änderst ein bestehendes Rezept so, wie Tobi oder Amy es sich wünschen, und gibst das ganze geänderte Rezept für ${portionen} gleiche Boxen ${ausgabe} aus. Ändere nur, was der Wunsch verlangt, und was dafür nötig ist: Zutaten, Schritte, Schalen, Zeiten, Name und Beschreibung, wenn sie nicht mehr stimmen. Alles andere bleibt genau so – dieselben Zutaten mit derselben id, Menge, min, max, anpassbar und pro100, dieselben Schritte im selben Wortlaut. Neue Zutaten bekommen eine neue id, weggefallene verschwinden auch aus den Schritten. Lässt sich der Wunsch nicht erfüllen, ohne gegen die Regeln unten zu verstoßen, änderst du so wenig wie möglich und sagst es in hinweis.`
+    ? `Du änderst ein bestehendes Rezept so, wie ${wer.replace(' und ', ' oder ')} es sich wünschen, und gibst das ganze geänderte Rezept für ${portionen} gleiche Boxen ${ausgabe} aus. Ändere nur, was der Wunsch verlangt, und was dafür nötig ist: Zutaten, Schritte, Schalen, Zeiten, Name und Beschreibung, wenn sie nicht mehr stimmen. Alles andere bleibt genau so – dieselben Zutaten mit derselben id, Menge, min, max, anpassbar und pro100, dieselben Schritte im selben Wortlaut. Neue Zutaten bekommen eine neue id, weggefallene verschwinden auch aus den Schritten. Lässt sich der Wunsch nicht erfüllen, ohne gegen die Regeln unten zu verstoßen, änderst du so wenig wie möglich und sagst es in hinweis.`
     : angebote
     ? `Aus den Angeboten der Woche bei ihren Supermärkten machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus. Die Hauptzutaten (Protein, Sättigungsbeilage, Gemüse) sollen möglichst aus den Angeboten kommen; sie sind alle zu kaufen (quelle: kaufen), nichts davon ist schon da. Was fehlt, kommt normal dazu.`
     : `Aus dem, was bei ihnen noch im Kühlschrank und im Vorrat ist, machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus.`;
-  return `Du bist der Meal-Prep-Koch von Tobi und Amy. ${auftrag}
+  return `Du bist der Meal-Prep-Koch von ${wer}. ${auftrag}
 
 Ziel pro Box: ${ziel.kcal} kcal, ${ziel.p} g Protein, ${ziel.kh} g Kohlenhydrate, ${ziel.f} g Fett. Die App rechnet die Nährwerte selbst aus deinen Werten pro 100 g nach und verschiebt die Mengen der Zutaten mit anpassbar: true zwischen min und max, bis jede Box das Ziel trifft. Plane das Gericht so, dass das mit sinnvollen Mengen aufgeht: genug mageres Protein, eine Sättigungsbeilage, Fett vor allem aus Öl, Käse oder Sahne.
 
@@ -246,7 +246,8 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   let werkzeug = gemini;
   let stopp = null;
   let grund = '';
-  const fortschritt = () => beiFortschritt({ zeichen: json.length, schritte: (json.match(/"min"\s*:/g) || []).length });
+  // schritte: so viele Schritte sind schon geschrieben; gerichte: so viele Gerichte einer Speisekarte (speisekarte.js)
+  const fortschritt = () => beiFortschritt({ zeichen: json.length, schritte: (json.match(/"min"\s*:/g) || []).length, gerichte: (json.match(/"kcal"\s*:/g) || []).length });
   // Interactions-API: step.delta mit Text, zum Schluss interaction.completed mit Status und Verbrauch.
   const verarbeiteGemini = (ev) => {
     if (ev.event_type === 'error' || ev.error) throw fehler(artVonStatus(Number(ev.error?.code) || 500, ev), ev.error?.message);

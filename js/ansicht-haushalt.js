@@ -21,6 +21,7 @@
  * Die Rechnung (welcher Tag dran ist) steht in haushalt.js.
  */
 import { app, $, $$, ansicht, melde, lese, schreibe, zeigeReiter } from './kern.js';
+import { istEigen } from './profil.js';
 import { esc } from './format.js';
 import { opSache, opPlan, opPutzHaken, opPutzFertig, opLoeschen, opTodoWunsch, teileVon } from './liste.js';
 import { RAEUME, RAUM, VORLAGEN, MATERIAL, JEDES, SACH_BEREICHE, bereichRaten, ERINNERN, ERINNERN_UHR, WOCHENTAGE, tagVon, plusTage, wochentag, termin, wdhText, tagText, zustaendig, naechsterTermin, aufgabenAm, wiederAm } from './haushalt.js';
@@ -194,7 +195,7 @@ function leerHTML() {
   const start = ['kueche', 'bad', 'wohnzimmer', 'schlafzimmer', 'waesche', 'flur'];
   return `<div class="empty-state h-leer">
   <p class="es-t">Noch kein Putzplan</p>
-  <p>Leg je Raum fest, was zu tun ist und an welchen Tagen – zum Abhaken, auf Wunsch mit Push-Nachricht „Heute ist Küche dran“ und in Microsoft To Do.</p>
+  <p>Leg je Raum fest, was zu tun ist und an welchen Tagen – zum Abhaken${istEigen() ? '' : ', auf Wunsch mit Push-Nachricht „Heute ist Küche dran“ und in Microsoft To Do'}.</p>
   <div class="h-start">${start.map((r) => `<button type="button" class="h-raum-chip" data-act="h-neu" data-raum="${r}">${raumBild(r, 24)}${esc(RAUM[r].name)}</button>`).join('')}<button type="button" class="h-raum-chip" data-act="h-neu" data-raum="sonstiges">${ic('plus')}Eigener</button></div>
   <div><button type="button" class="btn" data-act="h-vorschlag">Mit einem Vorschlag anfangen</button></div>
   <p class="fine">Der Vorschlag: Küche montags und donnerstags, Wohnzimmer mittwochs, Bad samstags, Schlafzimmer alle 2 Wochen sonntags, die ganze Wohnung alle 4 Wochen samstags – alles lässt sich ändern.</p>
@@ -230,7 +231,7 @@ ${gruppe('Noch offen', offen, 'h-offen-g')}
 ${gruppe('Demnächst', bald)}
 ${gruppe('Zwischendurch', frei)}
 <div class="h-neu-zeile"><button type="button" class="btn" data-act="h-neu">${ic('plus')}Putztag anlegen</button></div>
-${todoZeile(h)}`;
+${istEigen() ? '' : todoZeile(h)}`;
 }
 
 /* -------------------------------------------------------- Haushaltssachen */
@@ -453,7 +454,7 @@ function editorHTML() {
     <p class="fine" id="h-wdh-text">${esc(wdhVorschau(tageAn, wochen))}</p>
   </fieldset>
   ${leute.length > 1 || wer ? `<fieldset class="h-feld"><legend>Wer</legend><div class="h-wahl">${[['', 'Ihr beide'], ...leute.map((n) => [n, n])].map(([w, t]) => `<label class="h-raum-chip"><input type="radio" name="wer" value="${esc(w)}"${(w || '').toLowerCase() === (wer || '').toLowerCase() ? ' checked' : ''}>${esc(t)}</label>`).join('')}</div></fieldset>` : ''}
-  <fieldset class="h-feld"><legend>Erinnerung per Push</legend><div class="h-wahl">${ERINNERN.map(([w, t]) => `<label class="h-raum-chip"><input type="radio" name="erinnern" value="${w}"${w === erinnern ? ' checked' : ''}>${esc(t)}${ERINNERN_UHR[w] ? ` <small>${esc(ERINNERN_UHR[w].replace('gegen ', ''))}</small>` : ''}</label>`).join('')}</div>
+  <fieldset class="h-feld"${istEigen() ? ' hidden' : ''}><legend>Erinnerung per Push</legend><div class="h-wahl">${ERINNERN.map(([w, t]) => `<label class="h-raum-chip"><input type="radio" name="erinnern" value="${w}"${w === erinnern ? ' checked' : ''}>${esc(t)}${ERINNERN_UHR[w] ? ` <small>${esc(ERINNERN_UHR[w].replace('gegen ', ''))}</small>` : ''}</label>`).join('')}</div>
   <p class="fine">„Heute ist ${esc(name || 'Küche')} dran“ – an dem Tag, an ${wer ? esc(wer) : 'euch beide'}. Push-Nachrichten schaltet jedes Handy in den Einstellungen ein („Putzplan“).</p></fieldset>
   <div class="h-edit-btns"><button type="submit" class="btn btn-primary">Speichern</button><button type="button" class="btn btn-quiet" data-act="h-edit-zu">Abbrechen</button>${p ? `<button type="button" class="btn btn-quiet h-loeschen" data-act="h-plan-weg" data-plan="${esc(pm.id)}">Löschen</button>` : ''}</div>
 </form>`;

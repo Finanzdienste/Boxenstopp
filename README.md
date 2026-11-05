@@ -1,7 +1,9 @@
 # Boxenstopp
 
 Meal-Prep-Rezepte für je 8 Boxen und eine gemeinsame Einkaufsliste – als App
-fürs Handy, für Tobi und seine Freundin.
+fürs Handy, für Tobi und seine Freundin. Wer dazukommt (Marielle), bekommt
+eine **eigene Liste** mit eigenen Makros, in ihrer Farbe (siehe „Eigene
+Listen für Gäste“).
 
 **Adresse:** <https://finanzdienste.github.io/Boxenstopp/>
 (in Chrome öffnen, dann Menü ⋮ → „App installieren“; auf dem iPhone in
@@ -11,12 +13,12 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit, Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
-| **Amys Rezepte** | Amys eigene Rezepte, rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
+| **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
-| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen, wer wann was macht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
 Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat, ein
@@ -24,7 +26,32 @@ Preisalarm zuschlägt oder im Putzplan etwas dran ist (siehe unten).
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
 15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein Schwein,
-kein Putenhack.
+kein Putenhack. Ein anderes Ziel trägt man in den Einstellungen ein, dann
+rechnen sich alle Rezepte darauf um (siehe „Ziel pro Box“).
+
+### Ziel pro Box
+
+Einstellungen → **Ziel pro Box**: kcal, Protein, KH, Fett – pro Box oder pro
+Tag (geteilt durch die Mahlzeiten); ohne kcal rechnet die App 4/4/9. Das Ziel
+gilt für die ganze Liste (`profil.ziel` in liste.json: Wer eine Liste teilt,
+kocht dieselben Boxen), ohne eigenes gilt das aus `daten/rezepte.json`.
+
+Gerechnet wird, nicht geschätzt (`js/zielrechner.js`, dieselbe Rechnung wie
+„Anpassen“): Die Zutaten mit `anpassbar` (Fleisch, Reis, Nudeln, Öl, Käse …)
+wandern zwischen min und max, bis jede Box dem Ziel so nah kommt wie möglich;
+der Spielraum wächst mit dem Ziel mit (650 kcal brauchen größere Boxen).
+Dosen, Eier und Packungen bleiben ganz, volle Packungen bleiben voll, wenn es
+die Box kaum vom Ziel wegbringt (1 kg Hähnchen statt 1,03 kg). Danach hat das
+Rezept die neuen Mengen überall: Zutaten mit Packungshinweis („3 × 400 g“),
+Schritte, Nährwerttabelle, Werte pro Box, Kosten. Was schon auf der Liste
+steht und noch nicht gekauft ist, zieht mit; behaltene Rezepte der
+Resteverwertung rechnen sich auch darauf. Im Rezept steht, worauf es
+gerechnet ist und was sich geändert hat. Kommt ein Rezept mit den Mengen
+allein nicht hin (Kokosmilch gibt es nur dosenweise), sagt es das – und
+„Mit KI ändern“ tauscht eine Zutat; die Mengen rechnet danach wieder die App.
+Gemini rechnet bewusst nicht: Die Mengen kämen jedes Mal etwas anders heraus
+und stimmten nicht genau. Die gerechneten Mengen merkt sich das Gerät je
+Ziel (`boxenstopp.zielmengen.v1`), der nächste Start ist sofort da.
 
 ### Zubereitung
 
@@ -626,6 +653,9 @@ Der sechste Reiter, ganz rechts (breit: das Regler-Symbol oben; der Punkt
 „Geteilt“ / „Nur lokal“ oben führt auch hin) – alles, was man einmal
 einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
 
+- **Ziel pro Box** und **Gäste & Überblick:** siehe dort (die Gäste nur in
+  der Liste von Tobi und Amy). In einer eigenen Liste fehlen Push und To Do,
+  die Karte oben heißt „Deine Liste“, mit „Einführung zeigen“.
 - **Gemeinsame Liste:** nicht eingerichtet gleich das Formular (Name,
   Schlüssel), sonst wer du bist, der Stand, „Link fürs zweite Handy
   kopieren“, „Per WhatsApp schicken“, „Aufs iPad oder Tablet“, „Trennen“.
@@ -641,7 +671,8 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   angezeigt wird, sieht die App alle paar Sekunden in `todo.json` nach.
 - **KI-Schlüssel:** welcher eingetragen ist (Google oder Anthropic, Modell),
   ändern, entfernen (mit Rückgängig).
-- **Darstellung:** wie das Gerät, hell oder dunkel – je Gerät
+- **Darstellung:** die Farbe der App (Blau oder Lila, für die ganze Liste:
+  `profil.farbe`); wie das Gerät, hell oder dunkel – je Gerät
   (`boxenstopp.design.v1`, ein kleines Skript im Kopf von `index.html` setzt
   `html[data-design]` schon vor dem ersten Bild, damit nichts flackert; jeder
   dunkle Farbsatz in `css/styles.css` gilt für „wie das Gerät“ und „dunkel“).
@@ -651,9 +682,9 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   rechts. Je Gerät (`boxenstopp.reiter.v1`: `aus`, `reihe`; ein Skript
   gleich hinter der Leiste in `index.html` ordnet sie vor dem ersten Bild; ein neuer Reiter kommt hinten
   dazu). Ausgeblendet heißt auf dem Handy weg – zurück geht es nur hier.
-  Bei den Rezepten steht auf dem Handy nur ein schmaler Knopf
-  „Resteverwertung“ (sie hat keinen Reiter); breit, ohne Leiste unten,
-  führen dort vier Kacheln zu Resteverwertung, Amys Rezepten, Haushalt und
+  Bei den Rezepten stehen auf dem Handy nur zwei schmale Knöpfe
+  „Resteverwertung“ und „Speisekarte“ (sie haben keinen Reiter); breit, ohne Leiste unten,
+  führen dort fünf Kacheln zu Resteverwertung, Speisekarte, Amys Rezepten, Haushalt und
   Angeboten (mit den Zahlen wie am Reiter). Passen die Beschriftungen nicht
   nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
@@ -690,6 +721,22 @@ höchstens 12, das älteste fällt raus). Wer etwas davon auf die Liste setzt,
 einen Daumen gibt oder „Heute gekocht“ drückt, behält ihn automatisch. Auf
 die Liste kommt nur, was fehlt; Zutaten, die es im Katalog mit derselben
 Einheit gibt, teilen sich die Zeile mit den festen Rezepten.
+
+### Speisekarte
+
+Kachel **Speisekarte** bei den Rezepten: Fotos (bis sechs), ein PDF, der Text
+oder – mit Gemini – der Link einer Karte. Die KI liest die Gerichte und
+schätzt je Portion kcal, Protein, KH und Fett, so wie sie im Restaurant kommt
+(mit Beilage und Sauce, Restaurantfett ehrlich mitgerechnet), dazu einen
+Tipp zum Bestellen („Remoulade weglassen“) mit den Werten dann. Was am nächsten
+am Ziel pro Box liegt, rechnet die App (`js/speisekarte.js`, dieselbe
+Abweichung wie beim Anpassen) – oben das Gericht, darunter die nächsten zwei,
+dann alle; Desserts und Beilagen nie oben, Fisch und Schwein für sich („Esst
+ihr nicht“). Das Ergebnis merkt sich das Gerät (`boxenstopp.speisekarte.v1`,
+nicht in liste.json): Im Restaurant ohne Netz ist es noch da, und mit einem
+anderen Ziel sortiert die App neu, ohne die KI. Restaurantportionen
+schwanken – die App sagt ±20 %. PDFs bis 15 MB (Gemini: `type: document`,
+Claude: `document`-Block).
 
 ### Rezept anpassen
 
@@ -789,6 +836,54 @@ Der Schlüssel steht nur im Speicher der beiden Handys, nirgends im Code. Wer
 den Link hat, kann die Liste ändern – mehr nicht. Ist er abgelaufen oder
 verloren: in GitHub löschen, neuen anlegen, in der App neu eintragen (die
 App zeigt dann „Schlüssel prüfen“ und behält, was noch nicht gespeichert ist).
+
+### Eigene Listen für Gäste
+
+Will jemand die App mit **eigener** Liste (Marielle: eigene Einkaufsliste,
+eigene Makros, eigene Rezepte), bekommt sie ein eigenes privates Repo und
+einen Schlüssel nur dafür – an Tobis und Amys Liste kommt sie damit nicht.
+Eingeladen wird auf Tobis Handy, Einstellungen → **Gäste & Überblick** →
+„Jemanden einladen“:
+
+1. Name und Farbe (Lila oder Blau).
+2. **Repo anlegen** – der Knopf öffnet GitHub mit allem vorausgefüllt
+   (`Boxenstopp-<Name>`, privat); Häkchen bei „Add a README file“, anlegen.
+3. **Schlüssel anlegen** – der Knopf öffnet die Seite für einen Fine-grained
+   Token, vorausgefüllt mit Name, Besitzer, ohne Ablauf und *Contents: Read
+   and write*. Bei *Repository access* noch „Only select repositories“ →
+   das neue Repo wählen. Erzeugen, kopieren.
+4. Den Schlüssel einfügen, **Prüfen und Link machen**. Die App prüft ihn –
+   auch, dass er *nicht* an Boxenstopp-Daten kommt (sonst nimmt sie ihn
+   nicht) –, legt `liste.json` mit Name und Farbe im neuen Repo an
+   („Tobi: Einladung für Marielle“) und macht den Link:
+   `…/Boxenstopp/#zugang=<Schlüssel>&daten=Finanzdienste/Boxenstopp-Marielle&fuer=Marielle&farbe=lila&ki=<KI>`
+   (den KI-Schlüssel nur, wenn das Häkchen dafür an ist).
+
+Öffnet sie den Link, verbindet die App gleich (ohne Formular), wird lila –
+samt Symbol und Manifest für den Home-Bildschirm – und begrüßt sie einmal
+(`js/ansicht-willkommen.js`): was die App kann, ihre Makros pro Box, aufs
+Handy (auf dem iPhone mit „Link kopieren“, die App vom Home-Bildschirm hat
+ihren eigenen Speicher; dort reicht „Einfügen“ über der Liste), und wem die
+Liste gehört – ehrlich: Tobi sieht in seinem Überblick, wann sie was ändert.
+In ihrer Liste heißt der eigene Reiter „Marielles Rezepte“; Push, To Do und
+die privaten Angebote (Rewe, Edeka) gibt es dort nicht, die laufen über die
+Abläufe in Boxenstopp-Daten. Ihr zweites Gerät bekommt sie über „Link fürs
+zweite Gerät“ (mit Repo, Name und Farbe). Wo die Liste liegt, merkt sich
+jedes Gerät im Zugang (`daten`); der zwischengespeicherte Stand gilt nur für
+dieselbe Liste.
+
+**Überblick** (dasselbe Menü): wer wann was gemacht hat, in eurer Liste und
+in denen der Gäste, die dieses Gerät eingeladen hat – je Person zuletzt
+aktiv, Änderungen je Tag (7 oder 30 Tage), Bereiche, und ein Verlauf mit
+Sitzungen („18:38–18:58 Amy: 9 abgehakt, Reis auf die Liste“). Gelesen wird
+nichts aus den Listen, sondern die Commits an `liste.json`: Jede Nachricht
+der App sagt seit v41, was passiert ist („Amy: Einkaufsliste, 3 Änderungen –
+Chili auf die Liste; 2 abgehakt“), ältere nur wie viel. Gezählt wird, was
+gespeichert wird, nicht wer die App nur anschaut. Das Gerät merkt sich, was
+es schon geholt hat (`boxenstopp.verlauf.v1`), und holt beim Öffnen nur das
+Neue. Die Schlüssel der Gäste stehen nur in Tobis localStorage
+(`boxenstopp.gaeste.v1`); „Entfernen“ vergisst den Gast auf diesem Gerät,
+seine Liste bleibt.
 
 ### Wie der Abgleich funktioniert (js/speicher.js)
 
@@ -899,7 +994,8 @@ VAPID über das npm-Paket `web-push`):
   "todoApp": "<App-ID bei Microsoft>", "todoWunsch": { "amy": { "art": "verbinden", "at": "…", "name": "Amy" } }, "todoAn": { "tobi": "…" },
   "todoZiel": { "tobi": { "id": "<Liste bei Microsoft> | neu", "name": "Wir zwei", "geteilt": true, "at": "…" } }
  },
- "leute": { "amy": "Amy", "tobi": "Tobi" }
+ "leute": { "amy": "Amy", "tobi": "Tobi" },
+ "profil": { "ziel": { "kcal": 380, "p": 30, "kh": 35, "f": 12, "by": "Tobi", "at": "…" } }
 }
 ```
 
@@ -927,7 +1023,9 @@ den Markt: `{ "Aldi": { "n": 3, "at": "…", "k": { "zwiebeln": { "c": "obst", "
 Kochstand je Person (Name klein, höchstens sechs; die neueste Fassung `at` gewinnt), `fehlt` was in einem
 Laden nicht da war, `bons` die letzten fünf Preise je Zutat (höchstens 200 Zutaten), `preisalarm` die
 Wunschpreise (`u`: kg, l oder Stk), `haushalt` Haushaltssachen und Putzplan (Wochentage 1 = Mo … 7 = So,
-`wer` leer: beide; siehe Haushalt), `leute` wer die Liste teilt. Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
+`wer` leer: beide; siehe Haushalt), `leute` wer die Liste teilt, `profil` was die Liste festlegt: `ziel`
+(Makros pro Box, siehe Ziel pro Box), in einer eigenen Liste auch `person` (wessen Rezepte der eigene Reiter
+zeigt) und `farbe` (`lila`). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
 nicht passt; schreibt eine ältere App-Fassung die Liste ohne die neueren Teile, legt das Handy, das sie
 kennt, sie wieder dazu (`js/speicher.js`). Jeder Start liest die Datei einmal ganz frisch, bevor er
 schreibt: Der zwischengespeicherte Stand kann von einer älteren App-Fassung stammen, die beim Lesen
@@ -993,7 +1091,14 @@ die Action „Rezeptfotos“.
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
-| `js/zugang.js` | Schlüssel und Name, Einladungslink |
+| `js/zugang.js` | Schlüssel, Name und wo die Liste liegt (eigene Listen), Einladungslink |
+| `js/zielrechner.js` | Ziel pro Box: die festen Rezepte auf andere Makros rechnen (Mengen, Packungen, Texte, Nährwerte, Kosten) – ohne DOM |
+| `js/ansicht-ziel.js` | Ziel pro Box: anwenden, Einstellungen, oben bei den Rezepten, im Rezept, die Liste nachziehen |
+| `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
+| `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; der Überblick aus den Commits |
+| `js/ansicht-willkommen.js` | das Willkommen für einen Gast (Makros, aufs Handy, wem die Liste gehört) |
+| `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel – und die Ansicht |
+| `icon-lila*.png`, `icon-lila.svg`, `manifest-lila.webmanifest` | Symbol und Manifest einer lila Liste |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
 | `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten, Schritte – ohne DOM |
 | `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor |
@@ -1092,5 +1197,16 @@ hin und her, erledigt, nächster Tag, verpasst, gelöscht, Liste weg, geändert,
 429, abgelaufen, zwei Personen, trennen, ohne Secret, „Öffentliche
 Clientflows“ aus, Tobi allein mit der gemeinsamen Liste („Bad · Amy“, Amy
 hakt ab, umziehen); kein Token im Protokoll – und die Karte in den
-Einstellungen (Wahl, „für dich ist hier nichts zu tun“). Der Workflow „Prüfung“ lässt
+Einstellungen (Wahl, „für dich ist hier nichts zu tun“). `test-ziel.mjs` rechnet alle Rezepte in
+Node auf vier Ziele (wie viele treffen, Tabelle und Werte pro Box passen, ganze
+Dosen, Platzhalter, Kosten, gemerkte Mengen), prüft Texte, Formular und das
+Profil der Liste und spielt im Browser Ziel setzen, Liste nachziehen, das
+zweite Handy, Neuladen, eine ältere Fassung ohne Profil und zurück zum
+Standard durch. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
+Überblick in Node zusammen und spielt dann die Einladung durch (euer
+Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
+ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites
+Gerät und Tobis Überblick. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
+Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
+Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

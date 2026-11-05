@@ -12,14 +12,15 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="css/styles.css">
-<!-- Hell oder dunkel, wenn fest gewählt (Einstellungen → Darstellung) – vor dem ersten Bild, sonst flackert es -->
-<script>try{var d=JSON.parse(localStorage.getItem('boxenstopp.design.v1'));if(d==='hell'||d==='dunkel')document.documentElement.setAttribute('data-design',d)}catch(e){}</script>
+<!-- Hell oder dunkel, wenn fest gewählt (Einstellungen → Darstellung), und die Farbe der Liste (lila) – vor dem ersten Bild, sonst flackert es -->
+<script>try{var d=JSON.parse(localStorage.getItem('boxenstopp.design.v1'));if(d==='hell'||d==='dunkel')document.documentElement.setAttribute('data-design',d)}catch(e){}
+try{if(JSON.parse(localStorage.getItem('boxenstopp.farbe.v1'))==='lila'){var h=document.documentElement,q=function(s){return document.querySelector(s)};h.setAttribute('data-farbe','lila');q('link[rel="icon"]').href='icon-lila.svg';q('link[rel="apple-touch-icon"]').href='icon-lila-192.png';q('link[rel="manifest"]').href='manifest-lila.webmanifest';q('meta[name="theme-color"][media*="light"]').content='#F1EEF8';q('meta[name="theme-color"][media*="dark"]').content='#110D18'}}catch(e){}</script>
 </head>
 <body>
 <div id="app" data-tab="rezepte">
   <header class="top">
     <div class="top-in">
-      <div class="brand"><span class="brand-name">Boxenstopp</span><span class="brand-tag">Meal Prep</span></div>
+      <div class="brand"><span class="brand-name">Boxenstopp</span><span class="brand-tag" data-fuer="für Amy ♡">Meal Prep</span></div>
       <button type="button" class="sync" id="sync" data-state="lokal" data-tab="einstellungen" title="Gemeinsame Liste – in den Einstellungen"><span class="dot" aria-hidden="true"></span><span id="sync-text">Nur lokal</span></button>
       <button type="button" class="kopf-einst nur-breit" data-tab="einstellungen" aria-label="Einstellungen" title="Einstellungen"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17.5 7H20M4 17h2.5M11 17h9"/><circle cx="15.2" cy="7" r="2.3"/><circle cx="8.8" cy="17" r="2.3"/></svg></button>
     </div>
@@ -33,11 +34,12 @@
         <div class="intro">
           <span class="eyebrow" id="r-eyebrow">Rezepte · je 8 Boxen</span>
           <h1 id="r-title">Was kommt diese Woche in die Boxen?</h1>
-          <p>Jedes Rezept ist auf 8 gleiche Boxen gerechnet, mit Packungsgrößen aus dem Supermarkt. Rezept öffnen, Zutaten auf die gemeinsame Liste setzen, einkaufen, kochen.</p>
-          <div class="target"><span>Ziel pro Box</span><b>443 kcal</b><b class="m-p">33 g P</b><b class="m-kh">39 g KH</b><b class="m-f">15,4 g F</b></div>
+          <p id="r-intro">Jedes Rezept ist auf 8 gleiche Boxen gerechnet, mit Packungsgrößen aus dem Supermarkt. Rezept öffnen, Zutaten auf die gemeinsame Liste setzen, einkaufen, kochen.</p>
+          <div class="target" id="r-ziel"><span>Ziel pro Box</span><b>443 kcal</b><b class="m-p">33 g P</b><b class="m-kh">39 g KH</b><b class="m-f">15,4 g F</b></div>
         </div>
         <nav class="abk-leiste" aria-label="Mehr in der App">
           <button type="button" class="abk abk-reste" data-act="reste"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 10h14M8.5 6v1.5M8.5 13.5v3"/></svg></span><span class="abk-t">Resteverwertung</span><span class="vh" id="reste-letzter" hidden></span></button>
+          <button type="button" class="abk abk-karte" data-act="speisekarte"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9.5a2 2 0 0 1 2 2v15l-3-1.8-3 1.8-3-1.8-3 1.8v-15a2 2 0 0 1 .5-1.3"/><path d="M8.5 8h6M8.5 11.5h6M8.5 15h3.5"/></svg></span><span class="abk-t">Speisekarte</span></button>
           <button type="button" class="abk abk-amy" data-tab="amy"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span><span class="abk-t">Amys Rezepte</span></button>
           <button type="button" class="abk abk-haus" data-tab="haushalt"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 11L12 4.2l8.2 6.8"/><path d="M6 9.4v9.4a1.2 1.2 0 0 0 1.2 1.2h9.6a1.2 1.2 0 0 0 1.2-1.2V9.4"/><path d="M10 20v-4.6h4V20"/></svg></span><span class="abk-t">Haushalt</span><span class="abk-n" id="h-abk" hidden>0</span></button>
           <button type="button" class="abk abk-angebote" data-act="angebote"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/><path d="M8.5 7.5V6a3.5 3.5 0 0 1 7 0v1.5"/><path d="M9.5 12.5l1.8 1.8 3.5-3.5"/></svg></span><span class="abk-t">Angebote</span><span class="abk-n" id="a-abk" hidden>0</span></button>
@@ -49,6 +51,7 @@
       </section>
       <section id="detail" hidden></section>
       <section id="reste" aria-labelledby="k-titel" hidden></section>
+      <section id="speisekarte" aria-labelledby="sk-titel" hidden></section>
     </main>
 
     <aside id="view-list" class="pane list-pane" aria-labelledby="l-title">
@@ -86,7 +89,9 @@
       <button type="button" class="back nur-breit" data-tab="rezepte"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Alle Rezepte</button>
       <h1 id="e-titel" class="e-titel">Einstellungen</h1>
       <section class="e-karte" id="e-liste" aria-labelledby="e-liste-t"><h2 id="e-liste-t">Gemeinsame Liste</h2><div class="e-zugang" id="e-zugang"></div><div class="teilen" id="teilen" hidden></div></section>
-      <section class="e-karte" aria-labelledby="e-push-t"><h2 id="e-push-t">Push-Nachrichten</h2><div class="push-bereich" id="push-bereich"></div></section>
+      <section class="e-karte" id="e-ziel-karte" aria-labelledby="e-ziel-t"><h2 id="e-ziel-t">Ziel pro Box</h2><div id="e-ziel"></div></section>
+      <section class="e-karte" id="e-gaeste-karte" aria-labelledby="e-gaeste-t"><h2 id="e-gaeste-t">Gäste &amp; Überblick</h2><div id="e-gaeste"></div></section>
+      <section class="e-karte" id="e-push-karte" aria-labelledby="e-push-t"><h2 id="e-push-t">Push-Nachrichten</h2><div class="push-bereich" id="push-bereich"></div></section>
       <section class="e-karte" id="e-todo" aria-labelledby="e-todo-t"><h2 id="e-todo-t">Microsoft To Do</h2><div class="todo-bereich" id="todo-bereich"></div></section>
       <section class="e-karte" aria-labelledby="e-ki-t"><h2 id="e-ki-t">KI-Schlüssel</h2><div id="e-ki"></div></section>
       <section class="e-karte" aria-labelledby="e-design-t"><h2 id="e-design-t">Darstellung</h2><div id="e-design"></div></section>
@@ -133,6 +138,8 @@
 <dialog class="kochmodus" id="kochmodus" aria-label="Kochmodus"></dialog>
 <dialog class="putzmodus" id="putzmodus" aria-labelledby="pm-titel"></dialog>
 <dialog class="tablet-dlg push-dlg" id="push-dlg" aria-labelledby="push-dlg-titel"></dialog>
+<dialog class="tablet-dlg amy-thema wk-dlg" id="willkommen-dlg" aria-labelledby="wk-titel"></dialog>
+<dialog class="tablet-dlg ub-dlg" id="ueberblick-dlg" aria-labelledby="ub-titel"></dialog>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -11,7 +11,10 @@
  *   - githubAttrappe(): eine nachgebaute GitHub-API für das Daten-Repo, die
  *     sich alle Handys eines Tests teilen. Sie prüft den Schlüssel, liefert
  *     ETag/304, lehnt Schreiben mit veralteter sha ab (409) und lässt sich
- *     „vom Netz nehmen“.
+ *     „vom Netz nehmen“. Jeder Commit kommt in zustand.commits (für den
+ *     Überblick: GET …/commits, auch mit since, per_page, page).
+ *   - githubMehrere(a, b): mehrere Repos (die eigene Liste eines Gasts neben
+ *     Boxenstopp-Daten) – jede Anfrage geht an die Attrappe ihres Repos.
  */
 import { chromium } from 'playwright';
 import { readFileSync } from 'node:fs';
@@ -53,7 +56,8 @@ const CORS = {
 
 export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste', repo = 'Boxenstopp-Daten', pfad = 'liste.json' } = {}) {
   // dateien: weitere Dateien im Repo, die die App nur liest (z. B. angebote-privat.json) – Pfad → Inhalt (Text)
-  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, shas: {}, lesen: {} };
+  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, shas: {}, lesen: {}, commits: [], leer: false, gibtEs: true };
+  const commit = (message, pfadC, sha) => zustand.commits.unshift({ sha: sha || `c${zustand.commits.length + 1}-${Math.random().toString(36).slice(2, 8)}`, message, date: new Date().toISOString(), pfad: pfadC });
   const basis = `https://api.github.com/repos/${owner}/${repo}`;
   let alt = null; // für staleEinmal: die Fassung vor dem letzten Schreiben
 
@@ -64,7 +68,18 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
     if (zustand.netzWeg) return r.abort('internetdisconnected');
     if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
     if (req.headers().authorization !== `Bearer ${schluessel}`) return antwort(401, { message: 'Bad credentials' });
+    if (!zustand.gibtEs) return antwort(404, { message: 'Not Found' });
     if (url === basis && req.method() === 'GET') return antwort(200, { full_name: `${owner}/${repo}`, private: true });
+    if (url === `${basis}/commits` && req.method() === 'GET') {
+      if (zustand.leer && !zustand.commits.length) return antwort(409, { message: 'Git Repository is empty.' });
+      const q = new URL(req.url()).searchParams;
+      const per = Number(q.get('per_page') || 30);
+      const seite = Number(q.get('page') || 1);
+      const seit = q.get('since') || '';
+      const pfadQ = q.get('path') || '';
+      const alle = zustand.commits.filter((c) => (!pfadQ || c.pfad === pfadQ) && (!seit || c.date >= seit));
+      return antwort(200, alle.slice((seite - 1) * per, seite * per).map((c) => ({ sha: c.sha, commit: { message: c.message, author: { date: c.date }, committer: { date: c.date } } })));
+    }
     const weitere = url.startsWith(`${basis}/contents/`) ? decodeURIComponent(url.slice(`${basis}/contents/`.length)) : '';
     if (weitere && weitere !== pfad && req.method() === 'GET') {
       zustand.lesen[weitere] = (zustand.lesen[weitere] || 0) + 1;
@@ -82,6 +97,7 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
       zustand.dateien[weitere] = Buffer.from(body.content, 'base64').toString('utf8');
       zustand.shas[weitere] = `w${(zustand.wVersion = (zustand.wVersion || 0) + 1)}`;
       zustand.nachrichten.push(body.message);
+      commit(body.message, weitere);
       return antwort(da ? 200 : 201, { content: { sha: zustand.shas[weitere], path: weitere } });
     }
     if (url === `${basis}/contents/${pfad}`) {
@@ -110,6 +126,7 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
         zustand.version++;
         zustand.sha = `sha${zustand.version}`;
         zustand.nachrichten.push(body.message);
+        commit(body.message, pfad, `k${zustand.version}`);
         return antwort(zustand.version === 1 ? 201 : 200, { content: { sha: zustand.sha, path: pfad } });
       }
     }
@@ -119,7 +136,21 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
   return {
     zustand,
     route,
+    basis,
     liste: () => (zustand.datei ? JSON.parse(zustand.datei) : null),
+  };
+}
+
+/** Mehrere Repos hinter einer Route: jede Anfrage an die Attrappe ihres Repos, sonst 404. */
+export function githubMehrere(...attrappen) {
+  return {
+    route: (r) => {
+      const url = r.request().url().split('?')[0];
+      const a = attrappen.find((x) => url === x.basis || url.startsWith(`${x.basis}/`));
+      if (a) return a.route(r);
+      if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
+      return r.fulfill({ status: 404, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify({ message: 'Not Found' }) });
+    },
   };
 }
 

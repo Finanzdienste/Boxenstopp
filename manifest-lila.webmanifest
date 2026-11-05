@@ -1,0 +1,38 @@
+{
+  "name": "Boxenstopp – Meal Prep",
+  "short_name": "Boxenstopp",
+  "description": "Meal-Prep-Rezepte für je 8 Boxen und eure gemeinsame Einkaufsliste.",
+  "id": "/Boxenstopp/",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#F1EEF8",
+  "theme_color": "#7A3FE0",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "icon-lila-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-lila-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-lila-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-lila.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -24,6 +24,8 @@ import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, opAnpinnen, DAUMEN } from './liste.js';
 import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
 import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
+import { angepasstHTML, daneben } from './ansicht-ziel.js';
+import { istEigen } from './profil.js';
 
 const TOPF = 'boxenstopp.topf.v1';
 const ZUGEKLAPPT = 'boxenstopp.zugeklappt.v1';
@@ -176,11 +178,13 @@ function karte(r) {
   const ki = r.ki ? `<span class="pill pill-ki">${r.ki.herkunft ? 'Angepasst' : 'Resteverwertung'}${boxen(r) !== 8 ? ` · ${boxen(r)} Boxen` : ''}</span>` : '';
   const ko = kostenRezept(r, app);
   const preis = ko.box > 0 ? `<span class="box-cost">≈ ${esc(euro(ko.box))}/Box</span>` : '';
+  // Was das eigene Ziel verfehlt, ist an der Karte zu sehen (ansicht-ziel.js)
+  const aus = daneben(r);
   return `<button type="button" class="box" data-open="${esc(r.id)}">
 ${rezeptFoto(r)}<span class="tape">${esc(r.short)}</span>${zeitPille(r)}
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}${preis}</span>
-<span class="box-macros"><span><b>${r.m.kcal}</b> kcal</span><span class="m-p">P ${nf1(r.m.p)}</span><span class="m-kh">KH ${nf1(r.m.kh)}</span><span class="m-f">F ${nf1(r.m.f)}</span></span>
+<span class="box-macros"><span${aus.includes('kcal') ? ' class="aus"' : ''}><b>${r.m.kcal}</b> kcal</span><span class="m-p${aus.includes('p') ? ' aus' : ''}">P ${nf1(r.m.p)}</span><span class="m-kh${aus.includes('kh') ? ' aus' : ''}">KH ${nf1(r.m.kh)}</span><span class="m-f${aus.includes('f') ? ' aus' : ''}">F ${nf1(r.m.f)}</span></span>
 <span class="box-foot">${app.stand.gepinnt?.[r.id] ? `<span class="pill pill-pin">${ic('pin')}Läuft gerade</span>` : ''}${ki}${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
 </button>`;
 }
@@ -334,11 +338,12 @@ ${rezeptFoto(r, { gross: true })}
 </div>
 <span class="label-k">Pro Box, eine von ${zahlwort(boxen(r))}</span>
 ${etikett(r)}
+${angepasstHTML(r)}
 ${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
 <div class="actions" id="d-actions"></div>
 <section class="anpassen" id="d-anpassen" aria-label="Rezept anpassen" hidden></section>
 <div class="bewertung" id="d-bewertung" role="group" aria-label="Wie war's?"></div>
-${bereich('notizen', '<h3 id="h-notizen" class="sub-h">Notizen <small>für euch beide</small></h3>', `
+${bereich('notizen', `<h3 id="h-notizen" class="sub-h">Notizen <small>${istEigen() ? 'auf allen deinen Geräten' : 'für euch beide'}</small></h3>`, `
   <ul class="notiz-liste" id="d-notizen"></ul>
   <form class="notiz-form" id="notiz-form" autocomplete="off">
     <label class="sr" for="notiz-feld">Notiz</label>
@@ -545,7 +550,7 @@ function notizenZeichnen() {
 function bewertungHTML(rid) {
   const b = app.stand.bewertung?.[rid];
   const knopf = (w) => `<button type="button" class="daumen d-${w}" data-bewerten="${w}" aria-pressed="${b?.wert === w}" aria-label="${DAUMEN_TEXT[w]}"${app.listeDa ? '' : ' disabled'}>${daumenIc(w)}</button>`;
-  let von = 'Noch nicht bewertet. Gilt für euch beide.';
+  let von = istEigen() ? 'Noch nicht bewertet.' : 'Noch nicht bewertet. Gilt für euch beide.';
   if (b) {
     const wer = b.by ? ` von ${b.by === app.name() ? 'dir' : esc(b.by)}` : '';
     const wann = b.at && !Number.isNaN(Date.parse(b.at)) ? ` · ${tagKurz(heute(new Date(b.at)))}` : '';

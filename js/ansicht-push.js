@@ -9,6 +9,7 @@
  * selbst – mit „Einschalten“ gleich im Hinweis.
  */
 import { app, $, melde, ansicht, lese, schreibe } from './kern.js';
+import { istEigen } from './profil.js';
 import { esc } from './format.js';
 import { ARTEN, bekommt, pushStand, pushEinschalten, pushAusschalten, pushWas, pushTest, schluesselErzeugen, schluesselAblegen, geraetArt } from './push.js';
 
@@ -100,7 +101,7 @@ export async function pushZeichnen(frisch = false) {
   const el = $('#push-bereich');
   if (!el) return;
   el.innerHTML = inhalt();
-  if (!app.zugang || arbeitet) return;
+  if (!app.zugang || arbeitet || istEigen()) return;
   // GitHub nur fragen, wenn man die Einstellungen auch sieht
   if (!frisch && ansicht.tab !== 'einstellungen') return;
   // Mitteilungen inzwischen in den Einstellungen erlaubt (oder verboten): gleich neu, nicht erst in fünf Minuten
@@ -186,7 +187,8 @@ function hinweisWennFrei(n = 0) {
  * kommt der Hinweis – auf jedem Gerät nur einmal.
  */
 export async function pushHinweisPruefen() {
-  if (hinweisGeprueft || !app.zugang || !app.listeDa) return;
+  // Eine eigene Liste hat kein Push (das läuft über die Abläufe in Boxenstopp-Daten)
+  if (hinweisGeprueft || !app.zugang || !app.listeDa || istEigen()) return;
   hinweisGeprueft = true;
   // Gab es ihn schon, oder geht Push hier gar nicht (Safari statt Home-Bildschirm, Mitteilungen verboten)?
   if (lese(HINWEIS, false) || geraetArt()) return;

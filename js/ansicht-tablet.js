@@ -15,7 +15,7 @@
  */
 import { app, $, lese, schreibe } from './kern.js';
 import { esc } from './format.js';
-import { einladungsLink, ladeKi } from './zugang.js';
+import { linkFuerGeraet, istEigen } from './profil.js';
 import { bildPfad } from './bilder.js';
 
 const GEZEIGT = 'boxenstopp.tablet.v1';
@@ -35,7 +35,7 @@ function inhalt() {
   return `<button type="button" class="tablet-zu" data-act="tablet-zu" aria-label="Schließen">${KREUZ}</button>
 <p class="amy-eyebrow"><img class="amy-deko" src="${bildPfad('sparkles')}" alt="" width="20" height="20"> zwei Geräte, eine Liste <img class="amy-deko" src="${bildPfad('sparkles')}" alt="" width="20" height="20"></p>
 <h2 class="tablet-titel" id="tablet-titel">Boxenstopp auch auf deinem iPad</h2>
-<p class="tablet-lead">Dann hast du deine Rezepte und eure Einkaufsliste auf beiden – und kannst jederzeit wechseln. Was du auf dem einen speicherst, ist gleich auch auf dem anderen.</p>
+<p class="tablet-lead">Dann hast du deine Rezepte und ${istEigen() ? 'deine' : 'eure'} Einkaufsliste auf beiden – und kannst jederzeit wechseln. Was du auf dem einen speicherst, ist gleich auch auf dem anderen.</p>
 <ol class="tablet-schritte">
 <li><b>Hier deinen Link kopieren</b>
 <span><button type="button" class="amy-btn tablet-kopieren" data-act="tablet-link">Link kopieren</button></span>
@@ -80,7 +80,7 @@ export function klickTablet(el) {
     }
     case 'tablet-link': {
       if (!app.zugang) return true;
-      const link = einladungsLink(app.zugang.token, ladeKi());
+      const link = linkFuerGeraet();
       const feld = $('#tablet-linkfeld');
       const zeigen = () => { if (feld) { feld.value = link; feld.hidden = false; feld.select(); } el.textContent = 'Kopieren klappt hier nicht – der Link steht darunter'; };
       try {

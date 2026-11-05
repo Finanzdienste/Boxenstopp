@@ -37,6 +37,7 @@
  * angebotRabatt in angebote.js). Die Sortierung merkt sich das Handy.
  */
 import { app, $, melde, zeigeReiter, lese, schreibe } from './kern.js';
+import { istEigen } from './profil.js';
 import { esc, tagKurz, heute } from './format.js';
 import { angeboteBereinigen, zeileLesen, angebotMenge, angeboteText, topRezepte, rumpfAngebote, LAEDEN, angebotRabatt, nachRabatt, grundpreis, istHaehnchen, ladenWahl, rabattText, GUENSTIG_AB, woche, inWoche, abText, besteJeLaden, einheitsPreis, preisJe, preisalarmTreffer } from './angebote.js';
 import { verlaufHinweis, wochenSchluessel } from './preisverlauf.js';
@@ -377,7 +378,7 @@ function empfehlungHTML() {
   const wahl = ladenWahl(mitListe ? bedarf : bedarfRezepte(), angebote, app);
   if (!wahl.length) {
     const je = jeLadenHTML(angebote);
-    return mitListe || je ? `<section class="a-tipp" aria-label="Empfehlung">${mitListe ? `<p class="a-tipp-k">Empfehlung für eure Liste</p><p class="a-tipp-d">Von eurer Liste ist ${wannText()} nichts günstiger als sonst – geht dahin, wo es für euch passt.</p>` : ''}${je}</section>` : '';
+    return mitListe || je ? `<section class="a-tipp" aria-label="Empfehlung">${mitListe ? `<p class="a-tipp-k">Empfehlung für ${istEigen() ? 'deine' : 'eure'} Liste</p><p class="a-tipp-d">Von ${istEigen() ? 'deiner' : 'eurer'} Liste ist ${wannText()} nichts günstiger als sonst – ${istEigen() ? 'geh dahin, wo es für dich passt' : 'geht dahin, wo es für euch passt'}.</p>` : ''}${je}</section>` : '';
   }
   const [best, ...rest] = wahl;
   const was = best.treffer.slice(0, 4).map((t) => `${esc(kurzZutat(t.k, t.a))} <b>${rabattText(t.rabatt)}</b>`).join(', ');
@@ -402,7 +403,7 @@ function eigeneHTML() {
   const st = app.stand.angebote || {};
   const wer = st.von ? `von ${st.von === app.name() ? 'dir' : esc(st.von)}` : '';
   const wann = st.stand && !Number.isNaN(Date.parse(st.stand)) ? esc(tagKurz(heute(new Date(st.stand)))) : '';
-  return `<h3 class="sub-h a-eigene-h">Selbst eingetragen <small>für euch beide</small></h3>${gruppenHTML(liste, { eigen: true })}
+  return `<h3 class="sub-h a-eigene-h">Selbst eingetragen <small>${istEigen() ? 'auf allen deinen Geräten' : 'für euch beide'}</small></h3>${gruppenHTML(liste, { eigen: true })}
 <div class="a-foot"><span class="fine">${liste.length} eigene${wer || wann ? `, zuletzt ${[wer, wann].filter(Boolean).join(' ')}` : ''}</span>${leerenFragen
     ? '<span class="confirm">Alle eigenen löschen? <button type="button" class="btn btn-quiet" data-act="a-leeren-ja">Ja</button><button type="button" class="btn btn-quiet" data-act="a-leeren-nein">Nein</button></span>'
     : '<button type="button" class="linkbtn" data-act="a-leeren">Alle eigenen löschen</button>'}</div>`;
@@ -429,7 +430,7 @@ function wocheHTML() {
   const chip = (art, text) => {
     const w = woche(art);
     const n = inWoche(auto.angebote || [], w).filter((a) => a.k).length + eigeneIn(w).length;
-    return `<button type="button" class="a-woche-b" data-a-woche="${art}" aria-pressed="${wahlWoche === art}"><b>${text}</b><small>KW ${w.kw} · ${n ? `${n} für euch` : 'noch nichts da'}</small></button>`;
+    return `<button type="button" class="a-woche-b" data-a-woche="${art}" aria-pressed="${wahlWoche === art}"><b>${text}</b><small>KW ${w.kw} · ${n ? `${n} für ${istEigen() ? 'dich' : 'euch'}` : 'noch nichts da'}</small></button>`;
   };
   return `<div class="a-woche" role="group" aria-label="Woche">${chip('diese', 'Diese Woche')}${chip('naechste', 'Nächste Woche')}</div>`;
 }
@@ -449,7 +450,7 @@ export function angeboteZeichnen() {
   const top = mitAngeboten.length ? topRezepte(app.rezepte, mitAngeboten, app) : [];
   const sprung = mitAngeboten.length ? `<div class="a-oben"><button type="button" class="btn a-zu-passt" data-act="a-zu-passt">${RUNTER}Passt zu euren Rezepten${top.length ? `<span class="btn-n">${top.length}</span>` : ''}</button></div>` : '';
   el.innerHTML = `<button type="button" class="back nur-breit" data-act="angebote-zu">${ZURUECK}Alle Rezepte</button>
-<div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : wahlWoche === 'naechste' ? 'Angebote nächste Woche' : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für euch` : ''}</span></div>
+<div class="l-head"><h2 id="a-title">${laden ? `Angebote bei ${esc(laden)}` : wahlWoche === 'naechste' ? 'Angebote nächste Woche' : 'Angebote der Woche'}</h2><span class="l-count" id="a-count">${n ? `${n} für ${istEigen() ? 'dich' : 'euch'}` : ''}</span></div>
 ${wocheHTML()}
 ${alarmHTML()}
 ${sprung}

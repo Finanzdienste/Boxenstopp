@@ -13,6 +13,7 @@
  * sieht sie nie.
  */
 import { app, $, melde, lese, ansicht } from './kern.js';
+import { istEigen } from './profil.js';
 import { esc, uhrzeit } from './format.js';
 import { privatLesen, API } from './speicher.js';
 import { opTodoApp, opTodoWunsch, opTodoZiel, TODO_APP_ID } from './liste.js';
@@ -54,7 +55,7 @@ function planen() {
 
 /** todo.json holen und zeichnen – in den Einstellungen, solange sie offen sind. */
 export async function todoHolen() {
-  if (!app.zugang || holt || !app.stand.haushalt?.todoApp) { todoZeichnen(); return; }
+  if (!app.zugang || holt || !app.stand.haushalt?.todoApp || istEigen()) { todoZeichnen(); return; }
   holt = true;
   try {
     const t = await privatLesen('todo.json', { token: app.zugang.token, api: api() });

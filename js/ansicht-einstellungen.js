@@ -3,10 +3,17 @@
  *
  *   Gemeinsame Liste   Einrichten, Link fürs zweite Handy, Tablet, Trennen –
  *                      zeichnet ansicht-liste.js in #e-zugang und #teilen
- *   Push-Nachrichten   ansicht-push.js in #push-bereich
+ *   Ziel pro Box       die eigenen Makros, alle Rezepte rechnen sich darauf
+ *                      um – ansicht-ziel.js in #e-ziel
+ *   Gäste & Überblick  jemanden mit eigener Liste einladen, wer wann was
+ *                      macht – ansicht-gaeste.js (nur bei Tobi und Amy)
+ *   Push-Nachrichten   ansicht-push.js in #push-bereich (nicht in einer
+ *                      eigenen Liste: Push und To Do laufen über die Abläufe
+ *                      in Boxenstopp-Daten)
  *   KI-Schlüssel       ansehen, ändern, entfernen (zugang.js)
  *   Darstellung        hell, dunkel oder wie das Gerät – nur dieses Gerät
- *                      (html[data-design], gesetzt schon im Kopf von index.html)
+ *                      (html[data-design], gesetzt schon im Kopf von index.html);
+ *                      die Farbe der App (blau, lila) gilt für die Liste
  *   Reiter unten       welche Reiter die Leiste zeigt, in welcher
  *                      Reihenfolge – nur dieses Gerät
  *   Gelernt und gemerkt  Tempo, Wege durch die Läden, Preisalarme, Preise
@@ -24,10 +31,13 @@ import { ladeKi, speichereKi, loescheKi, kiAus } from './zugang.js';
 import { ANBIETER, anbieterVon } from './ki.js';
 import { tempoInfo, GRUPPEN_TEXT } from './tempo.js';
 import { preisJe } from './angebote.js';
-import { opBon, opBonWeg } from './liste.js';
+import { opBon, opBonWeg, opProfil } from './liste.js';
 import { nameSchluessel } from './bereiche.js';
 import { statusZeichnen } from './ansicht-liste.js';
 import { todoZeichnen } from './ansicht-todo.js';
+import { zielEinstellungenZeichnen } from './ansicht-ziel.js';
+import { gaesteZeichnen } from './ansicht-gaeste.js';
+import { istEigen, person, wessen, farbe, farbeSetzen } from './profil.js';
 
 /* ------------------------------------------------------------ Reiter */
 
@@ -82,7 +92,7 @@ const RUNTER = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentC
 function reiterHTML() {
   const aus = reiterAus();
   const reihe = reiterReihe();
-  const namen = Object.fromEntries(REITER_WAHL);
+  const namen = { ...Object.fromEntries(REITER_WAHL), amy: `${wessen(person())} Rezepte` };
   const symbol = (t) => $(`.tabbar .tab[data-tab="${t}"] .ic`)?.outerHTML || '';
   const an = ALLE.filter((k) => !aus.includes(k)).length;
   const zeilen = reihe.map((k, i) => {
@@ -117,8 +127,12 @@ const designJetzt = () => document.documentElement.dataset.design || 'auto';
 function designHTML() {
   const jetzt = designJetzt();
   const wahl = [['auto', 'Wie das Gerät'], ['hell', 'Hell'], ['dunkel', 'Dunkel']];
+  const f = farbe() || 'blau';
+  const farben = [['blau', 'Blau'], ['lila', 'Lila']];
   return `<div class="e-design" role="radiogroup" aria-label="Hell oder dunkel">${wahl.map(([w, name]) => `<label class="e-wahl${w === jetzt ? ' an' : ''}"><input type="radio" name="e-design" value="${w}"${w === jetzt ? ' checked' : ''}><span>${esc(name)}</span></label>`).join('')}</div>
-<p class="fine">Gilt für dieses Gerät. „Wie das Gerät“ folgt dem hellen oder dunklen Modus von Handy oder Tablet.</p>`;
+<p class="fine">Gilt für dieses Gerät. „Wie das Gerät“ folgt dem hellen oder dunklen Modus von Handy oder Tablet.</p>
+<div class="e-design e-farbe" role="radiogroup" aria-label="Farbe der App">${farben.map(([w, name]) => `<label class="e-wahl${w === f ? ' an' : ''}"><input type="radio" name="e-farbe" value="${w}"${w === f ? ' checked' : ''}${app.listeDa ? '' : ' disabled'}><span class="g-punkt g-${w}" aria-hidden="true"></span><span>${esc(name)}</span></label>`).join('')}</div>
+<p class="fine">Die Farbe gilt für ${istEigen() ? 'alle deine Geräte' : 'alle, die diese Liste teilen'}.</p>`;
 }
 
 /* -------------------------------------------------------- KI-Schlüssel */
@@ -137,7 +151,7 @@ ${kiFehler ? `<p class="zugang-fehler" role="alert">${esc(kiFehler)}</p>` : ''}
 
 function kiHTML() {
   const da = anbieterVon(ladeKi());
-  const wofuer = 'Für die Resteverwertung, „Mit KI ändern“, Rezepte übernehmen und Prospektfotos bei den Angeboten.';
+  const wofuer = 'Für die Resteverwertung, die Speisekarte, „Mit KI ändern“, Rezepte übernehmen und Prospektfotos bei den Angeboten.';
   const bleibt = 'Der Schlüssel bleibt nur auf diesem Gerät; aufs andere kommt er mit dem Link fürs zweite Handy.';
   if (!da) {
     return `<p>${wofuer} Kostenlos mit einem Google-Konto: auf <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> „Create API key“, den Schlüssel hier einfügen.</p>
@@ -223,6 +237,12 @@ export function einstellungenZeichnen() {
   if (dsg) dsg.innerHTML = designHTML();
   const g = $('#e-gemerkt');
   if (g) g.innerHTML = gemerktHTML();
+  zielEinstellungenZeichnen();
+  gaesteZeichnen();
+  // In einer eigenen Liste gibt es kein Push und kein To Do (die laufen über die Abläufe in Boxenstopp-Daten)
+  for (const id of ['#e-push-karte', '#e-todo']) { const k = $(id); if (k) k.hidden = istEigen(); }
+  const titel = $('#e-liste-t');
+  if (titel) titel.textContent = istEigen() ? 'Deine Liste' : 'Gemeinsame Liste';
   const u = $('#e-ueber');
   if (u) u.innerHTML = ueberHTML();
   // Microsoft To Do: was in liste.json steht (App-ID, Wünsche), kann sich geändert haben
@@ -290,6 +310,14 @@ export function klickEinstellungen(el) {
 
 /** Häkchen bei den Reitern (change). true, wenn es hierher gehörte. */
 export function aenderungEinstellungen(ziel) {
+  if (ziel.name === 'e-farbe') {
+    const neu = ziel.value === 'lila' ? 'lila' : '';
+    if (neu !== farbe() && app.listeDa) { app.aendern(opProfil({ farbe: neu }, app.name())); farbeSetzen(neu); }
+    const el = $('#e-design');
+    if (el) el.innerHTML = designHTML();
+    $(`#e-design input[name="e-farbe"][value="${neu || 'blau'}"]`)?.focus({ preventScroll: true });
+    return true;
+  }
   if (ziel.name === 'e-design') {
     designSetzen(ziel.value);
     const el = $('#e-design');

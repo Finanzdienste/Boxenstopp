@@ -4,19 +4,22 @@
  *
  * Ohne Schlüssel liegt die Liste nur auf diesem Handy (speicher.js lokal).
  * Mit Schlüssel liegt sie im privaten Repo Boxenstopp-Daten (github), und
- * beide Handys sehen dieselbe Liste.
+ * beide Handys sehen dieselbe Liste. Ein Gast mit eigener Liste (Marielle)
+ * hat sein eigenes Repo; wo, steht im Zugang (zugang.js ortVon). Öffnet ein
+ * Gast seine Einladung auf einem Gerät ohne Liste, verbindet die App gleich
+ * und begrüßt ihn (ansicht-willkommen.js).
  *
  * Für die Tests lassen sich zwei Dinge über den localStorage verstellen:
  * __api (statt https://api.github.com) und __takt (Abgleich in ms).
  */
 import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten } from './kern.js';
-import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, API } from './speicher.js';
+import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
 import { opZusammen, opPerson } from './liste.js';
 import { preiseMitBons } from './kosten.js';
-import { ladeZugang, speichereZugang, loescheZugang, schluesselAusAdresse, kiAusAdresse, speichereKi } from './zugang.js';
+import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
-import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen } from './ansicht-liste.js';
+import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen, eingabeZugang } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
@@ -29,18 +32,29 @@ import { einstellungenStart, einstellungenZeichnen, klickEinstellungen, aenderun
 import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus, tasteKochmodus, wischStart, wischEnde } from './kochmodus.js';
 import { haushaltStart, haushaltZeichnen, haushaltGezeigt, klickHaushalt, aenderungHaushalt, absendenHaushalt, tasteHaushalt } from './ansicht-haushalt.js';
 import { todoHolen, klickTodo, absendenTodo } from './ansicht-todo.js';
+import { zielAnwenden, klickZiel, absendenZiel, eingabeZiel, aenderungZiel } from './ansicht-ziel.js';
+import { profilAnwenden, farbeSetzen } from './profil.js';
+import { klickSpeisekarte, absendenSpeisekarte, eingabeSpeisekarte, aenderungSpeisekarte, speisekarteNeu } from './ansicht-speisekarte.js';
+import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste } from './ansicht-gaeste.js';
+import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillkommen, willkommenPruefen } from './ansicht-willkommen.js';
 
 const apiBasis = () => lese('__api', null) || API;
-/** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen. */
+/** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen (eine eigene Liste hat sie nicht). */
 const privateAngebote = () => {
-  if (!app.zugang?.token) return;
+  if (!app.zugang?.token || eigeneListe(app.zugang)) return;
   privatLesen('angebote-privat.json', { token: app.zugang.token, api: apiBasis() }).then((a) => { if (a) angeboteAutoSetzen(a, { privat: true }); });
 };
 const takt = () => Number(lese('__takt', 0)) || 8000;
+/** Der kurze Name eines Rezepts für die Commit-Nachricht („Chili auf die Liste“). */
+const rezeptName = (rid) => app.nachId[rid]?.short || app.amyNach?.[rid]?.short || app.extras?.[rid]?.short || '';
+const speicherFuer = (z) => github({ ...z, ort: ortVon(z), api: apiBasis(), takt: takt(), rezeptName });
 
 function beiAenderung(stand) {
   app.stand = stand;
   app.listeDa = true;
+  // Ein eigenes Ziel pro Box: die Rezepte darauf (ansicht-ziel.js); Name und Farbe der Liste (profil.js)
+  const zielNeu = zielAnwenden();
+  profilAnwenden();
   // Wer die Liste teilt, steht einmal drin – damit man im Putzplan „Wer“ wählen kann
   const ich = app.zugang?.name?.trim();
   if (ich && !stand.leute?.[ich.toLowerCase()]) setTimeout(() => { if (app.zugang?.name?.trim() === ich && !app.stand.leute?.[ich.toLowerCase()]) app.aendern(opPerson(ich)); }, 0);
@@ -58,12 +72,16 @@ function beiAenderung(stand) {
   tabletPruefen();
   // Ein Rezept aus der Resteverwertung kann auf dem anderen Handy gelöscht worden sein.
   if (offenesRezept() && !app.nachId[offenesRezept()]) schliesseRezept();
-  if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
+  if (offenesRezept() && zielNeu) oeffneRezept(offenesRezept(), { still: true });
+  else if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
+  if (zielNeu) speisekarteNeu();
   if (kochNeu) { kochstandZeichnen(); kochmodusNeu(); }
   // Putzplan und Haushaltssachen (zeichnet nur, wenn der Reiter offen ist – sonst beim Hinwechseln)
   haushaltZeichnen();
   // Preisalarme, Bons, Wege: was dort steht, kann sich geändert haben
   if (ansicht.tab === 'einstellungen') einstellungenZeichnen();
+  // Ein Gast mit eigener Liste: einmal das Willkommen
+  willkommenPruefen();
 }
 function beiStatus(s) {
   app.status = s;
@@ -89,14 +107,20 @@ reiterBeobachten((t) => {
   tabbarAnpassen();
 });
 
-app.verbinden = async (token, name) => {
-  const ergebnis = await pruefeSchluessel(token, { api: apiBasis() });
+/** Verbinden – daten: das Repo einer eigenen Liste (Gast), farbe: wie sie aussieht. */
+app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
+  const ort = ortVon({ daten });
+  const ergebnis = await pruefeSchluessel(token, { api: apiBasis(), ort });
   if (ergebnis !== 'ok') return ergebnis;
   // Was bisher nur auf diesem Handy stand, kommt mit in die gemeinsame Liste.
   const bisher = app.zugang ? null : lokalerStand();
-  app.zugang = { token, name };
+  // Eine andere Liste als bisher: was von der alten noch vorgemerkt ist, gehört nicht in die neue
+  const ortName = (o) => `${o.owner}/${o.repo}`;
+  if (app.zugang && ortName(ortVon(app.zugang)) !== ortName(ort)) { githubVergessen(); app.listeDa = false; }
+  app.zugang = { token, name, ...(eigeneListe({ daten }) ? { daten } : {}) };
   speichereZugang(app.zugang);
-  nimmSpeicher(github({ token, name, api: apiBasis(), takt: takt() }));
+  if (farbe) farbeSetzen(farbe === 'blau' ? '' : farbe);
+  nimmSpeicher(speicherFuer(app.zugang));
   if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || Object.keys(bisher.amy || {}).length)) app.aendern(opZusammen(bisher.items, bisher.ki, { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege }));
   lokalLoeschen();
   statusZeichnen();
@@ -140,6 +164,10 @@ document.addEventListener('click', (ev) => {
   if (klickPush(el)) return;
   if (klickTodo(el)) return;
   if (klickEinstellungen(el)) return;
+  if (klickWillkommen(el)) return;
+  if (klickGaeste(el)) return;
+  if (klickZiel(el)) return;
+  if (klickSpeisekarte(el)) return;
   if (klickHaushalt(el)) return;
   if (klickAmy(el)) return;
   if (klickListe(el)) return;
@@ -165,8 +193,16 @@ document.addEventListener('keydown', (ev) => {
   // Enter in einer Aufgabe des Putzplans: die nächste Zeile, nicht speichern
   if (ev.key === 'Enter' && !ev.isComposing && tasteHaushalt(ev.target)) ev.preventDefault();
 });
-document.addEventListener('input', (ev) => { if (!eingabeAmy(ev.target) && !eingabeAnpassen(ev.target) && !eingabeKi(ev.target) && !eingabeAngebote(ev.target)) eingabeRezepte(ev.target); });
-document.addEventListener('change', (ev) => { if (!aenderungKi(ev.target) && !aenderungAmy(ev.target) && !aenderungPush(ev.target) && !aenderungEinstellungen(ev.target) && !aenderungHaushalt(ev.target) && !aenderungRezepte(ev.target) && !aenderungListe(ev.target)) aenderungAngebote(ev.target); });
+document.addEventListener('input', (ev) => {
+  const t = ev.target;
+  if (eingabeZiel(t) || eingabeWillkommen(t) || eingabeGaeste(t) || eingabeSpeisekarte(t) || eingabeZugang(t)) return;
+  if (!eingabeAmy(t) && !eingabeAnpassen(t) && !eingabeKi(t) && !eingabeAngebote(t)) eingabeRezepte(t);
+});
+document.addEventListener('change', (ev) => {
+  const t = ev.target;
+  if (aenderungZiel(t) || aenderungWillkommen(t) || aenderungGaeste(t) || aenderungSpeisekarte(t)) return;
+  if (!aenderungKi(t) && !aenderungAmy(t) && !aenderungPush(t) && !aenderungEinstellungen(t) && !aenderungHaushalt(t) && !aenderungRezepte(t) && !aenderungListe(t)) aenderungAngebote(t);
+});
 // Im Kochmodus: wischen zum Blättern
 document.addEventListener('touchstart', wischStart, { passive: true });
 document.addEventListener('touchend', wischEnde, { passive: true });
@@ -174,7 +210,10 @@ document.addEventListener('touchend', wischEnde, { passive: true });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wegPruefen(); });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
 document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
-document.addEventListener('submit', (ev) => { if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenEinstellungen(ev) && !absendenTodo(ev) && !absendenHaushalt(ev) && !absendenRezepte(ev)) absendenListe(ev); });
+document.addEventListener('submit', (ev) => {
+  if (absendenZiel(ev) || absendenWillkommen(ev) || absendenGaeste(ev) || absendenSpeisekarte(ev)) return;
+  if (!absendenAmy(ev) && !absendenAnpassen(ev) && !absendenKi(ev) && !absendenAngebote(ev) && !absendenEinstellungen(ev) && !absendenTodo(ev) && !absendenHaushalt(ev) && !absendenRezepte(ev)) absendenListe(ev);
+});
 
 /* ----------------------------------------------------------------- Start */
 
@@ -188,14 +227,16 @@ async function start() {
     $('#grid').innerHTML = '<p class="empty">Die Rezepte ließen sich nicht laden. Prüf die Verbindung und öffne die App noch einmal.</p>';
     return;
   }
+  app.rezepteBasis = daten.rezepte;
   app.rezepte = daten.rezepte;
+  app.datenVersion = String(daten.version || '');
   app.katalog = daten.katalog;
   app.extras = daten.extras || {};
   app.naehrwerte = daten.naehrwerte || {};
   app.richtpreise = daten.preise || {};
   app.preise = app.richtpreise;
   app.preiseStand = daten.preise_stand || '';
-  if (daten.ziel) app.ziel = daten.ziel;
+  if (daten.ziel) { app.ziel = { ...daten.ziel }; app.zielStandard = { ...daten.ziel }; }
   for (const r of app.rezepte) app.nachId[r.id] = r;
   // Welche Einheit ein Katalog-Schlüssel hat – damit die Resteverwertung nur
   // dann eine Zeile mit einem festen Rezept teilt, wenn sich Mengen addieren lassen.
@@ -206,7 +247,16 @@ async function start() {
   try { hash = decodeURIComponent((location.hash || '').slice(1)); } catch { /* kaputte Adresse */ }
   const kiLink = kiAusAdresse();
   if (kiLink) speichereKi(kiLink);
-  const ausLink = schluesselAusAdresse();
+  const link = linkAusAdresse();
+  const ausLink = link.token;
+  // Ziel, Farbe und Namen der Liste schon vor dem ersten Zeichnen – wie das Gerät sie zuletzt kannte
+  app.zugang = ladeZugang();
+  app.stand = { ...app.stand, profil: bekanntesProfil(app.zugang ? ortVon(app.zugang) : null) };
+  zielAnwenden();
+  profilAnwenden();
+  // Eine Einladung (…&fuer=Marielle) auf einem Gerät ohne Liste: gleich verbinden, das Willkommen erklärt den Rest
+  const einladung = !!ausLink && !app.zugang && !!link.fuer;
+  if (link.farbe && (einladung || (ausLink && ausLink === app.zugang?.token))) farbeSetzen(link.farbe === 'blau' ? '' : link.farbe);
   kiStart();
   anpassenStart();
   lobStart();
@@ -236,8 +286,9 @@ async function start() {
   }).catch(() => {});
 
   // Ein Link mit einem neuen Schlüssel: das Einrichten steht in den Einstellungen
-  const neuerSchluessel = !!ausLink && ausLink !== ladeZugang()?.token;
-  if (neuerSchluessel) ansicht.tab = 'einstellungen';
+  const neuerSchluessel = !!ausLink && ausLink !== app.zugang?.token;
+  if (einladung) ansicht.tab = 'rezepte';
+  else if (neuerSchluessel) ansicht.tab = 'einstellungen';
   else if (hash === 'einkauf' || hash === 'liste' || ausLink) ansicht.tab = 'einkauf';
   if (hash === 'angebote') ansicht.tab = 'angebote';
   if (hash === 'amy') ansicht.tab = 'amy';
@@ -249,14 +300,21 @@ async function start() {
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
   if (hash === 'reste' || (kiLink && !ausLink)) kiStart({ oeffnen: true });
   else if (rezept) oeffneRezept(rezept, { still: true });
-  if (kiLink) melde('KI-Schlüssel übernommen – die Resteverwertung ist bereit.');
+  if (kiLink && !einladung) melde('KI-Schlüssel übernommen – die Resteverwertung ist bereit.');
 
-  app.zugang = ladeZugang();
-  if (app.zugang) nimmSpeicher(github({ ...app.zugang, api: apiBasis(), takt: takt() }));
+  if (app.zugang) nimmSpeicher(speicherFuer(app.zugang));
   else nimmSpeicher(lokal());
   privateAngebote();
 
-  if (ausLink && ausLink !== app.zugang?.token) formularMitSchluessel(ausLink);
+  if (einladung) {
+    app.verbinden(ausLink, link.fuer, { daten: link.daten, farbe: link.farbe }).then((e) => {
+      zugangZeichnen();
+      if (e === 'ok') return;
+      formularMitSchluessel(ausLink, link);
+      zeigeReiter('einstellungen');
+      melde(e === 'falsch' ? 'Der Schlüssel aus dem Link geht nicht – frag nach einem neuen Link.' : 'Gerade keine Verbindung – der Link ist eingetragen, tipp gleich auf „Verbinden“.');
+    });
+  } else if (ausLink && ausLink !== app.zugang?.token) formularMitSchluessel(ausLink, link);
   else zugangZeichnen();
   wegPruefen();
 }

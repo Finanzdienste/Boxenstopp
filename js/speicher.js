@@ -6,7 +6,9 @@
  *
  *   github()  als liste.json im privaten Repo Finanzdienste/Boxenstopp-Daten,
  *             gelesen und geschrieben über die GitHub-API mit dem Schlüssel
- *             aus zugang.js.
+ *             aus zugang.js. Eine eigene Liste (Gäste wie Marielle) liegt im
+ *             eigenen privaten Repo, etwa Finanzdienste/Boxenstopp-Marielle –
+ *             `ort` sagt, wo (zugang.js ortVon).
  *
  * So funktioniert github():
  *
@@ -32,7 +34,7 @@
  *   jetzt()   sofort abgleichen
  *   stop()
  */
-import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt, planNachtrag } from './liste.js';
+import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt, planNachtrag, beschreibung } from './liste.js';
 
 export const API = 'https://api.github.com';
 export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: 'liste.json' };
@@ -105,6 +107,20 @@ export async function privatSchreiben(pfad, aendern, { token, api = API, ort = D
   throw new Error('GitHub hat das nicht gespeichert – gleich nochmal versuchen.');
 }
 
+/**
+ * Das Profil der Liste (Ziel, Farbe, wessen Rezepte), wie dieses Gerät es
+ * zuletzt kannte – nur fürs erste Zeichnen beim Start, damit die Zahlen der
+ * Rezepte nicht springen. ort: wo die Liste liegt (null: nur auf dem Handy).
+ */
+export function bekanntesProfil(ort = null) {
+  try {
+    if (!ort) return bereinigen(lese(LOKAL, null)).profil || {};
+    const g = lese(GITHUB, null);
+    if (!g || (g.ort || `${DATEN.owner}/${DATEN.repo}`) !== `${ort.owner}/${ort.repo}`) return {};
+    return anwenden(bereinigen(g.stand), (() => { const o = lese(OFFEN, []); return Array.isArray(o) ? o : []; })()).profil || {};
+  } catch { return {}; }
+}
+
 /** Was nur auf diesem Handy steht – zum Übernehmen in die gemeinsame Liste. */
 export const lokalerStand = () => bereinigen(lese(LOKAL, null));
 export function lokalLoeschen() { weg(LOKAL); }
@@ -150,12 +166,19 @@ const ausB64 = (b64) => {
   return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
 };
 
-export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }) {
+/**
+ * rezeptName(rid): der kurze Name eines Rezepts für die Commit-Nachricht
+ * („Chili auf die Liste“) – die App kennt ihn, die Datei nicht.
+ */
+export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, rezeptName = () => '' }) {
   const basis = `${api}/repos/${ort.owner}/${ort.repo}`;
-  const datei = `${basis}/contents/${ort.pfad}`;
+  const datei = `${basis}/contents/${ort.pfad || DATEN.pfad}`;
   const kopf = (mehr = {}) => ({ Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...mehr });
+  // Der zwischengespeicherte Stand gilt nur für dieselbe Liste (eigene Listen liegen woanders)
+  const ortName = `${ort.owner}/${ort.repo}`;
 
-  const g = lese(GITHUB, null);
+  const roh0 = lese(GITHUB, null);
+  const g = roh0 && (roh0.ort || `${DATEN.owner}/${DATEN.repo}`) === ortName ? roh0 : null;
   // Hat eine ältere Fassung den Stand zwischengespeichert, fehlt darin, was sie
   // nicht kannte (sie hat es beim Lesen weggeräumt). Dann zählt er nur noch
   // fürs Anzeigen: ohne sha liest der nächste Abruf die Datei ganz neu – sonst
@@ -193,7 +216,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
   };
   const ansicht = () => anwenden(remote.stand, offen);
   const zeige = () => melden(ansicht());
-  const merkeRemote = () => schreibe(GITHUB, { ...remote, format: FORMAT });
+  const merkeRemote = () => schreibe(GITHUB, { ...remote, format: FORMAT, ort: ortName });
   const merkeOffen = () => schreibe(OFFEN, offen);
   // 403 heißt bei GitHub entweder „darf nicht“ oder „zu viele Anfragen“.
   const begrenzt = (r) => r.status === 429 || (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0');
@@ -241,7 +264,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
             // Schreiben weg. Dann kommt, was dieses Handy davon kannte, wieder dazu.
             const fehlt = (k) => roh && typeof roh === 'object' && !(k in roh);
             const mehr = {};
-            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
+            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm', 'profil']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
             if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
             if (fehlt('haushalt') && hatHaushalt(remote.stand?.haushalt)) mehr.haushalt = remote.stand.haushalt;
             if (fehlt('leute') && Object.keys(remote.stand?.leute || {}).length) mehr.leute = remote.stand.leute;
@@ -285,15 +308,19 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
   };
 
   /*
-   * „Amy: Einkaufsliste, 3 Änderungen“ – mit „· Bescheid“ am Ende, wenn es
-   * eine Nachricht an die anderen wert ist (Neues auf der Liste, ein neues
-   * Rezept, eine Notiz, alles eingekauft): Daran erkennt der Push im
-   * Daten-Repo, dass er laufen soll (.github/workflows/benachrichtigen.yml).
-   * „· To Do“, wenn Microsoft To Do nachziehen muss (haushalt.yml).
+   * „Amy: Einkaufsliste, 3 Änderungen – Chili auf die Liste; 2 abgehakt“ –
+   * mit „· Bescheid“ am Ende, wenn es eine Nachricht an die anderen wert ist
+   * (Neues auf der Liste, ein neues Rezept, eine Notiz, alles eingekauft):
+   * Daran erkennt der Push im Daten-Repo, dass er laufen soll
+   * (.github/workflows/benachrichtigen.yml). „· To Do“, wenn Microsoft To Do
+   * nachziehen muss (haushalt.yml). Was nach „–“ steht, liest der Überblick
+   * des Gastgebers (gaeste.js).
    */
   function nachricht(paket, vorher, nachher) {
-    const wer = name ? `${name}: ` : '';
-    return `${wer}Einkaufsliste, ${paket.length} ${paket.length === 1 ? 'Änderung' : 'Änderungen'}${bescheidNoetig(vorher, nachher) ? ' · Bescheid' : ''}${todoNoetig(vorher, nachher) ? ' · To Do' : ''}`;
+    const wer = name ? `${name.replace(/[:\n\r]/g, ' ').trim()}: ` : '';
+    let was = '';
+    try { was = beschreibung(vorher, nachher, rezeptName).replace(/·/g, '-'); } catch { was = ''; }
+    return `${wer}Einkaufsliste, ${paket.length} ${paket.length === 1 ? 'Änderung' : 'Änderungen'}${was ? ` – ${was}` : ''}${bescheidNoetig(vorher, nachher) ? ' · Bescheid' : ''}${todoNoetig(vorher, nachher) ? ' · To Do' : ''}`;
   }
 
   async function senden() {
@@ -393,6 +420,67 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN }
       meldeStatus = () => {};
     },
   };
+}
+
+/**
+ * Eine neue Liste anlegen (Einladung, ansicht-gaeste.js): liste.json mit dem
+ * Profil des Gasts in sein Repo – geht nur, wenn der Schlüssel dort schreiben
+ * darf; so merkt man es vor dem Verschicken. Gibt es die Datei schon, bleibt
+ * sie, nur das Profil wird ergänzt. 'ok' | 'falsch' | 'netz'
+ */
+export async function listeAnlegen(token, ort, profil, { api = API, wer = '' } = {}) {
+  const url = `${api}/repos/${ort.owner}/${ort.repo}/contents/${ort.pfad || DATEN.pfad}`;
+  const kopf = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
+  for (let versuch = 0; versuch < 3; versuch++) {
+    let r;
+    try { r = await fetch(url, { headers: kopf, cache: 'no-store' }); } catch { return 'netz'; }
+    if (r.status === 401 || r.status === 403) return 'falsch';
+    // 404: Datei fehlt (oder das ganze Repo – dann sagt es das Schreiben)
+    if (!r.ok && r.status !== 404) return 'netz';
+    const j = r.status === 404 ? null : await r.json().catch(() => null);
+    let alt = leer();
+    try { if (j?.content) alt = bereinigen(JSON.parse(ausB64(j.content))); } catch { alt = leer(); }
+    const neu = anwenden(alt, opZusammen({}, {}, { profil }));
+    neu.rev = (alt.rev || 0) + 1;
+    const body = { message: `${wer ? `${wer}: ` : ''}Einladung für ${profil.person || 'eine eigene Liste'}`, content: zuB64(`${JSON.stringify(neu, null, 1)}\n`), ...(j?.sha ? { sha: j.sha } : {}) };
+    let w;
+    try { w = await fetch(url, { method: 'PUT', headers: { ...kopf, 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' }); } catch { return 'netz'; }
+    if (w.ok) return 'ok';
+    if (w.status === 401 || w.status === 403 || w.status === 404) return 'falsch';
+    if (w.status !== 409 && w.status !== 422) return 'netz';
+    await warte(300 * (versuch + 1));
+  }
+  return 'netz';
+}
+
+/**
+ * Die Commits an liste.json, neueste zuerst: [{ sha, at, nachricht }] –
+ * fürs Überblick des Gastgebers. bis: bei dieser sha aufhören (schon
+ * bekannt); seiten: höchstens so viele Abrufe à 100. Ein leeres Repo (409)
+ * hat keine. Wirft 'falsch' oder 'netz'.
+ */
+export async function commitsLesen(token, ort, { api = API, bis = '', seit = '', seiten = 3 } = {}) {
+  const liste = [];
+  for (let seite = 1; seite <= seiten; seite++) {
+    const q = new URLSearchParams({ path: ort.pfad || DATEN.pfad, per_page: '100', page: String(seite) });
+    if (seit) q.set('since', seit);
+    let r;
+    try {
+      r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/commits?${q}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+    } catch { throw new Error('netz'); }
+    if (r.status === 409) return liste;
+    if (r.status === 401 || r.status === 403 || r.status === 404) throw new Error('falsch');
+    if (!r.ok) throw new Error('netz');
+    const j = await r.json().catch(() => []);
+    if (!Array.isArray(j)) throw new Error('netz');
+    for (const c of j) {
+      if (!c?.sha) continue;
+      if (bis && c.sha === bis) return liste;
+      liste.push({ sha: c.sha, at: c.commit?.committer?.date || c.commit?.author?.date || '', nachricht: String(c.commit?.message || '').split('\n')[0].slice(0, 300) });
+    }
+    if (j.length < 100) break;
+  }
+  return liste;
 }
 
 /**
