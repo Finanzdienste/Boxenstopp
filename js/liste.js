@@ -187,6 +187,49 @@ export function bescheidNoetig(vorher, nachher) {
 }
 
 /**
+ * In einem Stand andere Namen (alias, klein geschrieben) durch neu ersetzen:
+ * by und wer überall (nicht in den Angeboten), der Verlauf im Putzplan
+ * ([Tag, wer]), der Kochstand (der neuere bleibt) und „Mehr davon“
+ * (x-marielli → x-marielle; gibt es das schon, in derselben Einheit addiert).
+ */
+function namenErsetzen(s, alias, neu) {
+  const tief = (x, ebene = 0) => {
+    if (!x || typeof x !== 'object' || ebene > 8) return;
+    if (Array.isArray(x)) { for (const y of x) tief(y, ebene + 1); return; }
+    for (const [k, y] of Object.entries(x)) {
+      if ((k === 'by' || k === 'wer') && typeof y === 'string' && alias.has(y.toLowerCase())) x[k] = neu;
+      else if (y && typeof y === 'object') tief(y, ebene + 1);
+    }
+  };
+  for (const [k, y] of Object.entries(s)) if (k !== 'angebote' && k !== 'leute') tief(y);
+  for (const st of Object.values(s.haushalt?.stand || {})) {
+    for (const e of Array.isArray(st?.verlauf) ? st.verlauf : []) if (Array.isArray(e) && typeof e[1] === 'string' && alias.has(e[1].toLowerCase())) e[1] = neu;
+  }
+  if (istObj(s.kochen)) {
+    const ziel = kochenName(neu);
+    for (const k of Object.keys(s.kochen)) {
+      if (k === ziel || !alias.has(k)) continue;
+      if (!s.kochen[ziel] || String(s.kochen[k]?.at || '') > String(s.kochen[ziel]?.at || '')) s.kochen[ziel] = s.kochen[k];
+      delete s.kochen[k];
+    }
+  }
+  const zielId = extraId(neu);
+  const aliasIds = new Set([...alias].map(extraId));
+  for (const d of Object.values(s.items || {})) {
+    if (!istObj(d?.parts)) continue;
+    for (const rid of Object.keys(d.parts)) {
+      if (rid === zielId || !aliasIds.has(rid)) continue;
+      const a = d.parts[rid];
+      const b = d.parts[zielId];
+      if (!b) d.parts[zielId] = a;
+      else if (b.u === a.u && typeof a.q === 'number' && typeof b.q === 'number') b.q = Math.round((b.q + a.q) * 100) / 100;
+      else continue;
+      delete d.parts[rid];
+    }
+  }
+}
+
+/**
  * Was ein Paket von Änderungen getan hat, in ein paar Worten – für die
  * Commit-Nachricht (speicher.js) und damit für den Überblick des Gastgebers
  * (gaeste.js): „Chili, Milch auf die Liste; 3 abgehakt“. name(rid) gibt den
@@ -194,11 +237,17 @@ export function bescheidNoetig(vorher, nachher) {
  * Nennenswertes ist.
  */
 export function beschreibung(vorher, nachher, name = () => '') {
-  const v = vorher || leer();
+  let v = vorher || leer();
   const n = nachher || leer();
   const rn = (rid) => name(rid) || rid;
   const teile = [];
   const aufzaehlen = (xs, max = 3) => `${xs.slice(0, max).join(', ')}${xs.length > max ? ' …' : ''}`;
+  // Eine eigene Liste auf eine Person gebracht (opEinePerson): das Vorher genauso umbenannt – sonst sähe jedes „by“ wie eine Änderung aus
+  const umbenannt = n.profil?.person ? Object.entries(v.leute || {}).filter(([k]) => !n.leute?.[k]).map(([, x]) => String(x)) : [];
+  if (umbenannt.length) {
+    v = klon(v);
+    namenErsetzen(v, new Set(umbenannt.map((x) => x.toLowerCase())), n.profil.person);
+  }
   // Einkaufsliste
   const rezepte = new Set();
   const eigene = [];
@@ -242,6 +291,7 @@ export function beschreibung(vorher, nachher, name = () => '') {
   if (JSON.stringify(hv.sachen || {}) !== JSON.stringify(hn.sachen || {})) teile.push('Haushaltssachen');
   if (JSON.stringify(v.profil?.ziel || null) !== JSON.stringify(n.profil?.ziel || null)) teile.push('Ziel pro Box geändert');
   if (Object.keys(n.leute || {}).some((k) => !v.leute?.[k])) teile.push('zum ersten Mal dabei');
+  if (umbenannt.length) teile.push(`${aufzaehlen(umbenannt)} heißt jetzt ${n.profil.person}`);
   if (!teile.length) {
     if (JSON.stringify(v.bons || {}) !== JSON.stringify(n.bons || {})) teile.push('Preis vom Bon');
     else if (JSON.stringify(v.preisalarm || {}) !== JSON.stringify(n.preisalarm || {})) teile.push('Preisalarm');
@@ -721,6 +771,13 @@ export const opTodoZiel = (name, id, liste, geteilt) => ({ typ: 'todoZiel', name
 /** Wer die Liste teilt – jedes Gerät trägt seinen Namen einmal ein (app.js). */
 export const opPerson = (name) => ({ typ: 'person', name: String(name || '').trim() });
 /**
+ * Eine eigene Liste auf eine Person bringen (den Namen aus dem Profil): Hat
+ * sich ein Gerät anders genannt („Marielli“ statt „Marielle“), steht, was es
+ * gemacht hat, danach bei ihr – by und wer, Putzplan-Verlauf, Kochstand,
+ * „Mehr davon“ – und der andere Name ist aus leute raus.
+ */
+export const opEinePerson = (name) => ({ typ: 'einePerson', name: String(name || '').trim() });
+/**
  * Am Profil der Liste etwas setzen: { ziel } (null: zurück zum Standard),
  * { farbe } ('' : blau), { person } – was nicht drinsteht, bleibt.
  */
@@ -876,6 +933,15 @@ function aendere(s, op) {
       if (!PERSON.test(String(op.name))) return;
       if (TODO_WUENSCHE.includes(op.art)) h.todoWunsch[op.name] = { art: op.art, at: op.at, name: PERSON.test(String(op.wie || '')) ? op.wie : op.name };
       else delete h.todoWunsch[op.name];
+      return;
+    }
+    case 'einePerson': {
+      const p = s.profil?.person;
+      if (!p || op.name !== p || !PERSON.test(p)) return;
+      const andere = Object.values(istObj(s.leute) ? s.leute : {}).map(String).filter((x) => x.toLowerCase() !== p.toLowerCase());
+      if (!andere.length) return;
+      namenErsetzen(s, new Set(andere.map((x) => x.toLowerCase())), p);
+      s.leute = { [p.toLowerCase()]: p };
       return;
     }
     case 'person': {

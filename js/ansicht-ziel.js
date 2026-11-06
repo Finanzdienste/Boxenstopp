@@ -146,8 +146,10 @@ export function zielEinstellungenHTML() {
   const feld = (k, name, einheit, klasse = '') => `<label class="e-ziel-f ${klasse}"><span>${name}</span><span class="e-ziel-inp"><input name="${k}" type="text" inputmode="decimal" autocomplete="off" value="${esc(f.werte[k] ?? '')}" aria-label="${name}${f.tag ? ' pro Tag' : ' pro Box'}"${k === 'kcal' ? ' placeholder="auto"' : ''}><small>${einheit}</small></span></label>`;
   const vorschau = f.tag ? zielAusFeldern(f.werte, f) : null;
   const t = trefferZaehlen(app.rezepte);
-  const wer = eigen?.by ? ` von ${esc(eigen.by)}` : '';
-  const seit = eigen?.at ? `, seit ${esc(tagKurz(String(eigen.at).slice(0, 10)))}` : '';
+  // Wer es gesetzt hat und wann, steht im Profil (zielBereinigen behält nur die Werte)
+  const roh = app.stand.profil?.ziel;
+  const wer = eigen && roh?.by ? ` von ${roh.by === app.name() ? 'dir' : esc(roh.by)}` : '';
+  const seit = eigen && roh?.at ? `, seit ${esc(tagKurz(String(roh.at).slice(0, 10)))}` : '';
   const stand = eigen && !gleichesZiel(eigen, app.zielStandard)
     ? `<p class="e-ziel-stand"><b>${esc(zielText(eigen))}</b>${wer}${seit}. ${t.treffen} von ${t.gesamt} Rezepten treffen es genau${t.gesamt - t.treffen ? `, ${t.gesamt - t.treffen} nur ungefähr – im Rezept steht, wo es hakt` : ''}.</p>`
     : `<p class="e-ziel-stand">Gerade das Standard-Ziel <b>${esc(zielText(app.zielStandard))}</b> – darauf sind alle Rezepte gebaut.</p>`;

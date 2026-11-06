@@ -410,6 +410,8 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, 
       plane(700);
     },
     jetzt() { holen(true).then(() => senden()); },
+    /** Eine eigene Liste hat eine Person: Das Gerät heißt jetzt wie sie (app.js) – die nächsten Commits auch. */
+    umbenennen(neu) { if (typeof neu === 'string' && neu.trim()) name = neu.trim(); },
     stop() {
       aus = true;
       clearTimeout(sendeTimer);

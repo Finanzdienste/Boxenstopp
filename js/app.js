@@ -14,7 +14,7 @@
  */
 import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
-import { opZusammen, opPerson } from './liste.js';
+import { opZusammen, opPerson, opEinePerson } from './liste.js';
 import { preiseMitBons } from './kosten.js';
 import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
@@ -49,12 +49,26 @@ const takt = () => Number(lese('__takt', 0)) || 8000;
 const rezeptName = (rid) => app.nachId[rid]?.short || app.amyNach?.[rid]?.short || app.extras?.[rid]?.short || '';
 const speicherFuer = (z) => github({ ...z, ort: ortVon(z), api: apiBasis(), takt: takt(), rezeptName });
 
+let einePersonGeschickt = '';
 function beiAenderung(stand) {
   app.stand = stand;
   app.listeDa = true;
   // Ein eigenes Ziel pro Box: die Rezepte darauf (ansicht-ziel.js); Name und Farbe der Liste (profil.js)
   const zielNeu = zielAnwenden();
   profilAnwenden();
+  // Eine eigene Liste hat eine Person, auf jedem Gerät: Hat sich dieses Gerät anders genannt („Marielli“), heißt es
+  // jetzt wie die Liste („Marielle“) – und was es unter dem anderen Namen gemacht hat, steht bei ihr (opEinePerson)
+  const person = istEigen() ? stand.profil?.person : '';
+  if (person && app.zugang && app.zugang.name !== person) {
+    app.zugang = { ...app.zugang, name: person };
+    speichereZugang(app.zugang);
+    app.speicher?.umbenennen?.(person);
+  }
+  const anders = person ? Object.keys(stand.leute || {}).filter((k) => k !== person.toLowerCase()).sort().join() : '';
+  if (anders && anders !== einePersonGeschickt) {
+    einePersonGeschickt = anders;
+    setTimeout(() => app.aendern(opEinePerson(person)), 0);
+  }
   // Wer die Liste teilt, steht einmal drin – damit man im Putzplan „Wer“ wählen kann. Eine eigene Liste hat
   // eine Person: ein weiteres Gerät, auf dem sie sich anders nennt (Marielle, Marielli), kommt nicht als Zweite dazu
   const ich = app.zugang?.name?.trim();

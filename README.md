@@ -882,7 +882,11 @@ zweite Gerät“ (mit Repo, Name und Farbe). Eine eigene Liste hat **eine
 Person**, auf jedem Gerät: Tippt sie auf dem nächsten einen anderen Namen ein
 (Marielle hat auf ihrem zweiten Gerät „Marielli“ getippt), kommt der
 nicht als Zweite in `leute` (kein zweites „zum ersten Mal dabei“, kein „Wer“
-mit „Ihr beide“ im Putzplan, dort heißt es „Dein Putzplan“). Wo die Liste liegt, merkt sich
+mit „Ihr beide“ im Putzplan, dort heißt es „Dein Putzplan“). Das Gerät heißt
+dann wie die Liste (`profil.person`), auch in den Commits. Was ein Gerät schon
+unter dem anderen Namen gemacht hat, führt die App einmal zusammen
+(`opEinePerson`: leute, by und wer, Putzplan-Verlauf, Kochstand, „Mehr davon“)
+– Commit „Marielle: … – Marielli heißt jetzt Marielle“. Wo die Liste liegt, merkt sich
 jedes Gerät im Zugang (`daten`); der zwischengespeicherte Stand gilt nur für
 dieselbe Liste.
 
@@ -1228,7 +1232,8 @@ Standard durch. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
 Überblick in Node zusammen und spielt dann die Einladung durch (euer
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites
-Gerät, ein drittes als „Marielli“ (bleibt eine Person) und Tobis Überblick. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
+Gerät, ein drittes als „Marielli“ (heißt dann Marielle, die alten Einträge
+werden zusammengeführt) und Tobis Überblick. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
 Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

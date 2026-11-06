@@ -8,7 +8,7 @@
  */
 import { pruefer, handy, githubAttrappe, githubMehrere, starteBrowser, bis, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { nachrichtLesen, bereichVon, zusammenfassen, verlaufMischen, repoVorschlag, gaesteBereinigen } from '../js/gaeste.js';
-import { leer, anwenden, opPerson, opZusammen } from '../js/liste.js';
+import { leer, anwenden, opPerson, opZusammen, opEinePerson, opTeil, beschreibung } from '../js/liste.js';
 
 const { check, ende } = pruefer();
 const M_KEY = 'github_pat_11MARIELLE000000000000_abcdefghijklmnopqrstuvwxyz';
@@ -79,6 +79,18 @@ check(zwei.personen.filter((p) => p.liste === 'haupt').map((p) => p.name).sort()
 const ihre = anwenden(anwenden(anwenden(leer(), opZusammen({}, {}, { profil: { person: 'Marielle' } })), opPerson('Marielle')), opPerson('Marielli'));
 const eure = anwenden(anwenden(leer(), opPerson('Tobi')), opPerson('Amy'));
 check(JSON.stringify(ihre.leute) === JSON.stringify({ marielle: 'Marielle' }) && Object.keys(eure.leute).join() === 'tobi,amy', 'Eine eigene Liste hat eine Person, eure Liste beide');
+// Zusammenführen, so wie es bei der echten Marielle stand: zwei Namen (eine ältere Fassung kannte die Regel noch nicht)
+const SAHNE = { n: 'Schlagsahne 30 %', c: 'kuehl' };
+const zf = anwenden(ihre, [opTeil('schlagsahne', 'x-marielli', { q: 200, u: 'g', h: '' }, SAHNE), opTeil('schlagsahne', 'x-marielle', { q: 100, u: 'g', h: '' }, SAHNE)]);
+zf.leute.marielli = 'Marielli';
+zf.items.schlagsahne.by = 'Marielli';
+zf.profil.ziel = { kcal: 400, p: 30, kh: 40, f: 14, by: 'Marielli', at: '2026-11-05T20:58:27.632Z' };
+zf.kochen = { marielli: { at: '2026-11-05T21:00:00.000Z', schritte: { chili: [0, 1] } } };
+const zfNeu = anwenden(zf, opEinePerson('Marielle'));
+check(JSON.stringify(zfNeu.leute) === JSON.stringify({ marielle: 'Marielle' }) && zfNeu.profil.ziel.by === 'Marielle' && zfNeu.items.schlagsahne.by === 'Marielle', 'Zusammenführen: „Marielli“ ist raus, was sie so gemacht hat, steht bei Marielle');
+check(zfNeu.kochen.marielle?.schritte?.chili?.length === 2 && !zfNeu.kochen.marielli && zfNeu.items.schlagsahne.parts['x-marielle'].q === 300 && !zfNeu.items.schlagsahne.parts['x-marielli'], 'Zusammenführen: Kochstand und „Mehr davon“ (200 g + 100 g) auch');
+check(beschreibung(zf, zfNeu) === 'Marielli heißt jetzt Marielle', 'Commit: „Marielli heißt jetzt Marielle“ – nicht „Ziel pro Box geändert“');
+check(JSON.stringify(anwenden(eure, opEinePerson('Tobi')).leute) === JSON.stringify(eure.leute) && JSON.stringify(anwenden(zf, opEinePerson('Marielli')).leute) === JSON.stringify(zf.leute), 'Nur in einer eigenen Liste und nur auf den Namen aus dem Profil');
 
 /* ============================================================ Browser */
 
@@ -187,7 +199,15 @@ check(await bis(async () => (await ip.locator('#sync-text').innerText()) === 'Ge
 check(await bis(async () => (await ip.locator('#grid .box[data-open="chili"] .pill-list').count()) === 1), 'Zweites Gerät: ihre Liste (Chili steht drauf)');
 await ipad.ctx.close();
 
-// --- Noch ein Gerät (etwa die App vom Home-Bildschirm), auf dem sie „Marielli“ eintippt: dieselbe Person
+// --- So stand es bei der echten Marielle: Ein Gerät mit älterer Fassung hat sie als Zweite „Marielli“ eingetragen
+const vorMerge = mar.liste();
+vorMerge.leute = { ...vorMerge.leute, marielli: 'Marielli' };
+vorMerge.profil.ziel.by = 'Marielli';
+vorMerge.rev += 1;
+mar.zustand.datei = JSON.stringify(vorMerge);
+mar.zustand.version++;
+mar.zustand.sha = `sha${mar.zustand.version}`;
+// Noch ein Gerät (etwa die App vom Home-Bildschirm), auf dem sie „Marielli“ eintippt: dieselbe Person, es heißt wie ihre Liste
 const drittes = await handy(browser, { attrappe: beide });
 const d3 = drittes.page;
 await d3.evaluate(() => localStorage.setItem('boxenstopp.willkommen.v1', 'true'));
@@ -198,11 +218,17 @@ await d3.dispatchEvent('#z-token', 'input');
 check((await d3.inputValue('#z-name')) === 'Marielli', 'Drittes Gerät: ihr selbst getippter Name bleibt');
 await d3.click('#z-los');
 check(await bis(async () => (await d3.locator('#sync-text').innerText()) === 'Gespeichert'), 'Drittes Gerät als „Marielli“: an ihrer Liste');
+check(await bis(() => JSON.stringify(mar.liste()?.leute) === JSON.stringify({ marielle: 'Marielle' }) && mar.liste()?.profil?.ziel?.by === 'Marielle'), 'Zusammengeführt: „Marielli“ ist aus der Liste raus, ihr Ziel steht bei Marielle');
+check(mar.zustand.nachrichten.some((n) => /^Marielle: Einkaufsliste, 1 Änderung – Marielli heißt jetzt Marielle$/.test(n)), 'Commit: „Marielle: … – Marielli heißt jetzt Marielle“');
+check(await d3.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.zugang.v1')).name) === 'Marielle', 'Das Gerät heißt jetzt wie ihre Liste: Marielle');
 await d3.click('.tabbar .tab[data-tab="einkauf"]');
 await d3.fill('#add-input', 'Äpfel');
 await d3.press('#add-input', 'Enter');
-check(await bis(() => mar.zustand.nachrichten.some((n) => /^Marielli: .*Äpfel/.test(n))), '„Marielli“ setzt Äpfel auf die Liste');
-check(JSON.stringify(mar.liste().leute) === JSON.stringify({ marielle: 'Marielle' }) && !mar.zustand.nachrichten.some((n) => /^Marielli: .*zum ersten Mal dabei/.test(n)), 'Eine eigene Liste hat eine Person: „Marielli“ kommt nicht als Zweite dazu');
+check(await bis(() => mar.zustand.nachrichten.some((n) => /^Marielle: .*Äpfel/.test(n))), 'Äpfel auf der Liste – als Marielle');
+check(JSON.stringify(mar.liste().leute) === JSON.stringify({ marielle: 'Marielle' }) && !mar.zustand.nachrichten.some((n) => /^Marielli:/.test(n)), 'Eine eigene Liste hat eine Person: kein Commit als „Marielli“, kein zweites „zum ersten Mal dabei“');
+await d3.click('.tabbar .tab[data-tab="einstellungen"]');
+const zielText3 = await bis(async () => { const x = await d3.locator('#e-ziel').innerText(); return x.includes('von dir') ? x : null; });
+check(zielText3, `Ihr Ziel: „von dir“ (${zielText3 ? '' : (await d3.locator('#e-ziel').innerText()).slice(0, 160)})`);
 await d3.click('.tabbar .tab[data-tab="haushalt"]');
 check((await d3.locator('#view-haushalt').innerText()).includes('Dein Putzplan'), 'Haushalt in ihrer Liste: „Dein Putzplan“');
 await d3.click('#view-haushalt [data-act="h-neu"][data-raum="kueche"]');
@@ -216,7 +242,8 @@ check(await bis(async () => (await t.locator('#ueberblick-dlg .ub-person').count
 const ub = await t.locator('#ueberblick-dlg').innerText();
 check(ub.includes('Marielle') && ub.includes('Marielles Liste') && ub.includes('Tobi') && ub.includes('eure Liste'), 'Überblick: Marielle in ihrer Liste, Tobi in eurer');
 check(ub.includes('Chili') && ub.includes('Ziel pro Box geändert') && ub.includes('Einladung für Marielle'), 'Überblick: was passiert ist, im Verlauf');
-check((await t.locator('#ueberblick-dlg .ub-person').count()) === 2 && !ub.includes('Marielli') && ub.includes('Äpfel'), 'Überblick: Marielle einmal – was sie als „Marielli“ gemacht hat, steht bei ihr');
+const karten = await t.locator('#ueberblick-dlg .ub-person .ub-wer b').allInnerTexts();
+check(karten.length === 2 && karten.includes('Marielle') && !karten.includes('Marielli') && ub.includes('Äpfel') && ub.includes('Marielli heißt jetzt Marielle'), `Überblick: Marielle einmal, mit „Marielli heißt jetzt Marielle“ (${karten.join(', ')})`);
 await t.click('#ueberblick-dlg [data-ub-tage="30"]');
 check(await t.locator('#ueberblick-dlg .ub-balken.dicht').count() >= 1, 'Überblick: 30 Tage');
 const holtVorher = mar.zustand.commits.length;
