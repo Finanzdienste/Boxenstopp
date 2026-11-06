@@ -21,7 +21,7 @@
  *     bons:      { <Schlüssel>: [{ eur: 4.99, q: 1000, u: 'g', laden, at, by }] },  was es gekostet hat
  *     preisalarm: { <Schlüssel>: { max: 6.5, u: 'kg', by, at } },   Bescheid, wenn ein Angebot so günstig ist
  *     haushalt:  { sachen, plaene, stand, todoApp, todoWunsch, todoAn, todoZiel },   Haushaltssachen und Putzplan (haushalt.js)
- *     leute:     { amy: 'Amy', tobi: 'Tobi' } }   wer die Liste teilt (für „Wer“ im Putzplan)
+ *     leute:     { amy: 'Amy', tobi: 'Tobi' } }   wer die Liste teilt (für „Wer“ im Putzplan; eine eigene Liste: eine Person)
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -882,6 +882,9 @@ function aendere(s, op) {
       if (!PERSON.test(String(op.name))) return;
       if (!istObj(s.leute)) s.leute = {};
       const k = op.name.toLowerCase();
+      // Eine eigene Liste (mit Person im Profil, Marielle) hat eine Person: Ein weiteres Gerät, auf dem sie
+      // sich anders nennt („Marielli“), kommt nicht als Zweite dazu
+      if (s.profil?.person && Object.keys(s.leute).length) return;
       if (!s.leute[k] && Object.keys(s.leute).length < 8) s.leute[k] = op.name;
       return;
     }

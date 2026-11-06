@@ -50,6 +50,8 @@ const langTag = (tag) => { const [j, m, t] = tag.split('-').map(Number); return 
 
 /** Wer im Haushalt vorkommt – für „Wer“ im Editor. Groß- und Kleinschreibung wie zuerst gesehen. */
 export function namen(stand = app.stand) {
+  // Eine eigene Liste hat eine Person – auch wenn sie sich auf einem anderen Gerät anders nennt
+  if (istEigen()) return ich() ? [ich()] : [];
   const je = new Map();
   const dazu = (n) => { const x = String(n || '').trim(); if (x && x.length <= 40 && !je.has(x.toLowerCase())) je.set(x.toLowerCase(), x); };
   dazu(ich());
@@ -87,9 +89,9 @@ export function haushaltZahl() {
 /* --------------------------------------------------------------- Zeichnen */
 
 function titel(h, tag) {
-  if (teil === 'sachen') return 'Was braucht ihr im Haushalt?';
+  if (teil === 'sachen') return istEigen() ? 'Was brauchst du im Haushalt?' : 'Was braucht ihr im Haushalt?';
   const alle = tage(h, tag);
-  if (!alle.length) return 'Euer Putzplan';
+  if (!alle.length) return istEigen() ? 'Dein Putzplan' : 'Euer Putzplan';
   const jetzt = alle.filter((x) => x.t.art === 'heute').map((x) => x.p.name);
   if (jetzt.length === 1) return `Heute ist ${jetzt[0]} dran`;
   if (jetzt.length > 1 && jetzt.length <= 3) return `Heute sind ${und(jetzt)} dran`;
@@ -327,7 +329,7 @@ function putzHTML() {
   else if (s.vorab) wann = `dran ${tagText(s.vorab, tag) === 'morgen' ? 'morgen' : `am ${tagText(s.vorab, tag)}`}`;
   else if (t.art === 'offen') wann = `seit ${tagText(t.datum, tag)} offen`;
   else wann = tagText(s.datum, tag);
-  const unter = [wann.replace(/^./, (c) => c.toUpperCase()), t.frei ? '' : wdhText(p.wdh), werText(p) || 'ihr beide'].filter(Boolean).join(' · ');
+  const unter = [wann.replace(/^./, (c) => c.toUpperCase()), t.frei ? '' : wdhText(p.wdh), werText(p) || (istEigen() ? '' : 'ihr beide')].filter(Boolean).join(' · ');
   const pct = n ? Math.round((100 * k) / n) : (s.fertig ? 100 : 0);
   let stand;
   if (s.fertig) stand = `<p class="pm-stand pm-ok">${ic('check')}Erledigt${s.fertig.by ? ` von ${esc(fuer(s.fertig.by))}` : ''}</p>`;

@@ -282,7 +282,8 @@ export function ueberblickZeichnen() {
   const ls = listen();
   const nachId = Object.fromEntries(ls.map((l) => [l.id, l]));
   const verlauf = gemerkterVerlauf();
-  const z = zusammenfassen(ls.map((l) => ({ id: l.id, name: l.name, farbe: l.farbe, eintraege: verlauf[l.id] || [] })), { tage });
+  // In der Liste eines Gasts ist jeder dort der Gast (gaeste.js) – auch auf einem Gerät, auf dem er sich anders nennt
+  const z = zusammenfassen(ls.map((l) => ({ id: l.id, name: l.name, farbe: l.farbe, gast: l.id === 'haupt' ? '' : l.name, eintraege: verlauf[l.id] || [] })), { tage });
   const leer = !z.personen.length;
   const personen = z.personen.map((p) => {
     const l = nachId[p.liste];

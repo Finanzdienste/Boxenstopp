@@ -13,6 +13,13 @@
  * wer, wann, wie viel, was. Ältere Commits haben das „was“ noch nicht.
  * Daraus: je Person zuletzt, Änderungen je Tag und Bereich, und ein Verlauf
  * mit Sitzungen (was eine Person in einem Rutsch gemacht hat).
+ *
+ * Die Liste eines Gasts hat eine Person – auf jedem Gerät, wie sie sich dort
+ * auch nennt: Auf dem einen Gerät heißt Marielle „Marielle“ (aus dem Link),
+ * auf dem nächsten hat sie „Marielli“ eingetippt. Dort zählt also alles für
+ * den Gast, mit dem Namen aus der Einladung; nur die Einladung selbst bleibt
+ * beim Gastgeber. Und „zum ersten Mal dabei“ gibt es je Person einmal – das
+ * nächste ist ein weiteres Gerät.
  */
 
 const NAME = /^[\p{L}\p{N} ._-]{1,30}$/u;
@@ -76,9 +83,13 @@ export function bereichVon(was) {
 
 const tagVon = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
+const DABEI = 'zum ersten Mal dabei';
+const NOCH_EIN_GERAET = 'auf einem weiteren Gerät dabei';
+
 /**
  * Den Verlauf mehrerer Listen zusammenfassen.
- * listen: [{ id, name, farbe, eintraege: [{ sha, at, nachricht }] }]
+ * listen: [{ id, name, farbe, gast, eintraege: [{ sha, at, nachricht }] }]
+ *   gast: in der Liste eines Gasts sein Name – dann ist jeder dort der Gast
  * → { personen, tage, verlauf, automatik }
  *   personen: [{ name, liste, zuletzt, anzahl, jeTag: [n …], bereiche: { Einkauf: n } }] (zuletzt aktiv zuerst)
  *   tage: die Tage des Zeitraums (YYYY-MM-DD, ältester zuerst)
@@ -95,30 +106,46 @@ export function zusammenfassen(listen, { tage = 7, jetzt = new Date() } = {}) {
   const personen = new Map();
   const automatik = {};
   const roh = [];
+  // Alle Commits der Reihe nach, ältester zuerst – auch die vor dem Zeitraum, damit „zum ersten Mal dabei“ stimmt
+  const alle = [];
   for (const l of listen || []) {
     for (const e of l.eintraege || []) {
       const zeit = new Date(e.at);
-      if (Number.isNaN(zeit.getTime()) || zeit < ab) continue;
+      if (Number.isNaN(zeit.getTime())) continue;
       const n = nachrichtLesen(e.nachricht);
-      if (!n.wer) continue;
-      if (n.auto) {
-        automatik[l.id] = automatik[l.id] || {};
-        automatik[l.id][n.wer] = (automatik[l.id][n.wer] || 0) + 1;
-        continue;
-      }
-      roh.push({ zeit, liste: l.id, wer: n.wer, anzahl: n.anzahl, was: n.was });
-      // Die Einladung legt der Gastgeber in der Liste des Gasts an – das steht im Verlauf, zählt aber nicht als seine Arbeit dort
-      if (/^Einladung für /.test(n.was[0] || '')) continue;
-      const schluessel = `${l.id}|${n.wer.toLowerCase()}`;
-      const p = personen.get(schluessel) || { name: n.wer, liste: l.id, zuletzt: '', anzahl: 0, jeTag: tagListe.map(() => 0), bereiche: {} };
-      p.anzahl += n.anzahl;
-      if (!p.zuletzt || zeit.toISOString() > p.zuletzt) p.zuletzt = zeit.toISOString();
-      const i = tagListe.indexOf(tagVon(zeit));
-      if (i >= 0) p.jeTag[i] += n.anzahl;
-      // Ältere Commits sagen nicht, was – die zählen nur mit, nicht in einem Bereich
-      for (const b of new Set(n.was.map(bereichVon))) p.bereiche[b] = (p.bereiche[b] || 0) + 1;
-      personen.set(schluessel, p);
+      if (n.wer) alle.push({ zeit, l, n });
     }
+  }
+  alle.sort((a, b) => a.zeit - b.zeit);
+  const dabei = new Set();
+  for (const { zeit, l, n } of alle) {
+    if (n.auto) {
+      if (zeit < ab) continue;
+      automatik[l.id] = automatik[l.id] || {};
+      automatik[l.id][n.wer] = (automatik[l.id][n.wer] || 0) + 1;
+      continue;
+    }
+    // Die Einladung legt der Gastgeber in der Liste des Gasts an – das steht im Verlauf, zählt aber nicht als seine Arbeit dort
+    const einladung = /^Einladung für /.test(n.was[0] || '');
+    const wer = l.gast && !einladung ? String(l.gast) : n.wer;
+    const schluessel = `${l.id}|${wer.toLowerCase()}`;
+    const was = n.was.map((w) => {
+      if (w !== DABEI) return w;
+      if (dabei.has(schluessel)) return NOCH_EIN_GERAET;
+      dabei.add(schluessel);
+      return w;
+    }).filter((w, i, a) => a.indexOf(w) === i);
+    if (zeit < ab) continue;
+    roh.push({ zeit, liste: l.id, wer, anzahl: n.anzahl, was });
+    if (einladung) continue;
+    const p = personen.get(schluessel) || { name: wer, liste: l.id, zuletzt: '', anzahl: 0, jeTag: tagListe.map(() => 0), bereiche: {} };
+    p.anzahl += n.anzahl;
+    if (!p.zuletzt || zeit.toISOString() > p.zuletzt) p.zuletzt = zeit.toISOString();
+    const i = tagListe.indexOf(tagVon(zeit));
+    if (i >= 0) p.jeTag[i] += n.anzahl;
+    // Ältere Commits sagen nicht, was – die zählen nur mit, nicht in einem Bereich
+    for (const b of new Set(was.map(bereichVon))) p.bereiche[b] = (p.bereiche[b] || 0) + 1;
+    personen.set(schluessel, p);
   }
   // Sitzungen: dieselbe Person in derselben Liste, höchstens SITZUNG_MIN Minuten Pause
   roh.sort((a, b) => a.zeit - b.zeit);

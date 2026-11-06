@@ -8,6 +8,7 @@
  */
 import { pruefer, handy, githubAttrappe, githubMehrere, starteBrowser, bis, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { nachrichtLesen, bereichVon, zusammenfassen, verlaufMischen, repoVorschlag, gaesteBereinigen } from '../js/gaeste.js';
+import { leer, anwenden, opPerson, opZusammen } from '../js/liste.js';
 
 const { check, ende } = pruefer();
 const M_KEY = 'github_pat_11MARIELLE000000000000_abcdefghijklmnopqrstuvwxyz';
@@ -52,6 +53,32 @@ check(heute.tag === '2026-11-05' && heute.sitzungen[0].wer === 'Amy' && heute.si
 check(heute.sitzungen.some((s) => s.wer === 'Tobi' && s.was[0] === 'Einladung für Marielle'), 'Verlauf: die Einladung steht drin');
 const gemischt = verlaufMischen([{ sha: 'x', at: um('01', '10:00'), nachricht: 'alt' }], [{ sha: 'y', at: um('05', '10:00'), nachricht: 'neu' }, { sha: 'x', at: um('01', '10:00'), nachricht: 'alt' }, { sha: 'kaputt', at: 'gestern' }], { jetzt });
 check(gemischt.length === 2 && gemischt[0].sha === 'y', 'Verlauf mischen: neu vorn, doppelt und kaputt fallen weg');
+
+// Marielle auf einem zweiten Gerät, auf dem sie „Marielli“ eingetippt hat: im Überblick eine Person, einmal „zum ersten Mal dabei“
+const zwei = zusammenfassen([
+  { id: 'haupt', name: 'Eure Liste', gast: '', eintraege: [
+    { sha: 'h2', at: um('05', '18:10'), nachricht: 'Amy: Einkaufsliste, 1 Änderung – zum ersten Mal dabei' },
+    { sha: 'h1', at: um('05', '18:00'), nachricht: 'Tobi: Einkaufsliste, 1 Änderung – zum ersten Mal dabei' },
+  ] },
+  { id: 'Finanzdienste/Boxenstopp-Marielle', name: 'Marielle', farbe: 'lila', gast: 'Marielle', eintraege: [
+    { sha: 'm5', at: um('05', '18:40'), nachricht: 'Marielli: Einkaufsliste, 1 Änderung – Chili auf die Liste' },
+    { sha: 'm4', at: um('05', '18:20'), nachricht: 'Marielli: Einkaufsliste, 1 Änderung – zum ersten Mal dabei' },
+    { sha: 'm3', at: um('05', '18:14'), nachricht: 'Marielle: Einkaufsliste, 1 Änderung – Ziel pro Box geändert' },
+    { sha: 'm2', at: um('05', '18:13'), nachricht: 'Marielle: Einkaufsliste, 1 Änderung – zum ersten Mal dabei' },
+    { sha: 'm1', at: um('05', '17:00'), nachricht: 'Tobi: Einladung für Marielle' },
+  ] },
+], { tage: 7, jetzt });
+const inIhrer = zwei.personen.filter((p) => p.liste === 'Finanzdienste/Boxenstopp-Marielle');
+check(inIhrer.length === 1 && inIhrer[0].name === 'Marielle' && inIhrer[0].anzahl === 4, 'Ihre Liste: eine Person „Marielle“ mit allen 4 Änderungen – auch denen als „Marielli“');
+const ihreSitzungen = zwei.verlauf.flatMap((t) => t.sitzungen).filter((s) => s.liste === 'Finanzdienste/Boxenstopp-Marielle');
+const ihrWas = ihreSitzungen.flatMap((s) => s.was);
+check(!ihreSitzungen.some((s) => s.wer === 'Marielli') && ihrWas.filter((w) => w === 'zum ersten Mal dabei').length === 1 && ihrWas.includes('auf einem weiteren Gerät dabei'), 'Verlauf: einmal „zum ersten Mal dabei“, dann „auf einem weiteren Gerät dabei“ – kein „Marielli“');
+check(ihreSitzungen.some((s) => s.wer === 'Tobi' && s.was[0] === 'Einladung für Marielle') && !zwei.personen.some((p) => p.name === 'Tobi' && p.liste !== 'haupt'), 'Die Einladung bleibt bei Tobi, zählt aber nicht als seine Arbeit dort');
+check(zwei.personen.filter((p) => p.liste === 'haupt').map((p) => p.name).sort().join() === 'Amy,Tobi' && zwei.verlauf.flatMap((t) => t.sitzungen).filter((s) => s.liste === 'haupt').every((s) => s.was.includes('zum ersten Mal dabei')), 'Eure Liste: Amy und Tobi bleiben zwei, jeder einmal „zum ersten Mal dabei“');
+// Und in ihrer liste.json kommt „Marielli“ gar nicht erst dazu
+const ihre = anwenden(anwenden(anwenden(leer(), opZusammen({}, {}, { profil: { person: 'Marielle' } })), opPerson('Marielle')), opPerson('Marielli'));
+const eure = anwenden(anwenden(leer(), opPerson('Tobi')), opPerson('Amy'));
+check(JSON.stringify(ihre.leute) === JSON.stringify({ marielle: 'Marielle' }) && Object.keys(eure.leute).join() === 'tobi,amy', 'Eine eigene Liste hat eine Person, eure Liste beide');
 
 /* ============================================================ Browser */
 
@@ -160,12 +187,36 @@ check(await bis(async () => (await ip.locator('#sync-text').innerText()) === 'Ge
 check(await bis(async () => (await ip.locator('#grid .box[data-open="chili"] .pill-list').count()) === 1), 'Zweites Gerät: ihre Liste (Chili steht drauf)');
 await ipad.ctx.close();
 
+// --- Noch ein Gerät (etwa die App vom Home-Bildschirm), auf dem sie „Marielli“ eintippt: dieselbe Person
+const drittes = await handy(browser, { attrappe: beide });
+const d3 = drittes.page;
+await d3.evaluate(() => localStorage.setItem('boxenstopp.willkommen.v1', 'true'));
+await d3.click('.tabbar .tab[data-tab="einstellungen"]');
+await d3.fill('#z-name', 'Marielli');
+await d3.fill('#z-token', zweit);
+await d3.dispatchEvent('#z-token', 'input');
+check((await d3.inputValue('#z-name')) === 'Marielli', 'Drittes Gerät: ihr selbst getippter Name bleibt');
+await d3.click('#z-los');
+check(await bis(async () => (await d3.locator('#sync-text').innerText()) === 'Gespeichert'), 'Drittes Gerät als „Marielli“: an ihrer Liste');
+await d3.click('.tabbar .tab[data-tab="einkauf"]');
+await d3.fill('#add-input', 'Äpfel');
+await d3.press('#add-input', 'Enter');
+check(await bis(() => mar.zustand.nachrichten.some((n) => /^Marielli: .*Äpfel/.test(n))), '„Marielli“ setzt Äpfel auf die Liste');
+check(JSON.stringify(mar.liste().leute) === JSON.stringify({ marielle: 'Marielle' }) && !mar.zustand.nachrichten.some((n) => /^Marielli: .*zum ersten Mal dabei/.test(n)), 'Eine eigene Liste hat eine Person: „Marielli“ kommt nicht als Zweite dazu');
+await d3.click('.tabbar .tab[data-tab="haushalt"]');
+check((await d3.locator('#view-haushalt').innerText()).includes('Dein Putzplan'), 'Haushalt in ihrer Liste: „Dein Putzplan“');
+await d3.click('#view-haushalt [data-act="h-neu"][data-raum="kueche"]');
+check(await bis(() => d3.locator('#h-edit-form').count()) && !(await d3.locator('#h-edit-form').innerText()).includes('Ihr beide'), 'Neuer Putztag in ihrer Liste: kein „Wer“ mit „Ihr beide“');
+check(drittes.fehler.length === 0, `Drittes Gerät: keine Fehler im Browser (${drittes.fehler.join(' | ')})`);
+await drittes.ctx.close();
+
 // --- Tobi: der Überblick
 await t.click('[data-act="ub-oeffnen"]');
 check(await bis(async () => (await t.locator('#ueberblick-dlg .ub-person').count()) >= 2), 'Überblick: die Personen');
 const ub = await t.locator('#ueberblick-dlg').innerText();
 check(ub.includes('Marielle') && ub.includes('Marielles Liste') && ub.includes('Tobi') && ub.includes('eure Liste'), 'Überblick: Marielle in ihrer Liste, Tobi in eurer');
 check(ub.includes('Chili') && ub.includes('Ziel pro Box geändert') && ub.includes('Einladung für Marielle'), 'Überblick: was passiert ist, im Verlauf');
+check((await t.locator('#ueberblick-dlg .ub-person').count()) === 2 && !ub.includes('Marielli') && ub.includes('Äpfel'), 'Überblick: Marielle einmal – was sie als „Marielli“ gemacht hat, steht bei ihr');
 await t.click('#ueberblick-dlg [data-ub-tage="30"]');
 check(await t.locator('#ueberblick-dlg .ub-balken.dicht').count() >= 1, 'Überblick: 30 Tage');
 const holtVorher = mar.zustand.commits.length;

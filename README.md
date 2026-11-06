@@ -878,7 +878,11 @@ Liste gehört – ehrlich: Tobi sieht in seinem Überblick, wann sie was ändert
 In ihrer Liste heißt der eigene Reiter „Marielles Rezepte“; Push, To Do und
 die privaten Angebote (Rewe, Edeka) gibt es dort nicht, die laufen über die
 Abläufe in Boxenstopp-Daten. Ihr zweites Gerät bekommt sie über „Link fürs
-zweite Gerät“ (mit Repo, Name und Farbe). Wo die Liste liegt, merkt sich
+zweite Gerät“ (mit Repo, Name und Farbe). Eine eigene Liste hat **eine
+Person**, auf jedem Gerät: Tippt sie auf dem nächsten einen anderen Namen ein
+(Marielle hat auf ihrem zweiten Gerät „Marielli“ getippt), kommt der
+nicht als Zweite in `leute` (kein zweites „zum ersten Mal dabei“, kein „Wer“
+mit „Ihr beide“ im Putzplan, dort heißt es „Dein Putzplan“). Wo die Liste liegt, merkt sich
 jedes Gerät im Zugang (`daten`); der zwischengespeicherte Stand gilt nur für
 dieselbe Liste.
 
@@ -888,7 +892,11 @@ aktiv, Änderungen je Tag (7 oder 30 Tage), Bereiche, und ein Verlauf mit
 Sitzungen („18:38–18:58 Amy: 9 abgehakt, Reis auf die Liste“). Gelesen wird
 nichts aus den Listen, sondern die Commits an `liste.json`: Jede Nachricht
 der App sagt seit v41, was passiert ist („Amy: Einkaufsliste, 3 Änderungen –
-Chili auf die Liste; 2 abgehakt“), ältere nur wie viel. Gezählt wird, was
+Chili auf die Liste; 2 abgehakt“), ältere nur wie viel. In der Liste eines
+Gasts zählt alles für den Gast, mit dem Namen aus der Einladung – auch was
+von einem Gerät kommt, auf dem er sich anders nennt; nur die Einladung bleibt
+bei Tobi. „Zum ersten Mal dabei“ steht je Person einmal, das nächste heißt
+„auf einem weiteren Gerät dabei“. Gezählt wird, was
 gespeichert wird, nicht wer die App nur anschaut. Das Gerät merkt sich, was
 es schon geholt hat (`boxenstopp.verlauf.v1`), und holt beim Öffnen nur das
 Neue. Die Schlüssel der Gäste stehen nur in Tobis localStorage
@@ -1220,7 +1228,7 @@ Standard durch. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
 Überblick in Node zusammen und spielt dann die Einladung durch (euer
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites
-Gerät und Tobis Überblick. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
+Gerät, ein drittes als „Marielli“ (bleibt eine Person) und Tobis Überblick. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
 Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

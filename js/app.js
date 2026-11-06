@@ -33,7 +33,7 @@ import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus
 import { haushaltStart, haushaltZeichnen, haushaltGezeigt, klickHaushalt, aenderungHaushalt, absendenHaushalt, tasteHaushalt } from './ansicht-haushalt.js';
 import { todoHolen, klickTodo, absendenTodo } from './ansicht-todo.js';
 import { zielAnwenden, klickZiel, absendenZiel, eingabeZiel, aenderungZiel } from './ansicht-ziel.js';
-import { profilAnwenden, farbeSetzen } from './profil.js';
+import { profilAnwenden, farbeSetzen, istEigen } from './profil.js';
 import { klickSpeisekarte, absendenSpeisekarte, eingabeSpeisekarte, aenderungSpeisekarte, speisekarteNeu } from './ansicht-speisekarte.js';
 import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste } from './ansicht-gaeste.js';
 import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillkommen, willkommenPruefen } from './ansicht-willkommen.js';
@@ -55,9 +55,11 @@ function beiAenderung(stand) {
   // Ein eigenes Ziel pro Box: die Rezepte darauf (ansicht-ziel.js); Name und Farbe der Liste (profil.js)
   const zielNeu = zielAnwenden();
   profilAnwenden();
-  // Wer die Liste teilt, steht einmal drin – damit man im Putzplan „Wer“ wählen kann
+  // Wer die Liste teilt, steht einmal drin – damit man im Putzplan „Wer“ wählen kann. Eine eigene Liste hat
+  // eine Person: ein weiteres Gerät, auf dem sie sich anders nennt (Marielle, Marielli), kommt nicht als Zweite dazu
   const ich = app.zugang?.name?.trim();
-  if (ich && !stand.leute?.[ich.toLowerCase()]) setTimeout(() => { if (app.zugang?.name?.trim() === ich && !app.stand.leute?.[ich.toLowerCase()]) app.aendern(opPerson(ich)); }, 0);
+  const neuDabei = (s) => !!ich && !s.leute?.[ich.toLowerCase()] && !(istEigen() && Object.keys(s.leute || {}).length);
+  if (neuDabei(stand)) setTimeout(() => { if (app.zugang?.name?.trim() === ich && neuDabei(app.stand)) app.aendern(opPerson(ich)); }, 0);
   // Was ihr wirklich bezahlt habt (Bons auf der Liste), gilt vor dem Richtpreis
   app.preise = preiseMitBons(app.richtpreise, stand.bons, app.naehrwerte);
   // Hat dieselbe Person auf einem anderen Gerät weitergekocht? Dann gilt hier ihr Stand (kochstand.js)
