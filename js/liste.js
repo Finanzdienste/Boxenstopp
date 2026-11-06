@@ -230,24 +230,35 @@ function namenErsetzen(s, alias, neu) {
 }
 
 /**
- * Was ein Paket von Änderungen getan hat, in ein paar Worten – für die
- * Commit-Nachricht (speicher.js) und damit für den Überblick des Gastgebers
- * (gaeste.js): „Chili, Milch auf die Liste; 3 abgehakt“. name(rid) gibt den
- * kurzen Namen eines Rezepts (sonst steht die id da). Leer, wenn es nichts
- * Nennenswertes ist.
+ * Eine eigene Liste auf eine Person gebracht (opEinePerson): das Vorher
+ * genauso umbenennen – sonst sähe jedes „by“ wie eine Änderung aus. Für
+ * beschreibung() und die Einzelheiten im Überblick (einzelheiten.js).
+ * → { v: das angeglichene Vorher, umbenannt: [alte Namen] }
  */
-export function beschreibung(vorher, nachher, name = () => '') {
+export function vorherAngleichen(vorher, nachher) {
   let v = vorher || leer();
   const n = nachher || leer();
-  const rn = (rid) => name(rid) || rid;
-  const teile = [];
-  const aufzaehlen = (xs, max = 3) => `${xs.slice(0, max).join(', ')}${xs.length > max ? ' …' : ''}`;
-  // Eine eigene Liste auf eine Person gebracht (opEinePerson): das Vorher genauso umbenannt – sonst sähe jedes „by“ wie eine Änderung aus
   const umbenannt = n.profil?.person ? Object.entries(v.leute || {}).filter(([k]) => !n.leute?.[k]).map(([, x]) => String(x)) : [];
   if (umbenannt.length) {
     v = klon(v);
     namenErsetzen(v, new Set(umbenannt.map((x) => x.toLowerCase())), n.profil.person);
   }
+  return { v, umbenannt };
+}
+
+/**
+ * Was ein Paket von Änderungen getan hat, in ein paar Worten – für die
+ * Commit-Nachricht (speicher.js) und damit für den Überblick des Gastgebers
+ * (gaeste.js): „Chili, Milch auf die Liste; 3 abgehakt“. name(rid) gibt den
+ * kurzen Namen eines Rezepts (sonst steht die id da). Leer, wenn es nichts
+ * Nennenswertes ist. Was genau, Zeile für Zeile, rechnet einzelheiten.js.
+ */
+export function beschreibung(vorher, nachher, name = () => '') {
+  const n = nachher || leer();
+  const { v, umbenannt } = vorherAngleichen(vorher, n);
+  const rn = (rid) => name(rid) || rid;
+  const teile = [];
+  const aufzaehlen = (xs, max = 3) => `${xs.slice(0, max).join(', ')}${xs.length > max ? ' …' : ''}`;
   // Einkaufsliste
   const rezepte = new Set();
   const eigene = [];

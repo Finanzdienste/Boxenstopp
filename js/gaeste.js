@@ -93,7 +93,8 @@ const NOCH_EIN_GERAET = 'auf einem weiteren Gerät dabei';
  * → { personen, tage, verlauf, automatik }
  *   personen: [{ name, liste, zuletzt, anzahl, jeTag: [n …], bereiche: { Einkauf: n } }] (zuletzt aktiv zuerst)
  *   tage: die Tage des Zeitraums (YYYY-MM-DD, ältester zuerst)
- *   verlauf: [{ tag, sitzungen: [{ von, bis, wer, liste, anzahl, was }] }] (neuester zuerst)
+ *   verlauf: [{ tag, sitzungen: [{ von, bis, wer, liste, anzahl, was, shas }] }] (neuester zuerst;
+ *            shas: die Commits der Sitzung, ältester zuerst – für die Einzelheiten)
  *   automatik: { <liste>: { <wer>: n } }
  */
 export function zusammenfassen(listen, { tage = 7, jetzt = new Date() } = {}) {
@@ -113,12 +114,12 @@ export function zusammenfassen(listen, { tage = 7, jetzt = new Date() } = {}) {
       const zeit = new Date(e.at);
       if (Number.isNaN(zeit.getTime())) continue;
       const n = nachrichtLesen(e.nachricht);
-      if (n.wer) alle.push({ zeit, l, n });
+      if (n.wer) alle.push({ zeit, l, n, sha: typeof e.sha === 'string' ? e.sha : '' });
     }
   }
   alle.sort((a, b) => a.zeit - b.zeit);
   const dabei = new Set();
-  for (const { zeit, l, n } of alle) {
+  for (const { zeit, l, n, sha } of alle) {
     if (n.auto) {
       if (zeit < ab) continue;
       automatik[l.id] = automatik[l.id] || {};
@@ -136,7 +137,7 @@ export function zusammenfassen(listen, { tage = 7, jetzt = new Date() } = {}) {
       return w;
     }).filter((w, i, a) => a.indexOf(w) === i);
     if (zeit < ab) continue;
-    roh.push({ zeit, liste: l.id, wer, anzahl: n.anzahl, was });
+    roh.push({ zeit, liste: l.id, wer, anzahl: n.anzahl, was, sha });
     if (einladung) continue;
     const p = personen.get(schluessel) || { name: wer, liste: l.id, zuletzt: '', anzahl: 0, jeTag: tagListe.map(() => 0), bereiche: {} };
     p.anzahl += n.anzahl;
@@ -158,9 +159,10 @@ export function zusammenfassen(listen, { tage = 7, jetzt = new Date() } = {}) {
       s.bisZeit = c.zeit;
       s.anzahl += c.anzahl;
       for (const w of c.was) if (!s.was.includes(w)) s.was.push(w);
+      if (c.sha) s.shas.push(c.sha);
       continue;
     }
-    const neu = { vonZeit: c.zeit, bisZeit: c.zeit, wer: c.wer, liste: c.liste, anzahl: c.anzahl, was: [...c.was] };
+    const neu = { vonZeit: c.zeit, bisZeit: c.zeit, wer: c.wer, liste: c.liste, anzahl: c.anzahl, was: [...c.was], shas: c.sha ? [c.sha] : [] };
     offen.set(k, neu);
     sitzungen.push(neu);
   }
@@ -168,7 +170,7 @@ export function zusammenfassen(listen, { tage = 7, jetzt = new Date() } = {}) {
   for (const s of sitzungen.reverse()) {
     const tag = tagVon(s.vonZeit);
     if (!jeTag.has(tag)) jeTag.set(tag, []);
-    jeTag.get(tag).push({ von: s.vonZeit.toISOString(), bis: s.bisZeit.toISOString(), wer: s.wer, liste: s.liste, anzahl: s.anzahl, was: s.was.slice(0, 6) });
+    jeTag.get(tag).push({ von: s.vonZeit.toISOString(), bis: s.bisZeit.toISOString(), wer: s.wer, liste: s.liste, anzahl: s.anzahl, was: s.was.slice(0, 6), shas: s.shas });
   }
   return {
     personen: [...personen.values()].sort((a, b) => b.zuletzt.localeCompare(a.zuletzt)),

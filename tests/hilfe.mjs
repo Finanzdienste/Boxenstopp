@@ -56,7 +56,8 @@ const CORS = {
 
 export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste', repo = 'Boxenstopp-Daten', pfad = 'liste.json' } = {}) {
   // dateien: weitere Dateien im Repo, die die App nur liest (z. B. angebote-privat.json) – Pfad → Inhalt (Text)
-  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, shas: {}, lesen: {}, commits: [], leer: false, gibtEs: true };
+  // fassungen: die Datei, wie sie nach jedem Commit war (Commit-sha → Text) – für ?ref= (Einzelheiten im Überblick)
+  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, shas: {}, lesen: {}, commits: [], leer: false, gibtEs: true, fassungen: {}, fassungAbrufe: 0 };
   const commit = (message, pfadC, sha) => zustand.commits.unshift({ sha: sha || `c${zustand.commits.length + 1}-${Math.random().toString(36).slice(2, 8)}`, message, date: new Date().toISOString(), pfad: pfadC });
   const basis = `https://api.github.com/repos/${owner}/${repo}`;
   let alt = null; // für staleEinmal: die Fassung vor dem letzten Schreiben
@@ -101,6 +102,19 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
       return antwort(da ? 200 : 201, { content: { sha: zustand.shas[weitere], path: weitere } });
     }
     if (url === `${basis}/contents/${pfad}`) {
+      const ref = new URL(req.url()).searchParams.get('ref');
+      if (req.method() === 'GET' && ref) {
+        // Wie bei GitHub: die Datei bei einem Commit, „<sha>~1“ der Stand davor (beim ersten Commit: 404)
+        zustand.fassungAbrufe++;
+        const davor = /^(.+)~1$/.exec(ref);
+        const i = zustand.commits.findIndex((c) => c.sha === (davor ? davor[1] : ref));
+        if (i < 0) return antwort(404, { message: `No commit found for the ref ${ref}` });
+        const c = davor ? zustand.commits.slice(i + 1).find((x) => x.pfad === pfad) : zustand.commits[i];
+        const inhalt = c ? zustand.fassungen[c.sha] : undefined;
+        if (inhalt === undefined) return antwort(404, { message: 'Not Found' });
+        if (/raw/.test(req.headers().accept || '')) return r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/vnd.github.raw+json; charset=utf-8' }, body: inhalt });
+        return antwort(200, { sha: `blob-${c.sha}`, encoding: 'base64', content: Buffer.from(inhalt).toString('base64') });
+      }
       if (req.method() === 'GET') {
         zustand.gets++;
         if (zustand.staleEinmal && alt) {
@@ -127,6 +141,7 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
         zustand.sha = `sha${zustand.version}`;
         zustand.nachrichten.push(body.message);
         commit(body.message, pfad, `k${zustand.version}`);
+        zustand.fassungen[`k${zustand.version}`] = zustand.datei;
         return antwort(zustand.version === 1 ? 201 : 200, { content: { sha: zustand.sha, path: pfad } });
       }
     }

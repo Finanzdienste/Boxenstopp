@@ -9,19 +9,27 @@
  *   Überblick   Wer wann was gemacht hat, in allen Listen, die dieses Gerät
  *               kennt – aus den Commits (gaeste.js zusammenfassen). Was das
  *               Gerät schon geholt hat, merkt es sich (VERLAUF); beim Öffnen
- *               kommt nur das Neue dazu.
+ *               kommt nur das Neue dazu. Unter jeder Sitzung steht im Detail,
+ *               was passiert ist: Dafür holt das Gerät liste.json, wie sie
+ *               vor und nach jedem Commit war (speicher.js fassungLesen), und
+ *               vergleicht (einzelheiten.js) – je Commit einmal, dann ist es
+ *               gemerkt (DETAILS). Oben lässt sich der Verlauf auf eine
+ *               Person beschränken.
  *
  * Schlüssel stehen nur im localStorage dieses Geräts und im Link für den Gast.
  */
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { esc, tagKurz } from './format.js';
-import { DATEN, API, listeAnlegen, commitsLesen, pruefeSchluessel } from './speicher.js';
+import { DATEN, API, listeAnlegen, commitsLesen, pruefeSchluessel, fassungLesen } from './speicher.js';
+import { bereinigen, leer } from './liste.js';
 import { schluesselAus, einladungsLink, ladeKi, ortVon } from './zugang.js';
 import { gaesteBereinigen, repoVorschlag, zusammenfassen, verlaufMischen, BEREICHE } from './gaeste.js';
+import { einzelheiten, zusammenlegen, EINZELHEITEN_FASSUNG } from './einzelheiten.js';
 import { istEigen, wessen } from './profil.js';
 
 const GAESTE = 'boxenstopp.gaeste.v1';
 const VERLAUF = 'boxenstopp.verlauf.v1'; // { <id>: [{ sha, at, nachricht }] }
+const DETAILS = 'boxenstopp.einzelheiten.v1'; // { f: EINZELHEITEN_FASSUNG, d: { <sha>: [{ b, a, x }] } }
 const api = () => lese('__api', null) || API;
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 
@@ -192,11 +200,13 @@ export function klickGaeste(el) {
     case 'g-fertig-zu': fertig = null; gaesteZeichnen(); return true;
     case 'g-kopieren': if (fertig) kopieren(fertig.link, $('#g-linkfeld')); return true;
     case 'ub-oeffnen': ueberblickOeffnen(); return true;
-    case 'ub-zu': { const dlg = $('#ueberblick-dlg'); if (dlg?.open) dlg.close(); return true; }
-    case 'ub-neu': ueberblickLaden(true); return true;
+    case 'ub-zu': { const dlg = $('#ueberblick-dlg'); if (dlg?.open) dlg.close(); fassungen.clear(); return true; }
+    case 'ub-neu': versucht.clear(); detailsFehler = ''; ueberblickLaden(true); return true;
     default:
       if (d.ubTage) { tage = Number(d.ubTage) === 30 ? 30 : 7; ueberblickZeichnen(); return true; }
       if (d.act === 'ub-mehr') { mehr = true; ueberblickZeichnen(); return true; }
+      if (el.hasAttribute('data-ub-wer')) { wer = d.ubWer || ''; mehr = false; ueberblickZeichnen(); return true; }
+      if (d.ubAuf) { aufgeklappt.add(d.ubAuf); ueberblickZeichnen(); return true; }
       return false;
   }
 }
@@ -208,6 +218,13 @@ let mehr = false;
 let laedt = false;
 let fehlerJe = {}; // id → Text
 let geholt = null;
+let wer = ''; // der Verlauf nur einer Person (Name klein) – '' alle
+const aufgeklappt = new Set(); // Zeilen der Einzelheiten, die ganz zu sehen sind
+let details = null; // was DETAILS gemerkt hat, im Speicher
+let detailsLaeuft = false;
+let detailsFehler = '';
+const versucht = new Set(); // Commits, die dieses Öffnen schon geholt hat (oder versucht)
+const fassungen = new Map(); // `${liste}|${ref}` → Promise<Stand | null>, solange der Überblick offen ist
 
 /** Die Listen, die dieses Gerät kennt: eure (mit eurem Schlüssel) und die der Gäste. */
 function listen() {
@@ -219,6 +236,121 @@ function listen() {
 }
 
 const gemerkterVerlauf = () => { const v = lese(VERLAUF, {}); return v && typeof v === 'object' ? v : {}; };
+
+/* --------------------------------------------- Einzelheiten je Commit */
+
+/** Die gemerkten Einzelheiten { <sha>: [{ b, a, x }] } – nur aus dieser Fassung von einzelheiten.js. */
+function detailsCache() {
+  if (!details) {
+    const x = lese(DETAILS, null);
+    details = x && x.f === EINZELHEITEN_FASSUNG && x.d && typeof x.d === 'object' && !Array.isArray(x.d) ? x.d : {};
+  }
+  return details;
+}
+const merkeDetails = () => schreibe(DETAILS, { f: EINZELHEITEN_FASSUNG, d: detailsCache() });
+
+/** Was die App über Rezepte und Zutaten weiß – für Namen und Schritte (einzelheiten.js). */
+const hilfe = () => ({
+  rezeptName: (rid) => app.nachId[rid]?.short || app.amyNach?.[rid]?.short || app.extras?.[rid]?.short || '',
+  rezept: (rid) => app.nachId[rid] || app.amyNach?.[rid] || null,
+  zutatName: (k) => app.katalog?.[k]?.n || '',
+});
+
+/** liste.json bei einem Commit (ref: sha oder „sha~1“), bereinigt – jede Fassung nur einmal geholt. */
+function fassung(l, ref) {
+  const k = `${l.id}|${ref}`;
+  if (!fassungen.has(k)) {
+    fassungen.set(k, fassungLesen(l.token, l.ort, ref, { api: api() })
+      .then((roh) => (roh === null ? null : bereinigen(roh)))
+      .catch((e) => { fassungen.delete(k); throw e; }));
+  }
+  return fassungen.get(k);
+}
+
+/** f für alle xs, höchstens n zugleich. */
+async function nebeneinander(xs, n, f) {
+  let i = 0;
+  await Promise.all(Array.from({ length: Math.min(n, xs.length) }, async () => { while (i < xs.length) await f(xs[i++]); }));
+}
+
+/**
+ * Die Einzelheiten zu diesen Commits holen ([{ liste, sha }], die oben
+ * zuerst): liste.json nach dem Commit und davor. Davor ist meist der
+ * nächstältere Commit im Verlauf – genau dann, wenn sein rev eins kleiner ist
+ * (jeder Commit zählt rev hoch); sonst (Lücke im Verlauf, von Hand
+ * bearbeitet) der Stand direkt vor dem Commit („sha~1“).
+ */
+async function detailsHolen(noetig) {
+  detailsLaeuft = true;
+  detailsFehler = '';
+  const ls = Object.fromEntries(listen().map((l) => [l.id, l]));
+  const verlauf = gemerkterVerlauf();
+  const d = detailsCache();
+  const h = hilfe();
+  let geschafft = 0;
+  await nebeneinander(noetig, 4, async ({ liste, sha }) => {
+    versucht.add(sha);
+    const l = ls[liste];
+    if (!l || detailsFehler || d[sha]) return;
+    const reihe = Array.isArray(verlauf[liste]) ? verlauf[liste] : [];
+    const i = reihe.findIndex((e) => e.sha === sha);
+    const davor = i >= 0 ? reihe[i + 1]?.sha || '' : '';
+    try {
+      const nach = await fassung(l, sha);
+      if (!nach) { d[sha] = []; return; }
+      let vor = davor ? await fassung(l, davor) : null;
+      if (!vor || vor.rev + 1 !== nach.rev) vor = await fassung(l, `${sha}~1`);
+      d[sha] = einzelheiten(vor || leer(), nach, h);
+    } catch (e) {
+      if (e?.message === 'falsch' || e?.message === 'netz') {
+        detailsFehler = e.message === 'falsch' ? 'Mit dem Schlüssel kommen die Einzelheiten nicht.' : 'Die Einzelheiten kommen gerade nicht von GitHub.';
+        return;
+      }
+      // Kein JSON (von Hand kaputt) oder ein Stand, mit dem der Vergleich nichts anfangen kann: dann eben ohne
+      d[sha] = [];
+      return;
+    }
+    // Zwischendurch zeigen, was schon da ist
+    if (++geschafft % 6 === 0) { merkeDetails(); ueberblickZeichnen(); }
+  });
+  merkeDetails();
+  detailsLaeuft = false;
+  ueberblickZeichnen();
+}
+
+/** Für die gezeigten Sitzungen fehlende Einzelheiten holen – je Öffnen jeden Commit höchstens einmal. */
+function detailsAnstossen(sitzungen) {
+  if (laedt || detailsLaeuft || detailsFehler || !$('#ueberblick-dlg')?.open) return;
+  const d = detailsCache();
+  const noetig = [];
+  for (const s of sitzungen) for (const sha of [...(s.shas || [])].reverse()) if (!d[sha] && !versucht.has(sha)) noetig.push({ liste: s.liste, sha });
+  if (noetig.length) detailsHolen(noetig);
+}
+
+/** Eine Zeile der Einzelheiten: „Abgehakt: Spinat, Penne“ – lange Sachen (Schritte, Notizen) untereinander. */
+function detailZeile(e, schluessel) {
+  if (!e.x.length) return `<p class="ub-det-z"><b>${esc(e.a)}</b></p>`;
+  const max = 12;
+  const ganz = aufgeklappt.has(schluessel);
+  const xs = ganz ? e.x : e.x.slice(0, max);
+  const rest = e.x.length - xs.length;
+  const knopf = rest > 0 ? ` <button type="button" class="linkbtn ub-det-mehr" data-ub-auf="${esc(schluessel)}">+ ${rest} weitere</button>` : '';
+  if (e.x.length > 1 && xs.some((x) => x.length > 34)) return `<div class="ub-det-z"><b>${esc(e.a)}:</b><ul>${xs.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>${knopf}</div>`;
+  return `<p class="ub-det-z"><b>${esc(e.a)}:</b> ${esc(xs.join(', '))}${knopf}</p>`;
+}
+
+/** Unter einer Sitzung: was genau passiert ist – oder dass es noch kommt. */
+function detailsHTML(s) {
+  const d = detailsCache();
+  const da = (s.shas || []).map((sha) => d[sha]).filter(Boolean);
+  const fehlt = (s.shas || []).some((sha) => !d[sha]);
+  const zeilen = zusammenlegen(da);
+  if (zeilen.length) return `<div class="ub-det">${zeilen.map((e) => detailZeile(e, `${s.shas[0]}|${e.b}|${e.a}`)).join('')}${fehlt && detailsLaeuft ? '<p class="ub-det-z ub-det-laedt">Mehr kommt …</p>' : ''}</div>`;
+  if (fehlt && !detailsFehler) return '<div class="ub-det"><p class="ub-det-z ub-det-laedt">Einzelheiten kommen …</p></div>';
+  // Alles geholt, aber nichts, was man sieht (etwa nur gelerntes Kochtempo)
+  if (!fehlt && da.length) return '<div class="ub-det"><p class="ub-det-z ub-det-laedt">Nichts zu sehen – nur im Hintergrund gespeichert.</p></div>';
+  return '';
+}
 
 export async function ueberblickLaden(neu = false) {
   if (laedt) return;
@@ -240,6 +372,12 @@ export async function ueberblickLaden(neu = false) {
   const ids = new Set(listen().map((l) => l.id));
   for (const k of Object.keys(verlauf)) if (!ids.has(k)) delete verlauf[k];
   schreibe(VERLAUF, verlauf);
+  // Einzelheiten nur zu Commits, die noch im Verlauf stehen
+  const shas = new Set(Object.values(verlauf).flatMap((l) => (Array.isArray(l) ? l.map((e) => e.sha) : [])));
+  const d = detailsCache();
+  const vorher = Object.keys(d).length;
+  for (const sha of Object.keys(d)) if (!shas.has(sha)) delete d[sha];
+  if (Object.keys(d).length !== vorher) merkeDetails();
   geholt = new Date();
   laedt = false;
   ueberblickZeichnen();
@@ -249,8 +387,15 @@ function ueberblickOeffnen() {
   const dlg = $('#ueberblick-dlg');
   if (!dlg) return;
   mehr = false;
+  // Was beim letzten Öffnen nicht kam (kein Netz), darf es jetzt noch einmal versuchen
+  versucht.clear();
+  detailsFehler = '';
   ueberblickZeichnen();
-  if (!dlg.open) { if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', ''); }
+  if (!dlg.open) {
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    // Auch mit Esc oder Zurück zu: die geholten Stände nicht im Speicher behalten
+    dlg.addEventListener('close', () => fassungen.clear(), { once: true });
+  }
   ueberblickLaden();
 }
 
@@ -284,7 +429,7 @@ export function ueberblickZeichnen() {
   const verlauf = gemerkterVerlauf();
   // In der Liste eines Gasts ist jeder dort der Gast (gaeste.js) – auch auf einem Gerät, auf dem er sich anders nennt
   const z = zusammenfassen(ls.map((l) => ({ id: l.id, name: l.name, farbe: l.farbe, gast: l.id === 'haupt' ? '' : l.name, eintraege: verlauf[l.id] || [] })), { tage });
-  const leer = !z.personen.length;
+  const keiner = !z.personen.length;
   const personen = z.personen.map((p) => {
     const l = nachId[p.liste];
     const max = Math.max(1, ...p.jeTag);
@@ -304,7 +449,14 @@ ${bereiche ? `<p class="ub-bereiche">${esc(bereiche)}</p>` : ''}
   const still = ls.filter((l) => l.id !== 'haupt' && !z.personen.some((p) => p.liste === l.id)).map((l) => `<article class="ub-person ub-${farbeVon(l, l.name)} ub-still"><div class="ub-kopf"><span class="ub-kreis" aria-hidden="true">${esc(l.name.slice(0, 1).toUpperCase())}</span><div class="ub-wer"><b>${esc(l.name)}</b><small>${esc(listenName(l))} · in ${tage} Tagen nichts geändert</small></div></div></article>`).join('');
   const sitzungen = [];
   for (const t of z.verlauf) for (const s of t.sitzungen) sitzungen.push({ tag: t.tag, ...s });
-  const zeigen = mehr ? sitzungen : sitzungen.slice(0, 25);
+  // Nur eine Person: oben wählbar, sobald mehr als eine etwas gemacht hat
+  const namen = [...new Map([...z.personen.map((p) => p.name), ...sitzungen.map((s) => s.wer)].map((x) => [x.toLowerCase(), x])).entries()];
+  if (wer && !namen.some(([k]) => k === wer)) wer = '';
+  const filter = namen.length > 1
+    ? `<div class="ub-filter" role="group" aria-label="Wessen Verlauf">${[['', 'Alle'], ...namen].map(([k, t]) => `<button type="button" class="chip" data-ub-wer="${esc(k)}" aria-pressed="${wer === k}">${esc(t)}</button>`).join('')}</div>`
+    : '';
+  const gefiltert = wer ? sitzungen.filter((s) => s.wer.toLowerCase() === wer) : sitzungen;
+  const zeigen = mehr ? gefiltert : gefiltert.slice(0, 25);
   let tagJetzt = '';
   const zeilen = zeigen.map((s) => {
     const kopf = s.tag !== tagJetzt ? `${tagJetzt ? '</ul>' : ''}<h4 class="ub-tag-k">${esc(tagName(s.tag))}</h4><ul class="ub-liste">` : '';
@@ -312,7 +464,7 @@ ${bereiche ? `<p class="ub-bereiche">${esc(bereiche)}</p>` : ''}
     const l = nachId[s.liste];
     const zeit = uhr(s.von) === uhr(s.bis) ? uhr(s.von) : `${uhr(s.von)}–${uhr(s.bis)}`;
     const was = s.was.length ? s.was.join(', ') : `${s.anzahl} ${s.anzahl === 1 ? 'Änderung' : 'Änderungen'}`;
-    return `${kopf}<li class="ub-${farbeVon(l, s.wer)}"><time>${esc(zeit)}</time><span class="ub-name">${esc(s.wer)}${l?.id !== 'haupt' ? '' : ''}</span><span class="ub-was">${esc(was)}${s.was.length && s.anzahl > 1 ? ` <small>(${s.anzahl})</small>` : ''}</span></li>`;
+    return `${kopf}<li class="ub-${farbeVon(l, s.wer)}"><time>${esc(zeit)}</time><span class="ub-name">${esc(s.wer)}</span><span class="ub-was">${esc(was)}${s.was.length && s.anzahl > 1 ? ` <small>(${s.anzahl})</small>` : ''}</span>${detailsHTML(s)}</li>`;
   }).join('') + (zeigen.length ? '</ul>' : '');
   const auto = Object.entries(z.automatik).map(([id, a]) => {
     const teile = Object.entries(a).map(([w, n]) => `${n}× ${AUTO_TEXT[w.toLowerCase()] || w}`);
@@ -321,13 +473,14 @@ ${bereiche ? `<p class="ub-bereiche">${esc(bereiche)}</p>` : ''}
   const fehler = Object.entries(fehlerJe).map(([id, t]) => `<p class="zugang-fehler">${esc(nachId[id]?.name || id)}: ${esc(t)}</p>`).join('');
   dlg.innerHTML = `<button type="button" class="tablet-zu" data-act="ub-zu" aria-label="Schließen">${X}</button>
 <h2 class="ub-titel" id="ub-titel">Überblick</h2>
-<p class="ub-lead">Wer wann was gemacht hat – aus dem, was in den Listen gespeichert wurde.</p>
+<p class="ub-lead">Wer wann was gemacht hat – aus dem, was in den Listen gespeichert wurde. Unter jedem Eintrag steht, was genau passiert ist.</p>
 <div class="e-design ub-zeitraum" role="group" aria-label="Zeitraum"><button type="button" class="e-wahl${tage === 7 ? ' an' : ''}" data-ub-tage="7" aria-pressed="${tage === 7}">7 Tage</button><button type="button" class="e-wahl${tage === 30 ? ' an' : ''}" data-ub-tage="30" aria-pressed="${tage === 30}">30 Tage</button></div>
 ${fehler}
-${laedt && leer ? '<p class="loading">Holt die Änderungen …</p>' : ''}
-${!laedt && leer && !still ? `<p class="sk-leer">In den letzten ${tage} Tagen hat niemand etwas geändert.</p>` : ''}
+${laedt && keiner ? '<p class="loading">Holt die Änderungen …</p>' : ''}
+${!laedt && keiner && !still ? `<p class="sk-leer">In den letzten ${tage} Tagen hat niemand etwas geändert.</p>` : ''}
 <section class="ub-personen" aria-label="Personen">${personen}${still}</section>
-${zeilen ? `<section class="ub-verlauf" aria-labelledby="ub-verlauf-t"><h3 id="ub-verlauf-t" class="sub-h">Verlauf</h3>${zeilen}${!mehr && sitzungen.length > zeigen.length ? `<button type="button" class="linkbtn" data-act="ub-mehr">Alle ${sitzungen.length} zeigen</button>` : ''}</section>` : ''}
+${zeilen ? `<section class="ub-verlauf" aria-labelledby="ub-verlauf-t"><h3 id="ub-verlauf-t" class="sub-h">Verlauf</h3>${filter}${detailsFehler ? `<p class="zugang-fehler">${esc(detailsFehler)}</p>` : ''}${zeilen}${!mehr && gefiltert.length > zeigen.length ? `<button type="button" class="linkbtn" data-act="ub-mehr">Alle ${gefiltert.length} zeigen</button>` : ''}</section>` : ''}
 ${auto}
-<p class="fine">Gezählt wird, was gespeichert wird – nicht, wer die App nur anschaut. Ältere Einträge nennen nur die Zahl der Änderungen.${geholt ? ` Stand ${esc(uhr(geholt.toISOString()))}.` : ''} <button type="button" class="linkbtn" data-act="ub-neu"${laedt ? ' disabled' : ''}>${laedt ? 'Holt …' : 'Neu holen'}</button></p>`;
+<p class="fine">Gezählt wird, was gespeichert wird – nicht, wer die App nur anschaut. Die Einzelheiten kommen aus dem Vergleich der Liste vor und nach jeder Änderung, auch bei älteren Einträgen.${geholt ? ` Stand ${esc(uhr(geholt.toISOString()))}.` : ''} <button type="button" class="linkbtn" data-act="ub-neu"${laedt ? ' disabled' : ''}>${laedt ? 'Holt …' : 'Neu holen'}</button></p>`;
+  detailsAnstossen(zeigen);
 }

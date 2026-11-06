@@ -486,6 +486,28 @@ export async function commitsLesen(token, ort, { api = API, bis = '', seit = '',
 }
 
 /**
+ * liste.json, wie sie bei einem Commit war – für die Einzelheiten im
+ * Überblick (ansicht-gaeste.js, einzelheiten.js). ref: die sha eines Commits
+ * oder „<sha>~1“ für den Stand davor. Zurück kommt das JSON, wie es dort lag
+ * (noch nicht bereinigt), oder null, wenn es die Datei dort noch nicht gab.
+ * Wirft 'falsch' (Schlüssel), 'netz' oder 'kaputt' (kein JSON).
+ */
+export async function fassungLesen(token, ort, ref, { api = API } = {}) {
+  let r;
+  try {
+    r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/contents/${ort.pfad || DATEN.pfad}?ref=${encodeURIComponent(ref)}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.raw+json' },
+    });
+  } catch { throw new Error('netz'); }
+  if (r.status === 404) return null;
+  if (r.status === 401 || r.status === 403) throw new Error(r.headers.get('x-ratelimit-remaining') === '0' ? 'netz' : 'falsch');
+  if (!r.ok) throw new Error('netz');
+  const text = await r.text().catch(() => null);
+  if (text === null) throw new Error('netz');
+  try { return JSON.parse(text); } catch { throw new Error('kaputt'); }
+}
+
+/**
  * Prüft einen Schlüssel: Kommt man damit an das Daten-Repo heran?
  * 'ok' | 'falsch' (abgelehnt) | 'netz' (keine Verbindung oder GitHub hakt)
  */

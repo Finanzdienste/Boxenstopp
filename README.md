@@ -907,6 +907,25 @@ Neue. Die Schlüssel der Gäste stehen nur in Tobis localStorage
 (`boxenstopp.gaeste.v1`); „Entfernen“ vergisst den Gast auf diesem Gerät,
 seine Liste bleibt.
 
+**Einzelheiten:** Unter jeder Sitzung steht, was genau passiert ist – nicht
+aus der Commit-Nachricht, sondern aus dem Vergleich von `liste.json` vor und
+nach jedem Commit (`js/einzelheiten.js`), deshalb auch bei älteren Einträgen,
+die nur „1 Änderung“ sagen: „Für Chili auf die Liste: 500 g Rinderhackfleisch,
+200 g Zwiebeln …“, „Abgehakt: Spinat, Penne, Passata“, „Kocht Bueno Kuchen (10
+Schritte): 3. Eier und Zucker aufschlagen …“, „Neues Rezept: „Bueno Kuchen“ –
+5 Zutaten, 10 Schritte“, „Putzplan Küche: ✓ Arbeitsflächen abwischen“, „Ziel
+pro Box: 400 kcal … → 420 kcal …“, dazu Mengen, wieder Geöffnetes,
+Weggeräumtes, verschobene Abteilungen, Bons, Notizen mit Text, Daumen,
+Timer. Die Stände holt das Gerät mit `GET …/contents/liste.json?ref=<sha>`
+(`speicher.js fassungLesen`): den Stand nach dem Commit und als Stand davor
+den nächstälteren im Verlauf – wenn dessen `rev` genau eins kleiner ist, sonst
+`<sha>~1`. Je Commit einmal; was herauskommt, merkt sich das Gerät
+(`boxenstopp.einzelheiten.v1`, nur für Commits, die noch im Verlauf stehen).
+Geholt wird nur für die Sitzungen, die gerade zu sehen sind, höchstens vier
+zugleich; lange Zeilen zeigen zwölf Sachen und „+ … weitere“. Oben über dem
+Verlauf lässt er sich auf eine Person beschränken (Alle, Amy, Marielle,
+Tobi).
+
 ### Wie der Abgleich funktioniert (js/speicher.js)
 
 - Jede Änderung ist ein kleines Objekt aus `js/liste.js` („Teil dazu“,
@@ -1121,6 +1140,7 @@ die Action „Rezeptfotos“.
 | `js/ansicht-ziel.js` | Ziel pro Box: anwenden, Einstellungen, oben bei den Rezepten, im Rezept, die Liste nachziehen |
 | `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
 | `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; der Überblick aus den Commits |
+| `js/einzelheiten.js` | Überblick: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
 | `js/ansicht-willkommen.js` | das Willkommen für einen Gast (Makros, aufs Handy, wem die Liste gehört) |
 | `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel – und die Ansicht |
 | `icon-lila*.png`, `icon-lila.svg`, `manifest-lila.webmanifest` | Symbol und Manifest einer lila Liste |
@@ -1233,7 +1253,13 @@ Standard durch. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites
 Gerät, ein drittes als „Marielli“ (heißt dann Marielle, die alten Einträge
-werden zusammengeführt) und Tobis Überblick. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
+werden zusammengeführt) und Tobis Überblick (Einzelheiten aus den Ständen
+mit `?ref=`, nur eine Person, lange Zeilen, das Neue beim nächsten Öffnen ohne
+alles neu zu holen). `test-einzelheiten.mjs` rechnet die Einzelheiten in
+Node: Einkauf (mit Mengen, abgehakt, wieder offen, weggeräumt, Abteilung, Bon,
+Preisalarm), Kochen (Schritte fester und eigener Rezepte, Timer), Rezepte,
+Putzplan, Ziel, eine zusammengeführte eigene Liste und eine Sitzung aus
+mehreren Commits. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
 Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

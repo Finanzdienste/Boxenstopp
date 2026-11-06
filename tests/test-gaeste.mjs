@@ -244,6 +244,20 @@ check(ub.includes('Marielle') && ub.includes('Marielles Liste') && ub.includes('
 check(ub.includes('Chili') && ub.includes('Ziel pro Box geändert') && ub.includes('Einladung für Marielle'), 'Überblick: was passiert ist, im Verlauf');
 const karten = await t.locator('#ueberblick-dlg .ub-person .ub-wer b').allInnerTexts();
 check(karten.length === 2 && karten.includes('Marielle') && !karten.includes('Marielli') && ub.includes('Äpfel') && ub.includes('Marielli heißt jetzt Marielle'), `Überblick: Marielle einmal, mit „Marielli heißt jetzt Marielle“ (${karten.join(', ')})`);
+// Die Einzelheiten: was genau – aus liste.json vor und nach jedem Commit (?ref=), nicht aus der Nachricht
+// (Lange Sachen stehen untereinander – zum Vergleichen alles in einer Zeile)
+const verlaufText = async () => (await t.locator('#ueberblick-dlg .ub-verlauf').innerText()).replace(/\s+/g, ' ');
+const det = await bis(async () => { const x = await verlaufText(); return /Für Chili[^:]* auf die Liste: \d/.test(x) && x.includes('Auf die Liste: Äpfel') && x.includes('Ziel pro Box: 368 kcal · 30 g P · 35 g KH · 12 g F') ? x : null; }, 12000);
+check(det, `Einzelheiten: Chili mit Mengen, die Äpfel, ihr Ziel (${det ? '' : (await verlaufText()).slice(0, 400)})`);
+check(/Für Chili[^:]* auf die Liste: \d+ g Rinderhack/.test(det || ''), 'Einzelheiten: wie auf dem Einkaufszettel („… g Rinderhack…“)');
+check(mar.zustand.fassungAbrufe > 0 && await t.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('boxenstopp.einzelheiten.v1')).d).length > 0), 'Die Stände kommen mit ?ref= von GitHub, die Einzelheiten sind gemerkt');
+// Nur eine Person
+await t.click('#ueberblick-dlg .ub-filter [data-ub-wer="marielle"]');
+const nurSie = await t.locator('#ueberblick-dlg .ub-liste .ub-name').allInnerTexts();
+check(nurSie.length > 0 && nurSie.every((x) => x === 'Marielle') && await t.locator('#ueberblick-dlg .ub-filter [data-ub-wer="marielle"]').getAttribute('aria-pressed') === 'true', `Nur Marielle: nur ihre Einträge (${[...new Set(nurSie)].join(', ')})`);
+await t.click('#ueberblick-dlg .ub-filter [data-ub-wer=""]');
+check((await t.locator('#ueberblick-dlg .ub-liste .ub-name').allInnerTexts()).includes('Tobi'), 'Alle: Tobi steht wieder mit drin');
+const abrufeVorher = mar.zustand.fassungAbrufe;
 await t.click('#ueberblick-dlg [data-ub-tage="30"]');
 check(await t.locator('#ueberblick-dlg .ub-balken.dicht').count() >= 1, 'Überblick: 30 Tage');
 const holtVorher = mar.zustand.commits.length;
@@ -255,6 +269,24 @@ await m.press('#add-input', 'Enter');
 check(await bis(() => mar.zustand.commits.length > holtVorher), 'Marielle setzt Bananen auf die Liste');
 await t.click('[data-act="ub-oeffnen"]');
 check(await bis(async () => (await t.locator('#ueberblick-dlg').innerText()).includes('Bananen')), 'Überblick neu geöffnet: das Neue ist da');
+// Bananen kommen zur Sitzung von eben dazu: „Auf die Liste: Äpfel, Bananen“
+check(await bis(async () => /Auf die Liste: (?:[^:]*, )?Bananen/.test(await verlaufText())), `Einzelheiten zum Neuen: Bananen auf die Liste (${(await verlaufText()).slice(0, 300)})`);
+check(mar.zustand.fassungAbrufe - abrufeVorher <= 3, `Gemerkte Einzelheiten werden nicht neu geholt – nur der neue Commit (${mar.zustand.fassungAbrufe - abrufeVorher} Abrufe)`);
+// Lange Zeilen: die ersten zwölf Sachen, der Rest auf Tipp (dafür eine gemerkte Zeile mit 15 Sachen, dann neu laden)
+await t.evaluate(() => {
+  const x = JSON.parse(localStorage.getItem('boxenstopp.einzelheiten.v1'));
+  const sha = Object.keys(x.d)[0];
+  x.d[sha] = [...x.d[sha], { b: 'Einkauf', a: 'Testzeile', x: Array.from({ length: 15 }, (_, i) => `Sache ${i + 1}`) }];
+  localStorage.setItem('boxenstopp.einzelheiten.v1', JSON.stringify(x));
+});
+await t.reload();
+await t.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await t.click('.tabbar .tab[data-tab="einstellungen"]');
+await t.click('[data-act="ub-oeffnen"]');
+const lang = t.locator('#ueberblick-dlg .ub-det-z', { hasText: 'Testzeile' });
+check(await bis(() => lang.count()) && (await lang.innerText()).includes('Sache 12') && !(await lang.innerText()).includes('Sache 13') && (await lang.innerText()).includes('+ 3 weitere'), `Lange Zeile: zwölf Sachen und „+ 3 weitere“ (${await lang.innerText().catch(() => '')})`);
+await lang.locator('.ub-det-mehr').click();
+check((await lang.innerText()).includes('Sache 15') && !(await lang.locator('.ub-det-mehr').count()), '„+ 3 weitere“ zeigt die ganze Zeile');
 check(tobi.fehler.length === 0, `Tobi: keine Fehler im Browser (${tobi.fehler.join(' | ')})`);
 // Gast entfernen (nur von Tobis Gerät)
 await t.click('[data-act="ub-zu"]');
