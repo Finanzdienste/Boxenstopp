@@ -28,6 +28,7 @@ export const app = {
   listeDa: false,
   speicher: null,
   zugang: null,
+  kiGeteilt: null, // ki.json der Liste: { schluessel, von, stand } – der für alle Handys freigegebene KI-Schlüssel (zugang.js)
   status: { zustand: 'lokal', offen: 0, zuletzt: null },
   name() { return this.zugang?.name || ''; },
   aendern(op) { if (this.speicher) this.speicher.aendern(op); },

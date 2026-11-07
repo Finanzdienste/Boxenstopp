@@ -104,18 +104,56 @@ export const schluesselAusAdresse = () => linkAusAdresse().token;
  * (AQ.… oder älter AIza…, kostenlos) oder von Anthropic (sk-ant-…), ebenfalls nur hier im
  * localStorage. Er reist im selben Link mit: …/#zugang=<GitHub>&ki=<KI> –
  * oder allein als …/#ki=<KI>. Welcher Anbieter es ist, sieht ki.js am Anfang.
+ *
+ * Für alle Handys einer Liste: Wer will, gibt seinen Schlüssel in den
+ * Einstellungen frei – er liegt dann als ki.json im Daten-Repo der Liste
+ * ({ schluessel, von, stand }, speicher.js privatSchreiben), und jedes Handy
+ * mit dem Zugang holt ihn beim Start (app.js) und übernimmt ihn, wenn es
+ * keinen eigenen, neueren hat (kiUebernehmen). Dazu merkt sich der Eintrag
+ * hier, wann er kam und ob er geteilt war: { schluessel, stand, geteilt }.
  */
 const KI = 'boxenstopp.ki.v1';
 const KI_MUSTER = /^(?:sk-ant-[A-Za-z0-9_-]{20,250}|AQ\.[A-Za-z0-9_.-]{20,200}|AIza[A-Za-z0-9_-]{30,80})$/;
+/** Die Datei mit dem geteilten Schlüssel im Daten-Repo. */
+export const KI_DATEI = 'ki.json';
 
-export function ladeKi() {
+/** Der Eintrag auf diesem Handy: { schluessel, stand, geteilt } – oder null. */
+export function ladeKiEintrag() {
   try {
     const k = JSON.parse(localStorage.getItem(KI) || 'null');
-    return k && typeof k.schluessel === 'string' && KI_MUSTER.test(k.schluessel) ? k.schluessel : '';
-  } catch { return ''; }
+    if (!(k && typeof k.schluessel === 'string' && KI_MUSTER.test(k.schluessel))) return null;
+    return { schluessel: k.schluessel, stand: typeof k.stand === 'string' ? k.stand : '', geteilt: k.geteilt === true };
+  } catch { return null; }
 }
-export function speichereKi(schluessel) {
-  try { localStorage.setItem(KI, JSON.stringify({ schluessel })); return true; } catch { return false; }
+export const ladeKi = () => ladeKiEintrag()?.schluessel || '';
+/** Speichern – selbst eingetragen (stand: jetzt) oder aus ki.json übernommen (geteilt: true, stand der Datei). */
+export function speichereKi(schluessel, { stand = new Date().toISOString(), geteilt = false } = {}) {
+  try { localStorage.setItem(KI, JSON.stringify({ schluessel, stand, ...(geteilt ? { geteilt: true } : {}) })); return true; } catch { return false; }
+}
+
+/*
+ * Ob ein Handy den geteilten Schlüssel (ki.json) nimmt: ja, wenn es keinen
+ * hat, wenn seiner selbst aus ki.json kam oder wenn er älter ist als der
+ * geteilte (ein Eintrag ohne stand ist alt). Ein selbst eingetragener,
+ * neuerer bleibt. Gibt den neuen Eintrag zurück – oder null, wenn alles
+ * bleibt (auch bei einer leeren ki.json: Teilen beendet, die Handys behalten,
+ * was sie haben).
+ */
+export function kiUebernehmen(eigen, geteilt) {
+  const s = kiAus(geteilt?.schluessel);
+  if (!s) return null;
+  const stand = typeof geteilt.stand === 'string' ? geteilt.stand : '';
+  if (eigen?.schluessel === s) return eigen.geteilt && eigen.stand === stand ? null : { schluessel: s, stand, geteilt: true };
+  if (eigen?.schluessel && !eigen.geteilt && eigen.stand && eigen.stand >= stand) return null;
+  return { schluessel: s, stand, geteilt: true };
+}
+/** ki.json übernehmen, wenn kiUebernehmen das sagt; true, wenn der Schlüssel auf diesem Handy jetzt ein anderer ist. */
+export function geteiltenKiUebernehmen(geteilt) {
+  const eigen = ladeKiEintrag();
+  const neu = kiUebernehmen(eigen, geteilt);
+  if (!neu) return false;
+  speichereKi(neu.schluessel, { stand: neu.stand, geteilt: true });
+  return neu.schluessel !== eigen?.schluessel;
 }
 export function loescheKi() {
   try { localStorage.removeItem(KI); } catch { /* egal */ }

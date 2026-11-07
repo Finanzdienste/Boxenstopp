@@ -718,7 +718,9 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   abgleichen“, „Trennen“ (siehe Haushalt). Solange ein Code kommt oder
   angezeigt wird, sieht die App alle paar Sekunden in `todo.json` nach.
 - **KI-Schlüssel:** welcher eingetragen ist (Google oder Anthropic, Modell),
-  ändern, entfernen (mit Rückgängig).
+  ändern, entfernen (mit Rückgängig); mit Zugang zur Liste „Für alle Handys
+  dieser Liste freigeben“ bzw. „Nicht mehr teilen“ (siehe Resteverwertung →
+  Einrichten).
 - **Darstellung:** die Farbe der App (Blau oder Lila, für die ganze Liste:
   `profil.farbe`); wie das Gerät, hell oder dunkel – je Gerät
   (`boxenstopp.design.v1`, ein kleines Skript im Kopf von `index.html` setzt
@@ -849,9 +851,17 @@ Keys einen Schlüssel anlegen und ihn genauso in die App einfügen. Beide
 Antworten werden gestreamt, die Leiste zeigt Modell und Kosten der Anfrage.
 
 Der Schlüssel steht nur im localStorage (`boxenstopp.ki.v1`), nirgends im Code
-oder im Repo. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy in den
+oder im App-Repo. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy in den
 Einstellungen (`…#zugang=<GitHub>&ki=<KI>`) oder mit „Link fürs zweite Handy kopieren“ im
-Einrichten. Fotos werden vorher auf 1280 px verkleinert und gehen nur mit der
+Einrichten – oder für alle Handys einer Liste auf einmal: „Für alle Handys
+dieser Liste freigeben“ in den Einstellungen legt ihn als `ki.json`
+(`{ schluessel, von, stand }`) ins Daten-Repo der Liste, und jedes Handy mit
+dem Zugang holt ihn beim Start (`app.js`, `zugang.js kiUebernehmen`): Es nimmt
+ihn, wenn es keinen eigenen hat, wenn seiner selbst aus `ki.json` kam oder wenn
+seiner älter ist (ein Eintrag ohne Stand gilt als alt); ein selbst eingetragener,
+neuerer bleibt. „Nicht mehr teilen“ leert `ki.json` – wer den Schlüssel hat,
+behält ihn. Eine eigene Liste (Gast, eigenes Repo) hat ihre eigene `ki.json`.
+Fotos werden vorher auf 1280 px verkleinert und gehen nur mit der
 einen Anfrage an den Anbieter, gespeichert werden sie nicht.
 
 ## Die gemeinsame Liste

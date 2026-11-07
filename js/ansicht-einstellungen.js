@@ -29,7 +29,8 @@
 import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal, leisteFaerben } from './kern.js';
 import { esc, tagKurz, menge } from './format.js';
 import { euro } from './kosten.js';
-import { ladeKi, speichereKi, loescheKi, kiAus } from './zugang.js';
+import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon } from './zugang.js';
+import { privatSchreiben, API } from './speicher.js';
 import { ANBIETER, anbieterVon } from './ki.js';
 import { tempoInfo, GRUPPEN_TEXT } from './tempo.js';
 import { preisJe } from './angebote.js';
@@ -164,7 +165,38 @@ ${kiFormHTML(false)}
   const a = ANBIETER[da];
   return `<p class="e-ki-da"><span class="e-ok">✓</span> Ein Schlüssel von <b>${esc(a.name)}</b> ist eingetragen (${esc(a.modell)})${da === 'gemini' ? ' – kostenlos' : ' – etwa 30 Cent pro Rezept vom Anthropic-Guthaben'}.</p>
 ${kiOffen ? kiFormHTML(true) : '<div class="zugang-btns"><button type="button" class="btn" data-act="e-ki-aendern">Schlüssel ändern</button><button type="button" class="btn btn-quiet" data-act="e-ki-weg">Entfernen</button></div>'}
+${kiTeilenHTML()}
 <p class="fine">${wofuer} ${bleibt}</p>`;
+}
+
+/*
+ * Für alle Handys der Liste: Der Schlüssel liegt dann als ki.json im Daten-Repo,
+ * die anderen Handys holen ihn sich beim nächsten Öffnen (app.js, zugang.js).
+ */
+let kiTeilenLaeuft = false;
+function kiTeilenHTML() {
+  if (!app.zugang?.token) return '';
+  const g = app.kiGeteilt;
+  const geteilt = !!g && kiAus(g.schluessel) === ladeKi();
+  if (kiTeilenLaeuft) return '<p class="fine e-ki-teilen">Wird gespeichert …</p>';
+  return geteilt
+    ? `<p class="fine e-ki-teilen"><span class="e-ok">✓</span> Freigegeben für alle Handys dieser Liste${g.von ? ` (von ${esc(g.von)})` : ''} – wer die Liste öffnet, bekommt ihn automatisch. <button type="button" class="linkbtn" data-act="e-ki-teilen-weg">Nicht mehr teilen</button></p>`
+    : `<p class="fine e-ki-teilen"><button type="button" class="linkbtn" data-act="e-ki-teilen">Für alle Handys dieser Liste freigeben</button> – die anderen holen ihn sich beim nächsten Öffnen selbst${g && kiAus(g.schluessel) ? ` (bisher geteilt: ein Schlüssel von ${esc(ANBIETER[anbieterVon(kiAus(g.schluessel))]?.name || 'der KI')}${g.von ? `, von ${esc(g.von)}` : ''})` : ''}.</p>`;
+}
+async function kiTeilen(schluessel) {
+  if (!app.zugang?.token || kiTeilenLaeuft) return;
+  kiTeilenLaeuft = true;
+  einstellungenZeichnen();
+  try {
+    const neu = { schluessel, von: app.name() || '', stand: new Date().toISOString() };
+    app.kiGeteilt = await privatSchreiben(KI_DATEI, () => neu, { token: app.zugang.token, api: lese('__api', null) || API, ort: ortVon(app.zugang), nachricht: schluessel ? `${app.name() || 'Jemand'}: KI-Schlüssel für alle Handys` : `${app.name() || 'Jemand'}: KI-Schlüssel nicht mehr geteilt` });
+    melde(schluessel ? 'Freigegeben – die anderen Handys holen sich den Schlüssel beim nächsten Öffnen.' : 'Nicht mehr geteilt – wer ihn schon hat, behält ihn.');
+  } catch (e) {
+    melde(e?.message || 'GitHub hat das nicht gespeichert.');
+  } finally {
+    kiTeilenLaeuft = false;
+    einstellungenZeichnen();
+  }
 }
 
 /* --------------------------------------------------- Gelernt und gemerkt */
@@ -289,6 +321,8 @@ export function klickEinstellungen(el) {
   switch (d.act) {
     case 'e-ki-aendern': kiOffen = true; kiFehler = ''; einstellungenZeichnen(); $('#e-ki-feld')?.focus(); return true;
     case 'e-ki-zu': kiOffen = false; kiFehler = ''; einstellungenZeichnen(); return true;
+    case 'e-ki-teilen': { const s = ladeKi(); if (s) kiTeilen(s); return true; }
+    case 'e-ki-teilen-weg': kiTeilen(''); return true;
     case 'e-ki-weg': {
       const alt = ladeKi();
       loescheKi();

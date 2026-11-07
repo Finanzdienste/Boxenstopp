@@ -9,7 +9,7 @@ import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
 import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude } from '../js/ki.js';
-import { kiAus } from '../js/zugang.js';
+import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
 import { euro, kostenMenge, kostenRezept, kostenListe } from '../js/kosten.js';
@@ -124,6 +124,16 @@ const sys = rumpf.system;
 check(/Kein Fisch/.test(sys) && /Kein Schweinefleisch/.test(sys) && /kein Putenhack/.test(sys) && /Hüttenkäse/.test(sys), 'die Regeln gehen mit: kein Fisch, kein Schwein, kein Putenhack, kein Hüttenkäse');
 check(sys.includes('443 kcal') && sys.includes('33 g Protein') && /Mise en place/.test(sys) && /Schale 2/.test(sys) && /\{id\}/.test(sys) && /nichts dazugekauft/.test(sys), 'Ziel, Mise en place, Schalen, Platzhalter und „nichts dazukaufen“ stehen im Auftrag');
 check(sys.includes('haehnchenbrust=Hähnchenbrustfilet') && !sys.includes('backpapier='), 'der Katalog geht mit (ohne Haushalt)');
+
+const GKEY_T = 'sk-ant-api03-GETEILTTESTTESTTESTTESTTEST_abc';
+// --- Geteilter Schlüssel (ki.json): wer ihn nimmt
+{
+  const G = { schluessel: GKEY_T, von: 'Tobi', stand: '2026-11-07T10:00:00.000Z' };
+  const genommen = (eigen) => kiUebernehmen(eigen, G)?.schluessel === GKEY_T;
+  check(genommen(null) && genommen({ schluessel: 'sk-ant-api03-ALTTESTTESTTESTTESTTESTTEST', stand: '', geteilt: false }) && genommen({ schluessel: 'sk-ant-api03-ALTTESTTESTTESTTESTTESTTEST', stand: '2026-11-01T00:00:00.000Z', geteilt: false }) && genommen({ schluessel: 'sk-ant-api03-ALTTESTTESTTESTTESTTESTTEST', stand: '2026-11-08T00:00:00.000Z', geteilt: true }), 'geteilt übernehmen: ohne eigenen, mit altem (ohne Stand oder älter) oder mit selbst geteiltem Schlüssel');
+  check(kiUebernehmen({ schluessel: 'sk-ant-api03-NEUTESTTESTTESTTESTTESTTEST', stand: '2026-11-08T00:00:00.000Z', geteilt: false }, G) === null && kiUebernehmen({ schluessel: GKEY_T, stand: G.stand, geteilt: true }, G) === null, 'ein eigener, neuerer bleibt; derselbe geteilte noch einmal: nichts zu tun');
+  check(kiUebernehmen({ schluessel: GKEY_T, stand: '2026-11-01T00:00:00.000Z', geteilt: false }, G)?.geteilt === true && kiUebernehmen(null, { schluessel: '', von: 'Tobi', stand: G.stand }) === null && kiUebernehmen(null, { schluessel: 'quatsch' }) === null && kiUebernehmen(null, null) === null, 'derselbe eigene wird als geteilt gemerkt; leere oder kaputte ki.json: nichts');
+}
 
 // --- Gemini: Schlüssel, Rumpf, Schema
 const GKEY = 'AQ.Ab8TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST00';

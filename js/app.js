@@ -16,7 +16,7 @@ import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten } from './k
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
 import { opZusammen, opPerson, opEinePerson } from './liste.js';
 import { preiseMitBons } from './kosten.js';
-import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe } from './zugang.js';
+import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe, KI_DATEI, geteiltenKiUebernehmen } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen, eingabeZugang } from './ansicht-liste.js';
@@ -45,6 +45,24 @@ const apiBasis = () => lese('__api', null) || API;
 const privateAngebote = () => {
   if (!app.zugang?.token || eigeneListe(app.zugang)) return;
   privatLesen('angebote-privat.json', { token: app.zugang.token, api: apiBasis() }).then((a) => { if (a) angeboteAutoSetzen(a, { privat: true }); });
+};
+/*
+ * Der für alle Handys der Liste freigegebene KI-Schlüssel (ki.json im Daten-Repo,
+ * zugang.js): holen und übernehmen, wenn dieses Handy keinen eigenen, neueren hat.
+ * Was drinsteht, merkt sich app.kiGeteilt für die Einstellungen.
+ */
+const geteiltenKiHolen = async () => {
+  if (!app.zugang?.token) return;
+  const k = await privatLesen(KI_DATEI, { token: app.zugang.token, api: apiBasis(), ort: ortVon(app.zugang) });
+  app.kiGeteilt = k && typeof k === 'object' && !Array.isArray(k) ? k : null;
+  if (!app.kiGeteilt) return;
+  if (geteiltenKiUebernehmen(app.kiGeteilt)) {
+    einstellungenZeichnen();
+    resteZeichnen();
+    melde(`KI-Schlüssel${app.kiGeteilt.von ? ` von ${app.kiGeteilt.von}` : ''} übernommen – für alle Handys dieser Liste.`);
+  } else {
+    einstellungenZeichnen();
+  }
 };
 const takt = () => Number(lese('__takt', 0)) || 8000;
 /** Der kurze Name eines Rezepts für die Commit-Nachricht („Chili auf die Liste“). */
@@ -147,6 +165,7 @@ app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
   lokalLoeschen();
   statusZeichnen();
   privateAngebote();
+  geteiltenKiHolen();
   return 'ok';
 };
 
@@ -154,6 +173,7 @@ app.trennen = () => {
   loescheZugang();
   githubVergessen();
   app.zugang = null;
+  app.kiGeteilt = null;
   app.listeDa = false;
   angebotePrivatVergessen();
   nimmSpeicher(lokal());
@@ -274,6 +294,7 @@ async function start() {
   const ausLink = link.token;
   // Ziel, Farbe und Namen der Liste schon vor dem ersten Zeichnen – wie das Gerät sie zuletzt kannte
   app.zugang = ladeZugang();
+  geteiltenKiHolen();
   app.stand = { ...app.stand, profil: bekanntesProfil(app.zugang ? ortVon(app.zugang) : null) };
   zielAnwenden();
   profilAnwenden();

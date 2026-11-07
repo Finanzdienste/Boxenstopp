@@ -171,6 +171,42 @@ check(await bis(() => !gh.liste()?.bons?.haehnchenbrust, 8000), 'Preise vom Bon 
 await ap.click('#toast button');
 check(await bis(() => gh.liste()?.bons?.haehnchenbrust?.length === 2 && gh.liste().bons.haehnchenbrust[1].eur === 8.99, 8000), 'Rückgängig: beide Bons wieder da, in der Reihenfolge');
 
+// --- KI-Schlüssel für alle Handys der Liste: freigeben → ki.json, ein anderes Handy übernimmt ihn, ein eigener neuerer bleibt
+const AKEY = 'sk-ant-api03-TESTTESTTESTTESTTESTTESTTESTTEST_abc';
+await ap.fill('#e-ki-feld', AKEY);
+await ap.press('#e-ki-feld', 'Enter');
+check(await bis(async () => (await ap.locator('#e-ki').innerText()).includes('Anthropic')) && (await ap.locator('#e-ki [data-act="e-ki-teilen"]').count()) === 1 && !(await p.locator('#e-ki [data-act="e-ki-teilen"]').count()), 'mit Zugang: „Für alle Handys dieser Liste freigeben“ – ohne Zugang (erstes Handy) nicht');
+await ap.click('#e-ki [data-act="e-ki-teilen"]');
+const kiDatei = () => { try { return JSON.parse(gh.zustand.dateien['ki.json']); } catch { return null; } };
+check(await bis(() => kiDatei()?.schluessel === AKEY, 8000) && kiDatei().von === 'Amy' && /^\d{4}-/.test(kiDatei().stand) && await bis(async () => (await ap.locator('#e-ki .e-ki-teilen').innerText()).includes('Freigegeben für alle Handys')) && (await ap.locator('#toast').innerText()).includes('Freigegeben'), 'freigegeben: ki.json mit Schlüssel, von Amy und Stand; „Freigegeben für alle Handys dieser Liste“');
+const c = await handy(browser, { attrappe: gh, adresse: `${APP_URL}#zugang=${encodeURIComponent(SCHLUESSEL)}` });
+const cp = c.page;
+await cp.fill('#z-name', 'Tobi');
+await cp.click('#z-los');
+check(await bis(async () => await cp.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel === k, AKEY), 8000) && await cp.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).geteilt === true) && await bis(async () => (await cp.locator('#toast').innerText()).includes('KI-Schlüssel von Amy übernommen')), 'das zweite Handy bekommt den Schlüssel beim Verbinden, als geteilt gemerkt, mit Hinweis');
+await cp.click('.tab[data-tab="einstellungen"]');
+check(await bis(async () => (await cp.locator('#e-ki').innerText()).includes('Anthropic')) && (await cp.locator('#e-ki .e-ki-teilen').innerText()).includes('Freigegeben für alle Handys dieser Liste (von Amy)'), 'dort steht: Anthropic, freigegeben von Amy');
+// Ein eigener, neuerer Schlüssel bleibt beim Neuladen – der geteilte ist älter
+await cp.click('#e-ki [data-act="e-ki-aendern"]');
+await cp.fill('#e-ki-feld', GKEY);
+await cp.press('#e-ki-feld', 'Enter');
+check(await bis(async () => (await cp.locator('#e-ki').innerText()).includes('Google')), 'eigener Google-Schlüssel eingetragen');
+await cp.reload({ waitUntil: 'load' });
+await cp.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await new Promise((f) => { setTimeout(f, 1500); });
+check(await cp.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel === k, GKEY), 'nach dem Neuladen: der eigene, neuere Schlüssel bleibt');
+// Nicht mehr teilen: ki.json ohne Schlüssel – wer ihn hat, behält ihn; ein neues Handy bekommt nichts
+await ap.click('#e-ki [data-act="e-ki-teilen-weg"]');
+check(await bis(() => kiDatei()?.schluessel === '', 8000) && await bis(async () => (await ap.locator('#e-ki .e-ki-teilen').innerText()).includes('freigeben')) && await ap.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel === k, AKEY), 'nicht mehr geteilt: ki.json leer, Amys Schlüssel bleibt auf ihrem Handy');
+const d = await handy(browser, { attrappe: gh, adresse: `${APP_URL}#zugang=${encodeURIComponent(SCHLUESSEL)}` });
+await d.page.fill('#z-name', 'Marielle');
+await d.page.click('#z-los');
+await bis(async () => (await d.page.locator('#sync-text').innerText()) === 'Geteilt', 8000);
+await new Promise((f) => { setTimeout(f, 1500); });
+check(await d.page.evaluate(() => localStorage.getItem('boxenstopp.ki.v1')) === null, 'ein neues Handy bekommt keinen Schlüssel mehr');
+await c.ctx.close();
+await d.ctx.close();
+
 // --- Breit: das Zahnrad oben, die Liste bleibt rechts
 const b = await handy(browser, { viewport: { width: 1280, height: 860 } });
 const bp = b.page;
