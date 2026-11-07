@@ -27,7 +27,7 @@
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { esc, tagKurz, heute, nfi } from './format.js';
 import { kiBereinigen, mengenAnpassen, alsRezept, MAX_GESPEICHERT } from './ki-rezept.js';
-import { rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, KI_FEHLER } from './ki.js';
+import { rumpfFuer, kiAnfragen, anbieterVon, KI_FEHLER } from './ki.js';
 import { ladeKi, speichereKi, loescheKi, kiAus, einladungsLink } from './zugang.js';
 import { opKiBehalten, opKiWeg, opTeil, opTeilWeg } from './liste.js';
 import { oeffneRezept, schliesseRezept, offenesRezept, rasterZeichnen, ic } from './ansicht-rezepte.js';
@@ -139,8 +139,6 @@ function loeschen(rid) {
 
 /* --------------------------------------------- Leiste im Rezept */
 
-const kostenText = (c) => (c === 0 ? 'kostenlos' : c < 1 ? 'unter 1 Cent' : `ca. ${Math.round(c)} Cent`);
-
 function kiLeiste(r) {
   if (r.katalog) return app.katalogLeiste(r);
   const v = r.ki?.von || {};
@@ -155,7 +153,6 @@ function kiLeiste(r) {
       ? `<p class="ki-anp"><b>Auf eure Ziele gerechnet:</b> ${r.ki.aenderungen.map((a) => `${esc(a.name)} ${nfi(a.vorher)} → ${nfi(a.nachher)} ${esc(a.einheit)}`).join(' · ')}</p>` : '';
   const warn = daneben ? `<p class="ki-warn">Mit diesen Zutaten trifft die Box das Ziel nicht ganz, siehe die Nährwerte oben.${r.ki.hinweis ? ` ${esc(r.ki.hinweis)}` : ''}</p>` : '';
   const hinweis = !daneben && r.ki.hinweis ? `<p class="ki-hinweis">${esc(r.ki.hinweis)}</p>` : '';
-  const kosten = !gespeichert && typeof v.kosten === 'number' ? ` · ${esc(v.modell || 'KI')}, ${kostenText(v.kosten)}` : '';
   const basis = r.ki.herkunft ? app.nachId[r.ki.herkunft] : null;
   const quelle = v.modus === 'angebote' ? 'Aus den Angeboten' : v.modus === 'wunsch' ? 'Neues Rezept' : 'Resteverwertung';
   const knoepfe = gespeichert
@@ -164,7 +161,7 @@ function kiLeiste(r) {
   const titel = r.ki.herkunft
     ? `<b>Angepasst</b>${basis ? ` von <button type="button" class="linkbtn ki-basis" data-open="${esc(basis.id)}">${esc(basis.short)}</button>` : ''}`
     : `<b>${quelle}</b>`;
-  return `<p class="ki-k">${titel}${wer}${wann} · ${gespeichert ? (istEigen() ? 'gespeichert' : 'für euch beide gespeichert') : 'noch nicht gespeichert'}${kosten}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>`;
+  return `<p class="ki-k">${titel}${wer}${wann} · ${gespeichert ? (istEigen() ? 'gespeichert' : 'für euch beide gespeichert') : 'noch nicht gespeichert'}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>`;
 }
 
 /* ------------------------------------------------------ Ansicht */
@@ -196,10 +193,9 @@ function karteZeichnen() {
 
 function einrichtenHTML(schluessel) {
   const link = schluessel ? (app.zugang ? linkFuerGeraet() : einladungsLink('', schluessel)) : '';
-  const da = anbieterVon(schluessel);
   return `<form class="ki-box" id="k-schluessel-form" novalidate>
 <h2>${istWunsch() ? 'KI einrichten' : 'Resteverwertung einrichten'}</h2>
-<p>Die App fragt Googles Gemini direkt vom Handy aus. Das ist kostenlos, ohne Kreditkarte – du brauchst nur einmal einen API-Schlüssel von Google:</p>
+<p>Dafür braucht die App einmal einen KI-Schlüssel, am einfachsten von Google, ohne Kreditkarte:</p>
 <ol class="ki-anleitung">
 <li>Auf <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> mit deinem Google-Konto anmelden.</li>
 <li><b>Create API key</b> (bei der Frage nach dem Projekt: ein neues anlegen lassen).</li>
@@ -209,9 +205,8 @@ function einrichtenHTML(schluessel) {
 <input id="k-schluessel" type="password" autocomplete="off" spellcheck="false" placeholder="AQ.… oder der Link vom anderen Handy">
 <p class="zugang-fehler" id="k-schluessel-fehler"${fehler && einrichten ? '' : ' hidden'}>${esc(einrichten ? fehler || '' : '')}</p>
 <div class="zugang-btns"><button type="submit" class="btn btn-primary">Speichern</button>${schluessel ? '<button type="button" class="btn btn-quiet" data-act="k-einrichten-zu">Abbrechen</button><button type="button" class="btn btn-quiet" data-act="k-schluessel-weg">Schlüssel entfernen</button>' : ''}</div>
-${da ? `<p class="fine">Eingetragen ist ein Schlüssel von ${esc(ANBIETER[da].name)} (${esc(ANBIETER[da].modell)}).</p>` : ''}
 <p class="fine">Gratis heißt bei Google: Was ihr schickt (Fotos, Zutaten), darf Google zum Verbessern seiner Produkte nutzen. Schick also nichts Privates mit aufs Foto. Der Schlüssel bleibt nur auf diesem Handy. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy (Einstellungen)${schluessel ? ' oder mit diesem: <button type="button" class="linkbtn" data-act="k-link">Link fürs zweite Handy kopieren</button>' : ''}.</p>
-<p class="fine">Wer lieber Claude nimmt (Fable 5.1, das stärkste Modell): Ein Anthropic-Schlüssel (sk-ant-…, platform.claude.com) geht hier genauso. Mit einem Claude-Abo (Max, Ultra) läuft das über dessen Monatsguthaben, sonst kostet ein Rezept etwa 30 Cent.</p>
+<p class="fine">Ein Schlüssel von Anthropic (sk-ant-…) geht hier genauso.</p>
 ${link ? `<input class="z-linkfeld" id="k-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>` : ''}
 </form>`;
 }
@@ -226,7 +221,7 @@ function wunschHTML() {
 <textarea id="k-text" rows="4" maxlength="2000" placeholder="z. B. Kürbissuppe – oder genauer: was Cremiges mit Hähnchen und Spinat, ohne Ofen, mit Reis">${esc(eingabe.text)}</textarea>
 <p class="zugang-fehler" id="k-fehler"${fehler ? '' : ' hidden'}>${esc(fehler || '')}</p>
 <button type="submit" class="btn btn-primary k-los" id="k-los">Rezept machen</button>
-<p class="fine">Dauert etwa eine Minute${anbieterVon(ladeKi()) === 'gemini' ? ' und ist kostenlos. Der Wunsch geht nur an Google' : ' und geht aufs Anthropic-Guthaben (etwa 30 Cent). Der Wunsch geht nur an Anthropic'}. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
+<p class="fine">Dauert etwa eine Minute. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
 </form>`;
 }
 
@@ -247,7 +242,7 @@ function formularHTML() {
 <input id="k-wunsch" type="text" maxlength="200" placeholder="z. B. was Asiatisches, ohne Ofen, mit Reis" value="${esc(eingabe.wuensche)}">
 <p class="zugang-fehler" id="k-fehler"${fehler ? '' : ' hidden'}>${esc(fehler || '')}</p>
 <button type="submit" class="btn btn-primary k-los" id="k-los">Rezept machen</button>
-<p class="fine">Dauert etwa eine Minute${anbieterVon(ladeKi()) === 'gemini' ? ' und ist kostenlos. Fotos und Text gehen nur an Google' : ' und geht aufs Anthropic-Guthaben (etwa 30 Cent). Fotos und Text gehen nur an Anthropic'}. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
+<p class="fine">Dauert etwa eine Minute. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
 </form>`;
 }
 
@@ -438,7 +433,7 @@ async function rezeptMachen() {
       modus: eingabe.modus,
       wer: fuerWen(),
     });
-    const { eingabe: roh, usage } = await kiAnfragen(rumpf, {
+    const { eingabe: roh } = await kiAnfragen(rumpf, {
       schluessel,
       api: lese('__kiapi', null) || '',
       signal: meinLauf.controller.signal,
@@ -460,7 +455,7 @@ async function rezeptMachen() {
       }
     }
     const id = `ki-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-    entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), kosten: kostenCent(usage, anbieter), modell: ANBIETER[anbieter].modell, modus: eingabe.modus } };
+    entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), modus: eingabe.modus } };
     entwurfMerken();
     kiAbgleichen();
     fertig();

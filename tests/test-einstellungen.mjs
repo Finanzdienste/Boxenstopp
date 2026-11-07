@@ -113,7 +113,7 @@ await p.press('#e-ki-feld', 'Enter');
 check((await p.locator('#e-ki .zugang-fehler').innerText()).includes('AQ.'), 'kein Schlüssel: Hinweis, wie er aussieht');
 await p.fill('#e-ki-feld', GKEY);
 await p.press('#e-ki-feld', 'Enter');
-check(await bis(async () => (await p.locator('#e-ki').innerText()).includes('Google')) && await p.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel === k, GKEY), 'gespeichert: „Ein Schlüssel von Google ist eingetragen“');
+check(await bis(async () => (await p.locator('#e-ki').innerText()).includes('Ein Schlüssel von Google ist eingetragen.')) && !/Cent|kostenlos|gemini-3/.test(await p.locator('#e-ki').innerText()) && await p.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel === k, GKEY), 'gespeichert: „Ein Schlüssel von Google ist eingetragen.“ – ohne Modell und Kosten');
 await p.click('#e-ki [data-act="e-ki-aendern"]');
 check(await p.locator('#e-ki-feld').isVisible() && await p.evaluate(() => document.activeElement?.id) === 'e-ki-feld', '„Schlüssel ändern“: das Feld');
 await p.click('#e-ki [data-act="e-ki-zu"]');

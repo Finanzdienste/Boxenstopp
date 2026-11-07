@@ -131,7 +131,7 @@ function formularHTML() {
 <textarea id="sk-text" rows="3" maxlength="30000" placeholder="Die Karte als Text einfügen${gemini ? ' – oder den Link zur Karte auf der Webseite' : ''}">${esc(text)}</textarea>
 <p class="zugang-fehler" id="sk-fehler"${fehler ? '' : ' hidden'}>${esc(fehler)}</p>
 <button type="submit" class="btn btn-primary k-los" id="sk-los">Passendes Gericht finden</button>
-<p class="fine">Dauert etwa eine halbe Minute${gemini ? ' und ist kostenlos. Die Karte geht nur an Google' : ' und geht aufs Anthropic-Guthaben (ein paar Cent). Die Karte geht nur an Anthropic'}; gemerkt wird das Ergebnis nur auf diesem Gerät.</p>
+<p class="fine">Dauert etwa eine halbe Minute; gemerkt wird das Ergebnis nur auf diesem Gerät.</p>
 ${ergebnis ? '<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="sk-letzte">Letztes Ergebnis zeigen</button></div>' : ''}
 </form>`;
 }
@@ -155,7 +155,7 @@ export function zeichnen() {
 <p class="d-desc">Fotografier die Karte oder nimm das PDF – die App sagt dir, welches Gericht ${wessenZiel()} Ziel pro Box (${esc(zielText(app.ziel))}) am nächsten kommt, und wie du bestellst, damit es noch besser passt.</p></div>`;
   let rumpf;
   if (!ladeKi()) {
-    rumpf = `<div class="ki-box"><h2>Erst einen KI-Schlüssel</h2><p>Die Karte liest Googles Gemini – kostenlos, du brauchst nur einmal einen API-Schlüssel.</p><div class="zugang-btns"><button type="button" class="btn btn-primary" data-act="sk-einrichten">Einrichten</button></div></div>`;
+    rumpf = `<div class="ki-box"><h2>Erst einen KI-Schlüssel</h2><p>Die Karte liest die KI – dafür braucht die App einmal einen KI-Schlüssel.</p><div class="zugang-btns"><button type="button" class="btn btn-primary" data-act="sk-einrichten">Einrichten</button></div></div>`;
   } else if (lauf) rumpf = laufHTML();
   else if (ergebnis && !neuEingeben) rumpf = ergebnisHTML();
   else rumpf = formularHTML();

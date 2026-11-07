@@ -302,7 +302,7 @@ await t.fill('#k-schluessel', KI_SCHLUESSEL);
 await t.click('#k-schluessel-form button[type="submit"]');
 check(await t.locator('#k-form').count() === 1, 'mit Schlüssel: das Formular');
 check(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel.startsWith('AQ.')), 'der KI-Schlüssel liegt im Speicher dieses Handys');
-check((await t.locator('#k-form .fine').first().innerText()).includes('kostenlos'), 'mit Google-Schlüssel: „kostenlos“');
+check((await t.locator('#k-form .fine').first().innerText()).startsWith('Dauert etwa eine Minute. ') && !/Google|Anthropic|Cent|kostenlos/.test(await t.locator('#k-form').innerText()), 'Unter dem Formular nur „Dauert etwa eine Minute“ – kein Anbieter, keine Kosten');
 
 // --- ohne Eingabe geht nichts
 await t.click('#k-los');
@@ -323,7 +323,7 @@ check(anfrage?.kopf['x-goog-api-key'] === KI_SCHLUESSEL && /\/v1beta\/interactio
 const teile = anfrage.rumpf.input;
 check(teile[0].type === 'image' && teile[0].mime_type === 'image/jpeg' && teile[0].data.length > 50 && /Portionen: 8/.test(teile.at(-1).text) && /Mediterranes/.test(teile.at(-1).text), 'mit Foto (als JPEG), Portionen und Wunsch');
 check(anfrage.rumpf.response_format?.schema?.type === 'object', 'und dem Schema für die Antwort');
-check((await t.locator('.ki-leiste').innerText()).includes('noch nicht gespeichert') && (await t.locator('.ki-leiste').innerText()).includes('gemini-3.8-flash, kostenlos'), 'Leiste: noch nicht gespeichert, Gemini, kostenlos');
+check((await t.locator('.ki-leiste').innerText()).includes('noch nicht gespeichert') && !/gemini-3\.8-flash|kostenlos|Cent/.test(await t.locator('.ki-leiste').innerText()), 'Leiste: noch nicht gespeichert – ohne Modell und Kosten');
 check((await t.locator('.ki-anp').innerText()).includes('Auf eure Ziele gerechnet'), 'Leiste: welche Mengen die App angepasst hat');
 const kcal = Number((await t.locator('.label .c-kcal .v').innerText()).replace(/\D/g, ''));
 check(Math.abs(kcal - 443) <= 10, `das Etikett zeigt eine Box nahe am Ziel (${kcal} kcal)`);

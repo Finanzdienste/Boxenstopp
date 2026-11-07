@@ -94,7 +94,7 @@ function kiHTML() {
 <textarea id="anp-ki-text" rows="2" maxlength="300" placeholder="z. B. fertige Teriyaki-Sauce statt selbst gemacht">${esc(ki.wunsch)}</textarea>
 <p class="zugang-fehler" id="anp-ki-fehler"${ki.fehler ? '' : ' hidden'}>${esc(ki.fehler || '')}</p>
 ${schluessel
-    ? `<div class="anp-ki-f"><button type="submit" class="btn btn-primary" id="anp-ki-los">Ändern lassen</button><span class="fine">${anbieterVon(schluessel) === 'gemini' ? 'Kostenlos, geht nur an Google' : 'Etwa 30 Cent vom Anthropic-Guthaben, geht nur an Anthropic'}. Dauert etwa eine Minute.</span></div>`
+    ? `<div class="anp-ki-f"><button type="submit" class="btn btn-primary" id="anp-ki-los">Ändern lassen</button><span class="fine">Dauert etwa eine Minute.</span></div>`
     : '<p class="fine">Dafür braucht die App den KI-Schlüssel aus der Resteverwertung. <button type="button" class="linkbtn" data-act="anp-ki-einrichten">Jetzt einrichten</button></p>'}
 </form>${ki.hinweis ? `<p class="ki-hinweis anp-ki-hinweis"><b>Die KI:</b> ${esc(ki.hinweis)}</p>` : ''}`;
 }

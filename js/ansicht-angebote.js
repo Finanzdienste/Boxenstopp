@@ -181,7 +181,7 @@ function lesenHTML() {
 <p class="zugang-fehler" id="a-fehler"${fehler ? '' : ' hidden'}>${esc(fehler || '')}</p>
 <button type="submit" class="btn btn-primary k-los" id="a-los">${fotos.length ? 'Angebote auslesen' : 'Eintragen'}</button>
 <p class="fine">${fotos.length
-    ? (schluessel ? `Die Bilder gehen nur an ${anbieterVon(schluessel) === 'gemini' ? 'Google (kostenlos)' : 'Anthropic'}. Dauert etwa eine halbe Minute.` : 'Fürs Auslesen der Bilder braucht die App den KI-Schlüssel aus der Resteverwertung. <button type="button" class="linkbtn" data-act="a-einrichten">Jetzt einrichten</button>')
+    ? (schluessel ? 'Dauert etwa eine halbe Minute.' : 'Fürs Auslesen der Bilder braucht die App den KI-Schlüssel aus der Resteverwertung. <button type="button" class="linkbtn" data-act="a-einrichten">Jetzt einrichten</button>')
     : 'Getippte Zeilen liest die App selbst: Laden vorn, Preis hinten, dazwischen das Produkt und die Packung.'}</p>
 </form>`;
 }
