@@ -633,6 +633,67 @@ html[data-tab="amy"] .km-nav .km-los{border:0;background:var(--amy-verlauf);colo
 .km-start .ic{width:18px;height:18px}
 .amy-btn.km-start{min-height:42px;padding:0 18px;font-size:15px}
 
+/* Die Waage im Kochmodus (kochmodus.js, wiegen.js): Bild der Zutat, Ist und Ziel groß, Balken, Tara und „Nehmen wir so“ */
+.km-waage-platz:empty{display:none}
+.km-waage{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px 18px;padding:14px 18px;border-radius:22px;border:1.5px solid var(--line);background:var(--surface);transition:border-color .2s,background-color .2s}
+.km-waage.is-ok,.km-waage.is-fertig{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 9%,var(--surface))}
+.km-waage.is-viel{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 7%,var(--surface))}
+.km-waage.is-aus{grid-template-columns:auto minmax(0,1fr);gap:10px;padding:10px 14px;color:var(--muted);font-size:15px;line-height:1.35}
+.km-waage.is-aus .ic{width:22px;height:22px;flex:none}
+.km-waage[data-art="anzeige"]{grid-template-columns:auto minmax(0,1fr)}
+.km-waage[data-art="anzeige"]>.ic{width:36px;height:36px;color:var(--muted)}
+.km-wg-bild{width:clamp(56px,8vw,96px);height:auto;flex:none}
+.km-wg-mitte{display:grid;gap:5px;min-width:0}
+.km-wg-name{font:650 clamp(16px,2vw,20px)/1.2 var(--f-body)}
+.km-wg-name small{font-weight:500;color:var(--muted)}
+.km-wg-g{font:600 clamp(30px,5vw,56px)/1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.km-wg-g b{font-weight:600}
+.km-wg-g small{font:500 .4em/1 var(--f-mono);color:var(--muted)}
+.is-ok .km-wg-g b,.is-fertig .km-wg-g b{color:var(--ok)}
+.is-viel .km-wg-g b{color:var(--danger)}
+.km-wg-balken{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.km-wg-balken i{display:block;height:100%;border-radius:inherit;background:var(--accent);transition:width .15s linear}
+.is-ok .km-wg-balken i,.is-fertig .km-wg-balken i{background:var(--ok)}
+.is-viel .km-wg-balken i{background:var(--danger)}
+.km-wg-hinweis{display:inline-flex;align-items:center;gap:6px;font-size:clamp(15px,1.8vw,19px);line-height:1.3;color:var(--muted)}
+.is-ok .km-wg-hinweis,.is-fertig .km-wg-hinweis{color:var(--ok);font-weight:650}
+.is-viel .km-wg-hinweis{color:var(--danger);font-weight:650}
+.km-wg-hinweis .ic{width:20px;height:20px;flex:none}
+.km-wg-boxen{display:flex;flex-wrap:wrap;gap:4px 12px;font:500 14px/1.3 var(--f-mono);color:var(--muted)}
+.km-wg-knoepfe{display:grid;gap:8px}
+.km-wg-knoepfe:empty{display:none}
+.km-wg-btn{min-height:52px;padding:0 18px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:650 17px/1 var(--f-body);white-space:nowrap}
+.km-wg-so{border-color:var(--accent);color:var(--accent)}
+.km-wg-btn[disabled]{opacity:.4}
+@media (max-width:640px){
+  .km-waage{grid-template-columns:auto minmax(0,1fr);padding:12px 14px}
+  .km-wg-g{font-size:clamp(22px,7vw,34px);white-space:nowrap}
+  .km-wg-knoepfe{grid-column:1 / -1;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+  .km-wg-btn{min-height:46px;padding:0 12px;font-size:15px}
+}
+
+/* Unter dem Portionsrechner: was die Waage gerade zeigt, und was sie gemessen hat (ansicht-rezepte.js) */
+.calc-waage{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:8px;font-size:14px;color:var(--muted)}
+.calc-waage b{font:600 16px/1 var(--f-mono);color:var(--ink)}
+.calc-waage .linkbtn{min-height:32px;padding:0;font-size:13.5px}
+.gewogen{margin-top:10px;padding:12px 14px;border-radius:14px;background:var(--surface-2);font-size:14px;line-height:1.5}
+.gewogen p{margin:0 0 6px}
+.gewogen p:last-child{margin:0}
+.gewogen-box{display:inline-block;margin-right:4px;font:500 13.5px/1.6 var(--f-mono);white-space:nowrap}
+.gewogen-box small{color:var(--muted)}
+.gewogen .linkbtn{min-height:0;padding:0;font-size:12.5px}
+
+/* Einstellungen → Waage */
+.e-waage-form{display:grid;gap:6px}
+.e-waage-form label{font-weight:650;font-size:13.5px;color:var(--muted);margin-top:4px}
+.e-waage-form input{height:48px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line-strong);background:var(--bg);font:500 16px/1 var(--f-body);color:var(--ink);min-width:0;width:100%}
+.e-waage-form input:focus{outline:none;border-color:var(--accent)}
+.e-waage-form .zugang-btns{margin-top:6px}
+.e-waage-stand:empty{display:none}
+.e-waage-g{font:600 16px/1 var(--f-mono)}
+.e-waage-aus{color:var(--danger)}
+.btn.is-an{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
 /* Eine Zeile aufklappen: in welche Abteilung, dasselbe wie … */
 .item-main{display:block;min-width:0;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .item-main:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}

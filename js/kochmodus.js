@@ -12,13 +12,24 @@
  * Für feste Rezepte und Amys gleich: Wer ihn öffnet, gibt Text, Minuten und
  * das Abhaken mit (ansicht-rezepte.js, ansicht-amy.js). Die Haken sind
  * dieselben wie in der Liste (kochstand.js) – auch auf dem anderen Gerät.
+ *
+ * Mit der Waage (waage.js, wiegen.js): Wer ihn öffnet, kann wiegen(i) mitgeben
+ * – welcher Schritt gewogen wird. Dann steht unter dem Text die Zutat mit
+ * Bild, Ist und Ziel in Gramm, ein Balken, „Tara“ und „Nehmen wir so“; passt
+ * die Menge, hakt sich der Schritt von selbst ab (mit einem Piep) und es geht
+ * weiter. Beim Portionieren: Topf leer und voll übernehmen, dann Box für Box.
+ * Ist die Waage aus, steht das klein da, und der Schritt bleibt wie immer von
+ * Hand abhakbar.
  */
 import { $ } from './kern.js';
-import { esc } from './format.js';
+import { esc, nfi } from './format.js';
 import { schritteVon } from './kochstand.js';
 import { alleTimer, timerText, timerStoppen } from './timer.js';
+import { waageStand, waageBeobachten } from './waage.js';
+import { Wiegung } from './wiegen.js';
+import { bildPfad } from './bilder.js';
 
-let km = null; // { x, i, text, minuten, umschalten, timerKnopf, timerUmschalten, beimSchliessen, sperre, wischX }
+let km = null; // { x, i, text, minuten, umschalten, timerKnopf, timerUmschalten, beimSchliessen, sperre, wischX, wiegen, topf, gewogen, w, wSchritt, abmelden, audio }
 
 const ZU = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 const LINKS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
@@ -58,6 +69,188 @@ function timerHTML() {
   }).join('');
 }
 
+/* ----------------------------------------------------------------- Waage */
+
+const WAAGE_IC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9.5a2.5 2.5 0 0 1 2.5-2.5h7A2.5 2.5 0 0 1 18 9.5V20"/><path d="M9 7V5.5a3 3 0 0 1 6 0V7M9 13.5h6"/></svg>';
+const gramm = (x) => `${nfi(x)} g`;
+
+/** Der Plan des aktuellen Schritts – null, wenn die Waage hier nichts zu tun hat oder nicht eingerichtet ist. */
+function wiegePlan() {
+  if (!km?.wiegen || !waageStand().eingerichtet) return null;
+  try { return km.wiegen(km.i) || null; } catch { return null; }
+}
+
+/** Zu jedem Schritt eine frische Wiegung; dieselbe, solange man auf dem Schritt bleibt. */
+function wiegungFuer(plan) {
+  if (!plan) { km.w = null; km.wSchritt = -1; return null; }
+  if (km.w && km.wSchritt === km.i) return km.w;
+  const t = km.topf?.() || {};
+  const n = plan.n || t.n || 8;
+  const proBox = Number.isFinite(t.leer) && Number.isFinite(t.voll) && t.voll > t.leer ? (t.voll - t.leer) / n : null;
+  km.w = new Wiegung(plan, { proBox, leer: t.leer, n });
+  km.wSchritt = km.i;
+  km.wFertig = false;
+  km.wBoxen = 0;
+  const s = waageStand();
+  if (s.g !== null && s.da) km.w.lesen({ g: s.g, at: s.at });
+  return km.w;
+}
+
+function waageHTML(plan, w) {
+  const s = waageStand();
+  const st = w?.stand;
+  if (!s.da) return `<div class="km-waage is-aus">${WAAGE_IC}<span>${s.verbunden ? 'Waage aus – oder nicht im WLAN. Von Hand abhaken geht wie immer.' : s.fehler || 'Waage: verbinde …'}</span></div>`;
+  if (!st) return '';
+  const bild = (name) => `<img class="km-wg-bild" src="${bildPfad(name)}" alt="" width="96" height="96" decoding="async">`;
+  if (plan.art === 'zutat') {
+    const klasse = st.fertig ? ' is-fertig' : st.zuViel ? ' is-viel' : st.ist >= st.von && st.ist <= st.bis ? ' is-ok' : '';
+    let hinweis;
+    if (st.fertig) hinweis = `${HAKEN}${gramm(st.angenommen ?? st.ist)} – passt`;
+    else if (st.frage) hinweis = 'Gerade die Schale draufgestellt? Dann „Tara“';
+    else if (st.hinweis) hinweis = st.hinweis;
+    else if (st.zuViel) hinweis = `+${gramm(st.zuViel)} zu viel – etwas raus, oder „Nehmen wir so“`;
+    else if (st.ist >= st.von) hinweis = 'passt – einen Moment still halten';
+    else if (!st.tara) hinweis = 'Waage pendelt sich ein …';
+    else hinweis = `noch ${gramm(st.fehlt)}`;
+    return `<div class="km-waage${klasse}" data-art="zutat">${bild(plan.bild)}
+<div class="km-wg-mitte"><span class="km-wg-name">${esc(plan.name)}${plan.schale ? ` <small>→ Schale ${plan.schale}</small>` : ''}</span>
+<span class="km-wg-g"><b>${nfi(st.ist)}</b> / ${plan.ca ? 'ca. ' : ''}${gramm(plan.ziel)}</span>
+<div class="km-wg-balken" role="progressbar" aria-valuemin="0" aria-valuemax="${plan.ziel}" aria-valuenow="${st.ist}"><i style="width:${(st.anteil * 100).toFixed(1)}%"></i></div>
+<span class="km-wg-hinweis">${hinweis}</span></div>
+<div class="km-wg-knoepfe"><button type="button" class="km-wg-btn" data-km="tara">Tara</button>${!st.fertig && st.ist > 0 ? '<button type="button" class="km-wg-btn km-wg-so" data-km="so">Nehmen wir so</button>' : ''}</div></div>`;
+  }
+  if (plan.art === 'leer' || plan.art === 'voll') {
+    const was = plan.art === 'leer' ? 'Den leeren Topf auf die Waage' : 'Den Topf mit dem Essen auf die Waage';
+    return `<div class="km-waage${st.bereit ? ' is-ok' : ''}" data-art="${plan.art}">${bild('pot-of-food')}
+<div class="km-wg-mitte"><span class="km-wg-name">${plan.art === 'leer' ? 'Gefäß leer' : 'Mit Essen'}</span>
+<span class="km-wg-g"><b>${nfi(st.ist)}</b> g</span>
+<span class="km-wg-hinweis">${st.bereit ? 'steht – übernehmen?' : was}</span></div>
+<div class="km-wg-knoepfe"><button type="button" class="km-wg-btn km-wg-so" data-km="uebernehmen"${st.bereit ? '' : ' disabled'}>Übernehmen</button></div></div>`;
+  }
+  if (plan.art === 'boxen') {
+    if (!st.proBox) return `<div class="km-waage is-aus">${WAAGE_IC}<span>Erst den Topf leer und mit dem Essen wiegen (die Schritte davor) – dann zählt die Waage Box für Box.</span></div>`;
+    const laeuft = st.modus !== null && st.warten === null && !st.fertig;
+    const klasse = st.fertig ? ' is-fertig' : st.zuViel ? ' is-viel' : laeuft && st.ist >= st.von && st.ist <= st.bis ? ' is-ok' : '';
+    let hinweis;
+    if (st.fertig) hinweis = `${HAKEN}alle ${st.n} Boxen voll`;
+    else if (st.modus === null) hinweis = 'Den Topf auf die Waage (die Boxen daneben füllen) – oder eine leere Box drauf';
+    else if (st.warten === 'box') hinweis = 'Die nächste leere Box auf die Waage';
+    else if (st.warten === 'weg') hinweis = 'Box runter – dann die nächste drauf';
+    else if (st.zuViel) hinweis = `+${gramm(st.zuViel)} zu viel – etwas zurück, oder „Nehmen wir so“`;
+    else if (st.ist >= st.von) hinweis = 'passt – einen Moment still halten';
+    else hinweis = `noch ${gramm(st.fehlt)}${st.box === st.n && st.modus === 'topf' ? ' – die letzte Box bekommt den Rest' : ''}`;
+    const liste = st.boxen.length ? `<span class="km-wg-boxen">${st.boxen.map((x, k) => `<span>${k + 1}: ${gramm(x)}</span>`).join('')}</span>` : '';
+    return `<div class="km-waage${klasse}" data-art="boxen">${bild('bento-box')}
+<div class="km-wg-mitte"><span class="km-wg-name">Box ${st.box} von ${st.n}${st.modus ? ` <small>${st.modus === 'topf' ? 'Topf auf der Waage' : 'Box auf der Waage'}</small>` : ''}</span>
+<span class="km-wg-g"><b>${nfi(laeuft || st.fertig ? st.ist : 0)}</b> / ${gramm(st.proBox)}</span>
+<div class="km-wg-balken" role="progressbar" aria-valuemin="0" aria-valuemax="${st.proBox}" aria-valuenow="${st.ist}"><i style="width:${(st.anteil * 100).toFixed(1)}%"></i></div>
+<span class="km-wg-hinweis">${hinweis}</span>${liste}</div>
+<div class="km-wg-knoepfe">${laeuft && st.ist > 0 ? '<button type="button" class="km-wg-btn km-wg-so" data-km="so">Nehmen wir so</button>' : ''}</div></div>`;
+  }
+  return `<div class="km-waage" data-art="anzeige">${WAAGE_IC}
+<div class="km-wg-mitte"><span class="km-wg-g"><b>${nfi(st.ist)}</b> g${plan.n > 1 ? ` <small>÷ ${plan.n} = ${gramm(st.proBox)} pro Box</small>` : ''}</span></div></div>`;
+}
+
+/**
+ * Der Ton fürs Passen: Safari auf dem iPad lässt Audio nur zu, was mit einem
+ * Tipp angefangen hat – darum entsteht der AudioContext beim Öffnen des
+ * Kochmodus (ein Klick) und spielt gleich einen stummen Moment.
+ */
+function audioAn() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC || km.audio) return;
+    const ac = new AC();
+    km.audio = ac;
+    const o = ac.createOscillator();
+    const v = ac.createGain();
+    v.gain.value = 0.0001;
+    o.connect(v).connect(ac.destination);
+    o.start();
+    o.stop(ac.currentTime + 0.05);
+  } catch { km.audio = null; }
+}
+
+/** Ein kurzer Piep, wenn es passt (zwei beim Portionieren). */
+function piep(doppelt = false) {
+  try {
+    if (!km.audio) audioAn();
+    const ac = km.audio;
+    if (!ac) return;
+    if (ac.state === 'suspended') ac.resume().catch(() => {});
+    const ton = (ab, f) => {
+      const o = ac.createOscillator();
+      const v = ac.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      v.gain.setValueAtTime(0.0001, ac.currentTime + ab);
+      v.gain.exponentialRampToValueAtTime(0.25, ac.currentTime + ab + 0.01);
+      v.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + ab + 0.16);
+      o.connect(v).connect(ac.destination);
+      o.start(ac.currentTime + ab);
+      o.stop(ac.currentTime + ab + 0.18);
+    };
+    ton(0, 880);
+    if (doppelt) ton(0.2, 1175);
+  } catch { /* dann eben still */ }
+  try { navigator.vibrate?.(doppelt ? [60, 60, 60] : 60); } catch { /* egal */ }
+}
+
+/** Nur das Waagen-Stück neu zeichnen – bei jedem Wert der Waage. */
+function waageZeichnen() {
+  if (!km) return;
+  const el = $('#km-waage');
+  if (!el) return;
+  const plan = wiegePlan();
+  const h = plan ? waageHTML(plan, wiegungFuer(plan)) : '';
+  if (el.innerHTML !== h) el.innerHTML = h;
+}
+
+/** Ein Wert von der Waage: in die Wiegung des Schritts, fertig → abhaken und weiter. */
+function waageWert(s) {
+  if (!km) return;
+  const plan = wiegePlan();
+  const w = plan ? wiegungFuer(plan) : null;
+  if (w && s.da && s.g !== null) {
+    const st = w.lesen({ g: s.g, at: s.at });
+    if (st.fertig && !km.wFertig) {
+      km.wFertig = true;
+      if (plan.art === 'zutat') km.gewogen?.(km.i, plan, { k: plan.k, name: plan.name, g: st.angenommen ?? st.ist, ziel: plan.ziel });
+      if (plan.art === 'boxen') km.gewogen?.(km.i, plan, { boxen: st.boxen });
+      piep(plan.art === 'boxen');
+      waageZeichnen();
+      if (!schritteVon(km.x.id).has(km.i)) setTimeout(() => { if (km && km.wSchritt === km.i) erledigt(); }, 700);
+      return;
+    }
+    if (plan.art === 'boxen' && st.boxen.length > (km.wBoxen || 0)) { km.wBoxen = st.boxen.length; if (!st.fertig) piep(); }
+  }
+  waageZeichnen();
+}
+
+/** Tara, „Nehmen wir so“, Übernehmen – die Knöpfe im Waagen-Stück. */
+function waageKlick(was) {
+  const plan = wiegePlan();
+  const w = plan ? wiegungFuer(plan) : null;
+  if (!w) return;
+  if (was === 'tara') { w.tara(); waageZeichnen(); return; }
+  if (was === 'so') {
+    const g0 = w.so();
+    const st = w.stand;
+    if (plan.art === 'zutat') { km.wFertig = true; km.gewogen?.(km.i, plan, { k: plan.k, name: plan.name, g: g0, ziel: plan.ziel }); waageZeichnen(); if (!schritteVon(km.x.id).has(km.i)) erledigt(); return; }
+    if (plan.art === 'boxen') {
+      km.wBoxen = st.boxen.length;
+      if (st.fertig) { km.wFertig = true; km.gewogen?.(km.i, plan, { boxen: st.boxen }); piep(true); waageZeichnen(); if (!schritteVon(km.x.id).has(km.i)) erledigt(); } else waageZeichnen();
+    }
+    return;
+  }
+  if (was === 'uebernehmen' && (plan.art === 'leer' || plan.art === 'voll') && w.stand.bereit) {
+    km.wFertig = true;
+    km.gewogen?.(km.i, plan, { [plan.art]: w.stand.ist });
+    piep();
+    if (!schritteVon(km.x.id).has(km.i)) erledigt(); else waageZeichnen();
+  }
+}
+
 function zeichnen() {
   const dlg = $('#km-inhalt');
   if (!dlg || !km) return;
@@ -84,6 +277,7 @@ function zeichnen() {
 ${s?.neben ? '<span class="km-k">währenddessen</span>' : ''}${s?.entfaellt ? '<span class="km-k">entfällt – Zutat weggelassen</span>' : ''}
 <p class="km-text">${s ? km.text(s, km.i) : ''}</p>
 ${s?.liste?.length ? `<ul class="km-liste">${s.liste.map((z) => `<li>${km.text({ d: z }, km.i)}</li>`).join('')}</ul>` : ''}
+<div class="km-waage-platz" id="km-waage">${(() => { const plan = wiegePlan(); return plan ? waageHTML(plan, wiegungFuer(plan)) : ''; })()}</div>
 <div class="km-unten">${min ? `<span class="km-min">ca. ${min} Min.</span>` : ''}${timer ? `<span class="km-timerknopf" id="km-timerknopf">${timer.replace('data-timer=', 'data-km-timer=')}</span>` : ''}${istFertig ? `<span class="km-ok">${HAKEN}abgehakt</span>` : ''}</div>
 </section>
 <nav class="km-nav">
@@ -111,8 +305,10 @@ export function kochmodusTimerZeichnen() {
 
 /**
  * Öffnen. o = { rezept, text(s, i) → HTML, minuten(i) → Zahl, umschalten(i, an),
- * timerKnopf, timerUmschalten (ansicht-rezepte.js), beimSchliessen }.
- * Ohne start beginnt er beim ersten offenen Schritt.
+ * timerKnopf, timerUmschalten (ansicht-rezepte.js), beimSchliessen,
+ * wiegen(i) → Plan aus wiegen.js oder null (nur mit Waage), topf() → { leer,
+ * voll, n } aus dem Portionsrechner, gewogen(i, plan, ergebnis) – was die
+ * Waage gemessen hat }. Ohne start beginnt er beim ersten offenen Schritt.
  */
 export function kochmodusOeffnen(o) {
   const dlg = $('#kochmodus');
@@ -120,7 +316,8 @@ export function kochmodusOeffnen(o) {
   const liste = alle(o.rezept);
   const fertig = schritteVon(o.rezept.id);
   const erster = liste.findIndex((_, k) => !fertig.has(k));
-  km = { ...o, x: o.rezept, i: Number.isInteger(o.start) ? o.start : Math.max(0, erster), sperre: null, wischX: null };
+  km = { ...o, x: o.rezept, i: Number.isInteger(o.start) ? o.start : Math.max(0, erster), sperre: null, wischX: null, w: null, wSchritt: -1, wFertig: false, wBoxen: 0, abmelden: null, audio: null };
+  if (o.wiegen) { km.abmelden = waageBeobachten(waageWert); if (waageStand().eingerichtet) audioAn(); }
   dlg.innerHTML = '<div class="km-rahmen" id="km-inhalt"></div>';
   // Die Meldung unten muss mit in den Kochmodus (er liegt über allem)
   const toast = $('#toast');
@@ -143,6 +340,8 @@ function aufraeumen() {
   if (!km) return;
   const x = km;
   km = null;
+  x.abmelden?.();
+  x.audio?.close?.().catch?.(() => {});
   x.sperre?.release?.().catch(() => {});
   document.removeEventListener('visibilitychange', beimZurueckkommen);
   document.documentElement.classList.remove('km-offen');
@@ -182,6 +381,7 @@ export function klickKochmodus(el) {
     case 'zurueck': km.i -= 1; zeichnen(); return true;
     case 'weiter': km.i += 1; zeichnen(); return true;
     case 'erledigt': erledigt(); return true;
+    case 'tara': case 'so': case 'uebernehmen': waageKlick(d.km); return true;
     default: return true;
   }
 }

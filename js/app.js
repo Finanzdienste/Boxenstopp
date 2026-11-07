@@ -28,7 +28,8 @@ import { amyZeichnen, amyVorbereiten, amyStart, amyZuSchritt, amyTimerZeichnen, 
 import { tabletPruefen, klickTablet } from './ansicht-tablet.js';
 import { kochstandAbgleichen, kochstandStart } from './kochstand.js';
 import { klickPush, aenderungPush, pushAnmelden, pushZeichnen, pushHinweisPruefen } from './ansicht-push.js';
-import { einstellungenStart, einstellungenZeichnen, klickEinstellungen, aenderungEinstellungen, absendenEinstellungen, tabbarAnpassen } from './ansicht-einstellungen.js';
+import { einstellungenStart, einstellungenZeichnen, klickEinstellungen, aenderungEinstellungen, absendenEinstellungen, tabbarAnpassen, waageTestAus } from './ansicht-einstellungen.js';
+import { waageStart, waageNeu } from './waage.js';
 import { kochmodusAnmelden, kochmodusNeu, kochmodusTimerZeichnen, klickKochmodus, tasteKochmodus, wischStart, wischEnde } from './kochmodus.js';
 import { haushaltStart, haushaltZeichnen, haushaltGezeigt, klickHaushalt, aenderungHaushalt, absendenHaushalt, tasteHaushalt } from './ansicht-haushalt.js';
 import { todoHolen, klickTodo, absendenTodo } from './ansicht-todo.js';
@@ -119,6 +120,8 @@ function beiAenderung(stand) {
   app.preise = preiseMitBons(app.richtpreise, stand.bons, app.naehrwerte);
   // Hat dieselbe Person auf einem anderen Gerät weitergekocht? Dann gilt hier ihr Stand (kochstand.js)
   const kochNeu = kochstandAbgleichen(stand);
+  // Die Waage der Liste (profil.waage) kann sich geändert haben – neu verbinden, wenn gerade jemand zuhört
+  waageNeu();
   kiAbgleichen();
   amyVorbereiten();
   listeZeichnen();
@@ -159,7 +162,7 @@ app.listeNeu = () => listeZeichnen();
 app.tempoNeu = () => { amyZeichnen(); einstellungenZeichnen(); };
 // In die Einstellungen: dort frisch zeichnen und Push nachsehen; die Leiste unten passt ihre Beschriftungen an
 reiterBeobachten((t) => {
-  if (t === 'einstellungen') { einstellungenZeichnen(); pushZeichnen(); todoHolen(); }
+  if (t === 'einstellungen') { einstellungenZeichnen(); pushZeichnen(); todoHolen(); } else waageTestAus();
   if (t === 'haushalt') haushaltGezeigt();
   tabbarAnpassen();
 });
@@ -342,6 +345,7 @@ async function start() {
   });
   kochstandStart();
   kochmodusAnmelden();
+  waageStart();
   pushAnmelden();
   filterZeichnen();
   rasterZeichnen();

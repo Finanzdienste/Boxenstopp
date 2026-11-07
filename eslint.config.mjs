@@ -52,6 +52,8 @@ export default [
         AbortController: 'readonly',
         // Timer: Benachrichtigung am Ende.
         Notification: 'readonly',
+        // Waage: die Verbindung zu Supabase Realtime.
+        WebSocket: 'readonly',
       },
     },
     rules: {
