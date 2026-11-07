@@ -10,7 +10,8 @@
  *             mit „AQ.“ aus (Auth Keys); die älteren „AIza“ gehen weiter.
  *   sk-ant-…  Anthropic, Messages-API (claude-fable-5-1, das stärkste Modell),
  *             etwa 30 Cent pro Rezept vom Guthaben der Console – bei einem
- *             Claude-Max-Abo aus dessen Monatsguthaben (100 $ im Monat), sonst
+ *             Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $
+ *             im Monat), sonst
  *             gekauft. Der Kopf „anthropic-dangerous-direct-browser-access“
  *             erlaubt den Aufruf aus dem Browser, wenn – wie hier – jeder
  *             seinen eigenen Schlüssel mitbringt.

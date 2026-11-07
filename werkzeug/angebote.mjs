@@ -30,7 +30,7 @@
  *             eine KI aus, sechs je Anfrage – dafür braucht der Lauf einen
  *             Schlüssel (bei GitHub als Secret): ANTHROPIC_API_KEY für Claude
  *             (claude-fable-5-1, drei Anfragen nebeneinander, bei Überlastung
- *             Sonnet 5.5; mit einem Claude-Max-Abo aus dessen Monatsguthaben,
+ *             Sonnet 5.5; mit einem Claude-Abo (Max, Ultra) aus dessen Monatsguthaben,
  *             etwa 3 $ je Prospekt) oder GEMINI_KEY für Gemini (kostenlos,
  *             eine Anfrage nach der anderen, reihum durch die Modelle). Sind
  *             beide da, nimmt der Lauf Claude. Ohne Schlüssel fällt Lidl aus,
