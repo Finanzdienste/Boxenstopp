@@ -304,6 +304,7 @@ export function beschreibung(vorher, nachher, name = () => '') {
   if (JSON.stringify(v.profil?.ziel || null) !== JSON.stringify(n.profil?.ziel || null)) teile.push('Ziel pro Box geändert');
   const boxen = n.profil?.boxen || BOXEN_STANDARD;
   if (boxen !== (v.profil?.boxen || BOXEN_STANDARD)) teile.push(boxen === 1 ? '1 Box pro Rezept' : `${boxen} Boxen pro Rezept`);
+  if (JSON.stringify(v.profil?.waage || null) !== JSON.stringify(n.profil?.waage || null)) teile.push(n.profil?.waage ? 'Waage eingerichtet' : 'Waage entfernt');
   if (Object.keys(n.leute || {}).some((k) => !v.leute?.[k])) teile.push('zum ersten Mal dabei');
   if (umbenannt.length) teile.push(`${aufzaehlen(umbenannt)} heißt jetzt ${n.profil.person}`);
   if (!teile.length) {
@@ -486,19 +487,42 @@ export function profilBereinigen(x) {
   if (z) p.ziel = { ...z, by: text(x.ziel.by, 40), at: text(x.ziel.at, 40) || '' };
   const b = boxenBereinigen(x.boxen);
   if (b) p.boxen = b;
+  const w = waageBereinigen(x.waage);
+  if (w) p.waage = { ...w, by: text(x.waage.by, 40), at: text(x.waage.at, 40) || '' };
   return p;
 }
 
 /**
- * Eine ältere App-Fassung kennt profil.boxen nicht und lässt es beim
- * Schreiben weg (profilBereinigen behält nur, was sie kennt). Gesetzt wird
- * es immer ausdrücklich, auch 8 – fehlt es, wo dieses Handy es kannte, kommt
- * es wieder dazu (speicher.js).
+ * Die Waage der Liste (waage.js, Einstellungen → Waage): die Adresse des
+ * Supabase-Projekts, der anon-Schlüssel (darf jeder sehen) und der Kanal,
+ * auf dem die Waage sendet. Ohne Adresse oder Schlüssel: keine Waage.
+ */
+const WAAGE_URL = /^https:\/\/[\w.-]{3,120}$/;
+const WAAGE_KEY = /^[\w.-]{20,600}$/;
+const WAAGE_KANAL = /^[\w-]{1,40}$/;
+export function waageBereinigen(x) {
+  if (!istObj(x)) return null;
+  const url = String(x.url || '').trim().replace(/\/+$/, '');
+  const key = String(x.key || '').trim();
+  const kanal = String(x.kanal || 'waage').trim() || 'waage';
+  if (!WAAGE_URL.test(url) || !WAAGE_KEY.test(key) || !WAAGE_KANAL.test(kanal)) return null;
+  return { url, key, kanal };
+}
+
+/**
+ * Eine ältere App-Fassung kennt profil.boxen (oder profil.waage) nicht und
+ * lässt es beim Schreiben weg (profilBereinigen behält nur, was sie kennt).
+ * Gesetzt wird es immer ausdrücklich, auch 8 – fehlt es, wo dieses Handy es
+ * kannte, kommt es wieder dazu (speicher.js).
  */
 export function profilNachtrag(roh, stand, bekannt) {
+  if (!istObj(roh) || !istObj(roh.profil)) return [];
+  const ops = [];
   const b = boxenBereinigen(bekannt?.profil?.boxen);
-  if (!b || !istObj(roh) || !istObj(roh.profil) || 'boxen' in roh.profil || stand?.profil?.boxen) return [];
-  return [opProfil({ boxen: b })];
+  if (b && !('boxen' in roh.profil) && !stand?.profil?.boxen) ops.push(opProfil({ boxen: b }));
+  const w = waageBereinigen(bekannt?.profil?.waage);
+  if (w && !('waage' in roh.profil) && !stand?.profil?.waage) ops.push(opProfil({ waage: w }, bekannt.profil.waage.by || null));
+  return ops;
 }
 
 /* ------------------------------------------------------------- Haushalt */
@@ -996,6 +1020,10 @@ function aendere(s, op) {
       if ('boxen' in t) {
         const b = boxenBereinigen(t.boxen);
         if (b) s.profil.boxen = b; else delete s.profil.boxen;
+      }
+      if ('waage' in t) {
+        const w = waageBereinigen(t.waage);
+        if (w) s.profil.waage = { ...w, by: op.by || null, at: op.at }; else delete s.profil.waage;
       }
       return;
     }

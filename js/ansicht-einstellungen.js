@@ -13,6 +13,9 @@
  *                      eigenen Liste: Push und To Do laufen über die Abläufe
  *                      in Boxenstopp-Daten)
  *   KI-Schlüssel       ansehen, ändern, entfernen (zugang.js)
+ *   Waage              die Küchenwaage (waage.js): Supabase-Adresse, Schlüssel,
+ *                      Kanal – für alle Geräte der Liste (profil.waage), mit
+ *                      „Verbindung testen“
  *   Darstellung        hell, dunkel oder wie das Gerät – nur dieses Gerät
  *                      (html[data-design], gesetzt schon im Kopf von index.html);
  *                      die Farbe der App (blau, lila) gilt für die Liste
@@ -27,7 +30,7 @@
  * führt auch hierher.
  */
 import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal, leisteFaerben } from './kern.js';
-import { esc, tagKurz, menge } from './format.js';
+import { esc, tagKurz, menge, nfi } from './format.js';
 import { euro } from './kosten.js';
 import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon, eigeneListe } from './zugang.js';
 import { privatSchreiben, API } from './speicher.js';
@@ -35,7 +38,8 @@ import { ladeGaeste } from './ansicht-gaeste.js';
 import { ANBIETER, anbieterVon } from './ki.js';
 import { tempoInfo, GRUPPEN_TEXT } from './tempo.js';
 import { preisJe } from './angebote.js';
-import { opBon, opBonWeg, opProfil } from './liste.js';
+import { opBon, opBonWeg, opProfil, waageBereinigen } from './liste.js';
+import { waageKonfig, waageStand, waageBeobachten, waageAnfordern, waageFreigeben } from './waage.js';
 import { nameSchluessel } from './bereiche.js';
 import { statusZeichnen } from './ansicht-liste.js';
 import { todoZeichnen } from './ansicht-todo.js';
@@ -215,6 +219,69 @@ async function kiTeilen(schluessel) {
   }
 }
 
+/* --------------------------------------------------------------- Waage */
+
+let waageOffen = false; // das Formular (ändern) offen
+let waageFehler = '';
+let waageTest = false; // „Verbindung testen“ läuft – solange hört die App zu
+let waageAbmelden = null;
+
+function waageFormHTML(mitAbbrechen) {
+  const k = waageKonfig();
+  return `<form class="e-waage-form" id="e-waage-form" novalidate autocomplete="off">
+<label for="e-waage-url">Supabase-Adresse</label>
+<input id="e-waage-url" type="url" spellcheck="false" placeholder="https://xyz.supabase.co" value="${esc(k?.url || '')}">
+<label for="e-waage-key">anon-Schlüssel</label>
+<input id="e-waage-key" type="password" spellcheck="false" placeholder="eyJ… oder sb_publishable_…" value="${esc(k?.key || '')}">
+<label for="e-waage-kanal">Kanal</label>
+<input id="e-waage-kanal" type="text" spellcheck="false" maxlength="40" placeholder="waage" value="${esc(k?.kanal || 'waage')}">
+${waageFehler ? `<p class="zugang-fehler" role="alert">${esc(waageFehler)}</p>` : ''}
+<div class="zugang-btns"><button type="submit" class="btn btn-primary">Speichern</button>${mitAbbrechen ? '<button type="button" class="btn btn-quiet" data-act="e-waage-zu">Abbrechen</button>' : ''}</div>
+</form>`;
+}
+
+/** Die Zeile mit dem Stand der Verbindung – beim Testen lebt sie mit jedem Wert. */
+function waageStandHTML() {
+  const s = waageStand();
+  if (!waageTest) return '';
+  if (s.fehler) return `<span class="e-waage-aus">${esc(s.fehler)}</span>`;
+  if (!s.verbunden) return '<span>Verbindet …</span>';
+  if (!s.da) return '<span class="e-waage-aus">Verbunden, aber die Waage meldet sich nicht – ist sie an und im WLAN?</span>';
+  return `<span class="e-ok">✓</span> Waage da: <b class="e-waage-g">${nfi(s.g)} g</b>`;
+}
+
+function waageHTML() {
+  const k = waageKonfig();
+  const wofuer = 'Mit der Waage zählt der Kochmodus mit: Beim Vorbereiten zeigt er die Zutat mit Bild und Ziel in Gramm und hakt den Schritt ab, sobald es passt; beim Portionieren Box für Box. Die Waage selbst (ein ESP32 mit Wägezelle, Anleitung in werkzeug/waage) schickt nur Gramm an euer Supabase-Projekt, die App hört dort zu.';
+  if (!k) {
+    return `<p>${wofuer}</p>
+${waageOffen ? waageFormHTML(false) : '<div class="zugang-btns"><button type="button" class="btn" data-act="e-waage-aendern">Waage einrichten</button></div>'}
+<p class="fine">Gilt für ${istEigen() ? 'alle deine Geräte' : 'alle, die diese Liste teilen'} – einmal eintragen, das iPad hat es dann auch. Der anon-Schlüssel darf gesehen werden, er öffnet nur den Kanal.</p>`;
+  }
+  const host = (() => { try { return new URL(k.url).host; } catch { return k.url; } })();
+  const w = app.stand.profil?.waage;
+  const von = w?.by ? ` – von ${esc(w.by)}${w.at && tagKurz(String(w.at).slice(0, 10)) ? `, ${esc(tagKurz(String(w.at).slice(0, 10)))}` : ''}` : '';
+  return `<p class="e-ki-da"><span class="e-ok">✓</span> Eingerichtet: <b>${esc(host)}</b>, Kanal „${esc(k.kanal)}“${von}.</p>
+${waageOffen ? waageFormHTML(true) : `<div class="zugang-btns"><button type="button" class="btn${waageTest ? ' is-an' : ''}" data-act="e-waage-test" aria-pressed="${waageTest}">${waageTest ? 'Test beenden' : 'Verbindung testen'}</button><button type="button" class="btn" data-act="e-waage-aendern">Ändern</button><button type="button" class="btn btn-quiet" data-act="e-waage-weg">Entfernen</button></div>`}
+<p class="fine e-waage-stand" id="e-waage-stand" aria-live="polite">${waageStandHTML()}</p>
+<p class="fine">${wofuer}</p>`;
+}
+
+function waageTestSetzen(an) {
+  if (an === waageTest) return;
+  waageTest = an;
+  if (an) {
+    waageAnfordern();
+    waageAbmelden = waageBeobachten(() => { const el = $('#e-waage-stand'); if (el) el.innerHTML = waageStandHTML(); });
+  } else {
+    waageAbmelden?.();
+    waageAbmelden = null;
+    waageFreigeben();
+  }
+}
+/** Weg von den Einstellungen (app.js): der Test hört auf. */
+export function waageTestAus() { waageTestSetzen(false); const el = $('#e-waage'); if (el) el.innerHTML = waageHTML(); }
+
 /* --------------------------------------------------- Gelernt und gemerkt */
 
 const anzahl = (n, eins, mehr) => `${n} ${n === 1 ? eins : mehr}`;
@@ -282,6 +349,8 @@ export function einstellungenZeichnen() {
   if (!$('#view-einstellungen')) return;
   const ki = $('#e-ki');
   if (ki && !(ki.contains(document.activeElement) && document.activeElement.matches('input'))) ki.innerHTML = kiHTML();
+  const wg = $('#e-waage');
+  if (wg && !(wg.contains(document.activeElement) && document.activeElement.matches('input'))) wg.innerHTML = waageHTML();
   const r = $('#e-reiter');
   if (r) r.innerHTML = reiterHTML();
   const dsg = $('#e-design');
@@ -339,6 +408,19 @@ export function klickEinstellungen(el) {
     case 'e-ki-zu': kiOffen = false; kiFehler = ''; einstellungenZeichnen(); return true;
     case 'e-ki-teilen': { const s = ladeKi(); if (s) kiTeilen(s); return true; }
     case 'e-ki-teilen-weg': kiTeilen(''); return true;
+    case 'e-waage-aendern': waageOffen = true; waageFehler = ''; einstellungenZeichnen(); $('#e-waage-url')?.focus(); return true;
+    case 'e-waage-zu': waageOffen = false; waageFehler = ''; einstellungenZeichnen(); return true;
+    case 'e-waage-test': waageTestSetzen(!waageTest); einstellungenZeichnen(); return true;
+    case 'e-waage-weg': {
+      const alt = app.stand.profil?.waage ? { ...app.stand.profil.waage } : null;
+      if (!alt) return true;
+      waageTestSetzen(false);
+      app.aendern(opProfil({ waage: null }, app.name()));
+      waageOffen = false;
+      einstellungenZeichnen();
+      melde('Waage entfernt – auf allen Geräten der Liste', { knopf: 'Rückgängig', beiKnopf: () => { app.aendern(opProfil({ waage: alt }, alt.by || app.name())); einstellungenZeichnen(); } });
+      return true;
+    }
     case 'e-ki-weg': {
       const alt = ladeKi();
       loescheKi();
@@ -391,6 +473,22 @@ export function aenderungEinstellungen(ziel) {
 }
 
 export function absendenEinstellungen(ev) {
+  if (ev.target.id === 'e-waage-form') {
+    ev.preventDefault();
+    const w = waageBereinigen({ url: $('#e-waage-url')?.value, key: $('#e-waage-key')?.value, kanal: $('#e-waage-kanal')?.value });
+    if (!w) {
+      waageFehler = 'Das passt noch nicht: die Adresse wie https://xyz.supabase.co, der anon-Schlüssel aus dem Supabase-Projekt (ohne Leerzeichen), der Kanal nur Buchstaben, Zahlen, - und _.';
+      $('#e-waage').innerHTML = waageHTML();
+      $('#e-waage-url')?.focus();
+      return true;
+    }
+    app.aendern(opProfil({ waage: w }, app.name()));
+    waageOffen = false;
+    waageFehler = '';
+    einstellungenZeichnen();
+    melde(`Waage eingerichtet – Kanal „${w.kanal}“, für alle Geräte der Liste.`);
+    return true;
+  }
   if (ev.target.id !== 'e-ki-form') return false;
   ev.preventDefault();
   const s = kiAus($('#e-ki-feld')?.value || '');

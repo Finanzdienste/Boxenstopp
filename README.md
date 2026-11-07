@@ -13,12 +13,12 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
 | **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
-| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen, wer wann was macht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen, wer wann was macht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
 Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat, ein
@@ -211,6 +211,46 @@ stehen oben. Der Bildschirm bleibt an, solange der Kochmodus offen ist (Wake
 Lock – auf iPhone und iPad ab iOS/iPadOS 18.4 auch in der App vom
 Home-Bildschirm; geht es nicht, steht das oben). Die Haken sind dieselben wie
 im Rezept, Tempo und Belohnung laufen mit; der letzte Haken schließt ihn.
+
+### Waage
+
+Eine Küchenwaage ohne Display (`werkzeug/waage`: ein ESP32 mit Wägezelle),
+die ihre Gramm an Supabase Realtime schickt; die App hört dort zu
+(`js/waage.js`) – direkt ins Heimnetz darf eine HTTPS-Seite auf dem iPad
+nicht. Einrichten unter Einstellungen → **Waage** (Supabase-Adresse,
+anon-Schlüssel, Kanal) – gilt für alle Geräte der Liste (`profil.waage` in
+`liste.json`), mit „Verbindung testen“. Was gewogen wird und wann es passt,
+entscheidet `js/wiegen.js` (ohne DOM):
+
+- **Vorbereiten:** Schritte mit einer Menge in Gramm und einem Ziel („→
+  Schale 3“, „abwiegen“) – aus dem Platzhalter (`{tomatenmark}` → 70 g)
+  oder aus dem Text („3 Paprika (450 g)“). Im Kochmodus steht unter dem
+  Schritt die Zutat mit Bildchen, Ist und Ziel groß, ein Balken, „Tara“ und
+  „Nehmen wir so“. Was beim Anfang des Schritts auf der Waage steht (die
+  Schale), ist der Nullpunkt; eine Schale, die erst danach draufkommt,
+  erkennt die App, wenn sie weit über dem Ziel liegt, sonst fragt sie
+  („Schale draufgestellt? Dann Tara“). Steht die Menge 1,5 Sekunden im Ziel,
+  piept es und der Schritt hakt sich ab (Tempo und Lob wie immer). Genau
+  heißt ± 2 % (mindestens ± 4 g); beim Schälen und Entkernen bleibt weniger
+  übrig, dann gilt „ca.“ (70–112 %). Zu viel: „+12 g zu viel“, etwas raus
+  oder „Nehmen wir so“ – die echten Gramm werden übernommen. Gewürze (EL,
+  TL), Dosen, Milliliter, Knoblauchzehen und Schritte mit zwei Mengen werden
+  nicht gewogen.
+- **Portionieren:** „Topf leer wiegen“ und „mit dem Essen wiegen“ zeigen
+  das Gewicht mit **Übernehmen** – es landet im Rechner. „8 Boxen
+  nacheinander auf die Waage“ zählt dann Box für Box bis zur Menge aus dem
+  Rechner: mit dem Topf auf der Waage (es zählt herunter, die letzte Box
+  bekommt den Rest, bis der Topf leer ist) oder mit der Box auf der Waage
+  (zählt hoch, Box runter → die nächste). Unter dem Rechner im Rezept: was
+  die Waage gerade zeigt („Als Gefäß leer“), und **Gewogen** – die echten
+  Gramm je Zutat, daraus die Nährwerte pro Box, und je Box ihr Anteil
+  (`boxenstopp.gewogen.v1`, nur dieses Gerät).
+- Ohne Waage oder mit Waage aus (40 Sekunden kein Wert): ein kleiner
+  Hinweis, der Schritt ist wie immer von Hand abhakbar. Die App hört nur zu,
+  solange ein Rezept offen ist.
+
+Teile, Verdrahtung, Flashen und Kalibrieren stehen in
+[werkzeug/waage/README.md](werkzeug/waage/README.md).
 
 ### Kochstand pro Person
 
@@ -1181,7 +1221,7 @@ VAPID über das npm-Paket `web-push`):
   "todoZiel": { "tobi": { "id": "<Liste bei Microsoft> | neu", "name": "Wir zwei", "geteilt": true, "at": "…" } }
  },
  "leute": { "amy": "Amy", "tobi": "Tobi" },
- "profil": { "ziel": { "kcal": 380, "p": 30, "kh": 35, "f": 12, "by": "Tobi", "at": "…" } }
+ "profil": { "ziel": { "kcal": 380, "p": 30, "kh": 35, "f": 12, "by": "Tobi", "at": "…" }, "waage": { "url": "https://xyz.supabase.co", "key": "eyJ…", "kanal": "waage", "by": "Tobi", "at": "…" } }
 }
 ```
 

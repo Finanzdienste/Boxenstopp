@@ -27,8 +27,12 @@ import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
 import { angepasstHTML, daneben } from './ansicht-ziel.js';
 import { istEigen } from './profil.js';
 import { resteRezeptZeichnen } from './ansicht-reste.js';
+import { waageAnfordern, waageFreigeben, waageBeobachten, waageStand } from './waage.js';
+import { wiegeplan, naehrwerteGewogen, boxenNaehrwerte } from './wiegen.js';
 
 const TOPF = 'boxenstopp.topf.v1';
+const TOPF_VOLL = 'boxenstopp.topf-voll.v1'; // { rid, g } – das letzte „Mit Essen“, damit es den Kochmodus überlebt
+const GEWOGEN = 'boxenstopp.gewogen.v1'; // { <rid>: { zutaten: { <k>: g }, boxen: [g…], at } } – was die Waage gemessen hat (nur dieses Gerät)
 const ZUGEKLAPPT = 'boxenstopp.zugeklappt.v1';
 
 /** Darunter gilt ein Rezept als schnell – mit ehrlichen Zeiten ist keins unter einer Stunde. */
@@ -392,12 +396,14 @@ ${bereich('zutaten', `<h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</smal
 ${zubereitungHTML(r)}
 
 ${bereich('portionieren', '<h2 id="h-calc">Portionieren</h2>', `
-  <p class="sec-lead">Topf oder Schüssel leer wiegen, dann mit dem fertigen Essen. ${boxen(r) === 1 ? 'Die Differenz kommt in die Box.' : `Die Differenz geht durch ${boxen(r)}.`}</p>
+  <p class="sec-lead">Topf oder Schüssel leer wiegen, dann mit dem fertigen Essen. ${boxen(r) === 1 ? 'Die Differenz kommt in die Box.' : `Die Differenz geht durch ${boxen(r)}.`}${waageStand().eingerichtet ? ' Mit der Waage macht das der Kochmodus von selbst.' : ''}</p>
   <div class="calc">
     <div class="field"><label for="pot-empty">Gefäß leer</label><div class="inp"><input id="pot-empty" type="number" inputmode="numeric" min="0" step="1" placeholder="2150"><span>g</span></div></div>
     <div class="field"><label for="pot-full">Mit Essen</label><div class="inp"><input id="pot-full" type="number" inputmode="numeric" min="0" step="1" placeholder="5450"><span>g</span></div></div>
     <div class="calc-out"><span>Pro Box</span><output id="per-box" for="pot-empty pot-full"></output></div>
-  </div>`)}
+  </div>
+  <div class="calc-waage" id="calc-waage" hidden></div>
+  <div class="gewogen" id="d-gewogen" hidden></div>`)}
 
 ${bereich('aufbewahren', '<h2 id="h-keep">Aufbewahren</h2>', `
   <div class="keep"><div><span class="k">Kühlschrank</span><b>${esc(r.fridge)}</b></div><div><span class="k">Tiefkühler</span><b>${esc(r.freeze)}</b></div></div>
@@ -551,6 +557,8 @@ export function detailAktualisieren() {
   $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
   resteRezeptZeichnen(aktuell);
   notizenZeichnen();
+  // Die Waage kann gerade erst eingerichtet worden sein (auch vom anderen Gerät): dann jetzt zuhören
+  if (waageStand().eingerichtet) waageHoeren();
   if ($('#d-ki')) $('#d-ki').innerHTML = app.kiLeiste(r);
   for (const b of $$('#detail .tog')) {
     const z = zeilen[Number(b.dataset.tog)];
@@ -614,6 +622,103 @@ function rechnerZeichnen() {
   } else {
     out.innerHTML = '<b>– g</b><small>beide Gewichte eintragen</small>';
   }
+  gewogenZeichnen();
+}
+
+/* --------------------------------------------------------------- Waage */
+
+/** Der Rechner, wie der Kochmodus ihn braucht: Leer- und Vollgewicht (Zahlen oder NaN) und die Boxen. */
+function topfStand() {
+  const r = aktuell ? app.nachId[aktuell] : null;
+  let voll = parseFloat($('#pot-full')?.value);
+  if (!Number.isFinite(voll)) { const v = lese(TOPF_VOLL, null); if (v && v.rid === aktuell && Number.isFinite(v.g)) voll = v.g; }
+  return { leer: parseFloat($('#pot-empty')?.value), voll, n: r ? boxen(r) : 8 };
+}
+
+const gewogenAlle = () => { const x = lese(GEWOGEN, {}); return x && typeof x === 'object' ? x : {}; };
+export const gewogenVon = (rid) => gewogenAlle()[rid] || null;
+/** Die Waage hat gemessen: je Rezept die Gramm je Zutat und die Boxen – nur auf diesem Gerät. */
+function gewogenMerken(rid, { zutaten = null, boxen: bx = null, neu = false } = {}) {
+  const alle = gewogenAlle();
+  const alt = alle[rid] || { zutaten: {}, boxen: [] };
+  // Ein neuer Durchgang (der Topf wird leer gewogen): Die Boxen vom letzten Mal gelten nicht mehr
+  alle[rid] = { zutaten: { ...(alt.zutaten || {}), ...(zutaten || {}) }, boxen: bx || (neu ? [] : alt.boxen || []), at: heute() };
+  // Höchstens die letzten 30 Rezepte
+  const keys = Object.keys(alle);
+  if (keys.length > 30) for (const k of keys.sort((a, b) => String(alle[a].at || '').localeCompare(String(alle[b].at || ''))).slice(0, keys.length - 30)) delete alle[k];
+  schreibe(GEWOGEN, alle);
+}
+export function gewogenLoeschen(rid) { const alle = gewogenAlle(); delete alle[rid]; schreibe(GEWOGEN, alle); }
+
+/** Was die Waage beim Kochmodus gemessen hat (kochmodus.js gewogen): in den Rechner und merken. */
+function gewogenEintragen(i, plan, erg) {
+  const rid = aktuell;
+  if (!rid) return;
+  if (plan.art === 'leer' && Number.isFinite(erg.leer)) {
+    const f = $('#pot-empty');
+    if (f) f.value = String(Math.round(erg.leer));
+    schreibe(TOPF, String(Math.round(erg.leer)));
+    gewogenMerken(rid, { neu: true });
+    rechnerZeichnen();
+    return;
+  }
+  if (plan.art === 'voll' && Number.isFinite(erg.voll)) {
+    const f = $('#pot-full');
+    if (f) f.value = String(Math.round(erg.voll));
+    schreibe(TOPF_VOLL, { rid, g: Math.round(erg.voll) });
+    rechnerZeichnen();
+    return;
+  }
+  if (plan.art === 'zutat' && Number.isFinite(erg.g)) { gewogenMerken(rid, { zutaten: { [erg.k || `n:${erg.name}`]: Math.round(erg.g) } }); gewogenZeichnen(); return; }
+  if (plan.art === 'boxen' && Array.isArray(erg.boxen)) { gewogenMerken(rid, { boxen: erg.boxen.map((x) => Math.round(x)) }); gewogenZeichnen(); }
+}
+
+/** Unter dem Rechner: die gewogenen Zutaten und Boxen – und die Nährwerte, wie sie wirklich sind. */
+function gewogenZeichnen() {
+  const el = $('#d-gewogen');
+  const r = aktuell ? app.nachId[aktuell] : null;
+  if (!el || !r) return;
+  const gw = gewogenVon(aktuell);
+  const zutaten = Object.entries(gw?.zutaten || {});
+  const bx = (gw?.boxen || []).filter((x) => Number.isFinite(x));
+  if (!zutaten.length && !bx.length) { el.hidden = true; el.innerHTML = ''; return; }
+  const gesamt = naehrwerteGewogen(r, Object.fromEntries(zutaten));
+  const n = boxen(r);
+  const teile = [];
+  if (zutaten.length) {
+    const namen = zutaten.map(([k, g]) => { const it = r.items.find((x) => x.k === k); return `${esc(it ? it.n.replace(/\s*\(.*$/, '') : k.replace(/^n:/, ''))} ${nfi(g)} g`; });
+    teile.push(`<p><b>Gewogen:</b> ${namen.join(' · ')}${zutaten.some(([k, g]) => { const it = r.items.find((x) => x.k === k); return it && Math.abs(g - it.g) > Math.max(5, it.g * 0.03); }) ? ` – damit pro Box ≈ <b>${nfi(gesamt.kcal / n)} kcal</b>, ${nf1(gesamt.p / n)} g P, ${nf1(gesamt.kh / n)} g KH, ${nf1(gesamt.f / n)} g F` : ''}.</p>`);
+  }
+  if (bx.length) {
+    const je = boxenNaehrwerte(gesamt, bx);
+    teile.push(`<p><b>Boxen:</b> ${je.map((b, k) => `<span class="gewogen-box">${k + 1}: ${nfi(b.g)} g <small>≈ ${nfi(b.kcal)} kcal</small></span>`).join(' ')}</p>`);
+  }
+  teile.push(`<p class="fine">Von der Waage, ${gw.at ? esc(tagKurz(gw.at)) : 'heute'} – nur auf diesem Gerät. <button type="button" class="linkbtn" data-act="gewogen-weg">Vergessen</button></p>`);
+  el.innerHTML = teile.join('');
+  el.hidden = false;
+}
+
+let waageAbmelden = null;
+/** Die Zeile unter dem Rechner: was die Waage gerade zeigt, mit „Als Gefäß leer“ / „Als Mit Essen“ – nur, wenn sie da ist. */
+function calcWaageZeichnen() {
+  const el = $('#calc-waage');
+  if (!el) return;
+  const s = waageStand();
+  if (!s.eingerichtet || !s.da) { el.hidden = true; el.innerHTML = ''; return; }
+  const h = `<span>Waage: <b>${nfi(s.g)} g</b></span><button type="button" class="linkbtn" data-act="waage-leer">Als „Gefäß leer“</button><button type="button" class="linkbtn" data-act="waage-voll">Als „Mit Essen“</button>`;
+  if (el.innerHTML !== h) el.innerHTML = h;
+  el.hidden = false;
+}
+function waageHoeren() {
+  if (waageAbmelden) return;
+  waageAnfordern();
+  waageAbmelden = waageBeobachten(calcWaageZeichnen);
+}
+function waageLassen() {
+  if (!waageAbmelden) return;
+  waageAbmelden();
+  waageAbmelden = null;
+  waageFreigeben();
 }
 
 export function oeffneRezept(rid, { still = false } = {}) {
@@ -634,9 +739,16 @@ export function oeffneRezept(rid, { still = false } = {}) {
   const leerFeld = $('#pot-empty');
   const topf = lese(TOPF, '');
   if (leerFeld && topf) leerFeld.value = topf;
+  // „Mit Essen“ vom letzten Mal in diesem Rezept (der Kochmodus hat es eingetragen)
+  const voll = lese(TOPF_VOLL, null);
+  const vollFeld = $('#pot-full');
+  if (vollFeld && voll && voll.rid === rid && Number.isFinite(voll.g)) vollFeld.value = String(voll.g);
   detailAktualisieren();
   schritteZeichnen();
   rechnerZeichnen();
+  // Mit Waage: zuhören, solange das Rezept offen ist (auch für den Kochmodus)
+  if (waageStand().eingerichtet) waageHoeren(); else waageLassen();
+  calcWaageZeichnen();
   if (!still) { zeigeReiter('rezepte', true); window.scrollTo(0, 0); }
   // Das Tier für den Schluss schon mal holen, dann ist es da, wenn das letzte Häkchen fällt.
   tierVorladen();
@@ -648,6 +760,7 @@ export function schliesseRezept() {
   ansicht.rezept = null;
   ansichtMerken();
   setzeWach(false);
+  waageLassen();
   const el = $('#detail');
   el.hidden = true;
   el.innerHTML = '';
@@ -766,6 +879,7 @@ export function klickRezepte(el) {
     case 'kochmodus': {
       const r = app.nachId[aktuell];
       if (!r) return true;
+      const phasen = r.ablauf.flatMap((p) => p.schritte.map((s) => ({ s, t: p.t })));
       kochmodusOeffnen({
         rezept: r,
         text: (s) => schrittText(s.d, r),
@@ -773,8 +887,27 @@ export function klickRezepte(el) {
         umschalten: (i, an) => schrittUmschalten(r.id, i, an),
         timerKnopf,
         timerUmschalten,
-        beimSchliessen: () => { if (aktuell === r.id) { schritteZeichnen(); timerZeichnen(); } },
+        // Mit Waage: welcher Schritt gewogen wird, der Rechner, und was gemessen wurde
+        wiegen: (i) => (phasen[i] ? wiegeplan(phasen[i].s, r, { phase: phasen[i].t, boxen: boxen(r) }) : null),
+        topf: topfStand,
+        gewogen: gewogenEintragen,
+        beimSchliessen: () => { if (aktuell === r.id) { schritteZeichnen(); timerZeichnen(); rechnerZeichnen(); } },
       });
+      return true;
+    }
+    case 'waage-leer': case 'waage-voll': {
+      const s = waageStand();
+      if (!s.da || !aktuell) return true;
+      gewogenEintragen(-1, { art: d.act === 'waage-leer' ? 'leer' : 'voll' }, { leer: s.g, voll: s.g });
+      melde(`${d.act === 'waage-leer' ? 'Gefäß leer' : 'Mit Essen'}: ${nfi(s.g)} g von der Waage übernommen`);
+      return true;
+    }
+    case 'gewogen-weg': {
+      if (!aktuell) return true;
+      const alt = gewogenVon(aktuell);
+      gewogenLoeschen(aktuell);
+      gewogenZeichnen();
+      melde('Gewogene Mengen vergessen', { knopf: 'Rückgängig', beiKnopf: () => { if (alt) gewogenMerken(aktuell, { zutaten: alt.zutaten, boxen: alt.boxen }); gewogenZeichnen(); } });
       return true;
     }
     case 'tempo-weg': {
@@ -849,6 +982,7 @@ export function aenderungRezepte(ziel) {
 export function eingabeRezepte(ziel) {
   if (ziel.id === 'suche') { suche = normal(ziel.value.trim()); rasterZeichnen(); return; }
   if (ziel.id === 'pot-empty') schreibe(TOPF, ziel.value);
+  if (ziel.id === 'pot-full' && aktuell) { const g = parseFloat(ziel.value); if (Number.isFinite(g)) schreibe(TOPF_VOLL, { rid: aktuell, g }); }
   if (ziel.id === 'pot-empty' || ziel.id === 'pot-full') rechnerZeichnen();
 }
 

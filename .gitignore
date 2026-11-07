@@ -2,3 +2,5 @@ node_modules
 # Bildschirmfotos und Browserprofile aus Testläufen
 .testlauf/
 __pycache__/
+werkzeug/waage/include/config.h
+werkzeug/waage/.pio/

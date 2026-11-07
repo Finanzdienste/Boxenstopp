@@ -331,6 +331,10 @@ export function einzelheiten(vorher, nachher, hilfe = {}) {
   if (umbenannt.length) dazu('Sonstiges', 'Umbenannt', umbenannt.map((x) => `${x} → ${n.profil.person}`));
   if (n.profil?.person && n.profil.person !== v.profil?.person) dazu('Sonstiges', 'Eigene Liste', `für ${n.profil.person}`);
   if ((n.profil?.farbe || '') !== (v.profil?.farbe || '')) dazu('Sonstiges', 'Farbe der App', n.profil?.farbe || 'blau');
+  const wv = v.profil?.waage;
+  const wn = n.profil?.waage;
+  if (wn && (!wv || wv.url !== wn.url || wv.key !== wn.key || wv.kanal !== wn.kanal)) dazu('Sonstiges', 'Waage', `${(() => { try { return new URL(wn.url).host; } catch { return wn.url; } })()}, Kanal ${zitat(wn.kanal)}`);
+  else if (!wn && wv) dazu('Sonstiges', 'Waage', 'entfernt');
   const angVorher = v.angebote?.eintraege || [];
   const angNachher = n.angebote?.eintraege || [];
   const angIds = new Set(angVorher.map((e) => e.id));
