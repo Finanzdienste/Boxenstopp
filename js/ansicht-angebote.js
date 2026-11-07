@@ -279,10 +279,10 @@ function standHTML() {
     ? `<span class="a-quelle a-quelle-aus" title="${esc(q.hinweis || '')}">${esc(q.laden)}: –</span>`
     : `<span class="a-quelle" title="${esc(q.hinweis || '')}">${esc(q.laden)} ${q.anzahl}</span>`)).join('');
   const gesperrt = (auto.gesperrt || []).length ? `<span class="a-quelle a-quelle-aus">${esc(auto.gesperrt.join(', '))}: sperren automatische Abrufe</span>` : '';
-  const lidlOhne = (auto.quellen || []).find((q) => q.laden === 'Lidl' && q.ok === false && /GEMINI_KEY/.test(q.hinweis || ''));
+  const lidlOhne = (auto.quellen || []).find((q) => q.laden === 'Lidl' && q.ok === false && /GEMINI_KEY|ANTHROPIC_API_KEY/.test(q.hinweis || ''));
   // Rewe und Edeka kommen über kaufDA – gezielt nach Rezeptzutaten gesucht, nicht das ganze Prospekt
   const ueberKaufda = (auto.quellen || []).filter((q) => q.ok !== false && /kaufDA/.test(q.hinweis || '')).map((q) => q.laden);
-  return `<div class="a-stand"><span class="fine">KW ${W().kw}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub den Gemini-Schlüssel als Secret <code>GEMINI_KEY</code> (Settings → Secrets and variables → Actions).</p>' : ''}${ueberKaufda.length ? `<p class="fine a-kaufda">${esc(ueberKaufda.join(', '))}: über kaufDA gezielt nach euren Rezeptzutaten gesucht – nicht das ganze Prospekt.</p>` : ''}${leadHTML()}</div>`;
+  return `<div class="a-stand"><span class="fine">KW ${W().kw}${wann ? ` · geholt ${esc(wann)}` : ''}</span><div class="a-quellen">${quellen}${gesperrt}</div>${lidlOhne ? '<p class="fine a-lidl">Lidl fehlt noch: Dafür braucht der Abruf bei GitHub einen KI-Schlüssel als Secret – <code>ANTHROPIC_API_KEY</code> (Claude) oder <code>GEMINI_KEY</code> (Google), unter Settings → Secrets and variables → Actions.</p>' : ''}${ueberKaufda.length ? `<p class="fine a-kaufda">${esc(ueberKaufda.join(', '))}: über kaufDA gezielt nach euren Rezeptzutaten gesucht – nicht das ganze Prospekt.</p>` : ''}${leadHTML()}</div>`;
 }
 
 const wannText = () => (wahlWoche === 'naechste' ? 'nächste Woche' : 'diese Woche');

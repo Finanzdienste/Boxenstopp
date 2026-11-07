@@ -27,9 +27,17 @@
  * „Nächste Woche“.
  *   Lidl      Der Aktionsprospekt (lidl.de/l/prospekte) liegt als Seitenbilder
  *             vor, ohne Text. Die Lebensmittel-Seiten (lidlSeitenWahl) liest
- *             Gemini aus, vier je Anfrage – dafür braucht der Lauf den
- *             Schlüssel in GEMINI_KEY (bei GitHub als Secret). Ohne Schlüssel
- *             fällt Lidl aus, der Rest läuft.
+ *             eine KI aus, sechs je Anfrage – dafür braucht der Lauf einen
+ *             Schlüssel (bei GitHub als Secret): ANTHROPIC_API_KEY für Claude
+ *             (claude-fable-5-1, drei Anfragen nebeneinander, bei Überlastung
+ *             Sonnet 5.5; mit einem Claude-Max-Abo aus dessen Monatsguthaben,
+ *             etwa 3 $ je Prospekt) oder GEMINI_KEY für Gemini (kostenlos,
+ *             eine Anfrage nach der anderen, reihum durch die Modelle). Sind
+ *             beide da, nimmt der Lauf Claude. Ohne Schlüssel fällt Lidl aus,
+ *             der Rest läuft. Ein Prospekt, der beim letzten Lauf schon ganz
+ *             gelesen wurde (derselbe Prospekt gilt die ganze Woche), wird
+ *             nicht noch einmal gelesen – seine Angebote kommen aus der
+ *             alten Datei (quellen[].prospekte in daten/angebote.json).
  *
  *   Rewe, Edeka  Die eigenen Seiten sperren automatische Abrufe (403
  *             bzw. eine Scherzantwort). Ihre Angebote stehen aber bei kaufDA
@@ -55,8 +63,8 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { angeboteBereinigen, schluesselRaten, mengeAus, istTabu, stabileId, systemTextAngebote, nutzerTextAngebote, ANGEBOTE_SCHEMA } from '../js/angebote.js';
-import { ANBIETER, kiFehler, artVonStatus } from '../js/ki.js';
+import { angeboteBereinigen, schluesselRaten, mengeAus, istTabu, stabileId, systemTextAngebote, nutzerTextAngebote, rumpfAngebote, ANGEBOTE_SCHEMA } from '../js/angebote.js';
+import { ANBIETER, kiFehler, kiAnfragen, artVonStatus } from '../js/ki.js';
 
 const HIER = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HIER, '..');
@@ -67,6 +75,7 @@ const ZIEL = zielBei >= 0 && ARGS[zielBei + 1] ? path.resolve(ARGS[zielBei + 1])
 const UA = 'Boxenstopp-Angebote/1.0 (+https://github.com/Finanzdienste/Boxenstopp)';
 const KATALOG = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8')).katalog;
 const GEMINI_KEY = process.env.GEMINI_KEY || '';
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 const LIDL_MAX = Number(process.env.LIDL_MAX) || 0; // Probelauf: höchstens so viele Lidl-Seiten
 const nur = ARGS.filter((s, i) => !s.startsWith('--') && !(zielBei >= 0 && i === zielBei + 1)).map((s) => s.toLowerCase());
 const will = (q) => !nur.length || nur.includes(q);
@@ -262,11 +271,18 @@ async function penny() {
 /* ------------------------------------------------------------- Lidl */
 
 const LIDL_JE_ANFRAGE = 6; // Seiten je Anfrage; wird die Antwort zu lang, halbiert sich der Stapel
-const LIDL_PAUSE = 15000; // zwischen zwei Anfragen – das Gratis-Kontingent zählt Anfragen je Minute
+const LIDL_PAUSE = 15000; // zwischen zwei Gemini-Anfragen – das Gratis-Kontingent zählt Anfragen je Minute
 const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
-const LIDL_ZEIT = 18 * 60e3; // danach nichts mehr anfragen (der Lauf darf 30 Minuten)
+const LIDL_ZEIT = 28 * 60e3; // danach nichts mehr anfragen (der Lauf darf 45 Minuten)
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_ZEIT = 60000; // je Anfrage; ein gesundes Modell braucht für vier Seiten 3–15 s
+// Claude: das Modell der App (Fable 5.1) zuerst, bei Überlastung Sonnet 5.5; anderes
+// Modell über CLAUDE_MODELL (Variable in der Action). Gestreamt, darum darf eine
+// Anfrage lange dauern – Fable schreibt sechs volle Seiten in ein bis zwei Minuten.
+const CLAUDE_MODELLE = [...new Set([process.env.CLAUDE_MODELL || ANBIETER.anthropic.modell, 'claude-sonnet-5-5'])];
+const CLAUDE_ZEIT = 8 * 60e3; // je Anfrage, mit allem Streamen
+const CLAUDE_NEBENEINANDER = 3; // so viele Stapel zugleich (kein Gratis-Kontingent, das Anfragen je Minute zählt)
+const CLAUDE_PAUSE = 1000;
 // Das Modell der App zuerst; antwortet es nicht oder ist es überlastet (im
 // Gratis-Kontingent hängt mal das eine, mal das andere), das nächste – und
 // nach dem letzten wieder das erste. Namen laut Modellliste des Schlüssels
@@ -416,6 +432,39 @@ export async function geminiAnfragen(rumpf, { schluessel, modell = ANBIETER.gemi
   }
 }
 
+/*
+ * Der Rumpf für Anthropics /v1/messages: dieselbe Anfrage, die die App bei
+ * Prospektfotos stellt (rumpfAngebote in angebote.js), mit dem Werkzeug
+ * angebote_ausgeben; das Modell setzt claudeAnfragen (mitAusweichen sagt es).
+ */
+export function claudeRumpf({ fotos = [], text = '', katalog = {} }) {
+  return rumpfAngebote('anthropic', { fotos, text, katalog, modell: { anthropic: CLAUDE_MODELLE[0] } });
+}
+
+/*
+ * Die Anfrage an Claude schicken – gestreamt über kiAnfragen (ki.js, dasselbe
+ * wie im Browser), damit eine lange Antwort nicht abreißt. Gibt wie
+ * geminiAnfragen { eingabe, usage, dauer, grund } zurück und wirft Fehler mit
+ * .art; keine Antwort in der Zeit zählt als überlastet (mitAusweichen nimmt
+ * dann das nächste Modell).
+ */
+export async function claudeAnfragen(rumpf, { schluessel, modell = CLAUDE_MODELLE[0], api = ANBIETER.anthropic.api, timeout = CLAUDE_ZEIT } = {}) {
+  const start = Date.now();
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), timeout);
+  try {
+    const { eingabe, usage } = await kiAnfragen({ ...rumpf, model: modell }, { schluessel, api, signal: ac.signal });
+    return { eingabe, usage: { ein: usage.ein || 0, aus: usage.aus || 0, denken: 0 }, dauer: Date.now() - start, grund: 'tool_use' };
+  } catch (e) {
+    if (e?.art === 'abbruch') {
+      const f = kiFehler('ueberlastet', `keine Antwort nach ${Math.round(timeout / 1000)} s`, 'anthropic');
+      f.zeitablauf = true;
+      throw f;
+    }
+    throw e;
+  } finally { clearTimeout(t); }
+}
+
 /** Die Aktionsprospekte auf lidl.de/l/prospekte mit ihren Daten. */
 export function lidlProspekte(html) {
   const aus = new Map();
@@ -442,14 +491,15 @@ export function lidlSeitenWahl(pages, max = LIDL_SEITEN_MAX) {
 }
 
 /*
- * Einen Stapel Seiten ({ number, b64 }) von Gemini lesen lassen. Bricht die
+ * Einen Stapel Seiten ({ number, b64 }) von der KI lesen lassen. Bricht die
  * Antwort ab, weil sie zu lang wird, liest es den Stapel in zwei Hälften.
- * anfragen(rumpf) ist austauschbar (Tests; sonst mitAusweichen), melde(text)
+ * anfragen(rumpf) ist austauschbar (Tests; sonst mitAusweichen), rumpfBauen
+ * baut die Anfrage für den Anbieter (geminiRumpf oder claudeRumpf), melde(text)
  * bekommt den Verlauf.
  */
-export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () => {} }) {
+export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () => {}, rumpfBauen = geminiRumpf }) {
   const bereich = `Seiten ${stapel[0].number}–${stapel.at(-1).number}`;
-  const rumpf = geminiRumpf({ fotos: stapel.map((s) => s.b64), text: `Lidl Aktionsprospekt, gültig ${von} bis ${bis}, ${bereich}. Laden: Lidl.`, katalog: KATALOG });
+  const rumpf = rumpfBauen({ fotos: stapel.map((s) => s.b64), text: `Lidl Aktionsprospekt, gültig ${von} bis ${bis}, ${bereich}. Laden: Lidl.`, katalog: KATALOG });
   const start = Date.now();
   let antwort;
   try {
@@ -458,7 +508,7 @@ export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () =
     if (e?.art === 'zulang' && stapel.length > 1) {
       melde(`${bereich}: Antwort zu lang, halbiert`);
       const mitte = Math.ceil(stapel.length / 2);
-      return [...await lidlStapelLesen(stapel.slice(0, mitte), { von, bis, anfragen, melde }), ...await lidlStapelLesen(stapel.slice(mitte), { von, bis, anfragen, melde })];
+      return [...await lidlStapelLesen(stapel.slice(0, mitte), { von, bis, anfragen, melde, rumpfBauen }), ...await lidlStapelLesen(stapel.slice(mitte), { von, bis, anfragen, melde, rumpfBauen })];
     }
     throw e;
   }
@@ -468,8 +518,39 @@ export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () =
   return roh;
 }
 
+/*
+ * Welche KI den Prospekt liest: Claude, wenn ANTHROPIC_API_KEY da ist, sonst
+ * Gemini mit GEMINI_KEY – oder keine. Bei Gemini kommt das Modell zuerst, das
+ * beim letzten Lauf geantwortet hat (das neueste ist im Gratis-Kontingent oft
+ * überlastet); bei Claude bleibt die Reihenfolge, Fable soll es sein.
+ */
+export function lidlKi({ anthropic = ANTHROPIC_KEY, gemini = GEMINI_KEY, zuletzt = '' } = {}) {
+  if (anthropic) return { anbieter: 'anthropic', schluessel: anthropic, modelle: [...CLAUDE_MODELLE], anfragen: claudeAnfragen, rumpfBauen: claudeRumpf, nebeneinander: CLAUDE_NEBENEINANDER, pause: CLAUDE_PAUSE };
+  if (gemini) return { anbieter: 'gemini', schluessel: gemini, modelle: [...new Set([/^gemini-/.test(zuletzt) ? zuletzt : '', ...GEMINI_MODELLE].filter(Boolean))], anfragen: geminiAnfragen, rumpfBauen: geminiRumpf, nebeneinander: 1, pause: LIDL_PAUSE };
+  return null;
+}
+
+/*
+ * Welche Prospekte von vorher übernommen werden können: die, die der letzte
+ * Lauf ganz gelesen hat (quellen[].prospekte) und deren Angebote noch in der
+ * alten Datei stehen. Gibt je Prospekt-id die alten Angebote zurück.
+ */
+export function lidlSchonGelesen(alt, passende) {
+  const vorher = (alt?.quellen || []).find((q) => q.laden === 'Lidl');
+  const aus = {};
+  for (const p of passende) {
+    const schon = (vorher?.prospekte || []).find((x) => x.id === p.id && x.komplett);
+    if (!schon) continue;
+    const alte = (alt?.angebote || []).filter((a) => a.laden === 'Lidl' && a.von === schon.von);
+    if (alte.length) aus[p.id] = { eintrag: schon, angebote: alte };
+  }
+  return aus;
+}
+
 async function lidl(alt) {
-  if (!GEMINI_KEY) return { angebote: [], hinweis: 'ohne GEMINI_KEY nicht gelesen', ok: false };
+  const vorher = alt?.quellen?.find((q) => q.laden === 'Lidl');
+  const ki = lidlKi({ zuletzt: vorher?.modell || '' });
+  if (!ki) return { angebote: [], hinweis: 'ohne ANTHROPIC_API_KEY oder GEMINI_KEY nicht gelesen', ok: false };
   const html = await hole('https://www.lidl.de/c/online-prospekte/s10005610');
   const alle = lidlProspekte(html);
   const h = heute();
@@ -477,14 +558,13 @@ async function lidl(alt) {
   const passende = alle.filter((p) => p.bis >= h && (p.von <= h || new Date().getUTCDay() >= 5 || new Date().getUTCDay() === 0)).slice(0, 2);
   if (!passende.length) throw new Error('kein laufender Aktionsprospekt gefunden');
   const melde = (s) => console.log(`  Lidl ${s}`);
-  // Das Modell, das beim letzten Lauf geantwortet hat, zuerst – das neueste ist oft überlastet
-  const zuletzt = alt?.quellen?.find((q) => q.laden === 'Lidl')?.modell;
-  const modelle = [...new Set([zuletzt, ...GEMINI_MODELLE].filter(Boolean))];
-  const anfragen = mitAusweichen({ schluessel: GEMINI_KEY, modelle, melde });
+  const anfragen = mitAusweichen({ schluessel: ki.schluessel, modelle: ki.modelle, anfragen: ki.anfragen, melde });
   const start = Date.now();
   const angebote = [];
+  const prospekte = []; // je Prospekt: { id, von, bis, seiten, gelesen, komplett } – oder der alte Eintrag mit uebernommen: true
   let gelesen = 0;
   let letzter = null;
+  let fatal = null; // falscher Schlüssel, kein Guthaben: weitere Anfragen sind sinnlos
   let zeitUm = false;
   let modellGenutzt = '';
   const uebernehmen = (roh, von, bis) => {
@@ -493,58 +573,80 @@ async function lidl(alt) {
       angebote.push({ ...a, id: stabileId('Lidl', a.name, a.preis), laden: 'Lidl', von, bis: a.bis || bis, k: a.k || schluesselRaten(a.name, KATALOG) });
     }
   };
-  // Ein Stapel: { seiten: [{ number, b64 }], von, bis, name }
+  // Ein Stapel: { eintrag, teil: [Seitendaten], seiten: [{ number, b64 }], von, bis, name }
   const lesen = async (st) => {
     if (Date.now() - start > LIDL_ZEIT) { zeitUm = true; return false; }
     try {
-      uebernehmen(await lidlStapelLesen(st.seiten, { von: st.von, bis: st.bis, anfragen, melde }), st.von, st.bis);
+      uebernehmen(await lidlStapelLesen(st.seiten, { von: st.von, bis: st.bis, anfragen, melde, rumpfBauen: ki.rumpfBauen }), st.von, st.bis);
       gelesen += st.seiten.length;
+      st.eintrag.gelesen += st.seiten.length;
       modellGenutzt = anfragen.modell();
       return true;
     } catch (e) {
-      if (e?.art === 'schluessel') throw e; // falscher Schlüssel: weitere Anfragen sind sinnlos
+      if (e?.art === 'schluessel' || e?.art === 'guthaben') { fatal = e; return false; }
       letzter = e;
       melde(`Seiten ${st.name} übersprungen: ${e?.message || e}${e?.detail ? ` [${e.detail}]` : ''}`);
       return false;
     } finally {
       // Gratis-Kontingent: nicht zu schnell hintereinander
-      await pause(LIDL_PAUSE);
+      await pause(ki.pause);
     }
   };
-  let uebrig = [];
+  const schon = lidlSchonGelesen(alt, passende);
+  const stapel = [];
   for (const p of passende) {
+    // Schon beim letzten Lauf ganz gelesen: derselbe Prospekt gilt die ganze Woche, also die alten Angebote übernehmen
+    if (schon[p.id]) {
+      melde(`${p.id}: beim letzten Lauf schon ganz gelesen, ${schon[p.id].angebote.length} Angebote übernommen`);
+      angebote.push(...schon[p.id].angebote);
+      prospekte.push({ ...schon[p.id].eintrag, uebernommen: true });
+      continue;
+    }
     const f = (await hole(`https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=${p.id}&region_id=0&region_code=0`, { json: true })).flyer;
     const seiten = lidlSeitenWahl(f?.pages, LIDL_MAX || LIDL_SEITEN_MAX);
     melde(`${p.id}: ${seiten.length} von ${(f?.pages || []).length} Seiten lesen`);
     const bis = (f?.offerEndDate || f?.endDate || p.bis).slice(0, 10);
     const von = (f?.offerStartDate || f?.startDate || p.von).slice(0, 10);
-    for (let i = 0; i < seiten.length && !zeitUm; i += LIDL_JE_ANFRAGE) {
+    const eintrag = { id: p.id, von, bis, seiten: seiten.length, gelesen: 0, komplett: false };
+    prospekte.push(eintrag);
+    for (let i = 0; i < seiten.length; i += LIDL_JE_ANFRAGE) {
       const teil = seiten.slice(i, i + LIDL_JE_ANFRAGE);
-      const st = { seiten: [], von, bis, name: `${teil[0].number}–${teil.at(-1).number}` };
-      for (const x of teil) st.seiten.push({ number: x.number, b64: (await hole(x.image, { bin: true })).toString('base64') });
-      if (!await lesen(st) && !zeitUm) uebrig.push(st);
+      stapel.push({ eintrag, teil, seiten: [], von, bis, name: `${teil[0].number}–${teil.at(-1).number}` });
     }
-    if (zeitUm) break;
   }
+  // Die Seitenbilder holen und lesen – bei Claude mehrere Stapel nebeneinander, bei Gemini einer nach dem anderen
+  let uebrig = [];
+  const arbeiter = async () => {
+    for (let st = stapel.shift(); st && !zeitUm && !fatal; st = stapel.shift()) {
+      if (!st.seiten.length) for (const x of st.teil) st.seiten.push({ number: x.number, b64: (await hole(x.image, { bin: true })).toString('base64') });
+      if (!await lesen(st) && !zeitUm && !fatal) uebrig.push(st);
+    }
+  };
+  const durchgang = () => Promise.all(Array.from({ length: Math.min(ki.nebeneinander, stapel.length) || 1 }, arbeiter));
+  await durchgang();
   // Zweiter Durchgang für das, was beim ersten hing – oft klappt es dann
-  if (uebrig.length && !zeitUm) {
+  if (uebrig.length && !zeitUm && !fatal) {
     melde(`zweiter Durchgang für Seiten ${uebrig.map((st) => st.name).join(', ')}`);
-    const nochmal = uebrig;
+    stapel.push(...uebrig);
     uebrig = [];
-    for (const st of nochmal) if (!await lesen(st) && !zeitUm) uebrig.push(st);
+    await durchgang();
   }
+  if (fatal) throw fatal;
   const nichtLesbar = uebrig.map((st) => st.name);
-  if (nichtLesbar.length) {
+  if (nichtLesbar.length && ki.anbieter === 'gemini') {
     // Fürs Log: welche Modelle der Schlüssel überhaupt nutzen darf
-    try { melde(`Modelle mit diesem Schlüssel: ${(await geminiModelle(GEMINI_KEY)).join(', ')}`); } catch (e) { melde(`Modellliste nicht lesbar (${e?.message || e})`); }
+    try { melde(`Modelle mit diesem Schlüssel: ${(await geminiModelle(ki.schluessel)).join(', ')}`); } catch (e) { melde(`Modellliste nicht lesbar (${e?.message || e})`); }
   }
-  if (!gelesen) throw new Error(letzter ? `keine Seite lesbar (${String(letzter.message || letzter).slice(0, 60)})` : 'keine Seiten im Prospekt');
-  const teile = [`aus dem Aktionsprospekt gelesen (${passende.map((p) => `${p.von.slice(8)}.${p.von.slice(5, 7)}.–${p.bis.slice(8)}.${p.bis.slice(5, 7)}.`).join(', ')})`];
+  // Ganz gelesen heißt: jede gewählte Seite, und kein Probelauf mit Seitengrenze
+  for (const e of prospekte) if (!e.uebernommen) e.komplett = e.seiten > 0 && e.gelesen === e.seiten && !LIDL_MAX;
+  if (!gelesen && !prospekte.some((e) => e.uebernommen)) throw new Error(letzter ? `keine Seite lesbar (${String(letzter.message || letzter).slice(0, 60)})` : 'keine Seiten im Prospekt');
+  const datum = (d) => `${d.slice(8)}.${d.slice(5, 7)}.`;
+  const teile = [`aus dem Aktionsprospekt gelesen (${prospekte.map((e) => `${datum(e.von)}–${datum(e.bis)}${e.uebernommen ? ', vom letzten Lauf übernommen' : ''}`).join('; ')})`];
   if (nichtLesbar.length) teile.push(`Seiten ${nichtLesbar.join(', ')} nicht lesbar`);
   if (zeitUm) teile.push('Zeit um, Rest nicht gelesen');
   teile.push('Lesefehler möglich');
-  melde(`gelesen mit ${modellGenutzt}`);
-  return { angebote, hinweis: teile.join(', '), modell: modellGenutzt };
+  if (modellGenutzt) melde(`gelesen mit ${modellGenutzt}`);
+  return { angebote, hinweis: teile.join(', '), modell: modellGenutzt || vorher?.modell || '', prospekte };
 }
 
 /* ------------------------------------------------------------ kaufDA */
@@ -694,10 +796,10 @@ async function main() {
       continue;
     }
     try {
-      const { angebote: neu, hinweis, ok = true, modell } = await fn(alt);
+      const { angebote: neu, hinweis, ok = true, modell, prospekte } = await fn(alt);
       for (const laden of laeden) {
         const meine = neu.filter((a) => a.laden === laden);
-        quellen.push({ laden, ok, anzahl: meine.length, hinweis, stand: new Date().toISOString(), ...(modell ? { modell } : {}) });
+        quellen.push({ laden, ok, anzahl: meine.length, hinweis, stand: new Date().toISOString(), ...(modell ? { modell } : {}), ...(prospekte ? { prospekte } : {}) });
         console.log(`${laden.padEnd(9)} ${String(meine.length).padStart(4)} Angebote${hinweis ? ` – ${hinweis}` : ''}`);
       }
       angebote.push(...neu);
@@ -706,7 +808,7 @@ async function main() {
       for (const laden of laeden) {
         const vorher = alteVon(laden).filter((a) => !a.bis || a.bis >= heute());
         const q = alt?.quellen?.find((x) => x.laden === laden);
-        quellen.push({ laden, ok: false, anzahl: vorher.length, hinweis: `heute nicht erreichbar (${String(e?.message || e).slice(0, 80)})`, stand: q?.stand || '', ...(q?.modell ? { modell: q.modell } : {}) });
+        quellen.push({ laden, ok: false, anzahl: vorher.length, hinweis: `heute nicht erreichbar (${String(e?.message || e).slice(0, 80)})`, stand: q?.stand || '', ...(q?.modell ? { modell: q.modell } : {}), ...(q?.prospekte ? { prospekte: q.prospekte } : {}) });
         angebote.push(...vorher);
         console.log(`${laden.padEnd(9)} FEHLER ${e?.message || e}${vorher.length ? ` – ${vorher.length} alte behalten` : ''}`);
       }

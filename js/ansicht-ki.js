@@ -200,7 +200,7 @@ function einrichtenHTML(schluessel) {
 <div class="zugang-btns"><button type="submit" class="btn btn-primary">Speichern</button>${schluessel ? '<button type="button" class="btn btn-quiet" data-act="k-einrichten-zu">Abbrechen</button><button type="button" class="btn btn-quiet" data-act="k-schluessel-weg">Schlüssel entfernen</button>' : ''}</div>
 ${da ? `<p class="fine">Eingetragen ist ein Schlüssel von ${esc(ANBIETER[da].name)} (${esc(ANBIETER[da].modell)}).</p>` : ''}
 <p class="fine">Gratis heißt bei Google: Was ihr schickt (Fotos, Zutaten), darf Google zum Verbessern seiner Produkte nutzen. Schick also nichts Privates mit aufs Foto. Der Schlüssel bleibt nur auf diesem Handy. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy (Einstellungen)${schluessel ? ' oder mit diesem: <button type="button" class="linkbtn" data-act="k-link">Link fürs zweite Handy kopieren</button>' : ''}.</p>
-<p class="fine">Wer lieber Claude nimmt: Ein Anthropic-Schlüssel (sk-ant-…, console.anthropic.com, kostet ein paar Cent pro Rezept) geht hier genauso.</p>
+<p class="fine">Wer lieber Claude nimmt (Fable 5.1, das stärkste Modell): Ein Anthropic-Schlüssel (sk-ant-…, platform.claude.com) geht hier genauso. Mit einem Claude-Max-Abo läuft das über dessen Monatsguthaben, sonst kostet ein Rezept etwa 30 Cent.</p>
 ${link ? `<input class="z-linkfeld" id="k-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Handy" hidden>` : ''}
 </form>`;
 }
@@ -225,7 +225,7 @@ function formularHTML() {
 <input id="k-wunsch" type="text" maxlength="200" placeholder="z. B. was Asiatisches, ohne Ofen, mit Reis" value="${esc(eingabe.wuensche)}">
 <p class="zugang-fehler" id="k-fehler"${fehler ? '' : ' hidden'}>${esc(fehler || '')}</p>
 <button type="submit" class="btn btn-primary k-los" id="k-los">Rezept machen</button>
-<p class="fine">Dauert etwa eine Minute${anbieterVon(ladeKi()) === 'gemini' ? ' und ist kostenlos. Fotos und Text gehen nur an Google' : ' und kostet ein paar Cent. Fotos und Text gehen nur an Anthropic'}. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
+<p class="fine">Dauert etwa eine Minute${anbieterVon(ladeKi()) === 'gemini' ? ' und ist kostenlos. Fotos und Text gehen nur an Google' : ' und geht aufs Anthropic-Guthaben (etwa 30 Cent). Fotos und Text gehen nur an Anthropic'}. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
 </form>`;
 }
 

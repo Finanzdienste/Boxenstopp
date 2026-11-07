@@ -159,10 +159,10 @@ function kiHTML() {
   if (!da) {
     return `<p>${wofuer} Kostenlos mit einem Google-Konto: auf <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> „Create API key“, den Schlüssel hier einfügen.</p>
 ${kiFormHTML(false)}
-<p class="fine">${bleibt} Ein Anthropic-Schlüssel (sk-ant-…) geht auch – der kostet ein paar Cent pro Rezept.</p>`;
+<p class="fine">${bleibt} Ein Anthropic-Schlüssel (sk-ant-…, platform.claude.com) geht auch: Claude Fable 5.1, das stärkste Modell – mit einem Claude-Max-Abo aus dessen Monatsguthaben, sonst etwa 30 Cent pro Rezept.</p>`;
   }
   const a = ANBIETER[da];
-  return `<p class="e-ki-da"><span class="e-ok">✓</span> Ein Schlüssel von <b>${esc(a.name)}</b> ist eingetragen (${esc(a.modell)})${da === 'gemini' ? ' – kostenlos' : ' – ein paar Cent pro Rezept'}.</p>
+  return `<p class="e-ki-da"><span class="e-ok">✓</span> Ein Schlüssel von <b>${esc(a.name)}</b> ist eingetragen (${esc(a.modell)})${da === 'gemini' ? ' – kostenlos' : ' – etwa 30 Cent pro Rezept vom Anthropic-Guthaben'}.</p>
 ${kiOffen ? kiFormHTML(true) : '<div class="zugang-btns"><button type="button" class="btn" data-act="e-ki-aendern">Schlüssel ändern</button><button type="button" class="btn btn-quiet" data-act="e-ki-weg">Entfernen</button></div>'}
 <p class="fine">${wofuer} ${bleibt}</p>`;
 }

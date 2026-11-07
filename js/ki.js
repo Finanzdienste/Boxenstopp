@@ -8,8 +8,10 @@
  *             die Anfragen zum Verbessern seiner Produkte nutzen. Das ist der
  *             normale Weg. AI Studio gibt seit Mai 2026 nur noch Schlüssel
  *             mit „AQ.“ aus (Auth Keys); die älteren „AIza“ gehen weiter.
- *   sk-ant-…  Anthropic, Messages-API (claude-sonnet-5-5), ein paar Cent pro
- *             Rezept. Der Kopf „anthropic-dangerous-direct-browser-access“
+ *   sk-ant-…  Anthropic, Messages-API (claude-fable-5-1, das stärkste Modell),
+ *             etwa 30 Cent pro Rezept vom Guthaben der Console – bei einem
+ *             Claude-Max-Abo aus dessen Monatsguthaben (100 $ im Monat), sonst
+ *             gekauft. Der Kopf „anthropic-dangerous-direct-browser-access“
  *             erlaubt den Aufruf aus dem Browser, wenn – wie hier – jeder
  *             seinen eigenen Schlüssel mitbringt.
  *
@@ -33,9 +35,9 @@ export const ANBIETER = {
   },
   anthropic: {
     name: 'Anthropic',
-    modell: 'claude-sonnet-5-5',
+    modell: 'claude-fable-5-1',
     api: 'https://api.anthropic.com/v1/messages',
-    preis: { ein: 2, aus: 10 }, // US-Dollar pro Million Tokens (Sonnet 5.5)
+    preis: { ein: 10, aus: 50 }, // US-Dollar pro Million Tokens (Fable 5.1)
   },
 };
 /** Welcher Anbieter zu einem Schlüssel gehört – oder '' für keinen. */
@@ -159,8 +161,8 @@ export const KI_FEHLER = {
     sicherheit: 'Gemini wollte zu diesem Foto oder Text kein Rezept machen. Versuch es mit einer Liste statt Foto.',
   },
   anthropic: {
-    schluessel: 'Anthropic lehnt den Schlüssel ab. Prüf ihn unter console.anthropic.com → API Keys und trag ihn neu ein.',
-    guthaben: 'Auf dem Anthropic-Konto ist kein Guthaben. In der Console unter Billing aufladen, dann nochmal.',
+    schluessel: 'Anthropic lehnt den Schlüssel ab. Prüf ihn unter platform.claude.com → API Keys und trag ihn neu ein.',
+    guthaben: 'Auf dem Anthropic-Konto ist kein Guthaben: Das Monatsguthaben des Abos ist aufgebraucht (kommt mit der nächsten Abo-Zahlung wieder), oder es wurde noch keins verknüpft. Unter platform.claude.com → Billing nachsehen oder aufladen, dann nochmal.',
     grenze: 'Gerade zu viele Anfragen. In einer Minute nochmal versuchen.',
     ueberlastet: 'Claude ist gerade überlastet. Gleich nochmal versuchen.',
     netz: 'Keine Verbindung zu Anthropic. Prüf das Internet und versuch es nochmal.',

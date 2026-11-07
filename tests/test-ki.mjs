@@ -129,7 +129,7 @@ check(rg.model === 'gemini-3.8-flash' && rg.response_format?.mime_type === 'appl
 check(rg.input[0].type === 'image' && rg.input[0].mime_type === 'image/jpeg' && rg.input[0].data === 'AAAA' && rg.input[1].type === 'text' && /Portionen: 6/.test(rg.input[1].text), 'Foto als Bild-Teil, Text dahinter');
 check(/als JSON genau nach dem vorgegebenen Schema/.test(rg.system_instruction) && !/rezept_ausgeben/.test(rg.system_instruction) && /Kein Fisch/.test(rg.system_instruction), 'Gemini bekommt dieselben Regeln, nur ohne Werkzeug');
 check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).response_format && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).tool_choice, 'rumpfFuer wählt nach Anbieter');
-check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') > 0 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null, 'Gemini (3.8 Flash) kostet nichts, Claude ein paar Cent');
+check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') === 30 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null && ANBIETER.anthropic.modell === 'claude-fable-5-1' && MODELL === 'claude-fable-5-1', 'Gemini (3.8 Flash) kostet nichts, Claude (Fable 5.1) 10 $ und 50 $ je Million Tokens');
 
 // --- Rezept mit der KI ändern: Vorlage, Anfrage, ans Original anschließen, wieder aufs Ziel
 const terK = kiBereinigen(festAlsKi(daten.rezepte.find((r) => r.id === 'teriyaki'), daten.katalog)).r;
@@ -186,7 +186,7 @@ const gelesen = await mitFetch(() => new Response(STROM(JSON.stringify(ANTWORT))
 check(gelesen.eingabe.name === ANTWORT.name && gelesen.usage.ein === 3000 && gelesen.usage.aus === 4000 && fortschritt > 1000, 'der Strom wird gelesen: Rezept, Tokens, Fortschritt');
 const kopf = mitFetch.letzte.opt.headers;
 check(kopf['x-api-key'] === 'sk-ant-test' && kopf['anthropic-dangerous-direct-browser-access'] === 'true' && kopf['anthropic-version'] && JSON.parse(mitFetch.letzte.opt.body).stream === true, 'Anfrage mit Schlüssel, Browser-Freigabe, Version und stream');
-check(Math.abs(kostenCent(gelesen.usage) - 4.6) < 0.01, `Kosten: ca. ${kostenCent(gelesen.usage).toFixed(1)} Cent`);
+check(Math.abs(kostenCent(gelesen.usage) - 23) < 0.01, `Kosten: ca. ${kostenCent(gelesen.usage).toFixed(1)} Cent (3000 rein, 4000 raus, Fable)`);
 const fehlerArt = async (antwort) => { try { await mitFetch(antwort, () => kiAnfragen(rumpf, { schluessel: 'x' })); return 'kein Fehler'; } catch (e) { return e.art; } };
 check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'authentication_error', message: 'invalid x-api-key' } }), { status: 401 })) === 'schluessel', '401: Schlüssel prüfen');
 check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'invalid_request_error', message: 'Your credit balance is too low' } }), { status: 400 })) === 'guthaben', 'kein Guthaben wird erkannt');

@@ -131,7 +131,7 @@ function formularHTML() {
 <textarea id="sk-text" rows="3" maxlength="30000" placeholder="Die Karte als Text einfügen${gemini ? ' – oder den Link zur Karte auf der Webseite' : ''}">${esc(text)}</textarea>
 <p class="zugang-fehler" id="sk-fehler"${fehler ? '' : ' hidden'}>${esc(fehler)}</p>
 <button type="submit" class="btn btn-primary k-los" id="sk-los">Passendes Gericht finden</button>
-<p class="fine">Dauert etwa eine halbe Minute${gemini ? ' und ist kostenlos. Die Karte geht nur an Google' : ' und kostet ein paar Cent. Die Karte geht nur an Anthropic'}; gemerkt wird das Ergebnis nur auf diesem Gerät.</p>
+<p class="fine">Dauert etwa eine halbe Minute${gemini ? ' und ist kostenlos. Die Karte geht nur an Google' : ' und geht aufs Anthropic-Guthaben (ein paar Cent). Die Karte geht nur an Anthropic'}; gemerkt wird das Ergebnis nur auf diesem Gerät.</p>
 ${ergebnis ? '<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="sk-letzte">Letztes Ergebnis zeigen</button></div>' : ''}
 </form>`;
 }

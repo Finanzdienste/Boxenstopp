@@ -363,7 +363,7 @@ ehrlicher Kennung, dreimal die Woche:
 | Aldi (Nord) | `aldi-nord.de/angebote.html`, `…/angebote-vorschau.html` | alle Artikel der Woche als eingebettetes JSON: Preis, Packung, Grundpreis, gültig von/bis; die Vorschau auf die nächste Woche ist ab Donnerstag da |
 | Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` (und `?kloffer-week=next`) | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit); die nächste Woche ist anfangs nur Vorwerbung, die Lebensmittel kommen zum Wochenende |
 | Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe, diese und nächste Kalenderwoche (die nächste antwortet ab dem Wochenende) |
-| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Gemini (`generateContent`) liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Im Gratis-Kontingent hängt mal das eine, mal das andere Modell: Nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, steht in `daten/angebote.json` und kommt beim nächsten Lauf zuerst dran; hängende Stapel bekommen einen zweiten Durchgang. Dafür braucht der Lauf den Schlüssel als Secret `GEMINI_KEY` (Settings → Secrets and variables → Actions); ohne ihn fällt Lidl aus. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` |
+| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Eine KI liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Mit dem Secret `ANTHROPIC_API_KEY` ist das Claude (`claude-fable-5-1` über die Messages-API, gestreamt, drei Stapel nebeneinander; bei Überlastung nach zwei Pausen Sonnet 5.5; ein anderes Modell über die Variable `CLAUDE_MODELL`) – mit einem Claude-Max-Abo aus dessen Monatsguthaben, etwa 3 $ je Prospekt. Mit `GEMINI_KEY` ist es Gemini (`generateContent`, kostenlos): Im Gratis-Kontingent hängt mal das eine, mal das andere Modell, nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, kommt beim nächsten Lauf zuerst dran. Sind beide Secrets da, nimmt der Lauf Claude; ohne eins fällt Lidl aus. Hängende Stapel bekommen einen zweiten Durchgang. Ein Prospekt, den der letzte Lauf schon ganz gelesen hat, wird nicht noch einmal gelesen – er gilt die ganze Woche, seine Angebote kommen aus der alten Datei (`quellen[].prospekte` in `daten/angebote.json`); so liest der Lauf meist nur sonntags den Prospekt der nächsten Woche. Das Modell steht in `daten/angebote.json`. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` (zählt nicht als ganz gelesen) |
 | Rewe, Edeka | kaufDA, **privat** (siehe unten) | Die eigenen Seiten sperren automatische Abrufe (rewe.de: Cloudflare-Abfrage auf allen Seiten, Edeka: 403 mit Scherzantwort). Ihre Angebote kommen über kaufDA und landen nur im privaten Daten-Repo |
 
 **Rewe und Edeka über kaufDA – nur privat.** kaufDA (Bonial, der
@@ -837,13 +837,16 @@ API-Schlüssel, den der Anfang des Schlüssels einem Anbieter zuordnet:
 | Schlüssel | Anbieter, Modell | Kosten | Antwort |
 | --- | --- | --- | --- |
 | `AQ.…` (älter: `AIza…`) | Google, `gemini-3.8-flash` über die Interactions-API (`/v1beta/interactions`, `store: false`) | kostenlos, ohne Kreditkarte; dafür darf Google die Anfragen zum Verbessern seiner Produkte nutzen | JSON mit `response_format` und Schema |
-| `sk-ant-…` | Anthropic, `claude-sonnet-5-5` (Messages-API) | ein paar Cent pro Rezept, Guthaben nötig | Werkzeug `rezept_ausgeben` |
+| `sk-ant-…` | Anthropic, `claude-fable-5-1` (Messages-API) – das stärkste Modell | etwa 30 Cent pro Rezept vom Guthaben der Console; mit einem Claude-Max-Abo aus dessen Monatsguthaben (100 $ im Monat, verfällt monatlich) | Werkzeug `rezept_ausgeben` |
 
-Der normale Weg ist Google: auf
+Der Weg ohne Abo ist Google: auf
 [aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem
 Google-Konto anmelden, „Create API key“, den Schlüssel in der App unter
-Einstellungen → KI-Schlüssel (oder gleich in der Resteverwertung) einfügen. Beide Antworten werden gestreamt, die Leiste zeigt
-Modell und Kosten der Anfrage.
+Einstellungen → KI-Schlüssel (oder gleich in der Resteverwertung) einfügen.
+Mit einem Claude-Max-Abo lieber Claude: Auf claude.ai unter Settings →
+Billing → API credits die Console-Organisation verknüpfen, dort unter API
+Keys einen Schlüssel anlegen und ihn genauso in die App einfügen. Beide
+Antworten werden gestreamt, die Leiste zeigt Modell und Kosten der Anfrage.
 
 Der Schlüssel steht nur im localStorage (`boxenstopp.ki.v1`), nirgends im Code
 oder im Repo. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy in den
@@ -1212,7 +1215,7 @@ die Action „Rezeptfotos“.
 | `js/bilder.js` | Bildchen je Zutat (Schlüssel, Stichwort, Abteilung) und für Rezepte ohne Foto – ohne DOM |
 | `werkzeug/bilder.mjs`, `.github/workflows/bilder.yml` | Rezeptfotos per KI (Cloudflare Workers AI) → bilder/rezepte |
 | `werkzeug/zutaten-bilder.mjs` | Bildchen aus Fluent Emoji → bilder/zutaten (mit alle.json für den Offline-Vorrat) |
-| `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny, Lidl per Gemini) → daten/angebote.json |
+| `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny; Lidl liest Claude oder Gemini aus dem Prospekt) → daten/angebote.json |
 | `.github/workflows/angebote.yml` | Montag, Donnerstag und Sonntag: Angebote holen, Preisverlauf rechnen, einchecken |
 | `werkzeug/preisverlauf.mjs` | aus der Git-Historie von daten/angebote.json → daten/preisverlauf.json |
 | `werkzeug/push.mjs` | Push-Nachrichten verschicken (läuft im Daten-Repo: `benachrichtigen.yml`, `angebote.yml`, `haushalt.yml`) |

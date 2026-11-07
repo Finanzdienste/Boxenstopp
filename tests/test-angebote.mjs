@@ -11,7 +11,7 @@ import { istTabu, zeileLesen, einheitNorm, schluesselRaten, ladenName, angebotBe
 import { leer, anwenden, bereinigen, opAngebote, opAngeboteDazu, opAngebotWeg, opTeil, opHaken } from '../js/liste.js';
 import { offenJeZutat } from '../js/kosten.js';
 import { systemText, nutzerText } from '../js/ki.js';
-import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, geminiRumpf, geminiAnfragen, mitAusweichen, kaufdaLesen, kaufdaDoppelt, kaufdaMenge, kalenderwoche } from '../werkzeug/angebote.mjs';
+import { aldiLesen, kauflandLesen, pennyLesen, lidlProspekte, lidlSeitenWahl, lidlStapelLesen, lidlKi, lidlSchonGelesen, geminiRumpf, geminiAnfragen, claudeRumpf, claudeAnfragen, mitAusweichen, kaufdaLesen, kaufdaDoppelt, kaufdaMenge, kalenderwoche } from '../werkzeug/angebote.mjs';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -332,6 +332,95 @@ const anfragenMock = (zuViel) => {
   server.close();
   const weg = await (async () => { try { return await geminiAnfragen(rumpf, { schluessel: 'AQ.test', api: 'http://127.0.0.1:9/models', timeout: 3000 }); } catch (e) { return e; } })();
   check(weg.art === 'netz', 'generateContent: nicht erreichbar → netz');
+}
+
+// --- Claude liest den Prospekt: Rumpf, Anfrage gegen einen Mock von /v1/messages (Strom), Wahl des Anbieters
+{
+  const r = claudeRumpf({ fotos: ['abc'], text: 'Lidl, Seiten 1–6', katalog });
+  check(r.model === 'claude-fable-5-1' && r.tool_choice?.name === 'angebote_ausgeben' && r.tools[0].input_schema === ANGEBOTE_SCHEMA && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /kein Schwein/.test(r.system) && /Werkzeug angebote_ausgeben/.test(r.system), 'Claude-Rumpf: Fable, Werkzeug mit dem Schema, Seitenbilder, Seitenbereich im Text');
+  const { anfragen: mock, ruempfe } = (() => {
+    const liste = [];
+    return { anfragen: async (rumpf) => { liste.push(rumpf); return { eingabe: { angebote: [{ laden: 'Lidl', name: 'Skyr', preis: 0.99 }] }, usage: { ein: 1, aus: 2 } }; }, ruempfe: liste };
+  })();
+  const stapel6 = Array.from({ length: 6 }, (_, i) => ({ number: i + 10, b64: 'y' }));
+  const roh = await lidlStapelLesen(stapel6, { von: '2026-11-02', bis: '2026-11-07', anfragen: mock, rumpfBauen: claudeRumpf });
+  check(roh.length === 1 && ruempfe.length === 1 && ruempfe[0].messages && ruempfe[0].messages[0].content.filter((c) => c.type === 'image').length === 6 && /Seiten 10–15/.test(ruempfe[0].messages[0].content.at(-1).text), 'Lidl-Stapel mit Claude: die Messages-Anfrage statt generateContent');
+
+  const anfragen = [];
+  const antworten = [];
+  const strom = (json, { stopp = 'tool_use', stueck = 200 } = {}) => {
+    const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
+    let s = ev({ type: 'message_start', message: { usage: { input_tokens: 9000, output_tokens: 1 } } });
+    s += ev({ type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 't1', name: 'angebote_ausgeben', input: {} } });
+    for (let i = 0; i < json.length; i += stueck) s += ev({ type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: json.slice(i, i + stueck) } });
+    s += ev({ type: 'content_block_stop', index: 0 });
+    s += ev({ type: 'message_delta', delta: { stop_reason: stopp }, usage: { output_tokens: 2500 } });
+    s += ev({ type: 'message_stop' });
+    return s;
+  };
+  const server = createServer((req, res) => {
+    let body = '';
+    req.on('data', (d) => { body += d; });
+    req.on('end', () => {
+      anfragen.push({ url: req.url, key: req.headers['x-api-key'], version: req.headers['anthropic-version'], rumpf: JSON.parse(body) });
+      const [status, antwort, kopf = { 'content-type': 'text/event-stream' }] = antworten.shift() || [200, ''];
+      res.writeHead(status, kopf);
+      res.end(antwort);
+    });
+  });
+  await new Promise((r) => { server.listen(0, '127.0.0.1', r); });
+  const api = `http://127.0.0.1:${server.address().port}/v1/messages`;
+  const lauf = async (opt = {}) => { try { return await claudeAnfragen(r, { schluessel: 'sk-ant-test', api, timeout: 3000, ...opt }); } catch (e) { return e; } };
+  antworten.push([200, strom(JSON.stringify({ angebote: [{ laden: 'Lidl', name: 'Hähnchenbrustfilet', preis: 7.49, menge: 1, einheit: 'kg' }] }))]);
+  let a = await lauf();
+  check(a.eingabe?.angebote?.[0]?.name === 'Hähnchenbrustfilet' && a.usage.ein === 9000 && a.usage.aus === 2500 && a.usage.denken === 0 && a.grund === 'tool_use' && typeof a.dauer === 'number', `Messages-API: Antwort aus dem Werkzeug-Strom, Tokens (${JSON.stringify(a.usage)})`);
+  check(anfragen[0].key === 'sk-ant-test' && anfragen[0].version && anfragen[0].rumpf.model === 'claude-fable-5-1' && anfragen[0].rumpf.stream === true && anfragen[0].rumpf.tool_choice.name === 'angebote_ausgeben', 'Messages-API: Schlüssel und Version im Kopf, Fable, gestreamt');
+  antworten.push([200, strom('{"angebote":[]}')]);
+  a = await lauf({ modell: 'claude-sonnet-5-5' });
+  check(anfragen[1].rumpf.model === 'claude-sonnet-5-5' && Array.isArray(a.eingabe?.angebote), 'Messages-API: mitAusweichen gibt das Modell vor');
+  antworten.push([200, strom('{"angebote":[{"laden":"Lidl","na', { stopp: 'max_tokens' })]);
+  a = await lauf();
+  check(a.art === 'zulang', 'Messages-API: max_tokens → zulang (der Stapel wird halbiert)');
+  antworten.push([529, JSON.stringify({ type: 'error', error: { type: 'overloaded_error', message: 'Overloaded' } }), { 'content-type': 'application/json' }]);
+  a = await lauf();
+  check(a.art === 'ueberlastet' && !a.zeitablauf, 'Messages-API: 529 → ueberlastet');
+  antworten.push([429, JSON.stringify({ type: 'error', error: { type: 'rate_limit_error', message: 'This request would exceed the rate limit' } }), { 'content-type': 'application/json' }]);
+  a = await lauf();
+  check(a.art === 'grenze', 'Messages-API: 429 → grenze (warten, dann nochmal)');
+  antworten.push([400, JSON.stringify({ type: 'error', error: { type: 'invalid_request_error', message: 'Your credit balance is too low to access the Anthropic API.' } }), { 'content-type': 'application/json' }]);
+  a = await lauf();
+  check(a.art === 'guthaben', 'Messages-API: kein Guthaben → guthaben (der Lauf hört auf)');
+  antworten.push([401, JSON.stringify({ type: 'error', error: { type: 'authentication_error', message: 'invalid x-api-key' } }), { 'content-type': 'application/json' }]);
+  a = await lauf();
+  check(a.art === 'schluessel', 'Messages-API: 401 → schluessel');
+  antworten.push([404, JSON.stringify({ type: 'error', error: { type: 'not_found_error', message: 'model: claude-quatsch' } }), { 'content-type': 'application/json' }]);
+  a = await lauf();
+  check(a.art === 'modell', 'Messages-API: unbekanntes Modell → modell (fällt aus der Kette)');
+  const langsam = createServer((req, res) => { setTimeout(() => { res.writeHead(200, { 'content-type': 'text/event-stream' }); res.end(strom('{"angebote":[]}')); }, 1500); });
+  await new Promise((r2) => { langsam.listen(0, '127.0.0.1', r2); });
+  const zeit = await lauf({ api: `http://127.0.0.1:${langsam.address().port}/v1/messages`, timeout: 300 });
+  check(zeit.art === 'ueberlastet' && zeit.zeitablauf === true && /keine Antwort nach 0 s/.test(zeit.detail), 'Messages-API: keine Antwort in der Zeit → ueberlastet mit Zeitablauf');
+  langsam.close();
+  server.close();
+  const weg = await lauf({ api: 'http://127.0.0.1:9/v1/messages' });
+  check(weg.art === 'netz', 'Messages-API: nicht erreichbar → netz');
+
+  // Wahl des Anbieters: Claude vor Gemini, Gemini-Modell vom letzten Lauf zuerst, bei Claude bleibt Fable vorn
+  const kc = lidlKi({ anthropic: 'sk-ant-x', gemini: 'AQ.y', zuletzt: 'claude-sonnet-5-5' });
+  const kg = lidlKi({ anthropic: '', gemini: 'AQ.y', zuletzt: 'gemini-3.6-flash' });
+  const kgc = lidlKi({ anthropic: '', gemini: 'AQ.y', zuletzt: 'claude-sonnet-5-5' });
+  check(kc.anbieter === 'anthropic' && kc.modelle[0] === 'claude-fable-5-1' && kc.modelle.includes('claude-sonnet-5-5') && kc.nebeneinander === 3 && kc.anfragen === claudeAnfragen && kc.rumpfBauen === claudeRumpf, `Lidl-KI: mit beiden Schlüsseln Claude, Fable zuerst, drei nebeneinander (${kc.modelle.join(' → ')})`);
+  check(kg.anbieter === 'gemini' && kg.modelle[0] === 'gemini-3.6-flash' && kg.modelle[1] === 'gemini-3.8-flash' && kg.nebeneinander === 1 && kg.anfragen === geminiAnfragen && kgc.modelle[0] === 'gemini-3.8-flash' && lidlKi({ anthropic: '', gemini: '' }) === null, 'Lidl-KI: nur Gemini → das Modell vom letzten Lauf zuerst, ein Claude-Modell von früher zählt nicht; ohne Schlüssel keine');
+
+  // Schon gelesen: derselbe Prospekt gilt die ganze Woche
+  const passende = [{ id: 'aktionsprospekt-a', von: '2026-11-02', bis: '2026-11-07' }, { id: 'aktionsprospekt-b', von: '2026-11-09', bis: '2026-11-14' }];
+  const alt = {
+    quellen: [{ laden: 'Lidl', prospekte: [{ id: 'aktionsprospekt-a', von: '2026-11-02', bis: '2026-11-07', seiten: 40, gelesen: 40, komplett: true }, { id: 'aktionsprospekt-b', von: '2026-11-09', bis: '2026-11-14', seiten: 40, gelesen: 34, komplett: false }] }],
+    angebote: [{ laden: 'Lidl', name: 'Skyr', preis: 0.99, von: '2026-11-02', bis: '2026-11-07' }, { laden: 'Lidl', name: 'Hack', preis: 4.99, von: '2026-11-09', bis: '2026-11-14' }, { laden: 'Aldi', name: 'Skyr', preis: 0.89, von: '2026-11-02' }],
+  };
+  const schon = lidlSchonGelesen(alt, passende);
+  check(Object.keys(schon).join() === 'aktionsprospekt-a' && schon['aktionsprospekt-a'].angebote.length === 1 && schon['aktionsprospekt-a'].angebote[0].name === 'Skyr' && schon['aktionsprospekt-a'].eintrag.komplett === true, 'Schon gelesen: nur der ganz gelesene Prospekt mit seinen Lidl-Angeboten, der halbe nicht, Aldi nicht');
+  check(Object.keys(lidlSchonGelesen({ ...alt, angebote: [] }, passende)).length === 0 && Object.keys(lidlSchonGelesen(null, passende)).length === 0 && Object.keys(lidlSchonGelesen(alt, [{ id: 'aktionsprospekt-c', von: '2026-11-16', bis: '2026-11-21' }])).length === 0, 'Schon gelesen: ohne alte Angebote, ohne alte Datei oder bei einem neuen Prospekt nichts');
 }
 
 // --- Diese und nächste Woche (Mo–Sa); sonntags gilt schon die neue Woche als „diese“

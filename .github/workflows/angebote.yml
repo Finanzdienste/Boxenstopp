@@ -4,9 +4,12 @@
 # dort lassen sich die Quellen einschränken und Lidl auf ein paar Seiten begrenzen
 # (Probelauf, dauert dann nur Minuten).
 #
-# Lidl braucht einen Gemini-Schlüssel (Prospektseiten sind Bilder): als Secret
-# GEMINI_KEY unter Settings → Secrets and variables → Actions anlegen. Ohne ihn
-# läuft alles andere trotzdem.
+# Lidl braucht einen KI-Schlüssel (Prospektseiten sind Bilder), als Secret unter
+# Settings → Secrets and variables → Actions: ANTHROPIC_API_KEY für Claude
+# (Fable 5.1, läuft über das Monatsguthaben des Max-Abos) oder GEMINI_KEY für
+# Gemini (kostenlos); sind beide da, nimmt der Lauf Claude. Ein anderes
+# Claude-Modell geht über die Variable CLAUDE_MODELL (Variables, nicht Secrets).
+# Ohne Schlüssel läuft alles andere trotzdem.
 #
 # Danach kommt daten/preisverlauf.json dazu: je Zutat und Woche der günstigste
 # Preis aus allen eingecheckten Fassungen (werkzeug/preisverlauf.mjs – darum
@@ -39,7 +42,7 @@ jobs:
   holen:
     name: Angebote holen
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,6 +53,8 @@ jobs:
 
       - name: Angebote holen
         env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODELL: ${{ vars.CLAUDE_MODELL }}
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
           LIDL_MAX: ${{ inputs.lidl_seiten }}
           QUELLEN: ${{ inputs.quellen }}
