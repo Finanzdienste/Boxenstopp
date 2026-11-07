@@ -188,7 +188,7 @@ function werExtra(rid) {
   const t = String(rid).slice(2).replace(/-/g, ' ');
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
-const kurzName = (rid) => (istExtra(rid) ? (rid === 'x-ich' ? 'Dazu' : `${werExtra(rid)} dazu`) : null) || app.nachId[rid]?.short || app.extras[rid]?.short || (app.amyNach?.[rid] ? `♡ ${app.amyNach[rid].short}` : rid.startsWith('amy-') ? `♡ ${wessen(person())} Rezept` : rid);
+const kurzName = (rid) => (istExtra(rid) ? (rid === 'x-ich' ? 'Dazu' : `${werExtra(rid)} dazu`) : null) || app.nachId[rid]?.short || app.extras[rid]?.short || app.katalogNamen?.[rid] || (app.amyNach?.[rid] ? `♡ ${app.amyNach[rid].short}` : rid.startsWith('amy-') ? `♡ ${wessen(person())} Rezept` : rid);
 
 /** iPhone oder iPad: Dort hat die App vom Home-Bildschirm einen eigenen Speicher, getrennt von Safari. */
 const istIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

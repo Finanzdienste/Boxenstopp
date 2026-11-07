@@ -39,6 +39,7 @@ import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste } from './a
 import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillkommen, willkommenPruefen } from './ansicht-willkommen.js';
 import { boxenZeichnen, klickBoxen } from './ansicht-boxen.js';
 import { klickReste } from './ansicht-reste.js';
+import { katalogStart, katalogVorab, katalogLaden, klickKatalog } from './ansicht-katalog.js';
 import { boxenText } from './boxen.js';
 
 const apiBasis = () => lese('__api', null) || API;
@@ -71,6 +72,21 @@ const rezeptName = (rid) => app.nachId[rid]?.short || app.amyNach?.[rid]?.short 
 const speicherFuer = (z) => github({ ...z, ort: ortVon(z), api: apiBasis(), takt: takt(), rezeptName });
 
 const eyebrowZeichnen = () => { $('#r-eyebrow').textContent = `${app.rezepte.length} Rezepte · je ${boxenText(app.boxen)}`; };
+/*
+ * Der Katalog hat sich geändert (ansicht-katalog.js): neu rechnen und zeichnen.
+ * Ein offenes Katalogrezept zeichnet sich neu, ein herausgenommenes schließt;
+ * ein anderes offenes Rezept bleibt in Ruhe, das Raster kommt beim Schließen.
+ */
+app.rezepteNeu = () => {
+  if (!zielAnwenden()) return;
+  eyebrowZeichnen();
+  const rid = offenesRezept();
+  if (rid && !app.nachId[rid]) schliesseRezept();
+  else if (rid && app.nachId[rid].katalog) oeffneRezept(rid, { still: true });
+  else if (!rid) rasterZeichnen();
+  resteZeichnen();
+  listeZeichnen();
+};
 let einePersonGeschickt = '';
 function beiAenderung(stand) {
   app.stand = stand;
@@ -167,6 +183,9 @@ app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
   statusZeichnen();
   privateAngebote();
   geteiltenKiHolen();
+  katalogVorab();
+  app.rezepteNeu();
+  katalogLaden({ abgleich: true });
   return 'ok';
 };
 
@@ -177,6 +196,8 @@ app.trennen = () => {
   app.kiGeteilt = null;
   app.listeDa = false;
   angebotePrivatVergessen();
+  katalogVorab();
+  app.rezepteNeu();
   nimmSpeicher(lokal());
   zugangZeichnen();
   melde('Getrennt. Die Liste bleibt in GitHub, hier ist sie jetzt leer.');
@@ -215,6 +236,7 @@ document.addEventListener('click', (ev) => {
   if (klickHaushalt(el)) return;
   if (klickAmy(el)) return;
   if (klickReste(el)) return;
+  if (klickKatalog(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
   if (klickAnpassen(el)) return;
@@ -296,6 +318,8 @@ async function start() {
   const ausLink = link.token;
   // Ziel, Farbe und Namen der Liste schon vor dem ersten Zeichnen – wie das Gerät sie zuletzt kannte
   app.zugang = ladeZugang();
+  // Der gemeinsame Katalog: was das Gerät zuletzt kannte, gleich mit den Rezepten
+  katalogStart();
   geteiltenKiHolen();
   app.stand = { ...app.stand, profil: bekanntesProfil(app.zugang ? ortVon(app.zugang) : null) };
   zielAnwenden();
@@ -352,6 +376,7 @@ async function start() {
   if (app.zugang) nimmSpeicher(speicherFuer(app.zugang));
   else nimmSpeicher(lokal());
   privateAngebote();
+  katalogLaden({ abgleich: true });
 
   if (einladung) {
     app.verbinden(ausLink, link.fuer, { daten: link.daten, farbe: link.farbe }).then((e) => {

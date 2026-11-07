@@ -492,12 +492,13 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 @media (max-width:979.98px){
   .abk-leiste{flex-wrap:wrap}
   .abk-amy,.abk-haus,.abk-angebote{display:none}
-  .abk-reste,.abk-karte{flex:0 0 auto;max-width:none;flex-direction:row;gap:10px;padding:5px 16px 5px 5px;border-radius:14px;font-size:14.5px}
-  .abk-reste .abk-ic,.abk-karte .abk-ic{width:36px;height:36px;border-radius:10px}
-  .abk-reste .abk-ic .ic,.abk-karte .abk-ic .ic{width:20px;height:20px}
+  .abk-neu,.abk-reste,.abk-karte{flex:0 0 auto;max-width:none;flex-direction:row;gap:10px;padding:5px 16px 5px 5px;border-radius:14px;font-size:14.5px}
+  .abk-neu .abk-ic,.abk-reste .abk-ic,.abk-karte .abk-ic{width:36px;height:36px;border-radius:10px}
+  .abk-neu .abk-ic .ic,.abk-reste .abk-ic .ic,.abk-karte .abk-ic .ic{width:20px;height:20px}
   .abk-reste:has(#reste-letzter:not([hidden]))::after{top:5px;right:5px}
 }
 .abk-karte .abk-ic{background:#FFE9D6;color:#B45309}
+.abk-neu .abk-ic{background:var(--accent-soft);color:var(--accent)}
 html[data-farbe="lila"] .abk-karte .abk-ic{background:#F3E8FF;color:#7A3FE0}
 @media (prefers-color-scheme:dark){:root:not([data-design="hell"]) .abk-karte .abk-ic{background:#3A2614;color:#FDBA74}}
 :root[data-design="dunkel"] .abk-karte .abk-ic{background:#3A2614;color:#FDBA74}
@@ -894,6 +895,9 @@ a.btn{text-decoration:none;color:inherit}
 
 /* ------------------------------------------------------------ Resteverwertung */
 .pill-ki{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+/* Neu im gemeinsamen Katalog (ansicht-katalog.js) */
+.pill-neu{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.kat-wunsch{margin-top:6px;font-size:13.5px;line-height:1.45;font-style:italic;color:var(--muted)}
 .ki-leiste{margin-top:14px;padding:12px 14px 13px;border-radius:14px;background:var(--surface);border:1.5px dashed var(--accent)}
 .ki-k{font-size:13.5px;color:var(--muted)}
 .ki-k b{color:var(--ink)}
@@ -1606,6 +1610,12 @@ html.pm-offen{overflow:hidden}
 .r-boxen .linkbtn{justify-self:start}
 .wk-boxen{display:grid;gap:8px;margin-top:14px}
 .wk-boxen-k{margin:0;font-weight:600;font-size:14.5px}
+
+/* Neues Rezept aus der Suche (ansicht-rezepte.js wunschZeichnen) */
+.r-wunsch{display:grid;justify-items:start;gap:4px;margin-top:14px}
+.r-wunsch[hidden]{display:none}
+.r-wunsch p{margin:0;font-size:14px;color:var(--muted)}
+.r-wunsch .fine{margin-top:2px}
 
 /* Was von den Packungen übrig bleibt (ansicht-reste.js): im Rezept bei den Zutaten und unten auf der Liste */
 .reste{margin:16px 0 6px;padding:2px 14px 12px;border-radius:14px;background:var(--surface-2);max-width:640px}

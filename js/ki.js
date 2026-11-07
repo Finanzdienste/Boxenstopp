@@ -24,6 +24,10 @@
  * nicht ab. Fotos gehen als JPEG mit, vorher auf höchstens 1280 px verkleinert
  * (ansicht-ki.js).
  *
+ * Vier Aufträge (modus): reste (was da ist), angebote (aus den Angeboten),
+ * aendern (ein Rezept nach Wunsch ändern) und wunsch (ein neues Rezept für den
+ * gemeinsamen Katalog, katalog.js – ein Wort wie „Kürbissuppe“ reicht).
+ *
  * anfrageBauen() und rumpfFuer() sind ohne Netz und ohne DOM, tests/test-ki.mjs
  * prüft daran, dass alle Regeln mitgehen.
  */
@@ -89,7 +93,10 @@ export function systemText({ portionen, ziel, dazukaufen, katalog, modus = 'rest
   const ausgabe = 'als JSON genau nach dem vorgegebenen Schema'; // beide Anbieter: JSON nach Schema
   const angebote = modus === 'angebote';
   const aendern = modus === 'aendern';
-  const auftrag = aendern
+  const wunsch = modus === 'wunsch';
+  const auftrag = wunsch
+    ? `Du schreibst EIN richtig gutes Meal-Prep-Rezept für ${portionen} gleiche Boxen nach dem Wunsch von ${wer.replace(' und ', ' oder ')} und gibst es ${ausgabe} aus. Steht im Wunsch nur ein Gericht („Kürbissuppe“), machst du die bewährte Fassung davon – als ganze Mahlzeit für die Box: Fehlen dem Gericht für das Ziel mageres Protein oder eine Sättigungsbeilage, kommen sie passend dazu (in eine Suppe etwa Hähnchen oder rote Linsen, dazu Brot, Kartoffeln oder Reis). Steht mehr im Wunsch, hältst du dich an alles, was dort steht. Das Rezept kommt in den Katalog der App, den alle nutzen – also ein Gericht, das man gern wieder kocht.`
+    : aendern
     ? `Du änderst ein bestehendes Rezept so, wie ${wer.replace(' und ', ' oder ')} es sich wünschen, und gibst das ganze geänderte Rezept für ${portionen} gleiche Boxen ${ausgabe} aus. Ändere nur, was der Wunsch verlangt, und was dafür nötig ist: Zutaten, Schritte, Schalen, Zeiten, Name und Beschreibung, wenn sie nicht mehr stimmen. Alles andere bleibt genau so – dieselben Zutaten mit derselben id, Menge, min, max, anpassbar und pro100, dieselben Schritte im selben Wortlaut. Neue Zutaten bekommen eine neue id, weggefallene verschwinden auch aus den Schritten. Lässt sich der Wunsch nicht erfüllen, ohne gegen die Regeln unten zu verstoßen, änderst du so wenig wie möglich und sagst es in hinweis.`
     : angebote
     ? `Aus den Angeboten der Woche bei ihren Supermärkten machst du EIN richtig gutes Rezept für ${portionen} gleiche Boxen und gibst es ${ausgabe} aus. Die Hauptzutaten (Protein, Sättigungsbeilage, Gemüse) sollen möglichst aus den Angeboten kommen; sie sind alle zu kaufen (quelle: kaufen), nichts davon ist schon da. Was fehlt, kommt normal dazu.`
@@ -103,7 +110,9 @@ Feste Regeln:
 - Kein Schweinefleisch in jeder Form (Speck, Schinken, Salami, Chorizo, Wurst, gemischtes Hack, Gelatine) und kein Putenhack. Hähnchen, Putenbrust, Rind, Eier, Hülsenfrüchte und Milchprodukte sind gut.
 - Kein Hüttenkäse und kein Quark oder Skyr in warmen Saucen – die werden körnig. Quark und Skyr nur kalt (Dip, Marinade).
 - Richtig lecker und ordentlich gewürzt, so dass man es gern vier Tage hintereinander isst. Lieber ein bewährtes Gericht gut gemacht als ein wildes Experiment.
-- ${aendern
+- ${wunsch
+    ? 'Alles wird eingekauft (quelle: kaufen, Packungsgröße in packung), nichts ist schon da; Öl, Mehl, Brühe, Zucker, Senf und Sojasauce sind vorrat. Möglichst ganze Supermarkt-Packungen (500 g Hackfleisch, 1 Dose Kokosmilch, 1 Hokkaido-Kürbis), damit nichts übrig bleibt. Bei anpassbar min und max großzügig (etwa halb bis doppelt so viel), damit die App das Rezept auch auf andere Ziele rechnen kann. Hast du dem Gericht etwas fürs Ziel dazugegeben, sagst du es in hinweis in einem Satz.'
+    : aendern
     ? 'Was der Wunsch neu braucht, wird gekauft (quelle: kaufen, Packungsgröße in packung) – so wenig wie nötig und in Supermarkt-Packungen. Ersetzt eine fertige Zutat mehrere (fertige Sauce statt selbst gemacht), fallen die alten mit ihren Schritten weg. In hinweis sagst du in einem Satz, was du geändert hast.'
     : angebote
     ? 'Nutze so viele Angebote wie sinnvoll, aber kein Gericht erzwingen: lieber drei Angebote in einem stimmigen Rezept als sechs in einem seltsamen. In hinweis sagst du kurz, welche Angebote drin sind.'
@@ -138,6 +147,14 @@ Antworte nur mit dem JSON, ohne Text davor oder danach, alles auf Deutsch.`;
 export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, mag = [], magNicht = [], vermeiden = [], modus = 'reste', rezept = null, wunsch = '' }) {
   // Ändern: das Rezept, wie es jetzt ist, im Format der Antwort – und was anders sein soll
   if (modus === 'aendern') return ['Das Rezept, wie es jetzt ist (JSON im Format deiner Antwort):', JSON.stringify(rezept), '', `Was anders sein soll: ${String(wunsch || '').trim()}`].join('\n');
+  // Ein neues Rezept nach Wunsch: ein Wort oder ein ganzer Text
+  if (modus === 'wunsch') {
+    const z = ['Der Wunsch:', String(text || '').trim(), '', `Portionen: ${portionen}`];
+    if (mag.length) z.push(`Das mögen sie (Daumen hoch): ${mag.join(', ')}`);
+    if (magNicht.length) z.push(`Das mögen sie nicht (Daumen runter): ${magNicht.join(', ')}`);
+    if (vermeiden.length) z.push(`Diesmal anders als: ${vermeiden.join(', ')}`);
+    return z.join('\n');
+  }
   const zeilen = [
     modus === 'angebote' ? 'Das ist diese Woche im Angebot:' : 'Das ist noch da:',
     String(text || '').trim() || '(steht nur auf den Fotos)',

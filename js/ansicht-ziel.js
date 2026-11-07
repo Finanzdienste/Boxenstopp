@@ -22,11 +22,15 @@ import { alleAufZiel, zielBereinigen, gleichesZiel, kcalAus, zielText, trefferZa
 import { opProfil, opTeil, rezepteAufListe, einkaufsZutaten, aufloesen } from './liste.js';
 import { istEigen } from './profil.js';
 import { aufBoxen, boxenDerListe } from './boxen.js';
+import { katalogRezepte, katalogNamen } from './katalog.js';
 
 const MENGEN = 'boxenstopp.zielmengen.v1'; // { schluessel, mengen: { <rezept>: { <zutat>: Menge } } }
 const zielSchluessel = (z) => MAKROS.map((k) => z[k]).join('|');
 
 let angewendet = '';
+let katalogAngewendet = '';
+let feste = [];
+let ausKatalog = [];
 
 /** Das Ziel der Liste – das eigene, sonst das aus daten/rezepte.json. */
 export const eigenesZiel = () => zielBereinigen(app.stand.profil?.ziel);
@@ -35,8 +39,9 @@ const zielJetzt = () => eigenesZiel() || app.zielStandard;
 export const hatEigenesZiel = () => !!eigenesZiel() && !gleichesZiel(eigenesZiel(), app.zielStandard);
 
 /**
- * Das Ziel anwenden: app.ziel setzen und die festen Rezepte darauf rechnen
- * (app.rezepte, app.nachId). true, wenn sich etwas geändert hat – dann muss
+ * Das Ziel anwenden: app.ziel setzen und die festen Rezepte darauf rechnen,
+ * dazu die aus dem gemeinsamen Katalog (katalog.js, die neuesten zuerst) –
+ * app.rezepte, app.nachId. true, wenn sich etwas geändert hat – dann muss
  * neu gezeichnet werden.
  */
 export function zielAnwenden() {
@@ -44,21 +49,36 @@ export function zielAnwenden() {
   const z = zielJetzt();
   const boxen = boxenDerListe(app.stand);
   const schluessel = `${app.datenVersion || ''}|${zielSchluessel(z)}`;
-  if (`${schluessel}|${boxen}` === angewendet) return false;
-  angewendet = `${schluessel}|${boxen}`;
-  app.ziel = { ...z };
-  app.boxen = boxen;
-  let rezepte = app.rezepteBasis;
-  if (!gleichesZiel(z, app.zielStandard)) {
-    const gemerkt = lese(MENGEN, null);
-    const daten = { preise: app.richtpreise, naehrwerte: app.naehrwerte };
-    const ergebnis = alleAufZiel(app.rezepteBasis, z, daten, gemerkt?.schluessel === schluessel ? gemerkt.mengen : {});
-    rezepte = ergebnis.rezepte;
-    if (gemerkt?.schluessel !== schluessel) schreibe(MENGEN, { schluessel, mengen: ergebnis.mengen });
+  let neu = false;
+  if (`${schluessel}|${boxen}` !== angewendet) {
+    angewendet = `${schluessel}|${boxen}`;
+    app.ziel = { ...z };
+    app.boxen = boxen;
+    let rezepte = app.rezepteBasis;
+    if (!gleichesZiel(z, app.zielStandard)) {
+      const gemerkt = lese(MENGEN, null);
+      const daten = { preise: app.richtpreise, naehrwerte: app.naehrwerte };
+      const ergebnis = alleAufZiel(app.rezepteBasis, z, daten, gemerkt?.schluessel === schluessel ? gemerkt.mengen : {});
+      rezepte = ergebnis.rezepte;
+      if (gemerkt?.schluessel !== schluessel) schreibe(MENGEN, { schluessel, mengen: ergebnis.mengen });
+    }
+    if (boxen !== 8) rezepte = rezepte.map((r) => aufBoxen(r, boxen, { katalog: app.katalog }));
+    feste = rezepte;
+    neu = true;
   }
-  if (boxen !== 8) rezepte = rezepte.map((r) => aufBoxen(r, boxen, { katalog: app.katalog }));
-  app.rezepte = rezepte;
-  for (const r of rezepte) app.nachId[r.id] = r;
+  // Der Katalog: jedes Rezept auf das Ziel und die Boxen dieser Liste
+  const kat = app.katalogStand;
+  const katSchluessel = `${zielSchluessel(z)}|${boxen}|${kat ? Object.entries(kat.rezepte).map(([id, e]) => `${id}@${e.at}`).join(',') : ''}`;
+  if (katSchluessel !== katalogAngewendet) {
+    katalogAngewendet = katSchluessel;
+    for (const r of ausKatalog) delete app.nachId[r.id];
+    ausKatalog = kat ? katalogRezepte(kat, { ziel: z, boxen, katalog: app.katalog, einheiten: app.einheiten }) : [];
+    app.katalogNamen = kat ? katalogNamen(kat) : {};
+    neu = true;
+  }
+  if (!neu) return false;
+  app.rezepte = [...ausKatalog, ...feste];
+  for (const r of app.rezepte) app.nachId[r.id] = r;
   zielKopfZeichnen();
   return true;
 }

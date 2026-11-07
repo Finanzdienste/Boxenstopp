@@ -2,6 +2,13 @@
  * Reiter „Rezepte“, Teil Resteverwertung: Was ist noch da? → die KI macht ein
  * Rezept → die App rechnet es auf eure Ziele → behalten, einkaufen, kochen.
  *
+ * Dasselbe Formular macht auch neue Rezepte nach Wunsch (modus 'wunsch',
+ * „Neues Rezept“ oder aus der Suche): Ein Wort wie „Kürbissuppe“ reicht, ein
+ * ganzer Text auch. Das Rezept kommt für 8 Boxen gleich in den gemeinsamen
+ * Katalog (ansicht-katalog.js, über app.katalogDazu) – für alle, jede Liste
+ * auf ihr Ziel und ihre Boxen gerechnet. Ohne gemeinsame Liste wird es ein
+ * Vorschlag wie bei der Resteverwertung.
+ *
  *   1. #reste zeigt das Formular: Text, Fotos, Portionen, Dazukaufen,
  *      Wünsche. Ohne KI-Schlüssel zuerst das Einrichten.
  *   2. „Rezept machen“ schickt alles an Gemini oder Claude (ki.js) und zeigt, wie weit
@@ -49,8 +56,8 @@ const eingabe = {
   portionenBei: gueltig(gemerkt.portionenBei) ? gemerkt.portionenBei : gueltig(gemerkt.portionen) ? 8 : null,
   dazukaufen: gemerkt.dazukaufen !== false,
   vermeiden: Array.isArray(gemerkt.vermeiden) ? gemerkt.vermeiden.filter((x) => typeof x === 'string').slice(-5) : [],
-  // 'reste' (was da ist) oder 'angebote' (aus den Angeboten der Woche, ansicht-angebote.js)
-  modus: gemerkt.modus === 'angebote' ? 'angebote' : 'reste',
+  // 'reste' (was da ist), 'angebote' (aus den Angeboten der Woche, ansicht-angebote.js) oder 'wunsch' (ein neues Rezept für den Katalog)
+  modus: ['angebote', 'wunsch'].includes(gemerkt.modus) ? gemerkt.modus : 'reste',
 };
 const eingabeMerken = () => schreibe(EINGABE, eingabe);
 const portionen = () => (eingabe.portionen && eingabe.portionenBei === (app.boxen || 8) ? eingabe.portionen : app.boxen || 8);
@@ -67,6 +74,9 @@ let fotos = []; // { url, b64 }
 let lauf = null; // { controller, start, zeichen, schritte, timer }
 let fehler = null; // Text
 let einrichten = false;
+let ersetzen = ''; // „Neuer Vorschlag“ für ein Katalogrezept: dessen id, es geht dafür heraus
+let anders = ''; // … und dessen Name: diesmal anders als das
+const istWunsch = () => eingabe.modus === 'wunsch';
 
 /* ------------------------------------------------ Rezepte für die App */
 
@@ -132,6 +142,7 @@ function loeschen(rid) {
 const kostenText = (c) => (c === 0 ? 'kostenlos' : c < 1 ? 'unter 1 Cent' : `ca. ${Math.round(c)} Cent`);
 
 function kiLeiste(r) {
+  if (r.katalog) return app.katalogLeiste(r);
   const v = r.ki?.von || {};
   const gespeichert = !!v.gespeichert;
   const wer = v.by ? ` von ${v.by === app.name() ? 'dir' : esc(v.by)}` : '';
@@ -146,7 +157,7 @@ function kiLeiste(r) {
   const hinweis = !daneben && r.ki.hinweis ? `<p class="ki-hinweis">${esc(r.ki.hinweis)}</p>` : '';
   const kosten = !gespeichert && typeof v.kosten === 'number' ? ` · ${esc(v.modell || 'KI')}, ${kostenText(v.kosten)}` : '';
   const basis = r.ki.herkunft ? app.nachId[r.ki.herkunft] : null;
-  const quelle = v.modus === 'angebote' ? 'Aus den Angeboten' : 'Resteverwertung';
+  const quelle = v.modus === 'angebote' ? 'Aus den Angeboten' : v.modus === 'wunsch' ? 'Neues Rezept' : 'Resteverwertung';
   const knoepfe = gespeichert
     ? `${r.ki.herkunft ? '' : '<button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button>'}<button type="button" class="btn btn-quiet" data-act="ki-loeschen">Löschen</button>`
     : `<button type="button" class="btn btn-primary" data-act="ki-behalten"${app.listeDa ? '' : ' disabled'}>Behalten</button><button type="button" class="btn" data-act="ki-neu">Neuer Vorschlag</button><button type="button" class="btn btn-quiet" data-act="ki-verwerfen">Verwerfen</button>`;
@@ -187,7 +198,7 @@ function einrichtenHTML(schluessel) {
   const link = schluessel ? (app.zugang ? linkFuerGeraet() : einladungsLink('', schluessel)) : '';
   const da = anbieterVon(schluessel);
   return `<form class="ki-box" id="k-schluessel-form" novalidate>
-<h2>Resteverwertung einrichten</h2>
+<h2>${istWunsch() ? 'KI einrichten' : 'Resteverwertung einrichten'}</h2>
 <p>Die App fragt Googles Gemini direkt vom Handy aus. Das ist kostenlos, ohne Kreditkarte – du brauchst nur einmal einen API-Schlüssel von Google:</p>
 <ol class="ki-anleitung">
 <li>Auf <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> mit deinem Google-Konto anmelden.</li>
@@ -209,7 +220,18 @@ function fotosHTML() {
   return fotos.map((f, i) => `<div class="k-foto"><img src="${esc(f.url)}" alt="Foto ${i + 1}"><button type="button" class="k-foto-x" data-foto-weg="${i}" aria-label="Foto ${i + 1} entfernen">${X}</button></div>`).join('');
 }
 
+function wunschHTML() {
+  return `<form class="ki-form" id="k-form" novalidate>
+<label for="k-text">Dein Wunsch</label>
+<textarea id="k-text" rows="4" maxlength="2000" placeholder="z. B. Kürbissuppe – oder genauer: was Cremiges mit Hähnchen und Spinat, ohne Ofen, mit Reis">${esc(eingabe.text)}</textarea>
+<p class="zugang-fehler" id="k-fehler"${fehler ? '' : ' hidden'}>${esc(fehler || '')}</p>
+<button type="submit" class="btn btn-primary k-los" id="k-los">Rezept machen</button>
+<p class="fine">Dauert etwa eine Minute${anbieterVon(ladeKi()) === 'gemini' ? ' und ist kostenlos. Der Wunsch geht nur an Google' : ' und geht aufs Anthropic-Guthaben (etwa 30 Cent). Der Wunsch geht nur an Anthropic'}. <button type="button" class="linkbtn" data-act="k-einrichten">KI-Schlüssel ändern</button></p>
+</form>`;
+}
+
 function formularHTML() {
+  if (istWunsch()) return wunschHTML();
   const voll = fotos.length >= MAX_FOTOS;
   return `<form class="ki-form" id="k-form" novalidate>
 <label for="k-text">${eingabe.modus === 'angebote' ? 'Im Angebot' : 'Im Kühlschrank und Vorrat'}</label>
@@ -250,7 +272,20 @@ function laufZeichnen() {
   if (el) el.textContent = laufText();
 }
 
+/** Unter dem Wunsch: was zuletzt in den Katalog kam. */
+function katalogListeHTML() {
+  const neu = app.rezepte.filter((r) => r.katalog).slice(0, 8);
+  if (!neu.length) return '';
+  return `<h3 class="sub-h">Zuletzt in den Katalog gekommen</h3><ul class="ki-liste">${neu.map((r) => {
+    const v = r.katalog;
+    const wer = v.by ? `von ${v.by === app.name() ? 'dir' : esc(v.by)}` : '';
+    const wann = v.at && !Number.isNaN(Date.parse(v.at)) ? esc(tagKurz(heute(new Date(v.at)))) : '';
+    return `<li><button type="button" class="ki-liste-b" data-open="${esc(r.id)}"><b>${esc(r.name)}</b><small>${[wer, wann].filter(Boolean).join(', ')}</small></button></li>`;
+  }).join('')}</ul>`;
+}
+
 function gemerktHTML() {
+  if (istWunsch()) return katalogListeHTML();
   const teile = [];
   if (entwurf) teile.push(`<div class="ki-letzter"><span>Letzter Vorschlag: <b>${esc(entwurf.r.name)}</b></span><button type="button" class="btn" data-open="${esc(entwurf.id)}">Öffnen</button></div>`);
   const behalten = app.kiRezepte.filter((r) => r.ki?.von?.gespeichert);
@@ -270,7 +305,11 @@ export function resteZeichnen() {
   if (!el || el.hidden) return;
   const schluessel = ladeKi();
   const ziele = `${app.ziel.kcal} kcal, ${String(app.ziel.p).replace('.', ',')} g P, ${String(app.ziel.kh).replace('.', ',')} g KH und ${String(app.ziel.f).replace('.', ',')} g F pro Box`;
-  const kopf = eingabe.modus === 'angebote'
+  const kopf = istWunsch()
+    ? `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
+<div class="d-head"><span class="tape">Neues Rezept</span><h1 id="k-titel">Was möchtest du kochen?</h1>
+<p class="d-desc">Ein Wort reicht – „Kürbissuppe“ –, ein ganzer Text auch. Die KI schreibt das Rezept für 8 Boxen, ${app.zugang ? 'und es kommt in den gemeinsamen Katalog: für alle, die die App nutzen, jede Liste auf ihr Ziel pro Box und ihre Boxen gerechnet' : 'die App rechnet es auf dein Ziel – mit einer gemeinsamen Liste käme es gleich in den Katalog für alle'}. Bei dir: ${ziele}${(app.boxen || 8) !== 8 ? `, für ${app.boxen === 1 ? '1 Box' : `${app.boxen} Boxen`}` : ''}.</p></div>`
+    : eingabe.modus === 'angebote'
     ? `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
 <div class="d-head"><span class="tape">Angebote</span><h1 id="k-titel">Rezept aus den Angeboten</h1>
 <p class="d-desc">Die KI macht aus den Angeboten der Woche ein Rezept für ${istEigen() ? 'deine' : 'eure'} Boxen, und die App rechnet die Mengen auf ${ziele}. <button type="button" class="linkbtn" data-act="k-modus-reste">Lieber Resteverwertung</button></p></div>`
@@ -358,12 +397,19 @@ async function rezeptMachen() {
   if (!schluessel) { einrichten = true; resteZeichnen(); return; }
   if (lauf) return;
   const text = eingabe.text.trim();
-  if (!text && !fotos.length) {
-    fehler = eingabe.modus === 'angebote' ? 'Es stehen keine Angebote drin.' : 'Schreib auf, was da ist, oder mach ein Foto.';
+  const wunsch = istWunsch();
+  if (!text && (wunsch || !fotos.length)) {
+    fehler = wunsch ? 'Schreib, was du kochen möchtest – ein Wort reicht.' : eingabe.modus === 'angebote' ? 'Es stehen keine Angebote drin.' : 'Schreib auf, was da ist, oder mach ein Foto.';
     resteZeichnen();
     $('#k-text')?.focus();
     return;
   }
+  // Für den Katalog immer 8 Boxen – jede Liste rechnet auf ihre um
+  const anzahl = wunsch ? 8 : portionen();
+  const ersetzt = wunsch ? ersetzen : '';
+  const vermeiden = wunsch ? (anders ? [anders] : []) : eingabe.vermeiden;
+  ersetzen = '';
+  anders = '';
   fehler = null;
   lauf = { controller: new AbortController(), start: Date.now(), zeichen: 0, schritte: 0, timer: null, wach: null };
   lauf.timer = setInterval(laufZeichnen, 1000);
@@ -380,15 +426,15 @@ async function rezeptMachen() {
   try {
     const rumpf = rumpfFuer(anbieter, {
       text,
-      wuensche: eingabe.wuensche,
-      fotos: fotos.map((f) => f.b64),
-      portionen: portionen(),
-      dazukaufen: eingabe.dazukaufen,
+      wuensche: wunsch ? '' : eingabe.wuensche,
+      fotos: wunsch ? [] : fotos.map((f) => f.b64),
+      portionen: anzahl,
+      dazukaufen: wunsch || eingabe.dazukaufen,
       ziel: app.ziel,
       katalog: app.katalog,
       mag: namenMitDaumen('hoch'),
       magNicht: namenMitDaumen('runter'),
-      vermeiden: eingabe.vermeiden,
+      vermeiden,
       modus: eingabe.modus,
       wer: fuerWen(),
     });
@@ -398,14 +444,28 @@ async function rezeptMachen() {
       signal: meinLauf.controller.signal,
       beiFortschritt: (f) => { meinLauf.zeichen = f.zeichen; meinLauf.schritte = f.schritte; laufZeichnen(); },
     });
-    const { r, fehler: f, art } = kiBereinigen({ ...roh, portionen: portionen() });
+    const { r, fehler: f, art } = kiBereinigen({ ...roh, portionen: anzahl });
     if (!r) throw Object.assign(new Error(f), { art });
+    // Nach Wunsch und mit gemeinsamer Liste: gleich in den Katalog, für alle
+    let nichtImKatalog = '';
+    if (wunsch && app.zugang && app.katalogDazu) {
+      try {
+        const kid = await app.katalogDazu(r, { wunsch: text, ersetzt });
+        fertig();
+        oeffneRezept(kid);
+        melde(`„${r.kurz}“ ist im Katalog – für alle, auf ihr Ziel und ihre Boxen gerechnet.`);
+        return;
+      } catch (e) {
+        nichtImKatalog = e?.message || 'Das ging gerade nicht.';
+      }
+    }
     const id = `ki-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), kosten: kostenCent(usage, anbieter), modell: ANBIETER[anbieter].modell, modus: eingabe.modus } };
     entwurfMerken();
     kiAbgleichen();
     fertig();
     oeffneRezept(id);
+    if (nichtImKatalog) melde(`Nicht in den Katalog gekommen: ${nichtImKatalog} Mit „Behalten“ bleibt es auf eurer Liste.`);
   } catch (e) {
     fertig();
     if (e?.art !== 'abbruch') {
@@ -441,6 +501,32 @@ export function klickKi(el) {
   const rid = offenesRezept();
   switch (d.act) {
     case 'reste': if (eingabe.modus !== 'reste') { eingabe.modus = 'reste'; eingabe.text = ''; eingabeMerken(); } oeffneReste(); return true;
+    case 'wunsch': if (!istWunsch()) { eingabe.modus = 'wunsch'; eingabe.text = ''; eingabeMerken(); } fehler = null; oeffneReste(); $('#k-text')?.focus(); return true;
+    case 'wunsch-suche': {
+      // Aus der Suche: „Kürbissuppe“ gibt es noch nicht – dann eben machen
+      const t = String($('#suche')?.value || '').trim().slice(0, 200);
+      eingabe.modus = 'wunsch';
+      eingabe.text = t;
+      eingabeMerken();
+      fehler = null;
+      oeffneReste();
+      if (t) rezeptMachen(); else $('#k-text')?.focus();
+      return true;
+    }
+    case 'kat-neu': {
+      // Ein Katalogrezept neu schreiben lassen – derselbe Wunsch, ein anderer Vorschlag; das alte geht dafür heraus
+      const r = app.nachId[rid];
+      if (!r?.katalog) return true;
+      eingabe.modus = 'wunsch';
+      eingabe.text = r.katalog.wunsch || r.name;
+      eingabeMerken();
+      ersetzen = rid;
+      anders = r.name;
+      fehler = null;
+      oeffneReste();
+      rezeptMachen();
+      return true;
+    }
     case 'k-modus-reste': eingabe.modus = 'reste'; eingabe.text = ''; fehler = null; eingabeMerken(); resteZeichnen(); return true;
     case 'reste-zu': schliesseReste(); return true;
     case 'k-abbrechen': lauf?.controller.abort(); return true;
@@ -455,6 +541,7 @@ export function klickKi(el) {
       return true;
     }
     case 'ki-neu': {
+      if (istEntwurf(rid) && entwurf.von?.modus === 'wunsch') anders = entwurf.r.name;
       if (istEntwurf(rid)) verwerfen();
       else if (app.nachId[rid]?.name && !eingabe.vermeiden.includes(app.nachId[rid].name)) { eingabe.vermeiden = [...eingabe.vermeiden, app.nachId[rid].name].slice(-5); eingabeMerken(); }
       oeffneReste();
@@ -502,7 +589,7 @@ export function absendenKi(ev) {
     einrichten = false;
     fehler = null;
     resteZeichnen();
-    melde('Gespeichert. Jetzt aufschreiben oder fotografieren, was da ist.');
+    melde(istWunsch() ? 'Gespeichert. Jetzt schreiben, was du kochen möchtest.' : 'Gespeichert. Jetzt aufschreiben oder fotografieren, was da ist.');
     return true;
   }
   return false;

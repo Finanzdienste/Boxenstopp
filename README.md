@@ -13,7 +13,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
 | **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
@@ -814,6 +814,55 @@ einen Daumen gibt oder „Heute gekocht“ drückt, behält ihn automatisch. Auf
 die Liste kommt nur, was fehlt; Zutaten, die es im Katalog mit derselben
 Einheit gibt, teilen sich die Zeile mit den festen Rezepten.
 
+### Neue Rezepte für den gemeinsamen Katalog
+
+Nicht nur die 50: Kachel **Neues Rezept** bei den Rezepten – oder in der
+Suche, wenn es etwas nicht gibt („„Kürbissuppe“ als neues Rezept machen“,
+startet gleich). Ein Wort reicht, ein ganzer Text auch („was Cremiges mit
+Hähnchen und Spinat, ohne Ofen, mit Reis“). Die KI schreibt **ein** Rezept
+für 8 Boxen nach denselben Regeln wie bei der Resteverwertung (`js/ki.js`,
+modus `wunsch`): Ist der Wunsch nur ein Gericht, wird es eine ganze Mahlzeit
+– fehlen ihm fürs Ziel Protein oder Sättigungsbeilage, kommen sie passend dazu
+(Kürbissuppe mit Hähnchen, roten Linsen und Baguette; was dazukam, steht im
+Rezept). Alles wird eingekauft, in ganzen Supermarkt-Packungen, und die KI gibt
+den Mengen mit `anpassbar` großzügig Spielraum.
+
+Das Rezept kommt **gleich in den Katalog, für alle**, die die App nutzen –
+Tobi und Amy, Marielle, weitere Gäste – und **jede Liste rechnet es auf ihr
+Ziel pro Box und ihre Boxen** (`js/katalog.js`): gespeichert wird es im
+KI-Format mit den Mengen, wie die KI sie vorgeschlagen hat; beim Anzeigen
+schiebt `mengenAnpassen` die Mengen mit `anpassbar` aufs Ziel der Liste (der
+Spielraum wächst mit, wenn das Ziel weit weg ist, wie bei den festen
+Rezepten), dann `aufBoxen` auf ihre Boxen. Die Kürbissuppe hat bei Tobi und
+Amy 442 kcal pro Box für 8 Boxen, bei Marielle (380 kcal, 2 Boxen) 383 kcal
+mit 180 g Hähnchen.
+
+Im Raster stehen neue Rezepte vorn, zwei Wochen lang mit „Neu · von Tobi“,
+und der Chip **„Neu dazu“** zeigt alle aus dem Katalog. Im Rezept die Leiste:
+wer es sich wann gewünscht hat und was, **Neuer Vorschlag** (derselbe
+Wunsch, „diesmal anders als“ das bisherige – es ersetzt das alte) und **Aus
+dem Katalog nehmen** (für alle; was davon auf der eigenen Liste steht, geht
+mit, „Rückgängig“ holt beides zurück). Anpassen und „Mit KI ändern“ machen
+daraus ein eigenes Rezept der Liste, wie bei den festen. Ohne gemeinsame
+Liste wird es ein Vorschlag wie bei der Resteverwertung (Behalten).
+
+**Wo es liegt:** `katalog.json` im Daten-Repo jeder Liste –
+`{ v: 1, rezepte: { 'kat-…': { k, wunsch, by, at, ziel } }, weg: { 'kat-…':
+{ at, kurz } } }`, höchstens 100 Rezepte. Jedes Gerät liest die Datei seiner
+Liste beim Start, wenn die App wieder nach vorn kommt, und solange sie offen
+ist jede Minute (mit ETag, unverändert kostet das nichts), und merkt sich den
+letzten Stand (`boxenstopp.katalog.v1`). Zwischen den Listen gleicht das
+Handy ab, das die Gäste eingeladen hat – nur dort liegen ihre Schlüssel
+(`js/ansicht-katalog.js`): alle `katalog.json` lesen, mischen (`katalogMischen`:
+was neuer ist, gilt; Herausgenommenes bleibt mit Datum unter `weg`, damit es
+nicht aus einer anderen Liste zurückkommt), zurückschreiben, wo etwas fehlt –
+beim Start, nach jeder eigenen Änderung und alle fünf Minuten, solange die App
+offen ist. Was Marielle sich wünscht, sehen Tobi und Amy also, sobald Tobis
+Handy die App offen hat; was Tobi oder Amy sich wünschen, kommt bei Marielle
+genauso an. Commits: „Tobi: Katalog – „Kürbissuppe“ dazu“, „… raus“,
+„Tobi: Katalog abgeglichen – Kürbissuppe dazu“ (nicht im Überblick, der liest
+nur `liste.json`).
+
 ### Speisekarte
 
 Kachel **Speisekarte** bei den Rezepten: Fotos (bis sechs), ein PDF, der Text
@@ -1235,6 +1284,8 @@ die Action „Rezeptfotos“.
 | `js/boxen.js` | Boxen pro Rezept: ein Rezept auf 1–8 Boxen rechnen – Zutaten, Gewürze, Mengen in Schritten, Geräte, Nährwerte, Kosten, Zeiten – ohne DOM |
 | `js/ansicht-boxen.js` | Boxen pro Rezept: Einstellungen, der Hinweis in einer eigenen Liste, die Zahlen zum Antippen |
 | `js/reste.js` | Was von den Packungen übrig bleibt: Packungsgrößen, was schnell verdirbt, welche Rezepte es aufbrauchen – ohne DOM |
+| `js/katalog.js` | Der gemeinsame Katalog: Einträge bereinigen, mischen, herausnehmen, jedes Rezept auf Ziel und Boxen einer Liste – ohne DOM |
+| `js/ansicht-katalog.js` | Der Katalog in der App: katalog.json lesen und schreiben, zwischen den Listen abgleichen (Gastgeber-Handy), die Leiste im Rezept |
 | `js/ansicht-reste.js` | „Bleibt übrig“ im Rezept und auf der Liste, „Auf die Liste“, Theke und Einfrieren, KI-Rezept aus den Resten |
 | `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
 | `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; der Überblick aus den Commits |
@@ -1352,6 +1403,15 @@ Kosten, Tipps Satz für Satz, was pro Box bleibt, ein Blech, eine Box, alle 50
 Rezepte für 1–7 Boxen, mit eigenem Ziel) und spielt im Browser Marielles
 Liste durch: der Hinweis, 2 Boxen, das Chili, die Liste (1 Dose kaufen), 4
 Boxen ziehen nach, eine ältere Fassung ohne `boxen`, zurück auf 8.
+`test-katalog.mjs` prüft in Node die Anfrage nach Wunsch (ein Wort, ein ganzer
+Text, für Marielle) und den Katalog (bereinigen, höchstens 100, mischen in jeder
+Reihenfolge, herausnehmen und Rückgängig, neuer Vorschlag, die Kürbissuppe auf
+drei Ziele und 2 Boxen) und spielt im Browser durch: Tobi wünscht sich eine
+Kürbissuppe (nachgebaute Gemini-API), sie steht in eurer und – über sein Handy
+– in Marielles `katalog.json`, vorn im Raster mit „Neu · von dir“ und „Neu
+dazu“, die Suche ohne und mit Treffer, „Neuer Vorschlag“ ersetzt sie; bei
+Marielle auf ihr Ziel und 2 Boxen gerechnet, sie nimmt sie heraus, Tobis Handy
+gleicht das ab; ohne gemeinsame Liste ein Vorschlag.
 `test-reste.mjs` rechnet in Node Packungen, was verdirbt, die Reste von
 Chili für 2 und 8 und Köttbullar, den Plan (nachgerechnet, ohne Ausgenommenes)
 und die Posten der Liste, und spielt im Browser Marielle durch: die Karte im

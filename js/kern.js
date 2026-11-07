@@ -42,6 +42,15 @@ export const app = {
   kiVorAktion: () => {},
   /** Ein KI-Rezept aus den Resten der Packungen (ansicht-reste.js → ansicht-ki.js); null, solange die KI nicht geladen ist. */
   kiAusResten: null,
+  /** Der gemeinsame Katalog (katalog.js): der Stand aus katalog.json, die Kurznamen herausgenommener Rezepte. */
+  katalogStand: null,
+  katalogNamen: {},
+  /** Ein Rezept in den Katalog (ansicht-katalog.js) – gibt die id zurück; null, solange nicht geladen. */
+  katalogDazu: null,
+  /** Die Leiste im Rezept eines Katalogrezepts (ansicht-katalog.js). */
+  katalogLeiste: () => '',
+  /** Die Rezepte neu rechnen und zeichnen, wenn der Katalog sich geändert hat (setzt app.js). */
+  rezepteNeu: () => {},
   /** Den Anpassen-Editor schließen (ansicht-anpassen.js), wenn das Rezept wechselt. */
   anpassenZu: () => {},
   /** Die Angebote, die gerade gelten, und der Laden, zu dem man geht ('' für alle) – setzt ansicht-angebote.js, die Liste zeigt sie an. */

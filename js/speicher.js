@@ -94,8 +94,16 @@ export async function privatSchreiben(pfad, aendern, { token, api = API, ort = D
     try { r = await fetch(url, { headers: kopf, cache: 'no-store' }); } catch { throw new Error('Keine Verbindung zu GitHub.'); }
     if (r.status !== 404 && !r.ok) throw new Error('GitHub antwortet gerade nicht.');
     const j = r.status === 404 ? null : await r.json();
+    let text = j?.content ? ausB64(j.content) : '';
+    // Über 1 MB schickt GitHub den Inhalt nur roh – sonst schriebe man über eine Datei, die man nicht gelesen hat
+    if (j && !j.content && j.size > 0) {
+      let roh;
+      try { roh = await fetch(url, { headers: { ...kopf, Accept: 'application/vnd.github.raw+json' }, cache: 'no-store' }); } catch { throw new Error('Keine Verbindung zu GitHub.'); }
+      if (!roh.ok) throw new Error('GitHub antwortet gerade nicht.');
+      text = await roh.text();
+    }
     let alt = null;
-    try { alt = j?.content ? JSON.parse(ausB64(j.content)) : null; } catch { alt = null; }
+    try { alt = text ? JSON.parse(text) : null; } catch { alt = null; }
     const neu = aendern(alt);
     const body = { message: nachricht || `${pfad} geändert`, content: zuB64(`${JSON.stringify(neu, null, 1)}\n`), ...(j?.sha ? { sha: j.sha } : {}) };
     let w;

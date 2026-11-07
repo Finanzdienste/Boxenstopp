@@ -52,6 +52,7 @@ const boxPreis = (r) => kostenRezept(r, app).box || 0;
 
 export const FILTER = [
   ['alle', 'Alle', () => true],
+  ['neu', 'Neu dazu', (r) => !!r.katalog],
   ['top', 'Daumen hoch', (r) => app.stand.bewertung?.[r.id]?.wert === 'hoch'],
   ['haehnchen', 'Hähnchen', (r) => r.protein.includes('Hähnchen')],
   ['rind', 'Rind', (r) => r.protein.includes('Rind')],
@@ -62,7 +63,7 @@ export const FILTER = [
   ['bulgur', 'Bulgur & Co.', (r) => ['Bulgur', 'Couscous', 'Tortillas'].includes(r.base)],
   ['schnell', 'Unter 1½ Std.', (r) => gesamtZeit(r) < SCHNELL],
   ['liste', 'Auf der Liste', (r) => rezeptStand(app.stand, r).drauf],
-  ['reste', 'Eigene', (r) => !!r.ki],
+  ['reste', 'Eigene', (r) => !!r.ki && !r.katalog],
 ];
 const alleRezepte = () => [...app.rezepte, ...app.kiRezepte.filter((r) => r.ki?.von?.gespeichert)];
 /* Preis und Reihenfolge: zusätzlich zum Chip, das Handy merkt sie sich (kern.js ansicht). */
@@ -178,7 +179,11 @@ function karte(r) {
   const tag = c ? tagKurz(c.at) : '';
   const b = app.stand.bewertung?.[r.id];
   const daumen = b ? `<span class="pill p-${b.wert}">${daumenIc(b.wert)}${DAUMEN_TEXT[b.wert]}</span>` : '';
-  const ki = r.ki ? `<span class="pill pill-ki">${r.ki.herkunft ? 'Angepasst' : 'Resteverwertung'}${boxen(r) !== 8 ? ` · ${boxen(r)} Boxen` : ''}</span>` : '';
+  // Neu im Katalog (zwei Wochen lang): von wem; KI-Rezepte der Liste: woher
+  const neu = r.katalog && Date.now() - Date.parse(r.katalog.at) < 14 * 24 * 3600 * 1000;
+  const ki = r.katalog
+    ? (neu ? `<span class="pill pill-neu">Neu${r.katalog.by ? ` · ${r.katalog.by === app.name() ? 'von dir' : `von ${esc(r.katalog.by)}`}` : ''}</span>` : '')
+    : r.ki ? `<span class="pill pill-ki">${r.ki.herkunft ? 'Angepasst' : r.ki.von?.modus === 'wunsch' ? 'Neues Rezept' : 'Resteverwertung'}${boxen(r) !== 8 ? ` · ${boxen(r)} Boxen` : ''}</span>` : '';
   const ko = kostenRezept(r, app);
   const preis = ko.box > 0 ? `<span class="box-cost">≈ ${esc(euro(ko.box))}/Box</span>` : '';
   // Was das eigene Ziel verfehlt, ist an der Karte zu sehen (ansicht-ziel.js)
@@ -220,17 +225,18 @@ export function rasterZeichnen() {
   const f = FILTER.find((x) => x[0] === ansicht.filter);
   const alle = alleRezepte();
   const liste = sortiert(alle.filter(f[2]).filter(passtSuche).filter(passtPreis));
-  const leer = suche ? `Nichts gefunden für „${esc(suche)}“${ansicht.preis ? ` bis ${esc(euro(ansicht.preis))} pro Box` : ''}.`
+  const leer = suche ? `Nichts gefunden für „${esc(String($('#suche')?.value || suche).trim())}“${ansicht.preis ? ` bis ${esc(euro(ansicht.preis))} pro Box` : ''}.`
     : ansicht.preis && alle.filter(f[2]).length ? `Kein Rezept hier kostet höchstens ${esc(euro(ansicht.preis))} pro Box.`
       : ansicht.filter === 'liste' ? 'Gerade steht kein Rezept auf der Einkaufsliste.' : 'Hier ist gerade nichts.';
   $('#grid').innerHTML = liste.length ? liste.map(karte).join('') : `<p class="empty">${leer}</p>`;
+  wunschZeichnen(liste.length);
   for (const b of $$('[data-filter]')) {
     const fx = FILTER.find((x) => x[0] === b.dataset.filter);
     b.setAttribute('aria-pressed', String(b.dataset.filter === ansicht.filter));
     const n = b.querySelector('.n');
     const zahl = fx ? alle.filter(fx[2]).filter(passtSuche).filter(passtPreis).length : 0;
     if (n && fx) n.textContent = String(zahl);
-    if (fx?.[0] === 'reste') b.hidden = !zahl && ansicht.filter !== 'reste';
+    if (fx?.[0] === 'reste' || fx?.[0] === 'neu') b.hidden = !zahl && ansicht.filter !== fx[0];
   }
   // Im Preis-Menü steht, wie viele es jeweils sind
   const preis = $('#r-preis');
@@ -245,6 +251,23 @@ export function rasterZeichnen() {
   }
   const sort = $('#r-sort');
   if (sort) { sort.value = ansicht.sort; sort.closest('.sel')?.classList.toggle('an', ansicht.sort !== 'standard'); }
+}
+
+/*
+ * Unter dem Raster, wenn gesucht wird: Gibt es „Kürbissuppe“ nicht (oder nicht
+ * so), macht die KI das Rezept – es kommt in den gemeinsamen Katalog
+ * (ansicht-ki.js, data-act="wunsch-suche").
+ */
+function wunschZeichnen(gefunden) {
+  const el = $('#r-wunsch');
+  if (!el) return;
+  const t = String($('#suche')?.value || '').trim();
+  el.hidden = !t;
+  if (!t) { el.innerHTML = ''; return; }
+  const was = esc(t.length > 40 ? `${t.slice(0, 38)}…` : t);
+  el.innerHTML = gefunden
+    ? `<p>Nicht das Richtige dabei? <button type="button" class="linkbtn" data-act="wunsch-suche">„${was}“ als neues Rezept machen</button></p>`
+    : `<button type="button" class="btn btn-primary" data-act="wunsch-suche">${ic('ki')}„${was}“ als neues Rezept machen</button><p class="fine">Die KI schreibt es in etwa einer Minute, und es kommt in den Katalog – für alle, auf ihr Ziel und ihre Boxen gerechnet.</p>`;
 }
 
 /* ----------------------------------------------------------------- Detail */

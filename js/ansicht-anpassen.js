@@ -38,7 +38,8 @@ export const anpassenOffen = () => !!zustand;
 
 /** Das Rezept im KI-Format, aus dem der Editor startet. */
 function quelle(r) {
-  if (r.ki) {
+  // Ein Katalogrezept wird wie ein festes angepasst: so, wie es hier steht (auf Ziel und Boxen gerechnet)
+  if (r.ki && !r.katalog) {
     const k = kiQuelle(r.id);
     return k ? kiBereinigen(k).r : null;
   }

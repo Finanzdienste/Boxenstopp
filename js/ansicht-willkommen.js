@@ -57,7 +57,7 @@ function halloHTML() {
     ['Rezepte', '50 Meal-Prep-Rezepte, Schritt für Schritt mit Schalen und Timern – auf deine Makros gerechnet und auf so viele Boxen, wie du kochst.'],
     ['Einkaufsliste', 'Mit einem Tipp landen die Zutaten drauf, sortiert nach Abteilungen; die Angebote der Woche stehen daneben.'],
     [`${wessen(name)} Rezepte`, 'Deine eigenen Lieblingsrezepte – Zeile für Zeile tippen oder von einer Webseite übernehmen.'],
-    ...(ki ? [['Resteverwertung & Speisekarte', 'Was im Kühlschrank ist, wird ein Rezept; im Restaurant sagt dir die App, welches Gericht am besten zu deinen Makros passt.']] : []),
+    ...(ki ? [['Neue Rezepte, Resteverwertung & Speisekarte', 'Wünsch dir ein Gericht („Kürbissuppe“), und die KI schreibt das Rezept; was im Kühlschrank ist, wird ein Rezept; im Restaurant sagt dir die App, welches Gericht am besten zu deinen Makros passt.']] : []),
   ];
   return `<p class="amy-eyebrow">${deko('sparkles')} schön, dass du da bist ${deko('sparkles')}</p>
 <h2 class="tablet-titel" id="wk-titel">Hallo ${esc(name)} ♡</h2>
@@ -105,7 +105,7 @@ function gutHTML() {
   return `<p class="amy-eyebrow">${deko('sparkles')} gut zu wissen ${deko('sparkles')}</p>
 <h2 class="tablet-titel" id="wk-titel">Deine Liste ist deine</h2>
 <ul class="tablet-schritte wk-punkte">
-<li><b>Getrennt von Tobi und Amy</b><small>Deine Einkaufsliste, deine Rezepte, deine Makros – die beiden sehen davon in ihrer App nichts.</small></li>
+<li><b>Getrennt von Tobi und Amy</b><small>Deine Einkaufsliste, deine Rezepte, deine Makros – die beiden sehen davon in ihrer App nichts. Nur neue Rezepte nach Wunsch kommen in den gemeinsamen Katalog, für alle.</small></li>
 <li><b>Wo sie liegt</b><small>In einem privaten Speicher bei GitHub, den Tobi für dich angelegt hat. Er sieht in seinem Überblick, wann du was änderst – sonst niemand.</small></li>
 <li><b>Auf mehreren Geräten</b><small>Unter Einstellungen gibt es den Link fürs iPad oder ein zweites Handy.</small></li>
 </ul>`;

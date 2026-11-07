@@ -1,0 +1,67 @@
+{
+  "name": "Kürbissuppe mit Hähnchen, roten Linsen & Baguette",
+  "kurz": "Kürbissuppe",
+  "beschreibung": "Cremige Hokkaido-Suppe mit Kokosmilch, Ingwer und Curry, dazu gebratenes Hähnchen und Vollkorn-Baguette.",
+  "protein": "Hähnchen",
+  "basis": "Brot",
+  "methode": "Topf + Pfanne",
+  "kuehlschrank": "4 Tage",
+  "tiefkuehler": "3 Monate, ohne Baguette",
+  "zutaten": [
+    { "id": "kuerbis", "name": "Hokkaido-Kürbis", "menge": 1500, "einheit": "g", "stueck": "1 großer", "min": 1500, "max": 1500, "anpassbar": false, "pro100": { "kcal": 26, "p": 1.1, "kh": 4.6, "f": 0.1 }, "quelle": "kaufen", "katalog": "", "abteilung": "obst", "packung": "1 Stück" },
+    { "id": "haehnchen", "name": "Hähnchenbrustfilet", "menge": 1000, "einheit": "g", "min": 500, "max": 1600, "anpassbar": true, "pro100": { "kcal": 106, "p": 23, "kh": 0, "f": 1.5 }, "quelle": "kaufen", "katalog": "haehnchenbrust", "abteilung": "fleisch", "packung": "2 × 500 g" },
+    { "id": "linsen", "name": "Rote Linsen", "menge": 200, "einheit": "g", "min": 100, "max": 400, "anpassbar": true, "pro100": { "kcal": 340, "p": 24, "kh": 49, "f": 1.5 }, "quelle": "kaufen", "katalog": "linsen-rot", "abteilung": "trocken", "packung": "500 g" },
+    { "id": "kokosmilch", "name": "Kokosmilch light", "menge": 400, "einheit": "ml", "stueck": "1 Dose", "min": 400, "max": 400, "anpassbar": false, "pro100": { "kcal": 70, "p": 0.7, "kh": 1.5, "f": 7 }, "quelle": "kaufen", "katalog": "kokosmilch-light", "abteilung": "konserven", "packung": "1 Dose à 400 ml" },
+    { "id": "zwiebeln", "name": "Zwiebeln", "menge": 200, "einheit": "g", "stueck": "2 Stück", "min": 200, "max": 200, "anpassbar": false, "pro100": { "kcal": 35, "p": 1.2, "kh": 6, "f": 0.1 }, "quelle": "kaufen", "katalog": "zwiebeln", "abteilung": "obst", "packung": "1-kg-Netz" },
+    { "id": "ingwer", "name": "Ingwer", "menge": 30, "einheit": "g", "min": 30, "max": 30, "anpassbar": false, "pro100": { "kcal": 80, "p": 1.8, "kh": 18, "f": 0.8 }, "quelle": "kaufen", "katalog": "ingwer", "abteilung": "obst", "packung": "1 Stück" },
+    { "id": "knoblauch", "name": "Knoblauch", "menge": 16, "einheit": "g", "stueck": "4 Zehen", "min": 16, "max": 16, "anpassbar": false, "pro100": { "kcal": 149, "p": 6.4, "kh": 33, "f": 0.5 }, "quelle": "kaufen", "katalog": "knoblauch", "abteilung": "obst", "packung": "1 Knolle" },
+    { "id": "baguette", "name": "Vollkorn-Baguette", "menge": 400, "einheit": "g", "min": 200, "max": 800, "anpassbar": true, "pro100": { "kcal": 240, "p": 9, "kh": 45, "f": 2 }, "quelle": "kaufen", "katalog": "", "abteilung": "trocken", "packung": "2 × 250 g" },
+    { "id": "oel", "name": "Olivenöl", "menge": 30, "einheit": "g", "min": 10, "max": 80, "anpassbar": true, "pro100": { "kcal": 900, "p": 0, "kh": 0, "f": 100 }, "quelle": "vorrat", "katalog": "olivenoel", "abteilung": "vorrat" }
+  ],
+  "gewuerze": [
+    { "name": "Currypulver", "menge": "2 TL" },
+    { "name": "Kreuzkümmel", "menge": "1 TL" },
+    { "name": "Paprika edelsüß", "menge": "1 TL" },
+    { "name": "Chiliflocken", "menge": "½ TL" },
+    { "name": "Gemüsebrühe (Pulver)", "menge": "2 EL" },
+    { "name": "Salz", "menge": "2 TL" },
+    { "name": "Pfeffer", "menge": "1 TL" }
+  ],
+  "schalen": [
+    { "name": "Zwiebeln & Ingwer", "groesse": "mittel" },
+    { "name": "Kürbis", "groesse": "groß" },
+    { "name": "Linsen", "groesse": "klein" },
+    { "name": "Hähnchen", "groesse": "groß" }
+  ],
+  "geraete": ["Großer Topf (mind. 5 l)", "Pfanne", "Pürierstab", "Messbecher (1 l)"],
+  "vorbereiten": [
+    { "text": "Den großen Topf leer wiegen und unten im Rechner bei „Gefäß leer“ eintragen", "min": 1 },
+    { "text": "{zwiebeln} Zwiebeln schälen und würfeln → Schale 1", "min": 6 },
+    { "text": "{knoblauch} Knoblauch schälen und hacken, {ingwer} Ingwer schälen und reiben → Schale 1", "min": 5 },
+    { "text": "{kuerbis} Kürbis waschen, halbieren, entkernen und mit Schale in 3-cm-Würfel schneiden → Schale 2", "min": 12 },
+    { "text": "{linsen} rote Linsen im Sieb abspülen → Schale 3", "min": 2 },
+    { "text": "In Schale 4 abmessen:", "min": 2, "liste": ["1 TL Paprika edelsüß", "½ TL Salz", "{oel} Olivenöl, davon 1 EL"] },
+    { "text": "{haehnchen} Hähnchen in mundgerechte Stücke schneiden und in Schale 4 mischen", "min": 10 },
+    { "text": "Brett und Messer heiß abwaschen, Hände waschen", "min": 2 }
+  ],
+  "kochen": [
+    { "text": "Restliches Öl im Topf erhitzen, Schale 1 darin 4 Min. glasig dünsten", "min": 5 },
+    { "text": "Currypulver, Kreuzkümmel und Chiliflocken kurz mitrösten", "min": 1 },
+    { "text": "Schale 2 und Schale 3 dazu, mit 1,2 l Wasser und der Brühe auffüllen", "min": 2 },
+    { "text": "Aufkochen und zugedeckt 20 Min. köcheln, bis der Kürbis weich ist", "min": 2, "ruhe": 20 },
+    { "text": "Schale 4 in der Pfanne 6–8 Min. rundum goldbraun braten", "min": 8, "nebenbei": true },
+    { "text": "{kokosmilch} Kokosmilch zur Suppe, fein pürieren, mit Salz und Pfeffer abschmecken", "min": 4 },
+    { "text": "Das Hähnchen in die Suppe geben", "min": 1 }
+  ],
+  "portionieren": [
+    { "text": "Topf mit der Suppe wiegen und im Rechner bei „Mit Essen“ eintragen", "min": 1 },
+    { "text": "Die Suppe gleichmäßig auf die Boxen verteilen", "min": 4 },
+    { "text": "{baguette} Baguette in Stücke schneiden und getrennt einpacken", "min": 3 },
+    { "text": "Offen abkühlen lassen, höchstens 1–2 Std., dann Deckel drauf und kalt stellen", "min": 1 }
+  ],
+  "tipps": [
+    "Beim Aufwärmen 2–3 EL Wasser dazu, die Suppe dickt im Kühlschrank nach.",
+    "Mit 1 EL Kürbiskernen pro Box obendrauf wird es noch herbstlicher."
+  ],
+  "hinweis": "Hähnchen und Baguette sind dazugekommen, damit die Box satt macht und das Ziel trifft."
+}
