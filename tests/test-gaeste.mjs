@@ -187,6 +187,21 @@ await m.click('.tabbar .tab[data-tab="haushalt"]');
 check(!(await m.locator('#view-haushalt').innerText()).includes('Microsoft To Do'), 'Haushalt ohne To Do');
 check(marielle.fehler.length === 0, `Marielle: keine Fehler im Browser (${marielle.fehler.join(' | ')})`);
 
+// --- Tobi gibt seinen KI-Schlüssel frei: in eurer Liste und in Marielles – ihr Handy holt ihn beim nächsten Öffnen
+const AKEY = 'sk-ant-api03-TESTTESTTESTTESTTESTTESTTESTTEST_abc';
+check(await m.evaluate((g) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).schluessel === g, GKEY), 'Marielle hat Tobis Google-Schlüssel aus dem Link');
+await t.click('[data-act="e-ki-aendern"]');
+await t.fill('#e-ki-feld', AKEY);
+await t.press('#e-ki-feld', 'Enter');
+check(await bis(async () => (await t.locator('#e-ki').innerText()).includes('Anthropic')) && (await t.locator('#e-ki [data-act="e-ki-teilen"]').innerText()).includes('und für Marielle (eigene Liste)'), 'Tobi: neuer Anthropic-Schlüssel, Freigeben „und für Marielle (eigene Liste)“');
+await t.click('#e-ki [data-act="e-ki-teilen"]');
+const kiVon = (att) => { try { return JSON.parse(att.zustand.dateien['ki.json']); } catch { return null; } };
+check(await bis(() => kiVon(haupt)?.schluessel === AKEY && kiVon(mar)?.schluessel === AKEY, 8000) && kiVon(mar).von === 'Tobi' && mar.zustand.nachrichten.includes('Tobi: KI-Schlüssel für alle Handys') && await bis(async () => (await t.locator('#toast').innerText()).includes('auch bei Marielle')), 'ki.json liegt in eurer und in ihrer Liste, Commit „Tobi: KI-Schlüssel für alle Handys“, Hinweis „auch bei Marielle“');
+check(await bis(async () => (await t.locator('#e-ki .e-ki-teilen').innerText()).includes('Freigegeben für alle Handys dieser Liste und für Marielle (eigene Liste)')), 'Bei Tobi: „Freigegeben … und für Marielle“');
+await m.reload({ waitUntil: 'load' });
+await m.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+check(await bis(() => m.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel === k, AKEY), 8000) && await bis(async () => (await m.locator('#toast').innerText()).includes('KI-Schlüssel von Tobi übernommen')), 'Marielle öffnet die App: Tobis neuer Schlüssel ist da, mit Hinweis');
+
 // --- Ihr zweites Gerät: ohne Link in der Adresse, den Link ins Schlüsselfeld
 const ipad = await handy(browser, { attrappe: beide });
 const ip = ipad.page;

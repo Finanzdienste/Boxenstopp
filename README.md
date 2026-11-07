@@ -951,7 +951,9 @@ dem Zugang holt ihn beim Start (`app.js`, `zugang.js kiUebernehmen`): Es nimmt
 ihn, wenn es keinen eigenen hat, wenn seiner selbst aus `ki.json` kam oder wenn
 seiner älter ist (ein Eintrag ohne Stand gilt als alt); ein selbst eingetragener,
 neuerer bleibt. „Nicht mehr teilen“ leert `ki.json` – wer den Schlüssel hat,
-behält ihn. Eine eigene Liste (Gast, eigenes Repo) hat ihre eigene `ki.json`.
+behält ihn. Eine eigene Liste (Gast, eigenes Repo) hat ihre eigene `ki.json`;
+von eurer Liste aus geht die Freigabe auch an die Listen der Gäste, die dieses
+Gerät eingeladen hat (es kennt ihre Schlüssel, `ansicht-gaeste.js`).
 Fotos werden vorher auf 1280 px verkleinert und gehen nur mit der
 einen Anfrage an den Anbieter, gespeichert werden sie nicht.
 

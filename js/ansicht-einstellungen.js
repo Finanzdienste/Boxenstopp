@@ -29,8 +29,9 @@
 import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal, leisteFaerben } from './kern.js';
 import { esc, tagKurz, menge } from './format.js';
 import { euro } from './kosten.js';
-import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon } from './zugang.js';
+import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon, eigeneListe } from './zugang.js';
 import { privatSchreiben, API } from './speicher.js';
+import { ladeGaeste } from './ansicht-gaeste.js';
 import { ANBIETER, anbieterVon } from './ki.js';
 import { tempoInfo, GRUPPEN_TEXT } from './tempo.js';
 import { preisJe } from './angebote.js';
@@ -171,25 +172,41 @@ ${kiTeilenHTML()}
 /*
  * Für alle Handys der Liste: Der Schlüssel liegt dann als ki.json im Daten-Repo,
  * die anderen Handys holen ihn sich beim nächsten Öffnen (app.js, zugang.js).
+ * Von eurer Liste aus geht er auch an die eigenen Listen der Gäste, die dieses
+ * Gerät eingeladen hat (ansicht-gaeste.js merkt sich ihre Schlüssel) – ihre
+ * Handys holen ihn sich genauso.
  */
 let kiTeilenLaeuft = false;
+const kiGaeste = () => (app.zugang?.token && !eigeneListe(app.zugang) ? ladeGaeste() : []);
+const undGaeste = (gaeste) => (gaeste.length ? ` und für ${gaeste.map((g) => esc(g.name)).join(', ')} (eigene Liste${gaeste.length > 1 ? 'n' : ''})` : '');
 function kiTeilenHTML() {
   if (!app.zugang?.token) return '';
   const g = app.kiGeteilt;
   const geteilt = !!g && kiAus(g.schluessel) === ladeKi();
+  const gaeste = kiGaeste();
   if (kiTeilenLaeuft) return '<p class="fine e-ki-teilen">Wird gespeichert …</p>';
   return geteilt
-    ? `<p class="fine e-ki-teilen"><span class="e-ok">✓</span> Freigegeben für alle Handys dieser Liste${g.von ? ` (von ${esc(g.von)})` : ''} – wer die Liste öffnet, bekommt ihn automatisch. <button type="button" class="linkbtn" data-act="e-ki-teilen-weg">Nicht mehr teilen</button></p>`
-    : `<p class="fine e-ki-teilen"><button type="button" class="linkbtn" data-act="e-ki-teilen">Für alle Handys dieser Liste freigeben</button> – die anderen holen ihn sich beim nächsten Öffnen selbst${g && kiAus(g.schluessel) ? ` (bisher geteilt: ein Schlüssel von ${esc(ANBIETER[anbieterVon(kiAus(g.schluessel))]?.name || 'der KI')}${g.von ? `, von ${esc(g.von)}` : ''})` : ''}.</p>`;
+    ? `<p class="fine e-ki-teilen"><span class="e-ok">✓</span> Freigegeben für alle Handys dieser Liste${undGaeste(gaeste)}${g.von ? ` (von ${esc(g.von)})` : ''} – wer die Liste öffnet, bekommt ihn automatisch. <button type="button" class="linkbtn" data-act="e-ki-teilen-weg">Nicht mehr teilen</button></p>`
+    : `<p class="fine e-ki-teilen"><button type="button" class="linkbtn" data-act="e-ki-teilen">Für alle Handys dieser Liste${undGaeste(gaeste)} freigeben</button> – die anderen holen ihn sich beim nächsten Öffnen selbst${g && kiAus(g.schluessel) ? ` (bisher geteilt: ein Schlüssel von ${esc(ANBIETER[anbieterVon(kiAus(g.schluessel))]?.name || 'der KI')}${g.von ? `, von ${esc(g.von)}` : ''})` : ''}.</p>`;
 }
 async function kiTeilen(schluessel) {
   if (!app.zugang?.token || kiTeilenLaeuft) return;
   kiTeilenLaeuft = true;
   einstellungenZeichnen();
+  const api = lese('__api', null) || API;
+  const wer = app.name() || 'Jemand';
+  const nachricht = schluessel ? `${wer}: KI-Schlüssel für alle Handys` : `${wer}: KI-Schlüssel nicht mehr geteilt`;
   try {
     const neu = { schluessel, von: app.name() || '', stand: new Date().toISOString() };
-    app.kiGeteilt = await privatSchreiben(KI_DATEI, () => neu, { token: app.zugang.token, api: lese('__api', null) || API, ort: ortVon(app.zugang), nachricht: schluessel ? `${app.name() || 'Jemand'}: KI-Schlüssel für alle Handys` : `${app.name() || 'Jemand'}: KI-Schlüssel nicht mehr geteilt` });
-    melde(schluessel ? 'Freigegeben – die anderen Handys holen sich den Schlüssel beim nächsten Öffnen.' : 'Nicht mehr geteilt – wer ihn schon hat, behält ihn.');
+    app.kiGeteilt = await privatSchreiben(KI_DATEI, () => neu, { token: app.zugang.token, api, ort: ortVon(app.zugang), nachricht });
+    // Die Gäste, die dieses Gerät eingeladen hat: dieselbe Datei in ihre Listen
+    const klappt = [];
+    const klapptNicht = [];
+    for (const g of kiGaeste()) {
+      try { await privatSchreiben(KI_DATEI, () => neu, { token: g.token, api, ort: ortVon({ daten: g.daten }), nachricht }); klappt.push(g.name); } catch { klapptNicht.push(g.name); }
+    }
+    const dazu = `${klappt.length ? `, auch bei ${klappt.join(', ')}` : ''}${klapptNicht.length ? ` – bei ${klapptNicht.join(', ')} hat GitHub das nicht gespeichert` : ''}`;
+    melde(schluessel ? `Freigegeben${dazu} – die anderen Handys holen sich den Schlüssel beim nächsten Öffnen.` : `Nicht mehr geteilt${dazu} – wer ihn schon hat, behält ihn.`);
   } catch (e) {
     melde(e?.message || 'GitHub hat das nicht gespeichert.');
   } finally {
