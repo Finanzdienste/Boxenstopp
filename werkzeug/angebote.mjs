@@ -583,7 +583,7 @@ async function lidl(alt) {
       modellGenutzt = anfragen.modell();
       return true;
     } catch (e) {
-      if (e?.art === 'schluessel' || e?.art === 'guthaben') { fatal = e; return false; }
+      if (['schluessel', 'workspace', 'guthaben'].includes(e?.art)) { fatal = e; return false; }
       letzter = e;
       melde(`Seiten ${st.name} übersprungen: ${e?.message || e}${e?.detail ? ` [${e.detail}]` : ''}`);
       return false;

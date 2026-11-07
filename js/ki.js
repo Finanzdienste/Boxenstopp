@@ -164,6 +164,7 @@ export const KI_FEHLER = {
   anthropic: {
     schluessel: 'Anthropic lehnt den Schlüssel ab. Prüf ihn unter platform.claude.com → API Keys und trag ihn neu ein.',
     guthaben: 'Auf dem Anthropic-Konto ist kein Guthaben: Das Monatsguthaben des Abos ist aufgebraucht (kommt mit der nächsten Abo-Zahlung wieder), oder es wurde noch keins verknüpft. Unter platform.claude.com → Billing nachsehen oder aufladen, dann nochmal.',
+    workspace: 'Der Anthropic-Schlüssel gehört keinem Workspace. In der Console (platform.claude.com → API Keys) einen neuen Schlüssel anlegen und dabei den Default Workspace wählen, dann den neuen Schlüssel hier eintragen.',
     grenze: 'Gerade zu viele Anfragen. In einer Minute nochmal versuchen.',
     ueberlastet: 'Claude ist gerade überlastet. Gleich nochmal versuchen.',
     netz: 'Keine Verbindung zu Anthropic. Prüf das Internet und versuch es nochmal.',
@@ -186,6 +187,7 @@ export function artVonStatus(status, info) {
   const text = `${info?.error?.type || ''} ${info?.error?.status || ''} ${info?.error?.message || ''}`;
   if (status === 401 || status === 403 || /API key not valid|API_KEY_INVALID/i.test(text)) return 'schluessel';
   if (status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(text)) return 'grenze'; // vor „billing“: Googles Kontingent-Text nennt den Tarif
+  if (status === 400 && /workspace/i.test(text)) return 'workspace'; // Schlüssel ohne Workspace: Anthropic will dann den Workspace im Kopf
   if (/credit|balance|billing|guthaben/i.test(text)) return 'guthaben';
   if (status === 413) return 'zugross';
   if (status === 404 || (status === 400 && /model/i.test(text))) return 'modell';
