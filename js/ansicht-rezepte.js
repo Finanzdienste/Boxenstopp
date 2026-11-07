@@ -26,6 +26,7 @@ import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
 import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
 import { angepasstHTML, daneben } from './ansicht-ziel.js';
 import { istEigen } from './profil.js';
+import { resteRezeptZeichnen } from './ansicht-reste.js';
 
 const TOPF = 'boxenstopp.topf.v1';
 const ZUGEKLAPPT = 'boxenstopp.zugeklappt.v1';
@@ -358,6 +359,7 @@ ${bereich('zutaten', `<h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</smal
   <p class="sec-lead">Mit + setzt du einzelne Zutaten auf die Liste, mit ✓ nimmst du sie wieder runter.</p>
   ${ko.gesamt > 0 ? `<p class="kosten" id="d-kosten">Kostet ≈ <b>${esc(euro(ko.gesamt))}</b> für ${boxen(r)} Boxen, also ≈ ${esc(euro(ko.box))} pro Box${ko.luecken ? ` – mindestens, ${ko.luecken} Zutat${ko.luecken > 1 ? 'en' : ''} ohne Richtpreis` : ''}. <small>Richtpreise Discounter, ${esc(app.preiseStand || 'Stand unbekannt')}; verwendete Mengen, nicht ganze Packungen.</small></p>` : ''}
   ${gruppe('einkauf', 'Einkaufen')}
+  <div class="reste" id="d-reste" hidden></div>
   ${gruppe('vorhanden', 'Ist schon da')}
   ${gruppe('vorrat', 'Aus dem Vorrat')}
   ${gruppe('optional', 'Optional')}
@@ -381,7 +383,7 @@ ${bereich('aufbewahren', '<h2 id="h-keep">Aufbewahren</h2>', `
     <li>Gefrorene Boxen am besten über Nacht im Kühlschrank auftauen.</li>
     <li>Abgedeckt in der Mikrowelle erhitzen und zwischendurch umrühren, bis alles durch und durch heiß ist.</li>
   </ul>`)}
-${r.tips && r.tips.length ? bereich('tipps', '<h2 id="h-tips">Tipps</h2>', `<ul class="tips">${r.tips.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>${r.boxen?.vorher && r.boxen.vorher !== boxen(r) ? `<p class="fine tips-boxen">Mengen in den Tipps: für ${r.boxen.vorher} Boxen.</p>` : ''}`) : ''}
+${r.tips && r.tips.length ? bereich('tipps', '<h2 id="h-tips">Tipps</h2>', `<ul class="tips">${r.tips.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`) : ''}
 
 <details class="nut">
   <summary>Nährwertrechnung für alle ${boxen(r)} Boxen</summary>
@@ -524,6 +526,7 @@ export function detailAktualisieren() {
     laeuft.innerHTML = pin ? `${ic('pin')}Läuft gerade${pin.by ? ` · angepinnt von ${pin.by === app.name() ? 'dir' : esc(pin.by)}` : ''}` : '';
   }
   $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
+  resteRezeptZeichnen(aktuell);
   notizenZeichnen();
   if ($('#d-ki')) $('#d-ki').innerHTML = app.kiLeiste(r);
   for (const b of $$('#detail .tog')) {

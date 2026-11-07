@@ -44,6 +44,7 @@ import { istEigen, person, wessen, linkFuerGeraet } from './profil.js';
 import { nachBereichen, alsText, abteilungVon, merkSchluessel, nameSchluessel } from './bereiche.js';
 import { zutatImg } from './bilder.js';
 import { kaufMenge } from './boxen.js';
+import { resteListeZeichnen } from './ansicht-reste.js';
 import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, einheitsPreis, preisJe, preisalarmTreffer, GUENSTIG_AB, LAEDEN } from './angebote.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
@@ -439,6 +440,7 @@ export function listeZeichnen() {
     body.innerHTML = '<p class="loading">Liste wird geladen…</p>';
     $('#l-count').textContent = '';
     $('#l-foot').innerHTML = '';
+    resteListeZeichnen();
     return;
   }
   const eintraege = Object.entries(app.stand.items);
@@ -478,6 +480,8 @@ export function listeZeichnen() {
   $('#l-count').textContent = eintraege.length ? `${offen} offen${fertig.length ? ` · ${fertig.length} erledigt` : ''}${ko.gesamt > 0 ? ` · ≈ ${euro(ko.gesamt)}` : ''}` : '';
   $('#kopieren').hidden = !offen;
   if (!offen) $('#kopie-feld').hidden = true;
+  // Was von den Packungen übrig bleibt – und welche Rezepte es aufbrauchen
+  resteListeZeichnen();
   fussZeichnen(fertig.length);
 }
 

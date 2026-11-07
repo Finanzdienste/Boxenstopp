@@ -56,7 +56,7 @@ export function zielAnwenden() {
     rezepte = ergebnis.rezepte;
     if (gemerkt?.schluessel !== schluessel) schreibe(MENGEN, { schluessel, mengen: ergebnis.mengen });
   }
-  if (boxen !== 8) rezepte = rezepte.map((r) => aufBoxen(r, boxen));
+  if (boxen !== 8) rezepte = rezepte.map((r) => aufBoxen(r, boxen, { katalog: app.katalog }));
   app.rezepte = rezepte;
   for (const r of rezepte) app.nachId[r.id] = r;
   zielKopfZeichnen();

@@ -40,6 +40,8 @@ export const app = {
   kiLeiste: () => '',
   /** Vor allem, was andere sehen (Liste, Daumen, gekocht): einen KI-Vorschlag erst behalten. */
   kiVorAktion: () => {},
+  /** Ein KI-Rezept aus den Resten der Packungen (ansicht-reste.js → ansicht-ki.js); null, solange die KI nicht geladen ist. */
+  kiAusResten: null,
   /** Den Anpassen-Editor schließen (ansicht-anpassen.js), wenn das Rezept wechselt. */
   anpassenZu: () => {},
   /** Die Angebote, die gerade gelten, und der Laden, zu dem man geht ('' für alle) – setzt ansicht-angebote.js, die Liste zeigt sie an. */

@@ -39,7 +39,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v46';
+const VERSION = 'v47';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -61,6 +61,8 @@ const SHELL = [
   './js/zeiten.js',
   './js/boxen.js',
   './js/ansicht-boxen.js',
+  './js/reste.js',
+  './js/ansicht-reste.js',
   './js/tempo.js',
   './js/kochstand.js',
   './js/kochmodus.js',

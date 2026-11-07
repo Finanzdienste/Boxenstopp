@@ -525,6 +525,20 @@ export function resteMitAngeboten(text, { wuensche = '' } = {}) {
   rezeptMachen();
 }
 
+/**
+ * Von ansicht-reste.js (über app.kiAusResten): ein Rezept aus dem, was von
+ * den Packungen übrig bleibt – „375 g Rinderhack, ¾ Dose Mais“. Dazukaufen
+ * darf die KI; der Lauf startet sofort, wie bei den Angeboten.
+ */
+export function resteAusPackungen(text) {
+  eingabe.modus = 'reste';
+  eingabe.text = String(text || '').slice(0, 2000);
+  eingabe.dazukaufen = true;
+  eingabeMerken();
+  oeffneReste();
+  rezeptMachen();
+}
+
 /** Von anderswo (Angebote): die Resteverwertung mit dem Einrichten öffnen. */
 export function oeffneEinrichten() {
   einrichten = true;
@@ -536,6 +550,7 @@ export function oeffneEinrichten() {
 /** Beim Start: Haken setzen, Vorschlag anmelden, #reste öffnen. */
 export function kiStart({ oeffnen = false } = {}) {
   app.kiLeiste = kiLeiste;
+  app.kiAusResten = resteAusPackungen;
   app.kiVorAktion = (rid) => { if (istEntwurf(rid)) behalten(rid, { still: true }); };
   kiAbgleichen();
   if (oeffnen) oeffneReste();

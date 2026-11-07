@@ -41,7 +41,7 @@ function einstellungenHTML() {
   const n = boxenDerListe(app.stand);
   return `<p class="e-boxen-stand">${n === 8 ? 'Die Rezepte sind für <b>8 Boxen</b> gebaut.' : `Gerade für <b>${boxenText(n)}</b> – gebaut sind die Rezepte für 8.`}</p>
 <div class="e-boxen-wahl" role="group" aria-label="Boxen pro Rezept">${boxenChips(n)}</div>
-<p class="fine">Kochst du für weniger (oder mehr), rechnen sich Zutaten, Gewürze, die Mengen in den Schritten, Kosten und die Einkaufsliste um – die Werte pro Box bleiben. Gemüse und Dosen gibt es dann auch als ¼ (gekauft wird eine ganze), Knoblauch und Eier bleiben ganz. ${istEigen() ? 'Gilt auf allen deinen Geräten.' : 'Gilt für alle, die diese Liste teilen.'}</p>`;
+<p class="fine">Kochst du für weniger (oder mehr), rechnen sich Zutaten, Gewürze, die Mengen in den Schritten und Tipps, Kosten und die Einkaufsliste um – die Werte pro Box bleiben. Gemüse geht in ganzen, halben oder Viertel-Stück auf (lieber eine ganze Paprika als ¾), Dosen gibt es als ¼ (gekauft wird eine ganze), Knoblauch und Eier bleiben ganz. Was von den Packungen übrig bleibt, steht beim Rezept und auf der Liste – mit Rezepten, die es aufbrauchen. ${istEigen() ? 'Gilt auf allen deinen Geräten.' : 'Gilt für alle, die diese Liste teilen.'}</p>`;
 }
 
 /** Ob oben bei den Rezepten gefragt wird: eigene Liste, noch keine Zahl gesagt, nicht weggeklickt. */

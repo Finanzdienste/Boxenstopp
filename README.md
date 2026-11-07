@@ -13,8 +13,8 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen, **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
-| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
 | **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
@@ -64,16 +64,23 @@ Boxen kochst du meistens?“), bei Gästen auch im Willkommen. Ein Tipp auf eine
 Zahl speichert sie gleich; die Rezepte auf der Liste ziehen mit.
 
 Gerechnet wird nach dem Ziel (`js/boxen.js`): erst aufs Ziel für 8 Boxen,
-dann mal 2/8 – pro Box bleibt alles gleich. Umgerechnet wird überall, wo
-Mengen stehen:
+dann mal 2/8 – pro Box bleibt fast alles gleich (nur Gemüse, siehe gleich).
+Umgerechnet wird überall, wo Mengen stehen:
 
 - **Zutaten:** „125 g“ statt 500 g, der Packungshinweis sagt, was man kauft
-  („1 × 500 g“, „kleine Dose“). Gemüse und Dosen gibt es in Vierteln („¾
-  mittlere (75 g)“, „½ Dose à 400 g (130 g abgetropft)“, ganz wenig: ⅛),
-  Knoblauchzehen, Eier und Tortillas bleiben ganz (mindestens 1). Auf der
-  Einkaufsliste steht die ganze Dose, darunter „Chili ½ Dose“.
+  („1 × 500 g“, „kleine Dose“). Dosen und Packungen gibt es in Vierteln („½
+  Dose à 400 g (130 g abgetropft)“, ganz wenig: ⅛), Knoblauchzehen, Eier und
+  Tortillas bleiben ganz (mindestens 1). Auf der Einkaufsliste steht die
+  ganze Dose, darunter „Chili ½ Dose“.
+- **Frisches Gemüse und Obst** (Katalog „obst“, ohne Kartoffeln) geht in
+  Stück auf, damit kein Viertel Paprika im Kühlschrank liegt: eine ganze statt
+  ¾ (aufgerundet, wenn es höchstens ein Drittel mehr ist – auch 1½ → 2), sonst
+  ½ statt ⅜ (`rundStueck(x, 'frisch')`). Gramm in der Klammer, Menge zum
+  Kaufen, Nährwerttabelle und Kosten folgen dem Stück: „1 Stück (ca. 150 g)“
+  statt „¾ Stück (ca. 115 g)“, „1 mittlere (100 g)“ statt „¾ mittlere (75 g)“.
+  Pro Box gibt das ein paar kcal mehr (Chili für 2: 448 → 458), höchstens 16.
 - **Gewürze und die Mengen in den Schritten:** „2 gehäufte EL Kreuzkümmel“ →
-  „1½ gehäufte TL“, unter ⅛ TL „1 Prise“; „3 Zwiebeln“ → „¾ Zwiebel“, „2
+  „1½ gehäufte TL“, unter ⅛ TL „1 Prise“; „3 Zwiebeln“ → „1 Zwiebel“, „2
   Lorbeerblättern“ → „1 Lorbeerblatt“, „1,2 kg“ → „300 g“, „8 Boxen“ → „2
   Boxen“, „durch 8 teilen“ → „durch 2 teilen“, „In 2 × 4 gleich große
   Stücke“ → „In 2 gleich große Stücke“. Was pro Box oder Stück gilt („je ca.
@@ -84,12 +91,47 @@ Mengen stehen:
 - Für **eine Box:** „Im Ganzen in die Box“, „Die Box auf die Waage stellen“.
 - **Nährwerttabelle und Kosten** fürs ganze Rezept, die **Zeit:**
   Schnippeln und Portionieren gehen schneller, Garzeiten nicht.
-- **Tipps** bleiben, wie sie sind – darunter steht „Mengen in den Tipps: für
-  8 Boxen“ (dort ist oft nicht klar, ob pro Box oder fürs Ganze).
+- **Tipps** Satz für Satz: „150 g Basmati“ → „40 g“, „Ersatz: je 1 TL
+  Paprika …“ → „je ¼ TL“, „ein Glas Spargel“ → „¼ Glas“. Was pro Box gilt,
+  bleibt: ganze Sätze mit „Aufwärmen“ oder „Zu trocken?“ („Beim Aufwärmen 1–2
+  EL Wasser dazu“), „pro Portion rund 3,5 g Fett“, „1 TL Sesam pro Box“, „1 TL
+  sind nur rund 15 kcal“.
 
 Die Resteverwertung schlägt die Zahl der Liste als Portionen vor. Eigene
 Rezepte (Amy, Marielle) haben ihre eigene Portionenzahl und bleiben, wie sie
 eingetragen sind.
+
+### Was übrig bleibt
+
+Wer für 2 Boxen kocht, braucht fürs Chili 125 g Rinderhack – im Laden gibt
+es 500 g. Im Rezept bei den Zutaten und unten auf der Einkaufsliste steht
+deshalb **„Bleibt übrig“** (`js/reste.js`, `js/ansicht-reste.js`):
+
+- Was von den Packungen bleibt und schnell verdirbt – Fleisch, Kühlregal,
+  offene Dosen, frisches Gemüse –, ab einem Fünftel der Packung, mit dem Wert
+  in Euro: „375 g Rinderhackfleisch von 500 g“, „¾ Dose Mais“, „¾ Bund
+  Frühlingszwiebeln“. Die Packung kommt aus dem Hinweis der Zutat („1 ×
+  500 g“), sonst aus den Richtpreisen (Skyr 500 g, Staudensellerie 8
+  Stangen), sonst ist es ein Stück (eine Dose, ein Bund). Was offen lange hält
+  (Zwiebeln, Parmesan, Milch, Currypaste, Tomatenmark …), zählt nicht; Gemüse,
+  das man einzeln kauft (Paprika, Zucchini, Tomaten), nur mit dem
+  angeschnittenen Stück („¾ Zucchini“). Im Rezept
+  gerechnet mit dem, was schon auf der Liste steht; auf der Liste alles
+  zusammen, auch was jemand dazu will.
+- **Aufbrauchen mit:** bis zu drei Rezepte, eins nach dem anderen gerechnet –
+  ein Rezept zählt nur, wenn danach insgesamt weniger übrig bleibt, auch mit
+  dem, was es selbst übrig lässt (Bolognese bringt einen Bund Staudensellerie
+  mit). Ohne die Rezepte auf der Liste und ohne Daumen runter. Ein Tipp setzt
+  es auf die Liste – im Rezept, das noch nicht drauf ist, beide („Beide auf
+  die Liste“).
+- Beim Fleisch: an der Theke gibt es genau die Menge (im Rezept: „genau
+  125 g Rinderhackfleisch“), sonst den Rest gleich roh einfrieren.
+- Mit KI-Schlüssel: **„Aus den Resten ein Rezept (KI)“** – die
+  Resteverwertung mit „Reste von den Packungen: 375 g Rinderhackfleisch, ¾
+  Dose Mais …“, Dazukaufen erlaubt, startet gleich.
+
+Für 8 Boxen bleibt meist nichts – die Rezepte sind auf Packungen gebaut;
+wo doch (Köttbullar: 300 g mageres Hack), steht es genauso da.
 
 ### Zubereitung
 
@@ -1192,6 +1234,8 @@ die Action „Rezeptfotos“.
 | `js/ansicht-ziel.js` | Ziel pro Box: anwenden (danach die Boxen), Einstellungen, oben bei den Rezepten, im Rezept, die Liste nachziehen |
 | `js/boxen.js` | Boxen pro Rezept: ein Rezept auf 1–8 Boxen rechnen – Zutaten, Gewürze, Mengen in Schritten, Geräte, Nährwerte, Kosten, Zeiten – ohne DOM |
 | `js/ansicht-boxen.js` | Boxen pro Rezept: Einstellungen, der Hinweis in einer eigenen Liste, die Zahlen zum Antippen |
+| `js/reste.js` | Was von den Packungen übrig bleibt: Packungsgrößen, was schnell verdirbt, welche Rezepte es aufbrauchen – ohne DOM |
+| `js/ansicht-reste.js` | „Bleibt übrig“ im Rezept und auf der Liste, „Auf die Liste“, Theke und Einfrieren, KI-Rezept aus den Resten |
 | `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
 | `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; der Überblick aus den Commits |
 | `js/einzelheiten.js` | Überblick: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
@@ -1303,10 +1347,16 @@ Dosen, Platzhalter, Kosten, gemerkte Mengen), prüft Texte, Formular und das
 Profil der Liste und spielt im Browser Ziel setzen, Liste nachziehen, das
 zweite Handy, Neuladen, eine ältere Fassung ohne Profil und zurück zum
 Standard durch. `test-boxen.mjs` rechnet Texte und Rezepte in Node (Löffel,
-Viertel, ganze Zehen, was pro Box bleibt, ein Blech, eine Box, alle 50
+Viertel, ganze Zehen, Gemüse in ganzen Stück mit Gramm, Nährwerten und
+Kosten, Tipps Satz für Satz, was pro Box bleibt, ein Blech, eine Box, alle 50
 Rezepte für 1–7 Boxen, mit eigenem Ziel) und spielt im Browser Marielles
 Liste durch: der Hinweis, 2 Boxen, das Chili, die Liste (1 Dose kaufen), 4
-Boxen ziehen nach, eine ältere Fassung ohne `boxen`, zurück auf 8. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
+Boxen ziehen nach, eine ältere Fassung ohne `boxen`, zurück auf 8.
+`test-reste.mjs` rechnet in Node Packungen, was verdirbt, die Reste von
+Chili für 2 und 8 und Köttbullar, den Plan (nachgerechnet, ohne Ausgenommenes)
+und die Posten der Liste, und spielt im Browser Marielle durch: die Karte im
+Chili, „Beide auf die Liste“, die Karte auf der Liste, noch ein Rezept dazu,
+das KI-Rezept aus den Resten (mit nachgebauter API), dazu Tobi mit 8 Boxen. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
 Überblick in Node zusammen und spielt dann die Einladung durch (euer
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites

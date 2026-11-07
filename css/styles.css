@@ -1606,4 +1606,23 @@ html.pm-offen{overflow:hidden}
 .r-boxen .linkbtn{justify-self:start}
 .wk-boxen{display:grid;gap:8px;margin-top:14px}
 .wk-boxen-k{margin:0;font-weight:600;font-size:14.5px}
-.tips-boxen{margin-top:8px}
+
+/* Was von den Packungen übrig bleibt (ansicht-reste.js): im Rezept bei den Zutaten und unten auf der Liste */
+.reste{margin:16px 0 6px;padding:2px 14px 12px;border-radius:14px;background:var(--surface-2);max-width:640px}
+.reste[hidden]{display:none}
+.reste .sub-h{margin-top:12px}
+.reste .sub-h small{font-weight:500;letter-spacing:0;text-transform:none;font-size:12px}
+.reste-l{display:grid;gap:3px;margin:8px 0 0;padding:0;list-style:none;font-size:14.5px}
+.reste-l small{color:var(--muted);font-size:12.5px}
+.reste-k{margin:14px 0 2px;font-weight:650;font-size:14px}
+.reste-plan{margin:0;padding:0;list-style:none}
+.reste-r{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.reste-r:first-child{border-top:0}
+.reste-r-t{display:grid;min-width:0}
+.reste-r-n{justify-self:start;min-height:34px;padding:0;text-align:left}
+.reste-r-t small{color:var(--muted);font-size:12.5px;line-height:1.35}
+.reste-dazu,.reste-ki{flex:none;min-height:40px;padding:0 12px;font-size:14px}
+.reste-ki{margin-top:10px}
+.reste .fine{margin-top:8px}
+.reste .fine .linkbtn{min-height:0;font-size:12.5px}
+.l-reste{margin-top:22px}

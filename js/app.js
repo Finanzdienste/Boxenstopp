@@ -38,6 +38,7 @@ import { klickSpeisekarte, absendenSpeisekarte, eingabeSpeisekarte, aenderungSpe
 import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste } from './ansicht-gaeste.js';
 import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillkommen, willkommenPruefen } from './ansicht-willkommen.js';
 import { boxenZeichnen, klickBoxen } from './ansicht-boxen.js';
+import { klickReste } from './ansicht-reste.js';
 import { boxenText } from './boxen.js';
 
 const apiBasis = () => lese('__api', null) || API;
@@ -213,6 +214,7 @@ document.addEventListener('click', (ev) => {
   if (klickSpeisekarte(el)) return;
   if (klickHaushalt(el)) return;
   if (klickAmy(el)) return;
+  if (klickReste(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
   if (klickAnpassen(el)) return;
