@@ -32,7 +32,7 @@ await p.setViewportSize({ width: 430, height: 900 });
 check(await bis(async () => (await abgeschnitten(p)).length === 0), '430 px: alles lesbar');
 await p.setViewportSize({ width: 360, height: 780 });
 await p.click('.tab[data-tab="einstellungen"]');
-check(await tab(p) === 'einstellungen' && JSON.stringify(await p.$$eval('#view-einstellungen .e-karte > h2', (xs) => xs.map((x) => x.textContent))) === JSON.stringify(['Gemeinsame Liste', 'Ziel pro Box', 'Gäste & Überblick', 'Push-Nachrichten', 'Microsoft To Do', 'KI-Schlüssel', 'Darstellung', 'Reiter unten', 'Gelernt und gemerkt', 'Über die App']), 'Einstellungen: zehn Bereiche');
+check(await tab(p) === 'einstellungen' && JSON.stringify(await p.$$eval('#view-einstellungen .e-karte > h2', (xs) => xs.map((x) => x.textContent))) === JSON.stringify(['Gemeinsame Liste', 'Ziel pro Box', 'Boxen pro Rezept', 'Gäste & Überblick', 'Push-Nachrichten', 'Microsoft To Do', 'KI-Schlüssel', 'Darstellung', 'Reiter unten', 'Gelernt und gemerkt', 'Über die App']), 'Einstellungen: elf Bereiche');
 check(await p.locator('#e-zugang #z-form').isVisible() && !(await p.locator('#e-zugang [data-act="z-abbrechen"]').count()), 'nicht geteilt: hier gleich das Formular (ohne Abbrechen)');
 check((await p.locator('#push-bereich').innerText()).includes('sobald die gemeinsame Liste eingerichtet ist'), 'Push: erst nach dem Einrichten');
 // Über der Liste der Hinweis – „Einrichten“ führt hierher

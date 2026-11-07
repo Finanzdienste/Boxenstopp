@@ -1593,3 +1593,17 @@ html.pm-offen{overflow:hidden}
 .sk-zeile-w{font:500 12.5px/1.3 var(--f-mono);color:var(--muted)}
 .sk-chip{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;background:color-mix(in srgb,var(--danger) 12%,var(--surface));color:var(--danger);font:650 11px/1 var(--f-body)}
 .sk-leer{margin:0;color:var(--muted)}
+
+/* Boxen pro Rezept (ansicht-boxen.js): Zahlen zum Antippen in den Einstellungen, im Willkommen und oben bei den Rezepten */
+/* Alle acht in einer Reihe, auch auf dem schmalen Handy */
+.e-boxen-wahl,.r-boxen-wahl{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;max-width:420px}
+.e-boxen-wahl .chip,.r-boxen-wahl .chip{min-width:0;height:40px;padding:0;justify-content:center;font-variant-numeric:tabular-nums}
+#e-boxen{display:grid;gap:10px}
+.e-boxen-stand{font-size:14.5px}
+.r-boxen{display:grid;gap:10px;margin-top:12px;padding:12px 14px;border:1.5px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:14px;background:var(--surface);max-width:560px}
+.r-boxen[hidden]{display:none}
+.r-boxen p{margin:0;font-size:14.5px}
+.r-boxen .linkbtn{justify-self:start}
+.wk-boxen{display:grid;gap:8px;margin-top:14px}
+.wk-boxen-k{margin:0;font-weight:600;font-size:14.5px}
+.tips-boxen{margin-top:8px}

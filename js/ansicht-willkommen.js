@@ -19,6 +19,8 @@ import { ladeKi } from './zugang.js';
 import { istEigen, person, wessen, linkFuerGeraet } from './profil.js';
 import { zielAusFeldern, zielSpeichern, eigenesZiel } from './ansicht-ziel.js';
 import { zielText, MAKROS } from './zielrechner.js';
+import { boxenBereinigen } from './boxen.js';
+import { boxenChips } from './ansicht-boxen.js';
 
 const GESEHEN = 'boxenstopp.willkommen.v1';
 const KREUZ = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
@@ -52,7 +54,7 @@ function halloHTML() {
   const name = person();
   const ki = !!ladeKi();
   const punkte = [
-    ['Rezepte', '50 Meal-Prep-Rezepte für je 8 Boxen, Schritt für Schritt mit Schalen und Timern – auf deine Makros gerechnet.'],
+    ['Rezepte', '50 Meal-Prep-Rezepte, Schritt für Schritt mit Schalen und Timern – auf deine Makros gerechnet und auf so viele Boxen, wie du kochst.'],
     ['Einkaufsliste', 'Mit einem Tipp landen die Zutaten drauf, sortiert nach Abteilungen; die Angebote der Woche stehen daneben.'],
     [`${wessen(name)} Rezepte`, 'Deine eigenen Lieblingsrezepte – Zeile für Zeile tippen oder von einer Webseite übernehmen.'],
     ...(ki ? [['Resteverwertung & Speisekarte', 'Was im Kühlschrank ist, wird ein Rezept; im Restaurant sagt dir die App, welches Gericht am besten zu deinen Makros passt.']] : []),
@@ -78,7 +80,8 @@ ${f.tag ? `<label class="e-ziel-tag">Mahlzeiten am Tag <select name="mahlzeiten"
 <p class="fine" id="wk-vorschau">${vorschau.ziel ? `Pro Box: <b>${esc(zielText(vorschau.ziel))}</b>` : esc(vorschau.fehler || '')}</p>
 ${f.fehler ? `<p class="zugang-fehler" role="alert">${esc(f.fehler)}</p>` : ''}
 </form>
-<p class="tablet-fein">Kein Plan? Dann lass die Werte so – das sind 443 kcal mit viel Protein. Ändern kannst du sie jederzeit unter Einstellungen → Ziel pro Box.</p>`;
+<div class="wk-boxen"><p class="wk-boxen-k" id="wk-boxen-k">Für wie viele Boxen kochst du meistens?</p><div class="e-boxen-wahl" role="group" aria-labelledby="wk-boxen-k">${boxenChips(boxenBereinigen(app.stand.profil?.boxen))}</div></div>
+<p class="tablet-fein">Kein Plan? Dann lass die Werte so – das sind 443 kcal mit viel Protein, gebaut für 8 Boxen. Ändern kannst du beides jederzeit unter Einstellungen.</p>`;
 }
 
 function handyHTML() {

@@ -78,6 +78,7 @@ import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 import { umleiten } from './format.js';
 import { RAUM, SACH_BEREICH, aufgabenAm } from './haushalt.js';
 import { zielBereinigen as makrosBereinigen } from './zielrechner.js';
+import { boxenBereinigen, BOXEN_STANDARD } from './boxen.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
 export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {} });
@@ -301,6 +302,8 @@ export function beschreibung(vorher, nachher, name = () => '') {
   if (JSON.stringify(hv.plaene || {}) !== JSON.stringify(hn.plaene || {})) teile.push('Putzplan geändert');
   if (JSON.stringify(hv.sachen || {}) !== JSON.stringify(hn.sachen || {})) teile.push('Haushaltssachen');
   if (JSON.stringify(v.profil?.ziel || null) !== JSON.stringify(n.profil?.ziel || null)) teile.push('Ziel pro Box geändert');
+  const boxen = n.profil?.boxen || BOXEN_STANDARD;
+  if (boxen !== (v.profil?.boxen || BOXEN_STANDARD)) teile.push(boxen === 1 ? '1 Box pro Rezept' : `${boxen} Boxen pro Rezept`);
   if (Object.keys(n.leute || {}).some((k) => !v.leute?.[k])) teile.push('zum ersten Mal dabei');
   if (umbenannt.length) teile.push(`${aufzaehlen(umbenannt)} heißt jetzt ${n.profil.person}`);
   if (!teile.length) {
@@ -471,7 +474,8 @@ export function bereinigen(roh) {
  * Was eine Liste für sich festlegt (liste.json unter profil, für alle, die sie
  * teilen): person – wessen eigene Rezepte der rosa Reiter zeigt (bei einer
  * eigenen Liste wie Marielles; bei Tobi und Amy fehlt es: Amy), farbe – die
- * Farbe der App ('lila'; fehlt: blau), ziel – Makros pro Box mit by/at.
+ * Farbe der App ('lila'; fehlt: blau), ziel – Makros pro Box mit by/at,
+ * boxen – für wie viele Boxen gekocht wird (1–8; fehlt: 8, boxen.js).
  */
 export function profilBereinigen(x) {
   const p = {};
@@ -480,7 +484,21 @@ export function profilBereinigen(x) {
   if (FARBEN.includes(x.farbe)) p.farbe = x.farbe;
   const z = makrosBereinigen(x.ziel);
   if (z) p.ziel = { ...z, by: text(x.ziel.by, 40), at: text(x.ziel.at, 40) || '' };
+  const b = boxenBereinigen(x.boxen);
+  if (b) p.boxen = b;
   return p;
+}
+
+/**
+ * Eine ältere App-Fassung kennt profil.boxen nicht und lässt es beim
+ * Schreiben weg (profilBereinigen behält nur, was sie kennt). Gesetzt wird
+ * es immer ausdrücklich, auch 8 – fehlt es, wo dieses Handy es kannte, kommt
+ * es wieder dazu (speicher.js).
+ */
+export function profilNachtrag(roh, stand, bekannt) {
+  const b = boxenBereinigen(bekannt?.profil?.boxen);
+  if (!b || !istObj(roh) || !istObj(roh.profil) || 'boxen' in roh.profil || stand?.profil?.boxen) return [];
+  return [opProfil({ boxen: b })];
 }
 
 /* ------------------------------------------------------------- Haushalt */
@@ -974,6 +992,10 @@ function aendere(s, op) {
       if ('ziel' in t) {
         const z = makrosBereinigen(t.ziel);
         if (z) s.profil.ziel = { ...z, by: op.by || null, at: op.at }; else delete s.profil.ziel;
+      }
+      if ('boxen' in t) {
+        const b = boxenBereinigen(t.boxen);
+        if (b) s.profil.boxen = b; else delete s.profil.boxen;
       }
       return;
     }

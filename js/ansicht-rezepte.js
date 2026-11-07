@@ -265,7 +265,8 @@ function zeilenVon(r) {
  * „3 Paprika“), damit man beim Kochen nicht nach oben zu den Zutaten muss.
  * Läuft auf bereits entschärftem Text, fügt nur <b> ein.
  */
-const MENGE = new RegExp(String.raw`(?<![\w.,])(?:\d+(?:[.,]\d+)?[½¼¾]?|[½¼¾])(?:\s?[–-]\s?\d+(?:[.,]\d+)?[½¼¾]?)?\s(?:gehäufte\s|große\s|rote\s|gelbe\s)?(?:kg|g|ml|l|EL|TL|Prise|Zehen?|Knoblauchzehen?|Dosen?|Glas|Bund|Stangen?|Stück|Lorbeerblätter|Brühwürfeln?|Blatt|Blätter|Zwiebeln?|Paprika|Möhren|Tomaten|Zucchini|Limetten?|Zitronen?|Salatgurke)(?![\wäöüß])`, 'g');
+// Auch was boxen.js für weniger Boxen schreibt: „¼–½ TL“, „⅛ Zitrone“, „1 gehäufter TL“, „1 Lorbeerblatt“, „1 Ei“
+const MENGE = new RegExp(String.raw`(?<![\w.,])(?:\d+(?:[.,]\d+)?[½¼¾⅛]?|[½¼¾⅛])(?:\s?[–-]\s?(?:\d+(?:[.,]\d+)?[½¼¾⅛]?|[½¼¾⅛]))?\s(?:gehäufter?\s|große\s|rote\s|gelbe\s|kleine\s)?(?:kg|g|ml|l|EL|TL|Prise|Zehen?|Knoblauchzehen?|Dosen?|Glas|Bund|Stangen?|Stück|Lorbeerblätter|Lorbeerblatt|Brühwürfeln?|Blatt|Blätter|Zwiebeln?|Paprika|Möhren?|Tomaten|Zucchini|Limetten?|Zitronen?|Salatgurke|Eier|Ei|Packungen?|Tortillas?)(?![\wäöüß])`, 'g');
 export const mengenHervor = (html) => html.replace(MENGE, (m) => `<b class="mg">${m}</b>`);
 
 /*
@@ -338,7 +339,7 @@ ${rezeptFoto(r, { gross: true })}
   <div class="facts">${fakten.map((f) => `<span class="pill">${f}</span>`).join('')}</div>
   <p class="d-laeuft" id="d-laeuft" hidden></p>
 </div>
-<span class="label-k">Pro Box, eine von ${zahlwort(boxen(r))}</span>
+<span class="label-k">${boxen(r) === 1 ? 'Pro Box' : `Pro Box, eine von ${zahlwort(boxen(r))}`}</span>
 ${etikett(r)}
 ${angepasstHTML(r)}
 ${r.ki ? '<div class="ki-leiste" id="d-ki"></div>' : ''}
@@ -366,7 +367,7 @@ ${bereich('zutaten', `<h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</smal
 ${zubereitungHTML(r)}
 
 ${bereich('portionieren', '<h2 id="h-calc">Portionieren</h2>', `
-  <p class="sec-lead">Topf oder Schüssel leer wiegen, dann mit dem fertigen Essen. Die Differenz geht durch ${boxen(r)}.</p>
+  <p class="sec-lead">Topf oder Schüssel leer wiegen, dann mit dem fertigen Essen. ${boxen(r) === 1 ? 'Die Differenz kommt in die Box.' : `Die Differenz geht durch ${boxen(r)}.`}</p>
   <div class="calc">
     <div class="field"><label for="pot-empty">Gefäß leer</label><div class="inp"><input id="pot-empty" type="number" inputmode="numeric" min="0" step="1" placeholder="2150"><span>g</span></div></div>
     <div class="field"><label for="pot-full">Mit Essen</label><div class="inp"><input id="pot-full" type="number" inputmode="numeric" min="0" step="1" placeholder="5450"><span>g</span></div></div>
@@ -380,7 +381,7 @@ ${bereich('aufbewahren', '<h2 id="h-keep">Aufbewahren</h2>', `
     <li>Gefrorene Boxen am besten über Nacht im Kühlschrank auftauen.</li>
     <li>Abgedeckt in der Mikrowelle erhitzen und zwischendurch umrühren, bis alles durch und durch heiß ist.</li>
   </ul>`)}
-${r.tips && r.tips.length ? bereich('tipps', '<h2 id="h-tips">Tipps</h2>', `<ul class="tips">${r.tips.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`) : ''}
+${r.tips && r.tips.length ? bereich('tipps', '<h2 id="h-tips">Tipps</h2>', `<ul class="tips">${r.tips.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>${r.boxen?.vorher && r.boxen.vorher !== boxen(r) ? `<p class="fine tips-boxen">Mengen in den Tipps: für ${r.boxen.vorher} Boxen.</p>` : ''}`) : ''}
 
 <details class="nut">
   <summary>Nährwertrechnung für alle ${boxen(r)} Boxen</summary>

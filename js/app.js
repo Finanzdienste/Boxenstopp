@@ -37,6 +37,8 @@ import { profilAnwenden, farbeSetzen, istEigen } from './profil.js';
 import { klickSpeisekarte, absendenSpeisekarte, eingabeSpeisekarte, aenderungSpeisekarte, speisekarteNeu } from './ansicht-speisekarte.js';
 import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste } from './ansicht-gaeste.js';
 import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillkommen, willkommenPruefen } from './ansicht-willkommen.js';
+import { boxenZeichnen, klickBoxen } from './ansicht-boxen.js';
+import { boxenText } from './boxen.js';
 
 const apiBasis = () => lese('__api', null) || API;
 /** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen (eine eigene Liste hat sie nicht). */
@@ -49,6 +51,7 @@ const takt = () => Number(lese('__takt', 0)) || 8000;
 const rezeptName = (rid) => app.nachId[rid]?.short || app.amyNach?.[rid]?.short || app.extras?.[rid]?.short || '';
 const speicherFuer = (z) => github({ ...z, ort: ortVon(z), api: apiBasis(), takt: takt(), rezeptName });
 
+const eyebrowZeichnen = () => { $('#r-eyebrow').textContent = `${app.rezepte.length} Rezepte · je ${boxenText(app.boxen)}`; };
 let einePersonGeschickt = '';
 function beiAenderung(stand) {
   app.stand = stand;
@@ -56,6 +59,9 @@ function beiAenderung(stand) {
   // Ein eigenes Ziel pro Box: die Rezepte darauf (ansicht-ziel.js); Name und Farbe der Liste (profil.js)
   const zielNeu = zielAnwenden();
   profilAnwenden();
+  // Für wie viele Boxen: oben bei den Rezepten und in den Einstellungen (ansicht-boxen.js)
+  if (zielNeu) eyebrowZeichnen();
+  boxenZeichnen();
   // Eine eigene Liste hat eine Person, auf jedem Gerät: Hat sich dieses Gerät anders genannt („Marielli“), heißt es
   // jetzt wie die Liste („Marielle“) – und was es unter dem anderen Namen gemacht hat, steht bei ihr (opEinePerson)
   const person = istEigen() ? stand.profil?.person : '';
@@ -181,6 +187,7 @@ document.addEventListener('click', (ev) => {
   if (klickTodo(el)) return;
   if (klickEinstellungen(el)) return;
   if (klickWillkommen(el)) return;
+  if (klickBoxen(el)) return;
   if (klickGaeste(el)) return;
   if (klickZiel(el)) return;
   if (klickSpeisekarte(el)) return;
@@ -257,7 +264,7 @@ async function start() {
   // Welche Einheit ein Katalog-Schlüssel hat – damit die Resteverwertung nur
   // dann eine Zeile mit einem festen Rezept teilt, wenn sich Mengen addieren lassen.
   for (const r of app.rezepte) for (const it of r.items) if (it.k && typeof it.q === 'number') app.einheiten[it.k] = it.u;
-  $('#r-eyebrow').textContent = `${app.rezepte.length} Rezepte · je 8 Boxen`;
+  eyebrowZeichnen();
 
   let hash = '';
   try { hash = decodeURIComponent((location.hash || '').slice(1)); } catch { /* kaputte Adresse */ }
@@ -270,6 +277,7 @@ async function start() {
   app.stand = { ...app.stand, profil: bekanntesProfil(app.zugang ? ortVon(app.zugang) : null) };
   zielAnwenden();
   profilAnwenden();
+  eyebrowZeichnen();
   // Eine Einladung (…&fuer=Marielle) auf einem Gerät ohne Liste: gleich verbinden, das Willkommen erklärt den Rest
   const einladung = !!ausLink && !app.zugang && !!link.fuer;
   if (link.farbe && (einladung || (ausLink && ausLink === app.zugang?.token))) farbeSetzen(link.farbe === 'blau' ? '' : link.farbe);

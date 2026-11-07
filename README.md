@@ -27,7 +27,9 @@ Preisalarm zuschlägt oder im Putzplan etwas dran ist (siehe unten).
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
 15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein Schwein,
 kein Putenhack. Ein anderes Ziel trägt man in den Einstellungen ein, dann
-rechnen sich alle Rezepte darauf um (siehe „Ziel pro Box“).
+rechnen sich alle Rezepte darauf um (siehe „Ziel pro Box“) – und wer für
+weniger kocht, stellt dort ein, für wie viele Boxen (siehe „Boxen pro
+Rezept“).
 
 ### Ziel pro Box
 
@@ -52,6 +54,42 @@ allein nicht hin (Kokosmilch gibt es nur dosenweise), sagt es das – und
 Gemini rechnet bewusst nicht: Die Mengen kämen jedes Mal etwas anders heraus
 und stimmten nicht genau. Die gerechneten Mengen merkt sich das Gerät je
 Ziel (`boxenstopp.zielmengen.v1`), der nächste Start ist sofort da.
+
+### Boxen pro Rezept
+
+Einstellungen → **Boxen pro Rezept**: 1 bis 8 – Marielle kocht meist für 1
+oder 2. Die Zahl gilt für die ganze Liste (`profil.boxen`; ohne: 8), in einer
+eigenen Liste fragt die App einmal oben bei den Rezepten („Für wie viele
+Boxen kochst du meistens?“), bei Gästen auch im Willkommen. Ein Tipp auf eine
+Zahl speichert sie gleich; die Rezepte auf der Liste ziehen mit.
+
+Gerechnet wird nach dem Ziel (`js/boxen.js`): erst aufs Ziel für 8 Boxen,
+dann mal 2/8 – pro Box bleibt alles gleich. Umgerechnet wird überall, wo
+Mengen stehen:
+
+- **Zutaten:** „125 g“ statt 500 g, der Packungshinweis sagt, was man kauft
+  („1 × 500 g“, „kleine Dose“). Gemüse und Dosen gibt es in Vierteln („¾
+  mittlere (75 g)“, „½ Dose à 400 g (130 g abgetropft)“, ganz wenig: ⅛),
+  Knoblauchzehen, Eier und Tortillas bleiben ganz (mindestens 1). Auf der
+  Einkaufsliste steht die ganze Dose, darunter „Chili ½ Dose“.
+- **Gewürze und die Mengen in den Schritten:** „2 gehäufte EL Kreuzkümmel“ →
+  „1½ gehäufte TL“, unter ⅛ TL „1 Prise“; „3 Zwiebeln“ → „¾ Zwiebel“, „2
+  Lorbeerblättern“ → „1 Lorbeerblatt“, „1,2 kg“ → „300 g“, „8 Boxen“ → „2
+  Boxen“, „durch 8 teilen“ → „durch 2 teilen“, „In 2 × 4 gleich große
+  Stücke“ → „In 2 gleich große Stücke“. Was pro Box oder Stück gilt („je ca.
+  50 g“, „Je 5 Bällchen in jede Box“, „knapp 19 g pro Box“), Zeiten, Grad,
+  Größen („2-cm-Würfel“, „Messbecher (1 l)“) und Schalen bleiben.
+- **Geräte:** für die Hälfte oder weniger ein Blech statt zwei (die Schritte
+  dazu auch), eine kleine Auflaufform, kein „mind. 5 l“.
+- Für **eine Box:** „Im Ganzen in die Box“, „Die Box auf die Waage stellen“.
+- **Nährwerttabelle und Kosten** fürs ganze Rezept, die **Zeit:**
+  Schnippeln und Portionieren gehen schneller, Garzeiten nicht.
+- **Tipps** bleiben, wie sie sind – darunter steht „Mengen in den Tipps: für
+  8 Boxen“ (dort ist oft nicht klar, ob pro Box oder fürs Ganze).
+
+Die Resteverwertung schlägt die Zahl der Liste als Portionen vor. Eigene
+Rezepte (Amy, Marielle) haben ihre eigene Portionenzahl und bleiben, wie sie
+eingetragen sind.
 
 ### Zubereitung
 
@@ -663,7 +701,7 @@ Der sechste Reiter, ganz rechts (breit: das Regler-Symbol oben; der Punkt
 „Geteilt“ / „Nur lokal“ oben führt auch hin) – alles, was man einmal
 einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
 
-- **Ziel pro Box** und **Gäste & Überblick:** siehe dort (die Gäste nur in
+- **Ziel pro Box**, **Boxen pro Rezept** und **Gäste & Überblick:** siehe dort (die Gäste nur in
   der Liste von Tobi und Amy). In einer eigenen Liste fehlen Push und To Do,
   die Karte oben heißt „Deine Liste“, mit „Einführung zeigen“.
 - **Gemeinsame Liste:** nicht eingerichtet gleich das Formular (Name,
@@ -1068,7 +1106,8 @@ Kochstand je Person (Name klein, höchstens sechs; die neueste Fassung `at` gewi
 Laden nicht da war, `bons` die letzten fünf Preise je Zutat (höchstens 200 Zutaten), `preisalarm` die
 Wunschpreise (`u`: kg, l oder Stk), `haushalt` Haushaltssachen und Putzplan (Wochentage 1 = Mo … 7 = So,
 `wer` leer: beide; siehe Haushalt), `leute` wer die Liste teilt, `profil` was die Liste festlegt: `ziel`
-(Makros pro Box, siehe Ziel pro Box), in einer eigenen Liste auch `person` (wessen Rezepte der eigene Reiter
+(Makros pro Box, siehe Ziel pro Box), `boxen` (1–8, siehe Boxen pro Rezept; gespeichert wird es immer
+ausdrücklich, auch 8 – lässt eine ältere Fassung es weg, kommt es wieder dazu), in einer eigenen Liste auch `person` (wessen Rezepte der eigene Reiter
 zeigt) und `farbe` (`lila`). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
 nicht passt; schreibt eine ältere App-Fassung die Liste ohne die neueren Teile, legt das Handy, das sie
 kennt, sie wieder dazu (`js/speicher.js`). Jeder Start liest die Datei einmal ganz frisch, bevor er
@@ -1137,7 +1176,9 @@ die Action „Rezeptfotos“.
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
 | `js/zugang.js` | Schlüssel, Name und wo die Liste liegt (eigene Listen), Einladungslink |
 | `js/zielrechner.js` | Ziel pro Box: die festen Rezepte auf andere Makros rechnen (Mengen, Packungen, Texte, Nährwerte, Kosten) – ohne DOM |
-| `js/ansicht-ziel.js` | Ziel pro Box: anwenden, Einstellungen, oben bei den Rezepten, im Rezept, die Liste nachziehen |
+| `js/ansicht-ziel.js` | Ziel pro Box: anwenden (danach die Boxen), Einstellungen, oben bei den Rezepten, im Rezept, die Liste nachziehen |
+| `js/boxen.js` | Boxen pro Rezept: ein Rezept auf 1–8 Boxen rechnen – Zutaten, Gewürze, Mengen in Schritten, Geräte, Nährwerte, Kosten, Zeiten – ohne DOM |
+| `js/ansicht-boxen.js` | Boxen pro Rezept: Einstellungen, der Hinweis in einer eigenen Liste, die Zahlen zum Antippen |
 | `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
 | `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; der Überblick aus den Commits |
 | `js/einzelheiten.js` | Überblick: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
@@ -1248,7 +1289,11 @@ Node auf vier Ziele (wie viele treffen, Tabelle und Werte pro Box passen, ganze
 Dosen, Platzhalter, Kosten, gemerkte Mengen), prüft Texte, Formular und das
 Profil der Liste und spielt im Browser Ziel setzen, Liste nachziehen, das
 zweite Handy, Neuladen, eine ältere Fassung ohne Profil und zurück zum
-Standard durch. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
+Standard durch. `test-boxen.mjs` rechnet Texte und Rezepte in Node (Löffel,
+Viertel, ganze Zehen, was pro Box bleibt, ein Blech, eine Box, alle 50
+Rezepte für 1–7 Boxen, mit eigenem Ziel) und spielt im Browser Marielles
+Liste durch: der Hinweis, 2 Boxen, das Chili, die Liste (1 Dose kaufen), 4
+Boxen ziehen nach, eine ältere Fassung ohne `boxen`, zurück auf 8. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
 Überblick in Node zusammen und spielt dann die Einladung durch (euer
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites

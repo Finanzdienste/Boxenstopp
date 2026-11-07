@@ -5,6 +5,8 @@
  *                      zeichnet ansicht-liste.js in #e-zugang und #teilen
  *   Ziel pro Box       die eigenen Makros, alle Rezepte rechnen sich darauf
  *                      um – ansicht-ziel.js in #e-ziel
+ *   Boxen pro Rezept   für wie viele Boxen gekocht wird (1–8) – ansicht-boxen.js
+ *                      in #e-boxen
  *   Gäste & Überblick  jemanden mit eigener Liste einladen, wer wann was
  *                      macht – ansicht-gaeste.js (nur bei Tobi und Amy)
  *   Push-Nachrichten   ansicht-push.js in #push-bereich (nicht in einer
@@ -36,6 +38,7 @@ import { nameSchluessel } from './bereiche.js';
 import { statusZeichnen } from './ansicht-liste.js';
 import { todoZeichnen } from './ansicht-todo.js';
 import { zielEinstellungenZeichnen } from './ansicht-ziel.js';
+import { boxenZeichnen } from './ansicht-boxen.js';
 import { gaesteZeichnen } from './ansicht-gaeste.js';
 import { istEigen, person, wessen, farbe, farbeSetzen } from './profil.js';
 
@@ -238,6 +241,7 @@ export function einstellungenZeichnen() {
   const g = $('#e-gemerkt');
   if (g) g.innerHTML = gemerktHTML();
   zielEinstellungenZeichnen();
+  boxenZeichnen();
   gaesteZeichnen();
   // In einer eigenen Liste gibt es kein Push und kein To Do (die laufen über die Abläufe in Boxenstopp-Daten)
   for (const id of ['#e-push-karte', '#e-todo']) { const k = $(id); if (k) k.hidden = istEigen(); }

@@ -22,6 +22,8 @@ export const app = {
   /** Ziel pro Box: aus daten/rezepte.json oder das eigene der Liste (Einstellungen → Ziel pro Box). */
   ziel: { kcal: 443, p: 33, kh: 39, f: 15.4 },
   zielStandard: { kcal: 443, p: 33, kh: 39, f: 15.4 },
+  /** Für wie viele Boxen die Liste kocht (profil.boxen, ansicht-boxen.js) – die Rezepte sind für 8 gebaut. */
+  boxen: 8,
   stand: leer(),
   listeDa: false,
   speicher: null,

@@ -43,6 +43,7 @@ import { schluesselAus, kiAus, ladeKi, speichereKi, linkExtras } from './zugang.
 import { istEigen, person, wessen, linkFuerGeraet } from './profil.js';
 import { nachBereichen, alsText, abteilungVon, merkSchluessel, nameSchluessel } from './bereiche.js';
 import { zutatImg } from './bilder.js';
+import { kaufMenge } from './boxen.js';
 import { angeboteJeZutat, ladenWahl, rabattText, angebotMenge, grundpreis, schluesselRaten, einheitsPreis, preisJe, preisalarmTreffer, GUENSTIG_AB, LAEDEN } from './angebote.js';
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
@@ -400,7 +401,8 @@ function zeile([k, d]) {
   const fertig = erledigt(d);
   const teile = teileVon(d);
   const s = summen(d);
-  const mengeText = Object.entries(s).map(([u, q]) => menge(q, u)).join(' + ');
+  // Stückware ganz: ½ Dose fürs Rezept (2 Boxen) heißt eine Dose kaufen – was genau, steht darunter
+  const mengeText = Object.entries(s).map(([u, q]) => menge(kaufMenge(q, u), u)).join(' + ');
   const etwa = d.custom ? '' : ungefaehr(k, s);
   const herkunft = teile.map(([rid, p]) => {
     // Ein eigener Eintrag mit Menge: nur wessen sie ist; sonst „Amy dazu 500 g“

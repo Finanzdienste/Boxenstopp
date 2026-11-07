@@ -14,16 +14,31 @@ export const nf1 = (x) => Number(x).toLocaleString('de-DE', { minimumFractionDig
 export const nfi = (x) => Math.round(Number(x)).toLocaleString('de-DE');
 const nfmax = (x, d) => Number(x).toLocaleString('de-DE', { maximumFractionDigits: d });
 
+const TEILE = [[1 / 8, '⅛'], [1 / 4, '¼'], [1 / 3, '⅓'], [1 / 2, '½'], [2 / 3, '⅔'], [3 / 4, '¾']];
+/** 0.25 → „¼“, 1.5 → „1½“, 2 → „2“ – für Stückware (boxen.js rechnet in Vierteln); was kein Bruch ist, mit Komma. */
+export function bruch(x) {
+  const n = Number(x);
+  if (!Number.isFinite(n)) return '';
+  const ganz = Math.floor(n + 1e-6);
+  const rest = n - ganz;
+  if (rest < 0.02) return String(ganz);
+  if (rest > 0.98) return String(ganz + 1);
+  for (const [w, z] of TEILE) if (Math.abs(rest - w) < 0.02) return `${ganz || ''}${z}`;
+  return nfmax(n, 1);
+}
+// Einzahl bis 1 – auch „½ Dose“
+const stueck = (ein, mehr) => (n) => `${bruch(n)} ${n <= 1 + 1e-9 ? ein : mehr}`;
+
 const EINHEIT = {
   g: (n) => (n >= 1000 ? `${nfmax(n / 1000, 3)} kg` : `${nfi(n)} g`),
   ml: (n) => (n >= 1000 ? `${nfmax(n / 1000, 3)} l` : `${nfi(n)} ml`),
-  Stk: (n) => `${nfmax(n, 1)} Stk.`,
-  Dose: (n) => `${nfmax(n, 1)} ${n === 1 ? 'Dose' : 'Dosen'}`,
-  Glas: (n) => `${nfmax(n, 1)} ${n === 1 ? 'Glas' : 'Gläser'}`,
-  Bund: (n) => `${nfmax(n, 1)} Bund`,
-  Zehe: (n) => `${nfmax(n, 1)} ${n === 1 ? 'Zehe' : 'Zehen'}`,
-  Stange: (n) => `${nfmax(n, 1)} ${n === 1 ? 'Stange' : 'Stangen'}`,
-  Pck: (n) => `${nfmax(n, 1)} ${n === 1 ? 'Packung' : 'Packungen'}`,
+  Stk: (n) => `${bruch(n)} Stk.`,
+  Dose: stueck('Dose', 'Dosen'),
+  Glas: stueck('Glas', 'Gläser'),
+  Bund: stueck('Bund', 'Bund'),
+  Zehe: stueck('Zehe', 'Zehen'),
+  Stange: stueck('Stange', 'Stangen'),
+  Pck: stueck('Packung', 'Packungen'),
 };
 
 /** 1275, 'g' → „1,275 kg“; 2, 'Dose' → „2 Dosen“. */

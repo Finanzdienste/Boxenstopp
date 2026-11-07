@@ -36,6 +36,7 @@ try{if(JSON.parse(localStorage.getItem('boxenstopp.farbe.v1'))==='lila'){var h=d
           <h1 id="r-title">Was kommt diese Woche in die Boxen?</h1>
           <p id="r-intro">Jedes Rezept ist auf 8 gleiche Boxen gerechnet, mit Packungsgrößen aus dem Supermarkt. Rezept öffnen, Zutaten auf die gemeinsame Liste setzen, einkaufen, kochen.</p>
           <div class="target" id="r-ziel"><span>Ziel pro Box</span><b>443 kcal</b><b class="m-p">33 g P</b><b class="m-kh">39 g KH</b><b class="m-f">15,4 g F</b></div>
+          <div class="r-boxen" id="r-boxen" hidden></div>
         </div>
         <nav class="abk-leiste" aria-label="Mehr in der App">
           <button type="button" class="abk abk-reste" data-act="reste"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 10h14M8.5 6v1.5M8.5 13.5v3"/></svg></span><span class="abk-t">Resteverwertung</span><span class="vh" id="reste-letzter" hidden></span></button>
@@ -90,6 +91,7 @@ try{if(JSON.parse(localStorage.getItem('boxenstopp.farbe.v1'))==='lila'){var h=d
       <h1 id="e-titel" class="e-titel">Einstellungen</h1>
       <section class="e-karte" id="e-liste" aria-labelledby="e-liste-t"><h2 id="e-liste-t">Gemeinsame Liste</h2><div class="e-zugang" id="e-zugang"></div><div class="teilen" id="teilen" hidden></div></section>
       <section class="e-karte" id="e-ziel-karte" aria-labelledby="e-ziel-t"><h2 id="e-ziel-t">Ziel pro Box</h2><div id="e-ziel"></div></section>
+      <section class="e-karte" id="e-boxen-karte" aria-labelledby="e-boxen-t"><h2 id="e-boxen-t">Boxen pro Rezept</h2><div id="e-boxen"></div></section>
       <section class="e-karte" id="e-gaeste-karte" aria-labelledby="e-gaeste-t"><h2 id="e-gaeste-t">Gäste &amp; Überblick</h2><div id="e-gaeste"></div></section>
       <section class="e-karte" id="e-push-karte" aria-labelledby="e-push-t"><h2 id="e-push-t">Push-Nachrichten</h2><div class="push-bereich" id="push-bereich"></div></section>
       <section class="e-karte" id="e-todo" aria-labelledby="e-todo-t"><h2 id="e-todo-t">Microsoft To Do</h2><div class="todo-bereich" id="todo-bereich"></div></section>

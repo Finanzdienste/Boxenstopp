@@ -321,6 +321,9 @@ export function einzelheiten(vorher, nachher, hilfe = {}) {
   const zn = n.profil?.ziel;
   if (zn && !gleicheMakros(zv, zn)) dazu('Ziel', 'Ziel pro Box', zv ? `${makros(zv)} → ${makros(zn)}` : makros(zn));
   else if (!zn && zv) dazu('Ziel', 'Ziel pro Box', 'zurück auf das Ziel der Rezepte');
+  const bv = v.profil?.boxen || 8;
+  const bn = n.profil?.boxen || 8;
+  if (bv !== bn) dazu('Ziel', 'Boxen pro Rezept', `${bv} → ${bn}`);
 
   /* -------------------------------------------------------- Sonstiges */
   const neueLeute = Object.entries(n.leute || {}).filter(([k]) => !v.leute?.[k]).map(([, x]) => x);

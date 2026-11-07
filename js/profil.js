@@ -15,6 +15,7 @@
  */
 import { app, $, $$, schreibe, leisteFaerben } from './kern.js';
 import { eigeneListe, einladungsLink, ladeKi } from './zugang.js';
+import { boxenDerListe } from './boxen.js';
 
 const FARBE = 'boxenstopp.farbe.v1';
 const SYMBOLE = {
@@ -78,7 +79,7 @@ export function profilAnwenden() {
   const eigen = istEigen();
   const wer = person();
   const f = farbe();
-  const schluessel = JSON.stringify([eigen, wer, f]);
+  const schluessel = JSON.stringify([eigen, wer, f, boxenDerListe(app.stand)]);
   if (schluessel === zuletzt) return false;
   zuletzt = schluessel;
   const html = document.documentElement;
@@ -90,7 +91,9 @@ export function profilAnwenden() {
   $('#view-amy')?.setAttribute('aria-label', titel);
   $('.brand-tag')?.setAttribute('data-fuer', `für ${wer} ♡`);
   const intro = $('#r-intro');
-  if (intro) intro.textContent = `Jedes Rezept ist auf 8 gleiche Boxen gerechnet, mit Packungsgrößen aus dem Supermarkt. Rezept öffnen, Zutaten auf ${eigen ? 'deine' : 'die gemeinsame'} Liste setzen, einkaufen, kochen.`;
+  const boxen = boxenDerListe(app.stand);
+  const gerechnet = boxen === 8 ? 'Jedes Rezept ist auf 8 gleiche Boxen gerechnet, mit Packungsgrößen aus dem Supermarkt.' : `Jedes Rezept ist auf ${boxen === 1 ? 'eine Box' : `${boxen} gleiche Boxen`} gerechnet – gebaut sind sie für 8, die Mengen rechnet die App um.`;
+  if (intro) intro.textContent = `${gerechnet} Rezept öffnen, Zutaten auf ${eigen ? 'deine' : 'die gemeinsame'} Liste setzen, einkaufen, kochen.`;
   if (app.listeDa) farbeSetzen(f);
   return true;
 }

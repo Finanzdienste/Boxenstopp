@@ -34,7 +34,7 @@
  *   jetzt()   sofort abgleichen
  *   stop()
  */
-import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt, planNachtrag, beschreibung } from './liste.js';
+import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt, planNachtrag, profilNachtrag, beschreibung } from './liste.js';
 
 export const API = 'https://api.github.com';
 export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: 'liste.json' };
@@ -269,7 +269,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, 
             if (fehlt('haushalt') && hatHaushalt(remote.stand?.haushalt)) mehr.haushalt = remote.stand.haushalt;
             if (fehlt('leute') && Object.keys(remote.stand?.leute || {}).length) mehr.leute = remote.stand.leute;
             // Dasselbe in den Putztagen: Material und „jedes 2. Mal“
-            const nachtrag = planNachtrag(roh, stand, remote.stand);
+            const nachtrag = [...planNachtrag(roh, stand, remote.stand), ...profilNachtrag(roh, stand, remote.stand)];
             if (Object.keys(mehr).length) nachtrag.unshift(opZusammen({}, {}, mehr));
             if (nachtrag.length) {
               for (const op of nachtrag) { stand = anwenden(stand, op); offen.push(op); }

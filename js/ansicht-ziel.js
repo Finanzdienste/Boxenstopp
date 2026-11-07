@@ -12,12 +12,16 @@
  * (MENGEN), so ist der nächste Start sofort da. Ändert man das Ziel,
  * ziehen auch die Zutaten mit, die schon auf der Liste stehen und noch nicht
  * gekauft sind.
+ *
+ * Danach die Boxen pro Rezept (boxen.js, ansicht-boxen.js): erst aufs Ziel
+ * für 8 Boxen, dann auf die Zahl der Liste – so bleibt pro Box das Ziel.
  */
 import { app, $, melde, lese, schreibe, zeigeReiter } from './kern.js';
 import { esc, nf1, nfi, tagKurz } from './format.js';
 import { alleAufZiel, zielBereinigen, gleichesZiel, kcalAus, zielText, trefferZaehlen, GRENZEN, MAKROS, TREFFER } from './zielrechner.js';
 import { opProfil, opTeil, rezepteAufListe, einkaufsZutaten, aufloesen } from './liste.js';
 import { istEigen } from './profil.js';
+import { aufBoxen, boxenDerListe } from './boxen.js';
 
 const MENGEN = 'boxenstopp.zielmengen.v1'; // { schluessel, mengen: { <rezept>: { <zutat>: Menge } } }
 const zielSchluessel = (z) => MAKROS.map((k) => z[k]).join('|');
@@ -38,10 +42,12 @@ export const hatEigenesZiel = () => !!eigenesZiel() && !gleichesZiel(eigenesZiel
 export function zielAnwenden() {
   if (!app.rezepteBasis.length) return false;
   const z = zielJetzt();
+  const boxen = boxenDerListe(app.stand);
   const schluessel = `${app.datenVersion || ''}|${zielSchluessel(z)}`;
-  if (schluessel === angewendet) return false;
-  angewendet = schluessel;
+  if (`${schluessel}|${boxen}` === angewendet) return false;
+  angewendet = `${schluessel}|${boxen}`;
   app.ziel = { ...z };
+  app.boxen = boxen;
   let rezepte = app.rezepteBasis;
   if (!gleichesZiel(z, app.zielStandard)) {
     const gemerkt = lese(MENGEN, null);
@@ -50,6 +56,7 @@ export function zielAnwenden() {
     rezepte = ergebnis.rezepte;
     if (gemerkt?.schluessel !== schluessel) schreibe(MENGEN, { schluessel, mengen: ergebnis.mengen });
   }
+  if (boxen !== 8) rezepte = rezepte.map((r) => aufBoxen(r, boxen));
   app.rezepte = rezepte;
   for (const r of rezepte) app.nachId[r.id] = r;
   zielKopfZeichnen();
@@ -68,10 +75,11 @@ export function zielKopfZeichnen() {
 const zahl = (x) => (Number.isInteger(x) ? String(x) : nf1(x));
 
 /**
- * Nach einem neuen Ziel: was von den Rezepten auf der Liste noch offen ist,
- * auf die neuen Mengen (nur auf dem Gerät, das das Ziel geändert hat).
+ * Nach einem neuen Ziel (oder neuen Boxen): was von den Rezepten auf der
+ * Liste noch offen ist, auf die neuen Mengen (nur auf dem Gerät, das es
+ * geändert hat).
  */
-function listeNachziehen() {
+export function listeNachziehen() {
   const ops = [];
   for (const rid of rezepteAufListe(app.stand)) {
     const r = app.nachId[rid];

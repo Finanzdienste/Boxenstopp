@@ -20,6 +20,7 @@
  */
 import { erledigt, summen } from './liste.js';
 import { menge, ungefaehr, nameSchluessel } from './format.js';
+import { kaufMenge } from './boxen.js';
 
 export { nameSchluessel };
 
@@ -62,7 +63,7 @@ export function nachBereichen(stand, katalog = {}) {
 /** Eine Zeile zum Kopieren: „300 g Zwiebeln (≈ 3 Stück)“, Gewürze nur mit Namen. */
 export function zeileAlsText(k, d) {
   const s = summen(d);
-  const mengen = Object.entries(s).map(([u, q]) => menge(q, u)).join(' + ');
+  const mengen = Object.entries(s).map(([u, q]) => menge(kaufMenge(q, u), u)).join(' + ');
   const etwa = d.custom ? '' : ungefaehr(k, s);
   return `${mengen ? `${mengen} ` : ''}${d.name}${etwa ? ` (${etwa})` : ''}`;
 }

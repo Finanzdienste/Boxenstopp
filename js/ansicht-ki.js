@@ -29,7 +29,9 @@ import { hatEigenesZiel } from './ansicht-ziel.js';
 
 const EINGABE = 'boxenstopp.ki.eingabe.v1';
 const ENTWURF = 'boxenstopp.ki.entwurf.v1';
-const PORTIONEN = [2, 4, 6, 8];
+// Zur Wahl: 2, 4, 6, 8 – und die Boxen der Liste (Einstellungen → Boxen pro Rezept), wenn es eine andere Zahl ist
+const portionenWahl = () => [...new Set([2, 4, 6, 8, app.boxen || 8])].sort((a, b) => a - b);
+const gueltig = (n) => Number.isInteger(n) && n >= 1 && n <= 8;
 const MAX_FOTOS = 4;
 const KANTE = 1280;
 
@@ -41,13 +43,17 @@ const gemerkt = lese(EINGABE, {}) || {};
 const eingabe = {
   text: typeof gemerkt.text === 'string' ? gemerkt.text.slice(0, 2000) : '',
   wuensche: typeof gemerkt.wuensche === 'string' ? gemerkt.wuensche.slice(0, 200) : '',
-  portionen: PORTIONEN.includes(gemerkt.portionen) ? gemerkt.portionen : 8,
+  // Selbst gewählt gilt, solange die Boxen der Liste dieselben sind – sonst deren Zahl
+  portionen: gueltig(gemerkt.portionen) ? gemerkt.portionen : null,
+  // (vor den Boxen pro Rezept gemerkt: das war bei 8)
+  portionenBei: gueltig(gemerkt.portionenBei) ? gemerkt.portionenBei : gueltig(gemerkt.portionen) ? 8 : null,
   dazukaufen: gemerkt.dazukaufen !== false,
   vermeiden: Array.isArray(gemerkt.vermeiden) ? gemerkt.vermeiden.filter((x) => typeof x === 'string').slice(-5) : [],
   // 'reste' (was da ist) oder 'angebote' (aus den Angeboten der Woche, ansicht-angebote.js)
   modus: gemerkt.modus === 'angebote' ? 'angebote' : 'reste',
 };
 const eingabeMerken = () => schreibe(EINGABE, eingabe);
+const portionen = () => (eingabe.portionen && eingabe.portionenBei === (app.boxen || 8) ? eingabe.portionen : app.boxen || 8);
 
 let entwurf = (() => {
   const e = lese(ENTWURF, null);
@@ -213,7 +219,7 @@ function formularHTML() {
 <label class="btn${voll ? ' is-aus' : ''}" for="k-bilder">${BILD}Bild wählen</label><input class="vh" id="k-bilder" type="file" accept="image/*" multiple${voll ? ' disabled' : ''}>
 </div>
 <div class="k-vorschau" id="k-vorschau">${fotosHTML()}</div>
-<div class="k-zeile"><span class="k-k" id="k-port-k">Portionen</span><div class="k-portionen" role="group" aria-labelledby="k-port-k">${PORTIONEN.map((n) => `<button type="button" class="chip" data-portionen="${n}" aria-pressed="${eingabe.portionen === n}">${n}</button>`).join('')}</div></div>
+<div class="k-zeile"><span class="k-k" id="k-port-k">Portionen</span><div class="k-portionen" role="group" aria-labelledby="k-port-k">${portionenWahl().map((n) => `<button type="button" class="chip" data-portionen="${n}" aria-pressed="${portionen() === n}">${n}</button>`).join('')}</div></div>
 <label class="k-check"><input type="checkbox" id="k-kaufen"${eingabe.dazukaufen ? ' checked' : ''}><span>Fehlendes darf dazugekauft werden</span></label>
 <label for="k-wunsch">Wünsche <small>optional</small></label>
 <input id="k-wunsch" type="text" maxlength="200" placeholder="z. B. was Asiatisches, ohne Ofen, mit Reis" value="${esc(eingabe.wuensche)}">
@@ -376,7 +382,7 @@ async function rezeptMachen() {
       text,
       wuensche: eingabe.wuensche,
       fotos: fotos.map((f) => f.b64),
-      portionen: eingabe.portionen,
+      portionen: portionen(),
       dazukaufen: eingabe.dazukaufen,
       ziel: app.ziel,
       katalog: app.katalog,
@@ -392,7 +398,7 @@ async function rezeptMachen() {
       signal: meinLauf.controller.signal,
       beiFortschritt: (f) => { meinLauf.zeichen = f.zeichen; meinLauf.schritte = f.schritte; laufZeichnen(); },
     });
-    const { r, fehler: f, art } = kiBereinigen({ ...roh, portionen: eingabe.portionen });
+    const { r, fehler: f, art } = kiBereinigen({ ...roh, portionen: portionen() });
     if (!r) throw Object.assign(new Error(f), { art });
     const id = `ki-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), kosten: kostenCent(usage, anbieter), modell: ANBIETER[anbieter].modell, modus: eingabe.modus } };
@@ -426,6 +432,7 @@ export function klickKi(el) {
   const d = el.dataset;
   if (d.portionen) {
     eingabe.portionen = Number(d.portionen);
+    eingabe.portionenBei = app.boxen || 8;
     eingabeMerken();
     for (const b of document.querySelectorAll('[data-portionen]')) b.setAttribute('aria-pressed', String(b.dataset.portionen === d.portionen));
     return true;
@@ -511,7 +518,7 @@ export function resteMitAngeboten(text, { wuensche = '' } = {}) {
   eingabe.modus = 'angebote';
   eingabe.text = String(text || '').slice(0, 2000);
   eingabe.dazukaufen = true;
-  eingabe.portionen = 8;
+  eingabe.portionen = null;
   if (wuensche) eingabe.wuensche = String(wuensche).slice(0, 200);
   eingabeMerken();
   oeffneReste();
