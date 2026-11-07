@@ -17,10 +17,12 @@
  *             seinen eigenen Schlüssel mitbringt.
  *
  * Beide liefern das Rezept als JSON nach SCHEMA (ki-rezept.js): Gemini als
- * JSON-Antwort mit response_format, Claude als Eingabe des Werkzeugs
- * „rezept_ausgeben“ (tool_choice). Beides Stück für Stück gestreamt – so sieht
- * man, dass etwas passiert, und eine lange Antwort reißt nicht ab. Fotos gehen
- * als JPEG mit, vorher auf höchstens 1280 px verkleinert (ansicht-ki.js).
+ * JSON-Antwort mit response_format, Claude als JSON nach Schema über
+ * output_config (Structured Outputs; das Schema geht durch schemaFuerClaude,
+ * weil Anthropic ein paar Schlüsselwörter nicht kennt). Beides Stück für Stück
+ * gestreamt – so sieht man, dass etwas passiert, und eine lange Antwort reißt
+ * nicht ab. Fotos gehen als JPEG mit, vorher auf höchstens 1280 px verkleinert
+ * (ansicht-ki.js).
  *
  * anfrageBauen() und rumpfFuer() sind ohne Netz und ohne DOM, tests/test-ki.mjs
  * prüft daran, dass alle Regeln mitgehen.
@@ -45,14 +47,46 @@ export const ANBIETER = {
 export const anbieterVon = (schluessel) => (/^(?:AQ\.|AIza)/.test(String(schluessel || '')) ? 'gemini' : /^sk-ant-/.test(String(schluessel || '')) ? 'anthropic' : '');
 export const KI_API = ANBIETER.anthropic.api;
 export const MODELL = ANBIETER.anthropic.modell;
-const WERKZEUG = 'rezept_ausgeben';
 
-export function systemText({ portionen, ziel, dazukaufen, katalog, anbieter = 'anthropic', modus = 'reste', wer = 'Tobi und Amy' }) {
+/*
+ * Das Schema so, wie Anthropics Structured Outputs es nehmen: jedes Objekt mit
+ * additionalProperties: false; Zahlengrenzen (minimum, maximum), Längen und
+ * title kennt es nicht – die Grenzen wandern als Text in die description,
+ * damit das Modell sie trotzdem einhält. minItems nur 0 oder 1.
+ */
+export function schemaFuerClaude(schema) {
+  const FORMATE = new Set(['date-time', 'time', 'date', 'duration', 'email', 'hostname', 'uri', 'ipv4', 'ipv6', 'uuid']);
+  const um = (k) => {
+    if (Array.isArray(k)) return k.map(um);
+    if (!k || typeof k !== 'object') return k;
+    const n = {};
+    const grenzen = [];
+    for (const [key, wert] of Object.entries(k)) {
+      if (key === 'minimum') { grenzen.push(`mindestens ${wert}`); continue; }
+      if (key === 'maximum') { grenzen.push(`höchstens ${wert}`); continue; }
+      if (['exclusiveMinimum', 'exclusiveMaximum', 'multipleOf', 'minLength', 'maxLength', 'maxItems', 'title', 'uniqueItems'].includes(key)) continue;
+      if (key === 'minItems') { if (wert === 0 || wert === 1) n[key] = wert; continue; }
+      if (key === 'format') { if (FORMATE.has(wert)) n[key] = wert; continue; }
+      if (key === 'properties' || key === '$defs' || key === 'definitions') { n[key] = Object.fromEntries(Object.entries(wert || {}).map(([pk, pv]) => [pk, um(pv)])); continue; }
+      if (['items', 'anyOf', 'allOf', 'oneOf', 'not'].includes(key)) { n[key] = um(wert); continue; }
+      n[key] = wert;
+    }
+    if (grenzen.length) n.description = `${n.description ? `${n.description} ` : ''}(${grenzen.join(', ')})`;
+    if (n.type === 'object' || n.properties) n.additionalProperties = false;
+    return n;
+  };
+  return um(schema);
+}
+
+/** Der Teil der Anfrage an Claude, der die Antwort als JSON nach dem Schema verlangt. */
+export const ausgabeFuerClaude = (schema) => ({ output_config: { format: { type: 'json_schema', schema: schemaFuerClaude(schema) } } });
+
+export function systemText({ portionen, ziel, dazukaufen, katalog, modus = 'reste', wer = 'Tobi und Amy' }) {
   const kat = Object.entries(katalog || {})
     .filter(([, v]) => v.c !== 'haushalt')
     .map(([k, v]) => `${k}=${v.n}`)
     .join('; ');
-  const ausgabe = anbieter === 'gemini' ? 'als JSON genau nach dem vorgegebenen Schema' : `mit dem Werkzeug ${WERKZEUG}`;
+  const ausgabe = 'als JSON genau nach dem vorgegebenen Schema'; // beide Anbieter: JSON nach Schema
   const angebote = modus === 'angebote';
   const aendern = modus === 'aendern';
   const auftrag = aendern
@@ -98,7 +132,7 @@ Zubereitung, genau so, wie die App sie zeigt:
 - ruhe: Wartezeit, die danach im Hintergrund weiterläuft (Marinieren, Ofen vorheizen, Wasser aufkochen etwa 12, Reis quellen). nebenbei: true für einen Schritt, der in der Wartezeit des Schritts davor passiert (Reis aufsetzen, während die Sauce köchelt).
 - portionieren: Topf mit dem Essen wiegen und im Rechner bei „Mit Essen“ eintragen, die Boxen füllen, Döschen gleich mit Deckel kalt stellen, zum Schluss „Offen abkühlen lassen, höchstens 1–2 Std., dann Deckel drauf und kalt stellen“.
 
-${anbieter === 'gemini' ? 'Antworte nur mit dem JSON, ohne Text davor oder danach' : 'Antworte nur mit dem Werkzeug'}, alles auf Deutsch.`;
+Antworte nur mit dem JSON, ohne Text davor oder danach, alles auf Deutsch.`;
 }
 
 export function nutzerText({ text, wuensche, fotos = 0, portionen, dazukaufen, mag = [], magNicht = [], vermeiden = [], modus = 'reste', rezept = null, wunsch = '' }) {
@@ -124,8 +158,7 @@ export function anfrageBauen(e) {
     model: MODELL,
     max_tokens: 16000,
     system: systemText({ ...e, anbieter: 'anthropic' }),
-    tools: [{ name: WERKZEUG, description: 'Gibt das fertige Rezept an die App.', input_schema: SCHEMA }],
-    tool_choice: { type: 'tool', name: WERKZEUG },
+    ...ausgabeFuerClaude(SCHEMA),
     messages: [{ role: 'user', content: inhalt }],
   };
 }
@@ -168,6 +201,7 @@ export const KI_FEHLER = {
     grenze: 'Gerade zu viele Anfragen. In einer Minute nochmal versuchen.',
     ueberlastet: 'Claude ist gerade überlastet. Gleich nochmal versuchen.',
     netz: 'Keine Verbindung zu Anthropic. Prüf das Internet und versuch es nochmal.',
+    sicherheit: 'Claude wollte zu diesem Foto oder Text kein Rezept machen. Versuch es mit einer Liste statt Foto.',
   },
   zulang: 'Die Antwort wurde zu lang und ist abgebrochen. Nochmal versuchen, vielleicht mit weniger Zutaten.',
   zugross: 'Die Fotos sind zu groß. Nimm weniger Fotos.',
@@ -206,7 +240,9 @@ export function kostenCent(usage, anbieter = 'anthropic') {
 /*
  * Die Anfrage abschicken und den Strom lesen (server-sent events). Gibt
  * { eingabe, usage, anbieter } zurück: eingabe ist das Rezept als JSON – mit
- * roh: true stattdessen { text, usage, anbieter }.
+ * roh: true stattdessen { text, usage, anbieter }. Bei Claude kommt das JSON
+ * als Text (text_delta, Structured Outputs); Werkzeug-Eingaben
+ * (input_json_delta) werden zur Sicherheit genauso gelesen.
  * beiFortschritt({ zeichen, schritte }) meldet, wie weit die Antwort ist.
  * Der Anbieter ergibt sich aus dem Schlüssel; `api` übersteuert die Adresse
  * (für die Tests).
@@ -221,7 +257,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       method: 'POST',
       headers: gemini
         ? { 'content-type': 'application/json', 'x-goog-api-key': schluessel }
-        : { 'content-type': 'application/json', 'x-api-key': schluessel, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        : { 'content-type': 'application/json', 'x-api-key': schluessel, 'anthropic-version': '2026-10-21', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify(gemini ? rumpf : { ...rumpf, stream: true }),
       signal,
     });
@@ -285,11 +321,11 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
         usage.ein = Number(ev.message?.usage?.input_tokens) || 0;
         return;
       case 'content_block_start':
-        if (ev.content_block?.type === 'tool_use') werkzeug = true;
+        if (ev.content_block?.type === 'tool_use' || ev.content_block?.type === 'text') werkzeug = true;
         return;
       case 'content_block_delta':
-        if (ev.delta?.type === 'input_json_delta') {
-          json += ev.delta.partial_json || '';
+        if (ev.delta?.type === 'input_json_delta' || ev.delta?.type === 'text_delta') {
+          json += ev.delta?.type === 'text_delta' ? ev.delta.text || '' : ev.delta.partial_json || '';
           fortschritt();
         }
         return;
@@ -314,6 +350,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   }
   if (puffer.trim()) verarbeite(puffer);
   if (stopp === 'max_tokens' || stopp === 'MAX_TOKENS') throw fehler('zulang', grund || `${json.length} Zeichen`);
+  if (stopp === 'refusal') throw fehler('sicherheit', stopp);
   if (gemini && stopp && /safety|prohibited|blocklist|recitation|block/i.test(stopp)) throw fehler('sicherheit', stopp);
   if (gemini && stopp) throw fehler('antwort', stopp);
   if (!werkzeug || !json.trim()) throw fehler('antwort', 'keine Antwort');

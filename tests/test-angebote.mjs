@@ -117,7 +117,7 @@ check(JSON.stringify(bereinigen({}).angebote) === JSON.stringify({ stand: '', vo
 const rg = rumpfAngebote('gemini', { fotos: ['abc'], text: 'Aldi', katalog, modell: { gemini: 'g', anthropic: 'a' } });
 check(rg.model === 'g' && rg.response_format.schema === ANGEBOTE_SCHEMA && rg.input.length === 2 && rg.input[0].type === 'image' && /Prospekt/.test(rg.system_instruction) && /haehnchenbrust=/.test(rg.system_instruction), 'Gemini-Anfrage: Bild, Text, Schema, Katalog im Auftrag');
 const ra = rumpfAngebote('anthropic', { fotos: [], text: 'Aldi Hähnchen 1 kg 7,49', katalog, modell: { gemini: 'g', anthropic: 'a' } });
-check(ra.model === 'a' && ra.tools[0].name === 'angebote_ausgeben' && ra.tool_choice.name === 'angebote_ausgeben' && ra.messages[0].content.length === 1, 'Claude-Anfrage: Werkzeug angebote_ausgeben');
+check(ra.model === 'a' && ra.output_config.format.type === 'json_schema' && ra.output_config.format.schema.title === undefined && ra.output_config.format.schema.properties.angebote.items.additionalProperties === false && !ra.tools && ra.messages[0].content.length === 1 && /Antworte nur mit dem JSON/.test(ra.system), 'Claude-Anfrage: JSON nach dem Schema, ohne title, Objekte geschlossen');
 check(/kein Schwein, kein Fisch/.test(systemTextAngebote({ katalog })) && !/salz=/.test(systemTextAngebote({ katalog })), 'Auftrag: kein Schwein, kein Fisch; Gewürze nicht im Katalog');
 const sys = systemText({ portionen: 8, ziel: daten.ziel, dazukaufen: true, katalog, anbieter: 'gemini', modus: 'angebote' });
 check(/Angeboten der Woche/.test(sys) && /quelle: kaufen/.test(sys) && !/Kühlschrank und im Vorrat ist, machst/.test(sys), 'Rezept aus Angeboten: eigener Auftrag, alles zu kaufen');
@@ -337,7 +337,7 @@ const anfragenMock = (zuViel) => {
 // --- Claude liest den Prospekt: Rumpf, Anfrage gegen einen Mock von /v1/messages (Strom), Wahl des Anbieters
 {
   const r = claudeRumpf({ fotos: ['abc'], text: 'Lidl, Seiten 1–6', katalog });
-  check(r.model === 'claude-fable-5-1' && r.tool_choice?.name === 'angebote_ausgeben' && r.tools[0].input_schema === ANGEBOTE_SCHEMA && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /kein Schwein/.test(r.system) && /Werkzeug angebote_ausgeben/.test(r.system), 'Claude-Rumpf: Fable, Werkzeug mit dem Schema, Seitenbilder, Seitenbereich im Text');
+  check(r.model === 'claude-fable-5-1' && r.output_config?.format?.type === 'json_schema' && r.output_config.format.schema.required.includes('angebote') && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /kein Schwein/.test(r.system), 'Claude-Rumpf: Fable, JSON nach dem Schema, Seitenbilder, Seitenbereich im Text');
   const { anfragen: mock, ruempfe } = (() => {
     const liste = [];
     return { anfragen: async (rumpf) => { liste.push(rumpf); return { eingabe: { angebote: [{ laden: 'Lidl', name: 'Skyr', preis: 0.99 }] }, usage: { ein: 1, aus: 2 } }; }, ruempfe: liste };
@@ -348,11 +348,11 @@ const anfragenMock = (zuViel) => {
 
   const anfragen = [];
   const antworten = [];
-  const strom = (json, { stopp = 'tool_use', stueck = 200 } = {}) => {
+  const strom = (json, { stopp = 'end_turn', stueck = 200 } = {}) => {
     const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
     let s = ev({ type: 'message_start', message: { usage: { input_tokens: 9000, output_tokens: 1 } } });
-    s += ev({ type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 't1', name: 'angebote_ausgeben', input: {} } });
-    for (let i = 0; i < json.length; i += stueck) s += ev({ type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: json.slice(i, i + stueck) } });
+    s += ev({ type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } });
+    for (let i = 0; i < json.length; i += stueck) s += ev({ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: json.slice(i, i + stueck) } });
     s += ev({ type: 'content_block_stop', index: 0 });
     s += ev({ type: 'message_delta', delta: { stop_reason: stopp }, usage: { output_tokens: 2500 } });
     s += ev({ type: 'message_stop' });
@@ -373,8 +373,8 @@ const anfragenMock = (zuViel) => {
   const lauf = async (opt = {}) => { try { return await claudeAnfragen(r, { schluessel: 'sk-ant-test', api, timeout: 3000, ...opt }); } catch (e) { return e; } };
   antworten.push([200, strom(JSON.stringify({ angebote: [{ laden: 'Lidl', name: 'Hähnchenbrustfilet', preis: 7.49, menge: 1, einheit: 'kg' }] }))]);
   let a = await lauf();
-  check(a.eingabe?.angebote?.[0]?.name === 'Hähnchenbrustfilet' && a.usage.ein === 9000 && a.usage.aus === 2500 && a.usage.denken === 0 && a.grund === 'tool_use' && typeof a.dauer === 'number', `Messages-API: Antwort aus dem Werkzeug-Strom, Tokens (${JSON.stringify(a.usage)})`);
-  check(anfragen[0].key === 'sk-ant-test' && anfragen[0].version && anfragen[0].rumpf.model === 'claude-fable-5-1' && anfragen[0].rumpf.stream === true && anfragen[0].rumpf.tool_choice.name === 'angebote_ausgeben', 'Messages-API: Schlüssel und Version im Kopf, Fable, gestreamt');
+  check(a.eingabe?.angebote?.[0]?.name === 'Hähnchenbrustfilet' && a.usage.ein === 9000 && a.usage.aus === 2500 && a.usage.denken === 0 && a.grund === 'json' && typeof a.dauer === 'number', `Messages-API: Antwort aus dem JSON-Strom, Tokens (${JSON.stringify(a.usage)})`);
+  check(anfragen[0].key === 'sk-ant-test' && anfragen[0].version && anfragen[0].rumpf.model === 'claude-fable-5-1' && anfragen[0].rumpf.stream === true && anfragen[0].rumpf.output_config.format.type === 'json_schema' && !anfragen[0].rumpf.tool_choice, 'Messages-API: Schlüssel und Version im Kopf, Fable, gestreamt, JSON-Schema statt Werkzeug');
   antworten.push([200, strom('{"angebote":[]}')]);
   a = await lauf({ modell: 'claude-sonnet-5-5' });
   check(anfragen[1].rumpf.model === 'claude-sonnet-5-5' && Array.isArray(a.eingabe?.angebote), 'Messages-API: mitAusweichen gibt das Modell vor');

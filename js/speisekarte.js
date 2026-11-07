@@ -15,11 +15,10 @@
  *
  * Ohne DOM, damit tests/test-speisekarte.mjs alles direkt in Node prüft.
  */
-import { ANBIETER } from './ki.js';
+import { ANBIETER, ausgabeFuerClaude } from './ki.js';
 import { abstand } from './ki-rezept.js';
 import { linkAus } from './amy-import.js';
 
-export const WERKZEUG_KARTE = 'karte_ausgeben';
 export const ARTEN = ['hauptgang', 'salat', 'suppe', 'vorspeise', 'snack', 'beilage', 'dessert'];
 export const ART_NAME = { hauptgang: 'Hauptgang', salat: 'Salat', suppe: 'Suppe', vorspeise: 'Vorspeise', snack: 'Snack', beilage: 'Beilage', dessert: 'Dessert' };
 export const SICHER = ['grob', 'mittel', 'gut'];
@@ -69,7 +68,7 @@ export const KARTE_SCHEMA = {
 
 const zahl1 = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
 
-export function karteSystem({ ziel, wer = 'Tobi', anbieter = 'gemini', link = false } = {}) {
+export function karteSystem({ ziel, wer = 'Tobi', link = false } = {}) {
   return `Du liest eine Speisekarte und schätzt für jedes Gericht die Nährwerte, damit ${wer} das Gericht findet, das am besten zum Ziel passt. ${link ? 'Die Karte steht auf der Webseite unter dem Link – lies nur die Speisekarte, keine Werbung.' : 'Die Karte kommt als Foto, als PDF oder als kopierter Text.'}
 
 Ziel für diese Mahlzeit: ${Math.round(ziel.kcal)} kcal, ${zahl1(ziel.p)} g Protein, ${zahl1(ziel.kh)} g Kohlenhydrate, ${zahl1(ziel.f)} g Fett. Die App rechnet selbst aus, welches Gericht am nächsten liegt – du schätzt nur ehrlich.
@@ -83,7 +82,7 @@ So geht es:
 - tipp: eine konkrete Bestellung, die es näher ans Ziel bringt (Sauce extra, halbe Portion Beilage, Salat statt Pommes, Dressing weglassen) – und mit_tipp die Werte dann. Kein Tipp, wenn es schon gut passt.
 - Ist das keine Speisekarte, bleibt gerichte leer und hinweis sagt, warum.
 
-${anbieter === 'gemini' ? 'Antworte nur mit dem JSON, ohne Text davor oder danach.' : `Antworte nur mit dem Werkzeug ${WERKZEUG_KARTE}.`} Alles auf Deutsch.`;
+Antworte nur mit dem JSON, ohne Text davor oder danach. Alles auf Deutsch.`;
 }
 
 /**
@@ -107,7 +106,7 @@ export function rumpfKarte(e) {
     ];
     return {
       model: ANBIETER.gemini.modell,
-      system_instruction: karteSystem({ ziel: e.ziel, wer: e.wer, anbieter: 'gemini', link: !!link }),
+      system_instruction: karteSystem({ ziel: e.ziel, wer: e.wer, link: !!link }),
       input,
       ...(link ? { tools: [{ type: 'url_context' }] } : { response_format: { type: 'text', mime_type: 'application/json', schema: KARTE_SCHEMA } }),
       generation_config: { max_output_tokens: 16000 },
@@ -123,9 +122,8 @@ export function rumpfKarte(e) {
   return {
     model: ANBIETER.anthropic.modell,
     max_tokens: 16000,
-    system: karteSystem({ ziel: e.ziel, wer: e.wer, anbieter: 'anthropic' }),
-    tools: [{ name: WERKZEUG_KARTE, description: 'Gibt die Gerichte der Karte mit geschätzten Nährwerten an die App.', input_schema: KARTE_SCHEMA }],
-    tool_choice: { type: 'tool', name: WERKZEUG_KARTE },
+    system: karteSystem({ ziel: e.ziel, wer: e.wer }),
+    ...ausgabeFuerClaude(KARTE_SCHEMA),
     messages: [{ role: 'user', content: inhalt }],
   };
 }

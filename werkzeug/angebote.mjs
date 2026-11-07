@@ -434,8 +434,9 @@ export async function geminiAnfragen(rumpf, { schluessel, modell = ANBIETER.gemi
 
 /*
  * Der Rumpf für Anthropics /v1/messages: dieselbe Anfrage, die die App bei
- * Prospektfotos stellt (rumpfAngebote in angebote.js), mit dem Werkzeug
- * angebote_ausgeben; das Modell setzt claudeAnfragen (mitAusweichen sagt es).
+ * Prospektfotos stellt (rumpfAngebote in angebote.js), die Antwort als JSON
+ * nach ANGEBOTE_SCHEMA (Structured Outputs); das Modell setzt claudeAnfragen
+ * (mitAusweichen sagt es).
  */
 export function claudeRumpf({ fotos = [], text = '', katalog = {} }) {
   return rumpfAngebote('anthropic', { fotos, text, katalog, modell: { anthropic: CLAUDE_MODELLE[0] } });
@@ -454,7 +455,7 @@ export async function claudeAnfragen(rumpf, { schluessel, modell = CLAUDE_MODELL
   const t = setTimeout(() => ac.abort(), timeout);
   try {
     const { eingabe, usage } = await kiAnfragen({ ...rumpf, model: modell }, { schluessel, api, signal: ac.signal });
-    return { eingabe, usage: { ein: usage.ein || 0, aus: usage.aus || 0, denken: 0 }, dauer: Date.now() - start, grund: 'tool_use' };
+    return { eingabe, usage: { ein: usage.ein || 0, aus: usage.aus || 0, denken: 0 }, dauer: Date.now() - start, grund: 'json' };
   } catch (e) {
     if (e?.art === 'abbruch') {
       const f = kiFehler('ueberlastet', `keine Antwort nach ${Math.round(timeout / 1000)} s`, 'anthropic');

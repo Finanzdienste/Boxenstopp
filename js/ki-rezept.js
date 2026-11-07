@@ -58,7 +58,7 @@ const SCHRITT = {
   required: ['text', 'min'],
 };
 
-/** Eingabe des Werkzeugs „rezept_ausgeben“ (Anthropic tool use). */
+/** Das Rezept, wie die KI es liefert (JSON nach diesem Schema – Gemini response_format, Claude Structured Outputs). */
 export const SCHEMA = {
   type: 'object',
   properties: {

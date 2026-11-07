@@ -17,6 +17,7 @@
  */
 
 import { VERBOTEN } from './ki-rezept.js';
+import { ausgabeFuerClaude } from './ki.js';
 
 export const LAEDEN = ['Aldi', 'Lidl', 'Rewe', 'Kaufland', 'Penny', 'Edeka', 'Norma'];
 export const MAX_ANGEBOTE = 120;
@@ -626,19 +627,19 @@ export const ANGEBOTE_SCHEMA = {
   required: ['angebote'],
 };
 
-export function systemTextAngebote({ katalog, anbieter = 'gemini' }) {
+export function systemTextAngebote({ katalog }) {
   const kat = Object.entries(katalog || {})
     .filter(([, v]) => !['haushalt', 'gewuerz'].includes(v.c))
     .map(([k, v]) => `${k}=${v.n}`)
     .join('; ');
-  return `Du liest Supermarkt-Angebote aus Fotos von Prospektseiten, Screenshots aus Supermarkt-Apps und getippten Zeilen heraus und gibst sie ${anbieter === 'gemini' ? 'als JSON genau nach dem vorgegebenen Schema' : 'mit dem Werkzeug angebote_ausgeben'} aus.
+  return `Du liest Supermarkt-Angebote aus Fotos von Prospektseiten, Screenshots aus Supermarkt-Apps und getippten Zeilen heraus und gibst sie als JSON genau nach dem vorgegebenen Schema aus.
 
 Nimm nur Lebensmittel, die sich zum Kochen eignen: Fleisch (kein Schwein, kein Fisch), Geflügel, Eier, Milchprodukte, Käse, Gemüse, Obst, Hülsenfrüchte, Reis, Nudeln, Kartoffeln, Konserven, Öl, Saucen, Nüsse. Keine Süßigkeiten, Getränke, Fertiggerichte, Wurst, Fisch, Schweinefleisch, Non-Food.
 
 Je Angebot: laden (steht meist auf der Seite oder im Screenshot; wenn nicht erkennbar, aus dem Text des Nutzers), name kurz wie im Prospekt, preis als Zahl in Euro (der Angebotspreis für alle, nicht der Streichpreis und nicht ein Preis, der nur mit App oder Kundenkarte gilt – Lidl Plus, Kaufland Card, Payback), menge und einheit der Packung (1 kg → menge 1, einheit kg; 500 g → 500, g; 3 Stück → 3, Stk; Dose → 1, Dose), bis als JJJJ-MM-TT, wenn eine Gültigkeit zu sehen ist, sonst leer.
 katalog: der passende Schlüssel aus dieser Liste, wenn das Produkt dieser Zutat entspricht (Hähnchenbrustfilet → haehnchenbrust, Basmati → reis), sonst leer: ${kat}
 
-Lies sorgfältig, erfinde nichts, lass Unleserliches weg. ${anbieter === 'gemini' ? 'Antworte nur mit dem JSON, ohne Text davor oder danach' : 'Antworte nur mit dem Werkzeug'}, Namen auf Deutsch.`;
+Lies sorgfältig, erfinde nichts, lass Unleserliches weg. Antworte nur mit dem JSON, ohne Text davor oder danach, Namen auf Deutsch.`;
 }
 
 export function nutzerTextAngebote({ text, fotos = 0 }) {
@@ -657,7 +658,7 @@ export function rumpfAngebote(anbieter, { fotos = [], text = '', katalog = {}, m
     input.push({ type: 'text', text: nutzerTextAngebote({ text, fotos: fotos.length }) });
     return {
       model: modell.gemini,
-      system_instruction: systemTextAngebote({ katalog, anbieter }),
+      system_instruction: systemTextAngebote({ katalog }),
       input,
       response_format: { type: 'text', mime_type: 'application/json', schema: ANGEBOTE_SCHEMA },
       // Auslesen braucht kein langes Nachdenken – und die Denk-Tokens zählen mit in die Ausgabegrenze
@@ -671,9 +672,8 @@ export function rumpfAngebote(anbieter, { fotos = [], text = '', katalog = {}, m
   return {
     model: modell.anthropic,
     max_tokens: 12000,
-    system: systemTextAngebote({ katalog, anbieter: 'anthropic' }),
-    tools: [{ name: 'angebote_ausgeben', description: 'Gibt die gelesenen Angebote an die App.', input_schema: ANGEBOTE_SCHEMA }],
-    tool_choice: { type: 'tool', name: 'angebote_ausgeben' },
+    system: systemTextAngebote({ katalog }),
+    ...ausgabeFuerClaude(ANGEBOTE_SCHEMA),
     messages: [{ role: 'user', content: inhalt }],
   };
 }

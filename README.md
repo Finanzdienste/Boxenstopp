@@ -837,7 +837,7 @@ API-Schlüssel, den der Anfang des Schlüssels einem Anbieter zuordnet:
 | Schlüssel | Anbieter, Modell | Kosten | Antwort |
 | --- | --- | --- | --- |
 | `AQ.…` (älter: `AIza…`) | Google, `gemini-3.8-flash` über die Interactions-API (`/v1beta/interactions`, `store: false`) | kostenlos, ohne Kreditkarte; dafür darf Google die Anfragen zum Verbessern seiner Produkte nutzen | JSON mit `response_format` und Schema |
-| `sk-ant-…` | Anthropic, `claude-fable-5-1` (Messages-API) – das stärkste Modell | etwa 30 Cent pro Rezept vom Guthaben der Console; mit einem Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $ im Monat, verfällt monatlich) | Werkzeug `rezept_ausgeben` |
+| `sk-ant-…` | Anthropic, `claude-fable-5-1` (Messages-API) – das stärkste Modell | etwa 30 Cent pro Rezept vom Guthaben der Console; mit einem Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $ im Monat, verfällt monatlich) | JSON nach Schema über `output_config` (Structured Outputs; das Schema geht durch `schemaFuerClaude`, weil Anthropic `minimum`/`maximum`, `title` und Längen nicht kennt) |
 
 Der Weg ohne Abo ist Google: auf
 [aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem

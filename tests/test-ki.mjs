@@ -7,8 +7,8 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
-import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER } from '../js/ki.js';
+import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude } from '../js/ki.js';
 import { kiAus } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
@@ -110,8 +110,13 @@ check(appVar.ablauf[0].schritte.some((x) => x.d === '400 g TK-Erbsen abwiegen') 
 check(kiBereinigen({ ...var1, herkunft: 'teriyaki' }).r.herkunft === 'teriyaki' && kiBereinigen({ ...var1, herkunft: 'x y' }).r.herkunft === undefined && kiBereinigen({ ...var1, herkunft: 'teriyaki' }).r.basis === 'Reis', 'herkunft bleibt nur, wenn sie wie eine Rezept-id aussieht – die Beilage (basis) bleibt getrennt');
 
 // --- Anfrage
+const SCHEMA_HAT_GRENZEN = () => SCHEMA.properties.vorbereiten.items.properties.min.minimum === 1;
 const rumpf = anfrageBauen({ text: '1 Zucchini, Feta', wuensche: 'was Griechisches', fotos: ['AAAA', 'BBBB'], portionen: 4, dazukaufen: false, ziel: ZIEL, katalog: daten.katalog, mag: ['Butter Chicken mit Reis'], magNicht: ['Spaghetti Bolognese'], vermeiden: ['Feta-Reispfanne'] });
-check(rumpf.model === MODELL && rumpf.tool_choice?.name === 'rezept_ausgeben' && rumpf.tools[0].input_schema.required.includes('zutaten'), `Claude muss das Werkzeug rezept_ausgeben benutzen (${MODELL})`);
+const format = rumpf.output_config?.format;
+check(rumpf.model === MODELL && format?.type === 'json_schema' && format.schema.required.includes('zutaten') && !rumpf.tools && !rumpf.tool_choice && /Antworte nur mit dem JSON/.test(rumpf.system), `Claude antwortet als JSON nach dem Schema (Structured Outputs, ${MODELL})`);
+const schritt = format.schema.properties.vorbereiten.items.properties;
+check(format.schema.additionalProperties === false && format.schema.properties.zutaten.items.additionalProperties === false && schritt.min.minimum === undefined && /mindestens 1, höchstens 180/.test(schritt.min.description) && SCHEMA_HAT_GRENZEN(), 'Schema für Claude: additionalProperties false an jedem Objekt, Zahlengrenzen als Text in der description – das Original behält sie');
+check(JSON.stringify(schemaFuerClaude({ type: 'object', title: 'x', properties: { a: { type: 'array', minItems: 2, maxItems: 9, items: { type: 'string', minLength: 1, format: 'email' } }, b: { type: 'number', minimum: 0, description: 'Null oder mehr' }, c: { type: 'string', format: 'quatsch' } }, required: ['a'] })) === JSON.stringify({ type: 'object', properties: { a: { type: 'array', items: { type: 'string', format: 'email' } }, b: { type: 'number', description: 'Null oder mehr (mindestens 0)' }, c: { type: 'string' } }, required: ['a'], additionalProperties: false }), 'Schema für Claude: title, Längen, minItems > 1 und unbekannte Formate fallen weg');
 const inhalt = rumpf.messages[0].content;
 check(inhalt.length === 3 && inhalt[0].type === 'image' && inhalt[0].source.media_type === 'image/jpeg' && inhalt[2].type === 'text', 'erst die Fotos, dann der Text');
 check(/Portionen: 4/.test(inhalt[2].text) && /Dazukaufen: nein/.test(inhalt[2].text) && /was Griechisches/.test(inhalt[2].text) && /Daumen hoch\): Butter Chicken/.test(inhalt[2].text) && /nicht noch einmal: Feta-Reispfanne/.test(inhalt[2].text), 'im Text: Portionen, Dazukaufen, Wünsche, was ihr mögt und was nicht');
@@ -128,7 +133,7 @@ const rg = anfrageBauenGemini({ text: 'Feta', wuensche: '', fotos: ['AAAA'], por
 check(rg.model === 'gemini-3.8-flash' && rg.response_format?.mime_type === 'application/json' && rg.response_format.schema?.required?.includes('zutaten') && rg.stream === true && rg.store === false, 'Gemini-Anfrage (Interactions-API): Modell, JSON nach Schema, gestreamt, nicht gespeichert');
 check(rg.input[0].type === 'image' && rg.input[0].mime_type === 'image/jpeg' && rg.input[0].data === 'AAAA' && rg.input[1].type === 'text' && /Portionen: 6/.test(rg.input[1].text), 'Foto als Bild-Teil, Text dahinter');
 check(/als JSON genau nach dem vorgegebenen Schema/.test(rg.system_instruction) && !/rezept_ausgeben/.test(rg.system_instruction) && /Kein Fisch/.test(rg.system_instruction), 'Gemini bekommt dieselben Regeln, nur ohne Werkzeug');
-check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).response_format && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).tool_choice, 'rumpfFuer wählt nach Anbieter');
+check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).response_format && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).output_config, 'rumpfFuer wählt nach Anbieter');
 check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') === 30 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null && ANBIETER.anthropic.modell === 'claude-fable-5-1' && MODELL === 'claude-fable-5-1', 'Gemini (3.8 Flash) kostet nichts, Claude (Fable 5.1) 10 $ und 50 $ je Million Tokens');
 
 // --- Rezept mit der KI ändern: Vorlage, Anfrage, ans Original anschließen, wieder aufs Ziel
@@ -144,7 +149,7 @@ const raText = ra.input.at(-1).text;
 check(/änderst ein bestehendes Rezept/.test(ra.system_instruction) && /Kein Fisch/.test(ra.system_instruction) && /Kein Schweinefleisch/.test(ra.system_instruction) && /443 kcal/.test(ra.system_instruction) && /Platzhalter/.test(ra.system_instruction), 'Ändern: der Auftrag, mit allen Regeln und dem Ziel');
 check(raText.endsWith(`Was anders sein soll: ${WUNSCH}`) && JSON.parse(raText.split('\n')[1]).zutaten.length === vorlage.zutaten.length && raText.includes('"id":"sojasauce"') && ra.input.length === 1, 'Ändern: das Rezept als JSON und der Wunsch, kein Foto');
 const rc = anfrageBauen({ modus: 'aendern', rezept: vorlage, wunsch: WUNSCH, portionen: 8, ziel: ZIEL, katalog: daten.katalog });
-check(/änderst ein bestehendes Rezept/.test(rc.system) && rc.tool_choice.name === 'rezept_ausgeben' && rc.messages[0].content.at(-1).text.includes(WUNSCH), 'Ändern geht auch mit Claude');
+check(/änderst ein bestehendes Rezept/.test(rc.system) && rc.output_config.format.type === 'json_schema' && rc.messages[0].content.at(-1).text.includes(WUNSCH), 'Ändern geht auch mit Claude');
 // So antwortet die KI im Test: fertige Sauce statt Soja, Honig, Stärke und Sesamöl
 const TERIYAKI_FERTIGSAUCE = (() => {
   const v = klon(vorlage);
@@ -165,11 +170,12 @@ const alsApp = alsRezept(aufZiel, { id: 'ki-test1234', katalog: daten.katalog, e
 check(alsApp.ablauf[0].schritte.some((x) => x.d === '250 ml Teriyaki-Sauce und ½–1 TL Chiliflocken in Schale 3 geben') && !alsApp.ablauf.some((p) => p.schritte.some((x) => x.entfaellt)), 'die Schritte mit echten Mengen, nichts „entfällt“');
 
 // --- Strom lesen (mit nachgebautem fetch)
-const STROM = (json, { stopp = 'tool_use', stueck = 150 } = {}) => {
+// Claude streamt das JSON als Text (Structured Outputs); werkzeug: true baut den alten Werkzeug-Strom nach
+const STROM = (json, { stopp = 'end_turn', stueck = 150, werkzeug = false } = {}) => {
   const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
   let s = ev({ type: 'message_start', message: { usage: { input_tokens: 3000, output_tokens: 1 } } });
-  s += ev({ type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 't1', name: 'rezept_ausgeben', input: {} } });
-  for (let i = 0; i < json.length; i += stueck) s += ev({ type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: json.slice(i, i + stueck) } });
+  s += ev({ type: 'content_block_start', index: 0, content_block: werkzeug ? { type: 'tool_use', id: 't1', name: 'rezept_ausgeben', input: {} } : { type: 'text', text: '' } });
+  for (let i = 0; i < json.length; i += stueck) s += ev({ type: 'content_block_delta', index: 0, delta: werkzeug ? { type: 'input_json_delta', partial_json: json.slice(i, i + stueck) } : { type: 'text_delta', text: json.slice(i, i + stueck) } });
   s += ev({ type: 'content_block_stop', index: 0 });
   s += ev({ type: 'message_delta', delta: { stop_reason: stopp }, usage: { output_tokens: 4000 } });
   s += ev({ type: 'message_stop' });
@@ -184,6 +190,8 @@ let fortschritt = 0;
 const gelesen = await mitFetch(() => new Response(STROM(JSON.stringify(ANTWORT)), { status: 200, headers: { 'content-type': 'text/event-stream' } }),
   () => kiAnfragen(rumpf, { schluessel: 'sk-ant-test', beiFortschritt: (p) => { fortschritt = p.zeichen; } }));
 check(gelesen.eingabe.name === ANTWORT.name && gelesen.usage.ein === 3000 && gelesen.usage.aus === 4000 && fortschritt > 1000, 'der Strom wird gelesen: Rezept, Tokens, Fortschritt');
+const alsWerkzeug = await mitFetch(() => new Response(STROM(JSON.stringify(ANTWORT), { stopp: 'tool_use', werkzeug: true }), { status: 200 }), () => kiAnfragen(rumpf, { schluessel: 'sk-ant-test' }));
+check(alsWerkzeug.eingabe.name === ANTWORT.name, 'ein Werkzeug-Strom (input_json_delta) wird zur Sicherheit genauso gelesen');
 const kopf = mitFetch.letzte.opt.headers;
 check(kopf['x-api-key'] === 'sk-ant-test' && kopf['anthropic-dangerous-direct-browser-access'] === 'true' && kopf['anthropic-version'] && JSON.parse(mitFetch.letzte.opt.body).stream === true, 'Anfrage mit Schlüssel, Browser-Freigabe, Version und stream');
 check(Math.abs(kostenCent(gelesen.usage) - 23) < 0.01, `Kosten: ca. ${kostenCent(gelesen.usage).toFixed(1)} Cent (3000 rein, 4000 raus, Fable)`);
@@ -194,6 +202,7 @@ check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'invali
 check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'overloaded_error', message: 'Overloaded' } }), { status: 529 })) === 'ueberlastet', '529: überlastet');
 check(await fehlerArt(() => new Response(STROM(JSON.stringify(ANTWORT).slice(0, 500), { stopp: 'max_tokens' }), { status: 200 })) === 'zulang', 'abgeschnittene Antwort: zu lang');
 check(await fehlerArt(() => { throw new TypeError('Failed to fetch'); }) === 'netz', 'ohne Netz: Verbindung prüfen');
+check(await fehlerArt(() => new Response(STROM('Dazu mache ich kein Rezept.', { stopp: 'refusal' }), { status: 200 })) === 'sicherheit' && /kein Rezept/.test(KI_FEHLER.anthropic.sicherheit), 'stop_reason refusal → sicherheit');
 
 // --- Gemini-Strom lesen (Interactions-API: step.delta, interaction.completed)
 const GEMINI_STROM = (json, { status = 'completed', stueck = 400 } = {}) => {

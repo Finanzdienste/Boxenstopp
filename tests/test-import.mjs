@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
-import { linkAus, rumpfImport, importSystem, jsonAus, importBereinigen, IMPORT_SCHEMA, WERKZEUG_IMPORT } from '../js/amy-import.js';
+import { linkAus, rumpfImport, importSystem, jsonAus, importBereinigen, IMPORT_SCHEMA } from '../js/amy-import.js';
 import { ANBIETER } from '../js/ki.js';
 
 const { check, ende } = pruefer();
@@ -26,7 +26,7 @@ check(JSON.stringify(link.tools) === JSON.stringify([{ type: 'url_context' }]) &
 const fotos = rumpfImport({ anbieter: 'gemini', fotos: ['AAAA', 'BBBB'] });
 check(fotos.input.length === 3 && fotos.input[0].type === 'image' && fotos.input[0].mime_type === 'image/jpeg' && fotos.input[1].data === 'BBBB' && fotos.input[2].text === 'Das Rezept steht auf den 2 Fotos.', 'Gemini mit zwei Fotos: beide Bilder, dann der Satz');
 const claude = rumpfImport({ anbieter: 'anthropic', text: 'Shakshuka', fotos: ['AAAA'] });
-check(claude.model === ANBIETER.anthropic.modell && claude.tools[0].name === WERKZEUG_IMPORT && claude.tools[0].input_schema === IMPORT_SCHEMA && claude.tool_choice.name === WERKZEUG_IMPORT && claude.messages[0].content[0].source.data === 'AAAA' && claude.messages[0].content[1].text === 'Das Rezept:\nShakshuka' && claude.system.includes(`Werkzeug ${WERKZEUG_IMPORT}`), 'Claude: Werkzeug mit dem Schema, Foto und Text');
+check(claude.model === ANBIETER.anthropic.modell && claude.output_config.format.type === 'json_schema' && claude.output_config.format.schema.required.join() === IMPORT_SCHEMA.required.join() && claude.output_config.format.schema.additionalProperties === false && !claude.tools && claude.messages[0].content[0].source.data === 'AAAA' && claude.messages[0].content[1].text === 'Das Rezept:\nShakshuka' && claude.system.includes('Antworte nur mit dem JSON'), 'Claude: JSON nach dem Schema (Structured Outputs), Foto und Text');
 check(rumpfImport({ anbieter: 'anthropic', text: CK }).messages[0].content[0].text === `Das Rezept:\n${CK}`, 'Claude liest keine Links – der Link bleibt nur Text (die App sagt vorher Bescheid)');
 check(importSystem({}).includes('cups, oz') && importSystem({}).includes('erfinde nichts dazu'), 'die Anweisung: nichts dazuerfinden, US-Maße umrechnen');
 

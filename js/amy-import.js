@@ -10,10 +10,9 @@
  * ohne festes Schema – die Antwort ist trotzdem nur JSON). Mit einem
  * Claude-Schlüssel gehen Fotos und Text, für Links den Text kopieren.
  */
-import { ANBIETER } from './ki.js';
+import { ANBIETER, ausgabeFuerClaude } from './ki.js';
 import { TAG_VORSCHLAEGE, tagsBereinigen } from './amy.js';
 
-export const WERKZEUG_IMPORT = 'rezept_ausgeben';
 export const IMPORT_SCHEMA = {
   type: 'object',
   properties: {
@@ -37,7 +36,7 @@ export function linkAus(text) {
   return t.replace(m[0], '').trim().length <= 40 ? m[0].replace(/[).,;]+$/, '') : '';
 }
 
-export function importSystem({ tags = [], link = false, anbieter = 'gemini' } = {}) {
+export function importSystem({ tags = [], link = false } = {}) {
   const vorschlaege = [...new Set([...tags, ...TAG_VORSCHLAEGE])].slice(0, 14).join(', ');
   return `Du überträgst ein Rezept in Amys Format für ihre Rezepte-App. ${link ? 'Lies dazu die Webseite unter dem Link – nur das Rezept selbst, keine Werbung, keine Kommentare, keine anderen Rezepte von der Seite.' : 'Es kommt als Foto (etwa eine Kochbuchseite) oder als kopierter Text.'}
 
@@ -52,12 +51,12 @@ So soll es aussehen:
 
 Übernimm die Mengen genau so, wie sie dastehen, und erfinde nichts dazu. Ist etwas auf Englisch, übersetz es; amerikanische Maße (cups, oz) rechnest du in g oder ml um. Ist kein Rezept zu erkennen, schreib den Grund in fehler und lass den Rest leer.
 
-${anbieter === 'gemini' ? 'Antworte nur mit dem JSON, ohne Text davor oder danach.' : `Antworte nur mit dem Werkzeug ${WERKZEUG_IMPORT}.`} Alles auf Deutsch.`;
+Antworte nur mit dem JSON, ohne Text davor oder danach. Alles auf Deutsch.`;
 }
 
 /**
  * Der Rumpf der Anfrage: für Gemini (Interactions-API) oder Claude
- * (Messages-API, Werkzeug). e = { anbieter, text, fotos: [b64], tags }.
+ * (Messages-API, JSON nach Schema). e = { anbieter, text, fotos: [b64], tags }.
  */
 export function rumpfImport(e) {
   const link = e.anbieter === 'gemini' ? linkAus(e.text) : '';
@@ -69,7 +68,7 @@ export function rumpfImport(e) {
     input.push({ type: 'text', text });
     return {
       model: ANBIETER.gemini.modell,
-      system_instruction: importSystem({ tags: e.tags, link: !!link, anbieter: 'gemini' }),
+      system_instruction: importSystem({ tags: e.tags, link: !!link }),
       input,
       ...(link ? { tools: [{ type: 'url_context' }] } : { response_format: { type: 'text', mime_type: 'application/json', schema: IMPORT_SCHEMA } }),
       generation_config: { max_output_tokens: 8000 },
@@ -82,9 +81,8 @@ export function rumpfImport(e) {
   return {
     model: ANBIETER.anthropic.modell,
     max_tokens: 8000,
-    system: importSystem({ tags: e.tags, anbieter: 'anthropic' }),
-    tools: [{ name: WERKZEUG_IMPORT, description: 'Gibt das übertragene Rezept an die App.', input_schema: IMPORT_SCHEMA }],
-    tool_choice: { type: 'tool', name: WERKZEUG_IMPORT },
+    system: importSystem({ tags: e.tags }),
+    ...ausgabeFuerClaude(IMPORT_SCHEMA),
     messages: [{ role: 'user', content: inhalt }],
   };
 }

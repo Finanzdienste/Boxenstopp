@@ -38,7 +38,7 @@ check(g2.input.filter((x) => x.type === 'image' && x.mime_type === 'image/jpeg')
 const g3 = rumpfKarte({ anbieter: 'gemini', ziel: ZIEL, text: 'https://brauhaus.example/karte' });
 check(g3.tools?.[0]?.type === 'url_context' && !g3.response_format && /brauhaus\.example/.test(g3.input.at(-1).text), 'Gemini mit Link: url_context, ohne festes Schema');
 const a1 = rumpfKarte({ anbieter: 'anthropic', ziel: ZIEL, pdf: 'UERG' });
-check(a1.messages[0].content[0].type === 'document' && a1.messages[0].content[0].source.media_type === 'application/pdf' && a1.tool_choice.name === 'karte_ausgeben', 'Claude mit PDF: document-Block, Werkzeug karte_ausgeben');
+check(a1.messages[0].content[0].type === 'document' && a1.messages[0].content[0].source.media_type === 'application/pdf' && a1.output_config.format.type === 'json_schema' && a1.output_config.format.schema.required.includes('gerichte') && !a1.tools, 'Claude mit PDF: document-Block, JSON nach dem Schema');
 
 /* ------------------------------------------------------------ Rechnung */
 
