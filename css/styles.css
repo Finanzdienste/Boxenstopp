@@ -1752,3 +1752,11 @@ html.pm-offen{overflow:hidden}
 .km-punkte button.dp-k1.jetzt::before{box-shadow:0 0 0 3px var(--dp1-soft)}
 .mise .sub-h small{font-weight:500;letter-spacing:0;text-transform:none;font-size:12.5px}
 .ab-li{display:block;margin-top:2px;font-size:13.5px;color:var(--muted)}
+.ab-auch{display:block;margin-top:4px;padding-left:10px;border-left:2px solid var(--dp1)}
+.ab-auch .dp-k0{color:var(--dp0)}
+.ab-auch .dp-k1{color:var(--dp1)}
+.ab-beide .step-k{color:var(--accent)}
+.km-auch{margin:0;font:600 clamp(20px,3.4vw,36px)/1.35 var(--f-display);overflow-wrap:anywhere}
+.km-auch .km-von{display:inline-block;margin-right:8px;vertical-align:.15em;font:700 15px/1 var(--f-body);padding:6px 12px}
+.km-punkte button.dp-beide::before{border-color:var(--dp0);box-shadow:inset 0 0 0 2px var(--dp1)}
+.km-punkte button.dp-beide.f::before{background:linear-gradient(90deg,var(--dp0) 50%,var(--dp1) 50%)}

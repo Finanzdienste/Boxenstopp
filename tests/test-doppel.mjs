@@ -12,7 +12,8 @@ import { aufBoxen } from '../js/boxen.js';
 import { zeitVon } from '../js/zeiten.js';
 import {
   aufgabenVon, doppelPlan, doppelBester, doppelPaar, doppelPartner, besteDoppel, alleinMinuten, schalenPlan, schalenIm,
-  schalenUmbenennen, geraeteZusammen, gemeinsamSchneiden, beideReis, ofenGeteilt, resteGeteilt, warumText, MIN_SPART, OFEN_PLATZ,
+  schalenUmbenennen, geraeteZusammen, gemeinsamSchneiden, beideReis, ofenGeteilt, resteGeteilt, warumText, zutatVon, fuerSich,
+  zusammenlegbar, MIN_SPART, OFEN_PLATZ,
 } from '../js/doppel.js';
 
 const { check, ende } = pruefer();
@@ -113,6 +114,22 @@ check(Math.min(...ofenVon(1).map((s) => s.start)) >= ende0 - 1e-9 || Math.min(..
 check(ofenGeteilt(nach('honig-senf'), nach('cheeseburger')) === '200 °C Umluft' && ofenGeteilt(nach('butter-chicken'), nach('moussaka')) === '', 'Honig-Senf und Cheeseburger: beide bei 200 °C Umluft – einmal vorheizen');
 check(doppelBester(nach('chili'), nach('gulasch')).plan.ende <= doppelPlan([nach('chili'), nach('gulasch')]).ende, 'Der beste Plan ist nie schlechter als der in einer Reihenfolge');
 
+/* ------------------------------------------------- für beide auf einmal */
+
+check(zutatVon('2 Zwiebeln ({zwiebeln}) schälen und fein würfeln → Schale 3') === 'zwiebeln' && zutatVon('6 Knoblauchzehen schälen und hacken → Schale 3') === 'knoblauch'
+  && zutatVon('1 Bund Frühlingszwiebeln in feine Ringe schneiden → Schale 4') === 'fruehlingszwiebeln' && zutatVon('{knoblauch} Knoblauch schälen und hacken, {ingwer} Ingwer schälen und reiben → Schale 1') === ''
+  && zutatVon('In Schale 4 abmessen: 1 TL Paprika edelsüß') === '' && zutatVon('Kartoffeln abgießen, kurz ausdampfen lassen') === '', 'Was ein Schritt schneidet: genau eine Zutat – Knoblauch ist kein Lauch, Frühlingszwiebeln sind keine Zwiebeln, Gewürze und Abgießen zählen nicht');
+check(fuerSich('2 Zwiebeln ({zwiebeln}) schälen und fein würfeln → Schale 3') && fuerSich('{kartoffeln} Kartoffeln schälen, davon 1,2 kg abwiegen') && !fuerSich('Die Kartoffeln in ½-cm-Scheiben schneiden → Schale 2') && !fuerSich('Die restlichen 20 g Ingwer fein reiben → Schale 3') && !fuerSich('Aus Schale 1 32 Bällchen formen'), 'Früher machen geht, was für sich steht – nicht „Die Kartoffeln in Scheiben“ (die sind von vorher geschält), nicht aus einer Schale');
+const rutsch = gm.aufEinmal.find((m) => m.key === 'zwiebeln');
+const host = rutsch && gm.plan.schritte.find((s) => s.k === rutsch.host.k && s.i === rutsch.host.i);
+const platz = rutsch && gm.plan.schritte.find((s) => s.k === rutsch.platz.k && s.i === rutsch.platz.i);
+check(!!host && host.mit?.k === rutsch.platz.k && host.mit.i === rutsch.platz.i && host.bis - host.start === rutsch.aktiv && rutsch.spart >= 1 && /Zwiebeln/.test(gmFl[rutsch.platz.k][rutsch.platz.i].d), `Gulasch und Moussaka: die Zwiebeln für beide in einem Rutsch (${rutsch?.aktiv} Min., ${rutsch?.spart} weniger)`);
+check(!!platz && platz.durch?.k === rutsch.host.k && platz.start >= host.bis && platz.bis === platz.start, 'Der Schritt im anderen Rezept ist dann schon gemacht – er kommt erst danach und kostet nichts');
+check(gm.ende <= doppelBester(nach('gulasch'), nach('moussaka')).plan.ende, 'Zusammengelegt wird nur, wo der Plan dadurch nicht länger wird');
+check(zusammenlegbar(gm.reihe, gm.plan).every((m) => fuerSich(gmFl[m.platz.k][m.platz.i].d) && zutatVon(gmFl[m.host.k][m.host.i].d) === m.key), 'Was nach vorn wandert, steht immer für sich');
+const mitRutsch = paare.filter((p) => p.aufEinmal.length);
+check(mitRutsch.length > paare.length / 2 && mitRutsch.every((p) => p.aufEinmal.every((m) => p.plan.schritte.some((s) => s.mit && s.i === m.host.i && s.k === m.host.k))), `Bei ${mitRutsch.length} von ${paare.length} Paaren schneidet man etwas für beide auf einmal`);
+
 /* ------------------------------------------------- Partner */
 
 const partner = doppelPartner(nach('chili'), rs, { daten: d });
@@ -137,9 +154,11 @@ check(schalenUmbenennen('Schale 1 und Schale 3 in den Topf, dann Schalen 2 bis 4
 const sp = schalenPlan(gm.plan, gm.reihe);
 const nrB = Object.values(sp.nr[1]);
 check(sp.zahl < sp.getrennt && sp.getrennt === 12 && new Set(nrB).size === nrB.length && Object.entries(sp.nr[0]).every(([a, b]) => Number(a) === b), `Gulasch und Moussaka: ${sp.zahl} Schalen statt ${sp.getrennt} – das Gulasch behält seine Nummern, jede Moussaka-Schale hat ihre eigene`);
+// Wann eine Schale gebraucht wird – was für beide geschnitten wird, füllt sie schon im Schritt des anderen Rezepts
+const wann = (s) => (s.durch ? gm.plan.schritte.find((x) => x.k === s.durch.k && x.i === s.durch.i) : s);
 const nutzung = (k, n) => {
   const xs = gm.plan.schritte.filter((s) => s.k === k && schalenIm([gmFl[k][s.i].d, ...(gmFl[k][s.i].liste || [])].join(' ')).includes(n));
-  return { von: Math.min(...xs.map((s) => s.start)), bis: Math.max(...xs.map((s) => s.bis)) };
+  return { von: Math.min(...xs.map((s) => wann(s).start)), bis: Math.max(...xs.map((s) => Math.max(s.bis, wann(s).bis))) };
 };
 check([...sp.wieder].every((w) => { const [, alt] = w.split(':').map(Number); const neu = sp.nr[1][alt]; return nutzung(1, alt).von >= nutzung(0, neu).bis; }), 'Wiederverwendet wird eine Schale erst, wenn das Gulasch sie geleert hat');
 check(sp.schalen[1].every((s) => s.k === 1 && s.n === sp.nr[1][gm.reihe[1].schalen.find((x) => x.name === s.name).n]), 'Die Schalen der Moussaka tragen ihre neuen Nummern');
@@ -193,20 +212,29 @@ check(await bis(async () => (await lesen(ansicht.locator('.actions'))).includes(
 await ansicht.locator('[data-doppel-halb="0"]').click();
 
 // Kochmodus für beide
+const haken = (rid) => t.evaluate((r) => (JSON.parse(localStorage.getItem('boxenstopp.schritte.v2') || '{}')[r] || []), rid);
 await ansicht.locator('[data-act="doppel-kochmodus"]').click();
 const km = t.locator('#kochmodus');
 check(await bis(() => km.locator('.km-text').isVisible()), 'Der Kochmodus für beide öffnet');
 check((await lesen(km.locator('.km-titel'))).startsWith('Rindergulasch + ') && (await lesen(km.locator('.km-marke'))).startsWith('Rindergulasch'), 'Oben beide Namen, beim Schritt das Rezept');
 const punkte = await km.locator('.km-punkte button').count();
-check(punkte === flach(nach('gulasch')).length + flach(nach(zweitesId)).length && await km.locator('.km-punkte button.dp-k1').count() === flach(nach(zweitesId)).length, `Alle ${punkte} Schritte beider Rezepte, die Punkte in der Farbe des Rezepts`);
+const beide = await km.locator('.km-punkte button.dp-beide').count();
+check(punkte + beide === flach(nach('gulasch')).length + flach(nach(zweitesId)).length && beide >= 1 && await km.locator('.km-punkte button.dp-k1').count() > 0, `Alle Schritte beider Rezepte (${punkte}, davon ${beide} für beide auf einmal), die Punkte in der Farbe des Rezepts`);
+// Ein Schritt für beide: beide Rezepte, beide Texte – abgehakt in beiden
+const vorB = (await haken(zweitesId)).length;
+await km.locator('.km-punkte button.dp-beide').first().click();
+check((await km.locator('.km-marke .km-von').count()) === 2 && (await lesen(km.locator('.km-marke'))).includes('für beide auf einmal') && await km.locator('.km-auch .km-von').count() === 1, 'Ein Schritt für beide: beide Namen oben, der Schritt des anderen Rezepts darunter');
 await km.locator('[data-km="erledigt"]').click();
-const haken = (rid) => t.evaluate((r) => (JSON.parse(localStorage.getItem('boxenstopp.schritte.v2') || '{}')[r] || []), rid);
+check(await bis(async () => (await haken('gulasch')).length === 1 && (await haken(zweitesId)).length === vorB + 1), 'Erledigt: abgehakt im Gulasch und im anderen Rezept');
+await km.locator('.km-punkte button[data-km-zu="0"]').click();
+if (!(await km.locator('.km-punkte button[data-km-zu="0"]').getAttribute('class')).includes('f')) await km.locator('[data-km="erledigt"]').click();
 check(await bis(async () => (await haken('gulasch')).includes(0)), 'Erledigt: der Haken landet im Gulasch (Schritt 1)');
 // Ein Schritt des anderen Rezepts
-await km.locator('.km-punkte button.dp-k1').first().click();
+await km.locator('.km-punkte button.dp-k1:not(.f)').first().click();
 check((await lesen(km.locator('.km-von.dp-k1'))) === nach(zweitesId).short, `Ein Punkt des anderen Rezepts: dessen Schritt („${nach(zweitesId).short}“)`);
+const vorher = (await haken(zweitesId)).length;
 await km.locator('[data-km="erledigt"]').click();
-check(await bis(async () => (await haken(zweitesId)).length === 1), `Der Haken landet bei ${zweitesId}`);
+check(await bis(async () => (await haken(zweitesId)).length === vorher + 1), `Der Haken landet bei ${zweitesId}`);
 const tempo = await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.tempo.v1') || '{"offen":{}}'));
 check(!tempo.offen?.gulasch && !tempo.offen?.[zweitesId], 'Das Tempo lernt das Handy dabei nicht (zwischen zwei Haken lag das andere Rezept)');
 // Ein Timer

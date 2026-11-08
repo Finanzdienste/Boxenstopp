@@ -152,8 +152,9 @@ Moussaka vorzubereiten. **Zwei auf einmal** plant zwei Rezepte zusammen
   Boxen** (je 8 oder je 4 – zusammen so viele wie sonst eins; ab 4 Boxen),
   **beide auf die Einkaufsliste** (mit den
   Mengen des Plans), **Kochmodus für beide**, was gut zu wissen ist (Zwiebeln
-  und Knoblauch für beide in einem Rutsch, Reis zusammen, beide bei 200 °C im
-  Ofen, zwei große Töpfe nötig, weniger Reste), die Schalen und Geräte und der
+  und Knoblauch für beide in einem Rutsch – siehe unten –, Reis zusammen,
+  beide bei 200 °C im Ofen, zwei große Töpfe nötig, weniger Reste), die
+  Schalen und Geräte und der
   **Ablauf** in Blöcken ab 0:00: wer dran ist, was danach von selbst läuft
   („Rindergulasch schmort jetzt 1 Std. 27 Min. von selbst.“), Pausen, in
   denen beides läuft; aufgeklappt die Schritte. Unten andere Partner.
@@ -172,14 +173,25 @@ Moussaka vorzubereiten. **Zwei auf einmal** plant zwei Rezepte zusammen
   liefe er sonst eine Stunde leer). Vorbereiten, Kochen, Portionieren
   bleiben je Rezept in ihrer Reihenfolge. Probiert werden beide
   Reihenfolgen und ein paar Einstellungen, genommen wird der kürzeste Plan –
-  nie länger als nacheinander. Im Schnitt spart ein Paar 25 Minuten, jedes
+  nie länger als nacheinander. Im Schnitt spart ein Paar 30 Minuten, jedes
   zehnte über eine Stunde.
+- **Für beide auf einmal:** Was beide Rezepte schneiden – Zwiebeln,
+  Knoblauch, Paprika, Kartoffeln … –, wird ein Schritt: „3 Paprika (450 g)
+  waschen, entkernen und würfeln → Schale 3“ und darunter „Rindergulasch: 3
+  rote Paprika (480 g) in 2-cm-Stücke schneiden → Schale 10“. Einmal Brett,
+  Messer und Abfall spart ein Viertel des kürzeren Schritts. Gemacht wird es,
+  wo der erste der beiden im Plan steht; der andere wandert dafür nach vorn –
+  das geht nur, wenn er für sich steht (eigene Menge, nicht „Die Kartoffeln in
+  Scheiben schneiden“, die erst geschält sein müssen, nicht aus einer Schale),
+  und nur, wenn der Plan dadurch nicht länger wird. Bei gut vier von fünf
+  Paaren ist etwas dabei.
 - **Schalen:** Was das erste Rezept schon in den Topf gegeben hat, nimmt das
   zweite wieder (kurz ausspülen) – Gulasch und Moussaka brauchen 8 Schalen
   statt 12. Die Texte des zweiten Rezepts tragen die neuen Nummern.
 - **Kochmodus für beide:** alle Schritte in der Reihenfolge des Plans, beim
-  Schritt das Rezept (in seiner Farbe, auch die Punkte unten), darunter, was
-  danach von selbst läuft und wie es weitergeht. Abgehakt wird im Rezept
+  Schritt das Rezept (in seiner Farbe, auch die Punkte unten; ein Schritt für
+  beide trägt beide Namen und beide Texte und wird in beiden Rezepten
+  abgehakt), darunter, was danach von selbst läuft und wie es weitergeht. Abgehakt wird im Rezept
   selbst – derselbe Kochstand, auch auf dem anderen Gerät –, die Timer sind
   die des Rezepts. Ist eins fertig: „Biryani ist fertig – weiter mit
   Rindergulasch.“, sind beide fertig, das Tier. Das Tempo lernt das Handy
@@ -1533,11 +1545,12 @@ das KI-Rezept aus den Resten (mit nachgebauter API), dazu Tobi mit 8 Boxen.
 `test-doppel.mjs` prüft in Node Arbeit und Warten (schmoren, Ofen, abgießen),
 alle 1225 Paare (ein Koch, jeder Schritt einmal und in seiner Reihenfolge,
 Abschnitte, ein Ofen, nie länger als nacheinander, pünktlich), Gulasch und
-Moussaka (der Ofen erst spät an), Partner und beste Paare, Reste für 2 Boxen,
-je 4 Boxen, Schalen und Geräte, und spielt im Browser durch: die Partner im
-Gulasch, der Plan, je 4 Boxen, beide auf die Liste, der Kochmodus für beide
-(Haken im jeweiligen Rezept, kein Tempo, Timer, eins fertig), zurück, die
-Kachel. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
+Moussaka (der Ofen erst spät an), für beide auf einmal (was ein Schritt
+schneidet, was für sich steht, die Zwiebeln in einem Rutsch, nie länger),
+Partner und beste Paare, Reste für 2 Boxen, je 4 Boxen, Schalen und Geräte, und
+spielt im Browser durch: die Partner im Gulasch, der Plan, je 4 Boxen, beide
+auf die Liste, der Kochmodus für beide (ein Schritt für beide, Haken im
+jeweiligen Rezept, kein Tempo, Timer, eins fertig), zurück, die Kachel. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
 Überblick in Node zusammen und spielt dann die Einladung durch (euer
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites

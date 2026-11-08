@@ -194,8 +194,12 @@ function uebersichtHTML() {
 function hinweiseHTML(p) {
   const [a, b] = p.reihe;
   const h = [];
-  const schneiden = gemeinsamSchneiden(a, b, app.katalog);
-  if (schneiden.length) h.push(`Beide brauchen ${esc(und(schneiden))} – in einem Rutsch schälen und schneiden spart Zeit und Abwasch.`);
+  // Was der Plan schon für beide auf einmal schneidet – und was beide brauchen, aber in Schritten, die nicht zusammenpassen
+  const name = (k) => String(app.katalog[k]?.n || k).split(',')[0].trim();
+  const aufEinmal = p.aufEinmal.map((m) => name(m.key));
+  if (aufEinmal.length) h.push(`${esc(und(aufEinmal))} schneidest du für beide in einem Rutsch – im Ablauf und im Kochmodus steht das als „für beide“.`);
+  const schneiden = gemeinsamSchneiden(a, b, app.katalog).filter((n) => !aufEinmal.includes(n));
+  if (schneiden.length) h.push(`Beide brauchen ${esc(und(schneiden))} – wenn du magst, auch das auf einmal schälen und schneiden.`);
   if (beideReis(a, b)) h.push('Beide mit Reis: Ist der Topf groß genug, kochst du ihn zusammen – Reis und Wasser aus beiden Rezepten, die Zeit bleibt.');
   const ofen = ofenGeteilt(a, b);
   if (ofen) h.push(`Beide bei ${esc(ofen)} im Ofen – einmal vorheizen reicht.`);
@@ -224,6 +228,8 @@ function bereitHTML(p) {
 function bloecke(p) {
   const aus = [];
   for (const [idx, s] of p.plan.schritte.entries()) {
+    // Was das andere Rezept schon mitgemacht hat, steht dort
+    if (s.durch) continue;
     const b = aus[aus.length - 1];
     if (b && b.k === s.k) { b.schritte.push(idx); b.bis = Math.max(b.bis, s.bis); b.letzter = s; if (!b.phasen.includes(s.t)) b.phasen.push(s.t); continue; }
     aus.push({ k: s.k, von: s.start, bis: s.bis, schritte: [idx], phasen: [s.t], letzter: s });
@@ -272,7 +278,8 @@ function ablaufHTML(p) {
       const s = p.plan.schritte[idx];
       const x = fl[s.i];
       const liste = x.liste?.length ? `<span class="ab-li">${x.liste.map((l) => textVon(p, b.k, l)).join(' · ')}</span>` : '';
-      return `<li>${s.drin ? '<span class="step-k">währenddessen</span>' : ''}${textVon(p, b.k, x.d)}${liste}</li>`;
+      const auch = s.mit ? `<span class="ab-auch"><b class="dp-r dp-k${s.mit.k}">${esc(kurz(p.reihe[s.mit.k]))}:</b> ${textVon(p, s.mit.k, flach(p.reihe[s.mit.k])[s.mit.i].d)}</span>` : '';
+      return `<li${s.mit ? ' class="ab-beide"' : ''}>${s.mit ? '<span class="step-k">für beide</span>' : s.drin ? '<span class="step-k">währenddessen</span>' : ''}${textVon(p, b.k, x.d)}${liste}${auch}</li>`;
     }).join('');
     const warten = wartetText(r, b.letzter);
     const zahl = b.schritte.length;
@@ -369,21 +376,33 @@ function aufDieListe(p) {
 function kochmodusBeide(p) {
   const [a, b] = p.reihe;
   const fl = p.reihe.map(flach);
-  const plan = p.plan.schritte;
+  // Was das andere Rezept schon mitgemacht hat, ist kein eigener Schritt
+  const plan = p.plan.schritte.filter((s) => !s.durch);
   const schritte = plan.map((s) => {
     const x = fl[s.k][s.i];
     return { ...x, d: schalenUmbenennen(x.d, p.schalen.nr[s.k]), liste: x.liste?.map((l) => schalenUmbenennen(l, p.schalen.nr[s.k])), neben: s.drin };
   });
   const rezept = { id: `doppel:${a.id}+${b.id}`, name: `${kurz(a)} + ${kurz(b)}`, short: `${kurz(a)} + ${kurz(b)}`, ablauf: [{ t: 'Zwei auf einmal', schritte }] };
   const orig = (j) => ({ s: plan[j], r: p.reihe[plan[j].k], x: fl[plan[j].k][plan[j].i] });
-  const fertig = () => new Set(plan.map((s, j) => (schritteVon(s.rid).has(s.i) ? j : -1)).filter((j) => j >= 0));
+  // Ein Schritt für beide ist erst fertig, wenn er in beiden Rezepten abgehakt ist
+  const mitRid = (s) => p.reihe[s.mit.k].id;
+  const abgehakt = (s) => schritteVon(s.rid).has(s.i) && (!s.mit || schritteVon(mitRid(s)).has(s.mit.i));
+  const fertig = () => new Set(plan.map((s, j) => (abgehakt(s) ? j : -1)).filter((j) => j >= 0));
   const naechsterAnderer = (j) => { const s = plan[j]; for (let q = j + 1; q < plan.length; q++) if (!plan[q].drin) return plan[q].k !== s.k ? p.reihe[plan[q].k] : null; return null; };
   kochmodusOeffnen({
     rezept,
     fertig,
     text: (s, j) => schrittText(s.d, mitSchalen(p, plan[j].k)),
-    marke: (j) => `<span class="km-von dp-k${plan[j].k}">${esc(kurz(p.reihe[plan[j].k]))}</span><span class="km-phase">${esc(plan[j].t)}</span>`,
-    punkt: (j) => `dp-k${plan[j].k}`,
+    marke: (j) => (plan[j].mit
+      ? `<span class="km-von dp-k${plan[j].k}">${esc(kurz(p.reihe[plan[j].k]))}</span><span class="km-von dp-k${plan[j].mit.k}">${esc(kurz(p.reihe[plan[j].mit.k]))}</span><span class="km-phase">für beide auf einmal</span>`
+      : `<span class="km-von dp-k${plan[j].k}">${esc(kurz(p.reihe[plan[j].k]))}</span><span class="km-phase">${esc(plan[j].t)}</span>`),
+    // Für beide: der Schritt des anderen Rezepts gleich darunter, mit seinen Mengen und Schalen
+    auch: (j) => {
+      const s = plan[j];
+      if (!s.mit) return '';
+      return `<span class="km-von dp-k${s.mit.k}">${esc(kurz(p.reihe[s.mit.k]))}</span> ${textVon(p, s.mit.k, fl[s.mit.k][s.mit.i].d)}`;
+    },
+    punkt: (j) => (plan[j].mit ? 'dp-beide' : `dp-k${plan[j].k}`),
     hinweis: (j) => {
       const { s, r } = orig(j);
       const w = wartetText(r, s);
@@ -393,14 +412,16 @@ function kochmodusBeide(p) {
     },
     minuten: (j) => { const { x, r, s } = orig(j); return x && !planVon(x) ? zeitFuer(r).schritte[s.i]?.min ?? x.min : null; },
     umschalten: (j, an) => {
-      const { s, r } = orig(j);
-      const zahl = flach(r).length;
-      const vorher = schritteVon(s.rid).size;
-      schrittUmschalten(s.rid, s.i, an, { tempo: false, lob: false });
-      if (!an || vorher >= zahl || schritteVon(s.rid).size < zahl) return;
-      const anderes = p.reihe[1 - s.k];
-      if (schritteVon(anderes.id).size >= flach(anderes).length) lobGross({ rezept, name: app.name(), grund: 'fertig' });
-      else melde(`${kurz(r)} ist fertig – weiter mit ${kurz(anderes)}.`);
+      const { s } = orig(j);
+      // Abgehakt wird im Rezept selbst – bei einem Schritt für beide in beiden
+      const haken = [[s.k, s.i], ...(s.mit ? [[s.mit.k, s.mit.i]] : [])];
+      const vorher = p.reihe.map((r) => schritteVon(r.id).size >= flach(r).length);
+      for (const [k, i] of haken) schrittUmschalten(p.reihe[k].id, i, an, { tempo: false, lob: false });
+      if (!an) return;
+      const jetzt = p.reihe.map((r) => schritteVon(r.id).size >= flach(r).length);
+      if (jetzt.every(Boolean)) { if (!vorher.every(Boolean)) lobGross({ rezept, name: app.name(), grund: 'fertig' }); return; }
+      const eben = jetzt.findIndex((x, k) => x && !vorher[k]);
+      if (eben >= 0) melde(`${kurz(p.reihe[eben])} ist fertig – weiter mit ${kurz(p.reihe[1 - eben])}.`);
     },
     timerKnopf: (rid, s, j) => { const o = orig(j); return timerKnopf(o.s.rid, o.x, o.s.i); },
     timerUmschalten: (x, s, j) => { const o = orig(j); timerUmschalten(app.nachId[o.s.rid] || o.r, o.x, o.s.i); },

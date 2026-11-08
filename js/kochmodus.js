@@ -281,6 +281,7 @@ function zeichnen() {
 ${km.marke ? `<p class="km-marke">${km.marke(km.i)}</p>` : ''}${s?.neben ? '<span class="km-k">währenddessen</span>' : ''}${s?.entfaellt ? '<span class="km-k">entfällt – Zutat weggelassen</span>' : ''}
 <p class="km-text">${s ? km.text(s, km.i) : ''}</p>
 ${s?.liste?.length ? `<ul class="km-liste">${s.liste.map((z) => `<li>${km.text({ d: z }, km.i)}</li>`).join('')}</ul>` : ''}
+${(() => { const h = km.auch?.(km.i); return h ? `<p class="km-auch">${h}</p>` : ''; })()}
 ${(() => { const h = km.hinweis?.(km.i); return h ? `<p class="km-hinweis">${h}</p>` : ''; })()}
 <div class="km-waage-platz" id="km-waage">${(() => { const plan = wiegePlan(); return plan ? waageHTML(plan, wiegungFuer(plan)) : ''; })()}</div>
 <div class="km-unten">${min ? `<span class="km-min">ca. ${min} Min.</span>` : ''}${timer ? `<span class="km-timerknopf" id="km-timerknopf">${timer.replace('data-timer=', 'data-km-timer=')}</span>` : ''}${istFertig ? `<span class="km-ok">${HAKEN}abgehakt</span>` : ''}</div>
@@ -317,7 +318,8 @@ export function kochmodusTimerZeichnen() {
  * Für zwei Rezepte auf einmal (ansicht-doppel.js) außerdem: fertig() → Set
  * der abgehakten Schritte, marke(i) → HTML über dem Text (welches Rezept),
  * hinweis(i) → HTML darunter, timerZu(timer) → Schritt oder -1, punkt(i) →
- * Klasse für den Punkt des Schritts unten (die Farbe des Rezepts).
+ * Klasse für den Punkt des Schritts unten (die Farbe des Rezepts), auch(i) →
+ * HTML des Schritts im anderen Rezept, der hier gleich mitgemacht wird.
  */
 export function kochmodusOeffnen(o) {
   const dlg = $('#kochmodus');

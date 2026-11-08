@@ -210,14 +210,22 @@ function fristVon(x) {
 
 /**
  * Der Plan für zwei (oder mehr) Rezepte: { ende, schritte: [{ start, bis,
- * warten, ruhe, k, rid, i, pi, t, neben, drin, ziel }] } – k ist das
- * wievielte Rezept, i die Nummer des Schritts im Rezept, drin: läuft in der
- * Zeit des Schritts davor mit, ziel: wann das fertig war, worauf der Schritt
- * gewartet hat (sonst null). Zeiten in Minuten ab Start. nacheinander: erst
- * das eine ganz, dann das andere (zum Vergleich).
+ * warten, ruhe, k, rid, i, pi, t, neben, drin, ziel, mit, durch }] } – k ist
+ * das wievielte Rezept, i die Nummer des Schritts im Rezept, drin: läuft in
+ * der Zeit des Schritts davor mit, ziel: wann das fertig war, worauf der
+ * Schritt gewartet hat (sonst null), mit: { k, i } – dieser Schritt macht den
+ * des anderen Rezepts gleich mit, durch: { k, i } – dieser ist schon dort
+ * gemacht. Zeiten in Minuten ab Start. nacheinander: erst das eine ganz, dann
+ * das andere (zum Vergleich). zusammen: was für beide auf einmal geht.
  */
-export function doppelPlan(rezepte, { minuten, nacheinander = false, kritischAb = KRITISCH } = {}) {
-  return planen(rezepte.map((r) => ({ r, t: geplant(r, minuten) })), { nacheinander, kritischAb });
+export function doppelPlan(rezepte, { minuten, nacheinander = false, kritischAb = KRITISCH, zusammen = [] } = {}) {
+  const t = rezepte.map((r) => geplant(r, minuten));
+  // Für beide auf einmal (zusammenlegbar): der eine Schritt macht beide, der andere wartet nur darauf
+  for (const m of zusammen) {
+    t[m.host.k] = t[m.host.k].map((a) => (a.i === m.host.i ? { ...a, aktiv: m.aktiv, mit: { ...m.platz } } : a));
+    t[m.platz.k] = t[m.platz.k].map((a) => (a.i === m.platz.i ? { ...a, aktiv: 0, durch: { ...m.host } } : a));
+  }
+  return planen(rezepte.map((r, k) => ({ r, t: t[k] })), { nacheinander, kritischAb });
 }
 
 /** Der Plan selbst: je Rezept r und seine Aufgaben t in der Reihenfolge, in der sie drankommen. */
@@ -238,6 +246,7 @@ function planen(liste, { nacheinander = false, kritischAb = KRITISCH }) {
   const arbeit = (x) => x.arbeitAb[x.next];
   const belegt = [];
   const schritte = [];
+  const fertigBei = new Map();
   let koch = 0;
   let letzter = -1;
   for (;;) {
@@ -253,6 +262,8 @@ function planen(liste, { nacheinander = false, kritischAb = KRITISCH }) {
       if (a.wartet) { const z = zielVon(x.bg, a.d); if (z) { ziel = z.bis - a.vorher; frueh = Math.max(frueh, ziel); } }
       if (a.ofen && a.ofen.last > 0) frueh = Math.max(frueh, x.heiss);
       if (nacheinander) for (const y of st) if (y.k < x.k) frueh = Math.max(frueh, y.fertig);
+      // Hat das andere Rezept diesen Schritt mitgemacht, ist er erledigt, sobald das dort geschafft ist
+      if (a.durch) frueh = Math.max(frueh, fertigBei.get(`${a.durch.k}:${a.durch.i}`) ?? Infinity);
       const drin = a.neben && frueh < x.huelle;
       let start = drin ? frueh : Math.max(frueh, koch);
       if (a.ofen) start = ofenAb(belegt, x.k, a, start);
@@ -283,7 +294,7 @@ function planen(liste, { nacheinander = false, kritischAb = KRITISCH }) {
     kand.sort((p, q) => p.spaet - q.spaet || p.start - q.start || p.locker - q.locker || q.kritisch - p.kritisch
       || (q.x.k === letzter) - (p.x.k === letzter) || (q.a.wartet - p.a.wartet) || p.frueh - q.frueh || q.weg - p.weg || p.x.k - q.x.k);
     const { x, a, start, drin, ziel } = kand[0];
-    if (!drin) letzter = x.k;
+    if (!drin && !a.durch) letzter = x.k;
     const bis = start + a.aktiv;
     koch = Math.max(koch, bis);
     if (a.neben) x.nebenAb = bis;
@@ -305,7 +316,8 @@ function planen(liste, { nacheinander = false, kritischAb = KRITISCH }) {
       x.halt = x.ofenRest > 0 ? { k: x.k, von: aus, bis: Infinity, key: a.ofen.key, last: 0 } : null;
       if (x.halt) belegt.push(x.halt);
     }
-    schritte.push({ start, bis, warten: a.warten, ruhe: a.ruhe, k: x.k, rid: x.r.id, i: a.i, pi: a.pi, t: a.t, neben: a.neben, drin, ziel });
+    schritte.push({ start, bis, warten: a.warten, ruhe: a.ruhe, k: x.k, rid: x.r.id, i: a.i, pi: a.pi, t: a.t, neben: a.neben, drin, ziel, mit: a.mit || null, durch: a.durch || null });
+    fertigBei.set(`${x.k}:${a.i}`, bis);
     x.next += 1;
     if (x.next >= x.t.length) x.fertig = Math.max(koch, ...x.ende);
   }
@@ -358,14 +370,89 @@ export const alleinMinuten = (r, opt) => doppelPlan([r], opt).ende;
  * schlechter als nacheinander.
  */
 export function doppelBester(a, b, { minuten } = {}) {
-  let best = { reihe: [a, b], plan: doppelPlan([a, b], { minuten, nacheinander: true }) };
+  let best = { reihe: [a, b], plan: doppelPlan([a, b], { minuten, nacheinander: true }), nacheinander: true, kritischAb: KRITISCH };
   for (const kritischAb of KRITISCH_PROBEN) {
     for (const reihe of [[a, b], [b, a]]) {
       const plan = doppelPlan(reihe, { minuten, kritischAb });
-      if (plan.ende < best.plan.ende) best = { reihe, plan };
+      if (plan.ende < best.plan.ende) best = { reihe, plan, nacheinander: false, kritischAb };
     }
   }
   return best;
+}
+
+/* -------------------------------------------------- für beide auf einmal */
+
+/** Was man beim Vorbereiten schneidet – woran man es im Text erkennt. */
+const SCHNEIDE_ZUTAT = [
+  ['fruehlingszwiebeln', /Frühlingszwiebel/i],
+  ['rote-zwiebeln', /\brote[n]? Zwiebel/i],
+  ['zwiebeln', /(?<!Frühlings)(?<!rote )(?<!roten )Zwiebel/i],
+  ['knoblauch', /Knoblauch(?!pulver)/i],
+  ['ingwer', /Ingwer/i],
+  ['paprika', /Paprika(?!\s*(?:edelsüß|geräuchert|rosenscharf|pulver))/i],
+  ['moehren', /Möhre|Karotte/i],
+  ['suesskartoffel', /Süßkartoffel/i],
+  ['kartoffeln', /(?<!Süß)Kartoffel/i],
+  ['zucchini', /Zucchini/i],
+  ['brokkoli', /Brokkoli/i],
+  ['champignons', /Champignon/i],
+  ['lauch', /\bLauch/i],
+  ['staudensellerie', /Sellerie/i],
+  ['aubergine', /Aubergine/i],
+  ['blumenkohl', /Blumenkohl/i],
+  ['koriander', /Koriander/i],
+  ['petersilie', /Petersilie/i],
+];
+const SCHNEIDET = /schälen|würfeln|hacken|schneiden|reiben|zupfen|halbieren|in Röschen/i;
+
+/** Welche Zutat ein Schritt schneidet – nur, wenn es genau eine ist („Zwiebeln schälen und würfeln“). */
+export function zutatVon(d) {
+  const vor = String(d || '').split('→')[0];
+  if (!SCHNEIDET.test(vor)) return '';
+  const keys = SCHNEIDE_ZUTAT.filter(([, re]) => re.test(vor)).map(([k]) => k);
+  return keys.length === 1 ? keys[0] : '';
+}
+
+/**
+ * Lässt sich ein Schritt früher machen, als er im Rezept steht? Wenn er für
+ * sich steht: mit eigener Menge, nicht „Die Kartoffeln in Scheiben
+ * schneiden“ (das braucht die geschälten von vorher), nicht aus einer Schale.
+ */
+export function fuerSich(d) {
+  const vor = String(d || '').split('→')[0];
+  return !/^\s*(?:Die|Den|Das|Der)\b|restlich|übrig/i.test(vor) && !/\bSchalen?\s+\d/.test(vor);
+}
+
+const schneidbar = (a) => !a.warten && !a.ruhe && !a.ofen && !a.wartet && a.aktiv >= 2 && !!zutatVon(a.d);
+
+/**
+ * Was beide Rezepte schneiden, lässt sich in einem Rutsch machen: Zwiebeln
+ * fürs Gulasch und für die Moussaka auf einmal schälen, dann aufteilen.
+ * [{ key, host: { k, i }, platz: { k, i }, aktiv, spart }] – host ist der
+ * Schritt, der im Plan zuerst kommt und beide macht, platz der andere (er
+ * muss für sich stehen, er kommt ja früher dran). Ein Rutsch spart ein
+ * Viertel des kürzeren, mindestens eine Minute (einmal Brett, Messer,
+ * Abfall).
+ */
+export function zusammenlegbar(reihe, plan, { minuten } = {}) {
+  const t = reihe.map((r) => geplant(r, minuten));
+  const start = new Map(plan.schritte.map((s) => [`${s.k}:${s.i}`, s.start]));
+  const schnitt = t.map((liste) => liste.filter(schneidbar).map((a) => ({ a, key: zutatVon(a.d) })));
+  const aus = [];
+  const genommen = new Set();
+  for (const x of schnitt[0] || []) {
+    if (genommen.has(x.key)) continue;
+    const y = (schnitt[1] || []).find((z) => z.key === x.key);
+    if (!y) continue;
+    const s0 = start.get(`0:${x.a.i}`) ?? 0;
+    const s1 = start.get(`1:${y.a.i}`) ?? 0;
+    const [host, platz] = s0 <= s1 ? [{ k: 0, a: x.a }, { k: 1, a: y.a }] : [{ k: 1, a: y.a }, { k: 0, a: x.a }];
+    if (!fuerSich(platz.a.d)) continue;
+    genommen.add(x.key);
+    const spart = Math.max(1, Math.round(Math.min(x.a.aktiv, y.a.aktiv) * 0.25));
+    aus.push({ key: x.key, host: { k: host.k, i: host.a.i }, platz: { k: platz.k, i: platz.a.i }, aktiv: host.a.aktiv + platz.a.aktiv - spart, spart });
+  }
+  return aus;
 }
 
 /* ----------------------------------------------------------- Schalen */
@@ -407,12 +494,15 @@ const GROESSE = { klein: 1, mittel: 2, groß: 3 };
  */
 export function schalenPlan(plan, rezepte) {
   const nutzung = rezepte.map(() => new Map());
+  const zeit = new Map(plan.schritte.map((s) => [`${s.k}:${s.i}`, s]));
   for (const s of plan.schritte) {
     const x = flach(rezepte[s.k])[s.i];
+    // Für beide auf einmal geschnitten: die Schale füllt sich, wenn das andere Rezept den Schritt macht
+    const z = s.durch ? zeit.get(`${s.durch.k}:${s.durch.i}`) || s : s;
     for (const n of schalenIm([x?.d, ...(x?.liste || [])].join(' '))) {
-      const u = nutzung[s.k].get(n) || { von: s.start, bis: s.bis };
-      u.von = Math.min(u.von, s.start);
-      u.bis = Math.max(u.bis, s.bis);
+      const u = nutzung[s.k].get(n) || { von: z.start, bis: z.bis };
+      u.von = Math.min(u.von, z.start);
+      u.bis = Math.max(u.bis, s.bis, z.bis);
       nutzung[s.k].set(n, u);
     }
   }
@@ -592,11 +682,20 @@ const anzeigeStandard = (r) => zeitVon(r).gesamt;
 
 /**
  * Ein Paar ganz: { a, b, reihe, plan, ende, zusammen, getrennt, spart, warum,
- * reste, ofen, toepfe, wert }. zusammen und getrennt so, wie die App sie
- * zeigt (auf 5 Minuten, getrennt = was die beiden Rezepte sagen).
+ * reste, ofen, toepfe, wert, aufEinmal }. zusammen und getrennt so, wie die
+ * App sie zeigt (auf 5 Minuten, getrennt = was die beiden Rezepte sagen);
+ * aufEinmal: was für beide in einem Rutsch geschnitten wird (zusammenlegbar).
  */
 export function doppelPaar(a, b, { minuten, anzeige = anzeigeStandard, daten = null } = {}) {
-  const { plan, reihe } = doppelBester(a, b, { minuten });
+  const basis = doppelBester(a, b, { minuten });
+  const { reihe } = basis;
+  // Was beide schneiden, auf einmal – wo es den Plan nicht länger macht
+  let { plan } = basis;
+  const aufEinmal = [];
+  for (const m of zusammenlegbar(reihe, plan, { minuten })) {
+    const probe = doppelPlan(reihe, { minuten, kritischAb: basis.kritischAb, nacheinander: basis.nacheinander, zusammen: [...aufEinmal, m] });
+    if (probe.ende <= plan.ende + 1e-9) { plan = probe; aufEinmal.push(m); }
+  }
   const getrennt = anzeige(a) + anzeige(b);
   const zusammen = Math.min(runden5(plan.ende), getrennt);
   const spart = getrennt - zusammen;
@@ -605,7 +704,7 @@ export function doppelPaar(a, b, { minuten, anzeige = anzeigeStandard, daten = n
   const ofen = brauchtOfen(a) && brauchtOfen(b);
   // Reste zählen mit (1 € ≈ 8 Min.), aber höchstens so viel wie 40 Min. – es geht ums Zusammenkochen
   const wert = spart + Math.min(40, 8 * reste.euro) + (a.protein && b.protein && a.protein !== b.protein ? 5 : 0) - (toepfe ? 5 : 0);
-  return { a, b, reihe, plan, ende: plan.ende, zusammen, getrennt, spart, warum: warumText(plan, reihe), reste, ofen, toepfe, wert };
+  return { a, b, reihe, plan, ende: plan.ende, zusammen, getrennt, spart, warum: warumText(plan, reihe), reste, ofen, toepfe, wert, aufEinmal };
 }
 
 /** Darunter lohnt sich Zusammenkochen nicht – dann lieber nacheinander. */
