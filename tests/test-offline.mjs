@@ -212,13 +212,18 @@ await page.evaluate(async (alt) => {
   for (const req of await d.keys()) await c.put(req, await d.match(req));
   await caches.delete('boxenstopp-daten-v1');
 }, version);
-/** Nach einer neuen Fassung sehen; fertig, wenn sie aktiv ist (der alte Vorrat weg) – oder, wenn sie scheitert, sie weg ist. */
+/**
+ * Nach einer neuen Fassung sehen; fertig, wenn sie aktiv ist (der alte Vorrat weg) – oder, wenn sie scheitert, sie weg ist.
+ * Erst, wenn nichts mehr installiert oder aktiviert wird: Auf einem langsamen Rechner (CI) dauert das Laden der App
+ * länger als ein paar Sekunden, und dazwischen ist die alte Fassung noch da, obwohl die neue gleich übernimmt.
+ */
 const update = (neu, alt) => page.evaluate(async ([n, a]) => {
   const reg = await navigator.serviceWorker.getRegistration();
   try { await reg.update(); } catch (e) { return { fehler: e.message }; }
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     const keys = await caches.keys();
-    if (!reg.installing && !reg.waiting && (keys.includes(`boxenstopp-${n}`) || i > 20) && (!keys.includes(`boxenstopp-${a}`) || i > 40)) return { keys, aktiv: !keys.includes(`boxenstopp-${a}`) };
+    const ruhig = !reg.installing && !reg.waiting && (!reg.active || reg.active.state === 'activated');
+    if (ruhig && (keys.includes(`boxenstopp-${n}`) || i > 20) && (!keys.includes(`boxenstopp-${a}`) || i > 40)) return { keys, aktiv: !keys.includes(`boxenstopp-${a}`) };
     await new Promise((f) => { setTimeout(f, 100); });
   }
   return { keys: await caches.keys(), aktiv: null };
