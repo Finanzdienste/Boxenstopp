@@ -7,7 +7,7 @@
  * gemacht hat. Und: Marielles zweites Gerät über das Schlüsselfeld.
  */
 import { pruefer, handy, githubAttrappe, githubMehrere, starteBrowser, bis, SCHLUESSEL, APP_URL } from './hilfe.mjs';
-import { nachrichtLesen, bereichVon, zusammenfassen, verlaufMischen, repoVorschlag, gaesteBereinigen } from '../js/gaeste.js';
+import { nachrichtLesen, bereichVon, zusammenfassen, verlaufMischen, repoVorschlag, gaesteBereinigen, gaesteFuerLink, gaesteAusLink } from '../js/gaeste.js';
 import { leer, anwenden, opPerson, opZusammen, opEinePerson, opTeil, beschreibung } from '../js/liste.js';
 
 const { check, ende } = pruefer();
@@ -24,6 +24,15 @@ check(nachrichtLesen('liste.json geändert').wer === '' && nachrichtLesen('Tobi:
 check(bereichVon('Chili auf die Liste') === 'Einkauf' && bereichVon('Chili gekocht') === 'Kochen' && bereichVon('Rezept „Kokos-Curry“') === 'Rezepte' && bereichVon('Putzplan abgehakt') === 'Haushalt' && bereichVon('Ziel pro Box geändert') === 'Ziel', 'Bereiche');
 check(repoVorschlag('Marielle') === 'Boxenstopp-Marielle' && repoVorschlag('Jörg Müller') === 'Boxenstopp-Joerg-Mueller' && repoVorschlag('') === '', 'Repo-Vorschlag aus dem Namen');
 check(gaesteBereinigen([{ name: 'Marielle', daten: 'Finanzdienste/Boxenstopp-Marielle', token: M_KEY, farbe: 'lila' }, { name: 'X', daten: 'kaputt', token: M_KEY }, { name: 'Doppelt', daten: 'Finanzdienste/Boxenstopp-Marielle', token: M_KEY }]).length === 1, 'Gäste bereinigen: kaputte und doppelte fallen weg');
+// Aufs neue Handy: die Gäste in den Link und zurück
+const umzugGaeste = [
+  { name: 'Jörg', daten: 'Finanzdienste/Boxenstopp-Joerg', token: M_KEY, farbe: '', at: '2026-11-01T10:00:00.000Z', ki: true },
+  { name: 'Marielle', daten: 'Finanzdienste/Boxenstopp-Marielle', token: M_KEY, farbe: 'lila', at: '', ki: false },
+];
+const umzugTeil = gaesteFuerLink(umzugGaeste);
+check(/^[A-Za-z0-9_-]+$/.test(umzugTeil) && JSON.stringify(gaesteAusLink(`https://finanzdienste.github.io/Boxenstopp/#gaeste=${umzugTeil}`)) === JSON.stringify(umzugGaeste) && JSON.stringify(gaesteAusLink(` ${umzugTeil} `)) === JSON.stringify(umzugGaeste), 'Umzug: Gäste in den Link und zurück – ganzer Link oder nur der Teil, mit Umlaut');
+check(gaesteAusLink(`#gaeste=${umzugTeil}`, 'Finanzdienste/Boxenstopp-Marielle').map((g) => g.name).join() === 'Jörg', 'Umzug: eure eigene Liste kommt nie als Gast');
+check(gaesteAusLink('#gaeste=kaputt').length === 0 && gaesteAusLink('').length === 0 && gaesteAusLink('#zugang=github_pat_abc').length === 0 && gaesteAusLink(`#gaeste=${btoa('[{"name":"X"}]')}`).length === 0, 'Umzug: Kaputtes und Fremdes ergibt keine Gäste');
 
 const jetzt = new Date('2026-11-05T19:00:00');
 const um = (tag, uhr) => new Date(`2026-11-${tag}T${uhr}:00`).toISOString();
@@ -303,8 +312,53 @@ check(await bis(() => lang.count()) && (await lang.innerText()).includes('Sache 
 await lang.locator('.ub-det-mehr').click();
 check((await lang.innerText()).includes('Sache 15') && !(await lang.locator('.ub-det-mehr').count()), '„+ 3 weitere“ zeigt die ganze Zeile');
 check(tobi.fehler.length === 0, `Tobi: keine Fehler im Browser (${tobi.fehler.join(' | ')})`);
-// Gast entfernen (nur von Tobis Gerät)
 await t.click('[data-act="ub-zu"]');
+
+// --- Tobi zieht um: die Gäste aufs neue Handy
+check(!(await t.locator('#e-gaeste details.g-umzug').count()), 'Altes Handy (hat Gäste): kein „Vom alten Handy übernehmen“');
+await t.click('[data-act="g-umzug"]');
+const umzugLink = await t.inputValue('#g-umzug-link');
+check(/#gaeste=[A-Za-z0-9_-]+$/.test(umzugLink) && (await t.locator('#e-gaeste .g-fertig').innerText()).includes('Schlüssel von Marielle'), 'Altes Handy: „Aufs neue Handy“ macht den Link, mit dem Hinweis auf die Schlüssel');
+check(gaesteAusLink(umzugLink).map((g) => `${g.name}|${g.daten}|${g.token === M_KEY}|${g.farbe}`).join() === 'Marielle|Finanzdienste/Boxenstopp-Marielle|true|lila', 'Im Link: Marielle mit Repo, Schlüssel und Farbe');
+await t.click('[data-act="g-umzug-zu"]');
+check(!(await t.locator('#g-umzug-link').count()) && await t.locator('[data-act="g-umzug"]').isVisible(), '„Fertig“ schließt den Link wieder');
+
+// Das neue Handy: schon mit eurer Liste verbunden, öffnet den Link
+const neues = await handy(browser, { attrappe: beide });
+const n = neues.page;
+await n.evaluate((k) => localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: k, name: 'Tobi' })), SCHLUESSEL);
+await n.goto(`${APP_URL.replace(/index\.html$/, '')}icon.svg`);
+await n.goto(`${APP_URL}${new URL(umzugLink).hash}`);
+await n.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+check(await bis(async () => (await n.locator('#e-gaeste .g-fertig').innerText().catch(() => '')).includes('Vom alten Handy: Marielle')) && await n.evaluate(() => document.documentElement.dataset.tab) === 'einstellungen', 'Neues Handy: der Link öffnet die Einstellungen und fragt nach Marielle');
+check(await n.evaluate(() => !location.hash.includes('gaeste') && !localStorage.getItem('boxenstopp.gaeste.v1')), 'Der Link ist aus der Adresse, übernommen ist noch nichts');
+await n.click('[data-act="g-uebernehmen"]');
+const uebernommen = await n.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.gaeste.v1')));
+check(uebernommen.length === 1 && uebernommen[0].token === M_KEY && uebernommen[0].daten === 'Finanzdienste/Boxenstopp-Marielle' && (await n.locator('#e-gaeste .g-liste').innerText()).includes('Marielle') && (await n.locator('#toast').innerText()).includes('Marielle übernommen'), 'Übernehmen: Marielle steht auf dem neuen Handy, mit ihrem Schlüssel');
+await n.click('[data-act="ub-oeffnen"]');
+check(await bis(async () => (await n.locator('#ueberblick-dlg').innerText()).includes('Marielles Liste') && (await n.locator('#ueberblick-dlg').innerText()).includes('Bananen'), 8000), 'Neues Handy: der Überblick kennt Marielles Liste, samt Verlauf');
+check(neues.fehler.length === 0, `Neues Handy: keine Fehler im Browser (${neues.fehler.join(' | ')})`);
+await neues.ctx.close();
+
+// Landet der Link im Browser statt in der App: auf dem neuen Handy einfügen
+const einfuegen = await handy(browser, { attrappe: beide });
+const e = einfuegen.page;
+await e.evaluate((k) => localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: k, name: 'Tobi' })), SCHLUESSEL);
+await e.reload();
+await e.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await e.click('.tabbar .tab[data-tab="einstellungen"]');
+await e.click('#e-gaeste details.g-umzug summary');
+await e.fill('#g-umzug-feld', 'Hier der Link: kaputt');
+await e.click('#g-umzug-form button[type="submit"]');
+check(await bis(async () => (await e.locator('#g-umzug-fehler').innerText().catch(() => '')).includes('keine Gäste')) && !(await e.evaluate(() => localStorage.getItem('boxenstopp.gaeste.v1'))), 'Einfügen: Unsinn gibt einen Hinweis, keine Gäste');
+await e.fill('#g-umzug-feld', `Hier der Link: ${umzugLink}`);
+check(!(await e.locator('#g-umzug-fehler').isVisible()), 'Neu eingefügt: der Hinweis ist weg');
+await e.press('#g-umzug-feld', 'Enter');
+check(await bis(async () => (await e.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.gaeste.v1') || '[]'))).some((g) => g.token === M_KEY)) && (await e.locator('#e-gaeste .g-liste').innerText()).includes('Marielle') && !(await e.locator('#e-gaeste details.g-umzug').count()), 'Einfügen (mit Text drumherum, Enter): Marielle ist übernommen, das Feld ist weg');
+check(einfuegen.fehler.length === 0, `Einfügen: keine Fehler im Browser (${einfuegen.fehler.join(' | ')})`);
+await einfuegen.ctx.close();
+
+// Gast entfernen (nur von Tobis Gerät)
 await t.click('[data-g-weg="Finanzdienste/Boxenstopp-Marielle"]');
 check(!(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.gaeste.v1')))).length && !!mar.liste(), 'Entfernen: weg von Tobis Gerät, ihre Liste bleibt');
 

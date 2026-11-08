@@ -1091,6 +1091,22 @@ Neue. Die Schlüssel der Gäste stehen nur in Tobis localStorage
 (`boxenstopp.gaeste.v1`); „Entfernen“ vergisst den Gast auf diesem Gerät,
 seine Liste bleibt.
 
+**Neues Handy:** Weil die Schlüssel der Gäste nur auf dem Gerät stehen, das
+eingeladen hat, wären sie mit dem alten Handy weg. Deshalb steht unter
+„Gäste & Überblick“ **Aufs neue Handy**: Die App packt die Gäste (Name, Repo,
+Schlüssel, Farbe) als base64url-JSON in einen Link
+`…/Boxenstopp/#gaeste=<…>` (`gaesteFuerLink` in `js/gaeste.js`) – hinter `#`,
+er geht an keinen Server – zum Teilen oder Kopieren. Auf dem neuen Gerät
+öffnet der Link die Einstellungen und fragt einmal nach („Vom alten Handy:
+Marielle. Übernehmen?“). Landet er im Browser statt in der App (der hat einen
+eigenen Speicher), fügt man ihn in der App unter **Vom alten Handy
+übernehmen** ein – das Feld steht da, solange das Gerät noch keine Gäste
+kennt, und nimmt auch Text um den Link herum. Eure eigene Liste kommt nie als
+Gast herein; steht ein Gast schon da, gilt der Schlüssel aus dem Link. Verlauf
+und Einzelheiten holt das neue Gerät beim ersten Überblick selbst. Im Link
+stecken die Schlüssel: nur an sich selbst schicken und die Nachricht danach
+löschen.
+
 **Einzelheiten:** Unter jeder Sitzung steht, was genau passiert ist – nicht
 aus der Commit-Nachricht, sondern aus dem Vergleich von `liste.json` vor und
 nach jedem Commit (`js/einzelheiten.js`), deshalb auch bei älteren Einträgen,

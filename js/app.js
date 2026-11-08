@@ -36,7 +36,7 @@ import { todoHolen, klickTodo, absendenTodo } from './ansicht-todo.js';
 import { zielAnwenden, klickZiel, absendenZiel, eingabeZiel, aenderungZiel } from './ansicht-ziel.js';
 import { profilAnwenden, farbeSetzen, istEigen } from './profil.js';
 import { klickSpeisekarte, absendenSpeisekarte, eingabeSpeisekarte, aenderungSpeisekarte, speisekarteNeu } from './ansicht-speisekarte.js';
-import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste } from './ansicht-gaeste.js';
+import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste, gaesteAusAdresse } from './ansicht-gaeste.js';
 import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillkommen, willkommenPruefen } from './ansicht-willkommen.js';
 import { boxenZeichnen, klickBoxen } from './ansicht-boxen.js';
 import { klickReste } from './ansicht-reste.js';
@@ -321,6 +321,8 @@ async function start() {
   const ausLink = link.token;
   // Ziel, Farbe und Namen der Liste schon vor dem ersten Zeichnen – wie das Gerät sie zuletzt kannte
   app.zugang = ladeZugang();
+  // Die Gäste vom alten Handy (…#gaeste=…): in den Einstellungen einmal nachfragen
+  const gaesteLink = gaesteAusAdresse();
   // Der gemeinsame Katalog: was das Gerät zuletzt kannte, gleich mit den Rezepten
   katalogStart();
   geteiltenKiHolen();
@@ -369,9 +371,11 @@ async function start() {
   if (hash === 'amy') ansicht.tab = 'amy';
   if (hash === 'einstellungen') ansicht.tab = 'einstellungen';
   if (hash === 'haushalt') ansicht.tab = 'haushalt';
+  if (gaesteLink) ansicht.tab = 'einstellungen';
   zeigeReiter(ansicht.tab, true);
   // Welche Reiter unten stehen – stand der gemerkte auf einem ausgeblendeten, zum ersten sichtbaren
   einstellungenStart({ wechseln: !hash && !ausLink });
+  if (gaesteLink) window.requestAnimationFrame(() => $('#e-gaeste-karte')?.scrollIntoView({ block: 'center' }));
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
   if (hash === 'reste' || (kiLink && !ausLink)) kiStart({ oeffnen: true });
   else if (rezept) oeffneRezept(rezept, { still: true });

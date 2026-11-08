@@ -15,15 +15,22 @@
  *               vergleicht (einzelheiten.js) – je Commit einmal, dann ist es
  *               gemerkt (DETAILS). Oben lässt sich der Verlauf auf eine
  *               Person beschränken.
+ *   Umzug       Ein neues Handy kennt die Gäste nicht – ihre Schlüssel
+ *               stehen nur hier. „Aufs neue Handy“ packt sie in einen Link
+ *               (…#gaeste=…, gaeste.js); auf dem neuen öffnet man ihn (die
+ *               App fragt einmal nach) oder fügt ihn unter „Vom alten Handy
+ *               übernehmen“ ein. Verlauf und Einzelheiten holt das neue Gerät
+ *               beim ersten Überblick selbst.
  *
- * Schlüssel stehen nur im localStorage dieses Geräts und im Link für den Gast.
+ * Schlüssel stehen nur im localStorage dieses Geräts, im Link für den Gast
+ * und – solange man ihn nicht löscht – im Link fürs neue Handy.
  */
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { esc, tagKurz } from './format.js';
 import { DATEN, API, listeAnlegen, commitsLesen, pruefeSchluessel, fassungLesen } from './speicher.js';
 import { bereinigen, leer } from './liste.js';
-import { schluesselAus, einladungsLink, ladeKi, ortVon } from './zugang.js';
-import { gaesteBereinigen, repoVorschlag, zusammenfassen, verlaufMischen, BEREICHE } from './gaeste.js';
+import { schluesselAus, einladungsLink, ladeKi, ortVon, HAUPTLISTE } from './zugang.js';
+import { gaesteBereinigen, gaesteFuerLink, gaesteAusLink, repoVorschlag, zusammenfassen, verlaufMischen, BEREICHE } from './gaeste.js';
 import { einzelheiten, zusammenlegen, EINZELHEITEN_FASSUNG } from './einzelheiten.js';
 import { istEigen, wessen } from './profil.js';
 
@@ -38,6 +45,9 @@ const merkeGaeste = (g) => schreibe(GAESTE, gaesteBereinigen(g));
 
 let einladen = null; // { name, farbe, repo, repoFest, ki, fehler, laeuft }
 let fertig = null; // { name, link }
+let umzug = null; // { link } – die Gäste fürs neue Handy
+let angeboten = null; // [gast, …] – kamen mit einem Link, warten auf „Übernehmen“
+let umzugFehler = '';
 
 const linkFuer = (g) => einladungsLink(g.token, g.ki ? ladeKi() : '', { daten: g.daten, fuer: g.name, farbe: g.farbe || 'blau' });
 const besitzer = DATEN.owner;
@@ -81,6 +91,44 @@ function fertigHTML() {
 </div>`;
 }
 
+/** „Marielle“, „Marielle und Kim“, „A, B und C“. */
+const namenText = (gs) => {
+  const n = gs.map((g) => g.name);
+  return n.length > 1 ? `${n.slice(0, -1).join(', ')} und ${n.at(-1)}` : n[0] || '';
+};
+const umzugLink = () => `${location.origin}${location.pathname.replace(/index\.html$/, '')}#gaeste=${gaesteFuerLink(ladeGaeste())}`;
+
+/** Altes Handy: der Link mit den Gästen – zum Teilen oder Kopieren. */
+function umzugHTML() {
+  const teilen = typeof navigator.share === 'function';
+  return `<div class="g-fertig" role="status">
+<p><b>Die Gäste aufs neue Handy.</b> Schick dir den Link, am einfachsten per Mail an dich selbst. Auf dem neuen Handy in Boxenstopp unter Einstellungen → Gäste &amp; Überblick bei „Vom alten Handy übernehmen“ einfügen.</p>
+<label class="sr" for="g-umzug-link">Link fürs neue Handy</label><input class="z-linkfeld" id="g-umzug-link" type="text" readonly value="${esc(umzug.link)}">
+<div class="zugang-btns">${teilen ? '<button type="button" class="btn btn-primary" data-act="g-umzug-teilen">Teilen</button>' : ''}<button type="button" class="btn${teilen ? '' : ' btn-primary'}" data-act="g-umzug-kopieren">Link kopieren</button><button type="button" class="btn btn-quiet" data-act="g-umzug-zu">Fertig</button></div>
+<p class="fine">Im Link stecken die Schlüssel von ${esc(namenText(ladeGaeste()))}. Schick ihn nur an dich selbst und lösch die Nachricht, wenn das neue Handy die Gäste hat.</p>
+</div>`;
+}
+
+/** Neues Handy, mit dem Link geöffnet: einmal nachfragen. */
+function angebotenHTML() {
+  const viele = angeboten.length > 1;
+  return `<div class="g-fertig" role="group" aria-label="Gäste vom alten Handy">
+<p><b>Vom alten Handy: ${esc(namenText(angeboten))}.</b> Übernehmen? Dann siehst du ${viele ? 'ihre Listen' : 'die Liste'} auch hier im Überblick.</p>
+<div class="zugang-btns"><button type="button" class="btn btn-primary" data-act="g-uebernehmen">Übernehmen</button><button type="button" class="btn btn-quiet" data-act="g-nicht">Nicht übernehmen</button></div>
+</div>`;
+}
+
+/** Neues Handy ohne Gäste: der Link vom alten zum Einfügen (falls er beim Antippen im Browser statt in der App landet). */
+function einfuegenHTML(offen) {
+  return `<details class="g-mehr g-umzug"${offen || umzugFehler ? ' open' : ''}><summary>Vom alten Handy übernehmen</summary>
+<form class="zugang-form g-form" id="g-umzug-form" novalidate>
+<label class="sr" for="g-umzug-feld">Link vom alten Handy</label><input id="g-umzug-feld" type="text" autocomplete="off" spellcheck="false" placeholder="Link vom alten Handy einfügen">
+<p class="zugang-fehler" id="g-umzug-fehler"${umzugFehler ? '' : ' hidden'}>${esc(umzugFehler)}</p>
+<div class="zugang-btns"><button type="submit" class="btn btn-primary">Übernehmen</button></div>
+<p class="fine">Auf dem alten Handy hier „Aufs neue Handy“ tippen und dir den Link schicken.</p>
+</form></details>`;
+}
+
 export function gaesteZeichnen() {
   const karte = $('#e-gaeste-karte');
   const el = $('#e-gaeste');
@@ -94,14 +142,67 @@ export function gaesteZeichnen() {
     : '';
   const kopf = `<p>Will jemand Boxenstopp mit eigener Liste – eigene Einkaufsliste, eigene Makros, eigene Rezepte? Dann bekommt sie ein eigenes privates Repo; an eure Liste kommt sie damit nicht.</p>`;
   let rumpf = '';
-  if (fertig) rumpf = fertigHTML();
+  if (angeboten) rumpf = angebotenHTML();
+  else if (fertig) rumpf = fertigHTML();
   else if (einladen) rumpf = einladenHTML();
-  const knoepfe = einladen || fertig ? '' : `<div class="zugang-btns"><button type="button" class="btn" data-act="g-einladen"${app.zugang ? '' : ' disabled'}>Jemanden einladen</button><button type="button" class="btn" data-act="ub-oeffnen"${app.zugang ? '' : ' disabled'}>Überblick</button></div>`;
-  el.innerHTML = `${kopf}${liste}${rumpf}${knoepfe}${app.zugang ? '' : '<p class="fine">Erst die gemeinsame Liste einrichten.</p>'}`;
+  else if (umzug) rumpf = umzugHTML();
+  const offen = einladen || fertig || umzug || angeboten;
+  const knoepfe = offen ? '' : `<div class="zugang-btns"><button type="button" class="btn" data-act="g-einladen"${app.zugang ? '' : ' disabled'}>Jemanden einladen</button><button type="button" class="btn" data-act="ub-oeffnen"${app.zugang ? '' : ' disabled'}>Überblick</button>${gaeste.length ? '<button type="button" class="btn" data-act="g-umzug">Aufs neue Handy</button>' : ''}</div>`;
+  const einfuegen = offen || gaeste.length ? '' : einfuegenHTML(!!el.querySelector('details.g-umzug')?.open);
+  el.innerHTML = `${kopf}${liste}${rumpf}${knoepfe}${einfuegen}${app.zugang ? '' : '<p class="fine">Erst die gemeinsame Liste einrichten.</p>'}`;
+}
+
+/**
+ * Gäste vom alten Handy in der Adresse (…#gaeste=…)? Herausnehmen und in den
+ * Einstellungen einmal nachfragen. true, wenn welche zum Übernehmen da sind.
+ */
+export function gaesteAusAdresse() {
+  if (!/[#&]gaeste=/.test(location.hash)) return false;
+  const gs = gaesteAusLink(location.hash, HAUPTLISTE);
+  try { history.replaceState(null, '', location.pathname + location.search); } catch { /* egal */ }
+  // In der eigenen Liste eines Gasts gibt es keine Gäste
+  if (istEigen()) return false;
+  if (!gs.length) { melde('In dem Link stecken keine Gäste – nimm den ganzen Link vom alten Handy.'); return false; }
+  angeboten = gs;
+  return true;
+}
+
+function uebernehmen(gs) {
+  // Die mitgebrachten zuerst: Steht ein Gast schon hier, gilt der Schlüssel aus dem Link
+  merkeGaeste([...gs, ...ladeGaeste()]);
+  angeboten = null;
+  umzugFehler = '';
+  gaesteZeichnen();
+  melde(`${namenText(gs)} übernommen – der Überblick kennt ${gs.length > 1 ? 'ihre Listen' : 'die Liste'} jetzt auch hier.`);
+}
+
+function umzugEinfuegen() {
+  const feld = $('#g-umzug-feld');
+  const gs = gaesteAusLink(feld?.value, HAUPTLISTE);
+  // Sonst zeichnet gaesteZeichnen nicht neu, solange im Feld getippt wird
+  if (document.activeElement?.matches?.('input')) document.activeElement.blur();
+  if (!gs.length) {
+    umzugFehler = 'Da stecken keine Gäste drin. Nimm den ganzen Link vom alten Handy (…#gaeste=…).';
+    gaesteZeichnen();
+    return;
+  }
+  uebernehmen(gs);
+}
+
+async function umzugTeilen(link) {
+  try {
+    await navigator.share({ title: 'Boxenstopp: Gäste fürs neue Handy', text: link });
+  } catch (e) {
+    if (e?.name !== 'AbortError') kopieren(link, $('#g-umzug-link'));
+  }
 }
 
 /** Beim Tippen des Namens: Repo-Name und die beiden Links mitziehen (ohne neu zu zeichnen). */
 export function eingabeGaeste(ziel) {
+  if (ziel.id === 'g-umzug-feld') {
+    if (umzugFehler) { umzugFehler = ''; $('#g-umzug-fehler')?.setAttribute('hidden', ''); }
+    return true;
+  }
   if (!einladen) return false;
   if (ziel.id === 'g-name') {
     einladen.name = ziel.value;
@@ -120,6 +221,7 @@ export function eingabeGaeste(ziel) {
 }
 
 export function aenderungGaeste(ziel) {
+  if (ziel.id === 'g-umzug-feld') return true;
   if (!einladen) return false;
   if (ziel.name === 'g-farbe') {
     einladen.farbe = ziel.value === 'lila' ? 'lila' : '';
@@ -131,6 +233,7 @@ export function aenderungGaeste(ziel) {
 }
 
 export function absendenGaeste(ev) {
+  if (ev.target.id === 'g-umzug-form') { ev.preventDefault(); umzugEinfuegen(); return true; }
   if (ev.target.id !== 'g-form') return false;
   ev.preventDefault();
   if (!einladen || einladen.laeuft) return true;
@@ -182,6 +285,7 @@ export function klickGaeste(el) {
     if (!g) return true;
     fertig = { name: g.name, link: linkFuer(g) };
     einladen = null;
+    umzug = null;
     gaesteZeichnen();
     return true;
   }
@@ -195,10 +299,16 @@ export function klickGaeste(el) {
     return true;
   }
   switch (d.act) {
-    case 'g-einladen': einladen = { name: '', farbe: 'lila', repo: '', repoFest: false, ki: true, fehler: '', laeuft: false }; fertig = null; gaesteZeichnen(); $('#g-name')?.focus(); return true;
+    case 'g-einladen': einladen = { name: '', farbe: 'lila', repo: '', repoFest: false, ki: true, fehler: '', laeuft: false }; fertig = null; umzug = null; gaesteZeichnen(); $('#g-name')?.focus(); return true;
     case 'g-abbrechen': einladen = null; gaesteZeichnen(); return true;
     case 'g-fertig-zu': fertig = null; gaesteZeichnen(); return true;
     case 'g-kopieren': if (fertig) kopieren(fertig.link, $('#g-linkfeld')); return true;
+    case 'g-umzug': umzug = { link: umzugLink() }; einladen = null; fertig = null; gaesteZeichnen(); return true;
+    case 'g-umzug-teilen': if (umzug) umzugTeilen(umzug.link); return true;
+    case 'g-umzug-kopieren': if (umzug) kopieren(umzug.link, $('#g-umzug-link')); return true;
+    case 'g-umzug-zu': umzug = null; gaesteZeichnen(); return true;
+    case 'g-uebernehmen': if (angeboten) uebernehmen(angeboten); return true;
+    case 'g-nicht': angeboten = null; gaesteZeichnen(); return true;
     case 'ub-oeffnen': ueberblickOeffnen(); return true;
     case 'ub-zu': { const dlg = $('#ueberblick-dlg'); if (dlg?.open) dlg.close(); fassungen.clear(); return true; }
     case 'ub-neu': versucht.clear(); detailsFehler = ''; ueberblickLaden(true); return true;

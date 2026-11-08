@@ -40,6 +40,43 @@ export function gaesteBereinigen(x) {
     .slice(0, 12);
 }
 
+/*
+ * Aufs neue Handy: Die Gäste stehen nur im Speicher des Geräts, das sie
+ * eingeladen hat – mit dem Handy wären sie weg. Für ein neues Gerät kommen
+ * sie deshalb in einen Link …/Boxenstopp/#gaeste=<base64url aus JSON>
+ * (ansicht-gaeste.js). Der Teil hinter # geht an keinen Server; darin stecken
+ * aber ihre Schlüssel – der Link ist nur für einen selbst.
+ */
+const zuB64url = (s) => {
+  let bin = '';
+  for (const b of new TextEncoder().encode(s)) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+const ausB64url = (s) => {
+  const t = s.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(t + '==='.slice((t.length + 3) % 4));
+  return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+};
+
+/** Der Teil hinter „#gaeste=“ für diese Gäste. */
+export const gaesteFuerLink = (gaeste) => zuB64url(JSON.stringify(gaesteBereinigen(gaeste)));
+
+/**
+ * Die Gäste aus einem Link (oder nur dem Teil hinter „gaeste=“): bereinigt
+ * und ohne eure eigene Liste (hauptliste: „owner/repo“). Nichts Brauchbares: [].
+ */
+export function gaesteAusLink(text, hauptliste = '') {
+  const t = String(text || '').trim();
+  const m = /[#&]gaeste=([A-Za-z0-9_-]+)/.exec(t);
+  const roh = m ? m[1] : /^[A-Za-z0-9_-]+$/.test(t) ? t : '';
+  if (!roh) return [];
+  try {
+    return gaesteBereinigen(JSON.parse(ausB64url(roh))).filter((g) => g.daten !== hauptliste);
+  } catch {
+    return [];
+  }
+}
+
 /** Aus einem Namen der Vorschlag fürs Repo: „Marielle“ → „Boxenstopp-Marielle“. */
 export function repoVorschlag(name) {
   const s = String(name || '').trim()
