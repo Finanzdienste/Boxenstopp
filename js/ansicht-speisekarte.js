@@ -46,7 +46,7 @@ export const speisekarteOffen = () => !!$('#speisekarte') && !$('#speisekarte').
 
 export function oeffneSpeisekarte() {
   if (offenesRezept()) schliesseRezept();
-  for (const id of ['#browse', '#detail', '#reste']) { const el = $(id); if (el) el.hidden = true; }
+  for (const id of ['#browse', '#detail', '#reste', '#doppel']) { const el = $(id); if (el) el.hidden = true; }
   const el = $('#speisekarte');
   el.hidden = false;
   zeichnen();

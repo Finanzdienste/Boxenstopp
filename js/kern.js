@@ -49,6 +49,8 @@ export const app = {
   katalogDazu: null,
   /** Die Leiste im Rezept eines Katalogrezepts (ansicht-katalog.js). */
   katalogLeiste: () => '',
+  /** Im Rezept: die Rezepte, die gut zusammen damit gehen (ansicht-doppel.js). */
+  doppelKarte: () => {},
   /** Die Rezepte neu rechnen und zeichnen, wenn der Katalog sich geändert hat (setzt app.js). */
   rezepteNeu: () => {},
   /** Den Anpassen-Editor schließen (ansicht-anpassen.js), wenn das Rezept wechselt. */

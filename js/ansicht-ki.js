@@ -170,8 +170,7 @@ export const resteOffen = () => !!$('#reste') && !$('#reste').hidden;
 
 export function oeffneReste() {
   if (offenesRezept()) schliesseRezept();
-  $('#browse').hidden = true;
-  $('#detail').hidden = true;
+  for (const id of ['#browse', '#detail', '#speisekarte', '#doppel']) { const x = $(id); if (x) x.hidden = true; }
   const el = $('#reste');
   el.hidden = false;
   resteZeichnen();

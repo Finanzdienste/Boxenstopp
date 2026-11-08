@@ -39,6 +39,8 @@ export const KOCHMODUS_IC = '<svg class="ic" viewBox="0 0 24 24" fill="none" str
 
 const alle = (x) => (x?.ablauf || []).flatMap((p, pi) => p.schritte.map((s) => ({ s, pi, t: p.t })));
 export const kochmodusOffen = () => !!km;
+/** Was abgehakt ist – beim Kochmodus für zwei Rezepte sagt das, wer ihn geöffnet hat (fertig). */
+const fertigVon = () => (km?.fertig ? km.fertig() : schritteVon(km.x.id));
 
 /** Wach bleiben, solange der Kochmodus offen ist – geht es nicht, sagt es der Kopf. */
 async function wachHalten() {
@@ -64,8 +66,10 @@ function timerHTML() {
   const t = alleTimer();
   if (!t.length) return '';
   return t.map((x) => {
-    const hier = x.rid === km.x.id;
-    return `<span class="km-tm${x.fertig ? ' fertig' : ''}">${hier ? `<button type="button" class="km-tm-zu" data-km-zu="${x.schritt}">` : '<span class="km-tm-zu">'}<b>${timerText(x)}</b> ${esc(x.label || `${x.minuten} Min.`)}${hier ? '</button>' : '</span>'}<button type="button" class="km-tm-x" data-km-stopp="${esc(x.id)}" aria-label="Timer beenden">${ZU}</button></span>`;
+    // Zwei Rezepte auf einmal: timerZu sagt, welcher Schritt hier zu einem Timer gehört
+    const zu = km.timerZu ? km.timerZu(x) : x.rid === km.x.id ? x.schritt : -1;
+    const hier = zu >= 0;
+    return `<span class="km-tm${x.fertig ? ' fertig' : ''}">${hier ? `<button type="button" class="km-tm-zu" data-km-zu="${zu}">` : '<span class="km-tm-zu">'}<b>${timerText(x)}</b> ${esc(x.label || `${x.minuten} Min.`)}${hier ? '</button>' : '</span>'}<button type="button" class="km-tm-x" data-km-stopp="${esc(x.id)}" aria-label="Timer beenden">${ZU}</button></span>`;
   }).join('');
 }
 
@@ -219,7 +223,7 @@ function waageWert(s) {
       if (plan.art === 'boxen') km.gewogen?.(km.i, plan, { boxen: st.boxen });
       piep(plan.art === 'boxen');
       waageZeichnen();
-      if (!schritteVon(km.x.id).has(km.i)) setTimeout(() => { if (km && km.wSchritt === km.i) erledigt(); }, 700);
+      if (!fertigVon().has(km.i)) setTimeout(() => { if (km && km.wSchritt === km.i) erledigt(); }, 700);
       return;
     }
     if (plan.art === 'boxen' && st.boxen.length > (km.wBoxen || 0)) { km.wBoxen = st.boxen.length; if (!st.fertig) piep(); }
@@ -236,10 +240,10 @@ function waageKlick(was) {
   if (was === 'so') {
     const g0 = w.so();
     const st = w.stand;
-    if (plan.art === 'zutat') { km.wFertig = true; km.gewogen?.(km.i, plan, { k: plan.k, name: plan.name, g: g0, ziel: plan.ziel }); waageZeichnen(); if (!schritteVon(km.x.id).has(km.i)) erledigt(); return; }
+    if (plan.art === 'zutat') { km.wFertig = true; km.gewogen?.(km.i, plan, { k: plan.k, name: plan.name, g: g0, ziel: plan.ziel }); waageZeichnen(); if (!fertigVon().has(km.i)) erledigt(); return; }
     if (plan.art === 'boxen') {
       km.wBoxen = st.boxen.length;
-      if (st.fertig) { km.wFertig = true; km.gewogen?.(km.i, plan, { boxen: st.boxen }); piep(true); waageZeichnen(); if (!schritteVon(km.x.id).has(km.i)) erledigt(); } else waageZeichnen();
+      if (st.fertig) { km.wFertig = true; km.gewogen?.(km.i, plan, { boxen: st.boxen }); piep(true); waageZeichnen(); if (!fertigVon().has(km.i)) erledigt(); } else waageZeichnen();
     }
     return;
   }
@@ -247,7 +251,7 @@ function waageKlick(was) {
     km.wFertig = true;
     km.gewogen?.(km.i, plan, { [plan.art]: w.stand.ist });
     piep();
-    if (!schritteVon(km.x.id).has(km.i)) erledigt(); else waageZeichnen();
+    if (!fertigVon().has(km.i)) erledigt(); else waageZeichnen();
   }
 }
 
@@ -260,7 +264,7 @@ function zeichnen() {
   const n = liste.length;
   km.i = Math.max(0, Math.min(n - 1, km.i));
   const { s, t } = liste[km.i] || {};
-  const fertig = schritteVon(km.x.id);
+  const fertig = fertigVon();
   const istFertig = fertig.has(km.i);
   const min = km.minuten?.(km.i);
   const timer = s ? km.timerKnopf(km.x.id, s, km.i) : '';
@@ -274,9 +278,10 @@ function zeichnen() {
 <div class="km-fortschritt" role="progressbar" aria-label="Abgehakt" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${n - offenNoch}"><i style="width:${n ? ((n - offenNoch) / n) * 100 : 0}%"></i></div>
 <div class="km-timer" id="km-timer">${timerHTML()}</div>
 <section class="km-schritt${istFertig ? ' is-fertig' : ''}" aria-live="polite">
-${s?.neben ? '<span class="km-k">währenddessen</span>' : ''}${s?.entfaellt ? '<span class="km-k">entfällt – Zutat weggelassen</span>' : ''}
+${km.marke ? `<p class="km-marke">${km.marke(km.i)}</p>` : ''}${s?.neben ? '<span class="km-k">währenddessen</span>' : ''}${s?.entfaellt ? '<span class="km-k">entfällt – Zutat weggelassen</span>' : ''}
 <p class="km-text">${s ? km.text(s, km.i) : ''}</p>
 ${s?.liste?.length ? `<ul class="km-liste">${s.liste.map((z) => `<li>${km.text({ d: z }, km.i)}</li>`).join('')}</ul>` : ''}
+${(() => { const h = km.hinweis?.(km.i); return h ? `<p class="km-hinweis">${h}</p>` : ''; })()}
 <div class="km-waage-platz" id="km-waage">${(() => { const plan = wiegePlan(); return plan ? waageHTML(plan, wiegungFuer(plan)) : ''; })()}</div>
 <div class="km-unten">${min ? `<span class="km-min">ca. ${min} Min.</span>` : ''}${timer ? `<span class="km-timerknopf" id="km-timerknopf">${timer.replace('data-timer=', 'data-km-timer=')}</span>` : ''}${istFertig ? `<span class="km-ok">${HAKEN}abgehakt</span>` : ''}</div>
 </section>
@@ -286,7 +291,7 @@ ${istFertig
     ? `<button type="button" class="km-los" data-km="weiter"${km.i >= n - 1 ? ' disabled' : ''}>Weiter${RECHTS}</button>`
     : `<button type="button" class="km-los" data-km="erledigt">${HAKEN}Erledigt</button>`}
 </nav>
-<ol class="km-punkte" aria-label="Alle Schritte">${liste.map((_, k) => `<li><button type="button" class="${fertig.has(k) ? 'f' : ''}${k === km.i ? ' jetzt' : ''}" data-km-zu="${k}" aria-label="Schritt ${k + 1}${fertig.has(k) ? ', abgehakt' : ''}"${k === km.i ? ' aria-current="step"' : ''}></button></li>`).join('')}</ol>
+<ol class="km-punkte" aria-label="Alle Schritte">${liste.map((_, k) => `<li><button type="button" class="${fertig.has(k) ? 'f' : ''}${k === km.i ? ' jetzt' : ''}${km.punkt ? ` ${km.punkt(k)}` : ''}" data-km-zu="${k}" aria-label="Schritt ${k + 1}${fertig.has(k) ? ', abgehakt' : ''}"${k === km.i ? ' aria-current="step"' : ''}></button></li>`).join('')}</ol>
 </div>`;
   wachZeichnen();
   const ziel = (hatte && dlg.querySelector(`[data-km="${hatte}"]:not([disabled])`)) || dlg.querySelector('.km-los:not([disabled])') || dlg.querySelector('.km-zu');
@@ -309,12 +314,16 @@ export function kochmodusTimerZeichnen() {
  * wiegen(i) → Plan aus wiegen.js oder null (nur mit Waage), topf() → { leer,
  * voll, n } aus dem Portionsrechner, gewogen(i, plan, ergebnis) – was die
  * Waage gemessen hat }. Ohne start beginnt er beim ersten offenen Schritt.
+ * Für zwei Rezepte auf einmal (ansicht-doppel.js) außerdem: fertig() → Set
+ * der abgehakten Schritte, marke(i) → HTML über dem Text (welches Rezept),
+ * hinweis(i) → HTML darunter, timerZu(timer) → Schritt oder -1, punkt(i) →
+ * Klasse für den Punkt des Schritts unten (die Farbe des Rezepts).
  */
 export function kochmodusOeffnen(o) {
   const dlg = $('#kochmodus');
   if (!dlg || !o?.rezept?.ablauf?.length) return;
   const liste = alle(o.rezept);
-  const fertig = schritteVon(o.rezept.id);
+  const fertig = o.fertig ? o.fertig() : schritteVon(o.rezept.id);
   const erster = liste.findIndex((_, k) => !fertig.has(k));
   km = { ...o, x: o.rezept, i: Number.isInteger(o.start) ? o.start : Math.max(0, erster), sperre: null, wischX: null, w: null, wSchritt: -1, wFertig: false, wBoxen: 0, abmelden: null, audio: null };
   if (o.wiegen) { km.abmelden = waageBeobachten(waageWert); if (waageStand().eingerichtet) audioAn(); }
@@ -353,14 +362,15 @@ function aufraeumen() {
 /** Den aktuellen Schritt abhaken und zum nächsten offenen. */
 function erledigt() {
   const liste = alle(km.x);
-  const fertig = schritteVon(km.x.id);
+  const fertig = fertigVon();
   const i = km.i;
   const letzter = liste.every((_, k) => k === i || fertig.has(k));
   const umschalten = km.umschalten;
   // Der letzte Haken: erst zu, dann gibt es das Tier (das Lob liegt sonst hinter dem Kochmodus)
   if (letzter) { kochmodusZu(); umschalten(i, true); return; }
   umschalten(i, true);
-  const naechster = liste.findIndex((_, k) => k > i && !schritteVon(km.x.id).has(k));
+  const jetzt = fertigVon();
+  const naechster = liste.findIndex((_, k) => k > i && !jetzt.has(k));
   km.i = naechster >= 0 ? naechster : Math.min(liste.length - 1, i + 1);
   zeichnen();
 }
@@ -392,7 +402,7 @@ export function tasteKochmodus(ev) {
   if (!km) return false;
   if (ev.key === 'ArrowLeft') { if (km.i > 0) { km.i -= 1; zeichnen(); } return true; }
   if (ev.key === 'ArrowRight' || ((ev.key === ' ' || ev.key === 'Enter') && !ev.target?.matches?.('button'))) {
-    if (schritteVon(km.x.id).has(km.i)) { if (km.i < alle(km.x).length - 1) { km.i += 1; zeichnen(); } } else erledigt();
+    if (fertigVon().has(km.i)) { if (km.i < alle(km.x).length - 1) { km.i += 1; zeichnen(); } } else erledigt();
     return true;
   }
   return false;
@@ -414,7 +424,7 @@ export function wischEnde(ev) {
   const dy = t.clientY - start.y;
   if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
   if (dx > 0) { if (km.i > 0) { km.i -= 1; zeichnen(); } return; }
-  if (schritteVon(km.x.id).has(km.i)) { if (km.i < alle(km.x).length - 1) { km.i += 1; zeichnen(); } } else erledigt();
+  if (fertigVon().has(km.i)) { if (km.i < alle(km.x).length - 1) { km.i += 1; zeichnen(); } } else erledigt();
 }
 
 /** Von außen (Haken auf dem anderen Gerät, Liste neu): neu zeichnen, wenn offen. */

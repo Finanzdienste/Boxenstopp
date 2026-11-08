@@ -309,7 +309,7 @@ export function schalenHervor(html, schalen = []) {
   });
 }
 const schaleSchild = (s) => `<span class="schale"><span class="vh">Schale </span><b>${s.n}</b>${esc(s.name)}</span>`;
-const schrittText = (t, r) => schalenHervor(mengenHervor(esc(platzhalter(t, r.items, r.weg))), r.schalen);
+export const schrittText = (t, r) => schalenHervor(mengenHervor(esc(platzhalter(t, r.items, r.weg))), r.schalen);
 
 const teilFuer = (z) => ((z.art === 'einkauf' || z.art === 'vorhanden') && typeof z.q === 'number' ? { q: z.q, u: z.u, h: z.h || '' } : { t: z.a });
 /** Name und Abteilung für eine neue Zeile auf der Liste: aus dem Katalog oder vom KI-Rezept. */
@@ -392,6 +392,8 @@ ${bereich('zutaten', `<h2 id="h-ing">Zutaten <small>für ${boxen(r)} Boxen</smal
   ${gruppe('optional', 'Optional')}
   ${gruppe('gewuerz', 'Gewürze')}
   ${gruppe('haushalt', 'Extras')}`)}
+
+${bereich('doppel', '<h2 id="h-doppel">Zwei auf einmal</h2>', '<div class="doppel-karte" id="d-doppel"></div>')}
 
 ${zubereitungHTML(r)}
 
@@ -556,6 +558,7 @@ export function detailAktualisieren() {
   }
   $('#d-bewertung').innerHTML = bewertungHTML(aktuell);
   resteRezeptZeichnen(aktuell);
+  app.doppelKarte(r);
   notizenZeichnen();
   // Die Waage kann gerade erst eingerichtet worden sein (auch vom anderen Gerät): dann jetzt zuhören
   if (waageStand().eingerichtet) waageHoeren();
@@ -730,7 +733,7 @@ export function oeffneRezept(rid, { still = false } = {}) {
   ansicht.rezept = rid;
   ansichtMerken();
   $('#browse').hidden = true;
-  if ($('#reste')) $('#reste').hidden = true;
+  for (const id of ['#reste', '#speisekarte', '#doppel']) { const x = $(id); if (x) x.hidden = true; }
   const el = $('#detail');
   el.innerHTML = detailHTML(r);
   el.hidden = false;
@@ -938,9 +941,10 @@ export function klickRezepte(el) {
 /**
  * Einen Schritt abhaken oder wieder öffnen – aus der Liste und aus dem
  * Kochmodus. Die Zeit zwischen den Haken ist das Tempo (tempo.js); ist eine
- * Phase oder alles fertig, gibt es Lob und zum Schluss ein Tier.
+ * Phase oder alles fertig, gibt es Lob und zum Schluss ein Tier. tempo und
+ * lob: false beim Kochmodus für zwei Rezepte.
  */
-export function schrittUmschalten(rid, i, an) {
+export function schrittUmschalten(rid, i, an, { tempo = true, lob = true } = {}) {
   const r = app.nachId[rid];
   if (!r) return;
   const vorher = schritteVon(rid);
@@ -949,8 +953,9 @@ export function schrittUmschalten(rid, i, an) {
   if (an) s.add(i); else s.delete(i);
   schritteSetzen(rid, s);
   if (rid === aktuell) schritteZeichnen();
-  tempoHaken(r, i, an);
-  lobPruefen(r, s, vorher, { name: app.name() });
+  // Zwei Rezepte auf einmal (ansicht-doppel.js): zwischen zwei Haken lag das andere – kein Tempo, Lob macht der Plan
+  if (tempo) tempoHaken(r, i, an);
+  if (lob) lobPruefen(r, s, vorher, { name: app.name() });
 }
 
 /** Der Kochstand kam von einem anderen Gerät: Haken und Zeiten im offenen Rezept neu, sonst das Raster. */

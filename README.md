@@ -13,7 +13,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben **Zwei auf einmal** (zwei Rezepte zusammen kochen – welche gut zusammen gehen, ein gemeinsamer Plan, siehe unten) und die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
 | **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
@@ -133,6 +133,58 @@ deshalb **„Bleibt übrig“** (`js/reste.js`, `js/ansicht-reste.js`):
 Für 8 Boxen bleibt meist nichts – die Rezepte sind auf Packungen gebaut;
 wo doch (Köttbullar: 300 g mageres Hack), steht es genauso da.
 
+### Zwei auf einmal
+
+Während das Gulasch 90 Minuten schmort, ist man frei – Zeit genug, die
+Moussaka vorzubereiten. **Zwei auf einmal** plant zwei Rezepte zusammen
+(`js/doppel.js` rechnet, `js/ansicht-doppel.js` zeigt):
+
+- **Im Rezept** (vor der Zubereitung): bis zu drei Rezepte, die gut dazu
+  passen – „+ Moussaka · 4 Std. 30 Min. statt 6 Std. 30 Min. · Rindergulasch
+  schmort 1 Std. 25 Min. – in der Zeit bereitest du Moussaka vor.“ Gezählt
+  wird die Zeit, die man spart (mindestens 10 Minuten), dazu, was das andere
+  von den Packungen aufbraucht (bei 2 Boxen oft viel), ein bisschen
+  Abwechslung (anderes Protein); nicht, was einen Daumen runter hat. Die
+  Kachel **„Zwei auf einmal“** bei den Rezepten zeigt die besten Paare
+  überhaupt, jedes Rezept höchstens zweimal.
+- **Der Plan:** wie lange beides zusammen dauert statt nacheinander (die
+  Zeiten der beiden Rezepte, im eigenen Tempo), **je volle oder je halbe
+  Boxen** (je 8 oder je 4 – zusammen so viele wie sonst eins; ab 4 Boxen),
+  **beide auf die Einkaufsliste** (mit den
+  Mengen des Plans), **Kochmodus für beide**, was gut zu wissen ist (Zwiebeln
+  und Knoblauch für beide in einem Rutsch, Reis zusammen, beide bei 200 °C im
+  Ofen, zwei große Töpfe nötig, weniger Reste), die Schalen und Geräte und der
+  **Ablauf** in Blöcken ab 0:00: wer dran ist, was danach von selbst läuft
+  („Rindergulasch schmort jetzt 1 Std. 27 Min. von selbst.“), Pausen, in
+  denen beides läuft; aufgeklappt die Schritte. Unten andere Partner.
+- **Wie gerechnet wird:** Jeder Schritt ist Arbeit und Warten – „Zugedeckt 25
+  Min. köcheln“ sind 2 Min. Arbeit und 23 Min., in denen man frei ist
+  (köcheln, schmoren, backen, quellen, marinieren …), „3 Zwiebeln würfeln“ ist
+  Arbeit. Ein Koch, also eins nach dem anderen; zuerst, was gleich raus muss
+  (Nudeln abgießen, das Blech aus dem Ofen, „sobald der Reis fertig ist“ – nie
+  viel später, als das Rezept allein es täte); sonst das Rezept, dessen Weg
+  bestimmt, wann alles fertig ist; Schälen für das Gulasch, das noch eine
+  Stunde schmort, darf warten; und sonst beim Rezept bleiben, an dem man
+  gerade ist. Der Ofen hat eine Temperatur und Platz für zwei Bleche: Wer ihn
+  angeheizt hat, hat ihn, bis er fertig ist – teilen nur bei derselben
+  Temperatur –, und angeheizt wird erst kurz bevor er gebraucht wird (im
+  Rezept steht das Vorheizen vorn, weil das Vorbereiten dauert; zu zweit
+  liefe er sonst eine Stunde leer). Vorbereiten, Kochen, Portionieren
+  bleiben je Rezept in ihrer Reihenfolge. Probiert werden beide
+  Reihenfolgen und ein paar Einstellungen, genommen wird der kürzeste Plan –
+  nie länger als nacheinander. Im Schnitt spart ein Paar 25 Minuten, jedes
+  zehnte über eine Stunde.
+- **Schalen:** Was das erste Rezept schon in den Topf gegeben hat, nimmt das
+  zweite wieder (kurz ausspülen) – Gulasch und Moussaka brauchen 8 Schalen
+  statt 12. Die Texte des zweiten Rezepts tragen die neuen Nummern.
+- **Kochmodus für beide:** alle Schritte in der Reihenfolge des Plans, beim
+  Schritt das Rezept (in seiner Farbe, auch die Punkte unten), darunter, was
+  danach von selbst läuft und wie es weitergeht. Abgehakt wird im Rezept
+  selbst – derselbe Kochstand, auch auf dem anderen Gerät –, die Timer sind
+  die des Rezepts. Ist eins fertig: „Biryani ist fertig – weiter mit
+  Rindergulasch.“, sind beide fertig, das Tier. Das Tempo lernt das Handy
+  dabei nicht – zwischen zwei Haken lag ja das andere Rezept.
+
 ### Zubereitung
 
 Jedes Rezept läuft in drei Abschnitten, jeder mit seiner Zeit:
@@ -211,6 +263,7 @@ stehen oben. Der Bildschirm bleibt an, solange der Kochmodus offen ist (Wake
 Lock – auf iPhone und iPad ab iOS/iPadOS 18.4 auch in der App vom
 Home-Bildschirm; geht es nicht, steht das oben). Die Haken sind dieselben wie
 im Rezept, Tempo und Belohnung laufen mit; der letzte Haken schließt ihn.
+Für zwei Rezepte auf einmal gibt es ihn auch – siehe Zwei auf einmal.
 
 ### Waage
 
@@ -814,9 +867,9 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   rechts. Je Gerät (`boxenstopp.reiter.v1`: `aus`, `reihe`; ein Skript
   gleich hinter der Leiste in `index.html` ordnet sie vor dem ersten Bild; ein neuer Reiter kommt hinten
   dazu). Ausgeblendet heißt auf dem Handy weg – zurück geht es nur hier.
-  Bei den Rezepten stehen auf dem Handy nur zwei schmale Knöpfe
-  „Resteverwertung“ und „Speisekarte“ (sie haben keinen Reiter); breit, ohne Leiste unten,
-  führen dort fünf Kacheln zu Resteverwertung, Speisekarte, Amys Rezepten, Haushalt und
+  Bei den Rezepten stehen auf dem Handy nur vier schmale Knöpfe
+  „Neues Rezept“, „Resteverwertung“, „Zwei auf einmal“ und „Speisekarte“ (sie haben keinen Reiter); breit, ohne Leiste unten,
+  führen dort sieben Kacheln zu diesen vier, Amys Rezepten, Haushalt und
   Angeboten (mit den Zahlen wie am Reiter). Passen die Beschriftungen nicht
   nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
@@ -1345,6 +1398,8 @@ die Action „Rezeptfotos“.
 | `js/katalog.js` | Der gemeinsame Katalog: Einträge bereinigen, mischen, herausnehmen, jedes Rezept auf Ziel und Boxen einer Liste – ohne DOM |
 | `js/ansicht-katalog.js` | Der Katalog in der App: katalog.json lesen und schreiben, zwischen den Listen abgleichen (Gastgeber-Handy), die Leiste im Rezept |
 | `js/ansicht-reste.js` | „Bleibt übrig“ im Rezept und auf der Liste, „Auf die Liste“, Theke und Einfrieren, KI-Rezept aus den Resten |
+| `js/doppel.js` | Zwei auf einmal: Arbeit und Warten je Schritt, der Plan für zwei Rezepte (ein Koch, ein Ofen), Partner und beste Paare, Schalen, Geräte – ohne DOM |
+| `js/ansicht-doppel.js` | Zwei auf einmal in der App: die Partner im Rezept, der Plan mit Ablauf, je halbe Boxen, beide auf die Liste, Kochmodus für beide |
 | `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
 | `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; der Überblick aus den Commits |
 | `js/einzelheiten.js` | Überblick: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
@@ -1474,7 +1529,15 @@ gleicht das ab; ohne gemeinsame Liste ein Vorschlag.
 Chili für 2 und 8 und Köttbullar, den Plan (nachgerechnet, ohne Ausgenommenes)
 und die Posten der Liste, und spielt im Browser Marielle durch: die Karte im
 Chili, „Beide auf die Liste“, die Karte auf der Liste, noch ein Rezept dazu,
-das KI-Rezept aus den Resten (mit nachgebauter API), dazu Tobi mit 8 Boxen. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
+das KI-Rezept aus den Resten (mit nachgebauter API), dazu Tobi mit 8 Boxen.
+`test-doppel.mjs` prüft in Node Arbeit und Warten (schmoren, Ofen, abgießen),
+alle 1225 Paare (ein Koch, jeder Schritt einmal und in seiner Reihenfolge,
+Abschnitte, ein Ofen, nie länger als nacheinander, pünktlich), Gulasch und
+Moussaka (der Ofen erst spät an), Partner und beste Paare, Reste für 2 Boxen,
+je 4 Boxen, Schalen und Geräte, und spielt im Browser durch: die Partner im
+Gulasch, der Plan, je 4 Boxen, beide auf die Liste, der Kochmodus für beide
+(Haken im jeweiligen Rezept, kein Tempo, Timer, eins fertig), zurück, die
+Kachel. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
 Überblick in Node zusammen und spielt dann die Einladung durch (euer
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites

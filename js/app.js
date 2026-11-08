@@ -41,6 +41,7 @@ import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillko
 import { boxenZeichnen, klickBoxen } from './ansicht-boxen.js';
 import { klickReste } from './ansicht-reste.js';
 import { katalogStart, katalogVorab, katalogLaden, klickKatalog } from './ansicht-katalog.js';
+import { klickDoppel, doppelNeu } from './ansicht-doppel.js';
 import { boxenText } from './boxen.js';
 
 const apiBasis = () => lese('__api', null) || API;
@@ -136,6 +137,8 @@ function beiAenderung(stand) {
   else if (offenesRezept()) detailAktualisieren(); else { rasterZeichnen(); resteZeichnen(); }
   if (zielNeu) speisekarteNeu();
   if (kochNeu) { kochstandZeichnen(); kochmodusNeu(); }
+  // Zwei auf einmal: Liste und Haken stehen im Plan
+  doppelNeu();
   // Putzplan und Haushaltssachen (zeichnet nur, wenn der Reiter offen ist – sonst beim Hinwechseln)
   haushaltZeichnen();
   // Preisalarme, Bons, Wege: was dort steht, kann sich geändert haben
@@ -240,6 +243,7 @@ document.addEventListener('click', (ev) => {
   if (klickAmy(el)) return;
   if (klickReste(el)) return;
   if (klickKatalog(el)) return;
+  if (klickDoppel(el)) return;
   if (klickListe(el)) return;
   if (klickAngebote(el)) return;
   if (klickAnpassen(el)) return;

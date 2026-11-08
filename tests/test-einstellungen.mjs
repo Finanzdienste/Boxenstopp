@@ -21,9 +21,9 @@ const abgeschnitten = (p) => p.$$eval('.tabbar .tab:not([hidden]) span:not(.badg
 const h = await handy(browser, { viewport: { width: 360, height: 780 } });
 const p = h.page;
 check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'unten sechs Reiter, die Einstellungen ganz rechts');
-// Bei den Rezepten keine großen Karten mehr – nur die Kacheln „Reste“ und „Speisekarte“ (die haben keinen Reiter); was unten ein Reiter ist, steht nicht doppelt da
+// Bei den Rezepten keine großen Karten mehr – nur die Kacheln ohne Reiter (Neues Rezept, Reste, Zwei auf einmal, Speisekarte); was unten ein Reiter ist, steht nicht doppelt da
 const kacheln = () => p.$$eval('#browse .abk', (xs) => xs.filter((x) => x.offsetParent).map((x) => x.querySelector('.abk-t').innerText.trim()));
-check(JSON.stringify(await kacheln()) === JSON.stringify(['Neues Rezept', 'Resteverwertung', 'Speisekarte']) && await p.locator('#browse .reste-karte').count() === 0, `bei den Rezepten nur Neues Rezept, Resteverwertung und Speisekarte – Amy, Haushalt und Angebote sind ja Reiter (${(await kacheln()).join(', ')})`);
+check(JSON.stringify(await kacheln()) === JSON.stringify(['Neues Rezept', 'Resteverwertung', 'Zwei auf einmal', 'Speisekarte']) && await p.locator('#browse .reste-karte').count() === 0, `bei den Rezepten nur Neues Rezept, Resteverwertung, Zwei auf einmal und Speisekarte – Amy, Haushalt und Angebote sind ja Reiter (${(await kacheln()).join(', ')})`);
 const kachelHoehe = await p.locator('#browse .abk-reste').evaluate((x) => x.getBoundingClientRect().height);
 check(kachelHoehe < 60, `ein schmaler Knopf (${Math.round(kachelHoehe)} px hoch)`);
 check(await p.evaluate(() => document.querySelector('.tabbar').classList.contains('kurz')) && (await p.locator('.tab[data-tab="amy"]').innerText()).trim() === 'Amy' && (await p.locator('.tab[data-tab="einkauf"]').innerText()).includes('Liste'), '360 px breit: die Kurzform („Amy“, „Liste“)');
@@ -47,10 +47,10 @@ await p.click('#e-reiter [data-reiter="amy"]');
 check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['rezepte', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'Amys Rezepte ausgeblendet: fünf Reiter');
 check(await bis(async () => !(await p.evaluate(() => document.querySelector('.tabbar').classList.contains('kurz')))), 'jetzt passt die lange Beschriftung wieder');
 await p.click('.tab[data-tab="rezepte"]');
-check(await p.locator('#browse .abk-amy').isHidden() && JSON.stringify(await kacheln()) === JSON.stringify(['Neues Rezept', 'Resteverwertung', 'Speisekarte']), 'ausgeblendet ist weg: auch bei den Rezepten keine Kachel „Amy“ – zurück geht es in den Einstellungen');
+check(await p.locator('#browse .abk-amy').isHidden() && JSON.stringify(await kacheln()) === JSON.stringify(['Neues Rezept', 'Resteverwertung', 'Zwei auf einmal', 'Speisekarte']), 'ausgeblendet ist weg: auch bei den Rezepten keine Kachel „Amy“ – zurück geht es in den Einstellungen');
 await p.click('.tab[data-tab="einstellungen"]');
 for (const t of ['rezepte', 'angebote', 'haushalt']) await p.click(`#e-reiter [data-reiter="${t}"]`);
-check(await p.evaluate(() => [...document.querySelectorAll('#browse .abk')].filter((x) => window.getComputedStyle(x).display !== 'none').map((x) => x.dataset.act || x.dataset.tab).join()) === 'wunsch,reste,speisekarte', 'alles außer der Liste ausgeblendet: bei den Rezepten trotzdem nur Neues Rezept, Resteverwertung und Speisekarte');
+check(await p.evaluate(() => [...document.querySelectorAll('#browse .abk')].filter((x) => window.getComputedStyle(x).display !== 'none').map((x) => x.dataset.act || x.dataset.tab).join()) === 'wunsch,reste,doppel,speisekarte', 'alles außer der Liste ausgeblendet: bei den Rezepten trotzdem nur Neues Rezept, Resteverwertung, Zwei auf einmal und Speisekarte');
 check((await p.locator('#e-reiter').innerText()).includes('holst du hier wieder zurück'), 'der Hinweis: zurück geht es hier');
 check(await p.locator('#e-reiter [data-reiter="einkauf"]').isDisabled() && (await p.locator('#e-reiter').innerText()).includes('einer bleibt'), 'nur noch die Einkaufsliste: die lässt sich nicht auch noch ausblenden');
 check(JSON.stringify(await sichtbareReiter(p)) === JSON.stringify(['einkauf', 'einstellungen']), 'unten: Einkaufsliste und Einstellungen');
@@ -212,7 +212,7 @@ const b = await handy(browser, { viewport: { width: 1280, height: 860 } });
 const bp = b.page;
 check(await bp.locator('.tabbar').isHidden() && await bp.locator('.kopf-einst').isVisible(), 'breit: keine Leiste unten, oben das Zahnrad');
 const breitKacheln = await bp.$$eval('#browse .abk', (xs) => xs.filter((x) => x.offsetParent).map((x) => x.querySelector('.abk-t').innerText.trim()));
-check(JSON.stringify(breitKacheln) === JSON.stringify(['Neues Rezept', 'Resteverwertung', 'Speisekarte', 'Amys Rezepte', 'Haushalt', 'Angebote']), `breit (ohne Leiste unten): alle sechs Kacheln, ausgeschrieben (${breitKacheln.join(', ')})`);
+check(JSON.stringify(breitKacheln) === JSON.stringify(['Neues Rezept', 'Resteverwertung', 'Zwei auf einmal', 'Speisekarte', 'Amys Rezepte', 'Haushalt', 'Angebote']), `breit (ohne Leiste unten): alle sieben Kacheln, ausgeschrieben (${breitKacheln.join(', ')})`);
 await bp.click('.kopf-einst');
 check(await bp.locator('#view-einstellungen').isVisible() && await bp.locator('#view-list').isVisible() && await bp.locator('#view-recipes').isHidden(), 'Einstellungen links, die Liste bleibt rechts');
 await bp.click('#view-einstellungen .back');
