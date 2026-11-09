@@ -218,13 +218,57 @@ check(await bp.locator('#view-einstellungen').isVisible() && await bp.locator('#
 await bp.click('#view-einstellungen .back');
 check(await bp.locator('#view-recipes').isVisible() && await bp.locator('#view-einstellungen').isHidden(), '„Alle Rezepte“ führt zurück');
 
+// --- Breit, aber die Liste als eigener Reiter: am Rechner wählbar, auf dem iPad von selbst (Amy fand sie rechts unnötig)
+const breitDa = (x) => x.evaluate(() => document.documentElement.hasAttribute('data-breit'));
+const daneben = (x, w) => x.locator(`#e-design label:has(input[name="e-daneben"][value="${w}"])`);
+check(await breitDa(bp), 'am Rechner mit Maus: breit, die Liste rechts');
+await bp.click('.kopf-einst');
+check(await bp.locator('#e-design input[name="e-daneben"][value="ja"]').isChecked() && (await bp.locator('#e-design').innerText()).includes('wie auf dem Handy'), 'Darstellung: „Liste rechts daneben“ gewählt, „Liste als Reiter“ zur Wahl');
+await daneben(bp, 'nein').click();
+check(await bis(async () => !(await breitDa(bp)) && await bp.locator('.tabbar').isVisible() && await bp.locator('#view-list').isHidden() && await bp.locator('.kopf-einst').isHidden()), '„Liste als Reiter“: unten die Leiste, rechts keine Liste mehr, das Zahnrad steckt in der Leiste');
+check(await bp.evaluate(() => localStorage.getItem('boxenstopp.liste-daneben.v1')) === 'false' && await bp.locator('#e-design input[name="e-daneben"][value="nein"]').isChecked(), 'gemerkt für dieses Gerät');
+await bp.click('.tab[data-tab="einkauf"]');
+check(await bp.locator('#view-list').isVisible() && await bp.locator('#view-recipes').isHidden(), 'die Einkaufsliste als eigener Reiter');
+await bp.click('.tab[data-tab="rezepte"]');
+const spalten = await bp.locator('#grid').evaluate((g) => window.getComputedStyle(g).gridTemplateColumns.split(' ').length);
+const lesebreite = await bp.locator('.layout').evaluate((x) => x.getBoundingClientRect().width);
+check(spalten === 3 && lesebreite <= 960, `breit ohne Liste: mittig in Lesebreite (${Math.round(lesebreite)} px), die Rezepte zu dritt (${spalten})`);
+await bp.reload({ waitUntil: 'load' });
+await bp.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+check(!(await breitDa(bp)) && await bp.locator('.tabbar').isVisible(), 'nach dem Neuladen: weiter die Liste als Reiter');
+await bp.click('.tab[data-tab="einstellungen"]');
+await daneben(bp, 'ja').click();
+check(await bis(async () => await breitDa(bp) && await bp.locator('.tabbar').isHidden() && await bp.locator('#view-list').isVisible()), 'zurück zu „Liste rechts daneben“');
+
+// iPad quer: von selbst die Liste als Reiter; wer sie doch daneben will, stellt es um – hochkant ist ohnehin schmal
+const IPAD = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15';
+const alsIpad = () => {
+  Object.defineProperty(Object.getPrototypeOf(navigator), 'platform', { get: () => 'MacIntel', configurable: true });
+  Object.defineProperty(Object.getPrototypeOf(navigator), 'maxTouchPoints', { get: () => 5, configurable: true });
+};
+const ip = await handy(browser, { viewport: { width: 1180, height: 820 }, userAgent: IPAD, skript: alsIpad });
+const ipp = ip.page;
+check(!(await breitDa(ipp)) && await ipp.locator('.tabbar').isVisible() && await ipp.locator('#view-list').isHidden() && await ipp.locator('#view-recipes').isVisible(), 'iPad quer: die Rezepte über die ganze Breite, die Liste ist ein Reiter unten');
+await ipp.click('.tab[data-tab="einkauf"]');
+check(await ipp.locator('#view-list').isVisible() && await ipp.locator('#view-recipes').isHidden(), 'iPad: Einkaufsliste per Reiter');
+await ipp.click('.tab[data-tab="einstellungen"]');
+check(await ipp.locator('#e-design input[name="e-daneben"][value="nein"]').isChecked(), 'iPad: in der Darstellung steht „Liste als Reiter“');
+await daneben(ipp, 'ja').click();
+check(await bis(async () => await breitDa(ipp) && await ipp.locator('#view-list').isVisible()), 'iPad, umgestellt: die Liste wieder rechts');
+await ipp.setViewportSize({ width: 820, height: 1180 });
+check(await bis(async () => !(await breitDa(ipp)) && await ipp.locator('.tabbar').isVisible()), 'hochkant gedreht: schmal, mit Leiste unten');
+await ipp.setViewportSize({ width: 1180, height: 820 });
+check(await bis(async () => await breitDa(ipp) && await ipp.locator('.tabbar').isHidden()), 'wieder quer: breit mit der Liste rechts');
+await ip.ctx.close();
+check(!(await h.page.locator('#e-design input[name="e-daneben"]').count()), 'auf dem Handy gibt es die Wahl gar nicht – es wird nie so breit');
+
 // --- Mit Service Worker: die laufende Fassung
 const w = await handy(browser, { ohneWorker: false });
 await bis(() => w.page.evaluate(async () => (await caches.keys()).some((k) => /^boxenstopp-v\d+$/.test(k))), 15000);
 await w.page.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await w.page.locator('#e-ueber .e-fassung').innerText().catch(() => '')) === VERSION, 10000), `Über die App: Fassung ${VERSION} (wie in sw.js)`);
 
-const fehler = [...h.fehler, ...a.fehler, ...b.fehler, ...w.fehler];
+const fehler = [...h.fehler, ...a.fehler, ...b.fehler, ...ip.fehler, ...w.fehler];
 check(fehler.length === 0, `keine Fehler in der Konsole${fehler.length ? `: ${fehler.slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();

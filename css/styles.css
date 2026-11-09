@@ -134,32 +134,27 @@ html[data-tab="einstellungen"] .kopf-einst{border-color:var(--accent);color:var(
 .tm-btn{display:grid;place-items:center;min-width:28px;height:28px;padding:0 6px;border:0;border-radius:999px;background:color-mix(in srgb,currentColor 18%,transparent);color:inherit;font:700 13px/1 var(--f-mono)}
 @media (max-width:370px){.brand-tag{display:none}}
 
-/* layout */
+/* layout – breit (html[data-breit]: ab 980 px und die Liste daneben, setzt index.html/kern.js) mit der Liste rechts; sonst Reiter unten wie auf dem Handy.
+   :where() hält die Gewichtung wie vorher bei @media – so gewinnt etwa .putzmodus .toast weiter */
 .layout{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px calc(var(--tabbar-h) + 34px + env(safe-area-inset-bottom,0px))}
 .pane{min-width:0}
-@media (min-width:980px){
-  .layout{display:grid;grid-template-columns:minmax(0,1fr) 396px;gap:32px;align-items:start;padding-block:28px 48px}
-  .list-pane{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--header-h) + 20px);max-height:calc(100vh - var(--header-h) - 40px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px 18px 22px;box-shadow:var(--shadow)}
-  .list-pane .addform input{background:var(--bg)}
-  .tabbar{display:none!important}
-}
-@media (max-width:979.98px){
-  #app[data-tab="einkauf"] #view-recipes,#app[data-tab="einkauf"] #view-angebote,#app[data-tab="einkauf"] #view-amy{display:none}
-  #app[data-tab="rezepte"] #view-list,#app[data-tab="rezepte"] #view-angebote,#app[data-tab="rezepte"] #view-amy{display:none}
-  #app[data-tab="angebote"] #view-list,#app[data-tab="angebote"] #view-recipes,#app[data-tab="angebote"] #view-amy{display:none}
-  #app[data-tab="amy"] #view-list,#app[data-tab="amy"] #view-recipes,#app[data-tab="amy"] #view-angebote{display:none}
-  #app[data-tab="einstellungen"] #view-list,#app[data-tab="einstellungen"] #view-recipes,#app[data-tab="einstellungen"] #view-angebote,#app[data-tab="einstellungen"] #view-amy{display:none}
-  #app[data-tab="haushalt"] #view-list,#app[data-tab="haushalt"] #view-recipes,#app[data-tab="haushalt"] #view-angebote,#app[data-tab="haushalt"] #view-amy{display:none}
-}
+:where(:root[data-breit]) .layout{display:grid;grid-template-columns:minmax(0,1fr) 396px;gap:32px;align-items:start;padding-block:28px 48px}
+:where(:root[data-breit]) .list-pane{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--header-h) + 20px);max-height:calc(100vh - var(--header-h) - 40px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px 18px 22px;box-shadow:var(--shadow)}
+:where(:root[data-breit]) .list-pane .addform input{background:var(--bg)}
+:where(:root[data-breit]) .tabbar{display:none!important}
+:where(:root:not([data-breit])) #app[data-tab="einkauf"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="einkauf"] #view-angebote,:where(:root:not([data-breit])) #app[data-tab="einkauf"] #view-amy{display:none}
+:where(:root:not([data-breit])) #app[data-tab="rezepte"] #view-list,:where(:root:not([data-breit])) #app[data-tab="rezepte"] #view-angebote,:where(:root:not([data-breit])) #app[data-tab="rezepte"] #view-amy{display:none}
+:where(:root:not([data-breit])) #app[data-tab="angebote"] #view-list,:where(:root:not([data-breit])) #app[data-tab="angebote"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="angebote"] #view-amy{display:none}
+:where(:root:not([data-breit])) #app[data-tab="amy"] #view-list,:where(:root:not([data-breit])) #app[data-tab="amy"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="amy"] #view-angebote{display:none}
+:where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-list,:where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-angebote,:where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-amy{display:none}
+:where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-list,:where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-angebote,:where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-amy{display:none}
 #app:not([data-tab="einstellungen"]) #view-einstellungen{display:none}
 #app:not([data-tab="haushalt"]) #view-haushalt{display:none}
-@media (min-width:980px){
-  #app[data-tab="angebote"] #view-recipes,#app[data-tab="amy"] #view-recipes,#app[data-tab="einstellungen"] #view-recipes,#app[data-tab="haushalt"] #view-recipes{display:none}
-  #app:not([data-tab="angebote"]) #view-angebote{display:none}
-  #app:not([data-tab="amy"]) #view-amy{display:none}
-  #view-recipes,#view-angebote,#view-amy,#view-einstellungen,#view-haushalt{grid-column:1;grid-row:1}
-  #view-list{grid-column:2;grid-row:1}
-}
+:where(:root[data-breit]) #app[data-tab="angebote"] #view-recipes,:where(:root[data-breit]) #app[data-tab="amy"] #view-recipes,:where(:root[data-breit]) #app[data-tab="einstellungen"] #view-recipes,:where(:root[data-breit]) #app[data-tab="haushalt"] #view-recipes{display:none}
+:where(:root[data-breit]) #app:not([data-tab="angebote"]) #view-angebote{display:none}
+:where(:root[data-breit]) #app:not([data-tab="amy"]) #view-amy{display:none}
+:where(:root[data-breit]) #view-recipes,:where(:root[data-breit]) #view-angebote,:where(:root[data-breit]) #view-amy,:where(:root[data-breit]) #view-einstellungen,:where(:root[data-breit]) #view-haushalt{grid-column:1;grid-row:1}
+:where(:root[data-breit]) #view-list{grid-column:2;grid-row:1}
 
 /* recipes: intro + filters */
 .intro{display:grid;gap:8px}
@@ -468,7 +463,7 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 /* Angebote */
 .angebote-pane{display:grid;gap:14px;align-content:start}
 .nur-breit{display:none}
-@media (min-width:980px){.nur-breit{display:inline-flex}}
+:where(:root[data-breit]) .nur-breit{display:inline-flex}
 /*
  * Die Abkürzungen bei den Rezepten. Breit gibt es keine Leiste unten – da
  * führen vier Kacheln zu Resteverwertung, Amys Rezepten, Haushalt und
@@ -489,14 +484,12 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .abk-n{position:absolute;top:5px;right:6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:600 11.5px/20px var(--f-mono);text-align:center}
 /* Ein Vorschlag der Resteverwertung wartet: ein Punkt (der Text steht für Vorleser in #reste-letzter) */
 .abk-reste:has(#reste-letzter:not([hidden]))::after{content:'';position:absolute;top:9px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
-@media (max-width:979.98px){
-  .abk-leiste{flex-wrap:wrap}
-  .abk-amy,.abk-haus,.abk-angebote{display:none}
-  .abk-neu,.abk-reste,.abk-karte,.abk-doppel{flex:0 0 auto;max-width:none;flex-direction:row;gap:10px;padding:5px 16px 5px 5px;border-radius:14px;font-size:14.5px}
-  .abk-neu .abk-ic,.abk-reste .abk-ic,.abk-karte .abk-ic,.abk-doppel .abk-ic{width:36px;height:36px;border-radius:10px}
-  .abk-neu .abk-ic .ic,.abk-reste .abk-ic .ic,.abk-karte .abk-ic .ic,.abk-doppel .abk-ic .ic{width:20px;height:20px}
-  .abk-reste:has(#reste-letzter:not([hidden]))::after{top:5px;right:5px}
-}
+:where(:root:not([data-breit])) .abk-leiste{flex-wrap:wrap}
+:where(:root:not([data-breit])) .abk-amy,:where(:root:not([data-breit])) .abk-haus,:where(:root:not([data-breit])) .abk-angebote{display:none}
+:where(:root:not([data-breit])) .abk-neu,:where(:root:not([data-breit])) .abk-reste,:where(:root:not([data-breit])) .abk-karte,:where(:root:not([data-breit])) .abk-doppel{flex:0 0 auto;max-width:none;flex-direction:row;gap:10px;padding:5px 16px 5px 5px;border-radius:14px;font-size:14.5px}
+:where(:root:not([data-breit])) .abk-neu .abk-ic,:where(:root:not([data-breit])) .abk-reste .abk-ic,:where(:root:not([data-breit])) .abk-karte .abk-ic,:where(:root:not([data-breit])) .abk-doppel .abk-ic{width:36px;height:36px;border-radius:10px}
+:where(:root:not([data-breit])) .abk-neu .abk-ic .ic,:where(:root:not([data-breit])) .abk-reste .abk-ic .ic,:where(:root:not([data-breit])) .abk-karte .abk-ic .ic,:where(:root:not([data-breit])) .abk-doppel .abk-ic .ic{width:20px;height:20px}
+:where(:root:not([data-breit])) .abk-reste:has(#reste-letzter:not([hidden]))::after{top:5px;right:5px}
 .abk-karte .abk-ic{background:#FFE9D6;color:#B45309}
 .abk-neu .abk-ic{background:var(--accent-soft);color:var(--accent)}
 .abk-doppel .abk-ic{background:#DCEFF6;color:#0E6A8A}
@@ -887,7 +880,7 @@ body.lob-offen{overflow:hidden}
 .toast{position:fixed;left:50%;bottom:calc(var(--tabbar-h) + 14px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:12px;width:max-content;max-width:min(520px,calc(100vw - 32px));padding:10px 10px 10px 16px;border-radius:14px;background:var(--toast-bg);color:var(--toast-ink);font-weight:600;font-size:14px;box-shadow:0 12px 30px -10px rgba(0,0,0,.45);opacity:0;transform:translate(-50%,8px);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{flex:none;min-height:34px;padding:0 10px;border:0;border-radius:9px;background:none;color:var(--toast-accent);font-weight:700}
-@media (min-width:980px){.toast{bottom:calc(24px + env(safe-area-inset-bottom,0px))}}
+:where(:root[data-breit]) .toast{bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 
 /* gemeinsame Liste einrichten */
@@ -912,7 +905,7 @@ a.btn{text-decoration:none;color:inherit}
 .sync[data-state="offline"] .dot{background:var(--kh)}
 .sync[data-state="zugang"] .dot{background:var(--danger)}
 .list-pane .zugang-form input,.list-pane .z-linkfeld{background:var(--bg)}
-@media (max-width:979.98px){.list-pane .zugang-form input{background:var(--surface)}}
+:where(:root:not([data-breit])) .list-pane .zugang-form input{background:var(--surface)}
 
 /* Einkaufsliste: Bereiche, Kopieren */
 .grp h3 .grp-name small{margin-left:6px;font:500 11.5px/1 var(--f-body);letter-spacing:0;text-transform:none;color:var(--muted)}
@@ -1454,8 +1447,12 @@ select.h-input{width:auto;padding-right:28px}
 .h-sache.h-weg{border-color:var(--danger);color:var(--danger)}
 .h-sache.h-weg .ic{width:15px;height:15px}
 .h-sachen-fuss{display:flex}
+:where(:root[data-breit]) .haus-pane{max-width:760px}
+/* Breiter Bildschirm, aber die Liste als Reiter (etwa das iPad quer): alles mittig in Lesebreite, die Rezepte zu dritt */
 @media (min-width:980px){
-  .haus-pane{max-width:760px}
+  :where(:root:not([data-breit])) .layout,:where(:root:not([data-breit])) .top-in,:where(:root:not([data-breit])) .timerleiste{max-width:960px}
+  :where(:root:not([data-breit])) .tabbar{padding-left:max(10px,calc((100% - 960px) / 2));padding-right:max(10px,calc((100% - 960px) / 2))}
+  :where(:root:not([data-breit])) .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 /* Ein Putztag im eigenen Fenster: Material, Aufgaben, Bearbeiten (ansicht-haushalt.js) */
 html.pm-offen{overflow:hidden}
@@ -1535,7 +1532,7 @@ html.pm-offen{overflow:hidden}
 .e-ziel-inp small{font:500 13px/1 var(--f-body);color:var(--muted);text-transform:none;letter-spacing:0}
 .e-ziel-tag{display:flex;align-items:center;gap:10px;font-weight:650;font-size:14px}
 .e-ziel-tag select{min-height:40px;padding:0 10px;border:1.5px solid var(--line-strong);border-radius:10px;background:var(--surface);color:var(--ink);font:600 15px/1 var(--f-body)}
-.e-farbe{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:4px}
+.e-farbe,.e-daneben{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:4px}
 .e-farbe .e-wahl{display:flex;justify-content:center;gap:8px}
 .g-punkt{display:inline-block;flex:none;width:14px;height:14px;border-radius:50%;background:#2445C9;box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
 .g-punkt.g-lila{background:#7A3FE0}

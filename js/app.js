@@ -12,7 +12,7 @@
  * Für die Tests lassen sich zwei Dinge über den localStorage verstellen:
  * __api (statt https://api.github.com) und __takt (Abgleich in ms).
  */
-import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten } from './kern.js';
+import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten, breiteAnwenden } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
 import { opZusammen, opPerson, opEinePerson } from './liste.js';
 import { preiseMitBons } from './kosten.js';
@@ -292,6 +292,7 @@ document.addEventListener('submit', (ev) => {
 /* ----------------------------------------------------------------- Start */
 
 async function start() {
+  breiteAnwenden(); // falls index.html es nicht schon gesetzt hat
   let daten;
   try {
     const r = await fetch('daten/rezepte.json', { cache: 'no-cache' });

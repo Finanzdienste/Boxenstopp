@@ -18,7 +18,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
-| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen, wer wann was macht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, hell oder dunkel, welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen, wer wann was macht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, hell oder dunkel, breit die Liste rechts daneben oder als Reiter (auf dem iPad von selbst als Reiter), welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
 Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat, ein
@@ -844,7 +844,7 @@ Wunsch und ohne Verbundene ruft er Microsoft gar nicht erst.
 
 ### Einstellungen
 
-Der sechste Reiter, ganz rechts (breit: das Regler-Symbol oben; der Punkt
+Der sechste Reiter, ganz rechts (breit mit der Liste daneben: das Regler-Symbol oben; der Punkt
 „Geteilt“ / „Nur lokal“ oben führt auch hin) – alles, was man einmal
 einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
 
@@ -873,6 +873,16 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   (`boxenstopp.design.v1`, ein kleines Skript im Kopf von `index.html` setzt
   `html[data-design]` schon vor dem ersten Bild, damit nichts flackert; jeder
   dunkle Farbsatz in `css/styles.css` gilt für „wie das Gerät“ und „dunkel“).
+  Wo es breit werden kann (ab 980 px, etwa das iPad quer), dazu **Liste
+  rechts daneben** oder **Liste als Reiter**: daneben steht die
+  Einkaufsliste immer rechts neben allem anderen, ohne Leiste unten; als
+  Reiter ist es wie auf dem Handy, nur mittig in Lesebreite und die Rezepte
+  zu dritt. Von selbst als Reiter auf dem iPad und anderen Geräten nur zum
+  Tippen (Amy fand die Liste rechts unnötig), daneben am Rechner mit Maus. Je
+  Gerät (`boxenstopp.liste-daneben.v1`); das Skript im Kopf von `index.html`
+  setzt `html[data-breit]` schon vor dem ersten Bild, `kern.js` danach bei
+  jedem Drehen und jeder Wahl – alles Breite in `css/styles.css` hängt an
+  diesem Merkmal statt an `@media`.
 - **Reiter unten:** Rezepte, Amys Rezepte, Einkaufsliste, Angebote und
   Haushalt lassen sich ausblenden (einer bleibt) und mit ↑ ↓ umsortieren – oben in der
   Liste heißt links in der Leiste; die Einstellungen sind immer da, ganz
@@ -1507,7 +1517,8 @@ Rezepte nach gut 4 s aus dem Vorrat statt nach 20 s). `test-import.mjs` prüft d
 Rezept-Import mit einer nachgebauten Gemini-API. `test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
 ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,
-Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Fassung).
+Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Liste daneben oder
+als Reiter – am Rechner umgestellt, auf dem iPad von selbst, gedreht –, die Fassung).
 `test-haushalt.mjs` rechnet den Putzplan in Node (Wochentage, jede 2. Woche,
 ohne festen Tag, abhaken, neuer Tag, bereinigen, „· To Do“), lässt die
 Erinnerung trocken laufen (wann, an wen, nichts doppelt, schon erledigt)

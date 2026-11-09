@@ -12,9 +12,10 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="css/styles.css">
-<!-- Hell oder dunkel, wenn fest gewählt (Einstellungen → Darstellung), und die Farbe der Liste (lila) – vor dem ersten Bild, sonst flackert es -->
+<!-- Hell oder dunkel, wenn fest gewählt (Einstellungen → Darstellung), die Farbe der Liste (lila) und ob breit die Liste rechts daneben steht (data-breit, wie kern.js) – vor dem ersten Bild, sonst flackert es -->
 <script>try{var d=JSON.parse(localStorage.getItem('boxenstopp.design.v1'));if(d==='hell'||d==='dunkel')document.documentElement.setAttribute('data-design',d)}catch(e){}
-try{if(JSON.parse(localStorage.getItem('boxenstopp.farbe.v1'))==='lila'){var h=document.documentElement,q=function(s){return document.querySelector(s)};h.setAttribute('data-farbe','lila');q('link[rel="icon"]').href='icon-lila.svg';q('link[rel="apple-touch-icon"]').href='icon-lila-192.png';q('link[rel="manifest"]').href='manifest-lila.webmanifest';q('meta[name="theme-color"][media*="light"]').content='#F1EEF8';q('meta[name="theme-color"][media*="dark"]').content='#110D18'}}catch(e){}</script>
+try{if(JSON.parse(localStorage.getItem('boxenstopp.farbe.v1'))==='lila'){var h=document.documentElement,q=function(s){return document.querySelector(s)};h.setAttribute('data-farbe','lila');q('link[rel="icon"]').href='icon-lila.svg';q('link[rel="apple-touch-icon"]').href='icon-lila-192.png';q('link[rel="manifest"]').href='manifest-lila.webmanifest';q('meta[name="theme-color"][media*="light"]').content='#F1EEF8';q('meta[name="theme-color"][media*="dark"]').content='#110D18'}}catch(e){}
+try{var w=JSON.parse(localStorage.getItem('boxenstopp.liste-daneben.v1'));if(typeof w!=='boolean')w=!(/iPad/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1||matchMedia('(hover: none)').matches);if(w&&matchMedia('(min-width: 980px)').matches)document.documentElement.setAttribute('data-breit','')}catch(e){}</script>
 </head>
 <body>
 <div id="app" data-tab="rezepte">

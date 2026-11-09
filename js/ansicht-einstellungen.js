@@ -18,7 +18,10 @@
  *                      „Verbindung testen“
  *   Darstellung        hell, dunkel oder wie das Gerät – nur dieses Gerät
  *                      (html[data-design], gesetzt schon im Kopf von index.html);
- *                      die Farbe der App (blau, lila) gilt für die Liste
+ *                      die Farbe der App (blau, lila) gilt für die Liste; breit
+ *                      die Einkaufsliste rechts daneben oder als eigener Reiter
+ *                      (html[data-breit], kern.js) – nur dieses Gerät, und nur,
+ *                      wo es breit werden kann
  *   Reiter unten       welche Reiter die Leiste zeigt, in welcher
  *                      Reihenfolge – nur dieses Gerät
  *   Gelernt und gemerkt  Tempo, Wege durch die Läden, Preisalarme, Preise
@@ -29,7 +32,7 @@
  * mehr zurück); breit gibt es oben das Zahnrad, und der Punkt „Geteilt“ oben
  * führt auch hierher.
  */
-import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal, leisteFaerben } from './kern.js';
+import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal, leisteFaerben, DANEBEN, listeDaneben, kannBreit, breiteAnwenden } from './kern.js';
 import { esc, tagKurz, menge, nfi } from './format.js';
 import { euro } from './kosten.js';
 import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon, eigeneListe } from './zugang.js';
@@ -141,7 +144,15 @@ function designHTML() {
   return `<div class="e-design" role="radiogroup" aria-label="Hell oder dunkel">${wahl.map(([w, name]) => `<label class="e-wahl${w === jetzt ? ' an' : ''}"><input type="radio" name="e-design" value="${w}"${w === jetzt ? ' checked' : ''}><span>${esc(name)}</span></label>`).join('')}</div>
 <p class="fine">Gilt für dieses Gerät. „Wie das Gerät“ folgt dem hellen oder dunklen Modus von Handy oder Tablet.</p>
 <div class="e-design e-farbe" role="radiogroup" aria-label="Farbe der App">${farben.map(([w, name]) => `<label class="e-wahl${w === f ? ' an' : ''}"><input type="radio" name="e-farbe" value="${w}"${w === f ? ' checked' : ''}${app.listeDa ? '' : ' disabled'}><span class="g-punkt g-${w}" aria-hidden="true"></span><span>${esc(name)}</span></label>`).join('')}</div>
-<p class="fine">Die Farbe gilt für ${istEigen() ? 'alle deine Geräte' : 'alle, die diese Liste teilen'}.</p>`;
+<p class="fine">Die Farbe gilt für ${istEigen() ? 'alle deine Geräte' : 'alle, die diese Liste teilen'}.</p>${kannBreit() ? danebenHTML() : ''}`;
+}
+
+/** Breit (etwa das iPad quer): die Einkaufsliste rechts daneben oder als eigener Reiter unten. */
+function danebenHTML() {
+  const jetzt = listeDaneben() ? 'ja' : 'nein';
+  const wahl = [['ja', 'Liste rechts daneben'], ['nein', 'Liste als Reiter']];
+  return `<div class="e-design e-daneben" role="radiogroup" aria-label="Einkaufsliste auf breitem Bildschirm">${wahl.map(([w, name]) => `<label class="e-wahl${w === jetzt ? ' an' : ''}"><input type="radio" name="e-daneben" value="${w}"${w === jetzt ? ' checked' : ''}><span>${esc(name)}</span></label>`).join('')}</div>
+<p class="fine">Auf breitem Bildschirm, etwa auf dem iPad quer: die Einkaufsliste immer rechts neben den Rezepten – oder als eigener Reiter unten wie auf dem Handy. Gilt für dieses Gerät.</p>`;
 }
 
 /* -------------------------------------------------------- KI-Schlüssel */
@@ -452,6 +463,15 @@ export function aenderungEinstellungen(ziel) {
     const el = $('#e-design');
     if (el) el.innerHTML = designHTML();
     $(`#e-design input[name="e-farbe"][value="${neu || 'blau'}"]`)?.focus({ preventScroll: true });
+    return true;
+  }
+  if (ziel.name === 'e-daneben') {
+    schreibe(DANEBEN, ziel.value === 'ja');
+    breiteAnwenden();
+    tabbarAnpassen();
+    const el = $('#e-design');
+    if (el) el.innerHTML = designHTML();
+    $(`#e-design input[name="e-daneben"][value="${ziel.value === 'ja' ? 'ja' : 'nein'}"]`)?.focus({ preventScroll: true });
     return true;
   }
   if (ziel.name === 'e-design') {

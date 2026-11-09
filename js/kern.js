@@ -70,14 +70,40 @@ export const app = {
 
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
-export const istSchmal = () => window.matchMedia('(max-width: 979.98px)').matches;
-
 export const lese = (k, d) => {
   try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; }
 };
 export const schreibe = (k, v) => {
   try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ohne Gedächtnis weiter */ }
 };
+
+/*
+ * Breit oder schmal. Breit (html[data-breit]) steht die Einkaufsliste rechts
+ * neben allem anderen, und die Reiter unten fehlen. Das gibt es ab 980 px –
+ * aber nicht auf dem iPad und anderen Geräten nur zum Tippen: Dort ist die
+ * Liste ein eigener Reiter unten wie auf dem Handy (Amy fand sie rechts
+ * unnötig). Einstellbar je Gerät unter Einstellungen → Darstellung.
+ * index.html setzt das Merkmal schon vor dem ersten Bild; hier kommt es nach
+ * jedem Drehen, jeder Fenstergröße und jeder Wahl neu.
+ */
+export const DANEBEN = 'boxenstopp.liste-daneben.v1'; // true | false – fehlt: nach dem Gerät
+const BREIT_AB = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(min-width: 980px)') : null;
+/** iPad (gibt sich als Mac aus, hat aber Touch) oder sonst ein Gerät ohne Maus. */
+export const nurZumTippen = () => /iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || window.matchMedia('(hover: none)').matches;
+/** Soll die Liste auf breitem Bildschirm rechts daneben stehen? */
+export const listeDaneben = () => { const w = lese(DANEBEN, null); return typeof w === 'boolean' ? w : !nurZumTippen(); };
+/** Kann dieses Gerät überhaupt breit (980 px) werden – etwa das iPad quer? Sonst braucht es die Wahl nicht. */
+export const kannBreit = () => Math.max(window.screen?.width || 0, window.screen?.height || 0, window.innerWidth || 0) >= 980;
+export const istSchmal = () => !document.documentElement.hasAttribute('data-breit');
+/** html[data-breit] nach Breite und Wahl setzen; true, wenn es sich geändert hat. */
+export function breiteAnwenden() {
+  const breit = !!BREIT_AB?.matches && listeDaneben();
+  if (breit === !istSchmal()) return false;
+  document.documentElement.toggleAttribute('data-breit', breit);
+  return true;
+}
+if (BREIT_AB?.addEventListener) BREIT_AB.addEventListener('change', breiteAnwenden);
+else BREIT_AB?.addListener?.(breiteAnwenden);
 
 /* ------------------------------------------------------- Ansicht merken */
 
