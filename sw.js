@@ -39,7 +39,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v58';
+const VERSION = 'v59';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -83,6 +83,7 @@ const SHELL = [
   './js/ansicht-todo.js',
   './js/preisverlauf.js',
   './js/ansicht-tablet.js',
+  './js/ansicht-iphone.js',
   './js/ki-rezept.js',
   './js/ki.js',
   './js/ansicht-ki.js',

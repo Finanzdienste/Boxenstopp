@@ -1196,6 +1196,13 @@ Liste nur auf dem einen Handy („Nur lokal“).
      Safari“ – die App auf dem Home-Bildschirm ist dann oft schon verbunden.
      Wer mal Safari, mal das Symbol öffnet, sieht sonst scheinbar „Geteilt“
      und „Nur lokal“ im Wechsel.
+   - Ganz von selbst geht es dort darum nicht – aber fast
+     (`js/ansicht-iphone.js`): Ein Tipp auf den Link mit Namen verbindet
+     Safari, danach sagt ein Popup „Jetzt noch deine App“ mit „Link kopieren“
+     (mit deinem Namen). Die App vom Home-Bildschirm fragt ohne Liste beim
+     Öffnen selbst nach dem Link: „Einfügen“, und sie ist verbunden
+     („Später“ hält sie einen Tag still). Auf Android teilen Chrome und die
+     installierte App den Speicher – dort reicht der Tipp auf den Link.
 
 Mit Schlüssel steht oben schon beim Öffnen „Geteilt“ (ein Skript in
 `index.html` sieht vor dem ersten Bild nach, `kern.js` beginnt damit) – vorher
@@ -1544,6 +1551,7 @@ die Action „Rezeptfotos“.
 | `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten, Schritte – ohne DOM |
 | `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor |
 | `js/ansicht-tablet.js` | Popup: die App aufs iPad oder Tablet |
+| `js/ansicht-iphone.js` | iPhone/iPad: nach dem Link in Safari „Jetzt noch deine App“, in der App vom Home-Bildschirm ohne Liste gleich „Einfügen“ |
 | `js/amy-import.js` | Rezept übernehmen: Anfrage aus Foto, Link oder Text, Antwort als Entwurf – ohne DOM |
 | `js/kochmodus.js` | Kochmodus: ein Schritt groß, Wischen, Tasten, Timer, Bildschirm an |
 | `js/kochstand.js` | Haken, Tempo und Timer je Person über ihre Geräte (`kochen` in liste.json) |
@@ -1611,7 +1619,9 @@ Node zusammen, dann im Browser auf zwei Handys (Kackbürste zum Haushalt,
 „leckere Dino nuggies“ und „Dino nuggets“ zusammen, Rückgängig, von Hand,
 gemerkt fürs nächste Mal, „Nein, verschieden“). `test-tablet.mjs` spielt das
 iPad-Popup durch (von selbst nur bei Amy auf dem iPhone, Link kopieren,
-damit ein iPad einrichten, hin und her). `test-weg.mjs` lernt
+damit ein iPad einrichten, hin und her), die Links mit Namen, den Link in
+Safari („Jetzt noch deine App“), „Einfügen“ beim Öffnen der App vom
+Home-Bildschirm und die Rückfrage bei einem fremden Namen. `test-weg.mjs` lernt
 den Weg durch Aldi in Node und im Browser (abhaken, nächster Einkauf
 sortiert, vergessen, lange Pause). `test-kochen.mjs` spielt den Kochmodus auf
 dem iPad durch und den Kochstand über iPad, iPhone und Tobis Handy.

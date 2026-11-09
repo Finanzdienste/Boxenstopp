@@ -28,6 +28,7 @@ import { lobStart, klickLob } from './lob.js';
 import { angeboteZeichnen, angeboteAutoSetzen, angebotePrivatVergessen, zahlZeichnen as angeboteZahl, klickAngebote, eingabeAngebote, aenderungAngebote, absendenAngebote } from './ansicht-angebote.js';
 import { amyZeichnen, amyVorbereiten, amyStart, amyZuSchritt, amyTimerZeichnen, klickAmy, eingabeAmy, aenderungAmy, absendenAmy, tasteAmy } from './ansicht-amy.js';
 import { tabletPruefen, klickTablet } from './ansicht-tablet.js';
+import { safariVormerken, safariHinweis, einfuegenPruefen, klickIphone } from './ansicht-iphone.js';
 import { kochstandAbgleichen, kochstandStart } from './kochstand.js';
 import { klickPush, aenderungPush, pushAnmelden, pushZeichnen, pushHinweisPruefen } from './ansicht-push.js';
 import { einstellungenStart, einstellungenZeichnen, klickEinstellungen, aenderungEinstellungen, absendenEinstellungen, tabbarAnpassen, waageTestAus } from './ansicht-einstellungen.js';
@@ -244,6 +245,7 @@ document.addEventListener('click', (ev) => {
   if (klickLob(el)) return;
   if (klickTimer(el)) return;
   if (klickTablet(el)) return;
+  if (klickIphone(el)) return;
   if (klickPush(el)) return;
   if (klickTodo(el)) return;
   if (klickEinstellungen(el)) return;
@@ -361,6 +363,9 @@ async function start() {
   // Eine Einladung (…&fuer=Marielle, …&fuer=Amy) auf einem Gerät ohne Liste: gleich verbinden, das Willkommen erklärt den Rest.
   // War hier zuletzt jemand anderes verbunden (getrennt), lieber das Formular mit dem bisherigen Namen.
   const einladung = !!ausLink && !app.zugang && !!link.fuer && !sicher('Getrennt', () => anderesGeraet(link.fuer), '');
+  // iPhone/iPad: Der Link verbindet Safari (oder Safari war schon verbunden) – danach sagt ein Popup, was die App vom
+  // Home-Bildschirm noch braucht (ansicht-iphone.js); das iPad-Popup wartet so lange
+  if (einladung || (ausLink && ausLink === app.zugang?.token)) sicher('iPhone', safariVormerken);
   if (link.farbe && (einladung || (ausLink && ausLink === app.zugang?.token))) sicher('Farbe', () => farbeSetzen(link.farbe === 'blau' ? '' : link.farbe));
   sicher('Resteverwertung', kiStart);
   sicher('Anpassen', anpassenStart);
@@ -423,13 +428,19 @@ async function start() {
   if (einladung) {
     app.verbinden(ausLink, link.fuer, { daten: link.daten, farbe: link.farbe }).then((e) => {
       zugangZeichnen();
-      if (e === 'ok') return;
+      if (e === 'ok') { sicher('iPhone', safariHinweis); return; }
       formularMitSchluessel(ausLink, link);
       zeigeReiter('einstellungen');
       melde(e === 'falsch' ? 'Der Schlüssel aus dem Link geht nicht – frag nach einem neuen Link.' : 'Gerade keine Verbindung – der Link ist eingetragen, tipp gleich auf „Verbinden“.');
     });
   } else if (ausLink && ausLink !== app.zugang?.token) sicher('Link', () => formularMitSchluessel(ausLink, link));
-  else sicher('Zugang', zugangZeichnen);
+  else {
+    sicher('Zugang', zugangZeichnen);
+    // Safari war mit dem Link schon verbunden – die App vom Home-Bildschirm vielleicht noch nicht
+    if (ausLink) setTimeout(() => sicher('iPhone', safariHinweis), 900);
+  }
+  // Die App vom Home-Bildschirm ohne Liste: gleich nach dem Link fragen
+  sicher('iPhone', einfuegenPruefen);
   sicher('Wege', wegPruefen);
 }
 

@@ -26,7 +26,7 @@ const istIphone = () => /iPhone|iPod/.test(navigator.userAgent);
 /** „finanzdienste.github.io/Boxenstopp“ – so, wie man es ins Adressfeld tippt. */
 const adresse = () => `${location.host}${location.pathname.replace(/\/?(?:index\.html)?$/, '')}`;
 
-const TEILEN = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Teilen-Symbol" role="img"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
+export const TEILEN = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Teilen-Symbol" role="img"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
 const KREUZ = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 export const TABLET_IC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="2.5" width="15" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>';
 
@@ -65,6 +65,8 @@ export function tabletZeigen() {
 export function tabletPruefen() {
   if (geprueft || !app.listeDa || !app.zugang) return;
   geprueft = true;
+  // Ein Link in Safari: Dort sagt erst ansicht-iphone.js, was die App vom Home-Bildschirm noch braucht
+  if (app.safariHinweis) return;
   if (!/^amy$/i.test(String(app.zugang.name || '').trim()) || !istIphone() || lese(GEZEIGT, false)) return;
   setTimeout(() => { if (!document.querySelector('dialog[open]')) tabletZeigen(); }, 1200);
 }

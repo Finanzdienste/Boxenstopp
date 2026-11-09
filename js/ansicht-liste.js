@@ -621,7 +621,7 @@ function teilenZeichnen(zuletzt) {
   // Mit wem die Liste geteilt ist: Der Link trägt ihren Namen, dort verbindet „Einfügen“ ohne Tippen
   const du = anderePerson();
   const link = linkFuerGeraet(du);
-  const wa = `https://wa.me/?text=${encodeURIComponent(`${eigen ? 'Meine Liste' : 'Unsere Einkaufsliste'} in Boxenstopp: ${link}`)}`;
+  const wa = `https://wa.me/?text=${encodeURIComponent(`${eigen ? 'Meine Liste' : 'Unsere Einkaufsliste'} in Boxenstopp – einfach antippen: ${link}`)}`;
   const kopieren = eigen ? 'Link fürs zweite Gerät kopieren' : du ? `Link für ${esc(du)} kopieren` : 'Link fürs zweite Handy kopieren';
   const whatsapp = eigen ? '' : `<a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">${du ? `An ${esc(du)} per WhatsApp` : 'Per WhatsApp schicken'}</a>`;
   // Ein eigenes zweites Gerät: vom Handy aus das Popup fürs iPad, vom iPad aus der Link fürs Handy – mit deinem Namen
@@ -734,18 +734,30 @@ export function eingabeZugang(ziel) {
   return true;
 }
 
-/** „Einfügen“ (iPhone, App vom Home-Bildschirm): den Link aus der Zwischenablage nehmen – mit Namen gleich verbinden. */
-async function einfuegen() {
+/**
+ * „Einfügen“ (iPhone, App vom Home-Bildschirm): den Link aus der
+ * Zwischenablage nehmen – mit Namen gleich verbinden. Auch aus dem Popup
+ * beim Öffnen (ansicht-iphone.js): still – keine Meldung unten, das Popup
+ * sagt es selbst; gefunden – vorher das Popup schließen.
+ * → 'kein-link', 'verbinden' oder 'name' (dann fehlt der Name im Formular).
+ */
+export async function einfuegenAusZwischenablage({ still = false, gefunden = null } = {}) {
   let text = '';
   try { text = await navigator.clipboard.readText(); } catch { text = ''; }
   const token = schluesselAus(text);
-  if (!token) { melde('In der Zwischenablage ist kein Link. Kopier ihn zuerst (etwa aus WhatsApp) und tipp dann nochmal auf „Einfügen“.'); return; }
+  if (!token) {
+    if (!still) melde('In der Zwischenablage ist kein Link. Kopier ihn zuerst (etwa aus WhatsApp) und tipp dann nochmal auf „Einfügen“.');
+    return 'kein-link';
+  }
+  gefunden?.();
   const ex = linkExtras(text);
   const passt = formularAusLink(text.trim(), ex);
   zeigeReiter('einstellungen');
   zugangZeichnen();
   teilenZeichnen(app.status.zuletzt);
-  if (ex.fuer && passt) formularAbschicken(); else $('#z-name')?.focus();
+  if (ex.fuer && passt) { formularAbschicken(); return 'verbinden'; }
+  $('#z-name')?.focus();
+  return 'name';
 }
 
 async function formularAbschicken() {
@@ -889,7 +901,7 @@ export function klickListe(el) {
       $('#e-liste')?.scrollIntoView({ block: 'start' });
       return true;
     case 'z-abbrechen': formular = null; zugangZeichnen(); teilenZeichnen(app.status.zuletzt); return true;
-    case 'z-einfuegen': einfuegen(); return true;
+    case 'z-einfuegen': einfuegenAusZwischenablage(); return true;
     case 'z-link': {
       // Für wen (data-fuer): die andere Person oder dein eigenes Handy – dann reicht dort „Einfügen“
       const fuer = el.dataset.fuer || '';

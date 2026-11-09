@@ -2,9 +2,10 @@
  * Die App aufs iPad (js/ansicht-tablet.js): Bei Amy auf dem iPhone kommt die
  * Anleitung einmal von selbst, danach über „Auch auf dem iPad“. Der Link aus
  * dem Popup richtet das iPad ein – und dann zeigen beide dasselbe. Die Links
- * tragen den Namen (für Tobi, fürs eigene Handy): In der App vom
- * Home-Bildschirm reicht „Einfügen“; passt der Name nicht zu dem, der hier
- * zuletzt verbunden war, fragt sie nach.
+ * tragen den Namen (für Tobi, fürs eigene Handy): Ein Tipp auf den Link
+ * verbindet Safari, ein Popup sagt, was die App vom Home-Bildschirm noch
+ * braucht; die fragt beim Öffnen selbst nach dem Link („Einfügen“). Passt
+ * der Name nicht zu dem, der hier zuletzt verbunden war, fragt sie nach.
  */
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 
@@ -100,20 +101,47 @@ check(await a.locator('#teilen [data-act="tablet-zeigen"]').count() === 1 && awa
 await i.click('.tab[data-tab="einstellungen"]');
 check(await i.locator('#teilen [data-act="z-link"][data-fuer="Amy"]').innerText() === 'Link für dein Handy kopieren' && await i.locator('#teilen [data-act="tablet-zeigen"]').count() === 0, 'auf dem iPad stattdessen: „Link für dein Handy kopieren“ – mit ihrem Namen');
 
-// Amys iPhone, die App vom Home-Bildschirm (eigener Speicher): Link kopieren, „Einfügen“ – verbunden, ohne Namen tippen
 const HOME = () => { Object.defineProperty(window.Navigator.prototype, 'standalone', { get: () => true }); };
 const RECHTE = ['clipboard-read', 'clipboard-write'];
+const iosOffen = (page) => page.locator('#ios-dlg[open]').count();
+const iosTitel = (page) => page.locator('#ios-dlg[open] #ios-titel').innerText().catch(() => '');
+const verbundenAls = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.zugang.v1') || '{}').name || '');
+
+// Amy tippt in WhatsApp auf den Link: Safari verbindet sich gleich – und sagt, was die App vom Home-Bildschirm noch braucht
+const safari = await handy(browser, { attrappe: gh, userAgent: IPHONE, adresse: link, rechte: RECHTE });
+const sp = safari.page;
+check(await bis(async () => (await sp.locator('#sync-text').innerText()) === 'Geteilt', 8000) && await verbundenAls(sp) === 'Amy', 'Safari: der Link mit Namen verbindet gleich, als Amy');
+check(await bis(async () => (await iosTitel(sp)) === 'Jetzt noch deine App'), 'danach das Popup „Jetzt noch deine App“');
+await sp.waitForTimeout(1600);
+check(await offen(sp) === 0 && await iosOffen(sp) === 1, '… statt des iPad-Popups, und es bleibt stehen');
+await sp.click('[data-act="ios-link"]');
+const kopiertSafari = await bis(async () => { const x = await sp.evaluate(() => navigator.clipboard.readText()); return x.includes('&fuer=Amy') ? x : ''; });
+check(kopiertSafari.includes(`#zugang=${encodeURIComponent(SCHLUESSEL)}`) && (await sp.locator('[data-act="ios-link"]').innerText()).startsWith('Kopiert'), '„Link kopieren“: mit ihrem Namen, der Knopf sagt es');
+await sp.click('#ios-dlg .tablet-knoepfe [data-act="ios-zu"]');
+check(await bis(async () => (await iosOffen(sp)) === 0), 'Schließen');
+
+// Amys iPhone, die App vom Home-Bildschirm (eigener Speicher): Sie fragt beim Öffnen gleich nach dem Link
 const home = await handy(browser, { attrappe: gh, userAgent: IPHONE, skript: HOME, rechte: RECHTE });
 const hp = home.page;
-await hp.click('.tab[data-tab="einkauf"]');
-await hp.evaluate((l) => navigator.clipboard.writeText(l), link);
-await hp.click('#zugang [data-act="z-einfuegen"]');
-check(await bis(async () => (await hp.locator('#sync-text').innerText()) === 'Geteilt') && await hp.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.zugang.v1') || '{}').name) === 'Amy', 'vom Home-Bildschirm: „Einfügen“ verbindet gleich, als Amy');
+check(await bis(async () => (await iosTitel(hp)) === 'Mit der Liste verbinden'), 'vom Home-Bildschirm, noch ohne Liste: das Popup fragt gleich nach dem Link');
+await hp.evaluate(() => navigator.clipboard.writeText('Hallo'));
+await hp.click('[data-act="ios-einfuegen"]');
+check(await bis(async () => (await hp.locator('#ios-dlg .zugang-fehler').innerText().catch(() => '')).includes('kein Link')) && await iosOffen(hp) === 1, 'nichts Passendes kopiert: das Popup sagt es selbst');
+await hp.evaluate((l) => navigator.clipboard.writeText(l), kopiertSafari);
+await hp.click('[data-act="ios-einfuegen"]');
+check(await bis(async () => (await hp.locator('#sync-text').innerText()) === 'Geteilt') && await verbundenAls(hp) === 'Amy' && await iosOffen(hp) === 0, '„Einfügen“: verbunden als Amy, ohne Namen tippen – das Popup ist zu');
+await hp.reload({ waitUntil: 'load' });
+await hp.waitForTimeout(1500);
+check(await iosOffen(hp) === 0, 'verbunden fragt sie nicht mehr');
 
-// Hier war Amy verbunden (getrennt) – eingefügt wird aus Versehen der Link für Tobi: nicht gleich verbinden, nachfragen
+// Hier war Amy verbunden (getrennt) – eingefügt wird aus Versehen der Link für Tobi: nicht gleich verbinden, nachfragen.
+// Dabei erst „Später“ und dann „Einfügen“ über der Liste.
 const falsch = await handy(browser, { attrappe: gh, userAgent: IPHONE, skript: HOME, rechte: RECHTE });
 const fp = falsch.page;
 await fp.evaluate(() => localStorage.setItem('boxenstopp.getrennt.v1', JSON.stringify({ at: new Date().toISOString(), name: 'Amy' })));
+check(await bis(async () => (await iosOffen(fp)) === 1), 'das Popup kommt');
+await fp.click('#ios-dlg .tablet-knoepfe [data-act="ios-spaeter"]');
+check(await bis(async () => (await iosOffen(fp)) === 0) && Number(await fp.evaluate(() => localStorage.getItem('boxenstopp.einfuegen-spaeter.v1'))) > 0, '„Später“: zu, und gemerkt');
 await fp.click('.tab[data-tab="einkauf"]');
 await fp.evaluate((l) => navigator.clipboard.writeText(l), fuerTobi);
 await fp.click('#zugang [data-act="z-einfuegen"]');
@@ -121,9 +149,9 @@ check(await bis(async () => (await fp.inputValue('#z-name').catch(() => '')) ===
 await fp.waitForTimeout(800);
 check((await fp.locator('#sync-text').innerText()) !== 'Geteilt', '… und verbunden wird erst auf „Verbinden“');
 await fp.click('#z-los');
-check(await bis(async () => (await fp.locator('#sync-text').innerText()) === 'Geteilt') && await fp.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.zugang.v1') || '{}').name) === 'Amy', '„Verbinden“: wieder als Amy');
+check(await bis(async () => (await fp.locator('#sync-text').innerText()) === 'Geteilt') && await verbundenAls(fp) === 'Amy', '„Verbinden“: wieder als Amy');
 
-const alleFehler = [...tobi.fehler, ...amy.fehler, ...ipad.fehler, ...home.fehler, ...falsch.fehler];
+const alleFehler = [...tobi.fehler, ...amy.fehler, ...ipad.fehler, ...safari.fehler, ...home.fehler, ...falsch.fehler];
 check(alleFehler.length === 0, `keine Fehler in der Konsole${alleFehler.slice(0, 3).join(' | ')}`);
 await browser.close();
 ende();
