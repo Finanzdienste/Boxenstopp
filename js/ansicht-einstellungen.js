@@ -26,7 +26,8 @@
  *                      Reihenfolge – nur dieses Gerät
  *   Gelernt und gemerkt  Tempo, Wege durch die Läden, Preisalarme, Preise
  *                      vom Bon – mit Vergessen und Löschen
- *   Über die App       Fassung, nach Updates suchen
+ *   Über die App       Fassung, nach Updates suchen; was zuletzt hakte (fehler.js),
+ *                      zum Kopieren und Vergessen
  *
  * Die Einstellungen selbst sind immer in der Leiste (sonst käme man nicht
  * mehr zurück); breit gibt es oben das Zahnrad, und der Punkt „Geteilt“ oben
@@ -50,6 +51,7 @@ import { zielEinstellungenZeichnen } from './ansicht-ziel.js';
 import { boxenZeichnen } from './ansicht-boxen.js';
 import { gaesteZeichnen } from './ansicht-gaeste.js';
 import { istEigen, person, wessen, farbe, farbeSetzen } from './profil.js';
+import { letzteFehler, fehlerVergessen } from './fehler.js';
 
 /* ------------------------------------------------------------ Reiter */
 
@@ -348,9 +350,27 @@ async function fassungHolen() {
   } catch { return ''; }
 }
 
+/** Was zuletzt hakte (fehler.js) – die der letzten zwei Wochen. */
+const FEHLER_TAGE = 14;
+const frischeFehler = () => letzteFehler().filter((f) => Date.now() - Date.parse(f.at) < FEHLER_TAGE * 864e5);
+const wannKurz = (at) => new Date(at).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+/** Zum Weiterschicken: Fassung, Gerät und je Fehler Zeit, Teil, Text, Stelle. */
+function fehlerText() {
+  const kopf = `Boxenstopp ${fassung || '?'} · ${navigator.userAgent}`;
+  return [kopf, ...frischeFehler().map((f) => [wannKurz(f.at), f.wo, f.text, f.stelle, f.mal > 1 ? `${f.mal}×` : ''].filter(Boolean).join(' · '))].join('\n');
+}
+
+function fehlerHTML() {
+  const f = frischeFehler();
+  if (!f.length) return '';
+  return `<p class="fine e-fehler">Zuletzt hakte etwas – am ${esc(wannKurz(f[0].at))}${f.length > 1 ? ` (${f.length} Fehler gemerkt)` : ''}: <span class="e-fehler-text">${esc(f[0].text)}</span></p>
+<div class="zugang-btns"><button type="button" class="btn" data-act="e-fehler-kopieren">Fehler kopieren</button><button type="button" class="btn btn-quiet" data-act="e-fehler-weg">Vergessen</button></div>`;
+}
+
 function ueberHTML() {
   return `<p>Boxenstopp${fassung ? ` <b class="e-fassung">${esc(fassung)}</b>` : ''}${app.rezepte.length ? ` · ${app.rezepte.length} Rezepte` : ''}</p>
-<div class="zugang-btns"><button type="button" class="btn" data-act="e-update">Nach Updates suchen</button><a class="btn btn-quiet" href="https://github.com/Finanzdienste/Boxenstopp#readme" target="_blank" rel="noopener">Anleitung</a></div>`;
+<div class="zugang-btns"><button type="button" class="btn" data-act="e-update">Nach Updates suchen</button><a class="btn btn-quiet" href="https://github.com/Finanzdienste/Boxenstopp#readme" target="_blank" rel="noopener">Anleitung</a></div>${fehlerHTML()}`;
 }
 
 /* ---------------------------------------------------------- Zeichnen */
@@ -439,6 +459,24 @@ export function klickEinstellungen(el) {
       einstellungenZeichnen();
       statusZeichnen();
       melde('KI-Schlüssel entfernt', { knopf: 'Rückgängig', beiKnopf: () => { speichereKi(alt); einstellungenZeichnen(); statusZeichnen(); } });
+      return true;
+    }
+    case 'e-fehler-kopieren': {
+      const text = fehlerText();
+      const zeigen = () => {
+        const u = $('#e-ueber');
+        if (!u) return;
+        u.insertAdjacentHTML('beforeend', `<textarea class="e-fehler-feld" readonly rows="6" aria-label="Die Fehler zum Kopieren">${esc(text)}</textarea>`);
+        u.querySelector('.e-fehler-feld')?.select();
+      };
+      try { navigator.clipboard.writeText(text).then(() => melde('Fehler kopiert – jetzt einfügen und weiterschicken.'), zeigen); } catch { zeigen(); }
+      return true;
+    }
+    case 'e-fehler-weg': {
+      fehlerVergessen();
+      const u = $('#e-ueber');
+      if (u) u.innerHTML = ueberHTML();
+      melde('Fehler vergessen.');
       return true;
     }
     case 'e-update': {

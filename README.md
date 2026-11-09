@@ -898,7 +898,10 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   die Läden (je Laden „Vergessen“), die Preisalarme und eure Preise vom Bon
   (je löschen) – alles mit Rückgängig.
 - **Über die App:** die laufende Fassung (aus dem Vorrat des Service Workers)
-  und „Nach Updates suchen“.
+  und „Nach Updates suchen“; hakte in den letzten zwei Wochen etwas, steht
+  hier „Zuletzt hakte etwas …“ mit „Fehler kopieren“ (Fassung, Gerät, je
+  Fehler Zeit, Teil, Text, Stelle – für iPhone und iPad, die keine Konsole
+  haben) und „Vergessen“ (`js/fehler.js`, `boxenstopp.fehler.v1`).
 
 ## Resteverwertung
 
@@ -1103,6 +1106,17 @@ Liste nur auf dem einen Handy („Nur lokal“).
      Safari“ – die App auf dem Home-Bildschirm ist dann oft schon verbunden.
      Wer mal Safari, mal das Symbol öffnet, sieht sonst scheinbar „Geteilt“
      und „Nur lokal“ im Wechsel.
+
+Mit Schlüssel steht oben schon beim Öffnen „Geteilt“ (ein Skript in
+`index.html` sieht vor dem ersten Bild nach, `kern.js` beginnt damit) – vorher
+stand dort „Nur lokal“, bis die Rezepte geladen waren, auf langsamem Netz ein
+paar Sekunden lang, nach jedem Update noch einmal. Und der Abgleich startet
+auf jeden Fall: Jeder Teil des Starts läuft für sich (`sicher` in
+`js/fehler.js`); hakt einer, laufen die anderen weiter, statt dass die App
+ohne Abgleich stehen bleibt. Was hakte, merkt sich das Gerät (die letzten
+fünf, mit Teil und Stelle im Code, Schlüssel unkenntlich) und zeigt es unter
+Einstellungen → Über die App: „Fehler kopieren“ zum Weiterschicken,
+„Vergessen“.
 
 Der Schlüssel steht nur im Speicher der beiden Handys, nirgends im Code. Wer
 den Link hat, kann die Liste ändern – mehr nicht. Ist er abgelaufen oder
@@ -1411,6 +1425,7 @@ die Action „Rezeptfotos“.
 | `index.html`, `css/styles.css` | Gerüst und Aussehen, Schriften in `schrift/` (OFL bzw. Apache 2.0, Lizenzen daneben) |
 | `js/app.js` | Start, Speicher wählen, Klicks verteilen, Service Worker |
 | `js/kern.js` | gemeinsamer Zustand, Meldung unten, Reiter |
+| `js/fehler.js` | Fehler merken (nur auf dem Gerät), `sicher` für die Teile des Starts |
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
@@ -1480,7 +1495,9 @@ npm run lint
 
 `test-sync.mjs` spielt zwei Handys gegen eine nachgebaute GitHub-API durch
 (Einrichten, Link, Abhaken beim anderen, gleichzeitiges Schreiben, veraltete
-Antwort, offline, falscher Schlüssel, Trennen). `test-ki.mjs` prüft die
+Antwort, offline, falscher Schlüssel, Trennen, mit Schlüssel gleich „Geteilt“
+auch bei langsamen Rezepten, ein Teil hakt beim Start – der Abgleich läuft
+trotzdem, „Über die App“ zeigt den Fehler). `test-ki.mjs` prüft die
 Resteverwertung erst ohne Browser (Antwort bereinigen, verbotene Zutaten,
 Mengen aufs Ziel, Anfragen und Antwortströme beider Anbieter, Fehler) und
 dann mit einer nachgebauten Gemini-API und zwei Handys – Beispielantwort in

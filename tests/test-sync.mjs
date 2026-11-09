@@ -161,6 +161,55 @@ check(await bis(async () => (await zeile(t, 'Tomaten').count()) === 1), 'Tobi na
 check(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.offen.v1') || '[]').length) === 0, 'nichts mehr offen');
 check(await t.evaluate(() => !JSON.stringify(localStorage).includes('Kaffee') || !!localStorage.getItem('boxenstopp.zugang.v1')), 'der Schlüssel steht nur im Speicher dieses Handys');
 
-for (const h of [tobi, amy, fremd]) check(h.fehler.length === 0, `keine Fehler in der Konsole${h.fehler.length ? `: ${h.fehler.slice(0, 3).join(' | ')}` : ''}`);
+// --- Beim Öffnen mit Schlüssel gleich „Geteilt“ – nicht „Nur lokal“, bis die Rezepte geladen sind (Amy: „springt hin und her“)
+const lahm = await handy(browser, { attrappe: gh });
+const l = lahm.page;
+await l.evaluate((s) => localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: s, name: 'Amy' })), SCHLUESSEL);
+let rezepteLos;
+const rezepteDa = new Promise((ok) => { rezepteLos = ok; });
+await lahm.ctx.route('**/daten/rezepte.json', async (r) => { await rezepteDa; await r.continue(); });
+await l.reload({ waitUntil: 'domcontentloaded' });
+const frueh = [await status(l), await l.locator('#sync').getAttribute('data-state')];
+await l.waitForTimeout(1200);
+const nochOhneRezepte = [await status(l), await l.locator('#grid .box').count()];
+rezepteLos();
+await l.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+check(frueh[0] === 'Geteilt' && frueh[1] === 'ok', `mit Schlüssel: oben gleich „Geteilt“ (${frueh.join(', ')})`);
+check(nochOhneRezepte[0] === 'Geteilt' && nochOhneRezepte[1] === 0, `auch solange die Rezepte noch laden (${nochOhneRezepte.join(', ')})`);
+check(await bis(async () => (await status(l)) === 'Geteilt'), 'und danach weiter „Geteilt“');
+
+// --- Hakt beim Start ein Teil, gleicht die Liste trotzdem ab – und „Über die App“ sagt, was hakte
+const kaputt = await handy(browser, {
+  attrappe: gh,
+  rechte: ['clipboard-read', 'clipboard-write'],
+  // Die Timerleiste fehlt: Der Teil „Timer“ stolpert beim Start
+  skript: () => new window.MutationObserver((_, mo) => { const el = document.getElementById('timerleiste'); if (el) { el.remove(); mo.disconnect(); } }).observe(document, { childList: true, subtree: true }),
+});
+const k = kaputt.page;
+await k.evaluate((s) => localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: s, name: 'Amy' })), SCHLUESSEL);
+await k.reload({ waitUntil: 'load' });
+await k.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await k.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await status(k)) === 'Geteilt'), 'hakt beim Start ein Teil (die Timerleiste): trotzdem „Geteilt“');
+await k.fill('#add-input', 'Senf');
+await k.press('#add-input', 'Enter');
+check(await bis(() => namen(gh.liste()).includes('Senf')), '… und was dazukommt, landet in GitHub');
+const gemerkt = await k.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.fehler.v1') || '[]'));
+check(gemerkt[0]?.wo === 'Timer' && /^js\/app\.js:\d+/.test(gemerkt[0]?.stelle || ''), `gemerkt: welcher Teil und wo im Code (${gemerkt[0]?.wo}, ${gemerkt[0]?.stelle})`);
+await k.click('.tab[data-tab="einstellungen"]');
+check(/Zuletzt hakte etwas/.test(await k.locator('#e-ueber').innerText()), 'Über die App: „Zuletzt hakte etwas …“');
+await k.click('[data-act="e-fehler-kopieren"]');
+const kopiert = await k.evaluate(() => navigator.clipboard.readText());
+check(kopiert.startsWith('Boxenstopp') && kopiert.includes('Timer') && /js\/app\.js:\d+/.test(kopiert), '„Fehler kopieren“: Fassung, Gerät, Teil, Text und Stelle zum Weiterschicken');
+const ohneSchluessel = await k.evaluate(async (s) => {
+  const m = await import('./js/fehler.js');
+  m.fehlerMerken('Test', new Error(`Schlüssel ${s} ging nicht`));
+  return localStorage.getItem('boxenstopp.fehler.v1');
+}, SCHLUESSEL);
+check(!ohneSchluessel.includes(SCHLUESSEL) && ohneSchluessel.includes('Schlüssel … ging nicht'), 'ein Schlüssel im Fehlertext wird unkenntlich gemacht');
+await k.click('[data-act="e-fehler-weg"]');
+check(!/Zuletzt hakte/.test(await k.locator('#e-ueber').innerText()) && await k.evaluate(() => localStorage.getItem('boxenstopp.fehler.v1')) === '[]', '„Vergessen“: weg');
+
+for (const h of [tobi, amy, fremd, lahm]) check(h.fehler.length === 0, `keine Fehler in der Konsole${h.fehler.length ? `: ${h.fehler.slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();

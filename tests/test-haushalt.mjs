@@ -361,7 +361,8 @@ await p.evaluate(() => { location.hash = 'haushalt'; });
 await p.reload({ waitUntil: 'load' });
 check(await bis(async () => p.locator('#view-haushalt').isVisible()) && await p.locator('.tab[data-tab="haushalt"]').isHidden(), '#haushalt (wie aus der Push-Nachricht) führt trotzdem hin – der Reiter bleibt aus');
 await p.setViewportSize({ width: 1200, height: 900 });
-check(await p.locator('#view-haushalt').isVisible() && await p.locator('#view-list').isVisible() && await p.locator('#view-recipes').isHidden(), 'breit: links der Haushalt, rechts die Liste');
+// Breit wird es mit dem Ereignis der Bildschirmbreite (kern.js, html[data-breit]) – einen Augenblick nach dem Umstellen
+check(await bis(async () => await p.locator('#view-haushalt').isVisible() && await p.locator('#view-list').isVisible() && await p.locator('#view-recipes').isHidden()), 'breit: links der Haushalt, rechts die Liste');
 await p.click('.tab[data-tab="rezepte"]', { force: true }).catch(() => {});
 await p.evaluate(() => { location.hash = ''; });
 check(h.fehler.length === 0, `keine Fehler im Browser (${h.fehler.join(' | ')})`);

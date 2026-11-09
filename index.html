@@ -27,6 +27,8 @@ try{var w=JSON.parse(localStorage.getItem('boxenstopp.liste-daneben.v1'));if(typ
     </div>
     <div class="timerleiste" id="timerleiste" role="status" aria-live="polite" hidden></div>
   </header>
+  <!-- Mit Schlüssel auf diesem Gerät steht oben gleich „Geteilt“ (eigene Liste: „Gespeichert“) statt „Nur lokal“, bis die Rezepte geladen sind; danach zeichnet statusZeichnen -->
+  <script>try{var z=JSON.parse(localStorage.getItem('boxenstopp.zugang.v1')||'null');if(z&&typeof z.token==='string'&&z.token){document.getElementById('sync').setAttribute('data-state','ok');document.getElementById('sync-text').textContent=z.daten?'Gespeichert':'Geteilt'}}catch(e){}</script>
 
   <div class="layout">
     <main id="view-recipes" class="pane">

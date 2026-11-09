@@ -897,6 +897,9 @@ body.lob-offen{overflow:hidden}
 .zugang-form input:focus{outline:none;border-color:var(--accent)}
 .zugang-fehler{font-size:13.5px;font-weight:650;color:var(--danger)}
 .zugang-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.e-fehler{margin-top:12px}
+.e-fehler-text{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;overflow-wrap:anywhere}
+.e-fehler-feld{display:block;width:100%;margin-top:8px;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px}
 a.btn{text-decoration:none;color:inherit}
 .teilen{display:grid;gap:10px;font-size:14px}
 .teilen .fine{margin-top:0}

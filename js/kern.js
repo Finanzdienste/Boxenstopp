@@ -4,6 +4,11 @@
  */
 import { leer } from './liste.js';
 
+/** Liegt auf diesem Gerät ein Schlüssel für die Liste? (derselbe Eintrag wie ladeZugang in zugang.js) */
+function mitSchluessel() {
+  try { const z = JSON.parse(localStorage.getItem('boxenstopp.zugang.v1') || 'null'); return !!(z && typeof z.token === 'string' && z.token); } catch { return false; }
+}
+
 export const app = {
   rezepte: [],
   /** Rezepte aus der Resteverwertung (behaltene und der aktuelle Vorschlag), siehe ansicht-ki.js. */
@@ -29,7 +34,10 @@ export const app = {
   speicher: null,
   zugang: null,
   kiGeteilt: null, // ki.json der Liste: { schluessel, von, stand } – der für alle Handys freigegebene KI-Schlüssel (zugang.js)
-  status: { zustand: 'lokal', offen: 0, zuletzt: null },
+  // Mit Schlüssel auf diesem Gerät gilt bis zum ersten Abgleich „Geteilt“ – wie github() beim Start, und wie
+  // index.html den Punkt oben schon vor dem ersten Bild zeigt. Sonst stand dort beim Öffnen „Nur lokal“, bis die
+  // Rezepte geladen waren (Amy: „springt zwischen geteilt und lokal hin und her“).
+  status: { zustand: mitSchluessel() ? 'ok' : 'lokal', offen: 0, zuletzt: null },
   name() { return this.zugang?.name || ''; },
   aendern(op) { if (this.speicher) this.speicher.aendern(op); },
   // Werden in app.js bzw. ansicht-ki.js gesetzt.

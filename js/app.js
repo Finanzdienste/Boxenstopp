@@ -12,6 +12,8 @@
  * Für die Tests lassen sich zwei Dinge über den localStorage verstellen:
  * __api (statt https://api.github.com) und __takt (Abgleich in ms).
  */
+// Als erstes: Fehler mitschreiben (Einstellungen → Über die App), auch beim Laden der anderen Teile
+import { sicher } from './fehler.js';
 import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten, breiteAnwenden } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
 import { opZusammen, opPerson, opEinePerson } from './liste.js';
@@ -148,7 +150,7 @@ function beiAenderung(stand) {
 }
 function beiStatus(s) {
   app.status = s;
-  statusZeichnen();
+  sicher('Status', statusZeichnen);
   // Abgeglichen: Ist Push eingerichtet, aber hier noch aus, fragt die App einmal (ansicht-push.js)
   if (s.zustand === 'ok') setTimeout(pushHinweisPruefen, 2500);
 }
@@ -156,7 +158,8 @@ function beiStatus(s) {
 function nimmSpeicher(neu) {
   if (app.speicher) app.speicher.stop();
   app.speicher = neu;
-  neu.start(beiAenderung, beiStatus);
+  // Hakt das Zeichnen, läuft der Abgleich trotzdem weiter (und zeigt nicht „Offline“)
+  neu.start((stand) => sicher('Anzeigen', () => beiAenderung(stand)), beiStatus);
 }
 
 // Angebote oder Laden geändert (ansicht-angebote.js): die Hinweise auf der Liste mitziehen
@@ -318,30 +321,38 @@ async function start() {
   for (const r of app.rezepte) for (const it of r.items) if (it.k && typeof it.q === 'number') app.einheiten[it.k] = it.u;
   eyebrowZeichnen();
 
+  /*
+   * Ab hier jeder Teil für sich (sicher): Hakt einer, laufen die anderen
+   * weiter – vor allem der Abgleich unten. Sonst blieb oben „Nur lokal“
+   * stehen, und nichts kam bei den anderen an. Was hakte, steht unter
+   * Einstellungen → Über die App.
+   */
   let hash = '';
   try { hash = decodeURIComponent((location.hash || '').slice(1)); } catch { /* kaputte Adresse */ }
-  const kiLink = kiAusAdresse();
-  if (kiLink) speichereKi(kiLink);
-  const link = linkAusAdresse();
+  const kiLink = sicher('KI-Link', kiAusAdresse, null);
+  if (kiLink) sicher('KI-Link', () => speichereKi(kiLink));
+  const link = sicher('Link', linkAusAdresse, null) || {};
   const ausLink = link.token;
   // Ziel, Farbe und Namen der Liste schon vor dem ersten Zeichnen – wie das Gerät sie zuletzt kannte
   app.zugang = ladeZugang();
   // Die Gäste vom alten Handy (…#gaeste=…): in den Einstellungen einmal nachfragen
-  const gaesteLink = gaesteAusAdresse();
+  const gaesteLink = sicher('Gäste-Link', gaesteAusAdresse, null);
   // Der gemeinsame Katalog: was das Gerät zuletzt kannte, gleich mit den Rezepten
-  katalogStart();
-  geteiltenKiHolen();
-  app.stand = { ...app.stand, profil: bekanntesProfil(app.zugang ? ortVon(app.zugang) : null) };
-  zielAnwenden();
-  profilAnwenden();
-  eyebrowZeichnen();
+  sicher('Katalog', katalogStart);
+  sicher('KI-Schlüssel', geteiltenKiHolen);
+  sicher('Profil', () => {
+    app.stand = { ...app.stand, profil: bekanntesProfil(app.zugang ? ortVon(app.zugang) : null) };
+    zielAnwenden();
+    profilAnwenden();
+    eyebrowZeichnen();
+  });
   // Eine Einladung (…&fuer=Marielle) auf einem Gerät ohne Liste: gleich verbinden, das Willkommen erklärt den Rest
   const einladung = !!ausLink && !app.zugang && !!link.fuer;
-  if (link.farbe && (einladung || (ausLink && ausLink === app.zugang?.token))) farbeSetzen(link.farbe === 'blau' ? '' : link.farbe);
-  kiStart();
-  anpassenStart();
-  lobStart();
-  timerAnmelden(() => {
+  if (link.farbe && (einladung || (ausLink && ausLink === app.zugang?.token))) sicher('Farbe', () => farbeSetzen(link.farbe === 'blau' ? '' : link.farbe));
+  sicher('Resteverwertung', kiStart);
+  sicher('Anpassen', anpassenStart);
+  sicher('Lob', lobStart);
+  sicher('Timer', () => timerAnmelden(() => {
     const leiste = $('#timerleiste');
     const html = leisteHTML();
     if (leiste.innerHTML !== html) leiste.innerHTML = html;
@@ -349,17 +360,17 @@ async function start() {
     timerZeichnen();
     amyTimerZeichnen();
     kochmodusTimerZeichnen();
-  });
-  kochstandStart();
-  kochmodusAnmelden();
-  waageStart();
-  pushAnmelden();
-  filterZeichnen();
-  rasterZeichnen();
-  listeZeichnen();
-  angeboteZeichnen();
-  amyStart();
-  haushaltStart();
+  }));
+  sicher('Kochstand', kochstandStart);
+  sicher('Kochmodus', kochmodusAnmelden);
+  sicher('Waage', waageStart);
+  sicher('Push', pushAnmelden);
+  sicher('Filter', filterZeichnen);
+  sicher('Rezepte', rasterZeichnen);
+  sicher('Liste', listeZeichnen);
+  sicher('Angebote', angeboteZeichnen);
+  sicher('Amy', amyStart);
+  sicher('Haushalt', haushaltStart);
   // Die Angebote der Woche kommen nebenbei – ohne Netz bleibt der letzte Stand aus dem Speicher.
   fetch('daten/angebote.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((a) => { if (a) angeboteAutoSetzen(a); }).catch(() => {});
   // Wie günstig es in den letzten Wochen war (werkzeug/preisverlauf.mjs)
@@ -377,19 +388,20 @@ async function start() {
   if (hash === 'einstellungen') ansicht.tab = 'einstellungen';
   if (hash === 'haushalt') ansicht.tab = 'haushalt';
   if (gaesteLink) ansicht.tab = 'einstellungen';
-  zeigeReiter(ansicht.tab, true);
+  sicher('Reiter', () => zeigeReiter(ansicht.tab, true));
   // Welche Reiter unten stehen – stand der gemerkte auf einem ausgeblendeten, zum ersten sichtbaren
-  einstellungenStart({ wechseln: !hash && !ausLink });
+  sicher('Einstellungen', () => einstellungenStart({ wechseln: !hash && !ausLink }));
   if (gaesteLink) window.requestAnimationFrame(() => $('#e-gaeste-karte')?.scrollIntoView({ block: 'center' }));
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
-  if (hash === 'reste' || (kiLink && !ausLink)) kiStart({ oeffnen: true });
-  else if (rezept) oeffneRezept(rezept, { still: true });
+  if (hash === 'reste' || (kiLink && !ausLink)) sicher('Resteverwertung', () => kiStart({ oeffnen: true }));
+  else if (rezept) sicher('Rezept', () => oeffneRezept(rezept, { still: true }));
   if (kiLink && !einladung) melde('KI-Schlüssel übernommen – die Resteverwertung ist bereit.');
 
+  // Der Abgleich startet auf jeden Fall
   if (app.zugang) nimmSpeicher(speicherFuer(app.zugang));
   else nimmSpeicher(lokal());
-  privateAngebote();
-  katalogLaden({ abgleich: true });
+  sicher('Angebote (privat)', privateAngebote);
+  sicher('Katalog', () => katalogLaden({ abgleich: true }));
 
   if (einladung) {
     app.verbinden(ausLink, link.fuer, { daten: link.daten, farbe: link.farbe }).then((e) => {
@@ -399,9 +411,9 @@ async function start() {
       zeigeReiter('einstellungen');
       melde(e === 'falsch' ? 'Der Schlüssel aus dem Link geht nicht – frag nach einem neuen Link.' : 'Gerade keine Verbindung – der Link ist eingetragen, tipp gleich auf „Verbinden“.');
     });
-  } else if (ausLink && ausLink !== app.zugang?.token) formularMitSchluessel(ausLink, link);
-  else zugangZeichnen();
-  wegPruefen();
+  } else if (ausLink && ausLink !== app.zugang?.token) sicher('Link', () => formularMitSchluessel(ausLink, link));
+  else sicher('Zugang', zugangZeichnen);
+  sicher('Wege', wegPruefen);
 }
 
 start();
