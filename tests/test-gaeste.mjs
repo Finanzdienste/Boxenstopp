@@ -176,7 +176,7 @@ check(await bis(() => mar.liste()?.profil?.ziel?.p === 30), 'Ihr Ziel steht in i
 check(!haupt.liste()?.profil?.ziel, '… nicht in eurer');
 for (let i = 0; i < 4 && await m.evaluate(() => document.querySelector('#willkommen-dlg')?.open); i++) await m.click('[data-act="wk-weiter"]');
 check(!(await m.evaluate(() => document.querySelector('#willkommen-dlg')?.open)) && await m.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.willkommen.v1')) === true), 'Willkommen durch, gemerkt');
-check((await m.locator('.tab-amy .tab-l').innerText()) === 'Marielles Rezepte' && (await m.locator('.tab-amy .tab-k').innerText()) === 'Marielle', 'Der Reiter heißt „Marielles Rezepte“');
+check((await m.locator('.tab-amy .tab-l').innerText()) === 'Marielles Bereich' && (await m.locator('.tab-amy .tab-k').innerText()) === 'Marielle', 'Der Reiter heißt „Marielles Bereich“');
 check((await m.locator('#r-ziel').innerText()).replace(/\s+/g, ' ').includes('368 kcal 30 g P 35 g KH 12 g F'), 'Oben ihr Ziel');
 check((await m.locator('#sync-text').innerText()) === 'Gespeichert', 'Oben „Gespeichert“ statt „Geteilt“');
 // Etwas auf ihre Liste

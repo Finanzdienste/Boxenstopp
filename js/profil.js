@@ -3,7 +3,7 @@
  * liste.js profilBereinigen):
  *
  *   Tobi und Amy   die gemeinsame Liste in Boxenstopp-Daten – der rosa Reiter
- *                  heißt „Amys Rezepte“, die App ist blau.
+ *                  heißt „Amys Bereich“ (ihre Rezepte und Notizen), die App ist blau.
  *   eigene Liste   ein Gast (Marielle) mit eigenem Repo – der Reiter heißt
  *                  nach ihr, Push und To Do gibt es dort nicht (die laufen
  *                  über die Abläufe in Boxenstopp-Daten), die Farbe sucht sie
@@ -61,12 +61,22 @@ export function farbeSetzen(f) {
 /**
  * Der Link fürs zweite Gerät derselben Liste (Einstellungen, iPad-Popup,
  * Willkommen): mit KI-Schlüssel und – bei einer eigenen Liste – Ort, Name
- * und Farbe, damit das zweite Gerät gleich richtig aussieht.
+ * und Farbe, damit das zweite Gerät gleich richtig aussieht. fuer: wem das
+ * Gerät gehört (in der gemeinsamen Liste) – dann verbindet „Einfügen“ dort
+ * ohne Namen tippen. Ohne fuer tippt man den Namen dort selbst.
  */
-export function linkFuerGeraet() {
+export function linkFuerGeraet(fuer = '') {
   if (!app.zugang) return '';
-  const eigen = istEigen();
-  return einladungsLink(app.zugang.token, ladeKi(), eigen ? { daten: app.zugang.daten || '', fuer: app.zugang.name || '', farbe: farbe() || 'blau' } : {});
+  if (istEigen()) return einladungsLink(app.zugang.token, ladeKi(), { daten: app.zugang.daten || '', fuer: app.zugang.name || '', farbe: farbe() || 'blau' });
+  return einladungsLink(app.zugang.token, ladeKi(), { fuer });
+}
+
+/** Mit wem die gemeinsame Liste geteilt ist – genau eine andere Person (leute), sonst ''. */
+export function anderePerson() {
+  if (!app.zugang || istEigen()) return '';
+  const ich = String(app.name() || '').toLowerCase();
+  const andere = Object.values(app.stand?.leute || {}).map(String).filter((n) => n && n.toLowerCase() !== ich);
+  return ich && andere.length === 1 ? andere[0] : '';
 }
 
 let zuletzt = '';
@@ -84,7 +94,7 @@ export function profilAnwenden() {
   zuletzt = schluessel;
   const html = document.documentElement;
   if (eigen) html.dataset.liste = 'eigen'; else delete html.dataset.liste;
-  const titel = `${wessen(wer)} Rezepte`;
+  const titel = `${wessen(wer)} Bereich`;
   for (const el of $$('.tab-amy .tab-l, .abk-amy .abk-t')) el.textContent = titel;
   for (const el of $$('.tab-amy .tab-k')) el.textContent = wer;
   $('.tab-amy')?.setAttribute('aria-label', titel);

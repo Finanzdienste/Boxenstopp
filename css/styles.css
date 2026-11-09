@@ -148,12 +148,14 @@ html[data-tab="einstellungen"] .kopf-einst{border-color:var(--accent);color:var(
 :where(:root:not([data-breit])) #app[data-tab="amy"] #view-list,:where(:root:not([data-breit])) #app[data-tab="amy"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="amy"] #view-angebote{display:none}
 :where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-list,:where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-angebote,:where(:root:not([data-breit])) #app[data-tab="einstellungen"] #view-amy{display:none}
 :where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-list,:where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-angebote,:where(:root:not([data-breit])) #app[data-tab="haushalt"] #view-amy{display:none}
+:where(:root:not([data-breit])) #app[data-tab="plan"] #view-list,:where(:root:not([data-breit])) #app[data-tab="plan"] #view-recipes,:where(:root:not([data-breit])) #app[data-tab="plan"] #view-angebote,:where(:root:not([data-breit])) #app[data-tab="plan"] #view-amy{display:none}
 #app:not([data-tab="einstellungen"]) #view-einstellungen{display:none}
 #app:not([data-tab="haushalt"]) #view-haushalt{display:none}
-:where(:root[data-breit]) #app[data-tab="angebote"] #view-recipes,:where(:root[data-breit]) #app[data-tab="amy"] #view-recipes,:where(:root[data-breit]) #app[data-tab="einstellungen"] #view-recipes,:where(:root[data-breit]) #app[data-tab="haushalt"] #view-recipes{display:none}
+#app:not([data-tab="plan"]) #view-plan{display:none}
+:where(:root[data-breit]) #app[data-tab="angebote"] #view-recipes,:where(:root[data-breit]) #app[data-tab="amy"] #view-recipes,:where(:root[data-breit]) #app[data-tab="einstellungen"] #view-recipes,:where(:root[data-breit]) #app[data-tab="haushalt"] #view-recipes,:where(:root[data-breit]) #app[data-tab="plan"] #view-recipes{display:none}
 :where(:root[data-breit]) #app:not([data-tab="angebote"]) #view-angebote{display:none}
 :where(:root[data-breit]) #app:not([data-tab="amy"]) #view-amy{display:none}
-:where(:root[data-breit]) #view-recipes,:where(:root[data-breit]) #view-angebote,:where(:root[data-breit]) #view-amy,:where(:root[data-breit]) #view-einstellungen,:where(:root[data-breit]) #view-haushalt{grid-column:1;grid-row:1}
+:where(:root[data-breit]) #view-recipes,:where(:root[data-breit]) #view-angebote,:where(:root[data-breit]) #view-amy,:where(:root[data-breit]) #view-einstellungen,:where(:root[data-breit]) #view-haushalt,:where(:root[data-breit]) #view-plan{grid-column:1;grid-row:1}
 :where(:root[data-breit]) #view-list{grid-column:2;grid-row:1}
 
 /* recipes: intro + filters */
@@ -173,7 +175,7 @@ html[data-tab="einstellungen"] .kopf-einst{border-color:var(--accent);color:var(
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px}
 .chip .n{font:500 12px/1 var(--f-mono);color:var(--muted)}
-.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip[aria-pressed="true"],.chip[aria-checked="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 /* Preis und Reihenfolge: zwei Auswahlfelder, die aussehen wie die Chips */
 .sortier{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px;max-width:520px}
 .sel{position:relative;display:flex;align-items:center;gap:6px;min-width:0;height:38px;padding:0 26px 0 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:600}
@@ -480,12 +482,13 @@ tfoot tr:first-child td{border-top:1.5px solid var(--ink)}
 .abk-ic .ic{width:22px;height:22px}
 .abk-amy .abk-ic{background:#FFDDEB;color:#E0457F}
 .abk-haus .abk-ic{background:#DDF3EA;color:#0B7764}
+.abk-plan .abk-ic{background:#FFF0D6;color:#9A5B00}
 .abk-t{max-width:100%;overflow-wrap:anywhere}
 .abk-n{position:absolute;top:5px;right:6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:600 11.5px/20px var(--f-mono);text-align:center}
 /* Ein Vorschlag der Resteverwertung wartet: ein Punkt (der Text steht für Vorleser in #reste-letzter) */
 .abk-reste:has(#reste-letzter:not([hidden]))::after{content:'';position:absolute;top:9px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
 :where(:root:not([data-breit])) .abk-leiste{flex-wrap:wrap}
-:where(:root:not([data-breit])) .abk-amy,:where(:root:not([data-breit])) .abk-haus,:where(:root:not([data-breit])) .abk-angebote{display:none}
+:where(:root:not([data-breit])) .abk-amy,:where(:root:not([data-breit])) .abk-haus,:where(:root:not([data-breit])) .abk-angebote,:where(:root:not([data-breit])) .abk-plan{display:none}
 :where(:root:not([data-breit])) .abk-neu,:where(:root:not([data-breit])) .abk-reste,:where(:root:not([data-breit])) .abk-karte,:where(:root:not([data-breit])) .abk-doppel{flex:0 0 auto;max-width:none;flex-direction:row;gap:10px;padding:5px 16px 5px 5px;border-radius:14px;font-size:14.5px}
 :where(:root:not([data-breit])) .abk-neu .abk-ic,:where(:root:not([data-breit])) .abk-reste .abk-ic,:where(:root:not([data-breit])) .abk-karte .abk-ic,:where(:root:not([data-breit])) .abk-doppel .abk-ic{width:36px;height:36px;border-radius:10px}
 :where(:root:not([data-breit])) .abk-neu .abk-ic .ic,:where(:root:not([data-breit])) .abk-reste .abk-ic .ic,:where(:root:not([data-breit])) .abk-karte .abk-ic .ic,:where(:root:not([data-breit])) .abk-doppel .abk-ic .ic{width:20px;height:20px}
@@ -873,6 +876,8 @@ body.lob-offen{overflow:hidden}
 .tab-k{display:none}
 .tabbar.kurz .tab-l{display:none}
 .tabbar.kurz .tab-k{display:inline}
+.tabbar.eng{gap:0;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
+.tabbar.eng .tab{font-size:11px}
 .tab span:not(.badge){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab .ic{width:24px;height:24px}
 .tab[aria-current]{color:var(--accent)}
@@ -1760,3 +1765,242 @@ html.pm-offen{overflow:hidden}
 .km-auch .km-von{display:inline-block;margin-right:8px;vertical-align:.15em;font:700 15px/1 var(--f-body);padding:6px 12px}
 .km-punkte button.dp-beide::before{border-color:var(--dp0);box-shadow:inset 0 0 0 2px var(--dp1)}
 .km-punkte button.dp-beide.f::before{background:linear-gradient(90deg,var(--dp0) 50%,var(--dp1) 50%)}
+
+
+/* ---------------------------------------------------------------- Liste: „Gemeint ist …“ */
+.item-wie{font-weight:500;font-size:.8em;color:var(--muted);white-space:nowrap}
+.l-gemeint-info{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font-size:14px}
+.l-gemeint input[name="name"]{flex:1 1 180px;min-width:0}
+.z-trennen-zeile{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)}
+.z-trennen-link{color:var(--muted);font-weight:500;font-size:13.5px}
+
+/* ---------------------------------------------------------------- Amys Bereich: der Schalter */
+.amy-teile{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:4px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--surface) 70%,transparent);border:1.5px solid var(--line)}
+.amy-teil{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:600 14.5px/1 var(--f-body)}
+.amy-teil[aria-selected="true"]{background:var(--amy-verlauf);color:#fff;box-shadow:0 6px 14px -8px rgba(224,69,127,.8)}
+.amy-teil .n{min-width:20px;height:20px;padding:0 6px;border-radius:999px;display:inline-grid;place-items:center;font-size:11.5px;background:var(--accent-soft);color:var(--accent)}
+.amy-teil[aria-selected="true"] .n{background:rgba(255,255,255,.3);color:#fff}
+.amy-rezepte-kopf{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px}
+@media (max-width:539.98px){.amy-teile{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;border-radius:22px}.amy-teil{justify-content:center;padding:0 10px}}
+
+/* ---------------------------------------------------------------- Amys Notizen: Blätter wie bei OneNote */
+.nb{container-type:inline-size}
+.nb-innen{display:grid;gap:14px}
+.nb-seiten{display:grid;gap:10px;align-content:start}
+.nb-neu{justify-self:start}
+.nb-liste{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.nb-tab{--fb:#FF8FC0;position:relative;display:grid;gap:3px;width:100%;padding:11px 14px 11px 18px;border-radius:16px;border:2px solid var(--line);background:var(--surface);text-align:left;color:var(--ink);overflow:hidden}
+.nb-tab::before{content:"";position:absolute;inset:0 auto 0 0;width:7px;background:var(--fb)}
+.nb-tab b{font:600 16px/1.25 var(--f-body);overflow-wrap:anywhere}
+.nb-tab small{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nb-tab[aria-current="page"]{border-color:var(--fb);box-shadow:0 0 0 3px color-mix(in srgb,var(--fb) 25%,transparent)}
+.nb-tab-fuss{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:2px}
+.amy-tag.klein{min-height:18px;padding:1px 7px;font-size:11px}
+.nb-wann{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.nb-leer .ic,.nb-blatt-leer .ic{width:30px;height:30px;color:var(--accent)}
+.nb-nichts{color:var(--muted);font-size:14px}
+.nb-fein{margin-top:4px}
+.f-rosa{--fb:#FF8FC0}.f-lila{--fb:#A97BFF}.f-blau{--fb:#5B8DEF}.f-gruen{--fb:#3DBE8B}.f-gelb{--fb:#F2C230}.f-orange{--fb:#FF9B4A}
+.nb-blatt{--fb:#FF8FC0;display:grid;gap:10px;align-content:start;padding:16px 16px 14px;border-radius:24px;border:2px solid var(--line);border-top:7px solid var(--fb);background:var(--surface);box-shadow:var(--shadow);min-width:0}
+.nb-blatt-leer{place-items:center;min-height:220px;border-top-width:2px;color:var(--muted);text-align:center}
+.nb-blatt-leer p{display:grid;justify-items:center;gap:8px}
+.nb-titel{width:100%;padding:4px 2px;border:0;border-bottom:2px dashed var(--line);background:transparent;font:600 22px/1.3 var(--f-body);color:var(--ink)}
+.nb-titel:focus{outline:none;border-bottom-color:var(--fb)}
+.nb-werkzeug{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.nb-farben{display:flex;gap:8px}
+.nb-farbe{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--surface);background:var(--fb);box-shadow:0 0 0 1.5px var(--line-strong)}
+.nb-farbe[aria-checked="true"]{box-shadow:0 0 0 3px var(--fb)}
+.nb-tag-teil{display:grid;gap:6px}
+.nb-tags{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.amy-tag.mit-x{padding-right:3px}
+.amy-tag.mit-x button{display:inline-grid;place-items:center;width:20px;height:20px;border:0;border-radius:50%;background:transparent;color:inherit;font-size:15px;line-height:1}
+.nb-tag-feld{flex:1 1 120px;min-width:0;min-height:32px;padding:4px 10px;border-radius:999px;border:1.5px dashed var(--line-strong);background:transparent;font:500 14px/1 var(--f-body);color:var(--ink)}
+.nb-tag-vorschlaege{display:flex;flex-wrap:wrap;gap:6px}
+.amy-tag.vorschlag{opacity:.8;border-style:dashed;border-color:currentColor;background:transparent}
+.nb-text{width:100%;min-height:300px;padding:10px 4px;border:0;resize:vertical;background:repeating-linear-gradient(to bottom,transparent 0,transparent 29px,color-mix(in srgb,var(--fb) 22%,transparent) 29px,color-mix(in srgb,var(--fb) 22%,transparent) 30px);background-attachment:local;font:500 16px/30px var(--f-body);color:var(--ink)}
+.nb-text:focus{outline:none}
+.nb-fuss{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.nb-stand{font-size:12.5px;color:var(--muted)}
+.nb-zurueck{justify-self:start}
+/* schmal: entweder die Blätter oder das offene Blatt */
+@container (max-width:699.98px){
+  .nb.ist-offen .nb-seiten{display:none}
+  .nb:not(.ist-offen) .nb-blatt{display:none}
+}
+/* breit: links die Blätter, rechts das offene */
+@container (min-width:700px){
+  .nb-innen{grid-template-columns:minmax(220px,280px) minmax(0,1fr);align-items:start}
+  .nb-zurueck{display:none}
+  .nb-seiten{position:sticky;top:calc(var(--header-h) + 16px)}
+}
+
+/* ---------------------------------------------------------------- Was Amy verträgt */
+.vt{display:grid;gap:14px}
+.vt-lead{color:var(--muted);font-size:15px;line-height:1.5;text-align:center;max-width:52ch;justify-self:center}
+.vt-form{display:grid;gap:10px;padding:16px;border-radius:24px;background:var(--amy-karte);border:2px solid var(--line);box-shadow:var(--shadow)}
+.vt-form-k{font:600 16px/1.2 var(--f-body)}
+.vt-form input{width:100%;padding:11px 14px;border-radius:16px;border:2px solid var(--line);background:var(--surface);font:500 16px/1.4 var(--f-body);color:var(--ink)}
+.vt-form input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.vt-stufen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.vt-stufe{min-height:42px;padding:0 8px;border-radius:999px;border:2px solid var(--line);background:var(--surface);font:600 14px/1.1 var(--f-body);color:var(--ink)}
+.vt-stufe.vt-geht[aria-checked="true"]{background:#DDF3EA;border-color:#1B7A3D;color:#11552B}
+.vt-stufe.vt-wenig[aria-checked="true"]{background:#FFF0D6;border-color:#B26A00;color:#6E4100}
+.vt-stufe.vt-nicht[aria-checked="true"]{background:#FFE1DE;border-color:#B42318;color:#7A160F}
+.vt-form-btns{display:flex;flex-wrap:wrap;gap:8px}
+.vt-gruppen{display:grid;gap:12px}
+.vt-gruppe{padding:12px 14px;border-radius:20px;background:var(--surface);border:2px solid var(--line)}
+.vt-gruppe.vt-nicht{border-color:color-mix(in srgb,#B42318 35%,var(--line))}
+.vt-gruppe.vt-wenig{border-color:color-mix(in srgb,#B26A00 35%,var(--line))}
+.vt-gruppe.vt-geht{border-color:color-mix(in srgb,#1B7A3D 35%,var(--line))}
+.vt-gruppe-k{display:flex;align-items:center;gap:8px;font:600 15px/1.2 var(--f-body)}
+.vt-gruppe-k .n{font-size:12px;color:var(--muted)}
+.vt-gruppe ul{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0;padding:0;list-style:none}
+.vt-gruppe li{display:inline-flex;align-items:stretch;border-radius:14px;border:1.5px solid var(--line);background:var(--surface-2);overflow:hidden}
+.vt-e{display:grid;gap:1px;padding:6px 10px;border:0;background:transparent;text-align:left;color:var(--ink);font:500 14px/1.2 var(--f-body)}
+.vt-e b{font-weight:600}
+.vt-e small{font-size:12px;color:var(--muted)}
+.vt-x{width:32px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);font-size:17px}
+.vt-passt-zahl{text-align:center;color:var(--muted);font-size:14.5px}
+.vt-fein{text-align:center;justify-self:center}
+/* Zeichen an Zutaten und Karten */
+.vt-zeichen{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:6px;padding:0 4px;border-radius:999px;font:700 11.5px/1 var(--f-body);vertical-align:1px}
+.vt-zeichen.vt-nicht{background:#FFE1DE;color:#B42318}
+.vt-zeichen.vt-wenig{background:#FFF0D6;color:#9A5B00}
+.pill-vt.vt-nicht{background:#FFE1DE;border-color:#F3B4AD;color:#9B1C13}
+.pill-vt.vt-wenig{background:#FFF0D6;border-color:#F1CF92;color:#7A4A00}
+.vt-hinweis{display:grid;gap:6px;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);font-size:14.5px;line-height:1.45}
+.vt-hinweis ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.vt-hinweis small{color:var(--muted)}
+.vt-hinweis .linkbtn{justify-self:start;min-height:32px}
+.vt-k{font:600 12px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.vt-ist-nicht{border-color:#F3B4AD;background:color-mix(in srgb,#FFE1DE 55%,var(--surface))}
+.vt-ist-wenig{border-color:#F1CF92;background:color-mix(in srgb,#FFF0D6 55%,var(--surface))}
+.vt-passt{border-color:#A8DCC0;background:color-mix(in srgb,#DDF3EA 55%,var(--surface));color:var(--ink)}
+li.vt-nicht b{color:#B42318}
+li.vt-wenig b{color:#9A5B00}
+@media (prefers-color-scheme:dark){
+  :root:not([data-design="hell"]) .vt-zeichen.vt-nicht,:root:not([data-design="hell"]) .pill-vt.vt-nicht{background:#4A1A16;border-color:#7A2A22;color:#FFB4AB}
+  :root:not([data-design="hell"]) .vt-zeichen.vt-wenig,:root:not([data-design="hell"]) .pill-vt.vt-wenig{background:#45300C;border-color:#6E4D12;color:#FFD38A}
+  :root:not([data-design="hell"]) .vt-ist-nicht{border-color:#7A2A22;background:#2E1412}
+  :root:not([data-design="hell"]) .vt-ist-wenig{border-color:#6E4D12;background:#2C2210}
+  :root:not([data-design="hell"]) .vt-passt{border-color:#2D6B4A;background:#12261C}
+  :root:not([data-design="hell"]) li.vt-nicht b{color:#FF8B80}
+  :root:not([data-design="hell"]) li.vt-wenig b{color:#F2B35B}
+}
+:root[data-design="dunkel"] .vt-zeichen.vt-nicht,:root[data-design="dunkel"] .pill-vt.vt-nicht{background:#4A1A16;border-color:#7A2A22;color:#FFB4AB}
+:root[data-design="dunkel"] .vt-zeichen.vt-wenig,:root[data-design="dunkel"] .pill-vt.vt-wenig{background:#45300C;border-color:#6E4D12;color:#FFD38A}
+:root[data-design="dunkel"] .vt-ist-nicht{border-color:#7A2A22;background:#2E1412}
+:root[data-design="dunkel"] .vt-ist-wenig{border-color:#6E4D12;background:#2C2210}
+:root[data-design="dunkel"] .vt-passt{border-color:#2D6B4A;background:#12261C}
+
+/* ---------------------------------------------------------------- Vorschläge für Tobi */
+.ws{display:grid;gap:12px}
+.ws-form{display:grid;gap:8px;padding:14px;border-radius:24px;background:var(--amy-karte);border:2px solid var(--line);box-shadow:var(--shadow)}
+.ws-form textarea{width:100%;padding:11px 14px;border-radius:16px;border:2px solid var(--line);background:var(--surface);font:500 16px/1.45 var(--f-body);color:var(--ink);resize:vertical}
+.ws-form textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.ws-form-btns{display:flex;justify-content:flex-end}
+.ws-kopf{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.ws-k{font:600 18px/1.2 var(--f-body);color:var(--accent)}
+.ws-liste{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.ws-e{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 10px 12px 12px;border-radius:18px;background:var(--surface);border:2px solid var(--line)}
+.ws-e .cb{margin-top:2px}
+.ws-e.ist-fertig{opacity:.72}
+.ws-e.ist-fertig .ws-text{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--muted)}
+.ws-inhalt{display:grid;gap:4px;min-width:0}
+.ws-text{font-size:15.5px;line-height:1.45;overflow-wrap:anywhere}
+.ws-wer{font-size:12.5px;color:var(--muted)}
+.ws-antwort{padding:6px 10px;border-radius:12px;background:var(--accent-soft);font-size:14px;line-height:1.4}
+.ws-antworten{justify-self:start;min-height:30px}
+.ws-antwort-form{display:flex;flex-wrap:wrap;gap:6px}
+.ws-antwort-form input{flex:1 1 180px;min-width:0;padding:9px 12px;border-radius:12px;border:1.5px solid var(--line-strong);background:var(--surface);font:500 15px/1.3 var(--f-body);color:var(--ink)}
+.ws-antwort-form .btn{min-height:40px}
+.ws-leer{color:var(--muted);text-align:center;padding:8px}
+.ws-fertig-auf{justify-self:center}
+.ws-feld{margin-top:4px}
+
+/* ---------------------------------------------------------------- Essensplan */
+.plan-pane{display:grid;gap:14px;align-content:start}
+.plan-kopf{display:grid;gap:6px}
+.plan-titel{font-size:clamp(27px,5.2vw,36px);line-height:1.06;letter-spacing:-.025em;font-weight:760}
+.plan-lead{color:var(--muted);max-width:60ch}
+.plan-woche{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.plan-woche .plan-heute{grid-column:1/-1;justify-self:center;min-height:30px}
+.plan-pfeil{min-height:42px;width:42px;padding:0}
+.plan-pfeil .ic{width:20px;height:20px}
+.plan-woche-t{display:grid;justify-items:center;gap:2px;text-align:center}
+.plan-woche-t b{font-size:17px}
+.plan-woche-t small{font-size:12.5px;color:var(--muted)}
+.plan-einkauf-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.plan-einkauf-was{color:var(--muted);font-size:13px}
+.plan-einkauf-leer{color:var(--muted);font-size:14px}
+.plan-tage{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.plan-tag{display:grid;gap:8px;padding:12px 14px 10px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.plan-tag.is-heute{border:2px solid var(--accent)}
+.plan-tag.is-vorbei{opacity:.68}
+.plan-tag-k{display:flex;align-items:baseline;gap:8px;font-size:17px}
+.plan-tag-n{font-weight:720}
+.plan-tag-d{color:var(--muted);font-weight:500;font-size:14px}
+.pill-heute{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.plan-mz{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;align-items:center}
+.plan-mz-k{font-size:12.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.plan-es{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.plan-e{display:inline-flex;align-items:center;gap:7px;max-width:100%;min-height:38px;padding:3px 10px 3px 4px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);font:600 14px/1.15 var(--f-body);text-align:left}
+.plan-e img,.plan-e .plan-ic{flex:none;width:28px;height:28px;border-radius:50%;object-fit:cover}
+.plan-ic{display:inline-grid;place-items:center;background:var(--surface);color:var(--muted)}
+.plan-ic .ic{width:16px;height:16px}
+.plan-e-n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plan-e-n small{margin-left:5px;font-weight:600;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.plan-e.is-auf{border-color:var(--ink)}
+.plan-e.ist-box{border-style:dashed}
+.plan-wer{flex:none;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;background:var(--accent-soft);color:var(--accent)}
+.plan-wer.w-amy{background:#FFDDEB;color:#A3245B}
+.plan-wer.w-beide{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.plan-plus{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1.5px dashed var(--line-strong);background:transparent;color:var(--muted);font-size:21px;line-height:1}
+.plan-koch{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 8px 6px 6px;border-radius:16px;background:color-mix(in srgb,#FFF0D6 60%,var(--surface));border:1.5px solid #F1CF92}
+.plan-koch-b{display:inline-flex;align-items:center;gap:9px;flex:1 1 auto;min-width:0;padding:0;border:0;background:transparent;text-align:left;color:var(--ink)}
+.plan-koch-b img,.plan-koch-b .plan-ic{flex:none;width:36px;height:36px;border-radius:10px;object-fit:cover}
+.plan-koch-b span{display:grid;gap:1px;min-width:0}
+.plan-koch-b b{font-size:15px}
+.plan-koch-b small{font-size:12.5px;color:var(--muted)}
+.plan-verteilen-b{min-height:38px}
+.plan-koch-neu{justify-self:start;display:inline-flex;align-items:center;gap:6px;min-height:34px;color:var(--muted);font-weight:600;text-decoration:none}
+.plan-koch-neu .ic{width:17px;height:17px}
+.plan-editor{display:grid;gap:10px;padding:12px;border-radius:16px;border:1.5px solid var(--ink);background:var(--bg)}
+.plan-editor-k{font-size:14px;color:var(--muted)}
+.plan-editor-k b{color:var(--ink)}
+.plan-chips{display:flex;flex-wrap:wrap;gap:6px}
+.plan-chips .chip{height:34px}
+.plan-suche{width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid var(--line-strong);background:var(--surface);font:500 16px/1.3 var(--f-body);color:var(--ink)}
+.plan-vorschlaege{display:grid;gap:6px}
+.plan-v{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:6px 10px 6px 6px;border-radius:12px;border:1px solid var(--line);background:var(--surface);text-align:left;color:var(--ink)}
+.plan-v img,.plan-v .plan-ic{flex:none;width:34px;height:34px;border-radius:8px;object-fit:cover}
+.plan-v>span:not(.plan-ic):not(.vt-zeichen){display:grid;gap:1px;min-width:0;flex:1}
+.plan-v b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plan-v small{font-size:12px;color:var(--muted)}
+.plan-v-text b{white-space:normal}
+.plan-v-k{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.plan-v-k .ic{width:15px;height:15px}
+.plan-ideen{display:flex;flex-wrap:wrap;gap:6px}
+.plan-idee{height:auto;min-height:34px;padding:6px 12px;white-space:normal;text-align:left;border-style:dashed}
+.plan-v-leer{color:var(--muted);font-size:14px}
+.plan-editor-btns{display:flex;flex-wrap:wrap;gap:8px}
+.plan-editor-btns .btn{min-height:40px}
+.plan-boxen{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.plan-boxen>span{font-weight:600}
+.plan-boxen b{min-width:26px;text-align:center;font-size:18px}
+.plan-boxen small{color:var(--muted)}
+.plan-pm{min-height:38px;width:38px;padding:0;font-size:19px}
+.plan-vorschau{font-size:14px;line-height:1.45}
+@media (min-width:640px){
+  .plan-tag{grid-template-columns:150px minmax(0,1fr);column-gap:16px;align-items:start}
+  .plan-tag>.plan-tag-k{grid-row:1/span 6;flex-direction:column;gap:2px}
+  .plan-tag>*:not(.plan-tag-k){grid-column:2}
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-design="hell"]) .plan-koch{background:#2C2210;border-color:#6E4D12}
+  :root:not([data-design="hell"]) .plan-wer.w-amy{background:#5A2440;color:#FFC4DD}
+  :root:not([data-design="hell"]) .abk-plan .abk-ic{background:#45300C;color:#FFD38A}
+}
+:root[data-design="dunkel"] .plan-koch{background:#2C2210;border-color:#6E4D12}
+:root[data-design="dunkel"] .plan-wer.w-amy{background:#5A2440;color:#FFC4DD}
+:root[data-design="dunkel"] .abk-plan .abk-ic{background:#45300C;color:#FFD38A}

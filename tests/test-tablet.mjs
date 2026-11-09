@@ -1,7 +1,10 @@
 /*
  * Die App aufs iPad (js/ansicht-tablet.js): Bei Amy auf dem iPhone kommt die
  * Anleitung einmal von selbst, danach über „Auch auf dem iPad“. Der Link aus
- * dem Popup richtet das iPad ein – und dann zeigen beide dasselbe.
+ * dem Popup richtet das iPad ein – und dann zeigen beide dasselbe. Die Links
+ * tragen den Namen (für Tobi, fürs eigene Handy): In der App vom
+ * Home-Bildschirm reicht „Einfügen“; passt der Name nicht zu dem, der hier
+ * zuletzt verbunden war, fragt sie nach.
  */
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 
@@ -84,6 +87,43 @@ await a.click('#list-body .item:has(.item-name:text-is("Bananen")) [data-check]'
 await i.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await i.locator('.grp-done .item-name', { hasText: 'Bananen' }).count()) === 1, 8000), 'auf dem iPhone abgehakt – auf dem iPad im Wagen');
 check(await i.evaluate(() => window.innerWidth > 800) && await i.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'auf dem iPad: breit, ohne seitliches Scrollen');
-check([...tobi.fehler, ...amy.fehler, ...ipad.fehler].length === 0, `keine Fehler in der Konsole${[...tobi.fehler, ...amy.fehler, ...ipad.fehler].slice(0, 3).join(' | ')}`);
+
+// Die Links tragen den Namen: der aus dem Popup ihren (fürs eigene Gerät), der in den Einstellungen Tobis
+check(link.includes('&fuer=Amy'), 'der Link aus dem Popup trägt Amys Namen – fürs eigene iPad');
+await a.click('.tab[data-tab="einstellungen"]');
+check(await bis(async () => (await a.locator('#teilen [data-act="z-link"]').first().innerText()) === 'Link für Tobi kopieren'), 'in den Einstellungen: „Link für Tobi kopieren“ – mit wem sie teilt, weiß die Liste');
+const wa = a.locator('#teilen a.btn[href^="https://wa.me/"]');
+const waText = new URL(await wa.getAttribute('href')).searchParams.get('text') || '';
+const fuerTobi = (/(http\S+)/.exec(waText) || [])[1] || '';
+check((await wa.innerText()) === 'An Tobi per WhatsApp' && fuerTobi.includes('&fuer=Tobi') && fuerTobi.includes(`#zugang=${encodeURIComponent(SCHLUESSEL)}`), '„An Tobi per WhatsApp“ – der Link mit seinem Namen');
+check(await a.locator('#teilen [data-act="tablet-zeigen"]').count() === 1 && await a.locator('#teilen [data-fuer="Amy"]').count() === 0, 'auf dem iPhone fürs eigene Gerät: das Popup');
+await i.click('.tab[data-tab="einstellungen"]');
+check(await i.locator('#teilen [data-act="z-link"][data-fuer="Amy"]').innerText() === 'Link für dein Handy kopieren' && await i.locator('#teilen [data-act="tablet-zeigen"]').count() === 0, 'auf dem iPad stattdessen: „Link für dein Handy kopieren“ – mit ihrem Namen');
+
+// Amys iPhone, die App vom Home-Bildschirm (eigener Speicher): Link kopieren, „Einfügen“ – verbunden, ohne Namen tippen
+const HOME = () => { Object.defineProperty(window.Navigator.prototype, 'standalone', { get: () => true }); };
+const RECHTE = ['clipboard-read', 'clipboard-write'];
+const home = await handy(browser, { attrappe: gh, userAgent: IPHONE, skript: HOME, rechte: RECHTE });
+const hp = home.page;
+await hp.click('.tab[data-tab="einkauf"]');
+await hp.evaluate((l) => navigator.clipboard.writeText(l), link);
+await hp.click('#zugang [data-act="z-einfuegen"]');
+check(await bis(async () => (await hp.locator('#sync-text').innerText()) === 'Geteilt') && await hp.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.zugang.v1') || '{}').name) === 'Amy', 'vom Home-Bildschirm: „Einfügen“ verbindet gleich, als Amy');
+
+// Hier war Amy verbunden (getrennt) – eingefügt wird aus Versehen der Link für Tobi: nicht gleich verbinden, nachfragen
+const falsch = await handy(browser, { attrappe: gh, userAgent: IPHONE, skript: HOME, rechte: RECHTE });
+const fp = falsch.page;
+await fp.evaluate(() => localStorage.setItem('boxenstopp.getrennt.v1', JSON.stringify({ at: new Date().toISOString(), name: 'Amy' })));
+await fp.click('.tab[data-tab="einkauf"]');
+await fp.evaluate((l) => navigator.clipboard.writeText(l), fuerTobi);
+await fp.click('#zugang [data-act="z-einfuegen"]');
+check(await bis(async () => (await fp.inputValue('#z-name').catch(() => '')) === 'Amy' && (await fp.locator('#z-fehler').innerText()).includes('für Tobi')), 'getrennt als Amy, eingefügt der Link für Tobi: ihr Name steht drin, mit Hinweis');
+await fp.waitForTimeout(800);
+check((await fp.locator('#sync-text').innerText()) !== 'Geteilt', '… und verbunden wird erst auf „Verbinden“');
+await fp.click('#z-los');
+check(await bis(async () => (await fp.locator('#sync-text').innerText()) === 'Geteilt') && await fp.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.zugang.v1') || '{}').name) === 'Amy', '„Verbinden“: wieder als Amy');
+
+const alleFehler = [...tobi.fehler, ...amy.fehler, ...ipad.fehler, ...home.fehler, ...falsch.fehler];
+check(alleFehler.length === 0, `keine Fehler in der Konsole${alleFehler.slice(0, 3).join(' | ')}`);
 await browser.close();
 ende();

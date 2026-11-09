@@ -163,7 +163,7 @@ const h = await handy(browser, { viewport: { width: 390, height: 844 } });
 const p = h.page;
 const titel = () => p.locator('#h-titel').innerText();
 const badge = () => p.evaluate(() => { const b = document.querySelector('#h-badge'); return b.hidden ? 0 : Number(b.textContent); });
-check(JSON.stringify(await p.$$eval('.tabbar .tab:not([hidden])', (xs) => xs.map((x) => x.dataset.tab))) === JSON.stringify(['rezepte', 'amy', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'unten sechs Reiter: Haushalt vor den Einstellungen');
+check(JSON.stringify(await p.$$eval('.tabbar .tab:not([hidden])', (xs) => xs.map((x) => x.dataset.tab))) === JSON.stringify(['rezepte', 'amy', 'plan', 'einkauf', 'angebote', 'haushalt', 'einstellungen']), 'unten sieben Reiter: Haushalt vor den Einstellungen');
 check(await p.$$eval('.tabbar .tab:not([hidden]) span:not(.badge)', (xs) => xs.filter((s) => s.offsetWidth && s.scrollWidth > s.clientWidth + 1).length) === 0, '390 px: keine Beschriftung abgeschnitten');
 await p.click('.tab[data-tab="haushalt"]');
 check(await p.locator('#view-haushalt').isVisible() && await p.locator('#view-recipes').isHidden() && await p.locator('#view-list').isHidden(), 'Haushalt: nur dieser Reiter');

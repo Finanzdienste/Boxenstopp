@@ -14,8 +14,9 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | Reiter | Inhalt |
 | --- | --- |
 | **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben **Zwei auf einmal** (zwei Rezepte zusammen kochen – welche gut zusammen gehen, ein gemeinsamer Plan, siehe unten) und die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
-| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“) – beides gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
-| **Amys Rezepte** | Amys eigene Rezepte (in einer eigenen Liste die des Gasts: „Marielles Rezepte“, in ihrer Farbe), rosa und verspielt, mit ihren eigenen Tags zum Filtern und Sortieren (siehe unten). **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor. Ihre Zutaten kommen auf dieselbe gemeinsame Liste. „Auch auf dem iPad“ erklärt, wie die App auf ihr Tablet kommt |
+| **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“), bei eigenen Einträgen **„Gemeint ist …“** („chicki nuggies“ sind Chicken Nuggets) – alles gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
+| **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Vorschläge** (in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe, ohne Vorschläge), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
+| **Essensplan** | Die nächsten Tage und Wochen: je Tag Mittag und Abend, wer isst mit, dazu **Kochtage** („Chili kochen, 8 Boxen“) mit **Boxen verteilen** auf die Tage danach – und mit einem Tipp **die Woche auf die Einkaufsliste** (siehe unten) |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
 | **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen, wer wann was macht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, hell oder dunkel, breit die Liste rechts daneben oder als Reiter (auf dem iPad von selbst als Reiter), welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
@@ -260,7 +261,9 @@ im nächsten Rezept (localStorage). **Anpinnen** (bei „Heute gekocht“) marki
 ein Rezept als „läuft gerade“: Es steht dann bei euch beiden ganz oben bei den
 Rezepten, mit Foto und dem Fortschritt beim Kochen („5 von 26 Schritten“ – die
 eigenen Haken), auf seiner Karte steht „Läuft gerade“. Höchstens vier,
-für beide in `liste.json` unter `gepinnt`.
+für beide in `liste.json` unter `gepinnt`. Ist es zubereitet – „Heute gekocht“
+oder der letzte Schritt abgehakt –, läuft es nicht mehr: Die App nimmt es aus
+„Läuft gerade“ und bietet „Wieder anpinnen“ an.
 
 ### Kochmodus
 
@@ -349,6 +352,16 @@ Einträge erkennt der Weg am Namen („Bananen“).
 
 Eine Zeile antippen klappt sie auf:
 
+- **Gemeint ist …** (eigene Einträge): Amy tippt „chicki nuggies“ und meint
+  Chicken Nuggets. Einmal hier gesagt (mit Vorschlägen aus dem Katalog), heißt
+  die Zeile so, ihr Wort steht klein dabei („Chicken Nuggets „chicki
+  nuggies““), und die App merkt es sich für beide (`gemeint` in `liste.json`,
+  Schlüssel `n:chicki-nuggies`): Tippt jemand es wieder, kommt gleich „Chicken
+  Nuggets“ auf die Liste – oder es heißt „steht schon drauf“. Mit dem
+  gemeinten Namen gehen Abteilung, Angebote und Zusammenlegen; auch in Amys
+  Rezepten zählt eine Zutat „chicki nuggies“ dann als Chicken Nuggets.
+  „Vergessen“ (in der aufgeklappten Zeile) nimmt es zurück.
+
 - **Mehr davon:** was jemand zusätzlich zu den Rezepten will – Amy braucht
   250 g Sahne für Tobis Rezept und will 500 g für sich. Das ist ein eigenes
   Teil der Zeile je Person (`x-amy`; ohne Namen `x-ich`), in der Einheit der
@@ -415,10 +428,46 @@ Wer beim Einkaufen eintippt, was es gekostet hat, ersetzt den Richtpreis
 dieser Zutat durch den eigenen (siehe oben) – auch als Maßstab dafür, ob ein
 Angebot günstig ist.
 
-### Amys Rezepte
+### Amys Bereich
 
-Der Reiter, in dem Amy ihre eigenen Rezepte schreibt (am Rechner über die
-Kachel bei den Rezepten, direkt mit `#amy` in der Adresse). Alles ist rosa
+Der Reiter „Amys Bereich“ (am Rechner über die Kachel bei den Rezepten,
+direkt mit `#amy` in der Adresse) hat oben einen Schalter: **Rezepte ·
+Notizen · Verträglich · Vorschläge** (mit Zahlen; was zuletzt offen war,
+merkt sich das Gerät). Die Teile:
+
+- **Notizen** (`js/notizbuch.js`, `js/ansicht-notizen.js`): Blätter wie bei
+  OneNote – je Thema eins, mit Titel, Farbe (sechs, neue wechseln sich ab),
+  Tags (wie bei ihren Rezepten, mit Vorschlägen; darüber filtert die Liste
+  der Blätter) und freiem Text auf liniertem Papier. Gespeichert wird beim
+  Tippen, ohne Knopf – nach einem Augenblick Ruhe und sofort, wenn die App in
+  den Hintergrund geht –, als ganzes Blatt; solange ein Blatt offen ist, baut
+  die App es nicht neu (der Cursor bleibt). Ein leeres Blatt verschwindet
+  wieder, Löschen mit Rückgängig. Schmal entweder die Blätter oder das offene,
+  breit (iPad) beide nebeneinander. In der gemeinsamen Liste unter
+  `notizbuch` (nicht `notizen`: das sind die zu den Rezepten) – Tobi sieht sie
+  auch, so gewollt; im Commit steht nur „Notizen“, nie ein Titel. Gedacht für
+  Ideen, die bleiben: Ihre Zeilen tauchen im Essensplan beim Eintragen als
+  „Aus deinen Notizen“ auf.
+- **Verträglich** (`js/vertraeglich.js`, `js/ansicht-vertraeglich.js`): Was
+  Amy verträgt – je Zutat „geht“, „nur wenig“ oder „geht nicht“, mit Notiz
+  („gekocht geht“), Vorschläge aus dem Katalog. Sie trägt es selbst ein; es
+  liegt nur in der privaten Liste (`vertraeglich`), nie im Code. Die App
+  vergleicht nach Namen: „Zwiebel“ trifft auch Frühlingszwiebeln (ab vier
+  Buchstaben auch mitten im Wort, kürzere nur ganz: „Ei“ trifft Eier, nicht
+  Eisbergsalat); treffen mehrere, gilt der genaueste („laktosefreie Milch:
+  geht“ vor „Milch: geht nicht“). Und sagt es überall: an der Rezeptkarte
+  („✗ nicht für Amy“, für Amy selbst „für dich“), im Rezept oben (was nicht
+  geht und warum) und als ✗/~ an der Zutat, in Amys eigenen Rezepten, im
+  Essensplan bei allem, was sie mitisst, und als Filter „Passt für Amy“ (bei
+  ihr „Passt für mich“) – der erscheint erst, wenn sie etwas eingetragen hat.
+- **Vorschläge** (`js/wuensche.js`, `js/ansicht-wuensche.js`, nur in der
+  gemeinsamen Liste): Amy schreibt, was Tobi besser machen soll; er sieht es
+  in seiner App, hakt ab, was erledigt ist, und antwortet kurz. Offen oben,
+  „Erledigt (3)“ zum Aufklappen, „Alle offenen kopieren“ als Text zum
+  Weitergeben. Push: „Vorschlag von Amy“ an Tobi, Antwort und „erledigt“
+  an Amy (Art „Amys Bereich“).
+
+Der Teil **Rezepte**: Amys eigene Rezepte. Alles ist rosa
 und rund: das Thema hängt an `html[data-tab="amy"]` und färbt auch Kopf,
 Reiter und Liste um, Überschriften in Pacifico, Text in Fredoka (beide OFL),
 Pünktchen im Hintergrund, Herzchen und Glitzer aus den Fluent Emoji; dunkel
@@ -479,6 +528,37 @@ in Pflaume und Rosa.
   und den Link ins Feld „Schlüssel“. Dann zeigen beide dasselbe – auch die
   Haken beim Kochen und laufende Timer (Kochstand pro Person); nur ein
   ungespeicherter Entwurf bleibt auf dem Gerät (`js/ansicht-tablet.js`).
+
+### Essensplan
+
+Der Reiter „Essensplan“ (`js/essensplan.js` rechnet, `js/ansicht-essensplan.js`
+zeichnet; am Rechner die Kachel, direkt mit `#plan`), für alle, die die Liste
+teilen – in `liste.json` unter `essensplan.tage`. Oben die Woche mit ‹ ›
+(zwei Wochen zurück, ein halbes Jahr voraus, „Zu heute“) und wie viel
+geplant ist, darunter Montag bis Sonntag, heute markiert, vorbei blasser.
+
+- **Mittag und Abend:** je Mahlzeit mehrere Einträge, jeder mit „wer“
+  (beide, Tobi oder Amy) – damit Tobi seine Box isst und Amy etwas anderes.
+  „+“ öffnet ein Suchfeld mit Vorschlägen: Boxen von Kochtagen der letzten
+  zwei Wochen (noch übrig: 4), Rezepte (ohne Suche die, die gerade laufen oder
+  auf der Liste stehen, und Amys neueste), **Ideen aus Amys Notizen** – oder
+  einfach Text („Pizza bestellen“, Enter). Antippen: wer isst mit, Rezept
+  öffnen, Austragen (mit Rückgängig).
+- **Kochtage:** „Kochtag eintragen“ – ein Rezept mit so vielen Boxen, wie die
+  Liste kocht (−/+). Danach gleich **Boxen verteilen**: für wen (für beide
+  zwei je Mahlzeit), Mittag oder Abend, nur Werktage oder jeden Tag, ab dem
+  Tag danach oder schon am selben – mit Vorschau („Di, Mi, Do, Fr · Mittag für
+  euch beide“). Was schon belegt ist, bleibt; der Kochtag zeigt, wie viele
+  verplant sind. Austragen nimmt seine Boxen mit (Rückgängig bringt beides).
+- **Die Woche auf die Einkaufsliste:** die Rezepte der Kochtage dieser Woche
+  und was frisch gekocht wird (ein Rezept ohne Box, etwa Amys) – nur, was
+  noch fehlt, mit Zahl am Knopf; danach „Alles für diese Woche steht auf der
+  Liste“.
+- **Was Amy nicht verträgt:** ✗ bzw. ~ an jedem Eintrag, den sie mitisst,
+  schon in den Vorschlägen; offen steht, was genau.
+
+Alte Tage (über drei Wochen her) räumt die App beim Lesen weg. Im Commit
+steht „Essensplan“, ohne Push.
 
 ### Angebote der Woche
 
@@ -852,8 +932,11 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   der Liste von Tobi und Amy). In einer eigenen Liste fehlen Push und To Do,
   die Karte oben heißt „Deine Liste“, mit „Einführung zeigen“.
 - **Gemeinsame Liste:** nicht eingerichtet gleich das Formular (Name,
-  Schlüssel), sonst wer du bist, der Stand, „Link fürs zweite Handy
-  kopieren“, „Per WhatsApp schicken“, „Aufs iPad oder Tablet“, „Trennen“.
+  Schlüssel), sonst wer du bist, der Stand, „Link für Amy kopieren“, „An Amy
+  per WhatsApp“ (bei Amy: für Tobi), „Aufs iPad oder Tablet“ (auf dem iPad:
+  „Link für dein Handy kopieren“), „Trennen“. Die Links tragen den Namen
+  (`&fuer=`), dort reicht „Einfügen“; kennt die Liste noch niemand anderen,
+  heißen sie „Link fürs zweite Handy“ und fragen dort nach dem Namen.
   Über der Einkaufsliste steht nur noch ein Hinweis, solange sie nicht
   eingerichtet ist oder der Schlüssel klemmt – sein „Einrichten“ führt
   hierher. Ein Link mit Schlüssel öffnet die Einstellungen, nach dem
@@ -891,9 +974,11 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
   dazu). Ausgeblendet heißt auf dem Handy weg – zurück geht es nur hier.
   Bei den Rezepten stehen auf dem Handy nur vier schmale Knöpfe
   „Neues Rezept“, „Resteverwertung“, „Zwei auf einmal“ und „Speisekarte“ (sie haben keinen Reiter); breit, ohne Leiste unten,
-  führen dort sieben Kacheln zu diesen vier, Amys Rezepten, Haushalt und
-  Angeboten (mit den Zahlen wie am Reiter). Passen die Beschriftungen nicht
-  nebeneinander, zeigt die Leiste die Kurzform („Amy“, „Liste“).
+  führen dort acht Kacheln zu diesen vier, Amys Bereich, dem Essensplan,
+  Haushalt und Angeboten (mit den Zahlen wie am Reiter). Passen die
+  Beschriftungen nicht nebeneinander, zeigt die Leiste die Kurzform („Amy“,
+  „Plan“, „Liste“); reicht auch das nicht (sieben Reiter auf 360 px), schreibt
+  sie etwas kleiner und rückt enger zusammen.
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
   die Läden (je Laden „Vergessen“), die Preisalarme und eure Preise vom Bon
   (je löschen) – alles mit Rückgängig.
@@ -1098,6 +1183,11 @@ Liste nur auf dem einen Handy („Nur lokal“).
 4. Zweites Handy: in den Einstellungen **„Link fürs zweite Handy kopieren“**
    (oder „Per WhatsApp schicken“). Der Link öffnet die App in den
    Einstellungen mit eingetragenem Schlüssel, dort fehlt nur noch der Name.
+   Ist der andere schon dabei, heißen die Knöpfe „Link für Amy kopieren“ und
+   „An Amy per WhatsApp“: Der Link trägt ihren Namen, dort verbindet er ohne
+   Tippen. War auf dem Gerät zuletzt jemand anderes verbunden (Trennen merkt
+   sich den Namen), verbindet er nicht von selbst – im Formular steht der
+   bisherige Name mit einem Hinweis, verbunden wird erst auf „Verbinden“.
    - iPhone und iPad: Eine App auf dem Home-Bildschirm hat dort einen eigenen
      Speicher, getrennt von Safari, und Links öffnen immer Safari. Also erst zum
      Home-Bildschirm hinzufügen, die App von dort öffnen und den ganzen Link
@@ -1426,6 +1516,10 @@ die Action „Rezeptfotos“.
 | `js/app.js` | Start, Speicher wählen, Klicks verteilen, Service Worker |
 | `js/kern.js` | gemeinsamer Zustand, Meldung unten, Reiter |
 | `js/fehler.js` | Fehler merken (nur auf dem Gerät), `sicher` für die Teile des Starts |
+| `js/essensplan.js`, `js/ansicht-essensplan.js` | Essensplan: Tage, Kochtage, Boxen verteilen, Einkauf der Woche – und der Reiter |
+| `js/notizbuch.js`, `js/ansicht-notizen.js` | Amys Notizen: Blätter mit Farbe und Tags, Ideen fürs Planen |
+| `js/vertraeglich.js`, `js/ansicht-vertraeglich.js` | Was Amy verträgt: Liste, Abgleich mit Rezepten, Hinweise |
+| `js/wuensche.js`, `js/ansicht-wuensche.js` | Vorschläge für Tobi: schreiben, abhaken, antworten |
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
@@ -1493,6 +1587,10 @@ npm test            # alle; npm test -- sync  nur test-sync
 npm run lint
 ```
 
+`test-plan.mjs` rechnet den Essensplan in Node (Tage, Bereinigen, Boxen
+verteilen, belegte Mahlzeiten, Einkauf der Woche) und spielt ihn im Browser
+durch (Kochtag, verteilen, Text, Idee aus den Notizen, wer, was Amy nicht
+verträgt, Woche auf die Liste, Austragen mit Rückgängig, Tobi sieht alles).
 `test-sync.mjs` spielt zwei Handys gegen eine nachgebaute GitHub-API durch
 (Einrichten, Link, Abhaken beim anderen, gleichzeitiges Schreiben, veraltete
 Antwort, offline, falscher Schlüssel, Trennen, mit Schlüssel gleich „Geteilt“

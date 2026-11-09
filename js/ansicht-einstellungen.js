@@ -57,7 +57,7 @@ import { letzteFehler, fehlerVergessen } from './fehler.js';
 
 const REITER_AUS = 'boxenstopp.reiter.v1'; // { aus: ['amy'], reihe: ['einkauf', 'rezepte', …] } – nur dieses Gerät
 /** Die Reiter, die sich ausblenden und verschieben lassen – die Einstellungen bleiben immer, ganz rechts. */
-export const REITER_WAHL = [['rezepte', 'Rezepte'], ['amy', 'Amys Rezepte'], ['einkauf', 'Einkaufsliste'], ['angebote', 'Angebote'], ['haushalt', 'Haushalt']];
+export const REITER_WAHL = [['rezepte', 'Rezepte'], ['amy', 'Amys Bereich'], ['plan', 'Essensplan'], ['einkauf', 'Einkaufsliste'], ['angebote', 'Angebote'], ['haushalt', 'Haushalt']];
 const ALLE = REITER_WAHL.map(([k]) => k);
 
 /** Welche Reiter ausgeblendet sind – mindestens einer bleibt. */
@@ -90,14 +90,21 @@ export function reiterAnwenden({ wechseln = false } = {}) {
   tabbarAnpassen();
 }
 
-/** Passen die Beschriftungen nicht nebeneinander, die kurzen nehmen („Liste“, „Amy“). */
+/**
+ * Passen die Beschriftungen nicht nebeneinander, erst die kurzen nehmen
+ * („Liste“, „Amy“, „Plan“), dann etwas kleiner schreiben und enger setzen –
+ * mit sieben Reitern auf 360 px (Galaxy S24) braucht es beides.
+ */
 export function tabbarAnpassen() {
   const bar = $('.tabbar');
   if (!bar) return;
-  bar.classList.remove('kurz');
+  bar.classList.remove('kurz', 'eng');
   if (!istSchmal()) return;
-  const eng = $$('.tab:not([hidden]) span:not(.badge):not(.tab-k)', bar).some((s) => s.scrollWidth > s.clientWidth + 1);
-  bar.classList.toggle('kurz', eng);
+  const zuEng = () => $$('.tab:not([hidden]) span:not(.badge)', bar).some((s) => s.offsetWidth && s.scrollWidth > s.clientWidth + 1);
+  for (const stufe of ['kurz', 'eng']) {
+    if (!zuEng()) return;
+    bar.classList.add(stufe);
+  }
 }
 
 const HOCH = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
@@ -106,7 +113,7 @@ const RUNTER = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentC
 function reiterHTML() {
   const aus = reiterAus();
   const reihe = reiterReihe();
-  const namen = { ...Object.fromEntries(REITER_WAHL), amy: `${wessen(person())} Rezepte` };
+  const namen = { ...Object.fromEntries(REITER_WAHL), amy: `${wessen(person())} Bereich` };
   const symbol = (t) => $(`.tabbar .tab[data-tab="${t}"] .ic`)?.outerHTML || '';
   const an = ALLE.filter((k) => !aus.includes(k)).length;
   const zeilen = reihe.map((k, i) => {

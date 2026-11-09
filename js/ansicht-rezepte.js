@@ -17,6 +17,7 @@ import { dauer, timerPlan, timerDauer } from './zeiten.js';
 import { tempoHaken, tempoZurueck, tempoZeit, tempoGelernt, tempoInfo, tempoLoeschen, tempoWiederherstellen, GRUPPEN_TEXT } from './tempo.js';
 import { zahlwort } from './ki-rezept.js';
 import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
+import { pruefeFest, pilleHTML as vtPille, hinweisHTML as vtHinweis, zeichenHTML as vtZeichen, stufeVon as vtStufe, hatVertraeglich, wem as vtWem } from './ansicht-vertraeglich.js';
 import { lobPruefen, lobGross, tierVorladen } from './lob.js';
 import { euro, kostenRezept } from './kosten.js';
 import { zutatImg, rezeptBildchen, bildPfad } from './bilder.js';
@@ -68,6 +69,8 @@ export const FILTER = [
   ['schnell', 'Unter 1½ Std.', (r) => gesamtZeit(r) < SCHNELL],
   ['liste', 'Auf der Liste', (r) => rezeptStand(app.stand, r).drauf],
   ['reste', 'Eigene', (r) => !!r.ki && !r.katalog],
+  // Was Amy verträgt (ansicht-vertraeglich.js): nur da, wenn sie etwas eingetragen hat
+  ['vertraeglich', 'Passt für Amy', (r) => !pruefeFest(r).nicht.length],
 ];
 const alleRezepte = () => [...app.rezepte, ...app.kiRezepte.filter((r) => r.ki?.von?.gespeichert)];
 /* Preis und Reihenfolge: zusätzlich zum Chip, das Handy merkt sie sich (kern.js ansicht). */
@@ -197,7 +200,7 @@ ${rezeptFoto(r)}<span class="tape">${esc(r.short)}</span>${zeitPille(r)}
 <span class="box-desc">${esc(r.desc)}</span>
 <span class="box-meta">${esc(r.protein)} · ${esc(r.base)} · ${esc(r.method)}${preis}</span>
 <span class="box-macros"><span${aus.includes('kcal') ? ' class="aus"' : ''}><b>${r.m.kcal}</b> kcal</span><span class="m-p${aus.includes('p') ? ' aus' : ''}">P ${nf1(r.m.p)}</span><span class="m-kh${aus.includes('kh') ? ' aus' : ''}">KH ${nf1(r.m.kh)}</span><span class="m-f${aus.includes('f') ? ' aus' : ''}">F ${nf1(r.m.f)}</span></span>
-<span class="box-foot">${app.stand.gepinnt?.[r.id] ? `<span class="pill pill-pin">${ic('pin')}Läuft gerade</span>` : ''}${ki}${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
+<span class="box-foot">${app.stand.gepinnt?.[r.id] ? `<span class="pill pill-pin">${ic('pin')}Läuft gerade</span>` : ''}${vtPille(pruefeFest(r))}${ki}${daumen}${st.drauf ? `<span class="pill pill-list">${ic('list')}Auf der Liste</span>` : ''}${tag ? `<span class="pill">Zuletzt gekocht ${esc(tag)}</span>` : ''}</span>
 </button>`;
 }
 
@@ -241,6 +244,12 @@ export function rasterZeichnen() {
     const zahl = fx ? alle.filter(fx[2]).filter(passtSuche).filter(passtPreis).length : 0;
     if (n && fx) n.textContent = String(zahl);
     if (fx?.[0] === 'reste' || fx?.[0] === 'neu') b.hidden = !zahl && ansicht.filter !== fx[0];
+    if (fx?.[0] === 'vertraeglich') {
+      b.hidden = !hatVertraeglich() && ansicht.filter !== 'vertraeglich';
+      const t = b.firstChild;
+      const label = `Passt für ${vtWem().fuer === 'dich' ? 'mich' : vtWem().fuer}`;
+      if (t?.nodeType === 3 && t.textContent !== label) t.textContent = label;
+    }
   }
   // Im Preis-Menü steht, wie viele es jeweils sind
   const preis = $('#r-preis');
@@ -343,12 +352,17 @@ export function abschnittGeklappt(el) {
   schreibe(ZUGEKLAPPT, [...zugeklappt]);
 }
 
+/** Was Amy verträgt, fürs offene Rezept (detailHTML) – für die Zeichen an den Zutaten. */
+let vtRezept = { nicht: [], wenig: [], geht: [] };
+
 function zutatZeile(z, i) {
-  return `<li class="ing">${zutatImg(z.k, { name: z.n, cat: z.art === 'gewuerz' ? 'gewuerz' : '', katalog: app.katalog, groesse: 24 })}<div><span class="ing-name">${esc(z.n)}</span>${z.h ? `<span class="ing-hint">${esc(z.h)}</span>` : ''}</div><span class="ing-amt">${esc(z.a)}</span><button type="button" class="tog" data-tog="${i}" aria-pressed="false" aria-label="${esc(z.n)} auf die Einkaufsliste setzen">${ic('plus', 'i-plus')}${ic('check', 'i-check')}</button></li>`;
+  const vt = vtZeichen(vtStufe(vtRezept, { k: z.k, name: z.n }));
+  return `<li class="ing">${zutatImg(z.k, { name: z.n, cat: z.art === 'gewuerz' ? 'gewuerz' : '', katalog: app.katalog, groesse: 24 })}<div><span class="ing-name">${esc(z.n)}${vt}</span>${z.h ? `<span class="ing-hint">${esc(z.h)}</span>` : ''}</div><span class="ing-amt">${esc(z.a)}</span><button type="button" class="tog" data-tog="${i}" aria-pressed="false" aria-label="${esc(z.n)} auf die Einkaufsliste setzen">${ic('plus', 'i-plus')}${ic('check', 'i-check')}</button></li>`;
 }
 
 function detailHTML(r) {
   zeilen = zeilenVon(r);
+  vtRezept = pruefeFest(r);
   const gruppe = (art, titel) => {
     const idx = zeilen.map((z, i) => [z, i]).filter(([z]) => z.art === art);
     return idx.length ? `<h3 class="sub-h">${titel}</h3><ul class="ings">${idx.map(([z, i]) => zutatZeile(z, i)).join('')}</ul>` : '';
@@ -367,6 +381,7 @@ ${rezeptFoto(r, { gross: true })}
   <div class="facts">${fakten.map((f) => `<span class="pill">${f}</span>`).join('')}</div>
   <p class="d-laeuft" id="d-laeuft" hidden></p>
 </div>
+${vtHinweis(vtRezept)}
 <span class="label-k">${boxen(r) === 1 ? 'Pro Box' : `Pro Box, eine von ${zahlwort(boxen(r))}`}</span>
 ${etikett(r)}
 ${angepasstHTML(r)}
@@ -873,11 +888,18 @@ export function klickRezepte(el) {
     case 'zurueck': schliesseRezept(); return true;
     case 'alle-dazu': app.kiVorAktion(aktuell); rezeptAufListe(aktuell); return true;
     case 'alle-weg': rezeptVonListe(aktuell); return true;
-    case 'gekocht':
+    case 'gekocht': {
       app.kiVorAktion(aktuell);
-      app.aendern(opGekocht(aktuell, heute(), app.name()));
-      lobGross({ rezept: app.nachId[aktuell], name: app.name(), grund: 'gekocht' }).then((da) => { if (!da) melde('Eingetragen: heute gekocht'); });
+      const rid = aktuell;
+      // Fertig gekocht: läuft nicht mehr – raus aus „Läuft gerade“
+      const gepinnt = !!app.stand.gepinnt?.[rid];
+      app.aendern([opGekocht(rid, heute(), app.name()), ...(gepinnt ? [opAnpinnen(rid, false, app.name())] : [])]);
+      lobGross({ rezept: app.nachId[rid], name: app.name(), grund: 'gekocht' }).then((da) => {
+        if (gepinnt) entpinntMelden(rid, 'Heute gekocht');
+        else if (!da) melde('Eingetragen: heute gekocht');
+      });
       return true;
+    }
     case 'schritte-zurueck': schritteSetzen(aktuell, []); schritteZeichnen(); tempoZurueck(aktuell); return true;
     case 'kochmodus': {
       const r = app.nachId[aktuell];
@@ -956,6 +978,17 @@ export function schrittUmschalten(rid, i, an, { tempo = true, lob = true } = {})
   // Zwei Rezepte auf einmal (ansicht-doppel.js): zwischen zwei Haken lag das andere – kein Tempo, Lob macht der Plan
   if (tempo) tempoHaken(r, i, an);
   if (lob) lobPruefen(r, s, vorher, { name: app.name() });
+  // Der letzte Haken: Das Rezept ist zubereitet und läuft nicht mehr – raus aus „Läuft gerade“
+  const alle = (r.ablauf || []).reduce((n, p) => n + p.schritte.length, 0);
+  if (an && alle && s.size >= alle && vorher.size < alle && app.stand.gepinnt?.[rid]) {
+    app.aendern(opAnpinnen(rid, false, app.name()));
+    window.setTimeout(() => entpinntMelden(rid, 'Alle Schritte abgehakt'), lob ? 1200 : 0);
+  }
+}
+
+/** „… – nicht mehr angepinnt“ mit „Wieder anpinnen“. */
+function entpinntMelden(rid, warum) {
+  melde(`${warum} – ${app.nachId[rid]?.short || 'das Rezept'} ist nicht mehr angepinnt`, { knopf: 'Wieder anpinnen', beiKnopf: () => app.aendern(opAnpinnen(rid, true, app.name())) });
 }
 
 /** Der Kochstand kam von einem anderen Gerät: Haken und Zeiten im offenen Rezept neu, sonst das Raster. */

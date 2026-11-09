@@ -12,6 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
 import { leer, anwenden, opTeil, opHaken, opAmy, opNotiz, opEigener, opPreisalarm, offeneAnzahl } from '../js/liste.js';
+import { opWunsch, opWunschAntwort, opWunschErledigt } from '../js/wuensche.js';
 
 const { check, ende } = pruefer();
 const D = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -64,6 +65,14 @@ const chili = D.rezepte.find((x) => x.id === 'chili');
 einchecken([opAmy({ id: 'amy-avocado-1', name: 'Avocado-Toast', zutaten: ['1 Avocado'], schritte: ['Toasten'] }, 'Amy'), opNotiz('chili', 'n-1', 'Mehr Kreuzkümmel', 'Amy')], 'Amy: Einkaufsliste, 2 Änderungen · Bescheid');
 r = lauf(['--liste', '--trocken']);
 check(r.an.length === 2 && r.an[0] === '→ tobi (Android): Amys Rezepte – Neues Rezept von Amy: Avocado-Toast ♡' && r.an[1] === `→ tobi (Android): Notiz – Amy zu ${chili.short || chili.name}: Mehr Kreuzkümmel`, `neues Rezept und Notiz: an Tobi (${r.an.join(' / ')})`);
+
+// --- Vorschläge (Amys Bereich): neu an Tobi, Antwort und „erledigt“ an Amy
+einchecken(opWunsch('w-abcd1', 'Die Liste soll nach Läden sortieren', 'Amy'), 'Amy: Einkaufsliste, 1 Änderung – ein neuer Vorschlag · Bescheid');
+r = lauf(['--liste', '--trocken']);
+check(r.an.length === 1 && r.an[0] === '→ tobi (Android): Vorschlag von Amy – Die Liste soll nach Läden sortieren', `Vorschlag: an Tobi (${r.an.join(' / ')})`);
+einchecken([opWunschAntwort('w-abcd1', 'Kommt ♡', 'Tobi'), opWunschErledigt('w-abcd1', true, 'Tobi')], 'Tobi: Einkaufsliste, 2 Änderungen – Vorschlag erledigt · Bescheid');
+r = lauf(['--liste', '--trocken']);
+check(r.an.length === 2 && r.an[0] === '→ amy (iPhone): Tobi antwortet – „Die Liste soll nach Läden sortieren“ – Kommt ♡' && r.an[1] === '→ amy (iPhone): Vorschlag erledigt ✓ – Tobi hat „Die Liste soll nach Läden sortieren“ erledigt', `Antwort und erledigt: an Amy (${r.an.join(' / ')})`);
 
 // --- Preisalarm
 const tag = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);

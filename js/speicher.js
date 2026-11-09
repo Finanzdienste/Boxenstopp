@@ -272,7 +272,8 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, 
             // Schreiben weg. Dann kommt, was dieses Handy davon kannte, wieder dazu.
             const fehlt = (k) => roh && typeof roh === 'object' && !(k in roh);
             const mehr = {};
-            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm', 'profil']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
+            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm', 'profil', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
+            if (fehlt('essensplan') && Object.keys(remote.stand?.essensplan?.tage || {}).length) mehr.essensplan = remote.stand.essensplan;
             if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
             if (fehlt('haushalt') && hatHaushalt(remote.stand?.haushalt)) mehr.haushalt = remote.stand.haushalt;
             if (fehlt('leute') && Object.keys(remote.stand?.leute || {}).length) mehr.leute = remote.stand.leute;

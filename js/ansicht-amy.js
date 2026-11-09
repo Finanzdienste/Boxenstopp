@@ -1,6 +1,10 @@
 /*
- * Reiter „Amys Rezepte“: Rezepte, die Amy selbst schreibt – rosa, mit
- * Herzchen und Glitzer (das Thema hängt an html[data-tab="amy"], siehe CSS).
+ * Reiter „Amys Bereich“: oben ein Schalter Rezepte · Notizen · Verträglich ·
+ * Vorschläge. Die Notizen (Blätter wie bei OneNote) baut ansicht-notizen.js,
+ * was Amy verträgt ansicht-vertraeglich.js, ihre Vorschläge für Tobi
+ * ansicht-wuensche.js (nur in der gemeinsamen Liste) – hier die Rezepte, die Amy selbst
+ * schreibt: rosa, mit Herzchen und Glitzer (das Thema hängt an
+ * html[data-tab="amy"], siehe CSS).
  *
  * Drei Ansichten: die Liste ihrer Rezepte, ein Rezept (Zutaten mit + auf die
  * gemeinsame Einkaufsliste, Schritte zum Abhaken mit Timern, die Zeit in
@@ -41,16 +45,24 @@ import { rumpfImport, importBereinigen, jsonAus, linkAus } from './amy-import.js
 import { kiAnfragen, anbieterVon } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { fotoVorbereiten, oeffneEinrichten } from './ansicht-ki.js';
+import { notizenHTML, notizenAktualisieren, klickNotizen, eingabeNotizen, tasteNotizen, notizenZahl, notizJetztSpeichern } from './ansicht-notizen.js';
+import { wuenscheHTML, wuenscheAktualisieren, klickWuensche, absendenWuensche, wuenscheOffen } from './ansicht-wuensche.js';
+import { vertraeglichHTML, vertraeglichAktualisieren, klickVertraeglich, absendenVertraeglich, vertraeglichZahl, pruefeZutaten, hinweisHTML as vtHinweisHTML, zeichenHTML as vtZeichenHTML, stufeVon as vtStufeVon } from './ansicht-vertraeglich.js';
 
 const ANSICHT = 'boxenstopp.amy.ansicht.v1';
 const ENTWURF = 'boxenstopp.amy.entwurf.v1';
 const FILTER = 'boxenstopp.amy.filter.v1'; // { tags: ['gesund'], sort: 'neu' } – nur auf diesem Handy
 const ARTEN = ['liste', 'detail', 'editor'];
+/** Die Teile des Bereichs – oben der Schalter. */
+const TEILE = [['rezepte', 'Rezepte'], ['notizen', 'Notizen'], ['vertraeglich', 'Verträglich'], ['wuensche', 'Vorschläge']];
+/** In einer eigenen Liste (Gast) gibt es keine Vorschläge für Tobi. */
+const teile = () => TEILE.filter(([k]) => k !== 'wuensche' || !istEigen());
 const SORTEN = [['neu', 'Neueste zuerst'], ['name', 'Name A–Z'], ['schnell', 'Schnellste zuerst'], ['guenstig', 'Günstigste zuerst'], ['tags', 'Nach Tags']];
 
 let zustand = (() => {
   const z = lese(ANSICHT, null);
-  return z && ARTEN.includes(z.art) ? { art: z.art, id: typeof z.id === 'string' ? z.id : null } : { art: 'liste', id: null };
+  const teil = TEILE.some(([k]) => k === z?.teil) ? z.teil : 'rezepte';
+  return z && ARTEN.includes(z.art) ? { art: z.art, id: typeof z.id === 'string' ? z.id : null, teil } : { art: 'liste', id: null, teil };
 })();
 let entwurf = lese(ENTWURF, null);
 let loeschenFragen = false;
@@ -65,7 +77,7 @@ let filter = (() => {
 const merken = () => schreibe(ANSICHT, zustand);
 const filterMerken = () => schreibe(FILTER, filter);
 // Was auf der Liste zusammengelegt oder verschoben wurde, gilt auch für Amys Zutaten
-const daten = () => ({ katalog: app.katalog, naehrwerte: app.naehrwerte, preise: app.preise, einheiten: app.einheiten, gleich: app.stand.gleich, abteilungen: app.stand.abteilungen });
+const daten = () => ({ katalog: app.katalog, naehrwerte: app.naehrwerte, preise: app.preise, einheiten: app.einheiten, gleich: app.stand.gleich, abteilungen: app.stand.abteilungen, gemeint: app.stand.gemeint });
 const tagsVon = (id) => app.stand.amyTags?.[id] || [];
 const gleicherTag = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 const tagPille = (t) => `<span class="amy-tag tf${tagFarbe(t)}">${esc(t)}</span>`;
@@ -157,16 +169,29 @@ function nachTagsHTML(liste, gewaehlt) {
     + (ohne.length ? abschnitt('<span class="amy-tag ohne">ohne Tag</span>', ohne.length, ohne) : '');
 }
 
-function listeHTML() {
-  const alle = rezepte();
-  const kopf = `<button type="button" class="back nur-breit" data-act="amy-zu">${ZURUECK}Alle Rezepte</button>
+/** Oben im Bereich: Titel und der Schalter Rezepte · Notizen · Verträglich (mit Zahlen). */
+function kopfHTML() {
+  if (!teile().some(([k]) => k === zustand.teil)) zustand.teil = 'rezepte';
+  const zahl = { rezepte: Object.keys(app.stand.amy || {}).length, notizen: notizenZahl(), vertraeglich: vertraeglichZahl(), wuensche: wuenscheOffen() };
+  const lead = {
+    rezepte: `Deine eigenen Lieblingsrezepte. Mit einem Tipp landen die Zutaten auf ${istEigen() ? 'deiner' : 'eurer gemeinsamen'} Einkaufsliste – und beim Kochen lernt das Handy, wie lange du brauchst.`,
+    notizen: 'Blätter für alles, was dich inspiriert – je Thema eins, mit Farbe und Tags.',
+    vertraeglich: 'Was dir bekommt und was nicht – die App sagt es bei den Rezepten.',
+    wuensche: 'Was besser werden soll – direkt an Tobi.',
+  }[zustand.teil];
+  return `<button type="button" class="back nur-breit" data-act="amy-zu">${ZURUECK}Alle Rezepte</button>
 <header class="amy-kopf">
 <p class="amy-eyebrow">${deko('sparkles')} nur für dich ${deko('sparkles')}</p>
-<h1 class="amy-titel" id="amy-titel">${esc(wessen(person()))} Rezepte</h1>
-<p class="amy-lead">Deine eigenen Lieblingsrezepte. Mit einem Tipp landen die Zutaten auf ${istEigen() ? 'deiner' : 'eurer gemeinsamen'} Einkaufsliste – und beim Kochen lernt das Handy, wie lange du brauchst.</p>
-<button type="button" class="amy-btn amy-neu" data-act="amy-neu"${app.listeDa ? '' : ' disabled'}>${PLUS}Neues Rezept</button>
-${app.zugang && !istIpad() ? `<button type="button" class="linkbtn amy-ipad" data-act="tablet-zeigen">${TABLET_IC}Auch auf dem iPad ♡</button>` : ''}
+<h1 class="amy-titel" id="amy-titel">${esc(wessen(person()))} Bereich</h1>
+<p class="amy-lead">${esc(lead)}</p>
+<div class="amy-teile" role="tablist" aria-label="Teile">${teile().map(([k, name]) => `<button type="button" class="amy-teil" role="tab" data-amy-teil="${k}" aria-selected="${zustand.teil === k}">${esc(name)}${app.listeDa && zahl[k] ? `<span class="n">${zahl[k]}</span>` : ''}</button>`).join('')}</div>
 </header>`;
+}
+
+function listeHTML() {
+  const alle = rezepte();
+  const kopf = `${kopfHTML()}<div class="amy-rezepte-kopf"><button type="button" class="amy-btn amy-neu" data-act="amy-neu"${app.listeDa ? '' : ' disabled'}>${PLUS}Neues Rezept</button>
+${app.zugang && !istIpad() ? `<button type="button" class="linkbtn amy-ipad" data-act="tablet-zeigen">${TABLET_IC}Auch auf dem iPad ♡</button>` : ''}</div>`;
   if (!app.listeDa) return `${kopf}<p class="loading">Wird geladen…</p>`;
   if (!alle.length) {
     return `${kopf}<div class="amy-leer">${deko('ribbon', 'gross')}<p><b>Noch keine Rezepte hier.</b></p><p>Schreib dein erstes – Zutaten und Schritte einfach Zeile für Zeile, die App macht den Rest.</p></div>`;
@@ -183,10 +208,15 @@ ${app.zugang && !istIpad() ? `<button type="button" class="linkbtn amy-ipad" dat
 
 /* --------------------------------------------------------------- Rezept */
 
+/** Was Amy verträgt, für das gerade gezeigte Rezept (detailHTML) – für die Zeichen an den Zutaten. */
+let vtJetzt = { nicht: [], wenig: [], geht: [] };
+const zumPruefen = (z) => ({ k: String(z.k || '').startsWith('amyz-') ? '' : z.k, name: z.name });
+
 function zutatZeile(z, i, rid) {
   const drauf = hatTeil(app.stand, z.k, rid);
+  const vt = vtZeichenHTML(vtStufeVon(vtJetzt, zumPruefen(z)));
   const knopf = z.kaufen ? `<button type="button" class="tog" data-amy-tog="${i}" aria-pressed="${drauf}" aria-label="${esc(z.name)} ${drauf ? 'von der Einkaufsliste nehmen' : 'auf die Einkaufsliste setzen'}"${app.listeDa ? '' : ' disabled'}>${PLUS.replace('class="ic"', 'class="ic i-plus"')}${HAKEN.replace('class="ic"', 'class="ic i-check"')}</button>` : '<span></span>';
-  return `<li class="ing">${zutatImg(z.k.startsWith('amyz-') ? '' : z.k, { name: z.name, cat: z.kat.c, katalog: app.katalog, groesse: 24 })}<div><span class="ing-name">${esc(z.name)}</span>${z.h ? `<span class="ing-hint">${esc(z.h)}</span>` : ''}</div><span class="ing-amt">${esc(z.a)}</span>${knopf}</li>`;
+  return `<li class="ing">${zutatImg(z.k.startsWith('amyz-') ? '' : z.k, { name: z.name, cat: z.kat.c, katalog: app.katalog, groesse: 24 })}<div><span class="ing-name">${esc(z.name)}${vt}</span>${z.h ? `<span class="ing-hint">${esc(z.h)}</span>` : ''}</div><span class="ing-amt">${esc(z.a)}</span>${knopf}</li>`;
 }
 
 function schrittZeile(x, s, i) {
@@ -204,6 +234,7 @@ function detailHTML(r) {
   const t = zeitVon(r);
   x.zeit = t.z;
   const zut = zutatenVon(r, app.katalog, daten());
+  vtJetzt = pruefeZutaten(zut.map(zumPruefen));
   const nw = amyNaehrwerte(r, daten());
   const ko = amyKosten(r, daten());
   const st = aufListe(r);
@@ -227,6 +258,7 @@ function detailHTML(r) {
 <header class="amy-d-kopf"><span class="amy-d-bild"><img src="${bildPfad(r.bild)}" alt="" width="72" height="72" decoding="async"></span>
 <div><h1 class="amy-d-titel" id="amy-d-titel">${esc(r.name)}</h1><p class="amy-d-fakten">${fakten.map(esc).join(' · ')}</p>${von ? `<p class="amy-d-von">${von}</p>` : ''}${tags.length ? `<div class="amy-tags amy-d-tags" role="group" aria-label="Tags">${tags.map((t) => `<button type="button" class="amy-tag tf${tagFarbe(t)}" data-amy-tag-filter="${esc(t)}" aria-label="Alle Rezepte mit „${esc(t)}“">${esc(t)}</button>`).join('')}</div>` : ''}</div></header>
 ${nw.bekannt ? `<div class="amy-etikett" role="group" aria-label="Nährwerte pro Portion"><span><b>${nfi(nw.kcal)}</b> kcal</span><span class="m-p">P ${nf1(nw.p)}</span><span class="m-kh">KH ${nf1(nw.kh)}</span><span class="m-f">F ${nf1(nw.f)}</span><small>pro Portion, ungefähr${nw.unbekannt.length ? ` – ohne ${esc(nw.unbekannt.slice(0, 3).join(', '))}${nw.unbekannt.length > 3 ? ' …' : ''}` : ''}</small></div>` : ''}
+${vtHinweisHTML(vtJetzt)}
 <div class="actions amy-actions">${aktion}<button type="button" class="btn" data-act="amy-bearbeiten"${gesperrt}>Bearbeiten</button>${loeschen}</div>
 <section class="sec amy-sec"><h2>Zutaten <small>für ${r.portionen} ${r.portionen === 1 ? 'Portion' : 'Portionen'}</small></h2>
 ${einkaufen.length ? `<ul class="ings">${einkaufen.map(([z, i]) => zutatZeile(z, i, r.id)).join('')}</ul>` : '<p class="fine">Noch keine Zutaten.</p>'}
@@ -412,8 +444,8 @@ export function amyZeichnen() {
   const el = $('#view-amy');
   if (!el) return;
   nachIdNeu();
-  if (zustand.art === 'detail' && !rezept(zustand.id) && app.listeDa) zustand = { art: 'liste', id: null };
-  if (zustand.art === 'editor' && !entwurf) zustand = { art: 'liste', id: null };
+  if (zustand.art === 'detail' && !rezept(zustand.id) && app.listeDa) zustand = { art: 'liste', id: null, teil: 'rezepte' };
+  if (zustand.art === 'editor' && !entwurf) zustand = { art: 'liste', id: null, teil: 'rezepte' };
   if (zustand.art === 'detail' && rezept(zustand.id)) {
     // Neu zeichnen ohne Sprung: die Stelle, an der man gerade kocht, bleibt im Bild
     el.innerHTML = detailHTML(rezept(zustand.id));
@@ -421,16 +453,50 @@ export function amyZeichnen() {
   } else if (zustand.art === 'editor') {
     // Der Editor wird nicht bei jeder Änderung der Liste neu gebaut – sonst wäre das Getippte weg
     if (!el.querySelector('#amy-form')) el.innerHTML = editorHTML();
+  } else if (zustand.teil === 'notizen') {
+    // Ein offenes Blatt bleibt stehen, während darin getippt wird
+    if (!notizenAktualisieren(el)) el.innerHTML = kopfHTML() + notizenHTML();
+    else teileZahlen(el);
+  } else if (zustand.teil === 'vertraeglich') {
+    if (!vertraeglichAktualisieren(el)) el.innerHTML = kopfHTML() + vertraeglichHTML();
+    else teileZahlen(el);
+  } else if (zustand.teil === 'wuensche' && !istEigen()) {
+    if (!wuenscheAktualisieren(el)) el.innerHTML = kopfHTML() + wuenscheHTML();
+    else teileZahlen(el);
   } else {
     el.innerHTML = listeHTML();
   }
 }
 
+/** Nur die Zahlen am Schalter neu (wenn der Teil darunter stehen bleibt). */
+function teileZahlen(el) {
+  const k = el.querySelector('.amy-kopf');
+  if (!k) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = kopfHTML();
+  const neu = tmp.querySelector('.amy-teile');
+  const alt = k.querySelector('.amy-teile');
+  if (neu && alt && alt.innerHTML !== neu.innerHTML) alt.innerHTML = neu.innerHTML;
+}
+
+/** Einen Teil zeigen – auch von außen (ein Rezept sagt „Liste ansehen“). */
+function teilZeigen(teil) {
+  if (!TEILE.some(([k]) => k === teil)) return;
+  notizJetztSpeichern();
+  zustand = { art: 'liste', id: null, teil };
+  merken();
+  if (ansicht.tab !== 'amy') zeigeReiter('amy');
+  amyZeichnen();
+  window.scrollTo(0, 0);
+}
+app.amyTeilZeigen = teilZeigen;
+app.amyNeuZeichnen = () => amyZeichnen();
+
 /** Ein Rezept öffnen – auch von der Einkaufsliste oder vom Timer aus. */
 export function amyOeffnen(id, { still = false } = {}) {
   if (!AMY_ID.test(String(id || ''))) return;
   loeschenFragen = false;
-  zustand = { art: 'detail', id };
+  zustand = { art: 'detail', id, teil: 'rezepte' };
   merken();
   if (!still) zeigeReiter('amy');
   amyZeichnen();
@@ -461,7 +527,8 @@ export function amyTimerZeichnen() {
 }
 
 function zeige(art, id = null) {
-  zustand = { art, id };
+  // Aus einem Rezept oder dem Editor zurück: zu den Rezepten
+  zustand = { art, id, teil: 'rezepte' };
   loeschenFragen = false;
   merken();
   amyZeichnen();
@@ -492,6 +559,8 @@ function alleWeg(r) {
 export function klickAmy(el) {
   const d = el.dataset;
   if (d.amyOpen) { amyOeffnen(d.amyOpen); return true; }
+  if (d.amyTeil) { teilZeigen(d.amyTeil); return true; }
+  if (klickNotizen(el) || klickVertraeglich(el) || klickWuensche(el)) return true;
   if (!el.closest('#view-amy') && !d.act?.startsWith('amy-')) return false;
   const r = rezept(zustand.id);
   if ('amyFilter' in d) { filterUmschalten(d.amyFilter); return true; }
@@ -645,6 +714,7 @@ export function aenderungAmy(ziel) {
 
 /** Eingaben im Editor: Entwurf merken, erkannte Zutaten zeigen. true, wenn es hierher gehörte. */
 export function eingabeAmy(ziel) {
+  if (eingabeNotizen(ziel)) return true;
   if (!ziel.closest?.('#amy-form')) return false;
   if (ziel.id === 'amy-import-text') { if (importFehler) { importFehler = ''; const f = $('#amy-import-inhalt .zugang-fehler'); if (f) f.remove(); } return true; }
   // „gesund, schnell“ – mit dem Komma ist ein Tag fertig
@@ -665,6 +735,7 @@ export function eingabeAmy(ziel) {
 
 /** Enter im Tag-Feld: den Tag anlegen (app.js verhindert dann das Absenden). true, wenn es hierher gehörte. */
 export function tasteAmy(ziel) {
+  if (tasteNotizen(ziel)) return true;
   if (ziel?.id !== 'amy-tag-text') return false;
   if (ziel.value.trim()) tagDazu(ziel.value);
   ziel.value = '';
@@ -673,6 +744,7 @@ export function tasteAmy(ziel) {
 
 /** Speichern. true, wenn das Formular hierher gehörte. */
 export function absendenAmy(ev) {
+  if (absendenVertraeglich(ev) || absendenWuensche(ev)) return true;
   if (ev.target.id !== 'amy-form') return false;
   ev.preventDefault();
   entwurfAusFormular();

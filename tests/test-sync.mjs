@@ -146,9 +146,14 @@ check((await status(fremd.page)) === 'Nur lokal', 'und das Handy bleibt lokal');
 // --- trennen (in den Einstellungen)
 await a.click('.tab[data-tab="einstellungen"]');
 const vorherAnzahl = Object.keys(gh.liste().items).length;
+check(await a.locator('#teilen .zugang-btns [data-act="z-trennen"]').count() === 0 && await a.locator('#teilen .z-trennen-zeile [data-act="z-trennen"]').count() === 1, '„Trennen“ steht für sich unten, nicht neben „Aufs iPad“');
 await a.click('[data-act="z-trennen"]');
+check((await a.locator('#teilen .confirm').innerText()).includes('musst du nichts trennen'), 'die Rückfrage sagt: fürs iPad nichts trennen');
 await a.click('[data-act="z-trennen-ja"]');
 check(await bis(async () => (await status(a)) === 'Nur lokal'), 'Amy getrennt: „Nur lokal“');
+await a.click('.tab[data-tab="einkauf"]');
+check((await a.locator('#zugang .zugang-banner').innerText()).includes('Getrennt am'), 'über der Liste: wann getrennt – und wie es wieder geht');
+await a.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await a.locator('#list-body .empty-state').count()) === 1), 'getrennt: auf Amys Handy ist die Liste leer');
 check(Object.keys(gh.liste().items).length === vorherAnzahl, 'die Liste in GitHub bleibt, wie sie war');
 await a.reload({ waitUntil: 'load' });

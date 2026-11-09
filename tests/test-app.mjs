@@ -339,6 +339,14 @@ check(await page.evaluate(() => document.querySelector('#gepinnt').getBoundingCl
 await leiste.click();
 check(await bis(async () => (await page.locator('#d-title').innerText()) === 'Chili con Carne mit Süßkartoffel'), 'antippen öffnet das Rezept');
 await page.click('[data-act="schritte-zurueck"]');
+// Fertig gekocht: Es läuft nicht mehr – die App nimmt es aus „Läuft gerade“ (mit „Wieder anpinnen“)
+await page.click('[data-act="gekocht"]');
+check(await bis(async () => (await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 0), '„Heute gekocht“: nicht mehr angepinnt');
+check(await bis(async () => (await page.locator('#toast').innerText()).includes('nicht mehr angepinnt'), 8000), 'Meldung mit „Wieder anpinnen“');
+// Das große Lob (wenn es kam) zumachen, dann „Wieder anpinnen“
+if (await page.locator('#lob [data-lob="zu"]').count()) await page.locator('#lob [data-lob="zu"]').first().click().catch(() => {});
+await page.click('#toast button');
+check(await bis(async () => (await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 1), '„Wieder anpinnen“: wieder da');
 await page.click('[data-act="anpinnen"]');
 await page.click('[data-act="zurueck"]');
 check(await bis(async () => page.locator('#gepinnt').isHidden()) && (await page.locator('.box .pill-pin').count()) === 0, 'gelöst: Leiste und Pille sind weg');

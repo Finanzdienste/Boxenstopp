@@ -21,7 +21,7 @@ import { preiseMitBons } from './kosten.js';
 import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe, KI_DATEI, geteiltenKiUebernehmen } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
-import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen, eingabeZugang } from './ansicht-liste.js';
+import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen, eingabeZugang, GETRENNT, anderesGeraet } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
 import { anpassenStart, klickAnpassen, eingabeAnpassen, absendenAnpassen } from './ansicht-anpassen.js';
 import { lobStart, klickLob } from './lob.js';
@@ -44,6 +44,7 @@ import { boxenZeichnen, klickBoxen } from './ansicht-boxen.js';
 import { klickReste } from './ansicht-reste.js';
 import { katalogStart, katalogVorab, katalogLaden, klickKatalog } from './ansicht-katalog.js';
 import { klickDoppel, doppelNeu } from './ansicht-doppel.js';
+import { planZeichnen, planGezeigt, klickPlan, eingabePlan, tastePlan } from './ansicht-essensplan.js';
 import { boxenText } from './boxen.js';
 
 const apiBasis = () => lese('__api', null) || API;
@@ -141,6 +142,8 @@ function beiAenderung(stand) {
   if (kochNeu) { kochstandZeichnen(); kochmodusNeu(); }
   // Zwei auf einmal: Liste und Haken stehen im Plan
   doppelNeu();
+  // Der Essensplan (zeichnet nur, wenn der Reiter offen ist – sonst beim Hinwechseln)
+  if (ansicht.tab === 'plan') planZeichnen();
   // Putzplan und Haushaltssachen (zeichnet nur, wenn der Reiter offen ist – sonst beim Hinwechseln)
   haushaltZeichnen();
   // Preisalarme, Bons, Wege: was dort steht, kann sich geändert haben
@@ -170,6 +173,7 @@ app.tempoNeu = () => { amyZeichnen(); einstellungenZeichnen(); };
 reiterBeobachten((t) => {
   if (t === 'einstellungen') { einstellungenZeichnen(); pushZeichnen(); todoHolen(); } else waageTestAus();
   if (t === 'haushalt') haushaltGezeigt();
+  if (t === 'plan') planGezeigt();
   tabbarAnpassen();
 });
 
@@ -187,7 +191,11 @@ app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
   speichereZugang(app.zugang);
   if (farbe) farbeSetzen(farbe === 'blau' ? '' : farbe);
   nimmSpeicher(speicherFuer(app.zugang));
-  if (bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || Object.keys(bisher.amy || {}).length)) app.aendern(opZusammen(bisher.items, bisher.ki, { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege }));
+  // Auch Notizen, Essensplan, Verträglichkeit, Vorschläge und Wörter, die nur hier standen
+  const mehr = bisher ? { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege, gemeint: bisher.gemeint, notizbuch: bisher.notizbuch, essensplan: bisher.essensplan, vertraeglich: bisher.vertraeglich, wuensche: bisher.wuensche } : {};
+  const hatWas = bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(bisher[k] || {}).length) || Object.keys(bisher.essensplan?.tage || {}).length);
+  if (hatWas) app.aendern(opZusammen(bisher.items, bisher.ki, mehr));
+  try { localStorage.removeItem(GETRENNT); } catch { /* egal */ }
   lokalLoeschen();
   statusZeichnen();
   privateAngebote();
@@ -199,6 +207,8 @@ app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
 };
 
 app.trennen = () => {
+  // Gemerkt, damit der Hinweis über der Liste sagen kann, dass dieses Gerät schon verbunden war
+  try { localStorage.setItem(GETRENNT, JSON.stringify({ at: new Date().toISOString(), name: app.zugang?.name || '' })); } catch { /* egal */ }
   loescheZugang();
   githubVergessen();
   app.zugang = null;
@@ -243,6 +253,7 @@ document.addEventListener('click', (ev) => {
   if (klickZiel(el)) return;
   if (klickSpeisekarte(el)) return;
   if (klickHaushalt(el)) return;
+  if (klickPlan(el)) return;
   if (klickAmy(el)) return;
   if (klickReste(el)) return;
   if (klickKatalog(el)) return;
@@ -267,13 +278,14 @@ document.addEventListener('keydown', (ev) => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target?.matches?.('[data-timer-zu]')) { ev.preventDefault(); zumTimerSchritt(ev.target); }
   // Enter im Tag-Feld legt den Tag an, statt das Rezept zu speichern
   if (ev.key === 'Enter' && !ev.isComposing && tasteAmy(ev.target)) ev.preventDefault();
+  if (ev.key === 'Enter' && !ev.isComposing && tastePlan(ev.target)) ev.preventDefault();
   // Enter in einer Aufgabe des Putzplans: die nächste Zeile, nicht speichern
   if (ev.key === 'Enter' && !ev.isComposing && tasteHaushalt(ev.target)) ev.preventDefault();
 });
 document.addEventListener('input', (ev) => {
   const t = ev.target;
   if (eingabeZiel(t) || eingabeWillkommen(t) || eingabeGaeste(t) || eingabeSpeisekarte(t) || eingabeZugang(t)) return;
-  if (!eingabeAmy(t) && !eingabeAnpassen(t) && !eingabeKi(t) && !eingabeAngebote(t)) eingabeRezepte(t);
+  if (!eingabeAmy(t) && !eingabePlan(t) && !eingabeAnpassen(t) && !eingabeKi(t) && !eingabeAngebote(t)) eingabeRezepte(t);
 });
 document.addEventListener('change', (ev) => {
   const t = ev.target;
@@ -346,8 +358,9 @@ async function start() {
     profilAnwenden();
     eyebrowZeichnen();
   });
-  // Eine Einladung (…&fuer=Marielle) auf einem Gerät ohne Liste: gleich verbinden, das Willkommen erklärt den Rest
-  const einladung = !!ausLink && !app.zugang && !!link.fuer;
+  // Eine Einladung (…&fuer=Marielle, …&fuer=Amy) auf einem Gerät ohne Liste: gleich verbinden, das Willkommen erklärt den Rest.
+  // War hier zuletzt jemand anderes verbunden (getrennt), lieber das Formular mit dem bisherigen Namen.
+  const einladung = !!ausLink && !app.zugang && !!link.fuer && !sicher('Getrennt', () => anderesGeraet(link.fuer), '');
   if (link.farbe && (einladung || (ausLink && ausLink === app.zugang?.token))) sicher('Farbe', () => farbeSetzen(link.farbe === 'blau' ? '' : link.farbe));
   sicher('Resteverwertung', kiStart);
   sicher('Anpassen', anpassenStart);
@@ -387,6 +400,8 @@ async function start() {
   if (hash === 'amy') ansicht.tab = 'amy';
   if (hash === 'einstellungen') ansicht.tab = 'einstellungen';
   if (hash === 'haushalt') ansicht.tab = 'haushalt';
+  if (hash === 'plan') ansicht.tab = 'plan';
+  if (hash === 'vorschlaege') ansicht.tab = 'amy';
   if (gaesteLink) ansicht.tab = 'einstellungen';
   sicher('Reiter', () => zeigeReiter(ansicht.tab, true));
   // Welche Reiter unten stehen – stand der gemerkte auf einem ausgeblendeten, zum ersten sichtbaren
@@ -395,6 +410,8 @@ async function start() {
   const rezept = app.nachId[hash] ? hash : (app.nachId[ansicht.rezept] ? ansicht.rezept : null);
   if (hash === 'reste' || (kiLink && !ausLink)) sicher('Resteverwertung', () => kiStart({ oeffnen: true }));
   else if (rezept) sicher('Rezept', () => oeffneRezept(rezept, { still: true }));
+  // Aus der Push-Nachricht „Vorschlag von Amy“: gleich die Vorschläge
+  if (hash === 'vorschlaege') sicher('Vorschläge', () => app.amyTeilZeigen?.('wuensche'));
   if (kiLink && !einladung) melde('KI-Schlüssel übernommen – die Resteverwertung ist bereit.');
 
   // Der Abgleich startet auf jeden Fall
@@ -430,7 +447,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     // „chili#5“: ein Timer – zum Schritt; sonst ein Reiter oder ein Rezept
     const [ziel, schritt] = String(ev.data.ziel || '').split('#');
     if (schritt && ziel.startsWith('amy-')) amyZuSchritt(ziel, Number(schritt));
-    else if (schritt && app.nachId[ziel]) { zeigeReiter('rezepte'); zuSchritt(ziel, Number(schritt)); } else if (app.nachId[ziel]) { zeigeReiter('rezepte'); oeffneRezept(ziel); } else zeigeReiter(['einkauf', 'angebote', 'amy', 'haushalt'].includes(ziel) ? ziel : 'rezepte');
+    else if (schritt && app.nachId[ziel]) { zeigeReiter('rezepte'); zuSchritt(ziel, Number(schritt)); } else if (app.nachId[ziel]) { zeigeReiter('rezepte'); oeffneRezept(ziel); } else if (ziel === 'vorschlaege') app.amyTeilZeigen?.('wuensche'); else zeigeReiter(['einkauf', 'angebote', 'amy', 'haushalt', 'plan'].includes(ziel) ? ziel : 'rezepte');
   });
   const eigenerWorker = new URL('./sw.js', location.href).href;
   const hatteWorker = navigator.serviceWorker.controller?.scriptURL === eigenerWorker;

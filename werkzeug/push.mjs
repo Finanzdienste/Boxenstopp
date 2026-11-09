@@ -134,7 +134,7 @@ function inhalt(sha) {
 
 /** Was eine Änderung (Commit) gebracht hat. */
 function ereignisseVon(vor, nach) {
-  const e = { sachen: [], rezepte: [], notizen: [], fertig: false };
+  const e = { sachen: [], rezepte: [], notizen: [], wuensche: [], antworten: [], erledigt: [], fertig: false };
   for (const [k, d] of Object.entries(nach.items)) {
     const alt = vor.items[k];
     if (!alt || Object.keys(d.parts || {}).some((rid) => !alt.parts?.[rid])) e.sachen.push(d.name);
@@ -142,6 +142,15 @@ function ereignisseVon(vor, nach) {
   for (const [id, r] of Object.entries(nach.amy || {})) if (!vor.amy?.[id]) e.rezepte.push(r.name);
   for (const [rid, ns] of Object.entries(nach.notizen || {})) {
     for (const n of ns) if (!(vor.notizen?.[rid] || []).some((x) => x.id === n.id)) e.notizen.push({ rid, text: n.text, name: rezepteNamen[rid] || nach.amy?.[rid]?.name || nach.ki?.[rid]?.r?.name || 'einem Rezept' });
+  }
+  // Amys Vorschläge für Tobi (wuensche.js): neu, beantwortet, erledigt
+  for (const w of Object.values(nach.wuensche || {})) {
+    const alt = vor.wuensche?.[w.id];
+    if (!alt) e.wuensche.push(w.text);
+    else {
+      if (w.antwort && w.antwort !== alt.antwort) e.antworten.push({ text: w.text, antwort: w.antwort });
+      if (w.erledigt && !alt.erledigt) e.erledigt.push(w.text);
+    }
   }
   e.fertig = Object.keys(nach.items).length > 0 && offeneAnzahl(vor) > 0 && offeneAnzahl(nach) === 0;
   return e;
@@ -165,10 +174,13 @@ async function liste() {
     let vor;
     try { vor = inhalt(`${c.sha}^`); } catch { vor = leer(); }
     const e = ereignisseVon(vor, inhalt(c.sha));
-    const x = je.get(wer.toLowerCase()) || { wer, sachen: new Set(), rezepte: new Set(), notizen: [], fertig: false };
+    const x = je.get(wer.toLowerCase()) || { wer, sachen: new Set(), rezepte: new Set(), notizen: [], wuensche: [], antworten: [], erledigt: [], fertig: false };
     e.sachen.forEach((s) => x.sachen.add(s));
     e.rezepte.forEach((s) => x.rezepte.add(s));
     x.notizen.push(...e.notizen);
+    x.wuensche.push(...e.wuensche);
+    x.antworten.push(...e.antworten);
+    x.erledigt.push(...e.erledigt);
     x.fertig = x.fertig || e.fertig;
     je.set(wer.toLowerCase(), x);
   }
@@ -182,6 +194,10 @@ async function liste() {
       if (x.fertig) await an(name, 'liste', { titel: 'Einkauf erledigt', text: `${x.wer} hat alles eingekauft ✓`, tag: 'fertig', ziel: 'einkauf' });
       if (x.rezepte.size) await an(name, 'rezepte', { titel: 'Amys Rezepte', text: `Neues Rezept von ${x.wer}: ${[...x.rezepte].join(', ')} ♡`, tag: 'rezept', ziel: 'amy' });
       for (const n of x.notizen.slice(-3)) await an(name, 'rezepte', { titel: 'Notiz', text: `${x.wer} zu ${n.name}: ${n.text}`.slice(0, 200), tag: `notiz-${n.rid}`.slice(0, 40), ziel: n.rid });
+      // Vorschläge (Amys Bereich): die neuen einzeln, Antworten und Erledigtes zusammen
+      for (const t of x.wuensche.slice(-3)) await an(name, 'rezepte', { titel: `Vorschlag von ${x.wer}`, text: t.slice(0, 200), tag: 'vorschlag', ziel: 'vorschlaege' });
+      for (const a of x.antworten.slice(-2)) await an(name, 'rezepte', { titel: `${x.wer} antwortet`, text: `„${a.text.slice(0, 60)}${a.text.length > 60 ? '…' : ''}“ – ${a.antwort}`.slice(0, 200), tag: 'vorschlag-antwort', ziel: 'vorschlaege' });
+      if (x.erledigt.length) await an(name, 'rezepte', { titel: 'Vorschlag erledigt ✓', text: x.erledigt.length === 1 ? `${x.wer} hat „${x.erledigt[0].slice(0, 80)}“ erledigt` : `${x.wer} hat ${x.erledigt.length} Vorschläge erledigt`, tag: 'vorschlag-erledigt', ziel: 'vorschlaege' });
     }
   }
   delta.zuletzt = { sha: kopf, at: new Date().toISOString() };

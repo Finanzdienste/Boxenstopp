@@ -118,7 +118,7 @@ else BREIT_AB?.addListener?.(breiteAnwenden);
 const ANSICHT = 'boxenstopp.ansicht.v1';
 const gemerkt = lese(ANSICHT, {}) || {};
 /** Alle Reiter – die Einstellungen sind immer da, die anderen lassen sich unten ausblenden (ansicht-einstellungen.js). */
-export const REITER = ['rezepte', 'amy', 'einkauf', 'angebote', 'haushalt', 'einstellungen'];
+export const REITER = ['rezepte', 'amy', 'plan', 'einkauf', 'angebote', 'haushalt', 'einstellungen'];
 export const ansicht = {
   tab: REITER.includes(gemerkt.tab) ? gemerkt.tab : 'rezepte',
   filter: typeof gemerkt.filter === 'string' ? gemerkt.filter : 'alle',
@@ -196,6 +196,6 @@ export function zeigeReiter(t, scrollBehalten = false) {
   ansichtMerken();
   if (istSchmal() && !scrollBehalten) window.requestAnimationFrame(() => window.scrollTo(0, scrollPos[ansicht.tab] || 0));
   // Breit stehen Einstellungen und Haushalt links wie Angebote und Amy – nach oben, damit man sie sieht
-  else if (!istSchmal() && ['einstellungen', 'haushalt'].includes(ansicht.tab) && !scrollBehalten) window.scrollTo(0, 0);
+  else if (!istSchmal() && ['einstellungen', 'haushalt', 'plan'].includes(ansicht.tab) && !scrollBehalten) window.scrollTo(0, 0);
   beimReiter.forEach((fn) => fn(ansicht.tab));
 }

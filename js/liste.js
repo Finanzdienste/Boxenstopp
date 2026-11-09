@@ -21,7 +21,12 @@
  *     bons:      { <Schlüssel>: [{ eur: 4.99, q: 1000, u: 'g', laden, at, by }] },  was es gekostet hat
  *     preisalarm: { <Schlüssel>: { max: 6.5, u: 'kg', by, at } },   Bescheid, wenn ein Angebot so günstig ist
  *     haushalt:  { sachen, plaene, stand, todoApp, todoWunsch, todoAn, todoZiel },   Haushaltssachen und Putzplan (haushalt.js)
- *     leute:     { amy: 'Amy', tobi: 'Tobi' } }   wer die Liste teilt (für „Wer“ im Putzplan; eine eigene Liste: eine Person)
+ *     leute:     { amy: 'Amy', tobi: 'Tobi' },   wer die Liste teilt (für „Wer“ im Putzplan; eine eigene Liste: eine Person)
+ *     gemeint:   { 'n:chicki-nuggies': { name: 'Chicken Nuggets', by, at } },   was mit einem Wort gemeint ist
+ *     notizbuch: { <nb-…>: { id, titel, text, farbe, at, geaendert, by } },   Amys Notizblätter (notizbuch.js)
+ *     essensplan: { tage: { <JJJJ-MM-TT>: { mittag: [], abend: [], kochen: [] } } },   der Essensplan (essensplan.js)
+ *     vertraeglich: { amy: { <Schlüssel>: { name, stufe, notiz, by, at } } },   was jemand verträgt (vertraeglich.js)
+ *     wuensche:  { <w-…>: { id, text, by, at, erledigt, antwort } } }   Amys Vorschläge für Tobi (wuensche.js)
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -47,7 +52,10 @@
  * Einkauf offen; der Haken nimmt die Markierung weg. `bons` sind bezahlte
  * Preise (die letzten fünf je Zutat): Die Kosten rechnen dann damit statt mit
  * dem Richtpreis (kosten.js preiseMitBons). `preisalarm` ist ein Wunschpreis
- * je Zutat (angebote.js preisalarmTreffer, Push im Daten-Repo).
+ * je Zutat (angebote.js preisalarmTreffer, Push im Daten-Repo). `gemeint`:
+ * Amy tippt „chicki nuggies“ und meint Chicken Nuggets – einmal an der Zeile
+ * gesagt, heißt die Zeile so (ihr Wort steht klein dabei, `wie`), und beim
+ * nächsten Tippen kommt gleich „Chicken Nuggets“ auf die Liste.
  *
  * Ein Eintrag:
  *
@@ -75,13 +83,17 @@
 import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
 import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
-import { umleiten } from './format.js';
+import { umleiten, nameSchluessel } from './format.js';
 import { RAUM, SACH_BEREICH, aufgabenAm } from './haushalt.js';
 import { zielBereinigen as makrosBereinigen } from './zielrechner.js';
 import { boxenBereinigen, BOXEN_STANDARD } from './boxen.js';
+import { notizbuchBereinigen, notizbuchAnwenden, notizbuchZusammen } from './notizbuch.js';
+import { essensplanBereinigen, essensplanAnwenden, essensplanZusammen } from './essensplan.js';
+import { vertraeglichBereinigen, vertraeglichAnwenden, vertraeglichZusammen } from './vertraeglich.js';
+import { wuenscheBereinigen, wuenscheAnwenden, wuenscheZusammen } from './wuensche.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {} });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
 const MAX_BONS = 200;
@@ -184,6 +196,11 @@ export function bescheidNoetig(vorher, nachher) {
   }
   for (const id of Object.keys(nachher?.amy || {})) if (!v.amy?.[id]) return true;
   for (const [rid, ns] of Object.entries(nachher?.notizen || {})) for (const n of ns || []) if (!(v.notizen?.[rid] || []).some((x) => x.id === n.id)) return true;
+  // Ein Vorschlag für Tobi, seine Antwort, „erledigt“ (wuensche.js)
+  for (const w of Object.values(nachher?.wuensche || {})) {
+    const alt = v.wuensche?.[w.id];
+    if (!alt || (w.antwort && w.antwort !== alt.antwort) || (w.erledigt && !alt.erledigt)) return true;
+  }
   return Object.keys(nachher?.items || {}).length > 0 && offeneAnzahl(v) > 0 && offeneAnzahl(nachher) === 0;
 }
 
@@ -205,6 +222,14 @@ function namenErsetzen(s, alias, neu) {
   for (const [k, y] of Object.entries(s)) if (k !== 'angebote' && k !== 'leute') tief(y);
   for (const st of Object.values(s.haushalt?.stand || {})) {
     for (const e of Array.isArray(st?.verlauf) ? st.verlauf : []) if (Array.isArray(e) && typeof e[1] === 'string' && alias.has(e[1].toLowerCase())) e[1] = neu;
+  }
+  if (istObj(s.vertraeglich)) {
+    const ziel = String(neu).toLowerCase();
+    for (const k of Object.keys(s.vertraeglich)) {
+      if (k === ziel || !alias.has(k)) continue;
+      s.vertraeglich[ziel] = { ...s.vertraeglich[k], ...(s.vertraeglich[ziel] || {}) };
+      delete s.vertraeglich[k];
+    }
   }
   if (istObj(s.kochen)) {
     const ziel = kochenName(neu);
@@ -295,6 +320,17 @@ export function beschreibung(vorher, nachher, name = () => '') {
     for (const [rid, xs] of Object.entries(k.schritte || {})) if (JSON.stringify(xs) !== JSON.stringify(alt?.schritte?.[rid])) kocht.add(rid);
   }
   if (kocht.size) teile.push(`kocht ${aufzaehlen([...kocht].map(rn), 2)}`);
+  // Wörter, Amys Bereich, der Essensplan (Titel und Inhalt der Notizen bleiben aus der Nachricht)
+  const gemeintNeu = Object.entries(n.gemeint || {}).filter(([k, g]) => v.gemeint?.[k]?.name !== g.name).map(([, g]) => g.name);
+  if (gemeintNeu.length) teile.push(`${aufzaehlen(gemeintNeu, 2)} gemerkt`);
+  if (JSON.stringify(v.notizbuch || {}) !== JSON.stringify(n.notizbuch || {})) teile.push('Notizen');
+  if (JSON.stringify(v.essensplan || {}) !== JSON.stringify(n.essensplan || {})) teile.push('Essensplan');
+  if (JSON.stringify(v.vertraeglich || {}) !== JSON.stringify(n.vertraeglich || {})) teile.push('Verträglichkeit');
+  const wNeu = Object.keys(n.wuensche || {}).filter((id) => !v.wuensche?.[id]).length;
+  const wFertig = Object.values(n.wuensche || {}).filter((w) => w.erledigt && !v.wuensche?.[w.id]?.erledigt).length;
+  if (wNeu) teile.push(wNeu === 1 ? 'ein neuer Vorschlag' : `${wNeu} neue Vorschläge`);
+  else if (wFertig) teile.push(wFertig === 1 ? 'Vorschlag erledigt' : `${wFertig} Vorschläge erledigt`);
+  else if (JSON.stringify(v.wuensche || {}) !== JSON.stringify(n.wuensche || {})) teile.push('Vorschläge');
   // Haushalt, Profil, der Rest
   const hv = v.haushalt || leerHaushalt();
   const hn = n.haushalt || leerHaushalt();
@@ -366,6 +402,8 @@ export function bereinigen(roh) {
         at: text(d.at, 40),
         added: text(d.added, 40),
       };
+      // So hat es jemand getippt, gemeint ist name (gemeint)
+      if (typeof d.wie === 'string' && d.wie.trim() && d.wie !== e.name) e.wie = d.wie.slice(0, 80);
       if (istObj(d.parts)) {
         for (const [rid, p] of Object.entries(d.parts)) {
           if (!istObj(p) || !SCHLUESSEL.test(rid)) continue;
@@ -468,8 +506,27 @@ export function bereinigen(roh) {
     for (const [k, n] of Object.entries(roh.leute).slice(0, 8)) if (PERSON.test(String(n)) && k === String(n).toLowerCase()) s.leute[k] = n;
   }
   if (istObj(roh.profil)) s.profil = profilBereinigen(roh.profil);
+  s.gemeint = gemeintBereinigen(roh.gemeint);
+  s.notizbuch = notizbuchBereinigen(roh.notizbuch);
+  s.essensplan = essensplanBereinigen(roh.essensplan);
+  s.vertraeglich = vertraeglichBereinigen(roh.vertraeglich);
+  s.wuensche = wuenscheBereinigen(roh.wuensche);
   return s;
 }
+
+const MAX_GEMEINT = 200;
+/** Was mit einem Wort gemeint ist: { 'n:chicki-nuggies': { name: 'Chicken Nuggets', by, at } }. */
+export function gemeintBereinigen(x) {
+  if (!istObj(x)) return {};
+  const out = {};
+  for (const [k, g] of Object.entries(x).slice(-MAX_GEMEINT)) {
+    const name = istObj(g) ? text(g.name, 80)?.trim() : '';
+    if (k.startsWith('n:') && SCHLUESSEL.test(k) && name && nameSchluessel(name) !== k) out[k] = { name, by: text(g.by, 40), at: text(g.at, 40) || '' };
+  }
+  return out;
+}
+/** Das Wort, wie es getippt wird → was gemeint ist (oder ''). */
+export const gemeintVon = (stand, name) => stand?.gemeint?.[nameSchluessel(name)]?.name || '';
 
 /**
  * Was eine Liste für sich festlegt (liste.json unter profil, für alle, die sie
@@ -745,12 +802,14 @@ export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || 
 /**
  * Einträge und behaltene KI-Rezepte von einem anderen Stand dazunehmen, ohne
  * Vorhandenes zu überschreiben – dazu, was sonst noch fehlt:
- * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich, kochen, fehlt, bons, preisalarm }.
+ * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich, kochen, fehlt, bons, preisalarm,
+ * haushalt, leute, profil, gemeint, notizbuch, essensplan, vertraeglich, wuensche }.
  */
 export const opZusammen = (items, ki = {}, mehr = {}) => ({
   typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
   amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
   fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}), profil: klon(mehr.profil || {}),
+  gemeint: klon(mehr.gemeint || {}), notizbuch: klon(mehr.notizbuch || {}), essensplan: klon(mehr.essensplan || {}), vertraeglich: klon(mehr.vertraeglich || {}), wuensche: klon(mehr.wuensche || {}),
 });
 /**
  * Eine ältere App-Fassung kennt Material und „jedes 2. Mal“ der Putztage
@@ -786,6 +845,12 @@ export const opGleich = (von, nach, namen = [], ziel = {}) => ({ typ: 'gleich', 
 export const opGleichWeg = (schluessel) => ({ typ: 'gleichWeg', schluessel: klon(schluessel) });
 /** „Nein, verschieden“ – das Paar nicht noch einmal vorschlagen. */
 export const opUngleich = (a, b) => ({ typ: 'ungleich', paar: paar(a, b) });
+/**
+ * „chicki nuggies“ heißt Chicken Nuggets: merken, und offene eigene Zeilen
+ * mit diesem Wort heißen gleich so (cat: die Abteilung dazu, wenn die App sie kennt).
+ */
+export const opGemeint = (wort, name, cat, by) => ({ typ: 'gemeint', von: nameSchluessel(wort), wort: text(wort, 80), name: text(name, 80), cat: ABTEILUNGEN.includes(cat) ? cat : '', by: by || null, at: jetzt() });
+export const opGemeintWeg = (von) => ({ typ: 'gemeintWeg', von });
 /** Ein Einkauf im Laden ist vorbei: die Stellen der Zutaten auf dem Weg dazulegen (weg.js wegStellen). */
 export const opWeg = (laden, stellen, by) => ({ typ: 'weg', laden, stellen: klon(stellen), by: by || null, at: jetzt() });
 /** Den Weg durch einen Laden vergessen. */
@@ -1139,6 +1204,14 @@ function aendere(s, op) {
         if (!istObj(s.profil)) s.profil = {};
         for (const [k, v] of Object.entries(profilBereinigen(op.profil))) if (!(k in s.profil)) s.profil[k] = v;
       }
+      if (istObj(op.gemeint)) {
+        if (!istObj(s.gemeint)) s.gemeint = {};
+        for (const [k, g] of Object.entries(gemeintBereinigen(op.gemeint))) if (!s.gemeint[k]) s.gemeint[k] = g;
+      }
+      if (istObj(op.notizbuch)) notizbuchZusammen(s, op.notizbuch);
+      if (istObj(op.essensplan)) essensplanZusammen(s, op.essensplan);
+      if (istObj(op.vertraeglich)) vertraeglichZusammen(s, op.vertraeglich);
+      if (istObj(op.wuensche)) wuenscheZusammen(s, op.wuensche);
       if (istObj(op.leute)) {
         if (!istObj(s.leute)) s.leute = {};
         for (const [k, n] of Object.entries(op.leute)) if (PERSON.test(String(n)) && k === String(n).toLowerCase() && !s.leute[k] && Object.keys(s.leute).length < 8) s.leute[k] = n;
@@ -1327,6 +1400,42 @@ function aendere(s, op) {
       s.angebote.eintraege = (s.angebote.eintraege || []).filter((a) => a.id !== op.id);
       return;
     }
+    case 'gemeint': {
+      const von = String(op.von || '');
+      const name = text(op.name, 80)?.trim();
+      if (!von.startsWith('n:') || !SCHLUESSEL.test(von) || !name || nameSchluessel(name) === von) return;
+      if (!istObj(s.gemeint)) s.gemeint = {};
+      s.gemeint[von] = { name, by: text(op.by, 40), at: text(op.at, 40) || '' };
+      const alle = Object.keys(s.gemeint);
+      for (const k of alle.slice(0, Math.max(0, alle.length - MAX_GEMEINT))) delete s.gemeint[k];
+      // Offene eigene Zeilen mit dem Wort heißen jetzt so – das Wort steht klein dabei
+      for (const e of Object.values(s.items)) {
+        if (!e.custom || teileVon(e).length || erledigt(e) || nameSchluessel(e.name) !== von) continue;
+        e.wie = e.name;
+        e.name = name;
+        if (op.cat && ABTEILUNGEN.includes(op.cat) && (!e.cat || e.cat === 'sonstiges')) e.cat = op.cat;
+      }
+      return;
+    }
+    case 'gemeintWeg':
+      if (istObj(s.gemeint)) delete s.gemeint[op.von];
+      return;
+    case 'blatt':
+    case 'blattWeg':
+      notizbuchAnwenden(s, op);
+      return;
+    case 'essensplan':
+      essensplanAnwenden(s, op);
+      return;
+    case 'vertraeglich':
+      vertraeglichAnwenden(s, op);
+      return;
+    case 'wunsch':
+    case 'wunschErledigt':
+    case 'wunschAntwort':
+    case 'wunschWeg':
+      wuenscheAnwenden(s, op);
+      return;
     default:
   }
 }

@@ -9,11 +9,26 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
 import { woerter, wortWert, aehnlich, vorschlaege, richtung, rang, merkName, VORSCHLAG_AB } from '../js/gleich.js';
-import { leer, anwenden, bereinigen, aufloesen, hatTeil, erledigt, opTeil, opTeilWeg, opHaken, opEigener, opErledigteWeg, opGleich, opGleichWeg, opUngleich, opAbteilung, opZusammen, opSetzen, paar } from '../js/liste.js';
+import { leer, anwenden, bereinigen, aufloesen, hatTeil, erledigt, opTeil, opTeilWeg, opHaken, opEigener, opErledigteWeg, opGleich, opGleichWeg, opUngleich, opAbteilung, opZusammen, opSetzen, opGemeint, opGemeintWeg, gemeintVon, beschreibung, paar } from '../js/liste.js';
 import { abteilungVon, nachBereichen } from '../js/bereiche.js';
 import { umleiten, nameSchluessel, abteilung } from '../js/format.js';
 
 const { check, ende } = pruefer();
+
+// --- „Gemeint ist …“: Amy schreibt „chicki nuggies“ und meint Chicken Nuggets
+{
+  let g = anwenden(leer(), [opEigener('c-n1', 'chicki nuggies', 'sonstiges'), opEigener('c-n2', 'Chicki Nuggies', 'sonstiges'), opEigener('c-x', 'Milch', 'kuehl')]);
+  g = anwenden(g, opGemeint('chicki nuggies', 'Chicken Nuggets', 'tk', 'Amy'));
+  check(g.gemeint['n:chicki-nuggies']?.name === 'Chicken Nuggets' && g.gemeint['n:chicki-nuggies'].by === 'Amy', 'gemerkt: n:chicki-nuggies → Chicken Nuggets');
+  check(g.items['c-n1'].name === 'Chicken Nuggets' && g.items['c-n1'].wie === 'chicki nuggies' && g.items['c-n2'].wie === 'Chicki Nuggies' && g.items['c-n1'].cat === 'tk', 'offene Zeilen mit dem Wort heißen so, ihr Wort steht dabei (wie), Abteilung dazu');
+  check(g.items['c-x'].name === 'Milch' && !g.items['c-x'].wie, 'andere Zeilen nicht');
+  check(gemeintVon(g, 'Chicki  Nuggies') === 'Chicken Nuggets' && gemeintVon(g, 'Nuggets') === '', 'nachschlagen – groß/klein und Leerzeichen egal');
+  const b = bereinigen(JSON.parse(JSON.stringify(g)));
+  check(b.items['c-n1'].wie === 'chicki nuggies' && b.gemeint['n:chicki-nuggies'].name === 'Chicken Nuggets', 'bleibt beim Bereinigen');
+  check(!bereinigen({ gemeint: { 'n:a': { name: 'A' }, 'kein-n': { name: 'X' }, 'n:b': {} } }).gemeint['n:a'] && !Object.keys(bereinigen({ gemeint: { 'kein-n': { name: 'X' } } }).gemeint).length, 'unsinnige Einträge (das Wort selbst, ohne n:, ohne Namen) fallen raus');
+  check(beschreibung(leer(), g).includes('Chicken Nuggets gemerkt'), `Commit: „… gemerkt“ (${beschreibung(leer(), g)})`);
+  check(!anwenden(g, opGemeintWeg('n:chicki-nuggies')).gemeint['n:chicki-nuggies'], 'vergessen');
+}
 const D = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
 const K = D.katalog;
 
@@ -200,6 +215,35 @@ check(await bis(async () => !(await p.locator('#l-gleich').isVisible())) && awai
 await p.reload({ waitUntil: 'load' });
 await p.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await p.locator('#list-body .item-name', { hasText: 'Hafermilch Barista' }).count()) === 1) && !(await p.locator('#l-gleich').isVisible()), 'nach dem Neuladen fragt sie nicht wieder');
+// --- „Gemeint ist …“ im Browser: an der Zeile sagen, was gemeint ist – beim nächsten Tippen weiß es die App
+await p.click('.tab[data-tab="einkauf"]');
+await p.fill('#add-input', 'chicki nuggies');
+await p.press('#add-input', 'Enter');
+check(await bis(async () => (await p.locator('#list-body .item-name', { hasText: /^chicki nuggies$/ }).count()) === 1), 'Amy tippt „chicki nuggies“');
+await p.click('#list-body .item-main:has(.item-name:text-is("chicki nuggies"))');
+check(await p.locator('form[data-gemeint]').count() === 1, 'aufgeklappt: „Gemeint ist“');
+await p.fill('form[data-gemeint] input[name="name"]', 'Chicken Nuggets');
+await p.click('form[data-gemeint] button[type="submit"]');
+check(await bis(() => gh.liste()?.gemeint?.['n:chicki-nuggies']?.name === 'Chicken Nuggets'), 'gemerkt – für beide');
+check(await bis(async () => (await p.locator('#list-body .item-name', { hasText: 'Chicken Nuggets' }).innerText().catch(() => '')).includes('„chicki nuggies“')), 'die Zeile heißt Chicken Nuggets, ihr Wort steht klein dabei');
+const zeilen = () => Object.values(gh.liste()?.items || {}).filter((d) => d.name === 'Chicken Nuggets');
+check(await bis(() => zeilen().length === 1 && zeilen()[0].wie === 'chicki nuggies'), 'in der Liste: name und wie');
+await p.fill('#add-input', 'Chicki Nuggies');
+await p.press('#add-input', 'Enter');
+check(await bis(async () => (await p.locator('#toast').innerText()).includes('Chicken Nuggets')) && zeilen().length === 1, 'nochmal getippt: steht schon drauf (als Chicken Nuggets)');
+// Abhaken, wegräumen, neu tippen: kommt gleich richtig drauf
+const k = Object.entries(gh.liste().items).find(([, d]) => d.name === 'Chicken Nuggets')[0];
+await p.click(`#list-body [data-del="${k}"]`);
+check(await bis(() => !zeilen().length), 'Zeile gelöscht');
+await p.fill('#add-input', 'chicki nuggies');
+await p.press('#add-input', 'Enter');
+check(await bis(() => zeilen().length === 1 && zeilen()[0].wie === 'chicki nuggies'), 'neu getippt: gleich „Chicken Nuggets“ (mit ihrem Wort)');
+check((await p.locator('#toast').innerText()).includes('steht als „Chicken Nuggets“ drauf'), 'Meldung: „… steht als „Chicken Nuggets“ drauf“');
+// Vergessen
+const k2 = Object.entries(gh.liste().items).find(([, d]) => d.name === 'Chicken Nuggets')[0];
+await p.click(`#list-body [data-mehr="${k2}"]`);
+await p.click('[data-gemeint-weg]');
+check(await bis(() => !gh.liste()?.gemeint?.['n:chicki-nuggies'] && Object.values(gh.liste().items).some((d) => d.name === 'chicki nuggies' && !d.wie)), 'vergessen: wieder „chicki nuggies“');
 check(tobi.fehler.length === 0 && amy.fehler.length === 0, `keine Fehler in der Konsole${[...tobi.fehler, ...amy.fehler].length ? `: ${[...tobi.fehler, ...amy.fehler].slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();

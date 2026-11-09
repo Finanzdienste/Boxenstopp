@@ -46,7 +46,8 @@ try{var w=JSON.parse(localStorage.getItem('boxenstopp.liste-daneben.v1'));if(typ
           <button type="button" class="abk abk-reste" data-act="reste"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 10h14M8.5 6v1.5M8.5 13.5v3"/></svg></span><span class="abk-t">Resteverwertung</span><span class="vh" id="reste-letzter" hidden></span></button>
           <button type="button" class="abk abk-doppel" data-act="doppel"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 11h9v5.5a3 3 0 0 1-3 3h-3a3 3 0 0 1-3-3z"/><path d="M1 13h1.5M11.5 13H13"/><path d="M15 14h7v3a2.5 2.5 0 0 1-2.5 2.5h-2A2.5 2.5 0 0 1 15 17z"/><path d="M5.5 8c0-1 1-1.2 1-2.2M8.5 8c0-1 1-1.2 1-2.2M18.5 11c0-1 1-1.2 1-2.2"/></svg></span><span class="abk-t">Zwei auf einmal</span></button>
           <button type="button" class="abk abk-karte" data-act="speisekarte"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9.5a2 2 0 0 1 2 2v15l-3-1.8-3 1.8-3-1.8-3 1.8v-15a2 2 0 0 1 .5-1.3"/><path d="M8.5 8h6M8.5 11.5h6M8.5 15h3.5"/></svg></span><span class="abk-t">Speisekarte</span></button>
-          <button type="button" class="abk abk-amy" data-tab="amy"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span><span class="abk-t">Amys Rezepte</span></button>
+          <button type="button" class="abk abk-amy" data-tab="amy"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span><span class="abk-t">Amys Bereich</span></button>
+          <button type="button" class="abk abk-plan" data-tab="plan"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.2h3"/></svg></span><span class="abk-t">Essensplan</span></button>
           <button type="button" class="abk abk-haus" data-tab="haushalt"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 11L12 4.2l8.2 6.8"/><path d="M6 9.4v9.4a1.2 1.2 0 0 0 1.2 1.2h9.6a1.2 1.2 0 0 0 1.2-1.2V9.4"/><path d="M10 20v-4.6h4V20"/></svg></span><span class="abk-t">Haushalt</span><span class="abk-n" id="h-abk" hidden>0</span></button>
           <button type="button" class="abk abk-angebote" data-act="angebote"><span class="abk-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/><path d="M8.5 7.5V6a3.5 3.5 0 0 1 7 0v1.5"/><path d="M9.5 12.5l1.8 1.8 3.5-3.5"/></svg></span><span class="abk-t">Angebote</span><span class="abk-n" id="a-abk" hidden>0</span></button>
         </nav>
@@ -89,7 +90,9 @@ try{var w=JSON.parse(localStorage.getItem('boxenstopp.liste-daneben.v1'));if(typ
 
     <section id="view-angebote" class="pane angebote-pane" aria-labelledby="a-title"><p class="loading">Angebote werden geladen…</p></section>
 
-    <section id="view-amy" class="pane amy-pane" aria-label="Amys Rezepte"><p class="loading">Amys Rezepte werden geladen…</p></section>
+    <section id="view-amy" class="pane amy-pane" aria-label="Amys Bereich"><p class="loading">Amys Bereich wird geladen…</p></section>
+
+    <section id="view-plan" class="pane plan-pane" aria-labelledby="plan-titel"><p class="loading">Der Essensplan wird geladen…</p></section>
 
     <!-- Einstellungen: das Gerüst steht hier, den Inhalt zeichnen ansicht-einstellungen.js, ansicht-liste.js (Gemeinsame Liste) und ansicht-push.js -->
     <section id="view-haushalt" class="pane haus-pane" aria-labelledby="h-titel"><p class="loading">Haushalt wird geladen…</p></section>
@@ -119,9 +122,13 @@ try{var w=JSON.parse(localStorage.getItem('boxenstopp.liste-daneben.v1'));if(typ
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 10.5h15v7.5a2.5 2.5 0 0 1-2.5 2.5H7a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M3 8.2C3 7.5 3.5 7 4.2 7h15.6c.7 0 1.2.5 1.2 1.2v2.3H3z"/><path d="M9 4.5h6"/></svg>
       <span>Rezepte</span>
     </button>
-    <button type="button" class="tab tab-amy" data-tab="amy" aria-label="Amys Rezepte">
+    <button type="button" class="tab tab-amy" data-tab="amy" aria-label="Amys Bereich">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>
-      <span class="tab-l">Amys Rezepte</span><span class="tab-k">Amy</span>
+      <span class="tab-l">Amys Bereich</span><span class="tab-k">Amy</span>
+    </button>
+    <button type="button" class="tab" data-tab="plan">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.2h3"/></svg>
+      <span class="tab-l">Essensplan</span><span class="tab-k">Plan</span>
     </button>
     <button type="button" class="tab" data-tab="einkauf">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M3.8 6.6l1.3 1.3L7.6 5.4M3.8 12.1l1.3 1.3 2.5-2.5M3.8 17.6l1.3 1.3 2.5-2.5"/></svg>

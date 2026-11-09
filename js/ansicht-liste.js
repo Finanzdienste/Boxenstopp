@@ -30,7 +30,7 @@ import { app, $, melde, lese, schreibe, zeigeReiter } from './kern.js';
 import { lobKlein } from './lob.js';
 import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
-import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, opTeil, opTeilWeg, extraId, istExtra, aufloesen, ABTEILUNGEN } from './liste.js';
+import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, opTeil, opTeilWeg, opGemeint, opGemeintWeg, gemeintVon, extraId, istExtra, aufloesen, ABTEILUNGEN } from './liste.js';
 import { verlaufHinweis, verlaufText, wochenSchluessel } from './preisverlauf.js';
 import { nachWeg, wegSchluessel, wegStellen, PAUSE_MS, ABTEILUNG_NAME } from './weg.js';
 import { aehnlich, vorschlaege, richtung, merkName } from './gleich.js';
@@ -40,7 +40,7 @@ import { pushZeichnen } from './ansicht-push.js';
 const opZusammenWeg = (laden, w) => opZusammen({}, {}, { wege: { [laden]: w } });
 import { rezeptAufListe, rezeptVonListe, ic } from './ansicht-rezepte.js';
 import { schluesselAus, kiAus, ladeKi, speichereKi, linkExtras } from './zugang.js';
-import { istEigen, person, wessen, linkFuerGeraet } from './profil.js';
+import { istEigen, person, wessen, linkFuerGeraet, anderePerson } from './profil.js';
 import { nachBereichen, alsText, abteilungVon, merkSchluessel, nameSchluessel } from './bereiche.js';
 import { zutatImg } from './bilder.js';
 import { kaufMenge } from './boxen.js';
@@ -282,6 +282,60 @@ function extraMerken(form) {
   melde(`${d.name}: ${menge(q, u)} ${d.custom ? 'gemerkt' : schonGekauft ? `dazu – noch ${summe} zu kaufen` : `dazu – insgesamt ${summe}`}`);
 }
 
+/**
+ * „Gemeint ist …“ – bei eigenen Einträgen: Amy tippt „chicki nuggies“ und
+ * meint Chicken Nuggets. Einmal gesagt, heißt die Zeile so, ihr Wort steht
+ * klein dabei, und beim nächsten Tippen kommt gleich das Gemeinte auf die
+ * Liste (aufDieListe) – mit Abteilung, Angeboten und Zusammenlegen.
+ */
+function gemeintHTML(k, d) {
+  if (!d.custom || teileVon(d).some(([rid]) => !istExtra(rid))) return '';
+  const wort = d.wie || d.name;
+  if (d.wie && gemeintVon(app.stand, d.wie)) {
+    return `<p class="l-gemeint-info"><span class="l-mehr-k">Gemeint ist</span>„${esc(d.wie)}“ heißt ${esc(d.name)} – merkt sich die App. <button type="button" class="linkbtn" data-gemeint-weg="${esc(k)}">Vergessen</button></p>`;
+  }
+  return `<form class="l-bon l-gemeint" data-gemeint="${esc(k)}" novalidate><p class="l-mehr-k">Gemeint ist</p>
+<div class="l-felder"><input name="name" type="text" list="l-gemeint-namen" autocomplete="off" autocapitalize="sentences" placeholder="z. B. ${wort.toLowerCase().includes('nug') ? 'Chicken Nuggets' : 'der Name im Laden'}" aria-label="Was mit „${esc(wort)}“ gemeint ist"><button type="submit" class="btn">Merken</button></div>
+<p class="l-mehr-fein">Dann heißt die Zeile so, „${esc(wort)}“ steht klein dabei – und tippt ihr es wieder, kommt gleich das Richtige auf die Liste.</p>
+<datalist id="l-gemeint-namen">${[...new Set(Object.values(app.katalog || {}).map((x) => x.n).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'de')).map((n) => `<option value="${esc(n)}"></option>`).join('')}</datalist></form>`;
+}
+
+/** „Gemeint ist“ speichern: merken, die Zeile umbenennen (mit Rückgängig). */
+function gemeintMerken(form) {
+  const k = form.dataset.gemeint;
+  const d = app.stand.items[k];
+  if (!d) return;
+  const name = String(form.elements.name.value || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  if (!name) { form.elements.name.focus(); return; }
+  const wort = d.wie || d.name;
+  const von = nameSchluessel(wort);
+  if (nameSchluessel(name) === von) { melde('Das ist ja schon dasselbe Wort'); return; }
+  const vorher = klon(d);
+  const vorherG = app.stand.gemeint?.[von] || null;
+  const cat = app.stand.abteilungen?.[nameSchluessel(name)] || abteilung(name, app.katalog);
+  const verschoben = app.stand.abteilungen?.[k] || app.stand.abteilungen?.[von];
+  offenZeile = null;
+  app.aendern([opGemeint(wort, name, cat, app.name()), opSetzen(k, { ...d, name, wie: wort, cat: verschoben || (d.cat === 'sonstiges' ? cat : d.cat) })]);
+  melde(`„${wort}“ heißt jetzt ${name} – merkt sich die App`, {
+    knopf: 'Rückgängig',
+    beiKnopf: () => app.aendern([opGemeintWeg(von), ...(vorherG ? [opZusammen({}, {}, { gemeint: { [von]: vorherG } })] : []), opSetzen(k, vorher)]),
+  });
+}
+
+/** „Vergessen“: das Wort heißt wieder nur sich selbst – die Zeile auch. */
+function gemeintVergessen(k) {
+  const d = app.stand.items[k];
+  if (!d?.wie) return;
+  const von = nameSchluessel(d.wie);
+  const vorherG = app.stand.gemeint?.[von] || null;
+  const vorher = klon(d);
+  const zurueck = { ...d, name: d.wie };
+  delete zurueck.wie;
+  offenZeile = null;
+  app.aendern([opGemeintWeg(von), opSetzen(k, zurueck)]);
+  melde(`„${d.wie}“ vergessen`, { knopf: 'Rückgängig', beiKnopf: () => app.aendern([...(vorherG ? [opZusammen({}, {}, { gemeint: { [von]: vorherG } })] : []), opSetzen(k, vorher)]) });
+}
+
 /** Unter einer aufgeklappten Zeile: in welche Abteilung sie gehört, ob sie dasselbe ist wie eine andere – und der Einkauf. */
 function mehrHTML(k, d) {
   const jetzt = abteilungHier(k, d);
@@ -292,6 +346,7 @@ function mehrHTML(k, d) {
   const einkauf = einkaufHTML(k, d);
   return `<div class="l-mehr" id="l-mehr">
 ${einkauf.fehlt}
+${gemeintHTML(k, d)}
 ${extraHTML(k, d)}
 <p class="l-mehr-k">Gehört zu</p>
 <div class="l-abts" role="group" aria-label="Abteilung für ${esc(d.name)}">${ABTEILUNGEN.map((c) => `<button type="button" class="chip" data-abt="${c}" aria-pressed="${c === jetzt}">${esc(ABTEILUNG_NAME[c])}</button>`).join('')}</div>
@@ -423,7 +478,7 @@ function zeile([k, d]) {
   return `<li class="item${fertig ? ' is-done' : ''}${auf ? ' is-auf' : ''}">
 <button type="button" class="cb" role="checkbox" aria-checked="${fertig}" data-check="${esc(k)}" aria-label="${esc(d.name)}">${ic('check')}</button>
 ${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungHier(k, d) })}
-<button type="button" class="item-main" data-mehr="${esc(k)}" aria-expanded="${auf}"${auf ? ' aria-controls="l-mehr"' : ''}><span class="item-name">${esc(d.name)}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${fehlt}${von}</button>
+<button type="button" class="item-main" data-mehr="${esc(k)}" aria-expanded="${auf}"${auf ? ' aria-controls="l-mehr"' : ''}><span class="item-name">${esc(d.name)}${d.wie ? ` <span class="item-wie">„${esc(d.wie)}“</span>` : ''}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${fehlt}${von}</button>
 <span class="item-qty">${esc(mengeText)}${etwa ? `<small>${esc(etwa)}</small>` : ''}</span>
 <button type="button" class="x" data-del="${esc(k)}" aria-label="${esc(d.name)} löschen">${X}</button>
 ${angebot ? `<div class="l-angebote">${angebot}</div>` : ''}
@@ -528,6 +583,9 @@ export function zahlZeichnen() {
 /* -------------------------------------------------- gemeinsame Liste */
 
 const STATUS_TEXT = { lokal: 'Nur lokal', ok: 'Geteilt', sendet: 'Speichert…', offline: 'Offline', zugang: 'Schlüssel prüfen' };
+/** Wann dieses Gerät getrennt wurde (app.trennen) – für den Hinweis über der Liste. */
+export const GETRENNT = 'boxenstopp.getrennt.v1';
+const geraetName = () => (istIpad() ? 'iPad' : istIos() ? 'iPhone' : 'Handy');
 
 export function statusZeichnen() {
   const { zustand, offen, zuletzt } = app.status;
@@ -555,19 +613,27 @@ function teilenZeichnen(zuletzt) {
   const wann = zuletzt ? ` · abgeglichen ${uhrzeit(zuletzt)}` : '';
   if (trennenFragen) {
     const offen = app.status.offen;
-    el.innerHTML = `<div class="confirm" role="group" aria-label="Trennen"><span>Dieses Handy von der ${istEigen() ? '' : 'gemeinsamen '}Liste trennen? Die Liste bleibt in GitHub.${offen ? ` ${offen} ${offen === 1 ? 'Änderung ist' : 'Änderungen sind'} noch nicht gespeichert und gehen verloren.` : ''}</span><div class="confirm-btns"><button type="button" class="btn btn-danger" data-act="z-trennen-ja">Ja, trennen</button><button type="button" class="btn btn-quiet" data-act="z-trennen-nein">Abbrechen</button></div></div>`;
+    el.innerHTML = `<div class="confirm" role="group" aria-label="Trennen"><span>Dieses ${geraetName()} von der ${istEigen() ? '' : 'gemeinsamen '}Liste trennen? Danach steht hier „Nur lokal“ und eine leere Liste – die Liste in GitHub und die anderen Geräte bleiben, wie sie sind. <b>Für ein iPad oder ein zweites Handy musst du nichts trennen</b>, dafür reicht der Link.${offen ? ` ${offen} ${offen === 1 ? 'Änderung ist' : 'Änderungen sind'} noch nicht gespeichert und gehen verloren.` : ''}</span><div class="confirm-btns"><button type="button" class="btn btn-quiet" data-act="z-trennen-nein">Nicht trennen</button><button type="button" class="btn btn-danger" data-act="z-trennen-ja">Ja, trennen</button></div></div>`;
     return;
   }
   const ki = ladeKi();
   const eigen = istEigen();
-  const link = linkFuerGeraet();
+  // Mit wem die Liste geteilt ist: Der Link trägt ihren Namen, dort verbindet „Einfügen“ ohne Tippen
+  const du = anderePerson();
+  const link = linkFuerGeraet(du);
   const wa = `https://wa.me/?text=${encodeURIComponent(`${eigen ? 'Meine Liste' : 'Unsere Einkaufsliste'} in Boxenstopp: ${link}`)}`;
+  const kopieren = eigen ? 'Link fürs zweite Gerät kopieren' : du ? `Link für ${esc(du)} kopieren` : 'Link fürs zweite Handy kopieren';
+  const whatsapp = eigen ? '' : `<a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">${du ? `An ${esc(du)} per WhatsApp` : 'Per WhatsApp schicken'}</a>`;
+  // Ein eigenes zweites Gerät: vom Handy aus das Popup fürs iPad, vom iPad aus der Link fürs Handy – mit deinem Namen
+  const eigenes = !istIpad() ? '<button type="button" class="btn" data-act="tablet-zeigen">Aufs iPad oder Tablet</button>'
+    : du && app.name() ? `<button type="button" class="btn" data-act="z-link" data-fuer="${esc(app.name())}">Link für dein Handy kopieren</button>` : '';
   el.innerHTML = `<p class="e-status">${wer} · ${esc(STATUS_TEXT[app.status.zustand] || '')}${wann}</p>
-<div class="zugang-btns"><button type="button" class="btn" data-act="z-link">${eigen ? 'Link fürs zweite Gerät kopieren' : 'Link fürs zweite Handy kopieren'}</button>${eigen ? '' : `<a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Per WhatsApp schicken</a>`}${istIpad() ? '' : '<button type="button" class="btn" data-act="tablet-zeigen">Aufs iPad oder Tablet</button>'}<button type="button" class="btn btn-quiet" data-act="z-trennen">Trennen</button></div>
+<div class="zugang-btns"><button type="button" class="btn" data-act="z-link"${du ? ` data-fuer="${esc(du)}"` : ''}>${kopieren}</button>${whatsapp}${eigenes}</div>
 <input class="z-linkfeld" id="z-linkfeld" type="text" readonly value="${esc(link)}" aria-label="Link fürs zweite Gerät" hidden>
 <p class="fine">${eigen
     ? `Mit dem Link kommt deine Liste auch aufs iPad oder ein zweites Handy${ki ? ', samt KI-Schlüssel' : ''}. Behalt ihn für dich – wer ihn hat, kann deine Liste ändern.`
-    : `Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.`}</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal unter Einstellungen den Link ins Feld „Schlüssel“ einfügen.</p>' : ''}${eigen ? '<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="wk-einfuehrung">Einführung zeigen</button></div>' : ''}`;
+    : `Wer den Link hat, kann eure Liste ändern${ki ? ' und mit eurem KI-Schlüssel Rezepte machen lassen' : ''}. Schick ihn nur an die Person, mit der du die Liste teilst.`}</p>${istIos() && !vomHomeBildschirm() ? '<p class="fine z-ios">Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher: Dort einmal unter Einstellungen den Link ins Feld „Schlüssel“ einfügen.</p>' : ''}${eigen ? '<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="wk-einfuehrung">Einführung zeigen</button></div>' : ''}
+<p class="z-trennen-zeile"><button type="button" class="linkbtn z-trennen-link" data-act="z-trennen">Dieses ${geraetName()} von der Liste trennen …</button></p>`;
 }
 
 /**
@@ -594,7 +660,11 @@ export function zugangZeichnen() {
         : 'Richte die gemeinsame Liste ein, dann seht ihr beide dasselbe.';
     const titel = home ? `Nur auf diesem ${geraet}.` : ios ? 'Nur hier in Safari.' : 'Nur auf diesem Handy.';
     const einfuegen = home && navigator.clipboard?.readText ? '<button type="button" class="btn btn-primary" data-act="z-einfuegen">Einfügen</button>' : '';
-    el.innerHTML = `<div class="zugang-banner"><p><b>${titel}</b> ${text}</p>${einfuegen}<button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>`;
+    // Hier wurde getrennt (Einstellungen → Trennen): sagen, wann – und wie es wieder geht
+    const getrennt = lese(GETRENNT, null);
+    const wann = getrennt?.at && !Number.isNaN(Date.parse(getrennt.at)) ? new Date(getrennt.at) : null;
+    const vorher = wann ? `<b>Getrennt am ${wann.toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' })} um ${uhrzeit(wann)}.</b> Wieder verbinden: auf einem verbundenen Gerät unter Einstellungen → Gemeinsame Liste den Link für dich kopieren und hier ${einfuegen ? 'auf „Einfügen“ tippen' : 'bei „Einrichten“ einsetzen'}. ` : '';
+    el.innerHTML = `<div class="zugang-banner"><p>${vorher}<b>${titel}</b> ${text}</p>${einfuegen}<button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>`;
   } else el.innerHTML = '';
   formularZeichnen(kaputt);
 }
@@ -611,7 +681,7 @@ function formularZeichnen(kaputt) {
   let text;
   if (ausLink) text = 'Der Schlüssel aus dem Link ist schon eingetragen. Es fehlt nur noch dein Name.';
   else if (kaputt) text = `<b>Der Schlüssel funktioniert nicht.</b> Er ist abgelaufen, gelöscht oder hat keine Rechte mehr für ${istEigen() ? 'deine Liste' : 'Boxenstopp-Daten'}. Trag einen neuen ein – was noch nicht gespeichert ist, bleibt vorgemerkt.`;
-  else text = 'Gerade steht die Liste nur auf diesem Gerät. <b>Zweites Gerät?</b> Dann brauchst du keinen eigenen Schlüssel: Lass dir vom ersten den Link schicken (dort unter Einstellungen „Link fürs zweite Handy kopieren“) und füg den ganzen Link hier ins Schlüsselfeld ein. <b>Erstes Gerät?</b> Den Schlüssel legst du einmal bei GitHub an, die Anleitung steht im README.';
+  else text = 'Gerade steht die Liste nur auf diesem Gerät. <b>Zweites Gerät?</b> Dann brauchst du keinen eigenen Schlüssel: Lass dir vom ersten den Link schicken (dort unter Einstellungen → Gemeinsame Liste) und füg den ganzen Link hier ins Schlüsselfeld ein. <b>Erstes Gerät?</b> Den Schlüssel legst du einmal bei GitHub an, die Anleitung steht im README.';
   // Abbrechen nur, wenn es schon eine funktionierende Liste gibt (ein Link mit einem anderen Schlüssel)
   const abbrechen = app.zugang && !kaputt ? '<button type="button" class="btn btn-quiet" data-act="z-abbrechen">Abbrechen</button>' : '';
   el.innerHTML = `<form class="zugang-form" id="z-form" novalidate>
@@ -625,9 +695,32 @@ function formularZeichnen(kaputt) {
 </form>`;
 }
 
+/**
+ * Der Name aus einem Link – war hier zuletzt jemand anderes verbunden
+ * (Trennen merkt sich den Namen), lieber nachfragen: Dann war es wohl der
+ * Link für die andere Person. Gibt den bisherigen Namen zurück, sonst ''.
+ */
+export function anderesGeraet(fuer) {
+  const vorher = String(lese(GETRENNT, null)?.name || '').trim();
+  return fuer && vorher && vorher.toLowerCase() !== String(fuer).trim().toLowerCase() ? vorher : '';
+}
+
+/** Das Formular mit dem Schlüssel aus einem Link – passt der Name im Link nicht zu diesem Gerät, steht der bisherige drin und ein Hinweis. */
+function formularAusLink(token, extras) {
+  const vorher = anderesGeraet(extras.fuer);
+  formular = {
+    token,
+    name: vorher || extras.fuer || null,
+    fehler: vorher ? `Der Link ist für ${extras.fuer} – hier war bis jetzt ${vorher} verbunden. Stimmt dein Name? Dann auf „Verbinden“.` : '',
+    daten: extras.daten || '',
+    farbe: extras.farbe || '',
+  };
+  return !vorher;
+}
+
 /** Vom Start aus: Ein Link mit Schlüssel wurde geöffnet – das Formular steht in den Einstellungen. extras: daten, fuer, farbe aus dem Link. */
 export function formularMitSchluessel(token, extras = {}) {
-  formular = { token, name: extras.fuer || null, fehler: '', daten: extras.daten || '', farbe: extras.farbe || '' };
+  formularAusLink(token, extras);
   zugangZeichnen();
   teilenZeichnen(app.status.zuletzt);
 }
@@ -648,11 +741,11 @@ async function einfuegen() {
   const token = schluesselAus(text);
   if (!token) { melde('In der Zwischenablage ist kein Link. Kopier ihn zuerst (etwa aus WhatsApp) und tipp dann nochmal auf „Einfügen“.'); return; }
   const ex = linkExtras(text);
-  formular = { token: text.trim(), name: ex.fuer || null, fehler: '', daten: ex.daten, farbe: ex.farbe };
+  const passt = formularAusLink(text.trim(), ex);
   zeigeReiter('einstellungen');
   zugangZeichnen();
   teilenZeichnen(app.status.zuletzt);
-  if (ex.fuer) formularAbschicken(); else $('#z-name')?.focus();
+  if (ex.fuer && passt) formularAbschicken(); else $('#z-name')?.focus();
 }
 
 async function formularAbschicken() {
@@ -725,6 +818,7 @@ export function klickListe(el) {
   if (d.abt) { if (offenZeile) verschieben(offenZeile, d.abt); return true; }
   if (d.fehlt) { nichtBekommen(d.fehlt); return true; }
   if (d.fehltWeg) { app.aendern(opFehltWeg(d.fehltWeg)); return true; }
+  if (d.gemeintWeg) { gemeintVergessen(d.gemeintWeg); return true; }
   if (d.extraWeg) {
     const k = d.extraWeg;
     const rid = extraId(app.name());
@@ -797,11 +891,16 @@ export function klickListe(el) {
     case 'z-abbrechen': formular = null; zugangZeichnen(); teilenZeichnen(app.status.zuletzt); return true;
     case 'z-einfuegen': einfuegen(); return true;
     case 'z-link': {
-      const link = linkFuerGeraet();
+      // Für wen (data-fuer): die andere Person oder dein eigenes Handy – dann reicht dort „Einfügen“
+      const fuer = el.dataset.fuer || '';
+      const link = linkFuerGeraet(fuer);
       const feld = $('#z-linkfeld');
-      const zeigen = () => { if (feld) { feld.hidden = false; feld.select(); } melde('Kopieren klappt hier nicht. Der Link steht jetzt im Feld darunter.'); };
+      const zeigen = () => { if (feld) { feld.value = link; feld.hidden = false; feld.select(); } melde('Kopieren klappt hier nicht. Der Link steht jetzt im Feld darunter.'); };
+      const fertig = !fuer || istEigen() ? 'Link kopiert. Schick ihn an das zweite Handy.'
+        : fuer === app.name() ? 'Link kopiert. Auf dem Handy Boxenstopp öffnen und bei der Liste auf „Einfügen“ tippen.'
+          : `Link kopiert. Schick ihn an ${fuer} – dort reicht „Einfügen“.`;
       try {
-        navigator.clipboard.writeText(link).then(() => melde('Link kopiert. Schick ihn an das zweite Handy.'), zeigen);
+        navigator.clipboard.writeText(link).then(() => melde(fertig), zeigen);
       } catch { zeigen(); }
       return true;
     }
@@ -844,7 +943,11 @@ export function aufListe(name, stand = app.stand) {
  * steht offen drauf (auch unter dem Namen, mit dem er zusammengelegt ist).
  * cat: die Abteilung, wenn die App sie nicht kennt (Haushalt).
  */
-export function aufDieListe(name, { cat: sonst = '' } = {}) {
+export function aufDieListe(getippt, { cat: sonst = '' } = {}) {
+  // „chicki nuggies“ – gemeint sind Chicken Nuggets (gemeintHTML)
+  const gemeint = gemeintVon(app.stand, getippt);
+  const name = gemeint || getippt;
+  const wie = gemeint ? getippt : '';
   const nk = nameSchluessel(name);
   const geraten = abteilung(name, app.katalog);
   const cat = app.stand.abteilungen?.[nk] || (sonst && geraten === 'sonstiges' ? sonst : geraten);
@@ -861,13 +964,17 @@ export function aufDieListe(name, { cat: sonst = '' } = {}) {
     return { art: 'neu', k: ziel, name: kat?.n || name, umbenannt: kat && kat.n !== name ? kat.n : '' };
   }
   const id = `c-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
-  app.aendern(opEigener(id, name, cat));
-  return { art: 'neu', k: id, name, umbenannt: '' };
+  if (wie) {
+    const t = new Date().toISOString();
+    app.aendern(opSetzen(id, { name, wie, cat, parts: {}, custom: true, checked: false, by: null, at: t, added: t }));
+  } else app.aendern(opEigener(id, name, cat));
+  return { art: 'neu', k: id, name, umbenannt: wie ? name : '' };
 }
 
 export function absendenListe(ev) {
   if (ev.target.matches?.('form[data-extra]')) { ev.preventDefault(); extraMerken(ev.target); return true; }
   if (ev.target.matches?.('form[data-bon]')) { ev.preventDefault(); bonMerken(ev.target); return true; }
+  if (ev.target.matches?.('form[data-gemeint]')) { ev.preventDefault(); gemeintMerken(ev.target); return true; }
   if (ev.target.matches?.('form[data-alarm]')) { ev.preventDefault(); alarmMerken(ev.target); return true; }
   if (ev.target.id === 'addform') {
     ev.preventDefault();

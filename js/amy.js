@@ -198,14 +198,17 @@ export function zutatLesen(zeile, katalog = {}, mehr = {}) {
   if (komma > 0 && !NIE_KAUFEN.test(t)) { h = [t.slice(komma + 1).trim(), h].filter(Boolean).join(', '); t = t.slice(0, komma).trim(); }
   if (groesse) h = [h, groesse].filter(Boolean).join(', ');
   const name = gross(t || roh);
-  const k0 = schluesselRaten(name, katalog);
-  const eigen = k0 || `amyz-${slug(name)}`;
+  // „chicki nuggies“ – auf der Liste gesagt, was gemeint ist (liste.js gemeint): Liste, Nährwerte und Preis rechnen damit
+  const gemeint = mehr?.gemeint?.[nameSchluessel(name)]?.name || '';
+  const basis = gemeint || name;
+  const k0 = schluesselRaten(basis, katalog);
+  const eigen = k0 || `amyz-${slug(basis)}`;
   // Auf der Liste zusammengelegt? Dann gehört die Zutat zu dieser Zeile – auch für Nährwerte und Preis
   const g = mehr?.gleich;
   let k = umleiten(g, eigen);
-  if (k === eigen && g && typeof g[nameSchluessel(name)] === 'string') k = umleiten(g, nameSchluessel(name));
-  let kat = katalog[k] ? { n: katalog[k].n, c: katalog[k].c } : { n: name, c: abteilung(name, katalog) };
-  const verschoben = mehr?.abteilungen?.[k] || mehr?.abteilungen?.[nameSchluessel(name)];
+  if (k === eigen && g && typeof g[nameSchluessel(basis)] === 'string') k = umleiten(g, nameSchluessel(basis));
+  let kat = katalog[k] ? { n: katalog[k].n, c: katalog[k].c } : { n: basis, c: abteilung(basis, katalog) };
+  const verschoben = mehr?.abteilungen?.[k] || mehr?.abteilungen?.[nameSchluessel(basis)];
   if (verschoben) kat = { ...kat, c: verschoben };
   if (q !== null && !u) u = k === 'knoblauch' && /zehe/i.test(name) ? 'Zehe' : 'Stk';
   const gewuerz = kat.c === 'gewuerz' || /^(salz|pfeffer)\b/i.test(name);

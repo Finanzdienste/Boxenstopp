@@ -56,7 +56,8 @@ function halloHTML() {
   const punkte = [
     ['Rezepte', '50 Meal-Prep-Rezepte, Schritt für Schritt mit Schalen und Timern – auf deine Makros gerechnet und auf so viele Boxen, wie du kochst.'],
     ['Einkaufsliste', 'Mit einem Tipp landen die Zutaten drauf, sortiert nach Abteilungen; die Angebote der Woche stehen daneben.'],
-    [`${wessen(name)} Rezepte`, 'Deine eigenen Lieblingsrezepte – Zeile für Zeile tippen oder von einer Webseite übernehmen.'],
+    [`${wessen(name)} Bereich`, 'Deine eigenen Lieblingsrezepte – Zeile für Zeile tippen oder von einer Webseite übernehmen – und Notizen auf eigenen Blättern.'],
+    ['Essensplan', 'Die nächsten Tage und Wochen planen: Kochtage mit Boxen, Mittag und Abend – und mit einem Tipp alles auf die Liste.'],
     ...(ki ? [['Neue Rezepte, Resteverwertung & Speisekarte', 'Wünsch dir ein Gericht („Kürbissuppe“), und die KI schreibt das Rezept; was im Kühlschrank ist, wird ein Rezept; im Restaurant sagt dir die App, welches Gericht am besten zu deinen Makros passt.']] : []),
   ];
   return `<p class="amy-eyebrow">${deko('sparkles')} schön, dass du da bist ${deko('sparkles')}</p>

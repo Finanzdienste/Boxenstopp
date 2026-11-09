@@ -152,7 +152,7 @@ check(await bis(async () => (await a.locator('#sync-text').innerText()) === 'Get
 
 // Der Reiter: rosa, mit Schreibschrift
 await a.click('.tab[data-tab="amy"]');
-check(await a.evaluate(() => document.documentElement.dataset.tab) === 'amy' && (await a.locator('#amy-titel').innerText()) === 'Amys Rezepte', 'der vierte Reiter: „Amys Rezepte“');
+check(await a.evaluate(() => document.documentElement.dataset.tab) === 'amy' && (await a.locator('#amy-titel').innerText()) === 'Amys Bereich', 'der zweite Reiter: „Amys Bereich“');
 const farben = await a.evaluate(() => ({ akzent: window.getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(), titel: window.getComputedStyle(document.querySelector('#amy-titel')).fontFamily, bg: window.getComputedStyle(document.body).backgroundColor, leiste: document.querySelector('meta[name="theme-color"]').content }));
 check(farben.akzent === '#E0457F' && /Pacifico/.test(farben.titel) && farben.bg === 'rgb(255, 241, 247)' && farben.leiste === '#FFEAF3', `alles rosa: Akzent ${farben.akzent}, Hintergrund ${farben.bg}, Titel in ${farben.titel.split(',')[0]}`);
 await a.click('.tab[data-tab="rezepte"]');
@@ -286,6 +286,82 @@ gh.zustand.datei = `${JSON.stringify(roh, null, 1)}\n`;
 gh.zustand.version += 1;
 gh.zustand.sha = `sha${gh.zustand.version}`;
 check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe' && gh.liste()?.wege?.Aldi?.n === 1 && gh.liste()?.amyTags?.[amyId]?.length === 2, 8000), 'ältere Fassung ließ `amy`, `amyTags` und `wege` weg – Amys Handy schreibt alles zurück');
+
+// --- Amys Bereich: oben der Schalter – Notizen (Blätter), Verträglich, Vorschläge für Tobi
+await a.click('.tab[data-tab="amy"]');
+check(JSON.stringify(await a.locator('.amy-teil').evaluateAll((xs) => xs.map((x) => x.dataset.amyTeil))) === JSON.stringify(['rezepte', 'notizen', 'vertraeglich', 'wuensche']), 'oben: Rezepte · Notizen · Verträglich · Vorschläge');
+await a.click('[data-amy-teil="notizen"]');
+check((await a.locator('.nb-leer').innerText()).includes('Noch keine Blätter'), 'Notizen: noch keine Blätter');
+await a.click('[data-act="nb-neu"]');
+await a.fill('#nb-titel', 'Herbst-Ideen');
+await a.fill('#nb-text', '- Kürbis-Bowl\n- Linsensuppe\nOmas Gulasch');
+await a.fill('#nb-tag-text', 'herbst,');
+const blaetter = () => Object.values(gh.liste()?.notizbuch || {});
+check(await bis(() => blaetter().some((x) => x.titel === 'Herbst-Ideen' && x.text.includes('Gulasch') && x.tags.join() === 'herbst' && x.by === 'Amy'), 8000), 'Blatt gespeichert – Titel, Text, Tag, ohne Speichern-Knopf');
+await a.click('#nb-text');
+await a.keyboard.press('Control+End');
+await a.keyboard.type('\nNoch eine Idee');
+check(await bis(() => blaetter().some((x) => x.text.endsWith('Noch eine Idee')), 8000), 'weitergetippt: auch gespeichert');
+check((await a.inputValue('#nb-text')).endsWith('Noch eine Idee') && await a.evaluate(() => document.activeElement?.id === 'nb-text'), 'beim Speichern bleibt das Blatt stehen – Text und Cursor');
+await a.click('.nb-farbe[data-nb-farbe="blau"]');
+check(await bis(() => blaetter().some((x) => x.farbe === 'blau')), 'Farbe: blau');
+await a.click('[data-act="nb-zu"]');
+check(await a.locator('.nb-tab.f-blau:has-text("Herbst-Ideen")').count() === 1 && (await a.locator('.nb-tab small').innerText()).includes('Kürbis-Bowl'), 'in der Liste: Farbe, Titel, Vorschau');
+await a.click('[data-act="nb-neu"]');
+await a.click('[data-act="nb-zu"]');
+check(await bis(() => blaetter().length === 1), 'ein leeres Blatt verschwindet wieder');
+check(await a.locator('[data-nb-tag="herbst"]').count() === 1, 'die Tags zum Filtern stehen über den Blättern');
+await t.click('.tab[data-tab="amy"]');
+await t.click('[data-amy-teil="notizen"]');
+check(await bis(async () => (await t.locator('.nb-tab:has-text("Herbst-Ideen")').count()) === 1), 'Tobi sieht das Blatt auch');
+await a.click('.nb-tab:has-text("Herbst-Ideen")');
+await a.click('[data-act="nb-weg"]');
+check(await bis(() => !blaetter().length), 'Blatt gelöscht');
+await a.click('#toast button');
+check(await bis(() => blaetter().some((x) => x.titel === 'Herbst-Ideen' && x.text.endsWith('Noch eine Idee'))), 'Rückgängig: wieder da, ganz');
+
+// Verträglich: „Zwiebel – geht nicht“ trifft Zwiebeln im Chili
+await a.click('[data-amy-teil="vertraeglich"]');
+await a.fill('#vt-name', 'Zwiebel');
+await a.click('[data-vt-stufe="nicht"]');
+await a.click('#vt-form button[type="submit"]');
+check(await bis(() => gh.liste()?.vertraeglich?.amy?.['n:zwiebel']?.stufe === 'nicht'), 'Zwiebel: geht nicht – unter Amy in der Liste');
+check(await a.locator('.vt-gruppe.vt-nicht .vt-e:has-text("Zwiebel")').count() === 1, 'steht unter „Geht nicht“');
+await a.click('.tab[data-tab="rezepte"]');
+check(await bis(async () => (await a.locator('[data-open="chili"] .pill-vt.vt-nicht').count()) === 1), 'Chili hat Zwiebeln: an der Karte ✗');
+check((await a.locator('[data-open="chili"] .pill-vt').innerText()).includes('für dich'), 'für Amy heißt es „für dich“');
+check((await a.locator('[data-filter="vertraeglich"]').innerText()).startsWith('Passt für mich'), 'Filter „Passt für mich“');
+await a.click('[data-filter="vertraeglich"]');
+check(await a.locator('[data-open="chili"]').count() === 0 && await a.locator('#grid .box').count() > 0, 'gefiltert: ohne Chili, aber nicht leer');
+await a.click('[data-filter="alle"]');
+await a.click('[data-open="chili"]');
+check((await a.locator('#detail .vt-hinweis').innerText()).includes('Zwiebel') && await a.locator('#detail .ing-name .vt-zeichen.vt-nicht').count() >= 1, 'im Rezept: der Hinweis oben und ✗ an der Zutat');
+await a.click('[data-act="zurueck"]');
+await t.click('.tab[data-tab="rezepte"]');
+// Bei Tobi ist das Butter Chicken von vorhin noch offen – zurück zu den Karten
+if (await t.locator('#detail:not([hidden])').count()) await t.click('#detail [data-act="zurueck"]');
+check(await bis(async () => (await t.locator('[data-open="chili"] .pill-vt').count()) === 1 && (await t.locator('[data-open="chili"] .pill-vt').innerText()).includes('für Amy')), 'bei Tobi: „nicht für Amy“');
+
+// Vorschläge: Amy schreibt, Tobi antwortet und hakt ab
+await a.click('.tab[data-tab="amy"]');
+await a.click('[data-amy-teil="wuensche"]');
+await a.fill('#ws-text', 'Die Liste soll nach Läden sortieren');
+await a.click('#ws-form button[type="submit"]');
+const vorschlaege = () => Object.values(gh.liste()?.wuensche || {});
+check(await bis(() => vorschlaege().some((w) => w.text.includes('Läden') && w.by === 'Amy')), 'Vorschlag in der Liste');
+check(gh.zustand.nachrichten.some((m) => m.startsWith('Amy:') && m.includes('ein neuer Vorschlag') && m.includes('· Bescheid')), 'Commit „ein neuer Vorschlag · Bescheid“ – Tobi bekommt eine Push-Nachricht');
+await t.click('.tab[data-tab="amy"]');
+await t.click('[data-amy-teil="wuensche"]');
+check(await bis(async () => (await t.locator('.ws-e').count()) === 1), 'Tobi sieht ihn');
+await t.click('[data-ws-antworten]');
+await t.fill('form[data-ws-antwort] input', 'Kommt ♡');
+await t.click('form[data-ws-antwort] button[type="submit"]');
+await t.click('.ws-e [data-ws-fertig]');
+check(await bis(() => vorschlaege().some((w) => w.erledigt && w.antwort === 'Kommt ♡' && w.erledigtVon === 'Tobi' && w.antwortVon === 'Tobi')), 'Tobi antwortet und hakt ab');
+check(await bis(async () => (await a.locator('.ws-fertig-auf').innerText().catch(() => '')).includes('Erledigt (1)')), 'bei Amy: „Erledigt (1)“');
+await a.click('.ws-fertig-auf');
+check((await a.locator('.ws-erledigt .ws-antwort').innerText()).includes('Kommt ♡'), 'mit Tobis Antwort');
+await a.click('[data-amy-teil="rezepte"]');
 
 // So ging am 29.10. Amys Chicken Ceasar Wrap verloren: Tobis Handy hatte die Liste gelesen, als seine App-Fassung
 // Amys Rezepte noch nicht kannte – zwischengespeichert ohne sie, mit derselben Datei-Kennung. Nach dem Update

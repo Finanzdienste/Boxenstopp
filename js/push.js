@@ -23,7 +23,7 @@ import { app, lese } from './kern.js';
 import { privatLesen, privatSchreiben, API } from './speicher.js';
 
 export const PUSH_DATEI = 'push.json';
-export const ARTEN = [['liste', 'Einkaufsliste'], ['rezepte', 'Amys Rezepte'], ['preise', 'Preisalarm'], ['haushalt', 'Putzplan']];
+export const ARTEN = [['liste', 'Einkaufsliste'], ['rezepte', 'Amys Bereich'], ['preise', 'Preisalarm'], ['haushalt', 'Putzplan']];
 /**
  * Was ein Abo bekommt: was es gewählt hat – und jede Art, die es beim Wählen
  * noch nicht gab (kennt; Abos von vor dem Putzplan kannten nur die ersten

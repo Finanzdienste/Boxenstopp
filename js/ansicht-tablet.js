@@ -43,7 +43,7 @@ function inhalt() {
 <small>Mit derselben Apple-ID setzt du ihn auf dem iPad einfach ein. Sonst schick ihn dir per AirDrop oder Nachricht.</small></li>
 <li><b>Auf dem iPad in Safari öffnen</b><span class="tablet-adresse">${esc(adresse())}</span></li>
 <li><b>Zum Home-Bildschirm legen</b><span>Tipp auf ${TEILEN} <i>Teilen</i> (oben rechts, manchmal hinter „…“) → „Zum Home-Bildschirm“ → „Als Web-App öffnen“ an lassen → „Hinzufügen“.</span></li>
-<li><b>Dort einmal einrichten</b><span>Boxenstopp vom Home-Bildschirm öffnen → <i>Einstellungen</i> → „Gemeinsame Liste“. Name: <b>${esc(name || 'dein Name')}</b>, beim Schlüssel den Link einsetzen → „Verbinden“. Fertig ♡</span></li>
+<li><b>Dort einmal „Einfügen“</b><span>Boxenstopp vom Home-Bildschirm öffnen → <i>Einkaufsliste</i> → „Einfügen“ – fertig ♡ Der Link kennt deinen Namen schon. Ohne „Einfügen“: <i>Einstellungen</i> → „Gemeinsame Liste“, Name <b>${esc(name || 'dein Name')}</b>, beim Schlüssel den Link einsetzen → „Verbinden“.</span></li>
 </ol>
 <p class="tablet-fein">Gut zu wissen: Auch die Haken beim Kochen und laufende Timer wandern mit – nur ein Rezept, das du gerade schreibst und noch nicht gespeichert hast, bleibt auf dem Gerät, auf dem du gerade bist. Push-Nachrichten schaltest du auf dem iPad unter Einstellungen extra ein. Ein Android-Tablet geht genauso – dort in Chrome über ⋮ → „Zum Startbildschirm hinzufügen“.</p>
 <div class="tablet-knoepfe"><button type="button" class="amy-btn" data-act="tablet-zu">Alles klar ♡</button></div>`;
@@ -80,7 +80,8 @@ export function klickTablet(el) {
     }
     case 'tablet-link': {
       if (!app.zugang) return true;
-      const link = linkFuerGeraet();
+      // Dein eigenes Gerät: mit deinem Namen, dann reicht dort „Einfügen“
+      const link = linkFuerGeraet(app.zugang.name || app.name());
       const feld = $('#tablet-linkfeld');
       const zeigen = () => { if (feld) { feld.value = link; feld.hidden = false; feld.select(); } el.textContent = 'Kopieren klappt hier nicht – der Link steht darunter'; };
       try {
