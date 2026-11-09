@@ -581,13 +581,20 @@ export function zugangZeichnen() {
   if (kaputt) {
     el.innerHTML = `<div class="zugang-banner warn"><p><b>Der Schlüssel funktioniert nicht.</b> Er ist abgelaufen, gelöscht oder hat keine Rechte mehr für ${istEigen() ? 'deine Liste – frag Tobi nach einem neuen Link' : 'Boxenstopp-Daten'}. Änderungen bleiben vorgemerkt.</p><button type="button" class="btn" data-act="z-oeffnen">Neuen Schlüssel eintragen</button></div>`;
   } else if (!app.zugang) {
-    // Auf dem iPhone kommt, was in Safari eingerichtet ist, in der App vom Home-Bildschirm nicht an – und Links öffnen immer Safari
-    const ios = istIos() && vomHomeBildschirm();
-    const text = ios
-      ? 'Auf dem iPhone hat die App vom Home-Bildschirm ihren eigenen Speicher – was in Safari eingerichtet ist, kommt hier nicht an. Kopier deinen Link (etwa aus WhatsApp oder vorhin aus Safari) und tipp auf „Einfügen“.'
-      : 'Richte die gemeinsame Liste ein, dann seht ihr beide dasselbe.';
-    const einfuegen = ios && navigator.clipboard?.readText ? '<button type="button" class="btn btn-primary" data-act="z-einfuegen">Einfügen</button>' : '';
-    el.innerHTML = `<div class="zugang-banner"><p><b>Nur auf diesem Handy.</b> ${text}</p>${einfuegen}<button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>`;
+    // iPhone und iPad: Safari und die App vom Home-Bildschirm haben jede ihren eigenen Speicher – was in der einen
+    // eingerichtet ist, kommt in der anderen nicht an, und Links öffnen immer Safari. Wer mal hier, mal dort öffnet,
+    // sieht sonst scheinbar „Geteilt“ und „Nur lokal“ im Wechsel.
+    const ios = istIos();
+    const home = ios && vomHomeBildschirm();
+    const geraet = istIpad() ? 'iPad' : 'iPhone';
+    const text = home
+      ? `Auf dem ${geraet} hat die App vom Home-Bildschirm ihren eigenen Speicher – was in Safari eingerichtet ist, kommt hier nicht an. Kopier deinen Link (etwa aus WhatsApp oder vom anderen Gerät) und tipp auf „Einfügen“.`
+      : ios
+        ? `Safari hat auf dem ${geraet} einen eigenen Speicher, getrennt von der App auf dem Home-Bildschirm. Ist die dort schon verbunden, öffne Boxenstopp lieber über das Symbol auf dem Home-Bildschirm – sonst richte es hier ein.`
+        : 'Richte die gemeinsame Liste ein, dann seht ihr beide dasselbe.';
+    const titel = home ? `Nur auf diesem ${geraet}.` : ios ? 'Nur hier in Safari.' : 'Nur auf diesem Handy.';
+    const einfuegen = home && navigator.clipboard?.readText ? '<button type="button" class="btn btn-primary" data-act="z-einfuegen">Einfügen</button>' : '';
+    el.innerHTML = `<div class="zugang-banner"><p><b>${titel}</b> ${text}</p>${einfuegen}<button type="button" class="btn" data-act="z-oeffnen">Einrichten</button></div>`;
   } else el.innerHTML = '';
   formularZeichnen(kaputt);
 }

@@ -1085,11 +1085,14 @@ Liste nur auf dem einen Handy („Nur lokal“).
 4. Zweites Handy: in den Einstellungen **„Link fürs zweite Handy kopieren“**
    (oder „Per WhatsApp schicken“). Der Link öffnet die App in den
    Einstellungen mit eingetragenem Schlüssel, dort fehlt nur noch der Name.
-   - iPhone: Eine App auf dem Home-Bildschirm hat dort einen eigenen Speicher,
-     getrennt von Safari, und Links öffnen immer Safari. Also erst zum
+   - iPhone und iPad: Eine App auf dem Home-Bildschirm hat dort einen eigenen
+     Speicher, getrennt von Safari, und Links öffnen immer Safari. Also erst zum
      Home-Bildschirm hinzufügen, die App von dort öffnen und den ganzen Link
-     ins Schlüsselfeld einfügen. Die App sagt das auf dem iPhone auch selbst
-     (im Hinweis „Nur auf diesem Handy“ und unter dem Link in Safari).
+     ins Schlüsselfeld einfügen. Die App sagt das selbst: vom Home-Bildschirm
+     „Nur auf diesem iPhone/iPad“ mit „Einfügen“, in Safari „Nur hier in
+     Safari“ – die App auf dem Home-Bildschirm ist dann oft schon verbunden.
+     Wer mal Safari, mal das Symbol öffnet, sieht sonst scheinbar „Geteilt“
+     und „Nur lokal“ im Wechsel.
 
 Der Schlüssel steht nur im Speicher der beiden Handys, nirgends im Code. Wer
 den Link hat, kann die Liste ändern – mehr nicht. Ist er abgelaufen oder

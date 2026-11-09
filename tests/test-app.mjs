@@ -435,7 +435,23 @@ await ip.goto(APP_URL, { waitUntil: 'load' });
 await ip.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await ip.locator('#zugang .zugang-banner').innerText()).includes('eigenen Speicher')), 'iPhone, vom Home-Bildschirm: der Hinweis erklärt, dass der Link dort nochmal eingefügt werden muss');
 check(!(await page.locator('#zugang .zugang-banner').innerText().catch(() => '')).includes('eigenen Speicher'), 'auf Android steht der Hinweis nicht');
+check((await ip.locator('#zugang .zugang-banner b').first().innerText()) === 'Nur auf diesem iPhone.', 'iPhone vom Home-Bildschirm: „Nur auf diesem iPhone.“');
 await iphone.close();
+
+// --- iPad in Safari statt vom Home-Bildschirm: dort ist die App oft schon verbunden – der Hinweis sagt es (sonst wirkt es, als springe „Geteilt“ und „Nur lokal“)
+const ipad = await browser.newContext({ viewport: { width: 820, height: 1180 }, locale: 'de-DE', serviceWorkers: 'block', hasTouch: true, userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15' });
+await ipad.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
+await ipad.addInitScript(() => {
+  Object.defineProperty(Object.getPrototypeOf(navigator), 'platform', { get: () => 'MacIntel', configurable: true });
+  Object.defineProperty(Object.getPrototypeOf(navigator), 'maxTouchPoints', { get: () => 5, configurable: true });
+});
+const ipd = await ipad.newPage();
+await ipd.goto(APP_URL, { waitUntil: 'load' });
+await ipd.evaluate(() => document.querySelector('.tab[data-tab="einkauf"]')?.click());
+const ipadBanner = async () => (await ipd.locator('#zugang .zugang-banner').innerText().catch(() => '')).replace(/\s+/g, ' ');
+check(await bis(async () => (await ipadBanner()).startsWith('Nur hier in Safari.') && (await ipadBanner()).includes('Safari hat auf dem iPad einen eigenen Speicher') && (await ipadBanner()).includes('Home-Bildschirm')), `iPad in Safari: „Nur hier in Safari.“ – die App vom Home-Bildschirm hat ihren eigenen Stand (${(await ipadBanner()).slice(0, 90)})`);
+check(await ipd.locator('#zugang [data-act="z-einfuegen"]').count() === 0, 'in Safari kein „Einfügen“ – dort öffnet ja der Link selbst');
+await ipad.close();
 
 // --- Layout
 check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'kein seitliches Scrollen auf dem Handy');
