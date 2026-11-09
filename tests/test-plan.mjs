@@ -51,7 +51,7 @@ check(kochtage(s.essensplan).length === 1 && s.essensplan.tage['2026-11-08'].koc
 let v = boxenVerteilen(s.essensplan, { tag: '2026-11-08', k: s.essensplan.tage['2026-11-08'].kochen[0], wer: 'beide', mahlzeit: 'mittag', werktage: true });
 check(v.mahlzeiten === 4 && v.rest === 0 && v.setzen.map((x) => x.tag).join() === '2026-11-09,2026-11-10,2026-11-11,2026-11-12', `8 Boxen für beide: Mo–Do Mittag (${v.setzen.map((x) => x.tag)})`);
 v = boxenVerteilen(s.essensplan, { tag: '2026-11-08', k: s.essensplan.tage['2026-11-08'].kochen[0], wer: 'Tobi', mahlzeit: 'mittag', werktage: true });
-check(v.mahlzeiten === 8 && v.setzen[4].tag === '2026-11-16' && !v.setzen.some((x) => ['2026-11-14', '2026-11-15'].includes(x.tag)), 'für einen: acht Werktage, das Wochenende frei');
+check(v.mahlzeiten === 8 && v.setzen[4].tag === '2026-11-13' && v.setzen[5].tag === '2026-11-16' && !v.setzen.some((x) => ['2026-11-14', '2026-11-15'].includes(x.tag)), `für einen: acht Werktage, das Wochenende frei (${v.setzen.map((x) => x.tag.slice(8)).join(', ')})`);
 // Amy hat Dienstag Mittag schon etwas: für beide bleibt der Tag frei, für Tobi allein nicht
 s = anwenden(s, opEssensplan({ setzen: [{ tag: '2026-11-10', mahlzeit: 'mittag', e: E('ep-amy01', { text: 'Salat', wer: 'Amy' }) }] }, 'Amy'));
 v = boxenVerteilen(s.essensplan, { tag: '2026-11-08', k: s.essensplan.tage['2026-11-08'].kochen[0], wer: 'beide', mahlzeit: 'mittag', werktage: false, abHeute: false });
@@ -143,7 +143,7 @@ check(await a.locator('#plan-editor .vt-hinweis.vt-ist-nicht').count() === 1, 'o
 await a.click('[data-plan-wer-e="Tobi"]');
 check(await bis(() => (gh.liste()?.essensplan?.tage?.[morgen]?.mittag || []).some((e) => e.box && e.wer === 'Tobi')), 'nur noch Tobi');
 check(await bis(async () => (await a.locator(`#pt-${morgen} .plan-e.ist-box .vt-zeichen`).count()) === 0), 'isst Amy nicht mit, kein ✗ mehr');
-await a.click(`#pt-${morgen} .plan-e.ist-box`);
+check(await a.locator(`#pt-${morgen} .plan-e.ist-box[aria-expanded="true"]`).count() === 1 && await a.locator('[data-act="plan-oeffnen"]').count() === 1, 'der Eintrag bleibt dabei offen');
 await a.click('[data-act="plan-oeffnen"]');
 check(await bis(async () => await a.evaluate(() => document.documentElement.dataset.tab) === 'rezepte' && (await a.locator('#d-title').count()) === 1), 'Rezept öffnen: das Chili');
 await a.click('[data-act="zurueck"]');
