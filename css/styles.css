@@ -1264,11 +1264,11 @@ html[data-tab="amy"] .btn{border-radius:999px}
 .push-dlg .zugang-fehler{margin:0;text-align:center}
 
 /* Rezept übernehmen (Foto, Link, Text) */
-.amy-import{border-radius:20px;border:2px dashed var(--line-strong);background:var(--surface)}
-.amy-import[open]{border-style:solid;border-color:var(--accent)}
-.amy-import summary{display:flex;align-items:center;gap:8px;padding:12px 14px;font:600 15.5px/1.2 var(--f-body);color:var(--accent);cursor:pointer;list-style:none}
-.amy-import summary::-webkit-details-marker{display:none}
-.amy-import summary small{display:block;margin-top:3px;font-weight:500;font-size:13px;line-height:1.3;color:var(--muted)}
+.amy-import,.amy-suche{border-radius:20px;border:2px dashed var(--line-strong);background:var(--surface)}
+.amy-import[open],.amy-suche[open]{border-style:solid;border-color:var(--accent)}
+.amy-import summary,.amy-suche summary{display:flex;align-items:center;gap:8px;padding:12px 14px;font:600 15.5px/1.2 var(--f-body);color:var(--accent);cursor:pointer;list-style:none}
+.amy-import summary::-webkit-details-marker,.amy-suche summary::-webkit-details-marker{display:none}
+.amy-import summary small,.amy-suche summary small{display:block;margin-top:3px;font-weight:500;font-size:13px;line-height:1.3;color:var(--muted)}
 .amy-import-inhalt{display:grid;gap:10px;padding:0 14px 14px}
 .amy-import-fotos{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .amy-import-foto{position:relative;display:inline-block}
@@ -1279,6 +1279,25 @@ html[data-tab="amy"] .btn{border-radius:999px}
 .amy-import textarea{width:100%;padding:10px 12px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font:500 15px/1.45 var(--f-body);color:var(--ink);resize:vertical}
 .amy-import textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
 .amy-import-laeuft{font-weight:600;color:var(--accent);animation:blink 1.4s steps(2) infinite}
+/* Im Internet suchen: Wunsch, „ohne, was ich nicht vertrage“, bis zu drei Treffer */
+.amy-suche summary .ic{width:20px;height:20px;flex:none}
+.amy-suche-feld{width:100%;min-height:46px;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font:500 16px/1.3 var(--f-body);color:var(--ink)}
+.amy-suche-feld:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.amy-suche-ohne{display:flex;align-items:flex-start;gap:10px;font:600 14.5px/1.3 var(--f-body);color:var(--ink);cursor:pointer}
+.amy-suche-ohne input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent)}
+.amy-suche-ohne small{display:block;margin-top:2px;font-weight:500;font-size:13px;color:var(--muted)}
+.amy-treffer{display:grid;gap:10px;margin:2px 0 0;padding:0;list-style:none}
+.amy-treffer-k{display:grid;gap:6px;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--surface)}
+.amy-treffer-k.ist-genommen{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.amy-treffer-name{margin:0}
+.amy-treffer-name b{display:block;font:700 16px/1.25 var(--f-body);color:var(--ink)}
+.amy-treffer-name small{display:block;margin-top:2px;font-size:13px;color:var(--muted)}
+.amy-treffer-kurz{margin:0;font-size:14.5px;line-height:1.4;color:var(--ink-soft,var(--ink))}
+.amy-treffer-vt{margin:0;padding:4px 10px;border-radius:10px;font:600 13.5px/1.35 var(--f-body);justify-self:start}
+.amy-treffer-vt.vt-nicht{background:#FFE1DE;color:#9B1C13}
+.amy-treffer-vt.vt-wenig{background:#FFF0D6;color:#7A4A00}
+.amy-treffer-knoepfe{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:2px}
+.amy-treffer-knoepfe .amy-btn{min-height:40px;padding:0 18px;font-size:15px}
 
 /* Tags: sechs Pastellfarben, derselbe Tag immer in derselben (amy.js tagFarbe) */
 .tf0{--tag-bg:#FFDDEB;--tag-ink:#A3245B}

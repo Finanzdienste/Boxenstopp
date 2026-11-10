@@ -7,8 +7,15 @@
  * wird erst, wenn Amy es sich angeschaut hat.
  *
  * Links liest Gemini selbst (Werkzeug url_context der Interactions-API, dann
- * ohne festes Schema – die Antwort ist trotzdem nur JSON). Mit einem
- * Claude-Schlüssel gehen Fotos und Text, für Links den Text kopieren.
+ * ohne festes Schema – die Antwort ist trotzdem nur JSON), Claude mit dem
+ * Werkzeug web_fetch (kiMitWerkzeugen in ki.js).
+ *
+ * „Im Internet suchen“: Amy sagt, worauf sie Lust hat – Claude sucht mit der
+ * Websuche bis zu drei passende Rezepte, liest ihre Seiten und schreibt sie
+ * in dasselbe Format (rumpfSuche, sucheBereinigen); Amy nimmt eins davon in
+ * den Editor. Nährwerte spielen dabei keine Rolle. Nur mit Claude: Googles
+ * Bedingungen für die Suche erlauben nicht, Treffer zu ändern und dauerhaft
+ * aufzuheben – genau das ist ein Rezept in Amys Sammlung.
  */
 import { ANBIETER, ausgabeFuerClaude } from './ki.js';
 import { TAG_VORSCHLAEGE, tagsBereinigen } from './amy.js';
@@ -119,4 +126,108 @@ export function importBereinigen(roh) {
     notiz: typeof roh.notiz === 'string' ? roh.notiz.trim().slice(0, 600) : '',
     tags: tagsBereinigen(Array.isArray(roh.tags) ? roh.tags.slice(0, 3) : []),
   };
+}
+
+/* --------------------------------------------------- Claude liest Links */
+
+/** Die Werkzeuge des Servers: Websuche (mit Standort Deutschland) und Seiten lesen. */
+export const WEBSUCHE = { type: 'web_search_20250305', name: 'web_search', max_uses: 4, user_location: { type: 'approximate', country: 'DE', timezone: 'Europe/Berlin' } };
+export const SEITE_LESEN = (n = 3) => ({ type: 'web_fetch_20250910', name: 'web_fetch', max_uses: n, max_content_tokens: 16000 });
+
+/** Einen Link mit Claude übernehmen: Die Seite liest web_fetch, die Antwort ist JSON wie beim Import. */
+export function rumpfLinkClaude({ link, tags = [] }) {
+  return {
+    model: ANBIETER.anthropic.suchModell,
+    max_tokens: 8000,
+    system: importSystem({ tags, link: true }),
+    tools: [SEITE_LESEN(2)],
+    messages: [{ role: 'user', content: [{ type: 'text', text: `Das Rezept steht hier: ${link}` }] }],
+  };
+}
+
+/* ------------------------------------------------- Im Internet suchen */
+
+export const MAX_TREFFER = 3;
+
+export function sucheSystem({ tags = [] } = {}) {
+  const vorschlaege = [...new Set([...tags, ...TAG_VORSCHLAEGE])].slice(0, 14).join(', ');
+  return `Du suchst im Internet Rezepte für Amys Rezepte-App. Such mit der Websuche nach Rezepten, die zu ihrem Wunsch passen – am liebsten auf deutschsprachigen Rezeptseiten und guten Foodblogs (etwa Chefkoch, Lecker, Essen & Trinken, Kitchen Stories, EatSmarter, Springlane, Emmikochteinfach). Nimm bis zu ${MAX_TREFFER} verschiedene, die wirklich passen – keine drei Varianten desselben Gerichts, nur echte Rezepte mit Zutaten und Zubereitung, keine Übersichtsseiten.
+
+Lies jedes Rezept auf seiner Seite (mit dem Werkzeug zum Lesen von Seiten, wenn die Suche nicht alles zeigt) und schreib es in Amys Format:
+- name: der Name des Gerichts, kurz und auf Deutsch.
+- quelle: die Seite, kurz, etwa „chefkoch.de“.
+- url: die Adresse des Rezepts, genau so, wie sie in den Suchergebnissen stand.
+- kurz: ein Satz, was es ist und warum es passt.
+- portionen: für wie viele Portionen die Mengen sind (steht keine Zahl da: 4).
+- zeit: die Gesamtzeit in Minuten, wenn sie angegeben ist, sonst 0.
+- zutaten: eine Zutat je Eintrag, die Menge vorn, deutsche Einheiten: „500 g Hähnchenbrust“, „2 Zwiebeln“, „1 Dose Kokosmilch (400 ml)“, „1 EL Sojasauce“, „Pfeffer“.
+- schritte: ein Arbeitsschritt je Eintrag, du-Form, kurz. Zeiten als Zahl mit „Min.“: „20 Min. backen“. Abschnitte als kurzer Eintrag mit Doppelpunkt: „Soße:“.
+- notiz: ein Tipp oder eine Variante von der Seite – sonst leer.
+- tags: bis zu drei passende aus dieser Liste (oder nichts): ${vorschlaege}.
+
+Übernimm Mengen und Schritte so, wie sie auf der Seite stehen, und erfinde nichts dazu. Nährwerte brauchst du nicht. Englisches übersetzt du, amerikanische Maße (cups, oz) rechnest du in g oder ml um. Steht bei Amys Wunsch, was nicht hinein darf, nimm nur Rezepte ohne das.
+
+Antworte zum Schluss nur mit diesem JSON, ohne Text davor oder danach:
+{"rezepte": [{"name": "", "quelle": "", "url": "", "kurz": "", "portionen": 4, "zeit": 0, "zutaten": [], "schritte": [], "notiz": "", "tags": []}], "fehler": ""}
+Findest du nichts Passendes, bleibt rezepte leer, und in fehler steht kurz, warum. Alles auf Deutsch.`;
+}
+
+/**
+ * Was Amy sucht: wunsch (frei getippt), ohne/wenig – Zutaten, die sie nicht
+ * oder nur wenig verträgt (nur wenn sie es so will, nur die Namen).
+ */
+export function sucheText({ wunsch, ohne = [], wenig = [] }) {
+  const zeilen = [`Amys Wunsch: ${String(wunsch || '').trim().slice(0, 300)}`];
+  if (ohne.length) zeilen.push(`Bitte ohne: ${ohne.slice(0, 20).join(', ')} (verträgt sie nicht).`);
+  if (wenig.length) zeilen.push(`Davon nur wenig: ${wenig.slice(0, 20).join(', ')}.`);
+  return zeilen.join('\n');
+}
+
+export function rumpfSuche({ wunsch, ohne = [], wenig = [], tags = [] }) {
+  return {
+    model: ANBIETER.anthropic.suchModell,
+    max_tokens: 12000,
+    system: sucheSystem({ tags }),
+    tools: [WEBSUCHE, SEITE_LESEN(3)],
+    messages: [{ role: 'user', content: [{ type: 'text', text: sucheText({ wunsch, ohne, wenig }) }] }],
+  };
+}
+
+/** Eine Adresse, die man öffnen darf (nur http/https) – sonst ''. */
+export function sichereUrl(u) {
+  try {
+    const x = new URL(String(u || '').trim());
+    return /^https?:$/.test(x.protocol) ? x.href : '';
+  } catch { return ''; }
+}
+
+const seiteVon = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
+/** Zum Vergleichen: Seite ohne www., Pfad ohne / am Ende, ohne ?… und #… */
+const urlSchluessel = (u) => { try { const x = new URL(u); return `${x.hostname.replace(/^(?:www|m)\./, '')}${x.pathname.replace(/\/+$/, '')}`.toLowerCase(); } catch { return ''; } };
+
+/**
+ * Die Treffer der Suche: { rezepte: [{ name, quelle, url, kurz, …Entwurf }], fehler }.
+ * Jedes Rezept geht durch importBereinigen. Ein Rezept, dessen Adresse in
+ * keinem Such- oder Leseergebnis vorkam (quellen aus kiMitWerkzeugen), bleibt
+ * weg – das wäre nicht aus dem Internet, sondern ausgedacht.
+ */
+export function sucheBereinigen(roh, quellen = null) {
+  if (!roh || typeof roh !== 'object') return { rezepte: [], fehler: 'Die Antwort war keine Liste mit Rezepten.' };
+  const bekannt = Array.isArray(quellen) && quellen.length ? new Set(quellen.map((q) => urlSchluessel(sichereUrl(q.url))).filter(Boolean)) : null;
+  const rezepte = [];
+  for (const r of Array.isArray(roh.rezepte) ? roh.rezepte : []) {
+    const neu = importBereinigen(r);
+    if (neu.fehler) continue;
+    const url = sichereUrl(r.url);
+    if (bekannt && (!url || !bekannt.has(urlSchluessel(url)))) continue;
+    rezepte.push({ ...neu, quelle: zeile(r.quelle, 40) || seiteVon(url), url, kurz: zeile(r.kurz, 200) });
+    if (rezepte.length >= MAX_TREFFER) break;
+  }
+  return { rezepte, fehler: rezepte.length ? '' : zeile(roh.fehler, 200) || 'Dazu hat die Suche kein passendes Rezept gefunden.' };
+}
+
+/** Die Notiz eines übernommenen Treffers: was auf der Seite stand – und woher es ist. */
+export function notizMitQuelle(t) {
+  const quelle = t.url ? `Von ${t.quelle || seiteVon(t.url)}: ${t.url}` : t.quelle ? `Von ${t.quelle}` : '';
+  return [String(t.notiz || '').trim(), quelle].filter(Boolean).join('\n').slice(0, 600);
 }

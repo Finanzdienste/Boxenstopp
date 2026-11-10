@@ -28,6 +28,12 @@
  * aendern (ein Rezept nach Wunsch ändern) und wunsch (ein neues Rezept für den
  * gemeinsamen Katalog, katalog.js – ein Wort wie „Kürbissuppe“ reicht).
  *
+ * Dazu Claude mit Werkzeugen (kiMitWerkzeugen): im Internet suchen und
+ * Seiten lesen – für Amys „Im Internet suchen“ und Links beim Übernehmen
+ * (amy-import.js). Das macht claude-sonnet-5-5: Rezepte finden und abschreiben
+ * braucht nicht das stärkste Modell, und die gelesenen Seiten kosten sonst
+ * fünfmal so viel.
+ *
  * anfrageBauen() und rumpfFuer() sind ohne Netz und ohne DOM, tests/test-ki.mjs
  * prüft daran, dass alle Regeln mitgehen.
  */
@@ -43,6 +49,8 @@ export const ANBIETER = {
   anthropic: {
     name: 'Anthropic',
     modell: 'claude-fable-5-1',
+    // Suchen und Seiten lesen (kiMitWerkzeugen) – kennt der Schlüssel es nicht, nimmt die App das Modell oben
+    suchModell: 'claude-sonnet-5-5',
     api: 'https://api.anthropic.com/v1/messages',
     preis: { ein: 10, aus: 50 }, // US-Dollar pro Million Tokens (Fable 5.1)
   },
@@ -219,6 +227,7 @@ export const KI_FEHLER = {
     ueberlastet: 'Claude ist gerade überlastet. Gleich nochmal versuchen.',
     netz: 'Keine Verbindung zu Anthropic. Prüf das Internet und versuch es nochmal.',
     sicherheit: 'Claude wollte zu diesem Foto oder Text kein Rezept machen. Versuch es mit einer Liste statt Foto.',
+    websuche: 'Bei Anthropic ist die Websuche für euer Konto ausgeschaltet. In der Console (platform.claude.com) unter Settings einschalten – dann geht es.',
   },
   zulang: 'Die Antwort wurde zu lang und ist abgebrochen. Nochmal versuchen, vielleicht mit weniger Zutaten.',
   zugross: 'Die Fotos sind zu groß. Nimm weniger Fotos.',
@@ -239,6 +248,7 @@ export function artVonStatus(status, info) {
   if (status === 401 || status === 403 || /API key not valid|API_KEY_INVALID/i.test(text)) return 'schluessel';
   if (status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(text)) return 'grenze'; // vor „billing“: Googles Kontingent-Text nennt den Tarif
   if (status === 400 && /workspace/i.test(text)) return 'workspace'; // Schlüssel ohne Workspace: Anthropic will dann den Workspace im Kopf
+  if (status === 400 && /web[ _]?(?:search|fetch)/i.test(text) && /not enabled|disabled/i.test(text)) return 'websuche'; // in der Console ausgeschaltet
   if (/credit|balance|billing|guthaben/i.test(text)) return 'guthaben';
   if (status === 413) return 'zugross';
   if (status === 404 || (status === 400 && /model/i.test(text))) return 'modell';
@@ -380,4 +390,74 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   } catch {
     throw fehler('antwort', 'JSON kaputt');
   }
+}
+
+/*
+ * Claude mit Werkzeugen des Servers (Websuche, Seite lesen): ohne Strom,
+ * dafür die ganze Antwort mit allen Blöcken. Eine lange Suche kann der Server
+ * unterbrechen (stop_reason pause_turn) – dann geht die bisherige Antwort
+ * unverändert zurück, und es geht weiter. Mit Quellenangaben ist der Text auf
+ * mehrere Blöcke verteilt: Es zählt alles nach dem letzten Werkzeug.
+ *
+ * Kennt der Schlüssel das Suchmodell nicht, einmal mit dem normalen Modell;
+ * hakt nur das Lesen von Seiten (web_fetch), einmal ohne. Gibt { text,
+ * quellen: [{ url, titel }], usage: { ein, aus, suchen } } zurück.
+ */
+export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, runden = 4 }) {
+  const fehler = (art, detail) => kiFehler(art, detail, 'anthropic');
+  const usage = { ein: 0, aus: 0, suchen: 0 };
+  const quellen = [];
+  let bisher = [];
+  for (let runde = 0; runde < runden; runde++) {
+    const messages = bisher.length ? [...rumpf.messages, { role: 'assistant', content: bisher }] : rumpf.messages;
+    let res;
+    try {
+      res = await fetch(api || ANBIETER.anthropic.api, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': schluessel, 'anthropic-version': '2026-10-21', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ ...rumpf, messages }),
+        signal,
+      });
+    } catch (e) {
+      throw fehler(e?.name === 'AbortError' ? 'abbruch' : 'netz', e?.message);
+    }
+    let info = null;
+    try { info = await res.json(); } catch (e) {
+      if (e?.name === 'AbortError') throw fehler('abbruch', e.message);
+    }
+    if (!res.ok) {
+      const text = info?.error?.message || `HTTP ${res.status}`;
+      const art = artVonStatus(res.status, info);
+      if (!bisher.length && art === 'modell' && rumpf.model !== ANBIETER.anthropic.modell) {
+        return kiMitWerkzeugen({ ...rumpf, model: ANBIETER.anthropic.modell }, { schluessel, api, signal, runden });
+      }
+      // Hakt nur das Lesen von Seiten (unbekannt oder ausgeschaltet): einmal ohne – wenn dann noch ein Werkzeug bleibt
+      const ohneLesen = (rumpf.tools || []).filter((t) => !/^web_fetch/.test(t.type || ''));
+      if (!bisher.length && res.status === 400 && /web[ _]fetch/i.test(text) && ohneLesen.length && ohneLesen.length < (rumpf.tools || []).length) {
+        return kiMitWerkzeugen({ ...rumpf, tools: ohneLesen }, { schluessel, api, signal, runden });
+      }
+      throw fehler(art, text);
+    }
+    usage.ein += Number(info?.usage?.input_tokens) || 0;
+    usage.aus += Number(info?.usage?.output_tokens) || 0;
+    usage.suchen += Number(info?.usage?.server_tool_use?.web_search_requests) || 0;
+    const bloecke = Array.isArray(info?.content) ? info.content : [];
+    for (const b of bloecke) {
+      if (b?.type === 'web_search_tool_result' && Array.isArray(b.content)) {
+        for (const r of b.content) if (r?.url) quellen.push({ url: String(r.url), titel: String(r.title || '') });
+      }
+      if (b?.type === 'web_fetch_tool_result' && b.content?.url) quellen.push({ url: String(b.content.url), titel: String(b.content.content?.title || '') });
+    }
+    bisher = [...bisher, ...bloecke];
+    const stopp = info?.stop_reason || '';
+    if (stopp === 'pause_turn') continue;
+    if (stopp === 'max_tokens') throw fehler('zulang', `${usage.aus} Tokens`);
+    if (stopp === 'refusal') throw fehler('sicherheit', stopp);
+    let i = bisher.length;
+    while (i > 0 && bisher[i - 1]?.type === 'text') i--;
+    const text = bisher.slice(i).map((b) => b.text || '').join('');
+    if (!text.trim()) throw fehler('antwort', 'keine Antwort');
+    return { text, quellen, usage };
+  }
+  throw fehler('antwort', 'Die Suche hat zu lange gedauert');
 }

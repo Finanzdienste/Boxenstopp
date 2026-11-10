@@ -15,7 +15,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | --- | --- |
 | **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben **Zwei auf einmal** (zwei Rezepte zusammen kochen – welche gut zusammen gehen, ein gemeinsamer Plan, siehe unten) und die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“), bei eigenen Einträgen **„Gemeint ist …“** („chicki nuggies“ sind Chicken Nuggets) – alles gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
-| **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Vorschläge** (in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe, ohne Vorschläge), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Rezept übernehmen** aus einem Foto, einem Link oder Text – die KI füllt den Editor; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
+| **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Vorschläge** (in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe, ohne Vorschläge), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Im Internet suchen** – sag, worauf du Lust hast, Claude findet bis zu drei passende Rezepte und füllt den Editor; **Rezept übernehmen** aus einem Foto, einem Link oder Text; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
 | **Essensplan** | Die nächsten Tage und Wochen: je Tag Mittag und Abend, wer isst mit, dazu **Kochtage** („Chili kochen, 8 Boxen“) mit **Boxen verteilen** auf die Tage danach – und mit einem Tipp **die Woche auf die Einkaufsliste** (siehe unten) |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
@@ -504,15 +504,35 @@ in Pflaume und Rosa.
   sortiert: neueste, Name, schnellste, günstigste oder **nach Tags** (ein
   Abschnitt je Tag). Ein Tag im Rezept antippen zeigt alle Rezepte damit.
   Filter und Sortierung merkt sich das Handy.
-- **Rezept übernehmen** (oben im Editor, bei einem neuen Rezept gleich
+- **Im Internet suchen** (ganz oben im Editor): Amy tippt, worauf sie Lust
+  hat („Kürbissuppe mit Kokosmilch“), Claude sucht mit der Websuche bis zu
+  drei passende Rezepte (lieber deutschsprachige Rezeptseiten und gute
+  Foodblogs), liest ihre Seiten und schreibt sie in ihr Format – Nährwerte
+  spielen keine Rolle. Die Treffer zeigen Seite, Zeit, Portionen, einen Satz
+  dazu und, was sie nicht oder nur wenig verträgt („✗ Geht nicht für dich:
+  Zwiebel“); „Nehmen“ füllt den Editor (mit Rückgängig), die Quelle steht dann
+  in der Notiz, „Seite ansehen“ öffnet das Original. Der Haken „Ohne, was ich
+  nicht vertrage“ (gleich an, je Gerät gemerkt) schickt nur die Namen dieser
+  Zutaten mit, nie die Notizen. Ein Rezept, dessen Adresse in keinem
+  Suchergebnis vorkam, fällt weg – das wäre ausgedacht. Das macht
+  `claude-sonnet-5-5` mit den Werkzeugen `web_search` (Standort Deutschland)
+  und `web_fetch`, ohne Strom (`kiMitWerkzeugen` in `js/ki.js`: unterbricht
+  der Server eine lange Suche mit `pause_turn`, geht die Antwort unverändert
+  zurück; kennt der Schlüssel das Modell nicht, nimmt die App ihr normales;
+  ist die Websuche in der Console aus, sagt sie, wo man sie einschaltet).
+  Kosten: 1 Cent je Suche plus die gelesenen Seiten. Nur mit dem
+  Claude-Schlüssel – Googles Bedingungen für die Suche erlauben nicht, Treffer
+  zu ändern und dauerhaft aufzuheben; mit dem Google-Schlüssel sagt die App,
+  dass ein Link bei „Rezept übernehmen“ geht.
+- **Rezept übernehmen** (im Editor, bei einem neuen Rezept gleich
   offen): ein Foto einer Kochbuchseite (bis zu drei), ein Link (Chefkoch &
   Co.) oder kopierter Text – die KI (derselbe Schlüssel wie bei der
   Resteverwertung) überträgt es in ihr Format: eine Zutat je Zeile mit der
   Menge vorn, ein Schritt je Zeile mit „20 Min.“, Abschnitte mit
   Doppelpunkt, Portionen, Dauer, Notiz, bis zu drei Tags (`js/amy-import.js`).
   Gespeichert ist erst, was sie sich angeschaut hat; „Rückgängig“ in der
-  Meldung holt den Editor zurück. Links liest nur Gemini selbst (Werkzeug
-  `url_context`); mit einem Claude-Schlüssel gehen Fotos und Text.
+  Meldung holt den Editor zurück. Links liest Gemini mit dem Werkzeug
+  `url_context`, Claude mit `web_fetch` (ohne Strom, wie die Suche).
 - **Gespeichert** in `liste.json` unter `amy` (für beide, höchstens 60), so
   wie sie es getippt hat, die Tags daneben unter `amyTags`. Schreibt eine
   ältere App-Fassung die Liste ohne diese Teile, legt das Handy, das sie
@@ -1552,7 +1572,7 @@ die Action „Rezeptfotos“.
 | `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor |
 | `js/ansicht-tablet.js` | Popup: die App aufs iPad oder Tablet |
 | `js/ansicht-iphone.js` | iPhone/iPad: nach dem Link in Safari „Jetzt noch deine App“, in der App vom Home-Bildschirm ohne Liste gleich „Einfügen“ |
-| `js/amy-import.js` | Rezept übernehmen: Anfrage aus Foto, Link oder Text, Antwort als Entwurf – ohne DOM |
+| `js/amy-import.js` | Rezept übernehmen: Anfrage aus Foto, Link oder Text, Antwort als Entwurf; Im Internet suchen: Anfrage, Treffer bereinigen, Quelle in die Notiz – ohne DOM |
 | `js/kochmodus.js` | Kochmodus: ein Schritt groß, Wischen, Tasten, Timer, Bildschirm an |
 | `js/kochstand.js` | Haken, Tempo und Timer je Person über ihre Geräte (`kochen` in liste.json) |
 | `js/push.js`, `js/ansicht-push.js` | Push-Nachrichten: Schlüsselpaar, An- und Abmelden in push.json, der Bereich in den Einstellungen |
@@ -1639,7 +1659,12 @@ das Ersatzbild für ein fehlendes; ein Update, während die Rezepte nicht zu
 holen sind (samt Umzug aus dem alten Vorrat), ein Update mit fehlender
 Datei (gilt nicht), Auffrischen ohne Neustart und schlechtes Netz (die
 Rezepte nach gut 4 s aus dem Vorrat statt nach 20 s). `test-import.mjs` prüft den
-Rezept-Import mit einer nachgebauten Gemini-API. `test-einstellungen.mjs`
+Rezept-Import mit nachgebauten APIs von Google und Anthropic (auch Claude
+liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
+Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
+Speichern mit Quelle, `pause_turn`, Ausweichen bei unbekanntem Modell oder
+ohne Seiten lesen, Websuche aus, Abbrechen und der Hinweis mit Googles
+Schlüssel. `test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
 ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,
 Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Liste daneben oder

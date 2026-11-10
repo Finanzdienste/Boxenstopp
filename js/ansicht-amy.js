@@ -41,13 +41,14 @@ import { lobPruefen, tierVorladen } from './lob.js';
 import { istIpad, TABLET_IC } from './ansicht-tablet.js';
 import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
 import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
-import { rumpfImport, importBereinigen, jsonAus, linkAus } from './amy-import.js';
-import { kiAnfragen, anbieterVon } from './ki.js';
+import { rumpfImport, importBereinigen, jsonAus, linkAus, rumpfLinkClaude, rumpfSuche, sucheBereinigen, notizMitQuelle } from './amy-import.js';
+import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { fotoVorbereiten, oeffneEinrichten } from './ansicht-ki.js';
 import { notizenHTML, notizenAktualisieren, klickNotizen, eingabeNotizen, tasteNotizen, notizenZahl, notizJetztSpeichern } from './ansicht-notizen.js';
 import { wuenscheHTML, wuenscheAktualisieren, klickWuensche, absendenWuensche, wuenscheOffen } from './ansicht-wuensche.js';
-import { vertraeglichHTML, vertraeglichAktualisieren, klickVertraeglich, absendenVertraeglich, vertraeglichZahl, pruefeZutaten, hinweisHTML as vtHinweisHTML, zeichenHTML as vtZeichenHTML, stufeVon as vtStufeVon } from './ansicht-vertraeglich.js';
+import { vertraeglichHTML, vertraeglichAktualisieren, klickVertraeglich, absendenVertraeglich, vertraeglichZahl, pruefeZutaten, hinweisHTML as vtHinweisHTML, zeichenHTML as vtZeichenHTML, stufeVon as vtStufeVon, wem } from './ansicht-vertraeglich.js';
+import { eintraegeVon, namenKurz } from './vertraeglich.js';
 
 const ANSICHT = 'boxenstopp.amy.ansicht.v1';
 const ENTWURF = 'boxenstopp.amy.entwurf.v1';
@@ -69,6 +70,9 @@ let loeschenFragen = false;
 let importFotos = []; // { url, b64 } – Fotos fürs Übernehmen, nur bis es geklappt hat
 let importLauf = null; // { controller } während die KI liest
 let importFehler = '';
+// „Im Internet suchen“: der Wunsch, der Lauf, die Treffer und welcher im Editor steht
+const SUCHE_OHNE = 'boxenstopp.suche-ohne.v1';
+let suche = { wunsch: '', lauf: null, fehler: '', treffer: [], genommen: -1 };
 let filter = (() => {
   const f = lese(FILTER, null);
   return { tags: tagsBereinigen(f?.tags), sort: SORTEN.some(([k]) => k === f?.sort) ? f.sort : 'neu' };
@@ -88,6 +92,7 @@ const HERZ = '<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidde
 const PLUS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 const HAKEN = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
 const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+const LUPE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>';
 const KREUZ = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 const SORT_IC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/></svg>';
 const deko = (name, k = '') => `<img class="amy-deko ${k}" src="${bildPfad(name)}" alt="" width="22" height="22" decoding="async">`;
@@ -350,13 +355,16 @@ async function importieren() {
   if (!schluessel) { importFehler = 'Dafür braucht die App euren KI-Schlüssel – denselben wie bei der Resteverwertung.'; importZeichnen(); return; }
   if (!text.trim() && !importFotos.length) { importFehler = 'Mach ein Foto vom Rezept, oder füg einen Link oder den Text ein.'; importZeichnen(); return; }
   const anbieter = anbieterVon(schluessel);
-  if (linkAus(text) && anbieter !== 'gemini') { importFehler = 'Links liest die App nur mit dem Google-Schlüssel – kopier hier den Rezepttext rein.'; importZeichnen(); return; }
   const lauf = { controller: new AbortController() };
   importLauf = lauf;
   importZeichnen();
   try {
-    const rumpf = rumpfImport({ anbieter, text, fotos: importFotos.map((f) => f.b64), tags: alleTags(app.stand.amyTags).map(([t]) => t) });
-    const antwort = await kiAnfragen(rumpf, { schluessel, signal: lauf.controller.signal, roh: true });
+    const tags = alleTags(app.stand.amyTags).map(([t]) => t);
+    // Ein Link mit Claude: Die Seite liest das Werkzeug web_fetch (ohne Strom, die Antwort ist JSON wie sonst)
+    const link = anbieter === 'anthropic' && !importFotos.length ? linkAus(text) : '';
+    const antwort = link
+      ? await kiMitWerkzeugen(rumpfLinkClaude({ link, tags }), { schluessel, signal: lauf.controller.signal })
+      : await kiAnfragen(rumpfImport({ anbieter, text, fotos: importFotos.map((f) => f.b64), tags }), { schluessel, signal: lauf.controller.signal, roh: true });
     const neu = importBereinigen(jsonAus(antwort.text));
     if (neu.fehler) throw new Error(neu.fehler);
     entwurfAusFormular();
@@ -377,6 +385,124 @@ async function importieren() {
     if (importLauf === lauf) importLauf = null;
     importZeichnen();
   }
+}
+
+/* ------------------------------------------------- Im Internet suchen */
+
+/** Was die Person des Bereichs nicht oder nur wenig verträgt – nur die Namen. */
+function unvertraeglich() {
+  const e = eintraegeVon(app.stand, person());
+  return { ohne: e.filter(([, x]) => x.stufe === 'nicht').map(([, x]) => x.name), wenig: e.filter(([, x]) => x.stufe === 'wenig').map(([, x]) => x.name) };
+}
+
+function trefferHTML(t, i) {
+  const zut = t.zutaten.split('\n').filter(Boolean).map((x) => zumPruefen(zutatLesen(x, app.katalog, daten())));
+  const vt = pruefeZutaten(zut);
+  const w = wem();
+  const meta = [t.quelle, t.zeit ? dauer(t.zeit) : '', `${t.portionen} ${t.portionen === 1 ? 'Portion' : 'Portionen'}`].filter(Boolean).join(' · ');
+  const warn = vt.nicht.length ? `<p class="amy-treffer-vt vt-nicht">✗ Geht nicht für ${esc(w.fuer)}: ${esc(namenKurz(vt.nicht))}</p>`
+    : vt.wenig.length ? `<p class="amy-treffer-vt vt-wenig">~ Nur wenig für ${esc(w.fuer)}: ${esc(namenKurz(vt.wenig))}</p>` : '';
+  const ist = i === suche.genommen;
+  return `<li class="amy-treffer-k${ist ? ' ist-genommen' : ''}"><p class="amy-treffer-name"><b>${esc(t.name)}</b><small>${esc(meta)}</small></p>
+${t.kurz ? `<p class="amy-treffer-kurz">${esc(t.kurz)}</p>` : ''}${warn}
+<div class="amy-treffer-knoepfe"><button type="button" class="amy-btn" data-amy-treffer="${i}"${ist ? ' aria-pressed="true"' : ''}>${ist ? `${HAKEN}Steht im Editor` : 'Nehmen'}</button>${t.url ? `<a class="linkbtn" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">Seite ansehen</a>` : ''}</div></li>`;
+}
+
+/** „Im Internet suchen“: Wunsch, ohne Unverträgliches, und was gefunden wurde. */
+function sucheInnenHTML() {
+  const schluessel = ladeKi();
+  if (schluessel && anbieterVon(schluessel) === 'gemini') {
+    return '<p class="fine">Im Internet sucht die App mit dem Claude-Schlüssel. Mit dem Google-Schlüssel: bei „Rezept übernehmen“ einen Link von Chefkoch &amp; Co. einfügen.</p>';
+  }
+  const lauf = !!suche.lauf;
+  const { ohne, wenig } = unvertraeglich();
+  const namen = [...ohne, ...wenig];
+  const w = wem();
+  const an = lese(SUCHE_OHNE, true) !== false;
+  return `<input id="amy-suche-text" class="amy-suche-feld" type="search" maxlength="200" enterkeyhint="search" autocomplete="off" placeholder="Worauf hast du Lust? z. B. Kürbissuppe mit Kokosmilch" aria-label="Wonach suchen" value="${esc(suche.wunsch)}"${lauf ? ' disabled' : ''}>
+${namen.length ? `<label class="amy-suche-ohne"><input type="checkbox" id="amy-suche-ohne"${an ? ' checked' : ''}${lauf ? ' disabled' : ''}><span>Ohne, was ${w.ich ? 'ich nicht vertrage' : `${esc(w.name)} nicht verträgt`}<small>${esc(namen.slice(0, 6).join(', '))}${namen.length > 6 ? ' …' : ''}</small></span></label>` : ''}
+${suche.fehler ? `<p class="zugang-fehler">${esc(suche.fehler)}${/Schlüssel/.test(suche.fehler) ? ' <button type="button" class="linkbtn" data-act="amy-import-einrichten">Schlüssel eintragen</button>' : ''}</p>` : ''}
+<div class="amy-knoepfe">${lauf
+    ? '<span class="amy-import-laeuft" role="status">Die KI sucht im Internet und liest die Rezepte … das dauert etwa eine Minute</span><button type="button" class="btn btn-quiet" data-act="amy-suche-stopp">Abbrechen</button>'
+    : `<button type="button" class="amy-btn" data-act="amy-suche-los">${LUPE}${suche.treffer.length ? 'Nochmal suchen' : 'Suchen'}</button>`}</div>
+${suche.treffer.length ? `<ul class="amy-treffer" aria-label="Gefunden">${suche.treffer.map(trefferHTML).join('')}</ul>
+<p class="fine">Aus dem Internet: Nimm eins, schau drüber und speicher es. Die Quelle steht dann in der Notiz.</p>` : ''}`;
+}
+
+function sucheZeichnen() {
+  const el = $('#amy-suche-inhalt');
+  if (!el) return;
+  const wunsch = $('#amy-suche-text')?.value;
+  if (typeof wunsch === 'string' && !suche.lauf) suche.wunsch = wunsch;
+  el.innerHTML = sucheInnenHTML();
+}
+
+async function suchen() {
+  const schluessel = ladeKi();
+  const feld = $('#amy-suche-text');
+  const wunsch = String(feld?.value ?? suche.wunsch).trim();
+  suche.wunsch = wunsch;
+  suche.fehler = '';
+  if (!schluessel) { suche.fehler = 'Dafür braucht die App euren KI-Schlüssel – denselben wie bei der Resteverwertung.'; sucheZeichnen(); return; }
+  if (anbieterVon(schluessel) !== 'anthropic') { sucheZeichnen(); return; }
+  if (wunsch.length < 2) {
+    suche.fehler = 'Schreib kurz, worauf du Lust hast – etwa „Kürbissuppe“ oder „schnelles Abendessen mit Hähnchen“.';
+    sucheZeichnen();
+    $('#amy-suche-text')?.focus();
+    return;
+  }
+  const haken = $('#amy-suche-ohne');
+  if (haken) schreibe(SUCHE_OHNE, haken.checked);
+  const { ohne, wenig } = haken?.checked ? unvertraeglich() : { ohne: [], wenig: [] };
+  const lauf = { controller: new AbortController() };
+  suche = { ...suche, lauf, treffer: [], genommen: -1 };
+  sucheZeichnen();
+  try {
+    const tags = alleTags(app.stand.amyTags).map(([t]) => t);
+    const antwort = await kiMitWerkzeugen(rumpfSuche({ wunsch, ohne, wenig, tags }), { schluessel, signal: lauf.controller.signal });
+    if (suche.lauf !== lauf) return;
+    const r = sucheBereinigen(jsonAus(antwort.text), antwort.quellen);
+    suche.treffer = r.rezepte;
+    suche.fehler = r.fehler;
+  } catch (e) {
+    if (suche.lauf === lauf) suche.fehler = e?.art === 'abbruch' ? '' : (e?.message || 'Das hat nicht geklappt. Versuch es nochmal.');
+  } finally {
+    if (suche.lauf === lauf) { suche.lauf = null; sucheZeichnen(); }
+  }
+}
+
+/** Einen Treffer in den Editor – mit Rückgängig, wie beim Übernehmen. */
+function trefferNehmen(i) {
+  const t = suche.treffer[i];
+  if (!t) return;
+  entwurfAusFormular();
+  const vorher = { ...entwurf };
+  const vorherGenommen = suche.genommen;
+  entwurf = {
+    ...entwurf,
+    name: t.name,
+    portionen: t.portionen,
+    zeit: t.zeit,
+    zutaten: t.zutaten,
+    schritte: t.schritte,
+    notiz: notizMitQuelle(t),
+    tags: tagsBereinigen([...(entwurf.tags || []), ...t.tags]),
+  };
+  schreibe(ENTWURF, entwurf);
+  suche.genommen = i;
+  $('#view-amy').innerHTML = '';
+  amyZeichnen();
+  $('#amy-name')?.focus({ preventScroll: true });
+  melde('Übernommen ♡ Schau drüber, dann speichern', {
+    knopf: 'Rückgängig',
+    beiKnopf: () => { entwurf = vorher; suche.genommen = vorherGenommen; schreibe(ENTWURF, entwurf); $('#view-amy').innerHTML = ''; amyZeichnen(); },
+  });
+}
+
+/** Beim Öffnen und Schließen des Editors: die Suche von vorher weg. */
+function sucheVergessen() {
+  suche.lauf?.controller.abort();
+  suche = { wunsch: '', lauf: null, fehler: '', treffer: [], genommen: -1 };
 }
 
 /** Nach einer Änderung an den Tags nur diesen Teil des Editors neu – das Getippte bleibt. */
@@ -402,7 +528,8 @@ function editorHTML() {
   return `<button type="button" class="back" data-act="amy-abbrechen">${ZURUECK}${HERZ}${esc(wessen(person()))} Rezepte</button>
 <form class="amy-form" id="amy-form" autocomplete="off" novalidate>
 <h1 class="amy-titel amy-titel-klein">${neu ? 'Neues Rezept' : 'Rezept bearbeiten'} ${deko('sparkles')}</h1>
-<details class="amy-import"${neu && !e.name && !e.zutaten ? ' open' : ''}><summary>${deko('sparkles')}<span>Rezept übernehmen<small>aus einem Foto, einem Link oder Text – die KI füllt die Felder</small></span></summary><div class="amy-import-inhalt" id="amy-import-inhalt">${importInnenHTML()}</div></details>
+<details class="amy-suche"${suche.lauf || suche.treffer.length || suche.fehler ? ' open' : ''}><summary>${LUPE}<span>Im Internet suchen<small>sag, worauf du Lust hast – die KI findet passende Rezepte und füllt die Felder</small></span></summary><div class="amy-import-inhalt" id="amy-suche-inhalt">${sucheInnenHTML()}</div></details>
+<details class="amy-import"${neu && !e.name && !e.zutaten && !suche.treffer.length ? ' open' : ''}><summary>${deko('sparkles')}<span>Rezept übernehmen<small>aus einem Foto, einem Link oder Text – die KI füllt die Felder</small></span></summary><div class="amy-import-inhalt" id="amy-import-inhalt">${importInnenHTML()}</div></details>
 <label class="amy-feld"><span>Wie heißt es?</span><input id="amy-name" type="text" maxlength="80" required placeholder="z. B. Omas Pfannkuchen" value="${esc(e.name)}" enterkeyhint="next"></label>
 <fieldset class="amy-bilder"><legend>Ein Bildchen dazu</legend>${AMY_BILDER.map((b) => `<label class="amy-bild"><input type="radio" name="amy-bild" value="${b}"${b === e.bild ? ' checked' : ''}><img src="${bildPfad(b)}" alt="${esc(b)}" width="36" height="36" decoding="async"></label>`).join('')}</fieldset>
 <div class="amy-zwei">
@@ -579,6 +706,7 @@ export function klickAmy(el) {
     return true;
   }
   if ('amyTagDazu' in d) { tagDazu(d.amyTagDazu); return true; }
+  if ('amyTreffer' in d) { trefferNehmen(Number(d.amyTreffer)); return true; }
   if ('amyImportWeg' in d) {
     const [f] = importFotos.splice(Number(d.amyImportWeg), 1);
     if (f) URL.revokeObjectURL(f.url);
@@ -609,6 +737,7 @@ export function klickAmy(el) {
     case 'amy-zu': zeigeReiter('rezepte'); return true;
     case 'amy-liste': zeige('liste'); return true;
     case 'amy-neu':
+      sucheVergessen();
       entwurf = leererEntwurf();
       schreibe(ENTWURF, entwurf);
       $('#view-amy').innerHTML = '';
@@ -624,12 +753,15 @@ export function klickAmy(el) {
       return true;
     case 'amy-abbrechen': {
       const id = entwurf?.id;
+      sucheVergessen();
       entwurf = null;
       try { localStorage.removeItem(ENTWURF); } catch { /* egal */ }
       if (id && rezept(id)) zeige('detail', id); else zeige('liste');
       return true;
     }
     case 'amy-import-los': importieren(); return true;
+    case 'amy-suche-los': suchen(); return true;
+    case 'amy-suche-stopp': suche.lauf?.controller.abort(); return true;
     case 'amy-import-stopp': importLauf?.controller.abort(); return true;
     case 'amy-import-einrichten': oeffneEinrichten(); zeigeReiter('rezepte'); return true;
     case 'amy-tag-neu': {
@@ -704,6 +836,7 @@ function filterUmschalten(t) {
 /** Sortierung der Liste und Fotos fürs Übernehmen (change). true, wenn es hierher gehörte. */
 export function aenderungAmy(ziel) {
   if (ziel.id === 'amy-import-foto') { if (ziel.files?.length) importFotosDazu(ziel.files); return true; }
+  if (ziel.id === 'amy-suche-ohne') { schreibe(SUCHE_OHNE, ziel.checked); return true; }
   if (ziel.id !== 'amy-sort') return false;
   filter = { ...filter, sort: SORTEN.some(([k]) => k === ziel.value) ? ziel.value : 'neu' };
   filterMerken();
@@ -717,6 +850,7 @@ export function eingabeAmy(ziel) {
   if (eingabeNotizen(ziel)) return true;
   if (!ziel.closest?.('#amy-form')) return false;
   if (ziel.id === 'amy-import-text') { if (importFehler) { importFehler = ''; const f = $('#amy-import-inhalt .zugang-fehler'); if (f) f.remove(); } return true; }
+  if (ziel.id === 'amy-suche-text') { suche.wunsch = ziel.value; if (suche.fehler) { suche.fehler = ''; $('#amy-suche-inhalt .zugang-fehler')?.remove(); } return true; }
   // „gesund, schnell“ – mit dem Komma ist ein Tag fertig
   if (ziel.id === 'amy-tag-text') {
     if (/[,;]/.test(ziel.value)) {
@@ -736,6 +870,7 @@ export function eingabeAmy(ziel) {
 /** Enter im Tag-Feld: den Tag anlegen (app.js verhindert dann das Absenden). true, wenn es hierher gehörte. */
 export function tasteAmy(ziel) {
   if (tasteNotizen(ziel)) return true;
+  if (ziel?.id === 'amy-suche-text') { if (!suche.lauf) suchen(); return true; }
   if (ziel?.id !== 'amy-tag-text') return false;
   if (ziel.value.trim()) tagDazu(ziel.value);
   ziel.value = '';
