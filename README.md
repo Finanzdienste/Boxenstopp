@@ -490,8 +490,20 @@ in Pflaume und Rosa.
   die App kennt Nährwerte und Richtpreis. Unbekanntes bekommt `amyz-…` und
   eine geratene Abteilung. Gewürze, Wasser, Salz und Pfeffer kommen nicht mit
   „Alles auf die Einkaufsliste“, lassen sich aber einzeln mit + setzen.
+  „150g+ 75g Cheddar“ und „2 + 1 Eier“ zählt die App zusammen (die
+  Aufteilung bleibt als Zusatz).
+- **Werte schätzen** (`js/amy-werte.js`): Was die App nicht kennt („Gouda“,
+  „Dino Nuggies“, „1 Handvoll Parmesan“, „Feta“ ohne Menge), schätzt einmal
+  die KI – im Hintergrund, sobald Amys Bereich zu sehen ist: je Zeile die
+  Gramm im Rezept, die Werte pro 100 g und was die Menge kostet. Das steht in
+  der Liste unter `amyWerte` und gilt auf allen Geräten; kennt der Katalog die
+  Zutat und nur die Menge nicht, nimmt die App seine Werte und Preise mit den
+  geschätzten Gramm. Gefragt wird nur nach offenen Zeilen, je Gerät dieselben
+  höchstens einmal in sieben Tagen; eben auf einem anderen Gerät Gespeichertes
+  fragt das andere Gerät selbst. Auf der Karte stehen kcal und Preis nur, wenn
+  nichts fehlt – sonst wären sie viel zu klein.
 - **Im Rezept:** Portionen, Zeit, ≈ Kosten pro Portion, ≈ kcal/P/KH/F pro
-  Portion (ohne die Zutaten, die die App nicht kennt – die stehen dabei),
+  Portion („teils von der KI geschätzt“; was noch fehlt, steht dabei),
   Zutaten mit +, Schritte zum Abhaken mit Timern wie bei den festen Rezepten
   (Zeiten im Text), das Tempo lernt mit, zum Schluss das Tier. Bearbeiten,
   Löschen (mit Rückfrage und Rückgängig – ihre Zutaten gehen mit von der
@@ -1569,7 +1581,8 @@ die Action „Rezeptfotos“.
 | `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel – und die Ansicht |
 | `icon-lila*.png`, `icon-lila.svg`, `manifest-lila.webmanifest` | Symbol und Manifest einer lila Liste |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
-| `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten, Schritte – ohne DOM |
+| `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten (mit der Schätzung der KI), Schritte – ohne DOM |
+| `js/amy-werte.js` | Werte schätzen: die Anfrage an die KI für unbekannte Zutaten und ihre Antwort – ohne DOM |
 | `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor |
 | `js/ansicht-tablet.js` | Popup: die App aufs iPad oder Tablet |
 | `js/ansicht-iphone.js` | iPhone/iPad: nach dem Link in Safari „Jetzt noch deine App“, in der App vom Home-Bildschirm ohne Liste gleich „Einfügen“ |
@@ -1665,7 +1678,11 @@ liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
 Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
 Speichern mit Quelle, `pause_turn`, Ausweichen ohne Seiten lesen,
 Websuche aus, Abbrechen und der Hinweis mit Googles
-Schlüssel. `test-einstellungen.mjs`
+Schlüssel. `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
+keine Zahlen auf der Karte, die Anfrage nur mit den offenen Zeilen, danach
+kcal und Preis, die Schätzung in der Liste und bei Tobi ohne eigene Anfrage,
+nach dem Bearbeiten nur die neue Zeile und nicht gleich noch einmal.
+`test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
 ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,
 Gelerntes vergessen und wiederholen, breit mit dem Zahnrad, die Liste daneben oder

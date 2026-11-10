@@ -99,10 +99,19 @@ const STROM = (json) => {
   return s + ev({ event_type: 'interaction.completed', interaction: { id: 'ia_1', status: 'completed', usage: { total_input_tokens: 900, total_output_tokens: 400 } } });
 };
 const ki = { anfragen: [], antwort: JSON.stringify(R), verzoegerung: 0 };
+// Im Hintergrund fragt die App nach Werten für Unbekanntes (amy-werte.js, test-werte.mjs) – das zählt hier nicht mit
+const werteFrage = (rumpf) => /Nährwerte und Preise von Zutaten/.test(String(rumpf.system_instruction || rumpf.system || ''));
+const CLAUDE_STROM = (json) => {
+  const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
+  return ev({ type: 'message_start', message: { usage: { input_tokens: 300, output_tokens: 1 } } }) + ev({ type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } })
+    + ev({ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: json } }) + ev({ type: 'content_block_stop', index: 0 })
+    + ev({ type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 20 } }) + ev({ type: 'message_stop' });
+};
 const kiRoute = async (r) => {
   const req = r.request();
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
   if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  if (werteFrage(JSON.parse(req.postData() || '{}'))) return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: STROM('{"zutaten":[]}') }).catch(() => {});
   ki.anfragen.push({ kopf: req.headers(), rumpf: JSON.parse(req.postData() || '{}') });
   if (ki.verzoegerung) await new Promise((f) => { setTimeout(f, ki.verzoegerung); });
   return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: STROM(ki.antwort) }).catch(() => {});
@@ -118,6 +127,7 @@ const claudeRoute = async (r) => {
   const req = r.request();
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
   if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  if (werteFrage(JSON.parse(req.postData() || '{}'))) return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: CLAUDE_STROM('{"zutaten":[]}') }).catch(() => {});
   claudeKi.anfragen.push({ kopf: req.headers(), rumpf: JSON.parse(req.postData() || '{}') });
   const a = claudeKi.antworten.shift() || { status: 500, body: { error: { type: 'api_error', message: 'keine Antwort vorbereitet' } } };
   if (a.warten) await new Promise((f) => { setTimeout(f, a.warten); });

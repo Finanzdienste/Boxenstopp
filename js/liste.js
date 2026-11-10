@@ -26,7 +26,8 @@
  *     notizbuch: { <nb-…>: { id, titel, text, farbe, at, geaendert, by } },   Amys Notizblätter (notizbuch.js)
  *     essensplan: { tage: { <JJJJ-MM-TT>: { mittag: [], abend: [], kochen: [] } } },   der Essensplan (essensplan.js)
  *     vertraeglich: { amy: { <Schlüssel>: { name, stufe, notiz, by, at } } },   was jemand verträgt (vertraeglich.js)
- *     wuensche:  { <w-…>: { id, text, by, at, erledigt, antwort } } }   Amys Vorschläge für Tobi (wuensche.js)
+ *     wuensche:  { <w-…>: { id, text, by, at, erledigt, antwort } },   Amys Vorschläge für Tobi (wuensche.js)
+ *     amyWerte:  { <amy-…>: { at, z: { <Zeile>: { g, kcal, p, kh, f, eur } } } } }   was die KI für Amys unbekannte Zutaten geschätzt hat (amy-werte.js)
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -82,7 +83,7 @@
 
 import { kiBereinigen, KI_ID, MAX_GESPEICHERT } from './ki-rezept.js';
 import { angeboteBereinigen, MAX_ANGEBOTE } from './angebote.js';
-import { amyBereinigen, tagsBereinigen, AMY_ID, MAX_AMY } from './amy.js';
+import { amyBereinigen, tagsBereinigen, amyWertBereinigen, AMY_ID, MAX_AMY } from './amy.js';
 import { umleiten, nameSchluessel } from './format.js';
 import { RAUM, SACH_BEREICH, aufgabenAm } from './haushalt.js';
 import { zielBereinigen as makrosBereinigen } from './zielrechner.js';
@@ -93,7 +94,7 @@ import { vertraeglichBereinigen, vertraeglichAnwenden, vertraeglichZusammen } fr
 import { wuenscheBereinigen, wuenscheAnwenden, wuenscheZusammen } from './wuensche.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {}, amyWerte: {} });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
 const MAX_BONS = 200;
@@ -511,6 +512,19 @@ export function bereinigen(roh) {
   s.essensplan = essensplanBereinigen(roh.essensplan);
   s.vertraeglich = vertraeglichBereinigen(roh.vertraeglich);
   s.wuensche = wuenscheBereinigen(roh.wuensche);
+  s.amyWerte = amyWerteBereinigen(roh.amyWerte, s.amy);
+  return s;
+}
+
+/** Die Schätzungen für Amys Rezepte – nur für Rezepte, die es gibt (amy), und Zeilen, die sie noch haben. */
+export function amyWerteBereinigen(x, amy = {}) {
+  const s = {};
+  if (!istObj(x)) return s;
+  for (const [id, w] of Object.entries(x)) {
+    if (!AMY_ID.test(id) || !amy?.[id]) continue;
+    const b = amyWertBereinigen(w, amy[id]);
+    if (b) s[id] = b;
+  }
   return s;
 }
 
@@ -803,13 +817,14 @@ export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || 
  * Einträge und behaltene KI-Rezepte von einem anderen Stand dazunehmen, ohne
  * Vorhandenes zu überschreiben – dazu, was sonst noch fehlt:
  * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich, kochen, fehlt, bons, preisalarm,
- * haushalt, leute, profil, gemeint, notizbuch, essensplan, vertraeglich, wuensche }.
+ * haushalt, leute, profil, gemeint, notizbuch, essensplan, vertraeglich, wuensche, amyWerte }.
  */
 export const opZusammen = (items, ki = {}, mehr = {}) => ({
   typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
   amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
   fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}), profil: klon(mehr.profil || {}),
   gemeint: klon(mehr.gemeint || {}), notizbuch: klon(mehr.notizbuch || {}), essensplan: klon(mehr.essensplan || {}), vertraeglich: klon(mehr.vertraeglich || {}), wuensche: klon(mehr.wuensche || {}),
+  amyWerte: klon(mehr.amyWerte || {}),
 });
 /**
  * Eine ältere App-Fassung kennt Material und „jedes 2. Mal“ der Putztage
@@ -860,6 +875,8 @@ export const opAbteilung = (werte) => ({ typ: 'abteilung', werte: klon(werte) })
 /** Amys Rezept anlegen oder ändern (ganz ersetzen) – für beide; wegwerfen mit opAmyWeg. */
 export const opAmy = (r, by) => ({ typ: 'amy', r: klon(r), by: by || null, at: jetzt() });
 export const opAmyWeg = (id) => ({ typ: 'amyWeg', id });
+/** Was die KI für Zeilen eines Rezepts geschätzt hat (amy-werte.js): z = { <Zeile>: { g, kcal, p, kh, f, eur } }. */
+export const opAmyWerte = (id, z, by) => ({ typ: 'amyWerte', id, z: klon(z || {}), by: by || null, at: jetzt() });
 /** Der Kochstand einer Person (kochstand.js) – ersetzt einen älteren; eine noch nicht gesendete Fassung ersetzt die vorige (ersetzt). */
 export const opKochen = (wer, stand, at) => ({ typ: 'kochen', wer: kochenName(wer), stand: klon(stand), at, ersetzt: `kochen:${kochenName(wer)}` });
 /** Im Laden nicht bekommen: bleibt für den nächsten Einkauf offen (mit dem Laden, in dem es fehlte). */
@@ -1212,6 +1229,11 @@ function aendere(s, op) {
       if (istObj(op.essensplan)) essensplanZusammen(s, op.essensplan);
       if (istObj(op.vertraeglich)) vertraeglichZusammen(s, op.vertraeglich);
       if (istObj(op.wuensche)) wuenscheZusammen(s, op.wuensche);
+      if (istObj(op.amyWerte)) {
+        // Schätzungen, die hier fehlen (eine ältere Fassung hat sie weggelassen), kommen dazu
+        if (!istObj(s.amyWerte)) s.amyWerte = {};
+        for (const [id, w] of Object.entries(amyWerteBereinigen(op.amyWerte, s.amy))) if (!s.amyWerte[id]) s.amyWerte[id] = w;
+      }
       if (istObj(op.leute)) {
         if (!istObj(s.leute)) s.leute = {};
         for (const [k, n] of Object.entries(op.leute)) if (PERSON.test(String(n)) && k === String(n).toLowerCase() && !s.leute[k] && Object.keys(s.leute).length < 8) s.leute[k] = n;
@@ -1280,6 +1302,10 @@ function aendere(s, op) {
       if (!istObj(s.amy)) s.amy = {};
       s.amy[r.id] = r;
       s.amy = Object.fromEntries(neuesteAmy(Object.values(s.amy)).map((x) => [x.id, x]));
+      if (istObj(s.amyWerte) && s.amyWerte[r.id]) {
+        const b = amyWertBereinigen(s.amyWerte[r.id], r);
+        if (b) s.amyWerte[r.id] = b; else delete s.amyWerte[r.id];
+      }
       return;
     }
     case 'weg': {
@@ -1384,7 +1410,16 @@ function aendere(s, op) {
       if (t.length) s.amyTags[op.id] = t; else delete s.amyTags[op.id];
       return;
     }
+    case 'amyWerte': {
+      const r = AMY_ID.test(String(op.id)) && istObj(s.amy) ? s.amy[op.id] : null;
+      if (!r || !istObj(op.z)) return;
+      if (!istObj(s.amyWerte)) s.amyWerte = {};
+      const b = amyWertBereinigen({ at: op.at, z: { ...(s.amyWerte[op.id]?.z || {}), ...op.z } }, r);
+      if (b) s.amyWerte[op.id] = b;
+      return;
+    }
     case 'amyWeg':
+      if (istObj(s.amyWerte)) delete s.amyWerte[op.id];
       if (istObj(s.amy)) delete s.amy[op.id];
       if (istObj(s.amyTags)) delete s.amyTags[op.id];
       if (istObj(s.notizen)) delete s.notizen[op.id];

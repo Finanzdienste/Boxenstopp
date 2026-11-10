@@ -158,6 +158,15 @@ const gross = (t) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : t);
 export function zutatLesen(zeile, katalog = {}, mehr = {}) {
   const roh = text(zeile, 120);
   let t = roh.replace(/^[-•*·]\s*/, '').replace(/^(?:ca\.|circa|etwa)\s+/i, '');
+  // „150g+ 75g Cheddar“, „75 g + 35 g Gouda“, „2 + 1 Eier“: zwei Mengen (derselben Einheit) – zusammen, die Aufteilung als Zusatz
+  let teile = '';
+  const plus = t.match(/^(\d+(?:[.,]\d+)?)\s?(kg|g|ml|l|el|tl)?\.?\s*\+\s*(\d+(?:[.,]\d+)?)\s?(kg|g|ml|l|el|tl)?\.?(?=\s|$)/i);
+  if (plus && (plus[4] ? !plus[2] || plus[2].toLowerCase() === plus[4].toLowerCase() : !plus[2])) {
+    const e = plus[4] || '';
+    const summe = Math.round((zahlAus(plus[1]) + zahlAus(plus[3])) * 100) / 100;
+    teile = e ? `${plus[1]} ${e} + ${plus[3]} ${e}` : `${plus[1]} + ${plus[3]}`;
+    t = `${String(summe).replace('.', ',')}${e ? ` ${e}` : ''}${t.slice(plus[0].length)}`;
+  }
   let q = null;
   let menge = '';
   const m = t.match(/^(\d+(?:[.,]\d+)?)?(?:\s*\/\s*(\d+))?\s?([½¼¾⅓⅔⅛])?(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?(?=\s|[a-zA-ZäöüÄÖÜ]|$)/);
@@ -197,6 +206,7 @@ export function zutatLesen(zeile, katalog = {}, mehr = {}) {
   const komma = t.indexOf(',');
   if (komma > 0 && !NIE_KAUFEN.test(t)) { h = [t.slice(komma + 1).trim(), h].filter(Boolean).join(', '); t = t.slice(0, komma).trim(); }
   if (groesse) h = [h, groesse].filter(Boolean).join(', ');
+  if (teile) h = [teile, h].filter(Boolean).join(', ');
   const name = gross(t || roh);
   // „chicki nuggies“ – auf der Liste gesagt, was gemeint ist (liste.js gemeint): Liste, Nährwerte und Preis rechnen damit
   const gemeint = mehr?.gemeint?.[nameSchluessel(name)]?.name || '';
@@ -276,38 +286,127 @@ export function teilFuer(z, daten = {}) {
   return lm ? { q: lm.q, u: lm.u, h: z.h ? z.h.slice(0, 80) : '' } : { t: z.a || '' };
 }
 
+/** Eine Zutatenzeile als Schlüssel für die Schätzung (amyWerte in der Liste): klein, ohne doppelte Leerzeichen. */
+export const zeileSchluessel = (zeile) => String(zeile || '').replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 120);
+
+const zahlIn = (x, min, max) => {
+  const n = Number(x);
+  return Number.isFinite(n) && n >= min && n <= max ? Math.round(n * 10) / 10 : null;
+};
+
+/** Eine Schätzung der KI für eine Zeile: { g, kcal, p, kh, f, eur } (Werte pro 100 g) – oder null, wenn etwas nicht passt. */
+export function wertBereinigen(w) {
+  if (!w || typeof w !== 'object') return null;
+  const g = zahlIn(w.g ?? w.gramm, 0, 10000);
+  const kcal = zahlIn(w.kcal, 0, 950);
+  const p = zahlIn(w.p, 0, 100);
+  const kh = zahlIn(w.kh, 0, 100);
+  const f = zahlIn(w.f, 0, 100);
+  const eur = zahlIn(w.eur, 0, 100);
+  if ([g, kcal, p, kh, f, eur].some((x) => x === null) || p + kh + f > 105) return null;
+  return { g, kcal, p, kh, f, eur };
+}
+
+export const MAX_WERTE = 60;
+
 /**
- * Nährwerte pro Portion, so weit die App die Zutaten kennt:
- * { kcal, p, kh, f, bekannt, unbekannt: [Namen] } – unbekannt sind Zutaten
- * mit Menge, aber ohne Werte (Gewürze ohne Menge zählen nicht).
+ * Die Schätzungen eines Rezepts, wie sie in der Liste stehen (amyWerte[id]):
+ * { at, z: { [zeileSchluessel]: { g, kcal, p, kh, f, eur } } } – nur für
+ * Zeilen, die das Rezept (r) noch hat. Leer: null.
+ */
+export function amyWertBereinigen(roh, r) {
+  if (!roh || typeof roh !== 'object' || !roh.z || typeof roh.z !== 'object') return null;
+  const da = r ? new Set((r.zutaten || []).map(zeileSchluessel)) : null;
+  const z = {};
+  for (const [k, w] of Object.entries(roh.z).slice(0, MAX_WERTE * 2)) {
+    const b = wertBereinigen(w);
+    if (b && k && k.length <= 120 && (!da || da.has(k))) z[k] = b;
+    if (Object.keys(z).length >= MAX_WERTE) break;
+  }
+  return Object.keys(z).length ? { at: typeof roh.at === 'string' ? roh.at.slice(0, 40) : '', z } : null;
+}
+
+/** Was die KI für eine Zeile geschätzt hat (daten.werte: { [zeileSchluessel]: { g, kcal, p, kh, f, eur } }) – oder null. */
+const schaetzungVon = (daten, z) => daten?.werte?.[zeileSchluessel(z.roh)] || null;
+
+/** Werte pro 100 g aus dem Katalog – sonst aus der Schätzung. */
+function pro100Von(z, daten) {
+  const n = daten.naehrwerte?.[z.k];
+  if (n?.pro100) return n.pro100;
+  const w = schaetzungVon(daten, z);
+  return w ? { kcal: w.kcal, p: w.p, kh: w.kh, f: w.f } : null;
+}
+
+/** Gramm im Rezept: wie gramm(), sonst geschätzt (auch für Zeilen ohne Menge: „Feta“). */
+const grammMitSchaetzung = (z, daten) => gramm(z, daten) ?? (schaetzungVon(daten, z)?.g ?? null);
+
+/** Zählt die Zeile für Nährwerte und Preis? Gewürze, Salz und Wasser nicht. */
+const zaehlt = (z) => z.kaufen && !z.gewuerz;
+
+/**
+ * Nährwerte pro Portion, so weit die App die Zutaten kennt – aus dem
+ * Katalog, sonst aus der Schätzung der KI (daten.werte):
+ * { kcal, p, kh, f, bekannt, geschaetzt, unbekannt: [Namen] }. unbekannt
+ * sind Zutaten ohne Werte – auch ohne Menge („Feta“), Gewürze zählen nicht.
  */
 export function amyNaehrwerte(r, daten = {}) {
   const s = { kcal: 0, p: 0, kh: 0, f: 0 };
   const unbekannt = [];
   let bekannt = 0;
+  let geschaetzt = 0;
   for (const z of zutatenVon(r, daten.katalog || {}, daten)) {
-    const n = daten.naehrwerte?.[z.k];
-    const g = gramm(z, daten);
-    if (n?.pro100 && g !== null) {
-      for (const x of ['kcal', 'p', 'kh', 'f']) s[x] += (n.pro100[x] || 0) * g / 100;
+    const p100 = pro100Von(z, daten);
+    const g = grammMitSchaetzung(z, daten);
+    if (p100 && g !== null) {
+      for (const x of ['kcal', 'p', 'kh', 'f']) s[x] += (p100[x] || 0) * g / 100;
       bekannt++;
-    } else if (z.q !== null && !z.gewuerz && z.kaufen) unbekannt.push(z.name);
+      if (!daten.naehrwerte?.[z.k]?.pro100 || gramm(z, daten) === null) geschaetzt++;
+    } else if (zaehlt(z)) unbekannt.push(z.name);
   }
   const n = r?.portionen || 4;
-  return { kcal: Math.round(s.kcal / n), p: Math.round(s.p / n * 10) / 10, kh: Math.round(s.kh / n * 10) / 10, f: Math.round(s.f / n * 10) / 10, bekannt, unbekannt };
+  return { kcal: Math.round(s.kcal / n), p: Math.round(s.p / n * 10) / 10, kh: Math.round(s.kh / n * 10) / 10, f: Math.round(s.f / n * 10) / 10, bekannt, geschaetzt, unbekannt };
 }
 
-/** Kosten zum Richtpreis: { gesamt, portion, luecken } – luecken: Zutaten ohne Preis. */
+/** Euro für eine Zeile: Richtpreis aus dem Katalog, sonst die Schätzung – oder null. */
+function kostenZeile(z, daten) {
+  const g = gramm(z, daten);
+  const e = g !== null && g > 0 ? kostenMenge(z.k, g, 'g', daten) : z.q !== null ? kostenMenge(z.k, z.q, z.u, daten) : null;
+  if (e !== null) return { eur: e, geschaetzt: false };
+  const w = schaetzungVon(daten, z);
+  if (!w) return null;
+  // Kennt der Katalog den Preis, nur die Menge nicht („1 Handvoll Parmesan“): Richtpreis mal geschätzte Gramm
+  const mitG = w.g > 0 ? kostenMenge(z.k, w.g, 'g', daten) : null;
+  if (mitG !== null) return { eur: mitG, geschaetzt: true };
+  return Number.isFinite(w.eur) ? { eur: w.eur, geschaetzt: true } : null;
+}
+
+/** Kosten zum Richtpreis, sonst geschätzt: { gesamt, portion, luecken, geschaetzt } – luecken: Zutaten ohne Preis. */
 export function amyKosten(r, daten = {}) {
   let gesamt = 0;
   let luecken = 0;
+  let geschaetzt = 0;
   for (const z of zutatenVon(r, daten.katalog || {}, daten)) {
-    if (!z.kaufen || z.gewuerz) continue;
-    const g = gramm(z, daten);
-    const e = g !== null && g > 0 ? kostenMenge(z.k, g, 'g', daten) : z.q !== null ? kostenMenge(z.k, z.q, z.u, daten) : null;
-    if (e === null) luecken++; else gesamt += e;
+    if (!zaehlt(z)) continue;
+    const e = kostenZeile(z, daten);
+    if (e === null) luecken++;
+    else { gesamt += e.eur; if (e.geschaetzt) geschaetzt++; }
   }
-  return { gesamt, portion: gesamt / (r?.portionen || 4), luecken };
+  return { gesamt, portion: gesamt / (r?.portionen || 4), luecken, geschaetzt };
+}
+
+/**
+ * Die Zeilen, für die der App Nährwerte, Gramm oder Preis fehlen – das
+ * schätzt die KI (amy-werte.js). Gewürze und was man nicht kauft nicht, und
+ * was schon geschätzt ist (daten.werte) auch nicht. → [Zeile, wie sie im Rezept steht]
+ */
+export function offeneZeilen(r, daten = {}) {
+  const offen = [];
+  for (const z of zutatenVon(r, daten.katalog || {}, daten)) {
+    if (!zaehlt(z) || schaetzungVon(daten, z)) continue;
+    const naehrwerte = !!daten.naehrwerte?.[z.k]?.pro100 && gramm(z, daten) !== null;
+    if (!naehrwerte || kostenZeile(z, daten) === null) offen.push(z.roh);
+  }
+  return [...new Set(offen)];
 }
 
 /* -------------------------------------------------------------- Schritte */

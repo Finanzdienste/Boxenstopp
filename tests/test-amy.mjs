@@ -1,13 +1,16 @@
 /*
  * Amys Rezepte: erst die Logik in Node (js/amy.js – Zeilen lesen,
- * Einkaufsliste, Nährwerte, Kosten, Schritte – und der Stand in liste.js),
- * dann der Reiter im Browser auf zwei Handys mit der GitHub-Attrappe.
+ * Einkaufsliste, Nährwerte, Kosten, Schritte, die Schätzung der KI für
+ * Unbekanntes – und der Stand in liste.js), dann der Reiter im Browser auf
+ * zwei Handys mit der GitHub-Attrappe.
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
-import { zutatLesen, listenMenge, amyEinkauf, amyNaehrwerte, amyKosten, amyAblauf, alsRezept, amyBereinigen, slug, neueAmyId, schrittMinuten, AMY_ID, tagsBereinigen, tagsAusText, alleTags, hatTags, tagFarbe, MAX_TAGS } from '../js/amy.js';
-import { leer, anwenden, bereinigen, opAmy, opAmyWeg, opAmyTags, opZusammen, opTeil } from '../js/liste.js';
+import { zutatLesen, listenMenge, amyEinkauf, amyNaehrwerte, amyKosten, offeneZeilen, zeileSchluessel, wertBereinigen, amyWertBereinigen, amyAblauf, alsRezept, amyBereinigen, slug, neueAmyId, schrittMinuten, AMY_ID, tagsBereinigen, tagsAusText, alleTags, hatTags, tagFarbe, MAX_TAGS } from '../js/amy.js';
+import { leer, anwenden, bereinigen, opAmy, opAmyWeg, opAmyTags, opAmyWerte, opZusammen, opTeil } from '../js/liste.js';
+import { rumpfWerte, werteBereinigen, werteText, zeilenAbdruck, WERTE_SCHEMA } from '../js/amy-werte.js';
+import { ANBIETER } from '../js/ki.js';
 import { timerPlan } from '../js/zeiten.js';
 
 const { check, ende } = pruefer();
@@ -107,6 +110,60 @@ const nw = amyNaehrwerte(R, daten);
 check(nw.kcal > 350 && nw.kcal < 800 && nw.p > 25 && nw.bekannt >= 6 && nw.unbekannt.includes('Koriander'), `Nährwerte pro Portion ≈ ${nw.kcal} kcal, ${nw.p} g P (ohne: ${nw.unbekannt.join(', ')})`);
 const ko = amyKosten(R, daten);
 check(ko.gesamt > 4 && ko.gesamt < 20 && Math.abs(ko.portion - ko.gesamt / 4) < 1e-9 && ko.luecken >= 1, `Kosten ≈ ${ko.gesamt.toFixed(2)} € (${ko.portion.toFixed(2)} € pro Portion, ${ko.luecken} ohne Preis)`);
+
+// --- „150g + 75g“ zusammen; was die App nicht kennt, schätzt die KI (amy-werte.js)
+z = lies('150g+ 75g shredded Cheddar');
+check(z.q === 225 && z.u === 'g' && z.k === 'cheddar' && z.h === '150 g + 75 g', `„150g+ 75g shredded Cheddar“: 225 g Cheddar, die Aufteilung als Zusatz (${z.q} ${z.u} ${z.k} – ${z.h})`);
+z = lies('75 g + 35 g Gouda');
+check(z.q === 110 && z.u === 'g' && z.name === 'Gouda', '„75 g + 35 g Gouda“: 110 g');
+z = lies('2 + 1 Eier');
+check(z.q === 3 && z.name === 'Eier', '„2 + 1 Eier“: 3');
+const MAC = { id: 'amy-mac', name: 'Crack and Cheese', portionen: 4, zutaten: ['250 g Makkaroni', '200 g Gouda', '1 Handvoll Parmesan', 'Feta', '1 Packung Dino Nuggies', 'Salz'] };
+const nw0 = amyNaehrwerte(MAC, daten);
+check(nw0.unbekannt.includes('Gouda') && nw0.unbekannt.includes('Feta') && nw0.unbekannt.includes('Parmesan') && !nw0.unbekannt.includes('Salz') && nw0.geschaetzt === 0, `ohne Schätzung: Gouda, Parmesan (Handvoll), Feta (ohne Menge) und die Nuggies fehlen – Salz zählt nicht (${nw0.unbekannt.join(', ')})`);
+const offen = offeneZeilen(MAC, daten);
+check(offen.join('|') === '200 g Gouda|1 Handvoll Parmesan|Feta|1 Packung Dino Nuggies', `offene Zeilen für die KI: ${offen.join(' | ')}`);
+const W = {
+  [zeileSchluessel('200 g Gouda')]: { g: 200, kcal: 356, p: 25, kh: 0, f: 28, eur: 2.2 },
+  [zeileSchluessel('1 Handvoll Parmesan')]: { g: 25, kcal: 999, p: 99, kh: 99, f: 99, eur: 99 },
+  [zeileSchluessel('Feta')]: { g: 150, kcal: 270, p: 17, kh: 1, f: 22, eur: 1.4 },
+  [zeileSchluessel('1 Packung Dino Nuggies')]: { g: 250, kcal: 240, p: 14, kh: 18, f: 12, eur: 3.5 },
+};
+const mitW = { ...daten, werte: W };
+const nw1 = amyNaehrwerte(MAC, mitW);
+const gouda = 356 * 2;
+const parmesanKatalog = D.naehrwerte.parmesan.pro100.kcal * 0.25;
+check(!nw1.unbekannt.length && nw1.geschaetzt === 4 && Math.abs(nw1.kcal - Math.round((D.naehrwerte[lies('250 g Makkaroni').k].pro100.kcal * 2.5 + gouda + parmesanKatalog + 270 * 1.5 + 240 * 2.5) / 4)) <= 1, `mit Schätzung: alles drin – beim Parmesan die Werte aus dem Katalog, nur die Gramm geschätzt (${nw1.kcal} kcal)`);
+const ko1 = amyKosten(MAC, mitW);
+const ko0 = amyKosten(MAC, daten);
+check(ko0.luecken >= 3 && !ko1.luecken && ko1.geschaetzt === 4 && Math.abs(ko1.gesamt - (ko0.gesamt + 2.2 + D.preise.parmesan.je_g * 25 + 1.4 + 3.5)) < 0.01, `Kosten mit Schätzung: Gouda, Feta, Nuggies geschätzt, Parmesan zum Richtpreis mal 25 g (${ko1.gesamt.toFixed(2)} €)`);
+check(!offeneZeilen(MAC, mitW).length, 'geschätzt: nichts mehr offen');
+check(wertBereinigen({ gramm: 100, kcal: 200, p: 10, kh: 20, f: 5, eur: 1 })?.g === 100 && wertBereinigen({ g: 100, kcal: 2000, p: 1, kh: 1, f: 1, eur: 1 }) === null && wertBereinigen({ g: 100, kcal: 500, p: 60, kh: 60, f: 10, eur: 1 }) === null && wertBereinigen({ g: 100, kcal: 100, p: 1, kh: 1, f: 1 }) === null, 'Schätzungen prüfen: Gramm, kcal bis 950, P+KH+F höchstens 100 g, Preis nötig');
+const wb = amyWertBereinigen({ at: 'x', z: { ...W, 'gibt es nicht mehr': W[zeileSchluessel('Feta')] } }, MAC);
+check(Object.keys(wb.z).length === 3 && !wb.z['gibt es nicht mehr'] && !wb.z[zeileSchluessel('1 Handvoll Parmesan')], 'in der Liste: nur Zeilen, die das Rezept noch hat, und nur stimmige Werte');
+// Die Anfrage an die KI
+const rw = rumpfWerte({ anbieter: 'anthropic', r: MAC, zeilen: offen });
+const rg = rumpfWerte({ anbieter: 'gemini', r: MAC, zeilen: offen });
+check(rw.model === ANBIETER.anthropic.modell && rw.output_config?.format?.type === 'json_schema' && rw.messages[0].content[0].text === werteText(MAC, offen) && werteText(MAC, offen).startsWith('Rezept: Crack and Cheese (für 4 Portionen)\nZutaten:\n- 200 g Gouda') && rg.response_format.schema === WERTE_SCHEMA && rg.stream, 'die Anfrage: Rezept, Portionen und nur die offenen Zeilen; JSON nach Schema bei Claude und Gemini');
+const wz = werteBereinigen({ zutaten: [{ zeile: '200 g Gouda', gramm: 200, kcal: 356, p: 25, kh: 0, f: 28, eur: 2.2 }, { zeile: 'nicht gefragt', gramm: 1, kcal: 1, p: 0, kh: 0, f: 0, eur: 0 }, { zeile: 'Feta', gramm: 'viel' }] }, offen);
+check(Object.keys(wz).join() === zeileSchluessel('200 g Gouda'), 'die Antwort: nur gefragte Zeilen mit stimmigen Werten');
+check(zeilenAbdruck(['a', 'B']) === zeilenAbdruck(['b', 'A']) && zeilenAbdruck(['a']) !== zeilenAbdruck(['a', 'b']), 'Fingerabdruck der offenen Zeilen: Reihenfolge egal');
+// Im Stand: opAmyWerte nur für Rezepte, die es gibt; beim Bearbeiten fallen alte Zeilen weg; mit dem Rezept weg
+let sw = anwenden(leer(), opAmy(MAC, 'Amy'));
+sw = anwenden(sw, opAmyWerte('amy-mac', { [zeileSchluessel('200 g Gouda')]: W[zeileSchluessel('200 g Gouda')] }, 'Amy'));
+sw = anwenden(sw, opAmyWerte('amy-mac', { [zeileSchluessel('Feta')]: W[zeileSchluessel('Feta')] }, 'Tobi'));
+sw = anwenden(sw, opAmyWerte('amy-gibtsnicht', { x: W[zeileSchluessel('Feta')] }, 'Amy'));
+check(Object.keys(sw.amyWerte['amy-mac'].z).length === 2 && !sw.amyWerte['amy-gibtsnicht'], 'opAmyWerte: kommt dazu, nur für vorhandene Rezepte');
+check(Object.keys(bereinigen(JSON.parse(JSON.stringify(sw))).amyWerte['amy-mac'].z).length === 2, 'übersteht das Bereinigen beim Laden');
+sw = anwenden(sw, opAmy({ ...MAC, zutaten: ['250 g Makkaroni', '200 g Gouda'] }, 'Amy'));
+check(Object.keys(sw.amyWerte['amy-mac'].z).join() === zeileSchluessel('200 g Gouda'), 'bearbeitet: die Schätzung für „Feta“ ist weg, Gouda bleibt');
+const altFassung = JSON.parse(JSON.stringify(sw));
+delete altFassung.amyWerte;
+const zurueck = anwenden(bereinigen(altFassung), opZusammen({}, {}, { amyWerte: sw.amyWerte }));
+check(Object.keys(zurueck.amyWerte['amy-mac']?.z || {}).length === 1, 'eine ältere Fassung lässt amyWerte weg – opZusammen bringt sie wieder');
+sw = anwenden(sw, opAmyWeg('amy-mac'));
+check(!sw.amyWerte['amy-mac'], 'Rezept weg: Schätzung weg');
+
 const ab = amyAblauf(R);
 check(ab.length === 2 && ab[0].t === 'Zubereitung' && ab[1].t === 'Topping' && ab[0].schritte.length === 4 && ab[0].schritte[0].min === 12 && ab[0].schritte[1].min === 2, `Schritte in Abschnitten; „Topping:“ beginnt einen neuen (${ab.map((p) => `${p.t} ${p.schritte.map((s) => s.min).join('/')}`).join(' | ')})`);
 check(timerPlan(ab[0].schritte[2])?.min === 5 && timerPlan(ab[0].schritte[1]) === null, 'Timer bei „5 Min. anbraten“, nicht bei „Zwiebeln würfeln“');

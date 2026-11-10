@@ -27,14 +27,15 @@
  * kopierter Text, die KI füllt die Felder (amy-import.js) mit dem Schlüssel
  * der Resteverwertung. Gespeichert wird erst mit „Speichern“.
  */
-import { app, $, $$, melde, zeigeReiter, lese, schreibe, istSchmal, ansicht } from './kern.js';
+import { app, $, $$, melde, zeigeReiter, lese, schreibe, istSchmal, ansicht, reiterBeobachten } from './kern.js';
 import { istEigen, person, wessen } from './profil.js';
 import { esc, nf1, nfi } from './format.js';
 import { dauer } from './zeiten.js';
 import { euro } from './kosten.js';
-import { zutatenVon, zutatLesen, amyNaehrwerte, amyKosten, amyEinkauf, teilFuer, alsRezept, amySchaetzung, neueAmyId, AMY_ID, tagsBereinigen, tagsAusText, alleTags, hatTags, tagFarbe, TAG_VORSCHLAEGE, MAX_TAGS } from './amy.js';
+import { zutatenVon, zutatLesen, amyNaehrwerte, amyKosten, offeneZeilen, amyEinkauf, teilFuer, alsRezept, amySchaetzung, neueAmyId, AMY_ID, tagsBereinigen, tagsAusText, alleTags, hatTags, tagFarbe, TAG_VORSCHLAEGE, MAX_TAGS } from './amy.js';
 import { AMY_BILDER, bildPfad, zutatImg } from './bilder.js';
-import { opAmy, opAmyWeg, opAmyTags, opTeil, opTeilWeg, hatTeil } from './liste.js';
+import { opAmy, opAmyWeg, opAmyTags, opAmyWerte, opTeil, opTeilWeg, hatTeil } from './liste.js';
+import { rumpfWerte, werteBereinigen, zeilenAbdruck } from './amy-werte.js';
 import { timerKnopf, timerUmschalten, mengenHervor } from './ansicht-rezepte.js';
 import { tempoHaken, tempoZurueck, tempoZeit } from './tempo.js';
 import { lobPruefen, tierVorladen } from './lob.js';
@@ -82,6 +83,8 @@ const merken = () => schreibe(ANSICHT, zustand);
 const filterMerken = () => schreibe(FILTER, filter);
 // Was auf der Liste zusammengelegt oder verschoben wurde, gilt auch für Amys Zutaten
 const daten = () => ({ katalog: app.katalog, naehrwerte: app.naehrwerte, preise: app.preise, einheiten: app.einheiten, gleich: app.stand.gleich, abteilungen: app.stand.abteilungen, gemeint: app.stand.gemeint });
+/** Dazu, was die KI für die unbekannten Zutaten dieses Rezepts geschätzt hat (amy-werte.js). */
+const datenFuer = (r) => ({ ...daten(), werte: app.stand.amyWerte?.[r?.id]?.z || null });
 const tagsVon = (id) => app.stand.amyTags?.[id] || [];
 const gleicherTag = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 const tagPille = (t) => `<span class="amy-tag tf${tagFarbe(t)}">${esc(t)}</span>`;
@@ -125,10 +128,11 @@ function aufListe(r) {
 /* ---------------------------------------------------------------- Liste */
 
 function karte(r) {
-  const nw = amyNaehrwerte(r, daten());
-  const ko = amyKosten(r, daten());
+  const nw = amyNaehrwerte(r, datenFuer(r));
+  const ko = amyKosten(r, datenFuer(r));
   const st = aufListe(r);
-  const zahlen = [nw.bekannt ? `≈ ${nfi(nw.kcal)} kcal` : '', ko.gesamt > 0 ? `≈ ${euro(ko.portion)}` : ''].filter(Boolean).join(' · ');
+  // Nur, was ganz ist: Fehlt für eine Zutat noch der Wert, wäre die Zahl viel zu klein (die KI schätzt ihn gleich nach)
+  const zahlen = [nw.bekannt && !nw.unbekannt.length ? `≈ ${nfi(nw.kcal)} kcal` : '', ko.gesamt > 0 && !ko.luecken ? `≈ ${euro(ko.portion)}` : ''].filter(Boolean).join(' · ');
   const tags = tagsVon(r.id);
   return `<button type="button" class="amy-karte" data-amy-open="${esc(r.id)}">
 <span class="amy-karte-bild"><img src="${bildPfad(r.bild)}" alt="" width="56" height="56" decoding="async"></span>
@@ -146,7 +150,7 @@ function sortiert(liste, art) {
     return [...liste].sort((a, b) => m.get(a.id) - m.get(b.id) || name(a, b));
   }
   if (art === 'guenstig') {
-    const m = new Map(liste.map((r) => { const k = amyKosten(r, daten()); return [r.id, k.gesamt > 0 ? k.portion : Infinity]; }));
+    const m = new Map(liste.map((r) => { const k = amyKosten(r, datenFuer(r)); return [r.id, k.gesamt > 0 && !k.luecken ? k.portion : Infinity]; }));
     return [...liste].sort((a, b) => m.get(a.id) - m.get(b.id) || name(a, b));
   }
   return liste;
@@ -240,8 +244,8 @@ function detailHTML(r) {
   x.zeit = t.z;
   const zut = zutatenVon(r, app.katalog, daten());
   vtJetzt = pruefeZutaten(zut.map(zumPruefen));
-  const nw = amyNaehrwerte(r, daten());
-  const ko = amyKosten(r, daten());
+  const nw = amyNaehrwerte(r, datenFuer(r));
+  const ko = amyKosten(r, datenFuer(r));
   const st = aufListe(r);
   const gesperrt = app.listeDa ? '' : ' disabled';
   let aktion = '';
@@ -262,7 +266,7 @@ function detailHTML(r) {
   return `<button type="button" class="back" data-act="amy-liste">${ZURUECK}${HERZ}${esc(wessen(person()))} Rezepte</button>
 <header class="amy-d-kopf"><span class="amy-d-bild"><img src="${bildPfad(r.bild)}" alt="" width="72" height="72" decoding="async"></span>
 <div><h1 class="amy-d-titel" id="amy-d-titel">${esc(r.name)}</h1><p class="amy-d-fakten">${fakten.map(esc).join(' · ')}</p>${von ? `<p class="amy-d-von">${von}</p>` : ''}${tags.length ? `<div class="amy-tags amy-d-tags" role="group" aria-label="Tags">${tags.map((t) => `<button type="button" class="amy-tag tf${tagFarbe(t)}" data-amy-tag-filter="${esc(t)}" aria-label="Alle Rezepte mit „${esc(t)}“">${esc(t)}</button>`).join('')}</div>` : ''}</div></header>
-${nw.bekannt ? `<div class="amy-etikett" role="group" aria-label="Nährwerte pro Portion"><span><b>${nfi(nw.kcal)}</b> kcal</span><span class="m-p">P ${nf1(nw.p)}</span><span class="m-kh">KH ${nf1(nw.kh)}</span><span class="m-f">F ${nf1(nw.f)}</span><small>pro Portion, ungefähr${nw.unbekannt.length ? ` – ohne ${esc(nw.unbekannt.slice(0, 3).join(', '))}${nw.unbekannt.length > 3 ? ' …' : ''}` : ''}</small></div>` : ''}
+${nw.bekannt ? `<div class="amy-etikett" role="group" aria-label="Nährwerte pro Portion"><span><b>${nfi(nw.kcal)}</b> kcal</span><span class="m-p">P ${nf1(nw.p)}</span><span class="m-kh">KH ${nf1(nw.kh)}</span><span class="m-f">F ${nf1(nw.f)}</span><small>pro Portion, ungefähr${nw.geschaetzt ? ' – teils von der KI geschätzt' : ''}${nw.unbekannt.length ? ` – ohne ${esc(nw.unbekannt.slice(0, 3).join(', '))}${nw.unbekannt.length > 3 ? ' …' : ''}${werteLauf?.id === r.id ? ' (die KI schätzt sie gerade)' : ''}` : ''}</small></div>` : ''}
 ${vtHinweisHTML(vtJetzt)}
 <div class="actions amy-actions">${aktion}<button type="button" class="btn" data-act="amy-bearbeiten"${gesperrt}>Bearbeiten</button>${loeschen}</div>
 <section class="sec amy-sec"><h2>Zutaten <small>für ${r.portionen} ${r.portionen === 1 ? 'Portion' : 'Portionen'}</small></h2>
@@ -593,6 +597,59 @@ export function amyZeichnen() {
   } else {
     el.innerHTML = listeHTML();
   }
+  // Fehlen Werte für Zutaten, die KI fragen – erst, wenn die Seite steht
+  if (zustand.art !== 'editor') setTimeout(werteAnstossen, 0);
+}
+
+/* ------------------------------------------ Werte schätzen, was fehlt */
+
+// Nährwerte und Preis für Zutaten, die die App nicht kennt („Dino Nuggies“, „Gouda“, „Feta“ ohne Menge): einmal
+// die KI fragen (amy-werte.js) – das Ergebnis steht dann für alle Geräte in der Liste (amyWerte). Je Gerät
+// dieselben offenen Zeilen höchstens einmal in sieben Tagen, eins nach dem anderen, höchstens zwölf je Start.
+const WERTE_VERSUCHE = 'boxenstopp.amy-werte-versuch.v1';
+const WERTE_PAUSE = 7 * 24 * 60 * 60 * 1000;
+const FRISCH = 2 * 60 * 1000;
+let werteLauf = null;
+let werteRunden = 0;
+/** Welche Rezepte auf diesem Gerät eben gespeichert wurden – frisch gespeichert fragt das Gerät, das gespeichert hat. */
+const hierGespeichert = {};
+
+function werteAnstossen() {
+  if (werteLauf || werteRunden >= 12 || !app.listeDa || !app.zugang) return;
+  const schluessel = ladeKi();
+  if (!schluessel) return;
+  const versuche = lese(WERTE_VERSUCHE, {}) || {};
+  for (const r of rezepte()) {
+    // Eben woanders gespeichert: Das andere Gerät fragt gerade selbst – nicht zweimal dasselbe bezahlen
+    const zuletzt = Date.parse(r.geaendert || r.at || '') || 0;
+    if (Date.now() - zuletzt < FRISCH && !(hierGespeichert[r.id] >= zuletzt - FRISCH)) continue;
+    const zeilen = offeneZeilen(r, datenFuer(r));
+    if (!zeilen.length) continue;
+    const abdruck = zeilenAbdruck(zeilen);
+    const v = versuche[r.id];
+    if (v && v.h === abdruck && Date.now() - Date.parse(v.at) < WERTE_PAUSE) continue;
+    werteFragen(r, zeilen, abdruck, schluessel);
+    return;
+  }
+}
+
+async function werteFragen(r, zeilen, abdruck, schluessel) {
+  const versuche = { ...(lese(WERTE_VERSUCHE, {}) || {}), [r.id]: { h: abdruck, at: new Date().toISOString() } };
+  schreibe(WERTE_VERSUCHE, Object.fromEntries(Object.entries(versuche).slice(-60)));
+  werteRunden++;
+  const lauf = { id: r.id };
+  werteLauf = lauf;
+  let neu = false;
+  try {
+    const antwort = await kiAnfragen(rumpfWerte({ anbieter: anbieterVon(schluessel), r, zeilen }), { schluessel, roh: true });
+    const z = werteBereinigen(jsonAus(antwort.text), zeilen);
+    if (Object.keys(z).length && app.stand.amy?.[r.id]) { app.aendern(opAmyWerte(r.id, z, app.name())); neu = true; }
+  } catch { /* still: beim nächsten Mal (in sieben Tagen) wieder */ } finally {
+    if (werteLauf === lauf) werteLauf = null;
+    // Ohne neue Werte zeichnet niemand neu – der Hinweis „schätzt gerade“ soll trotzdem weg
+    if (!neu && zustand.art === 'detail' && zustand.id === r.id) amyZeichnen();
+    setTimeout(werteAnstossen, 300);
+  }
 }
 
 /** Nur die Zahlen am Schalter neu (wenn der Teil darunter stehen bleibt). */
@@ -897,6 +954,7 @@ export function absendenAmy(ev) {
   const alt = e.id ? rezept(e.id) : null;
   const id = alt ? alt.id : neueAmyId(name);
   const tags = tagsBereinigen(e.tags);
+  hierGespeichert[id] = Date.now();
   app.aendern([opAmy({
     id,
     name,
@@ -919,4 +977,6 @@ export function absendenAmy(ev) {
 /** Beim Start: die gemerkte Ansicht wiederherstellen. */
 export function amyStart() {
   amyZeichnen();
+  // Auch beim Öffnen von Amys Bereich: Ist inzwischen ein KI-Schlüssel da, die fehlenden Werte schätzen lassen
+  reiterBeobachten((t) => { if (t === 'amy') setTimeout(werteAnstossen, 0); });
 }
