@@ -514,13 +514,14 @@ in Pflaume und Rosa.
   in der Notiz, „Seite ansehen“ öffnet das Original. Der Haken „Ohne, was ich
   nicht vertrage“ (gleich an, je Gerät gemerkt) schickt nur die Namen dieser
   Zutaten mit, nie die Notizen. Ein Rezept, dessen Adresse in keinem
-  Suchergebnis vorkam, fällt weg – das wäre ausgedacht. Das macht
-  `claude-sonnet-5-5` mit den Werkzeugen `web_search` (Standort Deutschland)
-  und `web_fetch`, ohne Strom (`kiMitWerkzeugen` in `js/ki.js`: unterbricht
-  der Server eine lange Suche mit `pause_turn`, geht die Antwort unverändert
-  zurück; kennt der Schlüssel das Modell nicht, nimmt die App ihr normales;
-  ist die Websuche in der Console aus, sagt sie, wo man sie einschaltet).
-  Kosten: 1 Cent je Suche plus die gelesenen Seiten. Nur mit dem
+  Suchergebnis vorkam, fällt weg – das wäre ausgedacht. Das macht dasselbe
+  Modell wie bei den Rezepten (`claude-fable-5-1`) mit den Werkzeugen
+  `web_search` (Standort Deutschland) und `web_fetch`, ohne Strom
+  (`kiMitWerkzeugen` in `js/ki.js`: unterbricht der Server eine lange Suche
+  mit `pause_turn`, geht die Antwort unverändert zurück; ist die Websuche in
+  der Console aus, sagt sie, wo man sie einschaltet). Kosten vom
+  API-Guthaben: 1 Cent je Suchanfrage plus die gelesenen Seiten als Eingabe.
+  Nur mit dem
   Claude-Schlüssel – Googles Bedingungen für die Suche erlauben nicht, Treffer
   zu ändern und dauerhaft aufzuheben; mit dem Google-Schlüssel sagt die App,
   dass ein Link bei „Rezept übernehmen“ geht.
@@ -1662,8 +1663,8 @@ Rezepte nach gut 4 s aus dem Vorrat statt nach 20 s). `test-import.mjs` prüft d
 Rezept-Import mit nachgebauten APIs von Google und Anthropic (auch Claude
 liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
 Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
-Speichern mit Quelle, `pause_turn`, Ausweichen bei unbekanntem Modell oder
-ohne Seiten lesen, Websuche aus, Abbrechen und der Hinweis mit Googles
+Speichern mit Quelle, `pause_turn`, Ausweichen ohne Seiten lesen,
+Websuche aus, Abbrechen und der Hinweis mit Googles
 Schlüssel. `test-einstellungen.mjs`
 spielt den Reiter Einstellungen durch (Leiste mit Kurzform, Reiter
 ausblenden, umsortieren und merken, hell und dunkel, Einrichten über Hinweis und Link, KI-Schlüssel,

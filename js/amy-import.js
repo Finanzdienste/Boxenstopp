@@ -137,7 +137,7 @@ export const SEITE_LESEN = (n = 3) => ({ type: 'web_fetch_20250910', name: 'web_
 /** Einen Link mit Claude übernehmen: Die Seite liest web_fetch, die Antwort ist JSON wie beim Import. */
 export function rumpfLinkClaude({ link, tags = [] }) {
   return {
-    model: ANBIETER.anthropic.suchModell,
+    model: ANBIETER.anthropic.modell,
     max_tokens: 8000,
     system: importSystem({ tags, link: true }),
     tools: [SEITE_LESEN(2)],
@@ -185,7 +185,7 @@ export function sucheText({ wunsch, ohne = [], wenig = [] }) {
 
 export function rumpfSuche({ wunsch, ohne = [], wenig = [], tags = [] }) {
   return {
-    model: ANBIETER.anthropic.suchModell,
+    model: ANBIETER.anthropic.modell,
     max_tokens: 12000,
     system: sucheSystem({ tags }),
     tools: [WEBSUCHE, SEITE_LESEN(3)],

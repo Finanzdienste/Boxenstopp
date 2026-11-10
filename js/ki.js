@@ -30,9 +30,8 @@
  *
  * Dazu Claude mit Werkzeugen (kiMitWerkzeugen): im Internet suchen und
  * Seiten lesen – für Amys „Im Internet suchen“ und Links beim Übernehmen
- * (amy-import.js). Das macht claude-sonnet-5-5: Rezepte finden und abschreiben
- * braucht nicht das stärkste Modell, und die gelesenen Seiten kosten sonst
- * fünfmal so viel.
+ * (amy-import.js), mit demselben Modell. Die gelesenen Seiten zählen als
+ * Eingabe – eine Suche kostet darum mehr als ein Rezept.
  *
  * anfrageBauen() und rumpfFuer() sind ohne Netz und ohne DOM, tests/test-ki.mjs
  * prüft daran, dass alle Regeln mitgehen.
@@ -49,8 +48,6 @@ export const ANBIETER = {
   anthropic: {
     name: 'Anthropic',
     modell: 'claude-fable-5-1',
-    // Suchen und Seiten lesen (kiMitWerkzeugen) – kennt der Schlüssel es nicht, nimmt die App das Modell oben
-    suchModell: 'claude-sonnet-5-5',
     api: 'https://api.anthropic.com/v1/messages',
     preis: { ein: 10, aus: 50 }, // US-Dollar pro Million Tokens (Fable 5.1)
   },
@@ -399,8 +396,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
  * unverändert zurück, und es geht weiter. Mit Quellenangaben ist der Text auf
  * mehrere Blöcke verteilt: Es zählt alles nach dem letzten Werkzeug.
  *
- * Kennt der Schlüssel das Suchmodell nicht, einmal mit dem normalen Modell;
- * hakt nur das Lesen von Seiten (web_fetch), einmal ohne. Gibt { text,
+ * Hakt nur das Lesen von Seiten (web_fetch), einmal ohne. Gibt { text,
  * quellen: [{ url, titel }], usage: { ein, aus, suchen } } zurück.
  */
 export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, runden = 4 }) {
@@ -428,9 +424,6 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
     if (!res.ok) {
       const text = info?.error?.message || `HTTP ${res.status}`;
       const art = artVonStatus(res.status, info);
-      if (!bisher.length && art === 'modell' && rumpf.model !== ANBIETER.anthropic.modell) {
-        return kiMitWerkzeugen({ ...rumpf, model: ANBIETER.anthropic.modell }, { schluessel, api, signal, runden });
-      }
       // Hakt nur das Lesen von Seiten (unbekannt oder ausgeschaltet): einmal ohne – wenn dann noch ein Werkzeug bleibt
       const ohneLesen = (rumpf.tools || []).filter((t) => !/^web_fetch/.test(t.type || ''));
       if (!bisher.length && res.status === 400 && /web[ _]fetch/i.test(text) && ohneLesen.length && ohneLesen.length < (rumpf.tools || []).length) {
