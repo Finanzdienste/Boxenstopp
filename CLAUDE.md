@@ -61,7 +61,7 @@ Bei normalen Aufgaben erwähnst du Ultracode nicht.
 1. Ändern, dann `npm run lint` und die Tests: `node tests/lauf.mjs` (alle) oder
    `node tests/lauf.mjs katalog ki` (einzelne). Der Testserver braucht Port 8099.
    Neue Funktionen bekommen Tests, die README wird mitgezogen.
-2. In `sw.js` die `VERSION` hochzählen (`'v65'` → `'v66'`); neue JS-Dateien in
+2. In `sw.js` die `VERSION` um eins hochzählen (z. B. `'v66'` → `'v67'`); neue JS-Dateien in
    `SHELL` eintragen.
 3. Committen und vor dem Push `git pull --rebase origin main`; gepusht wird
    auf `main`. Keine History umschreiben (kein amend, kein force).
