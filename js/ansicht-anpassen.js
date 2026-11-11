@@ -16,8 +16,8 @@
  *     Rezept für beide dazu (liste.json unter ki, herkunft = das Original)
  *     und steht im Raster direkt davor.
  * Die Schritte bekommen die neuen Mengen, weggelassene Zutaten sind markiert;
- * unter „Geändert“ steht, was man der KI geschrieben hat, und was sich
- * geändert hat.
+ * unter „Geändert“ steht, was sich geändert hat (nicht, was man der KI
+ * geschrieben hat).
  *
  * Oben „Mit KI ändern“: Man schreibt, was anders sein soll („fertige
  * Teriyaki-Sauce statt selbst gemacht“), die KI bekommt das Rezept, wie es
@@ -38,7 +38,7 @@ import { rumpfFuer, kiAnfragen, anbieterVon, KI_FEHLER } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { fuerWen } from './profil.js';
 
-let zustand = null; // { rid, basis, k, gerechnet, speichert, ki: { wunsch, lauf, fehler, hinweis, wuensche } }
+let zustand = null; // { rid, basis, k, gerechnet, speichert, ki: { wunsch, lauf, fehler, hinweis } }
 const klon = (x) => JSON.parse(JSON.stringify(x));
 
 export const anpassenOffen = () => !!zustand;
@@ -60,7 +60,7 @@ export function oeffneAnpassen(rid, { mitKi = false } = {}) {
   if (zustand?.rid !== rid) {
     const k = quelle(r);
     if (!k) { melde('Dieses Rezept lässt sich nicht anpassen.'); return; }
-    zustand = { rid, basis: klon(k), k, gerechnet: false, speichert: false, ki: { wunsch: '', lauf: null, fehler: null, hinweis: '', wuensche: [] } };
+    zustand = { rid, basis: klon(k), k, gerechnet: false, speichert: false, ki: { wunsch: '', lauf: null, fehler: null, hinweis: '' } };
   }
   zeichnen();
   el.hidden = false;
@@ -103,7 +103,7 @@ function kiHTML() {
 ${schluessel
     ? `<div class="anp-ki-f"><button type="submit" class="btn btn-primary" id="anp-ki-los">Ändern lassen</button><span class="fine">Dauert etwa eine Minute.</span></div>`
     : '<p class="fine">Dafür braucht die App den KI-Schlüssel aus der Resteverwertung. <button type="button" class="linkbtn" data-act="anp-ki-einrichten">Jetzt einrichten</button></p>'}
-</form>${ki.wuensche?.length ? `<p class="anp-ki-wunsch"><b>Dein Wunsch:</b> ${ki.wuensche.map((w) => `„${esc(w)}“`).join(' · ')}</p>` : ''}${ki.hinweis ? `<p class="ki-hinweis anp-ki-hinweis"><b>Die KI:</b> ${esc(ki.hinweis)}</p>` : ''}`;
+</form>${ki.hinweis ? `<p class="ki-hinweis anp-ki-hinweis"><b>Die KI:</b> ${esc(ki.hinweis)}</p>` : ''}`;
 }
 
 function kiLaufText() {
@@ -139,7 +139,7 @@ async function kiAendern() {
     // Ans Original anschließen (neu, weggelassen), dann wieder aufs Ziel
     mein.k = mengenAnpassen(aenderungUebernehmen(r, mein.basis), app.ziel);
     mein.gerechnet = true;
-    mein.ki = { wunsch: '', lauf: null, fehler: null, hinweis: r.hinweis || '', wuensche: [...(mein.ki.wuensche || []), wunsch].slice(-4) };
+    mein.ki = { wunsch: '', lauf: null, fehler: null, hinweis: r.hinweis || '' };
     const box = proBox(mein.k);
     melde(`Geändert und auf Ziel gerechnet: ${nfi(box.kcal)} kcal, ${nf1(box.p)} P, ${nf1(box.kh)} KH, ${nf1(box.f)} F pro Box`);
   } catch (e) {
@@ -288,12 +288,12 @@ function istKatalog() {
 }
 
 /**
- * Was unter „Geändert“ steht (höchstens 12): zuerst, was man der KI
- * geschrieben hat, dann was sich diesmal geändert hat, dann Früheres.
+ * Was unter „Geändert“ steht (höchstens 12): was sich diesmal geändert hat,
+ * dann Früheres. Was man der KI geschrieben hat, steht nirgends – nur, was
+ * daraus geworden ist.
  */
 function geaendertText(frueher = []) {
-  const wuensche = (zustand.ki.wuensche || []).map((w) => `„${w}“`);
-  return [...new Set([...wuensche, ...aenderungenText(zustand.k, zustand.basis), ...frueher])].slice(0, 12);
+  return [...new Set([...aenderungenText(zustand.k, zustand.basis), ...frueher])].slice(0, 12);
 }
 
 /**

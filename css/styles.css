@@ -818,7 +818,6 @@ html[data-tab="amy"] .km-nav .km-los{border:0;background:var(--amy-verlauf);colo
 .anp-ki-f{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .anp-ki-f .fine{margin:0}
 .anp-ki-hinweis{margin:6px 0 4px;font-size:14px}
-.anp-ki-wunsch{margin:8px 0 0;font-size:14px;line-height:1.45;color:var(--ink)}
 .anp-ki-lauf{margin:12px 0 6px}
 .a-quellen{display:flex;flex-wrap:wrap;gap:6px}
 .a-quelle{font:600 12px/1 var(--f-mono);padding:6px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink)}

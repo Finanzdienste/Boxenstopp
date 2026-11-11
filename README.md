@@ -1164,10 +1164,8 @@ Mengen wieder auf die Ziele – im Beispiel 441 kcal / 33,0 P / 39,2 KH /
 die vier Werte nicht alle zugleich aufs Gramm passen und die Mengen auf
 5 g oder 10 g gerundet werden. Danach steht alles im Editor wie jede andere
 Änderung: ansehen, nachbessern, noch einen Wunsch hinterher, speichern. Was
-man der KI geschrieben hat, bleibt im Editor stehen („Dein Wunsch: …“) und
-kommt mit ins Rezept: unter „Geändert“ zuerst der Wunsch („„Tomaten und
-Brokkoli statt Paprika““), dann was sich geändert hat, dazu der Hinweis der
-KI.
+man der KI geschrieben hat, steht danach nirgends – im Rezept stehen unter
+„Geändert“ nur die Änderungen selbst, dazu der Hinweis der KI.
 
 ### Einrichten
 
