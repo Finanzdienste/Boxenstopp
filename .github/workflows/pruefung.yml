@@ -25,8 +25,16 @@ jobs:
         run: npm run lint
 
       # Nur Chromium: Die App ist fürs Handy, und Chrome ist der Browser,
-      # aus dem sie installiert wird.
-      - run: npx playwright install --with-deps chromium
+      # aus dem sie installiert wird. Bis zu drei Versuche: Ab und zu hakt
+      # das Holen der Pakete, und dann liefen die Tests gar nicht erst.
+      - name: Chromium für die Tests
+        run: |
+          for versuch in 1 2 3; do
+            npx playwright install --with-deps chromium && exit 0
+            echo "Versuch $versuch hat nicht geklappt – gleich noch einmal"
+            sleep 30
+          done
+          exit 1
 
       - name: Alle Tests
         run: node tests/lauf.mjs
