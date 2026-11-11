@@ -1078,9 +1078,12 @@ und der Chip **„Neu dazu“** zeigt alle aus dem Katalog. Im Rezept die Leiste
 wer es sich wann gewünscht hat und was, **Neuer Vorschlag** (derselbe
 Wunsch, „diesmal anders als“ das bisherige – es ersetzt das alte) und **Aus
 dem Katalog nehmen** (für alle; was davon auf der eigenen Liste steht, geht
-mit, „Rückgängig“ holt beides zurück). Anpassen und „Mit KI ändern“ machen
-daraus ein eigenes Rezept der Liste, wie bei den festen. Ohne gemeinsame
-Liste wird es ein Vorschlag wie bei der Resteverwertung (Behalten).
+mit, „Rückgängig“ holt beides zurück). Anpassen und „Mit KI ändern“ ändern
+ein Katalogrezept selbst – an seiner Stelle, für alle („Speichern, für
+alle“: dieselbe id mit neuem Datum, der Wunsch von damals und wer es sich
+gewünscht hat bleiben, `app.katalogAendern` in `js/ansicht-katalog.js`); was
+davon auf der Liste steht, zieht mit. Ohne gemeinsame Liste wird es ein
+Vorschlag wie bei der Resteverwertung (Behalten).
 
 **Wo es liegt:** `katalog.json` im Daten-Repo jeder Liste –
 `{ v: 1, rezepte: { 'kat-…': { k, wunsch, by, at, ziel } }, weg: { 'kat-…':
@@ -1121,9 +1124,14 @@ Im Rezept „Anpassen“: Jede Zutat mit Menge, Schloss und ✕. Nur 200 g Brokk
 da statt 1 kg? Menge eintippen – was man anfasst, ist fest (🔒). TK-Erbsen
 dazu? Aus der Liste wählen, Gramm eintippen. „Auf Ziel rechnen“ schiebt die
 freien Zutaten (Fleisch, Reis, Öl, Käse …), bis die Box wieder bei
-443 / 33 / 39 / 15,4 liegt; die Werte stehen live darunter. „Speichern, für
-beide“ legt das Ergebnis als eigenes Rezept ab („… (angepasst)“, Filter
-„Eigene“, Leiste „Angepasst von …“ mit den Änderungen in Worten). Die
+443 / 33 / 39 / 15,4 liegt; die Werte stehen live darunter. Beim Speichern
+sagt eine Zeile unter den Knöpfen, wohin es kommt: Ein festes Rezept bleibt,
+wie es ist – „Speichern, für beide“ legt das Ergebnis als eigenes Rezept ab
+(„… (angepasst)“, Filter „Eigene“, Leiste „Angepasst von …“ mit den
+Änderungen in Worten), und im Raster steht es direkt vor dem Original. Ein
+Rezept aus dem Katalog ändert sich selbst („Speichern, für alle“, siehe
+oben). Eigene Rezepte ohne Original (Resteverwertung, oder das Original ist
+aus dem Katalog genommen) stehen im Raster vorn, die neuesten zuerst. Die
 Schritte bekommen die neuen Mengen, weggelassene Zutaten sind in ihren
 Schritten durchgestrichen, eine neue Zutat bekommt eine eigene Schale und
 einen Schritt im Vorbereiten.
@@ -1155,8 +1163,11 @@ Mengen wieder auf die Ziele – im Beispiel 441 kcal / 33,0 P / 39,2 KH /
 15,5 F mit 40 g mehr Hähnchen und 4 g mehr Öl. Genauer geht es nicht, weil
 die vier Werte nicht alle zugleich aufs Gramm passen und die Mengen auf
 5 g oder 10 g gerundet werden. Danach steht alles im Editor wie jede andere
-Änderung: ansehen, nachbessern, noch einen Wunsch hinterher, „Speichern, für
-beide“.
+Änderung: ansehen, nachbessern, noch einen Wunsch hinterher, speichern. Was
+man der KI geschrieben hat, bleibt im Editor stehen („Dein Wunsch: …“) und
+kommt mit ins Rezept: unter „Geändert“ zuerst der Wunsch („„Tomaten und
+Brokkoli statt Paprika““), dann was sich geändert hat, dazu der Hinweis der
+KI.
 
 ### Einrichten
 

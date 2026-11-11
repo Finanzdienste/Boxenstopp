@@ -442,11 +442,17 @@ check(['Sojasauce weggelassen', 'Honig weggelassen', 'Speisestärke weggelassen'
 const kiWerte = (await t.locator('#d-anpassen .anp-werte').innerText()).replace(/\s+/g, ' ');
 check(Math.abs(Number(kiWerte.match(/KCAL (\d+)/)?.[1]) - 443) <= 5, `und wieder auf Ziel gerechnet (${kiWerte})`);
 check((await t.locator('.anp-ki-hinweis').innerText()).includes('Fertige Teriyaki-Sauce statt selbst gemacht'), 'der Hinweis der KI steht da');
+check((await t.locator('.anp-ki-wunsch').innerText()) === `Dein Wunsch: „${WUNSCH}“` && (await t.locator('#d-anpassen .anp-btns [data-act="anp-speichern"]').innerText()) === 'Speichern, für beide' && (await t.locator('#d-anpassen .anp-btns + .fine').innerText()).includes('direkt vor das Original'), 'was man der KI geschrieben hat, bleibt sichtbar; Speichern sagt, wohin es kommt');
 await t.click('[data-act="anp-speichern"]');
 check(await bis(async () => (await t.locator('#d-title').innerText()) === 'Chicken Teriyaki Bowl (angepasst)' && (await t.$$eval('.step-d', (xs) => xs.map((x) => x.textContent))).some((x) => x.startsWith('250 ml Teriyaki-Sauce und ½–1 TL Chiliflocken in Schale 3'))), 'gespeichert: die Schritte mit der fertigen Sauce');
 check(await bis(() => Object.values(gh.liste()?.ki || {}).some((e) => e.r.herkunft === 'teriyaki' && e.r.zutaten.some((z) => z.id === 'teriyaki-sauce'))), 'und in GitHub, für beide');
+const kiLeiste = await t.locator('.ki-leiste').innerText();
+check(kiLeiste.includes(`Geändert: „${WUNSCH}“`) && kiLeiste.includes('Sojasauce weggelassen') && kiLeiste.includes('Fertige Teriyaki-Sauce statt selbst gemacht'), `im gespeicherten Rezept: der Wunsch, was sich geändert hat, und der Hinweis der KI (${kiLeiste.replace(/\s+/g, ' ').slice(0, 160)})`);
 ki.z.antwort = ANTWORT;
 await t.click('[data-act="zurueck"]');
+const reihe = await t.$$eval('#grid .box', (xs) => xs.map((x) => x.dataset.open));
+const tIndex = reihe.indexOf('teriyaki');
+check(tIndex >= 2 && reihe.slice(tIndex - 2, tIndex).every((id) => id.startsWith('ki-')), `im Raster: die zwei angepassten direkt vor dem Original (${reihe.slice(Math.max(0, tIndex - 3), tIndex + 1).join(', ')})`);
 
 // --- Angebote der Woche: tippen, fotografieren, Treffer, Rezept daraus, das andere Handy
 await t.click('.tab[data-tab="angebote"]');

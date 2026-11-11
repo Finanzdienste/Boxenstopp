@@ -6,8 +6,10 @@
  *     jede Minute (mit ETag – unverändert ist das nur ein kurzes Nachfragen).
  *     Den letzten Stand merkt es sich (MERK), dann sind die Rezepte beim
  *     nächsten Start gleich da, auch ohne Netz.
- *   - Ein neues Rezept (ansicht-ki.js über app.katalogDazu) und „Aus dem
- *     Katalog nehmen“ schreiben dort hinein (speicher.js privatSchreiben).
+ *   - Ein neues Rezept (ansicht-ki.js über app.katalogDazu), ein geändertes
+ *     („Anpassen“, auch „Mit KI ändern“ – ansicht-anpassen.js über
+ *     app.katalogAendern: dieselbe id, an seiner Stelle, für alle) und „Aus
+ *     dem Katalog nehmen“ schreiben dort hinein (speicher.js privatSchreiben).
  *   - Das Handy, das Gäste eingeladen hat, kennt ihre Schlüssel
  *     (boxenstopp.gaeste.v1) und gleicht ab: alle katalog.json lesen, mischen,
  *     zurückschreiben, wo etwas fehlt. So kommt Tobis Kürbissuppe zu Marielle
@@ -134,6 +136,34 @@ async function neuSpeichern(k, { wunsch = '', ersetzt = '' } = {}) {
   return id;
 }
 
+/**
+ * Ein Rezept aus dem Katalog ändern („Anpassen“, auch „Mit KI ändern“): an
+ * seiner Stelle, für alle – dieselbe id, ein neues Datum (beim Abgleich gilt
+ * das neuere), der Wunsch von damals und wer es sich gewünscht hat bleiben. k
+ * im KI-Format, gerechnet auf das Ziel und die Boxen dieser Liste – das Ziel
+ * kommt mit, jede andere Liste rechnet von dort auf ihres. Wirft mit einem
+ * Satz für die Anzeige.
+ */
+async function aendernSpeichern(rid, k) {
+  if (!app.zugang?.token) throw new Error('Für den Katalog erst die gemeinsame Liste einrichten.');
+  const vorher = app.katalogStand || leererKatalog();
+  if (!vorher.rezepte[rid]) throw new Error('Das Rezept ist nicht mehr im Katalog.');
+  const at = new Date().toISOString();
+  const neu = await privatSchreiben(KATALOG_DATEI, (alt) => {
+    const m = katalogMischen(alt, vorher);
+    const e = m.rezepte[rid] || vorher.rezepte[rid];
+    return katalogDazu(m, rid, { k, wunsch: e.wunsch, by: e.by, ziel: { ...app.ziel }, at });
+  }, {
+    token: app.zugang.token,
+    ort: ortVon(app.zugang),
+    api: api(),
+    nachricht: `${app.name() || 'Jemand'}: Katalog – „${k.kurz}“ geändert`,
+  });
+  etag = '';
+  uebernehmen(neu);
+  katalogAbgleichen();
+}
+
 /** Aus dem Katalog nehmen – für alle; was davon auf der eigenen Liste steht, geht mit (Rückgängig holt beides zurück). */
 async function rausNehmen(rid) {
   const e = app.katalogStand?.rezepte?.[rid];
@@ -177,9 +207,11 @@ function leiste(r) {
   const daneben = Math.abs(r.m.kcal - z.kcal) > 15 || Math.abs(r.m.p - z.p) > 2 || Math.abs(r.m.kh - z.kh) > 3 || Math.abs(r.m.f - z.f) > 2;
   const warn = daneben ? '<p class="ki-warn">Mit diesen Zutaten trifft die Box das Ziel nicht ganz, siehe die Nährwerte oben.</p>' : '';
   const hinweis = r.ki?.hinweis ? `<p class="ki-hinweis">${esc(r.ki.hinweis)}</p>` : '';
+  // Was beim Anpassen geändert wurde – mit dem Wunsch dafür („Tomaten und Brokkoli statt Paprika“)
+  const anp = r.ki?.geaendert?.length ? `<p class="ki-anp"><b>Geändert:</b> ${r.ki.geaendert.map(esc).join(' · ')}</p>` : '';
   const aus = app.listeDa ? '' : ' disabled';
   const knoepfe = `${ladeKi() ? `<button type="button" class="btn" data-act="kat-neu"${aus}>Neuer Vorschlag</button>` : ''}<button type="button" class="btn btn-quiet" data-act="kat-weg"${aus}>Aus dem Katalog nehmen</button>`;
-  return `<p class="ki-k"><b>Aus dem Katalog</b> · gewünscht${wer}${wann}</p>${wunsch}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>
+  return `<p class="ki-k"><b>Aus dem Katalog</b> · gewünscht${wer}${wann}</p>${wunsch}${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>
 <p class="fine">Für alle, die die App nutzen – jede Liste bekommt es auf ihr Ziel pro Box und ihre Boxen gerechnet.</p>`;
 }
 
@@ -192,6 +224,7 @@ export function klickKatalog(el) {
 export function katalogStart() {
   app.katalogLeiste = leiste;
   app.katalogDazu = neuSpeichern;
+  app.katalogAendern = aendernSpeichern;
   katalogVorab();
   setInterval(() => { if (document.visibilityState === 'visible') katalogLaden(); }, takt());
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') katalogLaden(); });

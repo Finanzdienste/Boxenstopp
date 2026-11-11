@@ -8,9 +8,16 @@
  * darf. Was man selbst anfasst, ist damit fest; „Auf Ziel rechnen“ schiebt
  * die übrigen (Fleisch, Reis, Öl, Käse …), bis die Box wieder auf dem Ziel
  * liegt (app.ziel: 443 kcal / 33 P / 39 KH / 15,4 F oder das eigene der
- * Liste, ansicht-ziel.js). Speichern legt das Ergebnis als eigenes
- * Rezept für beide ab (liste.json unter ki, mit basis = das Original), die
- * Schritte bekommen die neuen Mengen, weggelassene Zutaten sind markiert.
+ * Liste, ansicht-ziel.js). Speichern:
+ *   - ein Rezept aus dem Katalog (eins von „Neues Rezept“) ändert sich an
+ *     seiner Stelle, für alle (ansicht-katalog.js app.katalogAendern) – was
+ *     davon auf der Liste steht, zieht mit;
+ *   - ein festes Rezept bleibt, wie es ist: Das Ergebnis kommt als eigenes
+ *     Rezept für beide dazu (liste.json unter ki, herkunft = das Original)
+ *     und steht im Raster direkt davor.
+ * Die Schritte bekommen die neuen Mengen, weggelassene Zutaten sind markiert;
+ * unter „Geändert“ steht, was man der KI geschrieben hat, und was sich
+ * geändert hat.
  *
  * Oben „Mit KI ändern“: Man schreibt, was anders sein soll („fertige
  * Teriyaki-Sauce statt selbst gemacht“), die KI bekommt das Rezept, wie es
@@ -24,14 +31,14 @@
 import { app, $, melde, lese } from './kern.js';
 import { esc, nf1, nfi, abweichung } from './format.js';
 import { kiBereinigen, mengenAnpassen, festAlsKi, proBox, aenderungenText, alsVorlage, aenderungUebernehmen } from './ki-rezept.js';
-import { opKiBehalten } from './liste.js';
+import { opKiBehalten, opTeil, opTeilWeg, einkaufsZutaten, aufloesen } from './liste.js';
 import { oeffneRezept, offenesRezept } from './ansicht-rezepte.js';
 import { kiQuelle, oeffneEinrichten } from './ansicht-ki.js';
 import { rumpfFuer, kiAnfragen, anbieterVon, KI_FEHLER } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { fuerWen } from './profil.js';
 
-let zustand = null; // { rid, basis, k, gerechnet, ki: { wunsch, lauf, fehler, hinweis } }
+let zustand = null; // { rid, basis, k, gerechnet, speichert, ki: { wunsch, lauf, fehler, hinweis, wuensche } }
 const klon = (x) => JSON.parse(JSON.stringify(x));
 
 export const anpassenOffen = () => !!zustand;
@@ -53,7 +60,7 @@ export function oeffneAnpassen(rid, { mitKi = false } = {}) {
   if (zustand?.rid !== rid) {
     const k = quelle(r);
     if (!k) { melde('Dieses Rezept lässt sich nicht anpassen.'); return; }
-    zustand = { rid, basis: klon(k), k, gerechnet: false, ki: { wunsch: '', lauf: null, fehler: null, hinweis: '' } };
+    zustand = { rid, basis: klon(k), k, gerechnet: false, speichert: false, ki: { wunsch: '', lauf: null, fehler: null, hinweis: '', wuensche: [] } };
   }
   zeichnen();
   el.hidden = false;
@@ -96,7 +103,7 @@ function kiHTML() {
 ${schluessel
     ? `<div class="anp-ki-f"><button type="submit" class="btn btn-primary" id="anp-ki-los">Ändern lassen</button><span class="fine">Dauert etwa eine Minute.</span></div>`
     : '<p class="fine">Dafür braucht die App den KI-Schlüssel aus der Resteverwertung. <button type="button" class="linkbtn" data-act="anp-ki-einrichten">Jetzt einrichten</button></p>'}
-</form>${ki.hinweis ? `<p class="ki-hinweis anp-ki-hinweis"><b>Die KI:</b> ${esc(ki.hinweis)}</p>` : ''}`;
+</form>${ki.wuensche?.length ? `<p class="anp-ki-wunsch"><b>Dein Wunsch:</b> ${ki.wuensche.map((w) => `„${esc(w)}“`).join(' · ')}</p>` : ''}${ki.hinweis ? `<p class="ki-hinweis anp-ki-hinweis"><b>Die KI:</b> ${esc(ki.hinweis)}</p>` : ''}`;
 }
 
 function kiLaufText() {
@@ -132,7 +139,7 @@ async function kiAendern() {
     // Ans Original anschließen (neu, weggelassen), dann wieder aufs Ziel
     mein.k = mengenAnpassen(aenderungUebernehmen(r, mein.basis), app.ziel);
     mein.gerechnet = true;
-    mein.ki = { wunsch: '', lauf: null, fehler: null, hinweis: r.hinweis || '' };
+    mein.ki = { wunsch: '', lauf: null, fehler: null, hinweis: r.hinweis || '', wuensche: [...(mein.ki.wuensche || []), wunsch].slice(-4) };
     const box = proBox(mein.k);
     melde(`Geändert und auf Ziel gerechnet: ${nfi(box.kcal)} kcal, ${nf1(box.p)} P, ${nf1(box.kh)} KH, ${nf1(box.f)} F pro Box`);
   } catch (e) {
@@ -161,6 +168,8 @@ function zeichnen() {
   const katalog = Object.entries(app.naehrwerte || {}).map(([key, n]) => [key, app.katalog[key]?.n || key, n]).sort((a, b) => a[1].localeCompare(b[1], 'de'));
   const weg = Object.entries(k.weg || {});
   const aend = aenderungenText(k, basis);
+  const imKatalog = istKatalog();
+  const aus = !app.listeDa || zustand.speichert ? ' disabled' : '';
   el.innerHTML = `<h2>Rezept anpassen <small>die Box bleibt auf Ziel</small></h2>
 ${kiHTML()}
 <p class="sec-lead">Oder selbst: Mengen ändern oder Zutaten weglassen, neue dazu. Was du anfasst, bleibt so (🔒). Den Rest schiebt die App mit „Auf Ziel rechnen“, bis die Werte wieder passen.</p>
@@ -179,10 +188,11 @@ ${weg.length ? `<p class="anp-weg">Weggelassen: ${weg.map(([id, name]) => `<butt
 ${werteHTML(k)}
 ${aend.length ? `<p class="ki-anp"><b>Geändert:</b> ${aend.map(esc).join(' · ')}</p>` : ''}
 <div class="anp-btns">
-  <button type="button" class="btn" data-act="anp-rechnen">Auf Ziel rechnen</button>
-  <button type="button" class="btn btn-primary" data-act="anp-speichern"${app.listeDa ? '' : ' disabled'}>Speichern, für beide</button>
+  <button type="button" class="btn" data-act="anp-rechnen"${zustand.speichert ? ' disabled' : ''}>Auf Ziel rechnen</button>
+  <button type="button" class="btn btn-primary" data-act="anp-speichern"${aus}>${zustand.speichert ? 'Speichert …' : imKatalog ? 'Speichern, für alle' : 'Speichern, für beide'}</button>
   <button type="button" class="btn btn-quiet" data-act="anp-zu">Abbrechen</button>
-</div>`;
+</div>
+<p class="fine">${imKatalog ? 'Speichern ändert das Rezept selbst – im Katalog, für alle, die die App nutzen.' : 'Speichern legt es als eigenes Rezept direkt vor das Original – das Original bleibt, wie es ist.'}</p>`;
 }
 
 /** Nur die Werte und die Änderungszeile nachzeichnen – die Eingabefelder bleiben, wie sie sind. */
@@ -271,21 +281,85 @@ function rechnen() {
   melde(`Gerechnet: ${nfi(box.kcal)} kcal, ${nf1(box.p)} P, ${nf1(box.kh)} KH, ${nf1(box.f)} F pro Box`);
 }
 
-function speichern() {
-  if (!zustand) return;
-  const basis = app.nachId[zustand.rid];
-  const k = klon(zustand.k);
-  k.herkunft = basis?.ki?.herkunft || zustand.rid;
-  k.geaendert = aenderungenText(zustand.k, zustand.basis);
+/** Ist das offene Rezept eins aus dem gemeinsamen Katalog („Neues Rezept“)? Dann ändert Speichern es selbst. */
+function istKatalog() {
+  const r = zustand ? app.nachId[zustand.rid] : null;
+  return !!r?.katalog && typeof app.katalogAendern === 'function';
+}
+
+/**
+ * Was unter „Geändert“ steht (höchstens 12): zuerst, was man der KI
+ * geschrieben hat, dann was sich diesmal geändert hat, dann Früheres.
+ */
+function geaendertText(frueher = []) {
+  const wuensche = (zustand.ki.wuensche || []).map((w) => `„${w}“`);
+  return [...new Set([...wuensche, ...aenderungenText(zustand.k, zustand.basis), ...frueher])].slice(0, 12);
+}
+
+/**
+ * Nach dem Ändern eines Katalogrezepts: Stand es auf der Liste, kommen dort
+ * die neuen Zutaten und Mengen hin – was weggefallen ist, geht runter
+ * (Abgehaktes bleibt, wie es ist).
+ */
+function listeAuffrischen(rid) {
+  const r = app.nachId[rid];
+  if (!r?.items) return 0;
+  const neu = einkaufsZutaten(r);
+  const bleibt = new Set(neu.map((it) => aufloesen(app.stand, it.k)));
+  const ops = [];
+  for (const [k, d] of Object.entries(app.stand.items)) {
+    const p = d.parts?.[rid];
+    if (p && p.done !== true && !bleibt.has(k)) ops.push(opTeilWeg(k, rid));
+  }
+  for (const it of neu) {
+    const p = app.stand.items[aufloesen(app.stand, it.k)]?.parts?.[rid];
+    if (p?.done === true || (p && p.q === it.q && p.u === it.u && (p.h || '') === (it.h || ''))) continue;
+    ops.push(opTeil(it.k, rid, { q: it.q, u: it.u, h: it.h || '' }, it.kat || app.katalog[it.k]));
+  }
+  if (ops.length) app.aendern(ops);
+  return ops.length;
+}
+
+async function speichern() {
+  if (!zustand || zustand.speichert) return;
+  const mein = zustand;
+  const rid = mein.rid;
+  const basis = app.nachId[rid];
+  const k = klon(mein.k);
+  // Was die KI dazu gesagt hat, bleibt im Rezept stehen
+  k.hinweis = mein.ki.hinweis || '';
+  if (istKatalog()) {
+    // Ein Rezept aus dem Katalog: an seiner Stelle ändern, für alle – kein zweites daneben
+    k.geaendert = geaendertText(basis?.ki?.geaendert || []);
+    delete k.herkunft;
+    const { r, fehler } = kiBereinigen(k);
+    if (!r) { melde(fehler || 'Das Rezept lässt sich so nicht speichern.'); return; }
+    const warDrauf = Object.values(app.stand.items || {}).some((d) => d.parts?.[rid]);
+    mein.speichert = true;
+    zeichnen();
+    try {
+      await app.katalogAendern(rid, r);
+    } catch (e) {
+      if (zustand === mein) { mein.speichert = false; zeichnen(); }
+      melde(e?.message || 'Das ging gerade nicht – versuch es gleich noch einmal.');
+      return;
+    }
+    const nachgezogen = warDrauf ? listeAuffrischen(rid) : 0;
+    // Noch im Editor (nicht inzwischen woanders hin): das geänderte Rezept von oben zeigen
+    if (zustand === mein) { schliesseAnpassen(); if (app.nachId[rid]) oeffneRezept(rid); }
+    melde(`Geändert – das Rezept selbst, für alle${nachgezogen ? '. Die Liste ist nachgezogen' : ''}.`);
+    return;
+  }
+  k.herkunft = basis?.ki?.herkunft || rid;
+  k.geaendert = geaendertText();
   if (!/angepasst/i.test(k.name)) k.name = `${k.name} (angepasst)`;
-  k.hinweis = '';
   const { r, fehler } = kiBereinigen(k);
   if (!r) { melde(fehler || 'Das Rezept lässt sich so nicht speichern.'); return; }
   const id = `ki-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   app.aendern(opKiBehalten(id, r, app.name()));
   schliesseAnpassen();
   oeffneRezept(id);
-  melde('Gespeichert – als eigenes Rezept, für euch beide.');
+  melde('Gespeichert – als eigenes Rezept, für euch beide. Im Raster steht es direkt vor dem Original.');
 }
 
 /* ---------------------------------------------------------------- Klicks */

@@ -55,6 +55,7 @@ export const app = {
   katalogNamen: {},
   /** Ein Rezept in den Katalog (ansicht-katalog.js) – gibt die id zurück; null, solange nicht geladen. */
   katalogDazu: null,
+  katalogAendern: null,
   /** Die Leiste im Rezept eines Katalogrezepts (ansicht-katalog.js). */
   katalogLeiste: () => '',
   /** Im Rezept: die Rezepte, die gut zusammen damit gehen (ansicht-doppel.js). */

@@ -72,7 +72,23 @@ export const FILTER = [
   // Was Amy verträgt (ansicht-vertraeglich.js): nur da, wenn sie etwas eingetragen hat
   ['vertraeglich', 'Passt für Amy', (r) => !pruefeFest(r).nicht.length],
 ];
-const alleRezepte = () => [...app.rezepte, ...app.kiRezepte.filter((r) => r.ki?.von?.gespeichert)];
+/**
+ * Alle Rezepte fürs Raster: eigene (Resteverwertung, behalten) vorn, die
+ * neuesten zuerst; ein angepasstes direkt vor seinem Original – dort, wo man
+ * es gerade angepasst hat. Ist das Original weg (aus dem Katalog genommen),
+ * steht es vorn bei den eigenen.
+ */
+function alleRezepte() {
+  const eigene = app.kiRezepte.filter((r) => r.ki?.von?.gespeichert);
+  const da = new Set(app.rezepte.map((r) => r.id));
+  const vor = new Map();
+  const vorn = [];
+  for (const r of eigene) {
+    const h = r.ki?.herkunft;
+    if (h && da.has(h)) vor.set(h, [...(vor.get(h) || []), r]); else vorn.push(r);
+  }
+  return [...vorn, ...app.rezepte.flatMap((r) => [...(vor.get(r.id) || []), r])];
+}
 /* Preis und Reihenfolge: zusätzlich zum Chip, das Handy merkt sie sich (kern.js ansicht). */
 export const PREISE = [1.75, 2, 2.25, 2.5];
 export const SORTIERUNG = [['standard', 'Empfohlen'], ['preis', 'Günstigste'], ['zeit', 'Schnellste']];

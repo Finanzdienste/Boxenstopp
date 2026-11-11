@@ -4,8 +4,9 @@
  * bereinigen, mischen, herausnehmen, auf jedes Ziel und jede Boxenzahl), dann
  * im Browser: Tobi wünscht sich eine Kürbissuppe, sie kommt in seinen und
  * (über sein Handy) Marielles Katalog, bei ihr auf ihr Ziel und 2 Boxen
- * gerechnet; „Neuer Vorschlag“ ersetzt sie; Marielle nimmt sie heraus, und
- * bei Tobi ist sie danach auch weg.
+ * gerechnet; „Neuer Vorschlag“ ersetzt sie; „Mit KI ändern“ ändert sie an
+ * ihrer Stelle (für alle, die Liste zieht mit, der Wunsch steht dabei);
+ * Marielle nimmt sie heraus, und bei Tobi ist sie danach auch weg.
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -88,13 +89,25 @@ const GEMINI_STROM = (json) => {
   return s;
 };
 const anfragen = [];
+let antwort = SUPPE;
 async function gemini(r) {
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
   if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
-  anfragen.push(JSON.parse(r.request().postData() || '{}'));
-  return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: GEMINI_STROM(JSON.stringify(SUPPE)) });
+  const rumpf = JSON.parse(r.request().postData() || '{}');
+  anfragen.push(rumpf);
+  const json = typeof antwort === 'function' ? antwort(rumpf) : antwort;
+  return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: GEMINI_STROM(JSON.stringify(json)) });
 }
+// „Mit KI ändern“: das Rezept, wie die App es schickt (mit ihren ids), ohne Kokosmilch zurück – wie es die KI macht
+const OHNE_KOKOS_NAME = 'Kürbissuppe mit Hähnchen & roten Linsen, ohne Kokos';
+const ohneKokos = (rumpf) => {
+  const v = JSON.parse(String(rumpf.input?.at(-1)?.text || '').split('\n')[1]);
+  const weg = v.zutaten.find((z) => /kokosmilch/i.test(z.name));
+  const ohne = (xs) => (Array.isArray(xs) ? xs.map((s) => (s?.text?.includes(`{${weg.id}}`) ? { ...s, text: 'Die Suppe fein pürieren, mit Salz und Pfeffer abschmecken' } : s)) : xs);
+  return { ...v, name: OHNE_KOKOS_NAME, zutaten: v.zutaten.filter((z) => z !== weg), vorbereiten: ohne(v.vorbereiten), kochen: ohne(v.kochen), portionieren: ohne(v.portionieren), hinweis: 'Ohne Kokosmilch – die Suppe wird nur püriert.' };
+};
 const kat = (a) => JSON.parse(a.zustand.dateien['katalog.json'] || '{"rezepte":{},"weg":{}}');
+const gh = (a) => JSON.parse(a.zustand.datei || '{}');
 
 const browser = await starteBrowser();
 const haupt = githubAttrappe();
@@ -159,6 +172,26 @@ check(await bis(() => { const x = kat(haupt); return Object.keys(x.rezepte).leng
 const [id2] = Object.keys(kat(haupt).rezepte);
 check(await bis(async () => (await t.locator('#d-title').count()) === 1 && await t.evaluate((i) => document.querySelector('#d-ki [data-act="kat-weg"]') !== null && !document.querySelector(`[data-open="${i}"]`), id1)), 'Die neue ist offen, die alte nirgends mehr');
 check(await bis(() => !!kat(mar).rezepte[id2] && !kat(mar).rezepte[id1], 8000), 'Auch bei Marielle: die neue statt der alten');
+// Mit KI ändern: Das Rezept selbst ändert sich – an seiner Stelle, für alle, kein zweites daneben; die Liste zieht mit
+await t.click('#detail [data-act="alle-dazu"]');
+check(await bis(() => !!gh(haupt).items?.['ki-kokosmilch']?.parts?.[id2] && !!gh(haupt).items?.zwiebeln?.parts?.[id2], 8000), 'die Suppe steht auf der Liste, mit Kokosmilch');
+const vorAt = kat(haupt).rezepte[id2].at;
+antwort = ohneKokos;
+await t.click('[data-act="anpassen-ki"]');
+await t.fill('#anp-ki-text', 'ohne Kokosmilch');
+await t.click('#anp-ki-los');
+check(await bis(async () => (await t.locator('.anp-ki-wunsch').innerText().catch(() => '')) === 'Dein Wunsch: „ohne Kokosmilch“', 10000), 'die KI hat geändert – der Wunsch bleibt sichtbar');
+check((await t.locator('#d-anpassen .anp-btns [data-act="anp-speichern"]').innerText()) === 'Speichern, für alle' && (await t.locator('#d-anpassen .anp-btns + .fine').innerText()).includes('ändert das Rezept selbst'), 'beim Katalogrezept: „Speichern, für alle“ – es ändert das Rezept selbst');
+await t.click('[data-act="anp-speichern"]');
+check(await bis(() => { const e = kat(haupt).rezepte[id2]; return Object.keys(kat(haupt).rezepte).length === 1 && e?.k.name === OHNE_KOKOS_NAME && e.at > vorAt && e.wunsch === 'Kürbissuppe' && e.by === 'Tobi' && e.k.geaendert?.[0] === '„ohne Kokosmilch“' && e.k.geaendert.includes('Kokosmilch light weggelassen') && !e.k.zutaten.some((z) => /kokosmilch/i.test(z.name)); }, 10000), 'in katalog.json: dieselbe id, neu, ohne Kokosmilch – Wunsch und wer bleiben, „ohne Kokosmilch“ unter geändert');
+check(!Object.keys(gh(haupt).ki || {}).length && haupt.zustand.nachrichten.includes('Tobi: Katalog – „Kürbissuppe“ geändert'), 'kein zweites Rezept daneben; Commit „… geändert“');
+check(await bis(async () => (await t.locator('#d-title').innerText().catch(() => '')) === OHNE_KOKOS_NAME && (await t.locator('#d-ki').innerText()).includes('Geändert: „ohne Kokosmilch“') && (await t.locator('#d-ki').innerText()).includes('Ohne Kokosmilch – die Suppe wird nur püriert.')), 'offen: die geänderte Suppe, „Geändert: „ohne Kokosmilch““ und der Hinweis der KI');
+check(await bis(() => !gh(haupt).items?.['ki-kokosmilch']?.parts?.[id2] && !!gh(haupt).items?.zwiebeln?.parts?.[id2], 8000), 'auf der Liste: die Kokosmilch ist runter, der Rest bleibt');
+await t.click('#detail [data-act="zurueck"]');
+check(await bis(async () => (await t.locator('#grid .box').first().getAttribute('data-open')) === id2 && (await t.locator('#r-eyebrow').textContent()) === '51 Rezepte · je 8 Boxen'), 'im Raster an derselben Stelle, weiter 51 Rezepte');
+check(await bis(() => kat(mar).rezepte[id2]?.k.name === OHNE_KOKOS_NAME, 8000), 'Marielles Katalog bekommt die geänderte');
+antwort = SUPPE;
+await t.click(`[data-open="${id2}"]`);
 check(tobi.fehler.length === 0, `Tobi: keine Fehler im Browser (${tobi.fehler.join(' | ')})`);
 
 // Marielle: ihre Liste, ihr Ziel, 2 Boxen – die Suppe ist da, auf sie gerechnet
