@@ -340,11 +340,13 @@ const anfragenMock = (zuViel) => {
   check(r.model === 'claude-opus-5-5' && r.output_config?.format?.type === 'json_schema' && r.output_config.format.schema.required.includes('angebote') && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /kein Schwein/.test(r.system), 'Claude-Rumpf: Fable, JSON nach dem Schema, Seitenbilder, Seitenbereich im Text');
   const { anfragen: mock, ruempfe } = (() => {
     const liste = [];
-    return { anfragen: async (rumpf) => { liste.push(rumpf); return { eingabe: { angebote: [{ laden: 'Lidl', name: 'Skyr', preis: 0.99 }] }, usage: { ein: 1, aus: 2 } }; }, ruempfe: liste };
+    return { anfragen: async (rumpf) => { liste.push(rumpf); return { eingabe: { angebote: [{ laden: 'Lidl', name: 'Skyr', preis: 0.99 }] }, usage: { ein: 1, aus: 2, cacheLesen: 2500, cacheSchreiben: 14000, berater: 1 } }; }, ruempfe: liste };
   })();
   const stapel6 = Array.from({ length: 6 }, (_, i) => ({ number: i + 10, b64: 'y' }));
-  const roh = await lidlStapelLesen(stapel6, { von: '2026-11-02', bis: '2026-11-07', anfragen: mock, rumpfBauen: claudeRumpf });
+  const meldungen = [];
+  const roh = await lidlStapelLesen(stapel6, { von: '2026-11-02', bis: '2026-11-07', anfragen: mock, rumpfBauen: claudeRumpf, melde: (m) => meldungen.push(m) });
   check(roh.length === 1 && ruempfe.length === 1 && ruempfe[0].messages && ruempfe[0].messages[0].content.filter((c) => c.type === 'image').length === 6 && /Seiten 10–15/.test(ruempfe[0].messages[0].content.at(-1).text), 'Lidl-Stapel mit Claude: die Messages-Anfrage statt generateContent');
+  check(/Seiten 10–15: 1 gelesen, 1\/2 Tokens \(Zwischenspeicher: 2500 gelesen, 14000 geschrieben\), Berater 1×/.test(meldungen[0] || ''), `Lidl-Protokoll: Zwischenspeicher und Berater je Stapel (${meldungen[0]})`);
 
   const anfragen = [];
   const antworten = [];
@@ -378,6 +380,11 @@ const anfragenMock = (zuViel) => {
   antworten.push([200, strom('{"angebote":[]}')]);
   a = await lauf({ modell: 'claude-sonnet-5-5' });
   check(anfragen[1].rumpf.model === 'claude-sonnet-5-5' && Array.isArray(a.eingabe?.angebote), 'Messages-API: mitAusweichen gibt das Modell vor');
+  // Mit Rat des Beraters und Zwischenspeicher: beides kommt im Verbrauch an (fürs Protokoll des Laufs)
+  antworten.push([200, strom('{"angebote":[]}').replace('"usage":{"output_tokens":2500}', `"usage":${JSON.stringify({ input_tokens: 400, cache_read_input_tokens: 9000, cache_creation_input_tokens: 9500, output_tokens: 2600, iterations: [{ type: 'message', input_tokens: 9000 }, { type: 'advisor_message', model: 'claude-fable-5-2', input_tokens: 9100, output_tokens: 700 }, { type: 'message', input_tokens: 400 }] })}`)]);
+  a = await lauf();
+  check(a.usage.ein === 400 && a.usage.aus === 2600 && a.usage.cacheLesen === 9000 && a.usage.cacheSchreiben === 9500 && a.usage.berater === 1 && anfragen.at(-1).rumpf.cache_control?.type === 'ephemeral',
+    `Messages-API: Zwischenspeicher und Berater im Verbrauch (${JSON.stringify(a.usage)})`);
   antworten.push([200, strom('{"angebote":[{"laden":"Lidl","na', { stopp: 'max_tokens' })]);
   a = await lauf();
   check(a.art === 'zulang', 'Messages-API: max_tokens → zulang (der Stapel wird halbiert)');

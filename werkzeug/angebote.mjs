@@ -456,7 +456,7 @@ export async function claudeAnfragen(rumpf, { schluessel, modell = CLAUDE_MODELL
   const t = setTimeout(() => ac.abort(), timeout);
   try {
     const { eingabe, usage } = await kiAnfragen({ ...rumpf, model: modell }, { schluessel, api, signal: ac.signal });
-    return { eingabe, usage: { ein: usage.ein || 0, aus: usage.aus || 0, denken: 0 }, dauer: Date.now() - start, grund: 'json' };
+    return { eingabe, usage: { ein: usage.ein || 0, aus: usage.aus || 0, denken: 0, cacheLesen: usage.cacheLesen || 0, cacheSchreiben: usage.cacheSchreiben || 0, berater: usage.beraterFragen || 0 }, dauer: Date.now() - start, grund: 'json' };
   } catch (e) {
     if (e?.art === 'abbruch') {
       const f = kiFehler('ueberlastet', `keine Antwort nach ${Math.round(timeout / 1000)} s`, 'anthropic');
@@ -516,7 +516,10 @@ export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () =
   }
   const roh = Array.isArray(antwort?.eingabe?.angebote) ? antwort.eingabe.angebote : [];
   const u = antwort?.usage || {};
-  melde(`${bereich}: ${roh.length} gelesen, ${u.ein || '?'}/${u.aus || '?'}${u.denken ? `+${u.denken}` : ''} Tokens, ${Math.round((Date.now() - start) / 1000)} s`);
+  // Bei Claude dazu der Zwischenspeicher (ein ist dann nur, was nicht aus ihm kam) und wie oft Opus den Berater gefragt hat
+  const cache = u.cacheLesen || u.cacheSchreiben ? ` (Zwischenspeicher: ${u.cacheLesen || 0} gelesen, ${u.cacheSchreiben || 0} geschrieben)` : '';
+  const rat = u.berater ? `, Berater ${u.berater}×` : '';
+  melde(`${bereich}: ${roh.length} gelesen, ${u.ein || '?'}/${u.aus || '?'}${u.denken ? `+${u.denken}` : ''} Tokens${cache}${rat}, ${Math.round((Date.now() - start) / 1000)} s`);
   return roh;
 }
 

@@ -532,7 +532,10 @@ in Pflaume und Rosa.
   (`kiMitWerkzeugen` in `js/ki.js`: unterbricht der Server eine lange Suche
   mit `pause_turn`, geht die Antwort unverändert zurück; ist die Websuche in
   der Console aus, sagt sie, wo man sie einschaltet). Kosten vom
-  API-Guthaben: 1 Cent je Suchanfrage plus die gelesenen Seiten als Eingabe.
+  API-Guthaben: 1 Cent je Suchanfrage plus die gelesenen Seiten als Eingabe –
+  und zwar in jeder Runde des Servers neu (suchen, lesen, weitersuchen,
+  schreiben); mit dem Zwischenspeicher liest jede weitere Runde das schon
+  Gefundene für ein Zwanzigstel (siehe Einrichten → Zwischenspeicher).
   Nur mit dem
   Claude-Schlüssel – Googles Bedingungen für die Suche erlauben nicht, Treffer
   zu ändern und dauerhaft aufzuheben; mit dem Google-Schlüssel sagt die App,
@@ -623,7 +626,7 @@ ehrlicher Kennung, dreimal die Woche:
 | Aldi (Nord) | `aldi-nord.de/angebote.html`, `…/angebote-vorschau.html` | alle Artikel der Woche als eingebettetes JSON: Preis, Packung, Grundpreis, gültig von/bis; die Vorschau auf die nächste Woche ist ab Donnerstag da |
 | Kaufland | `filiale.kaufland.de/angebote/uebersicht.html` (und `?kloffer-week=next`) | Artikelkacheln im HTML, nach Warengruppen, Gültigkeit je Gruppe (bundesweit); die nächste Woche ist anfangs nur Vorwerbung, die Lebensmittel kommen zum Wochenende |
 | Penny | `penny.de/.rest/offers/by-category/<Jahr>-<KW>/<Gruppe>` | JSON je Warengruppe, diese und nächste Kalenderwoche (die nächste antwortet ab dem Wochenende) |
-| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Eine KI liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Mit dem Secret `ANTHROPIC_API_KEY` ist das Claude (`claude-fable-5-1` über die Messages-API, gestreamt, drei Stapel nebeneinander; bei Überlastung nach zwei Pausen Sonnet 5.5; ein anderes Modell über die Variable `CLAUDE_MODELL`) – mit einem Claude-Abo (Max, Ultra) aus dessen Monatsguthaben, etwa 3 $ je Prospekt. Mit `GEMINI_KEY` ist es Gemini (`generateContent`, kostenlos): Im Gratis-Kontingent hängt mal das eine, mal das andere Modell, nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, kommt beim nächsten Lauf zuerst dran. Sind beide Secrets da, nimmt der Lauf Claude; ohne eins fällt Lidl aus. Hängende Stapel bekommen einen zweiten Durchgang. Ein Prospekt, den der letzte Lauf schon ganz gelesen hat, wird nicht noch einmal gelesen – er gilt die ganze Woche, seine Angebote kommen aus der alten Datei (`quellen[].prospekte` in `daten/angebote.json`); so liest der Lauf meist nur sonntags den Prospekt der nächsten Woche. Das Modell steht in `daten/angebote.json`. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` (zählt nicht als ganz gelesen) |
+| Lidl | Aktionsprospekt (`lidl.de/l/prospekte`, Seitenbilder) | Eine KI liest die Lebensmittel-Seiten (die mit Rezept-Links oder ohne Links; Werkzeug, Kleidung, Wein bleiben weg), sechs je Anfrage. Mit dem Secret `ANTHROPIC_API_KEY` ist das Claude (das Modell der App, `claude-opus-5-5` mit Fable 5.2 als Berater, über die Messages-API, gestreamt, drei Stapel nebeneinander; bei Überlastung nach zwei Pausen Sonnet 5.5; ein anderes Modell über die Variable `CLAUDE_MODELL`; im Protokoll je Stapel Tokens, Zwischenspeicher und wie oft der Berater gefragt wurde) – mit einem Claude-Abo (Max, Ultra) aus dessen Monatsguthaben, etwa 3 $ je Prospekt. Mit `GEMINI_KEY` ist es Gemini (`generateContent`, kostenlos): Im Gratis-Kontingent hängt mal das eine, mal das andere Modell, nach 60 s ohne Antwort, bei Überlastung oder am Kontingent geht es reihum weiter (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite), das Modell, das geantwortet hat, kommt beim nächsten Lauf zuerst dran. Sind beide Secrets da, nimmt der Lauf Claude; ohne eins fällt Lidl aus. Hängende Stapel bekommen einen zweiten Durchgang. Ein Prospekt, den der letzte Lauf schon ganz gelesen hat, wird nicht noch einmal gelesen – er gilt die ganze Woche, seine Angebote kommen aus der alten Datei (`quellen[].prospekte` in `daten/angebote.json`); so liest der Lauf meist nur sonntags den Prospekt der nächsten Woche. Das Modell steht in `daten/angebote.json`. Probelauf: Actions → Angebote → Run workflow mit `quellen` = `lidl` und `lidl_seiten` = `8` (zählt nicht als ganz gelesen) |
 | Rewe, Edeka | kaufDA, **privat** (siehe unten) | Die eigenen Seiten sperren automatische Abrufe (rewe.de: Cloudflare-Abfrage auf allen Seiten, Edeka: 403 mit Scherzantwort). Ihre Angebote kommen über kaufDA und landen nur im privaten Daten-Repo |
 
 **Rewe und Edeka über kaufDA – nur privat.** kaufDA (Bonial, der
@@ -1176,7 +1179,7 @@ API-Schlüssel, den der Anfang des Schlüssels einem Anbieter zuordnet:
 | Schlüssel | Anbieter, Modell | Kosten | Antwort |
 | --- | --- | --- | --- |
 | `AQ.…` (älter: `AIza…`) | Google, `gemini-3.8-flash` über die Interactions-API (`/v1beta/interactions`, `store: false`) | kostenlos, ohne Kreditkarte; dafür darf Google die Anfragen zum Verbessern seiner Produkte nutzen | JSON mit `response_format` und Schema |
-| `sk-ant-…` | Anthropic, `claude-opus-5-5` mit Aufwand mittel (Messages-API); bei schwierigen Stellen fragt Opus `claude-fable-5-2` um Rat (Advisor-Werkzeug, Beta `advisor-tool-2026-03-01`, so oft es will; beim großen Rezept-Schema lehnt die API den Berater ab, dann geht die Anfrage ohne ihn; Prompt Caching: `cache_control` oben im Rumpf, der Anfang der Anfrage bleibt 5 Minuten im Zwischenspeicher – Wiederholungen, Fortsetzungen und Suchrunden lesen ihn für ein Zwanzigstel des Preises, der Berater speichert seinen Teil selbst) | etwa 15–20 Cent pro Rezept, vom Guthaben der Console; mit einem Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $ im Monat, verfällt monatlich) | JSON nach Schema über `output_config` (Structured Outputs; das Schema geht durch `schemaFuerClaude`, weil Anthropic `minimum`/`maximum`, `title` und Längen nicht kennt) |
+| `sk-ant-…` | Anthropic, `claude-opus-5-5` mit Aufwand mittel (Messages-API); bei schwierigen Stellen fragt Opus `claude-fable-5-2` um Rat (Advisor-Werkzeug, Beta `advisor-tool-2026-03-01`, so oft es will; beim großen Rezept-Schema lehnt die API den Berater ab, dann geht die Anfrage ohne ihn; Prompt Caching nur, wo es sich lohnt – siehe unten) | etwa 15–20 Cent pro Rezept, vom Guthaben der Console; mit einem Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $ im Monat, verfällt monatlich) | JSON nach Schema über `output_config` (Structured Outputs; das Schema geht durch `schemaFuerClaude`, weil Anthropic `minimum`/`maximum`, `title` und Längen nicht kennt) |
 
 Der Weg ohne Abo ist Google: auf
 [aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem
@@ -1185,7 +1188,30 @@ Einstellungen → KI-Schlüssel (oder gleich in der Resteverwertung) einfügen.
 Mit einem Claude-Abo (Max, Ultra) lieber Claude: Auf claude.ai unter Settings →
 Billing → API credits die Console-Organisation verknüpfen, dort unter API
 Keys einen Schlüssel anlegen und ihn genauso in die App einfügen. Beide
-Antworten werden gestreamt, die Leiste zeigt Modell und Kosten der Anfrage.
+Antworten werden gestreamt.
+
+**Zwischenspeicher (Prompt Caching, nur Claude, `mitZwischenspeicher` in
+`js/ki.js`):** Was Claude schon einmal gelesen hat, kann die API 5 Minuten
+aufheben. Hineinschreiben kostet das 1,25-Fache (Opus 5 $ statt 4 $ je
+Million Tokens), daraus lesen ein Zwanzigstel (0,20 $) – es lohnt sich also
+nur, wenn derselbe Anfang wirklich wiederkommt. Das tut er, wenn der Server
+in Runden arbeitet: bei der Suche (jede Runde schickt alle Suchergebnisse und
+gelesenen Seiten noch einmal), nach einem Rat des Beraters (Opus liest danach
+alles noch einmal, Fotos eingeschlossen) und bei einer Fortsetzung nach
+`pause_turn`. Darum bekommt jede Anfrage mit Werkzeugen des Servers
+(Berater, Suche, Seiten lesen) `cache_control` oben im Rumpf – die API setzt
+dann nach jedem Such- und Leseergebnis selbst einen weiteren Punkt – und
+einen am Ende des Systemtexts, den Anfragen derselben Art teilen (die Stapel
+des Lidl-Prospekts, eine zweite Suche); der kostet nichts extra. Ohne
+Werkzeug – die Rezepte, deren Schema dem Berater zu groß ist – läuft eine
+Anfrage in einem Zug durch, und ihr Ende ist jedes Mal anders, auch beim
+„Neuen Vorschlag“: Dort bekäme sie keinen Treffer, nur den Aufpreis fürs
+Schreiben, und bei den Rezepten zählt ohnehin vor allem die Ausgabe. Der
+Berater hat keinen eigenen Zwischenspeicher (`caching`): Der lohnt sich
+laut Anthropic erst ab etwa drei Fragen an ihn in einem Gespräch, hier ist
+jede Anfrage ein eigenes. Ob er sich bei den Anfragen mit Berater lohnt,
+hängt davon ab, wie oft Opus fragt (ab etwa jeder vierten Anfrage) – das
+Protokoll des Lidl-Laufs zeigt es je Stapel.
 
 Der Schlüssel steht nur im localStorage (`boxenstopp.ki.v1`), nirgends im Code
 oder im App-Repo. Aufs zweite Handy kommt er mit dem Link fürs zweite Handy in den

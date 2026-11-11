@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, BERATER_HINWEIS } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS } from '../js/ki.js';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
@@ -206,15 +206,25 @@ const kopf = mitFetch.letzte.opt.headers;
 check(kopf['x-api-key'] === 'sk-ant-test' && kopf['anthropic-dangerous-direct-browser-access'] === 'true' && kopf['anthropic-version'] && JSON.parse(mitFetch.letzte.opt.body).stream === true, 'Anfrage mit Schlüssel, Browser-Freigabe, Version und stream');
 // --- Der Berater: Opus 5.5 fragt bei Bedarf Fable 5.2, Aufwand mittel
 const gesendet = JSON.parse(mitFetch.letzte.opt.body);
-check(kopf['anthropic-beta'] === 'advisor-tool-2026-03-01' && gesendet.model === 'claude-opus-5-5' && gesendet.tools.length === 1 && gesendet.tools[0].type === 'advisor_20260301' && gesendet.tools[0].model === 'claude-fable-5-2' && gesendet.output_config.effort === 'medium' && gesendet.output_config.format.type === 'json_schema' && gesendet.system.endsWith(BERATER_HINWEIS) && !gesendet.tool_choice,
+check(kopf['anthropic-beta'] === 'advisor-tool-2026-03-01' && gesendet.model === 'claude-opus-5-5' && gesendet.tools.length === 1 && gesendet.tools[0].type === 'advisor_20260301' && gesendet.tools[0].model === 'claude-fable-5-2' && gesendet.output_config.effort === 'medium' && gesendet.output_config.format.type === 'json_schema' && gesendet.system.at(-1).text.endsWith(BERATER_HINWEIS) && !gesendet.tool_choice,
   'Anfrage mit Berater (Fable 5.2), Beta-Kopf, Aufwand mittel, Schema bleibt, Hinweis im Systemtext, kein tool_choice');
 const mitWerkzeug = mitBerater({ system: 's', tools: [{ type: 'web_search_20250305', name: 'web_search' }], output_config: { format: { type: 'json_schema' } } });
 check(mitWerkzeug.tools.map((t) => t.name).join() === 'web_search,advisor' && mitBerater(mitWerkzeug) === mitWerkzeug && mitBerater({ system: [{ type: 'text', text: 'a' }] }).system.at(-1).text === BERATER_HINWEIS && !('tools' in anfrageBauen({ portionen: 4, ziel: { kcal: 600, p: 45, kh: 60, f: 18 }, katalog: {}, text: 'x' })),
   'mitBerater hängt den Berater an vorhandene Werkzeuge, nur einmal, auch bei system als Liste; der Rumpf selbst bleibt ohne');
 check(kostenCent({ ein: 0, aus: 0, beraterEin: 10000, beraterAus: 1000 }) === 12, 'Kosten: Berater mit Fables Preis (8 $ / 40 $)');
-// Prompt Caching: jede Anfrage mit cache_control oben, der Berater mit eigenem Zwischenspeicher
-check(gesendet.cache_control?.type === 'ephemeral' && gesendet.tools[0].caching?.type === 'ephemeral' && mitBerater({ system: 's' }, { berater: false }).cache_control?.type === 'ephemeral' && mitBerater(mitWerkzeug).cache_control === mitWerkzeug.cache_control && !('cache_control' in anfrageBauen({ portionen: 4, ziel: { kcal: 600, p: 45, kh: 60, f: 18 }, katalog: {}, text: 'x' })),
-  'Zwischenspeicher: cache_control im Rumpf (auch ohne Berater), der Berater speichert selbst, der gebaute Rumpf bleibt ohne');
+// Prompt Caching nur mit Werkzeugen des Servers: oben im Rumpf und am Ende des Systemtexts; der Berater ohne eigenen
+{
+  const ohneWerkzeug = mitZwischenspeicher(mitBerater({ system: 's', messages: [] }, { berater: false }));
+  const mitSuche = mitZwischenspeicher(mitWerkzeug);
+  const liste = mitZwischenspeicher({ system: [{ type: 'text', text: 'a' }, { type: 'text', text: 'b' }], tools: [{ type: 'web_search_20250305', name: 'web_search' }] });
+  check(gesendet.cache_control?.type === 'ephemeral' && gesendet.system.length === 1 && gesendet.system[0].cache_control?.type === 'ephemeral' && !('caching' in gesendet.tools[0]),
+    'mit Berater: cache_control oben und am Ende des Systemtexts, der Berater ohne eigenen Zwischenspeicher');
+  check(!('cache_control' in ohneWerkzeug) && ohneWerkzeug.system === 's' && !('cache_control' in anfrageBauen({ portionen: 4, ziel: { kcal: 600, p: 45, kh: 60, f: 18 }, katalog: {}, text: 'x' })),
+    'ohne Werkzeug (die Rezepte ohne Berater) kein Zwischenspeicher – das Ende ist jedes Mal anders, er kostete nur das Schreiben');
+  check(mitSuche.cache_control?.type === 'ephemeral' && mitSuche.system.length === 1 && mitSuche.system[0].text === `s\n\n${BERATER_HINWEIS}` && mitSuche.system[0].cache_control?.type === 'ephemeral'
+    && JSON.stringify(mitZwischenspeicher(mitSuche)) === JSON.stringify(mitSuche) && !liste.system[0].cache_control && liste.system[1].cache_control?.type === 'ephemeral',
+    'mit Werkzeugen: der Punkt sitzt am letzten Block des Systemtexts (auch als Liste), zweimal angewandt bleibt es dasselbe');
+}
 check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6, beraterCacheLesen: 1e6, beraterCacheSchreiben: 1e6 }) - (20 + 500 + 20 + 1000)) < 1e-9,
   'Kosten: aus dem Zwischenspeicher 0,20 $, hinein 5 $ (Opus) bzw. 10 $ (Fable) je Million');
 {
@@ -222,6 +232,23 @@ check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6
   const strom = STROM(JSON.stringify(ANTWORT)).replace(/^event: message_start\n.*\n\n/, ev({ type: 'message_start', message: { usage: { input_tokens: 50, cache_read_input_tokens: 2900, cache_creation_input_tokens: 0, output_tokens: 1 } } }));
   const r = await mitFetch(() => new Response(strom, { status: 200 }), () => kiAnfragen(rumpf, { schluessel: 'sk-ant-test' }));
   check(r.usage.ein === 50 && r.usage.cacheLesen === 2900 && r.usage.cacheSchreiben === 0, `Strom: Treffer im Zwischenspeicher werden gezählt (${JSON.stringify(r.usage)})`);
+}
+// Mit Rat des Beraters: message_delta kommt nach dem Rat und am Schluss, jedes Mal mit allem zusammen – gezählt wird das Letzte
+{
+  const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
+  const rat = { type: 'advisor_message', model: 'claude-fable-5-2', input_tokens: 3000, output_tokens: 800 };
+  const strom = ev({ type: 'message_start', message: { usage: { input_tokens: 50, cache_read_input_tokens: 0, cache_creation_input_tokens: 3000, output_tokens: 1 } } })
+    + ev({ type: 'content_block_start', index: 0, content_block: { type: 'server_tool_use', id: 'srvtoolu_1', name: 'advisor', input: {} } })
+    + ev({ type: 'content_block_stop', index: 0 })
+    + ev({ type: 'content_block_start', index: 1, content_block: { type: 'advisor_tool_result', tool_use_id: 'srvtoolu_1', content: { type: 'advisor_redacted_result', encrypted_content: 'geheim', stop_reason: 'end_turn' } } })
+    + ev({ type: 'content_block_stop', index: 1 })
+    + ev({ type: 'message_delta', delta: { stop_reason: null }, usage: { output_tokens: 300, iterations: [{ type: 'message', input_tokens: 50, cache_creation_input_tokens: 3000, output_tokens: 300 }, rat] } })
+    + STROM(JSON.stringify(ANTWORT)).replace(/^event: message_start\n.*\n\n/, '').replaceAll('"index":0', '"index":2')
+      .replace('"usage":{"output_tokens":4000}', `"usage":${JSON.stringify({ input_tokens: 120, cache_read_input_tokens: 3050, cache_creation_input_tokens: 3400, output_tokens: 4300, iterations: [{ type: 'message', input_tokens: 50, cache_creation_input_tokens: 3000, output_tokens: 300 }, rat, { type: 'message', input_tokens: 70, cache_read_input_tokens: 3050, cache_creation_input_tokens: 400, output_tokens: 4000 }] })}`);
+  const r = await mitFetch(() => new Response(strom, { status: 200 }), () => kiAnfragen(rumpf, { schluessel: 'sk-ant-test' }));
+  const u = r.usage;
+  check(r.eingabe?.name === ANTWORT.name && u.ein === 120 && u.cacheLesen === 3050 && u.cacheSchreiben === 3400 && u.aus === 4300 && u.beraterFragen === 1 && u.beraterEin === 3000 && u.beraterAus === 800,
+    `Strom mit Rat: Eingabe und Zwischenspeicher aller Runden aus message_delta, der Berater einmal gezählt (${JSON.stringify(u)})`);
 }
 // pause_turn mitten im Strom: die angefangene Antwort geht unverändert zurück, dann kommt das Rezept
 {
@@ -250,6 +277,8 @@ check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6
     'pause_turn: zweite Anfrage mit der angefangenen Antwort (Denkschritt samt Signatur, Aufruf des Beraters), gleiche Werkzeuge');
   check(fort?.eingabe?.name === ANTWORT.name && fort.usage.ein === 3000 && fort.usage.aus === 600 && fort.usage.beraterEin === 3000 && fort.usage.beraterAus === 800,
     `pause_turn: das Rezept kommt an, Verbrauch beider Teile und des Beraters zusammen (${JSON.stringify(fort?.usage)})`);
+  check(koerper[0].cache_control?.type === 'ephemeral' && koerper[1].cache_control?.type === 'ephemeral' && JSON.stringify(koerper[1].system) === JSON.stringify(koerper[0].system),
+    'pause_turn: beide Anfragen mit Zwischenspeicher und gleichem Anfang – die Fortsetzung liest ihn');
 }
 // Schema zu groß für den Berater (so beim Rezept-Schema): einmal ohne Berater, danach für dieses Schema gleich ohne
 {
@@ -269,6 +298,8 @@ check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6
   } finally { globalThis.fetch = echtFetch; }
   check(r1?.eingabe?.name === ANTWORT.name && r2?.eingabe?.name === ANTWORT.name && koerper.length === 3 && koerper[0].tools?.[0]?.type === 'advisor_20260301' && !koerper[1].tools && koerper[1].output_config.effort === 'medium' && koerper[1].output_config.format && !koerper[2].tools,
     `zu großes Schema: erst mit Berater abgelehnt, dann ohne – und beim nächsten Mal gleich ohne (${koerper.length} Anfragen)`);
+  check(koerper[0].cache_control?.type === 'ephemeral' && !('cache_control' in koerper[1]) && typeof koerper[1].system === 'string' && !('cache_control' in koerper[2]),
+    'ohne Berater (Rezept-Schema) geht die Anfrage ohne Zwischenspeicher');
 }
 check(Math.abs(kostenCent(gelesen.usage) - 9.2) < 0.01, `Kosten: ca. ${kostenCent(gelesen.usage).toFixed(1)} Cent (3000 rein, 4000 raus, Opus)`);
 const fehlerArt = async (antwort) => { try { await mitFetch(antwort, () => kiAnfragen(rumpf, { schluessel: 'x' })); return 'kein Fehler'; } catch (e) { return e.art; } };

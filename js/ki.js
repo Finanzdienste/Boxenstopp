@@ -63,8 +63,13 @@ export const ANBIETER = {
  * ein Satz im Systemtext. Der Rat kommt verschlüsselt und steht nur in den
  * Blöcken der Antwort; das Rezept-JSON kommt wie bisher als Text danach.
  * Gedeckelt ist das über das Guthaben, nicht über eine Zahl.
+ *
+ * Ohne eigenen Zwischenspeicher für den Berater (caching): Der lohnt sich laut
+ * Anthropic erst ab etwa drei Fragen an ihn in einem Gespräch. Hier ist jede
+ * Anfrage ein eigenes Gespräch mit keiner, einer oder zwei Fragen – mit
+ * caching zahlte schon die erste Frage ein Viertel mehr auf Fables Eingabe.
  */
-export const BERATER = { type: 'advisor_20260301', name: 'advisor', model: ANBIETER.anthropic.berater.modell, caching: { type: 'ephemeral', ttl: '5m' } };
+export const BERATER = { type: 'advisor_20260301', name: 'advisor', model: ANBIETER.anthropic.berater.modell };
 export const BETA_BERATER = 'advisor-tool-2026-03-01';
 export const BERATER_HINWEIS = 'Du hast einen Berater, das Werkzeug advisor, ein noch stärkeres Modell. Frag ihn, wenn gründliches Nachdenken das Ergebnis spürbar besser macht; für Einfaches brauchst du ihn nicht.';
 
@@ -80,25 +85,48 @@ const OHNE_BERATER = new Set();
 const schemaVon = (rumpf) => JSON.stringify(rumpf.output_config?.format?.schema ?? null);
 export const grammatikZuGross = (status, text) => status === 400 && /grammar is too large/i.test(String(text || ''));
 
-/*
- * Prompt Caching: Systemtext, Schema, Katalog und Fotos sind bei
- * Wiederholungen, Fortsetzungen (pause_turn) und Suchrunden gleich. Mit
- * cache_control oben im Rumpf legt die API den Anfang der Anfrage 5 Minuten
- * in den Zwischenspeicher (ab 512 Tokens); jede weitere Anfrage mit
- * demselben Anfang liest ihn für ein Zwanzigstel des Preises.
- */
-export const ZWISCHENSPEICHER = { type: 'ephemeral' };
-
-/** Der Rumpf für Claude mit Berater, Aufwand „mittel“ und Zwischenspeicher – für jede Anfrage an Anthropic. Mit berater: false ohne Berater. */
+/** Der Rumpf für Claude mit Berater und Aufwand „mittel“ – für jede Anfrage an Anthropic. Mit berater: false nur der Aufwand. */
 export function mitBerater(rumpf, { berater = true } = {}) {
-  const cache_control = rumpf.cache_control || ZWISCHENSPEICHER;
-  if (!berater) return { ...rumpf, cache_control, output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
-  if ((rumpf.tools || []).some((t) => t?.type === BERATER.type)) return rumpf.cache_control ? rumpf : { ...rumpf, cache_control };
+  if (!berater) return { ...rumpf, output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
+  if ((rumpf.tools || []).some((t) => t?.type === BERATER.type)) return rumpf;
   const system = typeof rumpf.system === 'string'
     ? `${rumpf.system}\n\n${BERATER_HINWEIS}`
     : Array.isArray(rumpf.system) ? [...rumpf.system, { type: 'text', text: BERATER_HINWEIS }] : BERATER_HINWEIS;
-  return { ...rumpf, system, tools: [...(rumpf.tools || []), BERATER], cache_control, output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
+  return { ...rumpf, system, tools: [...(rumpf.tools || []), BERATER], output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
 }
+
+/*
+ * Prompt Caching – nur, wo der Zwischenspeicher wieder gelesen wird.
+ * Hineinschreiben kostet das 1,25-Fache, Lesen ein Zwanzigstel; gelesen wird
+ * nur, was mit genau demselben Anfang innerhalb von 5 Minuten wiederkommt. Das
+ * passiert, wenn der Server in Runden arbeitet: Jede Suchrunde, die Runde nach
+ * einem Rat des Beraters und die Fortsetzung nach pause_turn schicken alles
+ * Bisherige noch einmal – Fotos, Suchergebnisse und gelesene Seiten
+ * eingeschlossen. Dann zwei Punkte:
+ *   - cache_control oben im Rumpf: Der Punkt liegt am Ende der Anfrage, und die
+ *     API setzt nach jedem Such- und Leseergebnis selbst einen weiteren (das
+ *     tut sie nur, wenn die Anfrage schon cache_control hat);
+ *   - einer am Ende des Systemtexts: Den teilen Anfragen derselben Art, etwa
+ *     die Stapel des Lidl-Prospekts oder eine zweite Suche. Er kostet nichts
+ *     extra – geschrieben werden die Tokens ohnehin, und nur einmal.
+ * Ohne Werkzeug (die Rezepte: ihr Schema ist dem Berater zu groß) läuft eine
+ * Anfrage in einem Zug durch, und ihr Ende ist jedes Mal anders, auch beim
+ * „Neuen Vorschlag“ („diesmal anders als …“). Dort kostete der
+ * Zwischenspeicher nur das Schreiben – und bei den Rezepten zählt ohnehin vor
+ * allem die Ausgabe.
+ */
+export const ZWISCHENSPEICHER = { type: 'ephemeral' };
+
+/** cache_control für einen fertigen Rumpf an Anthropic – nur, wenn er Werkzeuge des Servers hat (Berater, Suche, Seiten lesen). */
+export function mitZwischenspeicher(rumpf) {
+  if (!(rumpf.tools || []).length) return rumpf;
+  const bloecke = typeof rumpf.system === 'string' ? [{ type: 'text', text: rumpf.system }] : Array.isArray(rumpf.system) ? rumpf.system : [];
+  const system = bloecke.length ? { system: [...bloecke.slice(0, -1), { ...bloecke.at(-1), cache_control: ZWISCHENSPEICHER }] } : {};
+  return { ...rumpf, ...system, cache_control: rumpf.cache_control || ZWISCHENSPEICHER };
+}
+
+/** Was an Anthropic geht: mit Berater (wenn er darf), Aufwand mittel und, wo es sich lohnt, Zwischenspeicher. */
+const fuerClaude = (rumpf, opt) => mitZwischenspeicher(mitBerater(rumpf, opt));
 
 /** Die Köpfe für einen Aufruf von Anthropic aus dem Browser. */
 const claudeKoepfe = (schluessel) => ({
@@ -109,21 +137,25 @@ const claudeKoepfe = (schluessel) => ({
   'anthropic-dangerous-direct-browser-access': 'true',
 });
 
-/** Was der Berater verbraucht hat (usage.iterations, advisor_message) – zum Dazurechnen. */
-function beraterVerbrauch(usage, ziel) {
-  for (const it of usage?.iterations || []) {
-    if (it?.type !== 'advisor_message') continue;
-    ziel.beraterEin = (ziel.beraterEin || 0) + (Number(it.input_tokens) || 0);
-    ziel.beraterCacheLesen = (ziel.beraterCacheLesen || 0) + (Number(it.cache_read_input_tokens) || 0);
-    ziel.beraterCacheSchreiben = (ziel.beraterCacheSchreiben || 0) + (Number(it.cache_creation_input_tokens) || 0);
-    ziel.beraterAus = (ziel.beraterAus || 0) + (Number(it.output_tokens) || 0);
-  }
-}
-
-/** Was aus dem Zwischenspeicher kam und was hineinging (usage von Anthropic) – zum Dazurechnen. */
-function cacheVerbrauch(usage, ziel) {
-  ziel.cacheLesen = (ziel.cacheLesen || 0) + (Number(usage?.cache_read_input_tokens) || 0);
-  ziel.cacheSchreiben = (ziel.cacheSchreiben || 0) + (Number(usage?.cache_creation_input_tokens) || 0);
+/*
+ * Was eine Antwort verbraucht hat, auf das, was frühere Antworten (vor einer
+ * Fortsetzung) schon verbraucht haben (vorher). Im Strom steht usage zweimal:
+ * in message_start für die erste Runde des Servers, in message_delta
+ * zusammengezählt über alle Runden – mit Werkzeugen des Servers auch Eingabe
+ * und Zwischenspeicher, mit dem Berater nach jedem Rat neu. Darum gesetzt,
+ * nicht dazugezählt. Der Berater steht in usage.iterations (advisor_message).
+ */
+const VERBRAUCH = { ein: 'input_tokens', aus: 'output_tokens', cacheLesen: 'cache_read_input_tokens', cacheSchreiben: 'cache_creation_input_tokens' };
+const BERATER_VERBRAUCH = { beraterEin: 'input_tokens', beraterAus: 'output_tokens', beraterCacheLesen: 'cache_read_input_tokens', beraterCacheSchreiben: 'cache_creation_input_tokens' };
+function verbrauchSetzen(ziel, u, vorher = {}) {
+  if (!u) return;
+  const da = (x) => x !== undefined && x !== null;
+  for (const [k, feld] of Object.entries(VERBRAUCH)) if (da(u[feld])) ziel[k] = (vorher[k] || 0) + (Number(u[feld]) || 0);
+  if (da(u.server_tool_use?.web_search_requests)) ziel.suchen = (vorher.suchen || 0) + (Number(u.server_tool_use.web_search_requests) || 0);
+  if (!Array.isArray(u.iterations)) return;
+  const rat = u.iterations.filter((it) => it?.type === 'advisor_message');
+  ziel.beraterFragen = (vorher.beraterFragen || 0) + rat.length;
+  for (const [k, feld] of Object.entries(BERATER_VERBRAUCH)) ziel[k] = (vorher[k] || 0) + rat.reduce((s, it) => s + (Number(it[feld]) || 0), 0);
 }
 /** Welcher Anbieter zu einem Schlüssel gehört – oder '' für keinen. */
 export const anbieterVon = (schluessel) => (/^(?:AQ\.|AIza)/.test(String(schluessel || '')) ? 'gemini' : /^sk-ant-/.test(String(schluessel || '')) ? 'anthropic' : '');
@@ -361,7 +393,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       headers: gemini
         ? { 'content-type': 'application/json', 'x-goog-api-key': schluessel }
         : claudeKoepfe(schluessel),
-      body: JSON.stringify(gemini ? rumpf : { ...mitBerater(rumpf, { berater }), messages: nachrichten, stream: true }),
+      body: JSON.stringify(gemini ? rumpf : { ...fuerClaude(rumpf, { berater }), messages: nachrichten, stream: true }),
       signal,
     });
   } catch (e) {
@@ -390,8 +422,6 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   const leser = res.body.getReader();
   const dekoder = new TextDecoder();
   const usage = { ...vorher.usage };
-  const einVorher = usage.ein || 0;
-  const ausVorher = usage.aus || 0;
   const bloecke = []; // die Blöcke dieser Antwort, für eine Fortsetzung nach pause_turn
   let puffer = '';
   let json = vorher.json;
@@ -429,8 +459,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     if (gemini) { verarbeiteGemini(ev); return; }
     switch (ev.type) {
       case 'message_start':
-        usage.ein = einVorher + (Number(ev.message?.usage?.input_tokens) || 0);
-        cacheVerbrauch(ev.message?.usage, usage);
+        verbrauchSetzen(usage, ev.message?.usage, vorher.usage);
         return;
       case 'content_block_start': {
         const b = { ...(ev.content_block || {}) };
@@ -462,8 +491,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       }
       case 'message_delta':
         stopp = ev.delta?.stop_reason || stopp;
-        usage.aus = ausVorher + (Number(ev.usage?.output_tokens) || 0);
-        beraterVerbrauch(ev.usage, usage);
+        verbrauchSetzen(usage, ev.usage, vorher.usage);
         return;
       case 'error':
         throw fehler(/overloaded/i.test(ev.error?.type || '') ? 'ueberlastet' : 'antwort', ev.error?.message);
@@ -513,7 +541,8 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
  * mehrere Blöcke verteilt: Es zählt alles nach dem letzten Werkzeug.
  *
  * Hakt nur das Lesen von Seiten (web_fetch), einmal ohne. Gibt { text,
- * quellen: [{ url, titel }], usage: { ein, aus, suchen } } zurück.
+ * quellen: [{ url, titel }], usage: { ein, aus, suchen, cacheLesen,
+ * cacheSchreiben, berater… } } zurück.
  */
 export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, runden = 4 }) {
   const fehler = (art, detail) => kiFehler(art, detail, 'anthropic');
@@ -527,7 +556,7 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
       res = await fetch(api || ANBIETER.anthropic.api, {
         method: 'POST',
         headers: claudeKoepfe(schluessel),
-        body: JSON.stringify({ ...mitBerater(rumpf), messages }),
+        body: JSON.stringify({ ...fuerClaude(rumpf), messages }),
         signal,
       });
     } catch (e) {
@@ -547,11 +576,7 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
       }
       throw fehler(art, text);
     }
-    usage.ein += Number(info?.usage?.input_tokens) || 0;
-    usage.aus += Number(info?.usage?.output_tokens) || 0;
-    cacheVerbrauch(info?.usage, usage);
-    usage.suchen += Number(info?.usage?.server_tool_use?.web_search_requests) || 0;
-    beraterVerbrauch(info?.usage, usage);
+    verbrauchSetzen(usage, info?.usage, { ...usage });
     const bloecke = Array.isArray(info?.content) ? info.content : [];
     for (const b of bloecke) {
       if (b?.type === 'web_search_tool_result' && Array.isArray(b.content)) {
