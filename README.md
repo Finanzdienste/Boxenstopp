@@ -527,7 +527,7 @@ in Pflaume und Rosa.
   nicht vertrage“ (gleich an, je Gerät gemerkt) schickt nur die Namen dieser
   Zutaten mit, nie die Notizen. Ein Rezept, dessen Adresse in keinem
   Suchergebnis vorkam, fällt weg – das wäre ausgedacht. Das macht dasselbe
-  Modell wie bei den Rezepten (`claude-fable-5-1`) mit den Werkzeugen
+  Modell wie bei den Rezepten (`claude-opus-5-5` mit Berater) mit den Werkzeugen
   `web_search` (Standort Deutschland) und `web_fetch`, ohne Strom
   (`kiMitWerkzeugen` in `js/ki.js`: unterbricht der Server eine lange Suche
   mit `pause_turn`, geht die Antwort unverändert zurück; ist die Websuche in
@@ -1176,7 +1176,7 @@ API-Schlüssel, den der Anfang des Schlüssels einem Anbieter zuordnet:
 | Schlüssel | Anbieter, Modell | Kosten | Antwort |
 | --- | --- | --- | --- |
 | `AQ.…` (älter: `AIza…`) | Google, `gemini-3.8-flash` über die Interactions-API (`/v1beta/interactions`, `store: false`) | kostenlos, ohne Kreditkarte; dafür darf Google die Anfragen zum Verbessern seiner Produkte nutzen | JSON mit `response_format` und Schema |
-| `sk-ant-…` | Anthropic, `claude-fable-5-1` (Messages-API) – das stärkste Modell | etwa 30 Cent pro Rezept vom Guthaben der Console; mit einem Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $ im Monat, verfällt monatlich) | JSON nach Schema über `output_config` (Structured Outputs; das Schema geht durch `schemaFuerClaude`, weil Anthropic `minimum`/`maximum`, `title` und Längen nicht kennt) |
+| `sk-ant-…` | Anthropic, `claude-opus-5-5` mit Aufwand mittel (Messages-API); bei schwierigen Stellen fragt Opus `claude-fable-5-2` um Rat (Advisor-Werkzeug, Beta `advisor-tool-2026-03-01`, so oft es will; beim großen Rezept-Schema lehnt die API den Berater ab, dann geht die Anfrage ohne ihn) | etwa 15–20 Cent pro Rezept, vom Guthaben der Console; mit einem Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $ im Monat, verfällt monatlich) | JSON nach Schema über `output_config` (Structured Outputs; das Schema geht durch `schemaFuerClaude`, weil Anthropic `minimum`/`maximum`, `title` und Längen nicht kennt) |
 
 Der Weg ohne Abo ist Google: auf
 [aistudio.google.com/apikey](https://aistudio.google.com/apikey) mit dem

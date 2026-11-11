@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, BERATER_HINWEIS } from '../js/ki.js';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
@@ -144,7 +144,7 @@ check(rg.model === 'gemini-3.8-flash' && rg.response_format?.mime_type === 'appl
 check(rg.input[0].type === 'image' && rg.input[0].mime_type === 'image/jpeg' && rg.input[0].data === 'AAAA' && rg.input[1].type === 'text' && /Portionen: 6/.test(rg.input[1].text), 'Foto als Bild-Teil, Text dahinter');
 check(/als JSON genau nach dem vorgegebenen Schema/.test(rg.system_instruction) && !/rezept_ausgeben/.test(rg.system_instruction) && /Kein Fisch/.test(rg.system_instruction), 'Gemini bekommt dieselben Regeln, nur ohne Werkzeug');
 check(rumpfFuer('gemini', { ziel: ZIEL, katalog: {} }).response_format && rumpfFuer('anthropic', { ziel: ZIEL, katalog: {} }).output_config, 'rumpfFuer wählt nach Anbieter');
-check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') === 30 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null && ANBIETER.anthropic.modell === 'claude-fable-5-1' && MODELL === 'claude-fable-5-1', 'Gemini (3.8 Flash) kostet nichts, Claude (Fable 5.1) 10 $ und 50 $ je Million Tokens');
+check(kostenCent({ ein: 5000, aus: 5000 }, 'gemini') === 0 && kostenCent({ ein: 5000, aus: 5000 }, 'anthropic') === 12 && ANBIETER.gemini.modell === 'gemini-3.8-flash' && ANBIETER.gemini.preis === null && ANBIETER.anthropic.modell === 'claude-opus-5-5' && MODELL === 'claude-opus-5-5' && ANBIETER.anthropic.berater.modell === 'claude-fable-5-2', 'Gemini (3.8 Flash) kostet nichts, Claude (Opus 5.5) 4 $ und 20 $ je Million Tokens, Berater Fable 5.2');
 
 // --- Rezept mit der KI ändern: Vorlage, Anfrage, ans Original anschließen, wieder aufs Ziel
 const terK = kiBereinigen(festAlsKi(daten.rezepte.find((r) => r.id === 'teriyaki'), daten.katalog)).r;
@@ -204,7 +204,62 @@ const alsWerkzeug = await mitFetch(() => new Response(STROM(JSON.stringify(ANTWO
 check(alsWerkzeug.eingabe.name === ANTWORT.name, 'ein Werkzeug-Strom (input_json_delta) wird zur Sicherheit genauso gelesen');
 const kopf = mitFetch.letzte.opt.headers;
 check(kopf['x-api-key'] === 'sk-ant-test' && kopf['anthropic-dangerous-direct-browser-access'] === 'true' && kopf['anthropic-version'] && JSON.parse(mitFetch.letzte.opt.body).stream === true, 'Anfrage mit Schlüssel, Browser-Freigabe, Version und stream');
-check(Math.abs(kostenCent(gelesen.usage) - 23) < 0.01, `Kosten: ca. ${kostenCent(gelesen.usage).toFixed(1)} Cent (3000 rein, 4000 raus, Fable)`);
+// --- Der Berater: Opus 5.5 fragt bei Bedarf Fable 5.2, Aufwand mittel
+const gesendet = JSON.parse(mitFetch.letzte.opt.body);
+check(kopf['anthropic-beta'] === 'advisor-tool-2026-03-01' && gesendet.model === 'claude-opus-5-5' && gesendet.tools.length === 1 && gesendet.tools[0].type === 'advisor_20260301' && gesendet.tools[0].model === 'claude-fable-5-2' && gesendet.output_config.effort === 'medium' && gesendet.output_config.format.type === 'json_schema' && gesendet.system.endsWith(BERATER_HINWEIS) && !gesendet.tool_choice,
+  'Anfrage mit Berater (Fable 5.2), Beta-Kopf, Aufwand mittel, Schema bleibt, Hinweis im Systemtext, kein tool_choice');
+const mitWerkzeug = mitBerater({ system: 's', tools: [{ type: 'web_search_20250305', name: 'web_search' }], output_config: { format: { type: 'json_schema' } } });
+check(mitWerkzeug.tools.map((t) => t.name).join() === 'web_search,advisor' && mitBerater(mitWerkzeug) === mitWerkzeug && mitBerater({ system: [{ type: 'text', text: 'a' }] }).system.at(-1).text === BERATER_HINWEIS && !('tools' in anfrageBauen({ portionen: 4, ziel: { kcal: 600, p: 45, kh: 60, f: 18 }, katalog: {}, text: 'x' })),
+  'mitBerater hängt den Berater an vorhandene Werkzeuge, nur einmal, auch bei system als Liste; der Rumpf selbst bleibt ohne');
+check(kostenCent({ ein: 0, aus: 0, beraterEin: 10000, beraterAus: 1000 }) === 12, 'Kosten: Berater mit Fables Preis (8 $ / 40 $)');
+// pause_turn mitten im Strom: die angefangene Antwort geht unverändert zurück, dann kommt das Rezept
+{
+  const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
+  const erster = ev({ type: 'message_start', message: { usage: { input_tokens: 1000, output_tokens: 1 } } })
+    + ev({ type: 'content_block_start', index: 0, content_block: { type: 'thinking', thinking: '', signature: '' } })
+    + ev({ type: 'content_block_delta', index: 0, delta: { type: 'signature_delta', signature: 'sig-1' } })
+    + ev({ type: 'content_block_stop', index: 0 })
+    + ev({ type: 'content_block_start', index: 1, content_block: { type: 'server_tool_use', id: 'srvtoolu_1', name: 'advisor', input: {} } })
+    + ev({ type: 'content_block_delta', index: 1, delta: { type: 'input_json_delta', partial_json: '' } })
+    + ev({ type: 'content_block_stop', index: 1 })
+    + ev({ type: 'message_delta', delta: { stop_reason: 'pause_turn' }, usage: { output_tokens: 100 } })
+    + ev({ type: 'message_stop' });
+  const zweiter = ev({ type: 'message_start', message: { usage: { input_tokens: 2000, output_tokens: 1 } } })
+    + ev({ type: 'content_block_start', index: 0, content_block: { type: 'advisor_tool_result', tool_use_id: 'srvtoolu_1', content: { type: 'advisor_redacted_result', encrypted_content: 'geheim', stop_reason: 'end_turn' } } })
+    + ev({ type: 'content_block_stop', index: 0 })
+    + STROM(JSON.stringify(ANTWORT)).replace(/^event: message_start\n.*\n\n/, '').replaceAll('"index":0', '"index":1')
+      .replace('"usage":{"output_tokens":4000}', '"usage":{"output_tokens":500,"iterations":[{"type":"advisor_message","model":"claude-fable-5-2","input_tokens":3000,"output_tokens":800}]}');
+  const koerper = [];
+  let n = 0;
+  globalThis.fetch = async (url, opt) => { koerper.push(JSON.parse(opt.body)); n++; return new Response(n === 1 ? erster : zweiter, { status: 200 }); };
+  let fort;
+  try { fort = await kiAnfragen(rumpf, { schluessel: 'sk-ant-test' }); } finally { globalThis.fetch = echtFetch; }
+  const anhang = koerper[1]?.messages.at(-1);
+  check(koerper.length === 2 && anhang?.role === 'assistant' && JSON.stringify(anhang.content) === JSON.stringify([{ type: 'thinking', thinking: '', signature: 'sig-1' }, { type: 'server_tool_use', id: 'srvtoolu_1', name: 'advisor', input: {} }]) && koerper[1].messages.length === koerper[0].messages.length + 1 && JSON.stringify(koerper[1].tools) === JSON.stringify(koerper[0].tools),
+    'pause_turn: zweite Anfrage mit der angefangenen Antwort (Denkschritt samt Signatur, Aufruf des Beraters), gleiche Werkzeuge');
+  check(fort?.eingabe?.name === ANTWORT.name && fort.usage.ein === 3000 && fort.usage.aus === 600 && fort.usage.beraterEin === 3000 && fort.usage.beraterAus === 800,
+    `pause_turn: das Rezept kommt an, Verbrauch beider Teile und des Beraters zusammen (${JSON.stringify(fort?.usage)})`);
+}
+// Schema zu groß für den Berater (so beim Rezept-Schema): einmal ohne Berater, danach für dieses Schema gleich ohne
+{
+  const koerper = [];
+  globalThis.fetch = async (url, opt) => {
+    const b = JSON.parse(opt.body);
+    koerper.push(b);
+    return (b.tools || []).length
+      ? new Response(JSON.stringify({ type: 'error', error: { type: 'invalid_request_error', message: 'The compiled grammar is too large, which would cause performance issues.' } }), { status: 400 })
+      : new Response(STROM(JSON.stringify(ANTWORT)), { status: 200 });
+  };
+  const eigen = { ...rumpf, output_config: { format: { type: 'json_schema', schema: { type: 'object', properties: { nurHier: { type: 'string' } } } } } };
+  let r1, r2;
+  try {
+    r1 = await kiAnfragen(eigen, { schluessel: 'sk-ant-test' });
+    r2 = await kiAnfragen(eigen, { schluessel: 'sk-ant-test' });
+  } finally { globalThis.fetch = echtFetch; }
+  check(r1?.eingabe?.name === ANTWORT.name && r2?.eingabe?.name === ANTWORT.name && koerper.length === 3 && koerper[0].tools?.[0]?.type === 'advisor_20260301' && !koerper[1].tools && koerper[1].output_config.effort === 'medium' && koerper[1].output_config.format && !koerper[2].tools,
+    `zu großes Schema: erst mit Berater abgelehnt, dann ohne – und beim nächsten Mal gleich ohne (${koerper.length} Anfragen)`);
+}
+check(Math.abs(kostenCent(gelesen.usage) - 9.2) < 0.01, `Kosten: ca. ${kostenCent(gelesen.usage).toFixed(1)} Cent (3000 rein, 4000 raus, Opus)`);
 const fehlerArt = async (antwort) => { try { await mitFetch(antwort, () => kiAnfragen(rumpf, { schluessel: 'x' })); return 'kein Fehler'; } catch (e) { return e.art; } };
 check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'authentication_error', message: 'invalid x-api-key' } }), { status: 401 })) === 'schluessel', '401: Schlüssel prüfen');
 check(await fehlerArt(() => new Response(JSON.stringify({ error: { type: 'invalid_request_error', message: 'Your credit balance is too low' } }), { status: 400 })) === 'guthaben', 'kein Guthaben wird erkannt');

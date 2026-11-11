@@ -337,7 +337,7 @@ const anfragenMock = (zuViel) => {
 // --- Claude liest den Prospekt: Rumpf, Anfrage gegen einen Mock von /v1/messages (Strom), Wahl des Anbieters
 {
   const r = claudeRumpf({ fotos: ['abc'], text: 'Lidl, Seiten 1–6', katalog });
-  check(r.model === 'claude-fable-5-1' && r.output_config?.format?.type === 'json_schema' && r.output_config.format.schema.required.includes('angebote') && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /kein Schwein/.test(r.system), 'Claude-Rumpf: Fable, JSON nach dem Schema, Seitenbilder, Seitenbereich im Text');
+  check(r.model === 'claude-opus-5-5' && r.output_config?.format?.type === 'json_schema' && r.output_config.format.schema.required.includes('angebote') && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /kein Schwein/.test(r.system), 'Claude-Rumpf: Fable, JSON nach dem Schema, Seitenbilder, Seitenbereich im Text');
   const { anfragen: mock, ruempfe } = (() => {
     const liste = [];
     return { anfragen: async (rumpf) => { liste.push(rumpf); return { eingabe: { angebote: [{ laden: 'Lidl', name: 'Skyr', preis: 0.99 }] }, usage: { ein: 1, aus: 2 } }; }, ruempfe: liste };
@@ -374,7 +374,7 @@ const anfragenMock = (zuViel) => {
   antworten.push([200, strom(JSON.stringify({ angebote: [{ laden: 'Lidl', name: 'Hähnchenbrustfilet', preis: 7.49, menge: 1, einheit: 'kg' }] }))]);
   let a = await lauf();
   check(a.eingabe?.angebote?.[0]?.name === 'Hähnchenbrustfilet' && a.usage.ein === 9000 && a.usage.aus === 2500 && a.usage.denken === 0 && a.grund === 'json' && typeof a.dauer === 'number', `Messages-API: Antwort aus dem JSON-Strom, Tokens (${JSON.stringify(a.usage)})`);
-  check(anfragen[0].key === 'sk-ant-test' && anfragen[0].version && anfragen[0].rumpf.model === 'claude-fable-5-1' && anfragen[0].rumpf.stream === true && anfragen[0].rumpf.output_config.format.type === 'json_schema' && !anfragen[0].rumpf.tool_choice, 'Messages-API: Schlüssel und Version im Kopf, Fable, gestreamt, JSON-Schema statt Werkzeug');
+  check(anfragen[0].key === 'sk-ant-test' && anfragen[0].version && anfragen[0].rumpf.model === 'claude-opus-5-5' && anfragen[0].rumpf.stream === true && anfragen[0].rumpf.output_config.format.type === 'json_schema' && !anfragen[0].rumpf.tool_choice, 'Messages-API: Schlüssel und Version im Kopf, Opus, gestreamt, JSON-Schema statt Werkzeug');
   antworten.push([200, strom('{"angebote":[]}')]);
   a = await lauf({ modell: 'claude-sonnet-5-5' });
   check(anfragen[1].rumpf.model === 'claude-sonnet-5-5' && Array.isArray(a.eingabe?.angebote), 'Messages-API: mitAusweichen gibt das Modell vor');
@@ -405,11 +405,11 @@ const anfragenMock = (zuViel) => {
   const weg = await lauf({ api: 'http://127.0.0.1:9/v1/messages' });
   check(weg.art === 'netz', 'Messages-API: nicht erreichbar → netz');
 
-  // Wahl des Anbieters: Claude vor Gemini, Gemini-Modell vom letzten Lauf zuerst, bei Claude bleibt Fable vorn
+  // Wahl des Anbieters: Claude vor Gemini, Gemini-Modell vom letzten Lauf zuerst, bei Claude bleibt Opus vorn
   const kc = lidlKi({ anthropic: 'sk-ant-x', gemini: 'AQ.y', zuletzt: 'claude-sonnet-5-5' });
   const kg = lidlKi({ anthropic: '', gemini: 'AQ.y', zuletzt: 'gemini-3.6-flash' });
   const kgc = lidlKi({ anthropic: '', gemini: 'AQ.y', zuletzt: 'claude-sonnet-5-5' });
-  check(kc.anbieter === 'anthropic' && kc.modelle[0] === 'claude-fable-5-1' && kc.modelle.includes('claude-sonnet-5-5') && kc.nebeneinander === 3 && kc.anfragen === claudeAnfragen && kc.rumpfBauen === claudeRumpf, `Lidl-KI: mit beiden Schlüsseln Claude, Fable zuerst, drei nebeneinander (${kc.modelle.join(' → ')})`);
+  check(kc.anbieter === 'anthropic' && kc.modelle[0] === 'claude-opus-5-5' && kc.modelle.includes('claude-sonnet-5-5') && kc.nebeneinander === 3 && kc.anfragen === claudeAnfragen && kc.rumpfBauen === claudeRumpf, `Lidl-KI: mit beiden Schlüsseln Claude, Fable zuerst, drei nebeneinander (${kc.modelle.join(' → ')})`);
   check(kg.anbieter === 'gemini' && kg.modelle[0] === 'gemini-3.6-flash' && kg.modelle[1] === 'gemini-3.8-flash' && kg.nebeneinander === 1 && kg.anfragen === geminiAnfragen && kgc.modelle[0] === 'gemini-3.8-flash' && lidlKi({ anthropic: '', gemini: '' }) === null, 'Lidl-KI: nur Gemini → das Modell vom letzten Lauf zuerst, ein Claude-Modell von früher zählt nicht; ohne Schlüssel keine');
 
   // Schon gelesen: derselbe Prospekt gilt die ganze Woche
