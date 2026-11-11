@@ -6,7 +6,7 @@
 #
 # Lidl braucht einen KI-Schlüssel (Prospektseiten sind Bilder), als Secret unter
 # Settings → Secrets and variables → Actions: ANTHROPIC_API_KEY für Claude
-# (Fable 5.1, läuft über das Monatsguthaben des Max-/Ultra-Abos) oder GEMINI_KEY für
+# (Opus 5.5 mit Fable 5.2 als Berater, läuft über das Monatsguthaben des Max-/Ultra-Abos) oder GEMINI_KEY für
 # Gemini (kostenlos); sind beide da, nimmt der Lauf Claude. Ein anderes
 # Claude-Modell geht über die Variable CLAUDE_MODELL (Variables, nicht Secrets).
 # Ohne Schlüssel läuft alles andere trotzdem.

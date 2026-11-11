@@ -45,7 +45,7 @@ check(leer.portionen === 4 && leer.zeit === '' && importBereinigen({ zutaten: []
 
 // --- Im Internet suchen (nur Claude)
 const su = rumpfSuche({ wunsch: 'Kürbissuppe', ohne: ['Zwiebel'], wenig: ['Knoblauch'], tags: ['Omas Küche'] });
-check(su.model === ANBIETER.anthropic.modell && su.model === 'claude-fable-5-1' && !su.output_config && !su.stream && su.tools[0].type === 'web_search_20250305' && su.tools[0].user_location.country === 'DE' && su.tools[1].type === 'web_fetch_20250910' && su.tools[1].max_content_tokens > 0, 'Suche: Fable mit Websuche (Deutschland) und Seiten lesen, ohne festes Schema');
+check(su.model === ANBIETER.anthropic.modell && su.model === 'claude-opus-5-5' && !su.output_config && !su.stream && su.tools[0].type === 'web_search_20250305' && su.tools[0].user_location.country === 'DE' && su.tools[1].type === 'web_fetch_20250910' && su.tools[1].max_content_tokens > 0, 'Suche: Fable mit Websuche (Deutschland) und Seiten lesen, ohne festes Schema');
 check(su.messages[0].content[0].text === 'Amys Wunsch: Kürbissuppe\nBitte ohne: Zwiebel (verträgt sie nicht).\nDavon nur wenig: Knoblauch.' && su.system.includes('erfinde nichts dazu') && su.system.includes('Nährwerte brauchst du nicht') && su.system.includes('Omas Küche') && su.system.includes('"rezepte"'), 'Wunsch, ohne und wenig – nur die Namen; nichts erfinden, keine Nährwerte, JSON am Schluss');
 check(sucheText({ wunsch: '  Pasta  ' }) === 'Amys Wunsch: Pasta', 'ohne Unverträgliches: nur der Wunsch');
 const lc = rumpfLinkClaude({ link: CK });
@@ -79,7 +79,8 @@ check(notizMitQuelle(sb.rezepte[0]) === 'Mit Kernen.\nVon chefkoch.de: https://w
   rufe.length = 0;
   antworten = [{ status: 400, body: { error: { type: 'invalid_request_error', message: 'tools.1: web_fetch_20250910 is not available' } } }, { status: 200, body: { stop_reason: 'end_turn', content: [{ type: 'text', text: 'ok' }] } }];
   await kiMitWerkzeugen({ model: ANBIETER.anthropic.modell, messages: [], tools: [WEBSUCHE, SEITE_LESEN(3)] }, { schluessel: 'k' });
-  check(rufe.length === 2 && rufe[1].rumpf.tools.length === 1 && rufe[1].rumpf.tools[0].name === 'web_search', 'hakt nur das Lesen von Seiten: einmal nur mit der Suche');
+  check(rufe.length === 2 && rufe[1].rumpf.tools.map((t) => t.name).join() === 'web_search,advisor', 'hakt nur das Lesen von Seiten: einmal nur mit der Suche (und dem Berater)');
+  check(rufe[0].kopf['anthropic-beta'] === 'advisor-tool-2026-03-01' && rufe[0].rumpf.tools.at(-1).model === 'claude-fable-5-2' && rufe[0].rumpf.output_config.effort === 'medium', 'mit Werkzeugen: auch hier der Berater, Aufwand mittel');
   const fehlerVon = async (a, tools = [WEBSUCHE]) => { antworten = [a]; try { await kiMitWerkzeugen({ model: ANBIETER.anthropic.modell, messages: [], tools }, { schluessel: 'k' }); return ''; } catch (e) { return e.art; } };
   check(await fehlerVon({ status: 400, body: { error: { type: 'invalid_request_error', message: 'Web search is not enabled for this organization.' } } }) === 'websuche', 'Websuche in der Console aus: ein eigener Hinweis');
   check(await fehlerVon({ status: 400, body: { error: { type: 'invalid_request_error', message: 'web fetch is not enabled' } } }, [SEITE_LESEN(2)]) === 'websuche', 'nur Seiten lesen und das ist aus: kein Ausweichen ohne Werkzeug');
@@ -217,7 +218,7 @@ await p.fill('#amy-import-text', CK);
 await uebernehmen();
 check(await bis(async () => (await feld('amy-name')) === 'Shakshuka von Claude'), 'Claude-Schlüssel und Link: Claude liest die Seite, der Editor ist gefüllt');
 const c1 = claudeKi.anfragen.at(-1);
-check(c1?.kopf['x-api-key'] === CLAUDE && c1.rumpf.tools?.[0]?.type === 'web_fetch_20250910' && !c1.rumpf.stream && !c1.rumpf.output_config && c1.rumpf.messages[0].content[0].text === `Das Rezept steht hier: ${CK}`, 'die Anfrage: der Link, web_fetch, ohne Strom und ohne Schema');
+check(c1?.kopf['x-api-key'] === CLAUDE && c1.rumpf.tools?.[0]?.type === 'web_fetch_20250910' && c1.rumpf.tools.at(-1).type === 'advisor_20260301' && !c1.rumpf.stream && !c1.rumpf.output_config?.format && c1.rumpf.output_config?.effort === 'medium' && c1.rumpf.messages[0].content[0].text === `Das Rezept steht hier: ${CK}`, 'die Anfrage: der Link, web_fetch (und der Berater), ohne Strom und ohne Schema');
 await p.click('#view-amy details.amy-import summary');
 await p.fill('#amy-import-text', '');
 await uebernehmen();
@@ -252,7 +253,7 @@ check(await bis(async () => (await p.locator('#amy-suche-inhalt .amy-import-laeu
 check(await bis(async () => (await p.locator('#amy-suche-inhalt .amy-treffer-k').count()) === 2), 'zwei Treffer – der ausgedachte ohne Adresse aus der Suche bleibt weg');
 check((await p.locator('#amy-fehler').isHidden()) && !Object.values(gh.liste()?.amy || {}).some((x) => x.name === ''), 'Enter im Suchfeld speichert nicht das Rezept');
 const s1 = claudeKi.anfragen.at(-1).rumpf;
-check(s1.model === 'claude-fable-5-1' && s1.tools.map((t) => t.type).join() === 'web_search_20250305,web_fetch_20250910' && s1.messages[0].content[0].text === 'Amys Wunsch: Kürbissuppe mit Kokosmilch\nBitte ohne: Zwiebel (verträgt sie nicht).\nDavon nur wenig: Knoblauch.', 'die Anfrage: ihr Wunsch, ohne Zwiebel, wenig Knoblauch – Websuche und Seiten lesen');
+check(s1.model === 'claude-opus-5-5' && s1.tools.map((t) => t.type).join() === 'web_search_20250305,web_fetch_20250910,advisor_20260301' && s1.messages[0].content[0].text === 'Amys Wunsch: Kürbissuppe mit Kokosmilch\nBitte ohne: Zwiebel (verträgt sie nicht).\nDavon nur wenig: Knoblauch.', 'die Anfrage: ihr Wunsch, ohne Zwiebel, wenig Knoblauch – Websuche, Seiten lesen und Berater');
 const karten = p.locator('#amy-suche-inhalt .amy-treffer-k');
 check((await karten.nth(0).innerText()).includes('Cremige Kürbissuppe') && (await karten.nth(0).innerText()).includes('chefkoch.de · 40 Min. · 4 Portionen') && (await karten.nth(0).locator('.amy-treffer-vt.vt-nicht').innerText()).includes('Geht nicht für dich: Zwiebel'), 'der erste: Name, Seite, Zeit, Portionen – und „✗ Geht nicht für dich: Zwiebel“');
 check(await karten.nth(1).locator('.amy-treffer-vt').count() === 0 && await karten.nth(1).locator('a.linkbtn').getAttribute('href') === TREFFER[1].url && await karten.nth(1).locator('a.linkbtn').getAttribute('target') === '_blank' && (await karten.nth(1).locator('a.linkbtn').getAttribute('rel')).includes('noopener'), 'der zweite passt; „Seite ansehen“ öffnet das Original');

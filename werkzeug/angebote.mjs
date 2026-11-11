@@ -29,9 +29,9 @@
  *             vor, ohne Text. Die Lebensmittel-Seiten (lidlSeitenWahl) liest
  *             eine KI aus, sechs je Anfrage – dafür braucht der Lauf einen
  *             Schlüssel (bei GitHub als Secret): ANTHROPIC_API_KEY für Claude
- *             (claude-fable-5-1, drei Anfragen nebeneinander, bei Überlastung
- *             Sonnet 5.5; mit einem Claude-Abo (Max, Ultra) aus dessen Monatsguthaben,
- *             etwa 3 $ je Prospekt) oder GEMINI_KEY für Gemini (kostenlos,
+ *             (claude-opus-5-5 mit Fable 5.2 als Berater, drei Anfragen
+ *             nebeneinander, bei Überlastung Sonnet 5.5; mit einem Claude-Abo
+ *             (Max, Ultra) aus dessen Monatsguthaben, etwa 1–1,50 $ je Prospekt) oder GEMINI_KEY für Gemini (kostenlos,
  *             eine Anfrage nach der anderen, reihum durch die Modelle). Sind
  *             beide da, nimmt der Lauf Claude. Ohne Schlüssel fällt Lidl aus,
  *             der Rest läuft. Ein Prospekt, der beim letzten Lauf schon ganz
@@ -276,9 +276,10 @@ const LIDL_SEITEN_MAX = 48; // höchstens so viele Seiten je Prospekt
 const LIDL_ZEIT = 28 * 60e3; // danach nichts mehr anfragen (der Lauf darf 45 Minuten)
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_ZEIT = 60000; // je Anfrage; ein gesundes Modell braucht für vier Seiten 3–15 s
-// Claude: das Modell der App (Fable 5.1) zuerst, bei Überlastung Sonnet 5.5; anderes
-// Modell über CLAUDE_MODELL (Variable in der Action). Gestreamt, darum darf eine
-// Anfrage lange dauern – Fable schreibt sechs volle Seiten in ein bis zwei Minuten.
+// Claude: das Modell der App (Opus 5.5, mit Fable 5.2 als Berater) zuerst, bei
+// Überlastung Sonnet 5.5; anderes Modell über CLAUDE_MODELL (Variable in der
+// Action). Gestreamt, darum darf eine Anfrage lange dauern – sechs volle Seiten
+// dauern ein bis zwei Minuten, mit Rückfrage beim Berater auch länger.
 const CLAUDE_MODELLE = [...new Set([process.env.CLAUDE_MODELL || ANBIETER.anthropic.modell, 'claude-sonnet-5-5'])];
 const CLAUDE_ZEIT = 8 * 60e3; // je Anfrage, mit allem Streamen
 const CLAUDE_NEBENEINANDER = 3; // so viele Stapel zugleich (kein Gratis-Kontingent, das Anfragen je Minute zählt)
@@ -523,7 +524,7 @@ export async function lidlStapelLesen(stapel, { von, bis, anfragen, melde = () =
  * Welche KI den Prospekt liest: Claude, wenn ANTHROPIC_API_KEY da ist, sonst
  * Gemini mit GEMINI_KEY – oder keine. Bei Gemini kommt das Modell zuerst, das
  * beim letzten Lauf geantwortet hat (das neueste ist im Gratis-Kontingent oft
- * überlastet); bei Claude bleibt die Reihenfolge, Fable soll es sein.
+ * überlastet); bei Claude bleibt die Reihenfolge, Opus soll es sein.
  */
 export function lidlKi({ anthropic = ANTHROPIC_KEY, gemini = GEMINI_KEY, zuletzt = '' } = {}) {
   if (anthropic) return { anbieter: 'anthropic', schluessel: anthropic, modelle: [...CLAUDE_MODELLE], anfragen: claudeAnfragen, rumpfBauen: claudeRumpf, nebeneinander: CLAUDE_NEBENEINANDER, pause: CLAUDE_PAUSE };

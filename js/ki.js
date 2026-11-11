@@ -8,8 +8,9 @@
  *             die Anfragen zum Verbessern seiner Produkte nutzen. Das ist der
  *             normale Weg. AI Studio gibt seit Mai 2026 nur noch Schlüssel
  *             mit „AQ.“ aus (Auth Keys); die älteren „AIza“ gehen weiter.
- *   sk-ant-…  Anthropic, Messages-API (claude-fable-5-1, das stärkste Modell),
- *             etwa 30 Cent pro Rezept vom Guthaben der Console – bei einem
+ *   sk-ant-…  Anthropic, Messages-API (claude-opus-5-5, Aufwand mittel, mit
+ *             claude-fable-5-2 als Berater, den Opus bei Bedarf fragt – siehe
+ *             mitBerater; beim großen Rezept-Schema ohne), etwa 15–20 Cent pro Rezept vom Guthaben der Console – bei einem
  *             Claude-Abo Max oder Ultra aus dessen Monatsguthaben (100 bzw. 200 $
  *             im Monat), sonst
  *             gekauft. Der Kopf „anthropic-dangerous-direct-browser-access“
@@ -47,11 +48,64 @@ export const ANBIETER = {
   },
   anthropic: {
     name: 'Anthropic',
-    modell: 'claude-fable-5-1',
+    modell: 'claude-opus-5-5',
     api: 'https://api.anthropic.com/v1/messages',
-    preis: { ein: 10, aus: 50 }, // US-Dollar pro Million Tokens (Fable 5.1)
+    preis: { ein: 4, aus: 20 }, // US-Dollar pro Million Tokens (Opus 5.5)
+    berater: { modell: 'claude-fable-5-2', preis: { ein: 8, aus: 40 } }, // Fable 5.2
   },
 };
+
+/*
+ * Der Berater: Opus kann bei schwierigen Stellen Fable 5.2 um Rat fragen
+ * (Advisor-Werkzeug, Beta advisor-tool-2026-03-01), so oft es will. Wann,
+ * entscheidet Opus selbst; erzwingen lässt es sich bei Opus 5.5 nicht, darum
+ * ein Satz im Systemtext. Der Rat kommt verschlüsselt und steht nur in den
+ * Blöcken der Antwort; das Rezept-JSON kommt wie bisher als Text danach.
+ * Gedeckelt ist das über das Guthaben, nicht über eine Zahl.
+ */
+export const BERATER = { type: 'advisor_20260301', name: 'advisor', model: ANBIETER.anthropic.berater.modell };
+export const BETA_BERATER = 'advisor-tool-2026-03-01';
+export const BERATER_HINWEIS = 'Du hast einen Berater, das Werkzeug advisor, ein noch stärkeres Modell. Frag ihn, wenn gründliches Nachdenken das Ergebnis spürbar besser macht; für Einfaches brauchst du ihn nicht.';
+
+/*
+ * Ein großes Schema verträgt sich nicht mit dem Berater: Mit dem Rezept-Schema
+ * lehnt die API ab („The compiled grammar is too large“), ohne Berater nimmt
+ * sie es an. Dann geht dieselbe Anfrage ohne Berater noch einmal, und für
+ * dieses Schema fragt die App danach gleich ohne (bis zum Neuladen).
+ * Prospekt, Speisekarte, Nährwerte und Import gehen mit Berater (geprüft im
+ * November 2026).
+ */
+const OHNE_BERATER = new Set();
+const schemaVon = (rumpf) => JSON.stringify(rumpf.output_config?.format?.schema ?? null);
+export const grammatikZuGross = (status, text) => status === 400 && /grammar is too large/i.test(String(text || ''));
+
+/** Der Rumpf für Claude mit Berater und Aufwand „mittel“ – für jede Anfrage an Anthropic. Mit berater: false nur der Aufwand. */
+export function mitBerater(rumpf, { berater = true } = {}) {
+  if (!berater) return { ...rumpf, output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
+  if ((rumpf.tools || []).some((t) => t?.type === BERATER.type)) return rumpf;
+  const system = typeof rumpf.system === 'string'
+    ? `${rumpf.system}\n\n${BERATER_HINWEIS}`
+    : Array.isArray(rumpf.system) ? [...rumpf.system, { type: 'text', text: BERATER_HINWEIS }] : BERATER_HINWEIS;
+  return { ...rumpf, system, tools: [...(rumpf.tools || []), BERATER], output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
+}
+
+/** Die Köpfe für einen Aufruf von Anthropic aus dem Browser. */
+const claudeKoepfe = (schluessel) => ({
+  'content-type': 'application/json',
+  'x-api-key': schluessel,
+  'anthropic-version': '2026-10-21',
+  'anthropic-beta': BETA_BERATER,
+  'anthropic-dangerous-direct-browser-access': 'true',
+});
+
+/** Was der Berater verbraucht hat (usage.iterations, advisor_message) – zum Dazurechnen. */
+function beraterVerbrauch(usage, ziel) {
+  for (const it of usage?.iterations || []) {
+    if (it?.type !== 'advisor_message') continue;
+    ziel.beraterEin = (ziel.beraterEin || 0) + (Number(it.input_tokens) || 0) + (Number(it.cache_creation_input_tokens) || 0) + (Number(it.cache_read_input_tokens) || 0);
+    ziel.beraterAus = (ziel.beraterAus || 0) + (Number(it.output_tokens) || 0);
+  }
+}
 /** Welcher Anbieter zu einem Schlüssel gehört – oder '' für keinen. */
 export const anbieterVon = (schluessel) => (/^(?:AQ\.|AIza)/.test(String(schluessel || '')) ? 'gemini' : /^sk-ant-/.test(String(schluessel || '')) ? 'anthropic' : '');
 export const KI_API = ANBIETER.anthropic.api;
@@ -254,11 +308,12 @@ export function artVonStatus(status, info) {
   return 'antwort';
 }
 
-/** Ungefähre Kosten einer Anfrage in Cent (US-Dollar ≈ Euro); 0 bei Gemini. */
+/** Ungefähre Kosten einer Anfrage in Cent (US-Dollar ≈ Euro); 0 bei Gemini. Der Berater zum eigenen Preis. */
 export function kostenCent(usage, anbieter = 'anthropic') {
   const preis = ANBIETER[anbieter]?.preis;
   if (!preis) return 0;
-  return ((usage.ein || 0) * preis.ein + (usage.aus || 0) * preis.aus) / 1e4;
+  const b = ANBIETER[anbieter]?.berater?.preis || { ein: 0, aus: 0 };
+  return ((usage.ein || 0) * preis.ein + (usage.aus || 0) * preis.aus + (usage.beraterEin || 0) * b.ein + (usage.beraterAus || 0) * b.aus) / 1e4;
 }
 
 /*
@@ -271,18 +326,21 @@ export function kostenCent(usage, anbieter = 'anthropic') {
  * Der Anbieter ergibt sich aus dem Schlüssel; `api` übersteuert die Adresse
  * (für die Tests).
  */
-export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiFortschritt = () => {}, roh: alsText = false }) {
+export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiFortschritt = () => {}, roh: alsText = false, fortsetzung = null, berater = !OHNE_BERATER.has(schemaVon(rumpf)) }) {
   const anbieter = anbieterVon(schluessel) || 'anthropic';
   const gemini = anbieter === 'gemini';
   const fehler = (art, detail) => kiFehler(art, detail, anbieter);
+  // Nach pause_turn: die angefangene Antwort unverändert anhängen, der Server macht dort weiter
+  const vorher = fortsetzung || { bloecke: [], json: '', usage: { ein: 0, aus: 0 }, runde: 0 };
+  const nachrichten = vorher.bloecke.length ? [...rumpf.messages, { role: 'assistant', content: vorher.bloecke }] : rumpf.messages;
   let res;
   try {
     res = await fetch(api || ANBIETER[anbieter].api, {
       method: 'POST',
       headers: gemini
         ? { 'content-type': 'application/json', 'x-goog-api-key': schluessel }
-        : { 'content-type': 'application/json', 'x-api-key': schluessel, 'anthropic-version': '2026-10-21', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify(gemini ? rumpf : { ...rumpf, stream: true }),
+        : claudeKoepfe(schluessel),
+      body: JSON.stringify(gemini ? rumpf : { ...mitBerater(rumpf, { berater }), messages: nachrichten, stream: true }),
       signal,
     });
   } catch (e) {
@@ -299,16 +357,24 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       delete ohne.thinking_level;
       return kiAnfragen({ ...rumpf, generation_config: ohne }, { schluessel, api, signal, beiFortschritt, roh: alsText });
     }
+    // Schema zu groß für den Berater: dieselbe Anfrage ohne ihn, und künftig gleich ohne
+    if (!gemini && berater && grammatikZuGross(res.status, text)) {
+      OHNE_BERATER.add(schemaVon(rumpf));
+      return kiAnfragen(rumpf, { schluessel, api, signal, beiFortschritt, roh: alsText, fortsetzung, berater: false });
+    }
     throw fehler(artVonStatus(res.status, info), text);
   }
   if (!res.body?.getReader) throw fehler('antwort', 'kein Datenstrom');
 
   const leser = res.body.getReader();
   const dekoder = new TextDecoder();
-  const usage = { ein: 0, aus: 0 };
+  const usage = { ...vorher.usage };
+  const einVorher = usage.ein || 0;
+  const ausVorher = usage.aus || 0;
+  const bloecke = []; // die Blöcke dieser Antwort, für eine Fortsetzung nach pause_turn
   let puffer = '';
-  let json = '';
-  let werkzeug = gemini;
+  let json = vorher.json;
+  let werkzeug = gemini || !!vorher.json;
   let stopp = null;
   let grund = '';
   // schritte: so viele Schritte sind schon geschrieben; gerichte: so viele Gerichte einer Speisekarte (speisekarte.js)
@@ -342,20 +408,40 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     if (gemini) { verarbeiteGemini(ev); return; }
     switch (ev.type) {
       case 'message_start':
-        usage.ein = Number(ev.message?.usage?.input_tokens) || 0;
+        usage.ein = einVorher + (Number(ev.message?.usage?.input_tokens) || 0);
         return;
-      case 'content_block_start':
-        if (ev.content_block?.type === 'tool_use' || ev.content_block?.type === 'text') werkzeug = true;
+      case 'content_block_start': {
+        const b = { ...(ev.content_block || {}) };
+        bloecke[ev.index ?? bloecke.length] = b;
+        if (b.type === 'tool_use' || b.type === 'text') werkzeug = true;
         return;
-      case 'content_block_delta':
-        if (ev.delta?.type === 'input_json_delta' || ev.delta?.type === 'text_delta') {
-          json += ev.delta?.type === 'text_delta' ? ev.delta.text || '' : ev.delta.partial_json || '';
+      }
+      case 'content_block_delta': {
+        const b = bloecke[ev.index];
+        const d = ev.delta || {};
+        if (b && d.type === 'text_delta') b.text = (b.text || '') + (d.text || '');
+        if (b && d.type === 'thinking_delta') b.thinking = (b.thinking || '') + (d.thinking || '');
+        if (b && d.type === 'signature_delta') b.signature = d.signature;
+        if (b && d.type === 'input_json_delta') b.eingabeTeile = (b.eingabeTeile || '') + (d.partial_json || '');
+        // Das Rezept: Text, oder die Eingabe eines eigenen Werkzeugs – nicht die eines Server-Werkzeugs wie des Beraters
+        if (d.type === 'text_delta' || (d.type === 'input_json_delta' && (!b || b.type === 'tool_use'))) {
+          json += d.type === 'text_delta' ? d.text || '' : d.partial_json || '';
           fortschritt();
         }
         return;
+      }
+      case 'content_block_stop': {
+        const b = bloecke[ev.index];
+        if (b && 'eingabeTeile' in b) {
+          try { b.input = JSON.parse(b.eingabeTeile || '{}'); } catch { b.input = {}; }
+          delete b.eingabeTeile;
+        }
+        return;
+      }
       case 'message_delta':
         stopp = ev.delta?.stop_reason || stopp;
-        usage.aus = Number(ev.usage?.output_tokens) || usage.aus;
+        usage.aus = ausVorher + (Number(ev.usage?.output_tokens) || 0);
+        beraterVerbrauch(ev.usage, usage);
         return;
       case 'error':
         throw fehler(/overloaded/i.test(ev.error?.type || '') ? 'ueberlastet' : 'antwort', ev.error?.message);
@@ -373,6 +459,14 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     }
   }
   if (puffer.trim()) verarbeite(puffer);
+  // Der Server hat pausiert (etwa nach vielen Rückfragen beim Berater): fortsetzen, höchstens viermal
+  if (!gemini && stopp === 'pause_turn') {
+    if (vorher.runde >= 4) throw fehler('antwort', 'zu oft pausiert');
+    return kiAnfragen(rumpf, {
+      schluessel, api, signal, beiFortschritt, roh: alsText, berater,
+      fortsetzung: { bloecke: [...vorher.bloecke, ...bloecke.filter(Boolean)], json, usage, runde: vorher.runde + 1 },
+    });
+  }
   if (stopp === 'max_tokens' || stopp === 'MAX_TOKENS') throw fehler('zulang', grund || `${json.length} Zeichen`);
   if (stopp === 'refusal') throw fehler('sicherheit', stopp);
   if (gemini && stopp && /safety|prohibited|blocklist|recitation|block/i.test(stopp)) throw fehler('sicherheit', stopp);
@@ -410,8 +504,8 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
     try {
       res = await fetch(api || ANBIETER.anthropic.api, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-api-key': schluessel, 'anthropic-version': '2026-10-21', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ ...rumpf, messages }),
+        headers: claudeKoepfe(schluessel),
+        body: JSON.stringify({ ...mitBerater(rumpf), messages }),
         signal,
       });
     } catch (e) {
@@ -434,6 +528,7 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
     usage.ein += Number(info?.usage?.input_tokens) || 0;
     usage.aus += Number(info?.usage?.output_tokens) || 0;
     usage.suchen += Number(info?.usage?.server_tool_use?.web_search_requests) || 0;
+    beraterVerbrauch(info?.usage, usage);
     const bloecke = Array.isArray(info?.content) ? info.content : [];
     for (const b of bloecke) {
       if (b?.type === 'web_search_tool_result' && Array.isArray(b.content)) {
