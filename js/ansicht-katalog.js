@@ -201,17 +201,16 @@ function leiste(r) {
   const v = r.katalog || {};
   const wer = v.by ? ` von ${v.by === app.name() ? 'dir' : esc(v.by)}` : '';
   const wann = v.at && !Number.isNaN(Date.parse(v.at)) ? `, ${esc(tagKurz(heute(new Date(v.at))))}` : '';
-  const gleich = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
-  const wunsch = v.wunsch && !gleich(v.wunsch, r.name) ? `<p class="kat-wunsch">„${esc(v.wunsch.length > 160 ? `${v.wunsch.slice(0, 157)}…` : v.wunsch)}“</p>` : '';
+  // Was jemand der KI geschrieben hat, steht nicht da – nur, von wem und wann
   const z = app.ziel;
   const daneben = Math.abs(r.m.kcal - z.kcal) > 15 || Math.abs(r.m.p - z.p) > 2 || Math.abs(r.m.kh - z.kh) > 3 || Math.abs(r.m.f - z.f) > 2;
   const warn = daneben ? '<p class="ki-warn">Mit diesen Zutaten trifft die Box das Ziel nicht ganz, siehe die Nährwerte oben.</p>' : '';
   const hinweis = r.ki?.hinweis ? `<p class="ki-hinweis">${esc(r.ki.hinweis)}</p>` : '';
-  // Was beim Anpassen geändert wurde – mit dem Wunsch dafür („Tomaten und Brokkoli statt Paprika“)
+  // Was beim Anpassen geändert wurde – ohne den Wunsch dafür
   const anp = r.ki?.geaendert?.length ? `<p class="ki-anp"><b>Geändert:</b> ${r.ki.geaendert.map(esc).join(' · ')}</p>` : '';
   const aus = app.listeDa ? '' : ' disabled';
   const knoepfe = `${ladeKi() ? `<button type="button" class="btn" data-act="kat-neu"${aus}>Neuer Vorschlag</button>` : ''}<button type="button" class="btn btn-quiet" data-act="kat-weg"${aus}>Aus dem Katalog nehmen</button>`;
-  return `<p class="ki-k"><b>Aus dem Katalog</b> · gewünscht${wer}${wann}</p>${wunsch}${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>
+  return `<p class="ki-k"><b>Aus dem Katalog</b> · gewünscht${wer}${wann}</p>${anp}${warn}${hinweis}<div class="ki-btns">${knoepfe}</div>
 <p class="fine">Für alle, die die App nutzen – jede Liste bekommt es auf ihr Ziel pro Box und ihre Boxen gerechnet.</p>`;
 }
 

@@ -962,7 +962,6 @@ a.btn{text-decoration:none;color:inherit}
 .pill-ki{background:var(--accent-soft);color:var(--accent);border-color:transparent}
 /* Neu im gemeinsamen Katalog (ansicht-katalog.js) */
 .pill-neu{background:var(--accent);color:var(--accent-ink);border-color:transparent}
-.kat-wunsch{margin-top:6px;font-size:13.5px;line-height:1.45;font-style:italic;color:var(--muted)}
 .ki-leiste{margin-top:14px;padding:12px 14px 13px;border-radius:14px;background:var(--surface);border:1.5px dashed var(--accent)}
 .ki-k{font-size:13.5px;color:var(--muted)}
 .ki-k b{color:var(--ink)}

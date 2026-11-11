@@ -1075,7 +1075,8 @@ mit 180 g Hähnchen.
 
 Im Raster stehen neue Rezepte vorn, zwei Wochen lang mit „Neu · von Tobi“,
 und der Chip **„Neu dazu“** zeigt alle aus dem Katalog. Im Rezept die Leiste:
-wer es sich wann gewünscht hat und was, **Neuer Vorschlag** (derselbe
+wer es sich wann gewünscht hat (der Wunsch selbst steht nicht da – nur
+in katalog.json für den nächsten Vorschlag), **Neuer Vorschlag** (derselbe
 Wunsch, „diesmal anders als“ das bisherige – es ersetzt das alte) und **Aus
 dem Katalog nehmen** (für alle; was davon auf der eigenen Liste steht, geht
 mit, „Rückgängig“ holt beides zurück). Anpassen und „Mit KI ändern“ ändern

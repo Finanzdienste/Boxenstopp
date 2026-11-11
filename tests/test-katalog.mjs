@@ -137,7 +137,7 @@ check((await t.locator('#r-eyebrow').textContent()) === '50 Rezepte · je 8 Boxe
 await t.click('#browse [data-act="wunsch"]');
 check(await t.locator('#reste').isVisible() && (await t.locator('#k-titel').innerText()) === 'Was möchtest du kochen?' && (await t.locator('#reste .d-desc').innerText()).includes('gemeinsamen Katalog'), '„Neues Rezept“: Was möchtest du kochen? – es kommt in den gemeinsamen Katalog');
 check(await t.locator('#k-kaufen').count() === 0 && await t.locator('#k-kamera').count() === 0 && await t.locator('[data-portionen]').count() === 0, 'Nur der Wunsch: keine Fotos, kein Dazukaufen, keine Portionen (der Katalog hat 8, jede Liste rechnet um)');
-await t.fill('#k-text', 'Kürbissuppe');
+await t.fill('#k-text', 'Kürbissuppe, aber bitte richtig cremig');
 await t.click('#k-los');
 check(await bis(async () => (await t.locator('#d-title').count()) === 1 && (await t.locator('#d-title').innerText()) === SUPPE.name, 10000), 'Die Kürbissuppe öffnet');
 const anfrage = anfragen.at(-1);
@@ -145,10 +145,10 @@ check(anfragen.length === 1 && anfrage.input[0].text.startsWith('Der Wunsch:\nK�
 check(await bis(() => Object.keys(kat(haupt).rezepte).length === 1), 'In eurer katalog.json steht sie');
 const [id1] = Object.keys(kat(haupt).rezepte);
 const e1 = kat(haupt).rezepte[id1];
-check(/^kat-/.test(id1) && e1.wunsch === 'Kürbissuppe' && e1.by === 'Tobi' && e1.ziel.kcal === 443 && e1.k.portionen === 8 && haupt.zustand.nachrichten.includes('Tobi: Katalog – „Kürbissuppe“ dazu'), 'Mit Wunsch, von wem, Ziel, 8 Portionen – Commit „Tobi: Katalog – „Kürbissuppe“ dazu“');
+check(/^kat-/.test(id1) && e1.wunsch === 'Kürbissuppe, aber bitte richtig cremig' && e1.by === 'Tobi' && e1.ziel.kcal === 443 && e1.k.portionen === 8 && haupt.zustand.nachrichten.includes('Tobi: Katalog – „Kürbissuppe“ dazu'), 'Mit Wunsch, von wem, Ziel, 8 Portionen – Commit „Tobi: Katalog – „Kürbissuppe“ dazu“');
 check(await bis(() => !!kat(mar).rezepte[id1], 8000) && mar.zustand.nachrichten.some((x) => x.startsWith('Tobi: Katalog abgeglichen – Kürbissuppe dazu')), 'Tobis Handy gleicht ab: Sie steht auch in Marielles katalog.json');
 let leiste = await t.locator('#d-ki').innerText();
-check(leiste.includes('Aus dem Katalog') && leiste.includes('gewünscht von dir') && leiste.includes('Für alle, die die App nutzen') && leiste.includes('Neuer Vorschlag') && leiste.includes('Aus dem Katalog nehmen'), 'Im Rezept: „Aus dem Katalog · gewünscht von dir“, Neuer Vorschlag, Aus dem Katalog nehmen');
+check(leiste.includes('Aus dem Katalog') && leiste.includes('gewünscht von dir') && leiste.includes('Für alle, die die App nutzen') && leiste.includes('Neuer Vorschlag') && leiste.includes('Aus dem Katalog nehmen') && !leiste.includes('richtig cremig'), 'Im Rezept: „Aus dem Katalog · gewünscht von dir“ (ohne den Wunsch), Neuer Vorschlag, Aus dem Katalog nehmen');
 check((await t.locator('#detail').innerText()).includes('Hähnchen und Baguette sind dazugekommen'), 'Was die KI fürs Ziel dazugenommen hat, steht dabei');
 // Im Raster: vorn, „Neu · von dir“, „Neu dazu“
 await t.click('#detail [data-act="zurueck"]');
@@ -183,7 +183,7 @@ await t.click('#anp-ki-los');
 check(await bis(async () => (await t.locator('#d-anpassen .ki-anp').innerText().catch(() => '')).includes('Kokosmilch light weggelassen'), 10000) && !(await t.locator('#d-anpassen').innerText()).includes('ohne Kokosmilch'), 'die KI hat geändert – was man ihr geschrieben hat, steht nicht da');
 check((await t.locator('#d-anpassen .anp-btns [data-act="anp-speichern"]').innerText()) === 'Speichern, für alle' && (await t.locator('#d-anpassen .anp-btns + .fine').innerText()).includes('ändert das Rezept selbst'), 'beim Katalogrezept: „Speichern, für alle“ – es ändert das Rezept selbst');
 await t.click('[data-act="anp-speichern"]');
-check(await bis(() => { const e = kat(haupt).rezepte[id2]; return Object.keys(kat(haupt).rezepte).length === 1 && e?.k.name === OHNE_KOKOS_NAME && e.at > vorAt && e.wunsch === 'Kürbissuppe' && e.by === 'Tobi' && !JSON.stringify(e.k).includes('ohne Kokosmilch') && e.k.geaendert.includes('Kokosmilch light weggelassen') && !e.k.zutaten.some((z) => /kokosmilch/i.test(z.name)); }, 10000), 'in katalog.json: dieselbe id, neu, ohne Kokosmilch – Wunsch und wer bleiben, der Prompt steht nirgends');
+check(await bis(() => { const e = kat(haupt).rezepte[id2]; return Object.keys(kat(haupt).rezepte).length === 1 && e?.k.name === OHNE_KOKOS_NAME && e.at > vorAt && e.wunsch === 'Kürbissuppe, aber bitte richtig cremig' && e.by === 'Tobi' && !JSON.stringify(e.k).includes('ohne Kokosmilch') && e.k.geaendert.includes('Kokosmilch light weggelassen') && !e.k.zutaten.some((z) => /kokosmilch/i.test(z.name)); }, 10000), 'in katalog.json: dieselbe id, neu, ohne Kokosmilch – Wunsch und wer bleiben, der Prompt steht nirgends');
 check(!Object.keys(gh(haupt).ki || {}).length && haupt.zustand.nachrichten.includes('Tobi: Katalog – „Kürbissuppe“ geändert'), 'kein zweites Rezept daneben; Commit „… geändert“');
 check(await bis(async () => (await t.locator('#d-title').innerText().catch(() => '')) === OHNE_KOKOS_NAME && (await t.locator('#d-ki').innerText()).includes('Kokosmilch light weggelassen') && !(await t.locator('#d-ki').innerText()).includes('ohne Kokosmilch') && (await t.locator('#d-ki').innerText()).includes('Ohne Kokosmilch – die Suppe wird nur püriert.')), 'offen: die geänderte Suppe, was sich geändert hat und der Hinweis der KI – ohne den Prompt');
 check(await bis(() => !gh(haupt).items?.['ki-kokosmilch']?.parts?.[id2] && !!gh(haupt).items?.zwiebeln?.parts?.[id2], 8000), 'auf der Liste: die Kokosmilch ist runter, der Rest bleibt');
