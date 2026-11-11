@@ -50,8 +50,9 @@ export const ANBIETER = {
     name: 'Anthropic',
     modell: 'claude-opus-5-5',
     api: 'https://api.anthropic.com/v1/messages',
-    preis: { ein: 4, aus: 20 }, // US-Dollar pro Million Tokens (Opus 5.5)
-    berater: { modell: 'claude-fable-5-2', preis: { ein: 8, aus: 40 } }, // Fable 5.2
+    // US-Dollar pro Million Tokens (Opus 5.5); aus dem Zwischenspeicher lesen kostet ein Zwanzigstel, hineinschreiben 1,25-mal
+    preis: { ein: 4, aus: 20, cacheLesen: 0.2, cacheSchreiben: 5 },
+    berater: { modell: 'claude-fable-5-2', preis: { ein: 8, aus: 40, cacheLesen: 0.2, cacheSchreiben: 10 } }, // Fable 5.2
   },
 };
 
@@ -63,7 +64,7 @@ export const ANBIETER = {
  * Blöcken der Antwort; das Rezept-JSON kommt wie bisher als Text danach.
  * Gedeckelt ist das über das Guthaben, nicht über eine Zahl.
  */
-export const BERATER = { type: 'advisor_20260301', name: 'advisor', model: ANBIETER.anthropic.berater.modell };
+export const BERATER = { type: 'advisor_20260301', name: 'advisor', model: ANBIETER.anthropic.berater.modell, caching: { type: 'ephemeral', ttl: '5m' } };
 export const BETA_BERATER = 'advisor-tool-2026-03-01';
 export const BERATER_HINWEIS = 'Du hast einen Berater, das Werkzeug advisor, ein noch stärkeres Modell. Frag ihn, wenn gründliches Nachdenken das Ergebnis spürbar besser macht; für Einfaches brauchst du ihn nicht.';
 
@@ -79,14 +80,24 @@ const OHNE_BERATER = new Set();
 const schemaVon = (rumpf) => JSON.stringify(rumpf.output_config?.format?.schema ?? null);
 export const grammatikZuGross = (status, text) => status === 400 && /grammar is too large/i.test(String(text || ''));
 
-/** Der Rumpf für Claude mit Berater und Aufwand „mittel“ – für jede Anfrage an Anthropic. Mit berater: false nur der Aufwand. */
+/*
+ * Prompt Caching: Systemtext, Schema, Katalog und Fotos sind bei
+ * Wiederholungen, Fortsetzungen (pause_turn) und Suchrunden gleich. Mit
+ * cache_control oben im Rumpf legt die API den Anfang der Anfrage 5 Minuten
+ * in den Zwischenspeicher (ab 512 Tokens); jede weitere Anfrage mit
+ * demselben Anfang liest ihn für ein Zwanzigstel des Preises.
+ */
+export const ZWISCHENSPEICHER = { type: 'ephemeral' };
+
+/** Der Rumpf für Claude mit Berater, Aufwand „mittel“ und Zwischenspeicher – für jede Anfrage an Anthropic. Mit berater: false ohne Berater. */
 export function mitBerater(rumpf, { berater = true } = {}) {
-  if (!berater) return { ...rumpf, output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
-  if ((rumpf.tools || []).some((t) => t?.type === BERATER.type)) return rumpf;
+  const cache_control = rumpf.cache_control || ZWISCHENSPEICHER;
+  if (!berater) return { ...rumpf, cache_control, output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
+  if ((rumpf.tools || []).some((t) => t?.type === BERATER.type)) return rumpf.cache_control ? rumpf : { ...rumpf, cache_control };
   const system = typeof rumpf.system === 'string'
     ? `${rumpf.system}\n\n${BERATER_HINWEIS}`
     : Array.isArray(rumpf.system) ? [...rumpf.system, { type: 'text', text: BERATER_HINWEIS }] : BERATER_HINWEIS;
-  return { ...rumpf, system, tools: [...(rumpf.tools || []), BERATER], output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
+  return { ...rumpf, system, tools: [...(rumpf.tools || []), BERATER], cache_control, output_config: { ...(rumpf.output_config || {}), effort: 'medium' } };
 }
 
 /** Die Köpfe für einen Aufruf von Anthropic aus dem Browser. */
@@ -102,9 +113,17 @@ const claudeKoepfe = (schluessel) => ({
 function beraterVerbrauch(usage, ziel) {
   for (const it of usage?.iterations || []) {
     if (it?.type !== 'advisor_message') continue;
-    ziel.beraterEin = (ziel.beraterEin || 0) + (Number(it.input_tokens) || 0) + (Number(it.cache_creation_input_tokens) || 0) + (Number(it.cache_read_input_tokens) || 0);
+    ziel.beraterEin = (ziel.beraterEin || 0) + (Number(it.input_tokens) || 0);
+    ziel.beraterCacheLesen = (ziel.beraterCacheLesen || 0) + (Number(it.cache_read_input_tokens) || 0);
+    ziel.beraterCacheSchreiben = (ziel.beraterCacheSchreiben || 0) + (Number(it.cache_creation_input_tokens) || 0);
     ziel.beraterAus = (ziel.beraterAus || 0) + (Number(it.output_tokens) || 0);
   }
+}
+
+/** Was aus dem Zwischenspeicher kam und was hineinging (usage von Anthropic) – zum Dazurechnen. */
+function cacheVerbrauch(usage, ziel) {
+  ziel.cacheLesen = (ziel.cacheLesen || 0) + (Number(usage?.cache_read_input_tokens) || 0);
+  ziel.cacheSchreiben = (ziel.cacheSchreiben || 0) + (Number(usage?.cache_creation_input_tokens) || 0);
 }
 /** Welcher Anbieter zu einem Schlüssel gehört – oder '' für keinen. */
 export const anbieterVon = (schluessel) => (/^(?:AQ\.|AIza)/.test(String(schluessel || '')) ? 'gemini' : /^sk-ant-/.test(String(schluessel || '')) ? 'anthropic' : '');
@@ -308,12 +327,14 @@ export function artVonStatus(status, info) {
   return 'antwort';
 }
 
-/** Ungefähre Kosten einer Anfrage in Cent (US-Dollar ≈ Euro); 0 bei Gemini. Der Berater zum eigenen Preis. */
+/** Ungefähre Kosten einer Anfrage in Cent (US-Dollar ≈ Euro); 0 bei Gemini. Der Berater zum eigenen Preis, der Zwischenspeicher zu seinem. */
 export function kostenCent(usage, anbieter = 'anthropic') {
   const preis = ANBIETER[anbieter]?.preis;
   if (!preis) return 0;
-  const b = ANBIETER[anbieter]?.berater?.preis || { ein: 0, aus: 0 };
-  return ((usage.ein || 0) * preis.ein + (usage.aus || 0) * preis.aus + (usage.beraterEin || 0) * b.ein + (usage.beraterAus || 0) * b.aus) / 1e4;
+  const b = ANBIETER[anbieter]?.berater?.preis || {};
+  const teil = (menge, p) => (Number(menge) || 0) * (p || 0);
+  return (teil(usage.ein, preis.ein) + teil(usage.aus, preis.aus) + teil(usage.cacheLesen, preis.cacheLesen) + teil(usage.cacheSchreiben, preis.cacheSchreiben)
+    + teil(usage.beraterEin, b.ein) + teil(usage.beraterAus, b.aus) + teil(usage.beraterCacheLesen, b.cacheLesen) + teil(usage.beraterCacheSchreiben, b.cacheSchreiben)) / 1e4;
 }
 
 /*
@@ -409,6 +430,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     switch (ev.type) {
       case 'message_start':
         usage.ein = einVorher + (Number(ev.message?.usage?.input_tokens) || 0);
+        cacheVerbrauch(ev.message?.usage, usage);
         return;
       case 'content_block_start': {
         const b = { ...(ev.content_block || {}) };
@@ -527,6 +549,7 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
     }
     usage.ein += Number(info?.usage?.input_tokens) || 0;
     usage.aus += Number(info?.usage?.output_tokens) || 0;
+    cacheVerbrauch(info?.usage, usage);
     usage.suchen += Number(info?.usage?.server_tool_use?.web_search_requests) || 0;
     beraterVerbrauch(info?.usage, usage);
     const bloecke = Array.isArray(info?.content) ? info.content : [];

@@ -212,6 +212,17 @@ const mitWerkzeug = mitBerater({ system: 's', tools: [{ type: 'web_search_202503
 check(mitWerkzeug.tools.map((t) => t.name).join() === 'web_search,advisor' && mitBerater(mitWerkzeug) === mitWerkzeug && mitBerater({ system: [{ type: 'text', text: 'a' }] }).system.at(-1).text === BERATER_HINWEIS && !('tools' in anfrageBauen({ portionen: 4, ziel: { kcal: 600, p: 45, kh: 60, f: 18 }, katalog: {}, text: 'x' })),
   'mitBerater hängt den Berater an vorhandene Werkzeuge, nur einmal, auch bei system als Liste; der Rumpf selbst bleibt ohne');
 check(kostenCent({ ein: 0, aus: 0, beraterEin: 10000, beraterAus: 1000 }) === 12, 'Kosten: Berater mit Fables Preis (8 $ / 40 $)');
+// Prompt Caching: jede Anfrage mit cache_control oben, der Berater mit eigenem Zwischenspeicher
+check(gesendet.cache_control?.type === 'ephemeral' && gesendet.tools[0].caching?.type === 'ephemeral' && mitBerater({ system: 's' }, { berater: false }).cache_control?.type === 'ephemeral' && mitBerater(mitWerkzeug).cache_control === mitWerkzeug.cache_control && !('cache_control' in anfrageBauen({ portionen: 4, ziel: { kcal: 600, p: 45, kh: 60, f: 18 }, katalog: {}, text: 'x' })),
+  'Zwischenspeicher: cache_control im Rumpf (auch ohne Berater), der Berater speichert selbst, der gebaute Rumpf bleibt ohne');
+check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6, beraterCacheLesen: 1e6, beraterCacheSchreiben: 1e6 }) - (20 + 500 + 20 + 1000)) < 1e-9,
+  'Kosten: aus dem Zwischenspeicher 0,20 $, hinein 5 $ (Opus) bzw. 10 $ (Fable) je Million');
+{
+  const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
+  const strom = STROM(JSON.stringify(ANTWORT)).replace(/^event: message_start\n.*\n\n/, ev({ type: 'message_start', message: { usage: { input_tokens: 50, cache_read_input_tokens: 2900, cache_creation_input_tokens: 0, output_tokens: 1 } } }));
+  const r = await mitFetch(() => new Response(strom, { status: 200 }), () => kiAnfragen(rumpf, { schluessel: 'sk-ant-test' }));
+  check(r.usage.ein === 50 && r.usage.cacheLesen === 2900 && r.usage.cacheSchreiben === 0, `Strom: Treffer im Zwischenspeicher werden gezählt (${JSON.stringify(r.usage)})`);
+}
 // pause_turn mitten im Strom: die angefangene Antwort geht unverändert zurück, dann kommt das Rezept
 {
   const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
