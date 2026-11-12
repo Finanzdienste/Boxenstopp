@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-09T13:01:25.134Z",
+ "stand": "2026-11-12T12:54:26.421Z",
  "woche": "2026-46",
  "gesperrt": [
   "Rewe",
@@ -9,16 +9,16 @@
   {
    "laden": "Aldi",
    "ok": true,
-   "anzahl": 210,
-   "hinweis": "Aldi Nord, bundesweit, mit Vorschau auf nächste Woche (108)",
-   "stand": "2026-11-09T13:00:29.474Z"
+   "anzahl": 215,
+   "hinweis": "Aldi Nord, bundesweit, mit Vorschau auf nächste Woche (110)",
+   "stand": "2026-11-12T12:54:18.270Z"
   },
   {
    "laden": "Lidl",
    "ok": true,
    "anzahl": 57,
-   "hinweis": "aus dem Aktionsprospekt gelesen (09.11.–14.11.), Lesefehler möglich",
-   "stand": "2026-11-09T13:01:20.322Z",
+   "hinweis": "aus dem Aktionsprospekt gelesen (09.11.–14.11., vom letzten Lauf übernommen), Lesefehler möglich",
+   "stand": "2026-11-12T12:54:18.938Z",
    "modell": "claude-fable-5-1",
    "prospekte": [
     {
@@ -27,23 +27,24 @@
      "bis": "2026-11-14",
      "seiten": 34,
      "gelesen": 34,
-     "komplett": true
+     "komplett": true,
+     "uebernommen": true
     }
    ]
   },
   {
    "laden": "Kaufland",
    "ok": true,
-   "anzahl": 217,
+   "anzahl": 251,
    "hinweis": "bundesweite Angebote, regional kann es abweichen; nächste Woche 15",
-   "stand": "2026-11-09T13:01:21.046Z"
+   "stand": "2026-11-12T12:54:21.679Z"
   },
   {
    "laden": "Penny",
    "ok": true,
    "anzahl": 65,
    "hinweis": "KW 46, bundesweit",
-   "stand": "2026-11-09T13:01:25.104Z"
+   "stand": "2026-11-12T12:54:26.396Z"
   }
  ],
  "angebote": [
@@ -118,6 +119,18 @@
    "von": "2026-11-12",
    "k": "kirschtomaten",
    "bild": "https://s7g10.scene7.com/is/image/aldinord/6210_1005532_1013395_46_2026_cherrydatteltomaten_on_281026_101506?wid=200&hei=200"
+  },
+  {
+   "id": "a-0ag9as8",
+   "laden": "Aldi",
+   "name": "Cocktailrispentomaten",
+   "preis": 2.49,
+   "menge": 650,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "tomaten",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1006083_2026_minirispentomaten_dam_on_041126_143130?wid=200&hei=200"
   },
   {
    "id": "a-0ezooy2",
@@ -468,16 +481,40 @@
    "bild": "https://s7g10.scene7.com/is/image/aldinord/6194_25_2026_zucchini_04_on_041126_113208?wid=200&hei=200"
   },
   {
+   "id": "a-02wc6gs",
+   "laden": "Kaufland",
+   "name": "Almette Alpenfrischkäse",
+   "preis": 0.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "frischkaese",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00502302?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-02mfq9s",
    "laden": "Kaufland",
    "name": "Almette Alpenfrischkäse",
    "preis": 0.99,
    "menge": 150,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "frischkaese",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00502302?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-1q0yitx",
+   "laden": "Kaufland",
+   "name": "Barilla Pesto",
+   "preis": 1.88,
+   "menge": 190,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "pesto",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8076809513746_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0qs9u8h",
@@ -486,7 +523,7 @@
    "preis": 1.88,
    "menge": 190,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "pesto",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/8076809513746_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -540,6 +577,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/03963675?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1hp3iiu",
+   "laden": "Kaufland",
+   "name": "Dtsch. Cherryrispentomaten, rot",
+   "preis": 1.99,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-09",
+   "k": "tomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01481760FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1r31a76",
    "laden": "Kaufland",
    "name": "Dtsch. Kohlrabi, lose",
@@ -552,13 +601,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00398289FRa?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0nrzrdi",
+   "laden": "Kaufland",
+   "name": "Dtsch. Speisekartoffeln",
+   "preis": 2.49,
+   "menge": 5,
+   "einheit": "kg",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "kartoffeln",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01548933-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-0qtyji6",
    "laden": "Kaufland",
    "name": "Dtsch. Speisekartoffeln",
    "preis": 2.49,
    "menge": 5,
    "einheit": "kg",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "kartoffeln",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/01548933-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -588,6 +649,30 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/8001665727525_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1v57fr4",
+   "laden": "Kaufland",
+   "name": "Heinz Tomaten-Ketchup",
+   "preis": 1.79,
+   "menge": 400,
+   "einheit": "ml",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "tomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20730437?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-0kx28qx",
+   "laden": "Kaufland",
+   "name": "Ital./dtsch. Tafeläpfel, rot",
+   "preis": 1.49,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "aepfel",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00372102FR-2?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1mxw1ct",
    "laden": "Kaufland",
    "name": "Ital./span. Bio-Zitronen",
@@ -598,6 +683,18 @@
    "von": "2026-11-09",
    "k": "zitrone",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00374660FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-02nbu3q",
+   "laden": "Kaufland",
+   "name": "K-Bio Bio-Olivenöl",
+   "preis": 4.99,
+   "menge": 750,
+   "einheit": "ml",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "olivenoel",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8002802103288_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-13ro99m",
@@ -768,6 +865,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/01410794?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1eo813p",
+   "laden": "Kaufland",
+   "name": "Mutti Tomatenprodukt",
+   "preis": 1.11,
+   "menge": 200,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "tomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01384422?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-07ljl1m",
    "laden": "Kaufland",
    "name": "Odenwald Apfel-Fruchtmus",
@@ -852,13 +961,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00370492-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0jllhuk",
+   "laden": "Kaufland",
+   "name": "Span. Bio-Paprika, rot und gelb",
+   "preis": 2.49,
+   "menge": 400,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "paprika",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00379022FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-0jbp1nk",
    "laden": "Kaufland",
    "name": "Span. Bio-Paprika, rot und gelb",
    "preis": 2.49,
    "menge": 400,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "paprika",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00379022FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -888,16 +1009,52 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00374082FRb?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-11o4gpq",
+   "laden": "Kaufland",
+   "name": "Span./ital. Broccoli",
+   "preis": 0.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "brokkoli",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00370726FR-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-10a9lqu",
    "laden": "Kaufland",
    "name": "Span./ital. Broccoli",
    "preis": 0.99,
    "menge": 500,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "brokkoli",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00370726FR-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-1mercg9",
+   "laden": "Kaufland",
+   "name": "Span./ital. Cherryrispentomaten",
+   "preis": 2.99,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "tomaten",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00372690FRa-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-017k4kb",
+   "laden": "Kaufland",
+   "name": "Weihenstephan Joghurt mild",
+   "preis": 0.89,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "joghurt",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00431023?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0u2rbyu",
@@ -1795,8 +1952,8 @@
    "laden": "Aldi",
    "name": "Brathähnchen",
    "preis": 4.49,
-   "menge": 1600,
-   "einheit": "g",
+   "menge": 1,
+   "einheit": "kg",
    "bis": "2026-11-21",
    "von": "2026-11-16",
    "k": "",
@@ -1813,6 +1970,18 @@
    "von": "2026-11-16",
    "k": "",
    "bild": "https://s7g10.scene7.com/is/image/aldinord/6258_38_2026_chicoree_on_291026_181530?wid=200&hei=200"
+  },
+  {
+   "id": "a-0te0xr3",
+   "laden": "Aldi",
+   "name": "Choceur Milchmäuse-Schneebälle",
+   "preis": 1.59,
+   "menge": 130,
+   "einheit": "g",
+   "bis": "2026-11-21",
+   "von": "2026-11-16",
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1036955_33_2026_milch_maeuse_schneebaelle_130g_2_on_comp_210726_125327?wid=200&hei=200"
   },
   {
    "id": "a-00w97n4",
@@ -1908,7 +2077,7 @@
    "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
-   "bild": "https://s7g10.scene7.com/is/image/aldinord/1039429_41_2026_fuzetea_zitronezitronengas_on_comp?wid=200&hei=200"
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1039429_46_2026_fuzetea_on_comp_111126_113612?wid=200&hei=200"
   },
   {
    "id": "a-0lhqi0d",
@@ -2281,6 +2450,18 @@
    "von": "2026-11-09",
    "k": "",
    "bild": "https://s7g10.scene7.com/is/image/aldinord/0168_46_2026_jagertee_konzentrat_40_proz_vol_07_l_1_on_151026_153833?wid=200&hei=200"
+  },
+  {
+   "id": "a-1milx71",
+   "laden": "Aldi",
+   "name": "Kakis",
+   "preis": 2.19,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/product_1219806_main_cms_1_nl_nl_kaki_fruit_cw01_2024_on_051126_104023?wid=200&hei=200"
   },
   {
    "id": "a-10rrfq2",
@@ -2820,7 +3001,7 @@
    "bis": "2026-11-21",
    "von": "2026-11-16",
    "k": "",
-   "bild": "https://s7g10.scene7.com/is/image/aldinord/4673_36_2026_nivea_soft_on_comp_120826_203829?wid=200&hei=200"
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/4673_47_2026_nivea_creme_on_comp_091126_124253?wid=200&hei=200"
   },
   {
    "id": "a-0mtdtsi",
@@ -2845,6 +3026,18 @@
    "von": "2026-11-09",
    "k": "",
    "bild": "https://s7g10.scene7.com/is/image/aldinord/1040897_46_2026_oelz_mohnstrudel_350g_2_on?wid=200&hei=200"
+  },
+  {
+   "id": "a-0qv4i0f",
+   "laden": "Aldi",
+   "name": "Orangen",
+   "preis": 2.49,
+   "menge": 2,
+   "einheit": "kg",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6145_25_2026_orangen_on_041126_142854?wid=200&hei=200"
   },
   {
    "id": "a-0nif1vh",
@@ -3279,6 +3472,18 @@
    "bild": "https://s7g10.scene7.com/is/image/aldinord/1002061_47_2026_tassenkekse_170_g_2_on_on?wid=200&hei=200"
   },
   {
+   "id": "a-07w5aor",
+   "laden": "Aldi",
+   "name": "Wintertraum Weihnachtsgebäck",
+   "preis": 1.79,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-11-21",
+   "von": "2026-11-16",
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1042511_33_2026_weihnachtsgebaeck_vanillekipferl_on_comp_210726_174619?wid=200&hei=200"
+  },
+  {
    "id": "a-0bx8d0b",
    "laden": "Aldi",
    "name": "Wintertraum Weihnachtsmann",
@@ -3471,13 +3676,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00013014a?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0ca83vf",
+   "laden": "Kaufland",
+   "name": "Barilla Collezione oder Al Bronzo Pasta",
+   "preis": 1.49,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/04100669?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-0989bqr",
    "laden": "Kaufland",
    "name": "Barilla Collezione oder Al Bronzo Pasta",
    "preis": 1.49,
    "menge": 250,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/04100669?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -3505,6 +3722,18 @@
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4014829927062_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-1145v9i",
+   "laden": "Kaufland",
+   "name": "Bayreuther Hell",
+   "preis": 13.99,
+   "menge": 10,
+   "einheit": "l",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4017300007048_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-14iujr1",
@@ -3579,6 +3808,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4014472002741_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1so0mja",
+   "laden": "Kaufland",
+   "name": "Blend-A-Dent Haftcreme Extra Stark",
+   "preis": 3.99,
+   "menge": 47,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8700216624053_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-0b41u4h",
    "laden": "Kaufland",
    "name": "Bonduelle Goldmais",
@@ -3633,7 +3874,7 @@
    "preis": 24.99,
    "menge": null,
    "einheit": "",
-   "bis": "2026-11-21",
+   "bis": "2026-11-16",
    "von": "2026-11-16",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/7500435241595_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -3663,18 +3904,6 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/01181483?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
-   "id": "a-0jq4v63",
-   "laden": "Kaufland",
-   "name": "De'longhi Entkalker »EcoDecalk«",
-   "preis": 6.99,
-   "menge": 500,
-   "einheit": "ml",
-   "bis": "2026-11-21",
-   "von": "2026-11-16",
-   "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00879660?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
-  },
-  {
    "id": "a-1uppe5v",
    "laden": "Kaufland",
    "name": "Der Scharfe Maxx Schweiz. Schnittkäse",
@@ -3699,13 +3928,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050009408312_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1we0aaj",
+   "laden": "Kaufland",
+   "name": "Doppio Passo Primitivo IGT, Grillo DOC oder Alkoholfrei",
+   "preis": 4.99,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4002859120799_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1tc1i5v",
    "laden": "Kaufland",
    "name": "Doppio Passo Primitivo IGT, Grillo DOC oder Alkoholfrei",
    "preis": 4.99,
    "menge": 0.75,
    "einheit": "l",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4002859120799_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -3732,7 +3973,43 @@
    "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00374272FRa-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://media.kaufland.com/images/PPIM/Lago/c46293122_0.jpg"
+  },
+  {
+   "id": "a-10qy9pm",
+   "laden": "Kaufland",
+   "name": "Eilles Gourmet",
+   "preis": 6.49,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006581020006_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-0n3bonf",
+   "laden": "Kaufland",
+   "name": "Em-Eukal Hustenbonbons gefüllt",
+   "preis": 1.29,
+   "menge": 75,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4009077024458_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-0z2yngr",
+   "laden": "Kaufland",
+   "name": "Em-Eukal Hustenbonbons zuckerfrei",
+   "preis": 1.29,
+   "menge": 75,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4009077024601_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1prnpw9",
@@ -3759,6 +4036,42 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00509693?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1x8wu23",
+   "laden": "Kaufland",
+   "name": "Frosta High Protein oder À la Carte",
+   "preis": 4.49,
+   "menge": 450,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4008366018185_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-1j24b1o",
+   "laden": "Kaufland",
+   "name": "Gallo Family Cabernet Sauvignon, Rosé, Zinfandel oder Chardonnay",
+   "preis": 22,
+   "menge": 0.75,
+   "einheit": "l",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01766476?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-0p7re5c",
+   "laden": "Kaufland",
+   "name": "Giotto Mini-Gebäckkugeln",
+   "preis": 2.99,
+   "menge": 154,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4008400122625_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1pcekvk",
    "laden": "Kaufland",
    "name": "Grünländer Dtsch. Schnittkäse",
@@ -3771,13 +4084,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/2806710000000_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-17nps5w",
+   "laden": "Kaufland",
+   "name": "Gusto Maissnack Original",
+   "preis": 0.89,
+   "menge": 100,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01410057?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-03fgroo",
    "laden": "Kaufland",
    "name": "Gusto Maissnack Original",
    "preis": 0.89,
    "menge": 100,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/01410057?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -3855,13 +4180,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050008566273_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-084dr87",
+   "laden": "Kaufland",
+   "name": "Iglo Filegro",
+   "preis": 2.99,
+   "menge": 240,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4250241203494_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-052ez3j",
    "laden": "Kaufland",
    "name": "Iglo Filegro",
    "preis": 2.99,
    "menge": 240,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4250241203494_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -3891,16 +4228,40 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00399543FRa-2?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1rpx971",
+   "laden": "Kaufland",
+   "name": "Ital./dtsch. Feldsalat",
+   "preis": 0.99,
+   "menge": 150,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00398644FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1nk02ah",
    "laden": "Kaufland",
    "name": "Ital./dtsch. Feldsalat",
    "preis": 0.99,
    "menge": 150,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00398644FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-10il8d3",
+   "laden": "Kaufland",
+   "name": "Jack Daniel's Alkoholisches Mixgetränk",
+   "preis": 1.99,
+   "menge": 0.33,
+   "einheit": "l",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/5099873026076_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0xgmg8f",
@@ -3909,7 +4270,7 @@
    "preis": 1.99,
    "menge": 0.33,
    "einheit": "l",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/5099873026076_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -3963,6 +4324,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20931143-P-4063367624056?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0g6nbdr",
+   "laden": "Kaufland",
+   "name": "K-Classic Deutsche Markenbutter",
+   "preis": 1.09,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE01235956-P-4337185756245?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1r6nb3d",
    "laden": "Kaufland",
    "name": "K-Classic Emmentaler am Stück 45 % Fett i. Tr.",
@@ -3985,6 +4358,18 @@
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE01199639-P-4038934506981?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-14iduc2",
+   "laden": "Kaufland",
+   "name": "K-Classic Kaliforn. Pistazien",
+   "preis": 2.69,
+   "menge": 250,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4063367441745_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1qt27uu",
@@ -4021,6 +4406,18 @@
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4251318160207_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-0ixn5jr",
+   "laden": "Kaufland",
+   "name": "K-Classic Mandarin-Orangen",
+   "preis": 0.75,
+   "menge": 312,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01082290_P_677675-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-09irv7v",
@@ -4467,6 +4864,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4016287007522_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-09zfb8m",
+   "laden": "Kaufland",
+   "name": "Lenor Wäscheparfüm",
+   "preis": 3.49,
+   "menge": 155,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8700216633994_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1mhh2nf",
    "laden": "Kaufland",
    "name": "Lion Muffin",
@@ -4479,13 +4888,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/2050009463700_DE_V_2225-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0eu1h4l",
+   "laden": "Kaufland",
+   "name": "Listerine Mundspülung",
+   "preis": 3.99,
+   "menge": 500,
+   "einheit": "ml",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3574661730967_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-0f3xxbl",
    "laden": "Kaufland",
    "name": "Listerine Mundspülung",
    "preis": 3.99,
    "menge": 500,
    "einheit": "ml",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/3574661730967_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -4527,6 +4948,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4005500331506_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0h1ipzn",
+   "laden": "Kaufland",
+   "name": "Metaxa 7 Sterne",
+   "preis": 12.99,
+   "menge": 0.7,
+   "einheit": "l",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/02143303?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1wz5kiy",
    "laden": "Kaufland",
    "name": "MirÁColi Pasta-Sauce",
@@ -4549,6 +4982,18 @@
    "von": "2026-11-16",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20909066-P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-1ngvw8d",
+   "laden": "Kaufland",
+   "name": "Original Wagner Piccolinis",
+   "preis": 1.79,
+   "menge": 270,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4009233014002_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-115e7ts",
@@ -4671,6 +5116,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00398594FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1e98pr9",
+   "laden": "Kaufland",
+   "name": "Rügenwalder Mühle Vegane Pfannen- oder Grillprodukte",
+   "preis": 2.49,
+   "menge": 180,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00982465?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1h2a0cm",
    "laden": "Kaufland",
    "name": "Saint Albray oder Chaumes Franz. Weichkäse",
@@ -4719,6 +5176,18 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4008191053009_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0km6nac",
+   "laden": "Kaufland",
+   "name": "Smashed Bagels",
+   "preis": 1.59,
+   "menge": 300,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20625753?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-16lpsdw",
    "laden": "Kaufland",
    "name": "Sonnen Bassermann Eintopf",
@@ -4731,13 +5200,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4002473960351_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-1wn32ef",
+   "laden": "Kaufland",
+   "name": "Span. Clementinen XXL",
+   "preis": 3.99,
+   "menge": 2.3,
+   "einheit": "kg",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00373027b?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-1tl4a9r",
    "laden": "Kaufland",
    "name": "Span. Clementinen XXL",
    "preis": 3.99,
    "menge": 2.3,
    "einheit": "kg",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/00373027b?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -4767,13 +5248,25 @@
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/Orange-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
+   "id": "a-0rv48o7",
+   "laden": "Kaufland",
+   "name": "Span./dtsch. Minigurken",
+   "preis": 1.99,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-11-12",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01486453FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
    "id": "a-0ot5gjj",
    "laden": "Kaufland",
    "name": "Span./dtsch. Minigurken",
    "preis": 1.99,
    "menge": 750,
    "einheit": "g",
-   "bis": "2026-11-09",
+   "bis": "2026-11-14",
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/01486453FR?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
@@ -4813,6 +5306,18 @@
    "von": "2026-11-09",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/4004860401010_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+  },
+  {
+   "id": "a-16dqprk",
+   "laden": "Kaufland",
+   "name": "St. Mang Limburger oder Rubius",
+   "preis": 1.99,
+   "menge": 180,
+   "einheit": "g",
+   "bis": "2026-11-14",
+   "von": "2026-11-12",
+   "k": "",
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00570275?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1d9vsen",
@@ -4965,7 +5470,7 @@
    "preis": 2.99,
    "menge": 150,
    "einheit": "ml",
-   "bis": "2026-11-21",
+   "bis": "2026-11-16",
    "von": "2026-11-16",
    "k": "",
    "bild": "https://kaufland.media.schwarz/is/image/schwarz/5032227490352_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
