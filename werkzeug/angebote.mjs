@@ -64,7 +64,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { angeboteBereinigen, schluesselRaten, mengeAus, istTabu, stabileId, systemTextAngebote, nutzerTextAngebote, rumpfAngebote, ANGEBOTE_SCHEMA } from '../js/angebote.js';
-import { ANBIETER, kiFehler, kiAnfragen, artVonStatus } from '../js/ki.js';
+import { ANBIETER, kiFehler, kiAnfragen, artVonStatus, kostenMeldenAn, KOSTEN_MELDEN } from '../js/ki.js';
 
 const HIER = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HIER, '..');
@@ -786,6 +786,8 @@ kaufda.laeden = ['Rewe', 'Edeka'];
 const QUELLEN = PRIVAT_LAUF ? { kaufda } : { aldi, lidl, kaufland, penny };
 
 async function main() {
+  // In der Action: Kosten an „Frag mal“ melden (Supabase-Funktion api-kosten)
+  if (process.env.GITHUB_ACTIONS === 'true') kostenMeldenAn(KOSTEN_MELDEN);
   const alt = (() => { try { return JSON.parse(readFileSync(ZIEL, 'utf8')); } catch { return null; } })();
   const quellen = [];
   let angebote = [];

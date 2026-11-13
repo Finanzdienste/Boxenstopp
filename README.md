@@ -1190,6 +1190,15 @@ Billing → API credits die Console-Organisation verknüpfen, dort unter API
 Keys einen Schlüssel anlegen und ihn genauso in die App einfügen. Beide
 Antworten werden gestreamt.
 
+**Kosten melden (nur Claude, `kostenMelden` in `js/ki.js`):** Nach jeder
+Anfrage meldet die App – und die Angebots-Action – die ungefähren Kosten an
+die Supabase-Funktion `api-kosten` (Repo Amy). Dort zählt „Frag mal“
+zusammen, wie viel vom monatlichen API-Guthaben schon weg ist. Gemeldet
+werden nur App-Name, Modell und Betrag; der Schlüssel geht im Kopf
+`x-anthropic-key` mit, damit die Funktion bei Anthropic prüfen kann, ob er zur
+selben Organisation gehört. Sie speichert ihn nicht. Eingeschaltet nur auf
+finanzdienste.github.io und in der Action, nie in den Tests.
+
 **Zwischenspeicher (Prompt Caching, nur Claude, `mitZwischenspeicher` in
 `js/ki.js`):** Was Claude schon einmal gelesen hat, kann die API 5 Minuten
 aufheben. Hineinschreiben kostet das 1,25-Fache (Opus 5 $ statt 4 $ je
