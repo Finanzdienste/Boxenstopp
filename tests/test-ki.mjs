@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN } from '../js/ki.js';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
@@ -227,6 +227,28 @@ check(kostenCent({ ein: 0, aus: 0, beraterEin: 10000, beraterAus: 1000 }) === 12
 }
 check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6, beraterCacheLesen: 1e6, beraterCacheSchreiben: 1e6 }) - (20 + 500 + 20 + 1000)) < 1e-9,
   'Kosten: aus dem Zwischenspeicher 0,20 $, hinein 5 $ (Opus) bzw. 10 $ (Fable) je Million');
+// Kosten melden (an „Frag mal“): nur eingeschaltet, nur Anthropic, nur ohne Test-Adresse; der Schlüssel geht im Kopf mit
+{
+  const gemeldet = [];
+  const strom = () => new Response(STROM(JSON.stringify(ANTWORT)), { status: 200 });
+  globalThis.fetch = async (url, opt) => {
+    if (String(url) === KOSTEN_MELDEN) { gemeldet.push({ kopf: opt.headers, koerper: JSON.parse(opt.body) }); return new Response(null, { status: 204 }); }
+    return strom();
+  };
+  try {
+    await kiAnfragen(rumpf, { schluessel: 'sk-ant-test' });
+    const aus = gemeldet.length;
+    kostenMeldenAn(KOSTEN_MELDEN);
+    await kiAnfragen(rumpf, { schluessel: 'sk-ant-test' });
+    await kiAnfragen(rumpf, { schluessel: 'sk-ant-test', api: 'http://127.0.0.1:1/attrappe' });
+    await kiAnfragen(rumpf, { schluessel: 'sk-ant-test', api: ANBIETER.anthropic.api });
+    check(aus === 0 && gemeldet.length === 2 && gemeldet[0].kopf['x-anthropic-key'] === 'sk-ant-test' && gemeldet[0].koerper.app === 'boxenstopp' && Math.abs(gemeldet[0].koerper.usd - 0.092) < 1e-9 && gemeldet[0].koerper.modell === (rumpf.model || MODELL) && Object.keys(gemeldet[0].koerper).sort().join() === 'app,modell,usd',
+      `Kosten melden: nur eingeschaltet und ohne Test-Adresse, mit Betrag und Modell, sonst nichts (${gemeldet.length} Meldungen)`);
+  } finally {
+    kostenMeldenAn('');
+    globalThis.fetch = echtFetch;
+  }
+}
 {
   const ev = (o) => `event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`;
   const strom = STROM(JSON.stringify(ANTWORT)).replace(/^event: message_start\n.*\n\n/, ev({ type: 'message_start', message: { usage: { input_tokens: 50, cache_read_input_tokens: 2900, cache_creation_input_tokens: 0, output_tokens: 1 } } }));

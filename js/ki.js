@@ -359,6 +359,38 @@ export function artVonStatus(status, info) {
   return 'antwort';
 }
 
+/*
+ * Kosten melden: Nach jeder Anfrage an Claude meldet die App, was sie ungefähr
+ * gekostet hat, an die Supabase-Funktion api-kosten (Repo Amy). Dort zählt
+ * „Frag mal“ zusammen, wie viel vom monatlichen API-Guthaben schon weg ist.
+ * Die Funktion prüft bei Anthropic, ob der Schlüssel zur selben Organisation
+ * gehört; dafür geht er im Kopf x-anthropic-key mit. Gespeichert wird er dort
+ * nicht. Gemeldet wird nur mit kostenMeldenAn(adresse), ohne eigene
+ * Test-Adresse (api) und nur für Anthropic. Geht die Meldung schief, merkt
+ * niemand etwas.
+ */
+export const KOSTEN_MELDEN = 'https://vjyohppohmvhhxgwouti.supabase.co/functions/v1/api-kosten';
+let meldeAdresse = '';
+/** Schaltet das Melden ein (mit Adresse) oder aus (ohne). */
+export function kostenMeldenAn(adresse = '') { meldeAdresse = adresse; }
+
+/** Meldet die Kosten einer fertigen Anfrage; wartet nicht und wirft nie. */
+export function kostenMelden({ schluessel, usage, modell, api = '' }) {
+  if (!meldeAdresse || (api && api !== ANBIETER.anthropic.api) || anbieterVon(schluessel) !== 'anthropic') return null;
+  const usd = kostenCent(usage || {}) / 100;
+  if (!(usd > 0)) return null;
+  try {
+    return fetch(meldeAdresse, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-anthropic-key': schluessel },
+      body: JSON.stringify({ app: 'boxenstopp', modell: String(modell || MODELL), usd }),
+      keepalive: true,
+    }).catch(() => null);
+  } catch {
+    return null;
+  }
+}
+
 /** Ungefähre Kosten einer Anfrage in Cent (US-Dollar ≈ Euro); 0 bei Gemini. Der Berater zum eigenen Preis, der Zwischenspeicher zu seinem. */
 export function kostenCent(usage, anbieter = 'anthropic') {
   const preis = ANBIETER[anbieter]?.preis;
@@ -523,6 +555,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   if (gemini && stopp) throw fehler('antwort', stopp);
   if (!werkzeug || !json.trim()) throw fehler('antwort', 'keine Antwort');
   // Ohne festes Schema (etwa mit url_context): den Text zurück, das JSON sucht sich der Aufrufer
+  if (!gemini) kostenMelden({ schluessel, usage, modell: rumpf.model, api });
   if (alsText) return { text: json, usage, anbieter };
   // Zur Sicherheit: Gemini packt JSON hin und wieder in ```json … ```.
   const roh = json.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
@@ -593,6 +626,7 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
     while (i > 0 && bisher[i - 1]?.type === 'text') i--;
     const text = bisher.slice(i).map((b) => b.text || '').join('');
     if (!text.trim()) throw fehler('antwort', 'keine Antwort');
+    kostenMelden({ schluessel, usage, modell: rumpf.model, api });
     return { text, quellen, usage };
   }
   throw fehler('antwort', 'Die Suche hat zu lange gedauert');

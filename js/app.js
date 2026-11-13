@@ -14,6 +14,7 @@
  */
 // Als erstes: Fehler mitschreiben (Einstellungen → Über die App), auch beim Laden der anderen Teile
 import { sicher } from './fehler.js';
+import { kostenMeldenAn, KOSTEN_MELDEN } from './ki.js';
 import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten, breiteAnwenden } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
 import { opZusammen, opPerson, opEinePerson } from './liste.js';
@@ -310,6 +311,8 @@ document.addEventListener('submit', (ev) => {
 
 async function start() {
   breiteAnwenden(); // falls index.html es nicht schon gesetzt hat
+  // Kosten an „Frag mal“ melden – nur in der echten App, nicht in den Tests
+  if (location.hostname === 'finanzdienste.github.io') kostenMeldenAn(KOSTEN_MELDEN);
   let daten;
   try {
     const r = await fetch('daten/rezepte.json', { cache: 'no-cache' });
