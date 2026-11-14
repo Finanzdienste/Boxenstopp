@@ -363,29 +363,43 @@ export function artVonStatus(status, info) {
  * Kosten melden: Nach jeder Anfrage an Claude meldet die App, was sie ungefähr
  * gekostet hat, an die Supabase-Funktion api-kosten (Repo Amy). Dort zählt
  * „Frag mal“ zusammen, wie viel vom monatlichen API-Guthaben schon weg ist.
- * Die Funktion prüft bei Anthropic, ob der Schlüssel zur selben Organisation
- * gehört; dafür geht er im Kopf x-anthropic-key mit. Gespeichert wird er dort
- * nicht. Gemeldet wird nur mit kostenMeldenAn(adresse), ohne eigene
- * Test-Adresse (api) und nur für Anthropic. Geht die Meldung schief, merkt
- * niemand etwas.
+ * Den Schlüssel bekommt die Funktion nicht: Die App schickt nur seine
+ * Prüfsumme (SHA-256, hex) im Kopf x-schluessel-hash, und die Funktion
+ * vergleicht sie mit der ihres eigenen Schlüssels und mit ERLAUBTE_SCHLUESSEL
+ * (ein Secret dort – die Prüfsumme zum Eintragen zeigen die Einstellungen).
+ * Der Schlüssel selbst geht nur an Anthropic. Gemeldet wird nur mit
+ * kostenMeldenAn(adresse), ohne eigene Test-Adresse (api) und nur für
+ * Anthropic. Geht die Meldung schief, merkt niemand etwas.
  */
 export const KOSTEN_MELDEN = 'https://vjyohppohmvhhxgwouti.supabase.co/functions/v1/api-kosten';
 let meldeAdresse = '';
 /** Schaltet das Melden ein (mit Adresse) oder aus (ohne). */
 export function kostenMeldenAn(adresse = '') { meldeAdresse = adresse; }
 
-/** Meldet die Kosten einer fertigen Anfrage; wartet nicht und wirft nie. */
+const pruefsummen = new Map();
+/** Die Prüfsumme eines Schlüssels (SHA-256, hex) – damit weist sich die App aus, ohne ihn herzugeben. */
+export function schluesselPruefsumme(schluessel) {
+  const s = String(schluessel || '');
+  if (!pruefsummen.has(s)) {
+    pruefsummen.set(s, globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
+      .then((b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, '0')).join('')));
+  }
+  return pruefsummen.get(s);
+}
+
+/** Meldet die Kosten einer fertigen Anfrage – mit der Prüfsumme statt des Schlüssels; wartet nicht und wirft nie. */
 export function kostenMelden({ schluessel, usage, modell, api = '' }) {
   if (!meldeAdresse || (api && api !== ANBIETER.anthropic.api) || anbieterVon(schluessel) !== 'anthropic') return null;
   const usd = kostenCent(usage || {}) / 100;
   if (!(usd > 0)) return null;
+  const adresse = meldeAdresse;
   try {
-    return fetch(meldeAdresse, {
+    return schluesselPruefsumme(schluessel).then((summe) => fetch(adresse, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-anthropic-key': schluessel },
+      headers: { 'content-type': 'application/json', 'x-schluessel-hash': summe },
       body: JSON.stringify({ app: 'boxenstopp', modell: String(modell || MODELL), usd }),
       keepalive: true,
-    }).catch(() => null);
+    })).catch(() => null);
   } catch {
     return null;
   }

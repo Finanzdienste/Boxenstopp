@@ -1230,9 +1230,15 @@ Antworten werden gestreamt.
 Anfrage meldet die App – und die Angebots-Action – die ungefähren Kosten an
 die Supabase-Funktion `api-kosten` (Repo Amy). Dort zählt „Frag mal“
 zusammen, wie viel vom monatlichen API-Guthaben schon weg ist. Gemeldet
-werden nur App-Name, Modell und Betrag; der Schlüssel geht im Kopf
-`x-anthropic-key` mit, damit die Funktion bei Anthropic prüfen kann, ob er zur
-selben Organisation gehört. Sie speichert ihn nicht. Eingeschaltet nur auf
+werden nur App-Name, Modell und Betrag. Den Schlüssel bekommt die Funktion
+nicht: Im Kopf `x-schluessel-hash` steht nur seine Prüfsumme (SHA-256,
+`schluesselPruefsumme` in `js/ki.js`), und die Funktion nimmt Meldungen nur,
+wenn sie zu ihrem eigenen Schlüssel passt oder im Supabase-Secret
+`ERLAUBTE_SCHLUESSEL` steht – der Schlüssel selbst geht nur an Anthropic. Ist
+der Schlüssel hier ein anderer als bei „Frag mal“: Einstellungen →
+KI-Schlüssel → „Prüfsumme kopieren“ und dort eintragen (für den der Action,
+`ANTHROPIC_API_KEY` in den Secrets dieses Repos, am Rechner mit
+`printf %s "$SCHLUESSEL" | sha256sum`). Eingeschaltet nur auf
 finanzdienste.github.io und in der Action, nie in den Tests.
 
 **Zwischenspeicher (Prompt Caching, nur Claude, `mitZwischenspeicher` in

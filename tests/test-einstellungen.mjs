@@ -6,6 +6,7 @@
  * KI-Schlüssel, was die App gelernt hat (Tempo, Wege, Preisalarme, Bons),
  * die Fassung – und breit das Zahnrad oben.
  */
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
@@ -189,6 +190,10 @@ await cp.click('#z-los');
 check(await bis(async () => await cp.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel === k, AKEY), 8000) && await cp.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).geteilt === true) && await bis(async () => (await cp.locator('#toast').innerText()).includes('KI-Schlüssel von Amy übernommen')), 'das zweite Handy bekommt den Schlüssel beim Verbinden, als geteilt gemerkt, mit Hinweis');
 await cp.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await cp.locator('#e-ki').innerText()).includes('Anthropic')) && (await cp.locator('#e-ki .e-ki-teilen').innerText()).includes('Freigegeben für alle Handys dieser Liste (von Amy)'), 'dort steht: Anthropic, freigegeben von Amy');
+check((await cp.locator('#e-ki .e-ki-summe').innerText()).includes('ERLAUBTE_SCHLUESSEL'), 'für „Frag mal“: die Prüfsumme des Schlüssels zum Kopieren');
+await cp.evaluate(() => { window.__kopiert = ''; navigator.clipboard.writeText = async (t) => { window.__kopiert = t; }; });
+await cp.click('#e-ki [data-act="e-ki-summe"]');
+check(await bis(async () => (await cp.evaluate(() => window.__kopiert)) === createHash('sha256').update(AKEY).digest('hex')), 'kopiert wird die Prüfsumme (SHA-256), nicht der Schlüssel');
 // Ein eigener, neuerer Schlüssel bleibt beim Neuladen – der geteilte ist älter
 await cp.click('#e-ki [data-act="e-ki-aendern"]');
 await cp.fill('#e-ki-feld', GKEY);

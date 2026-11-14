@@ -8,7 +8,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme } from '../js/ki.js';
+import { createHash } from 'node:crypto';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
@@ -227,7 +228,7 @@ check(kostenCent({ ein: 0, aus: 0, beraterEin: 10000, beraterAus: 1000 }) === 12
 }
 check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6, beraterCacheLesen: 1e6, beraterCacheSchreiben: 1e6 }) - (20 + 500 + 20 + 1000)) < 1e-9,
   'Kosten: aus dem Zwischenspeicher 0,20 $, hinein 5 $ (Opus) bzw. 10 $ (Fable) je Million');
-// Kosten melden (an „Frag mal“): nur eingeschaltet, nur Anthropic, nur ohne Test-Adresse; der Schlüssel geht im Kopf mit
+// Kosten melden (an „Frag mal“): nur eingeschaltet, nur Anthropic, nur ohne Test-Adresse – mit der Prüfsumme, nie mit dem Schlüssel
 {
   const gemeldet = [];
   const strom = () => new Response(STROM(JSON.stringify(ANTWORT)), { status: 200 });
@@ -242,7 +243,11 @@ check(Math.abs(kostenCent({ ein: 0, aus: 0, cacheLesen: 1e6, cacheSchreiben: 1e6
     await kiAnfragen(rumpf, { schluessel: 'sk-ant-test' });
     await kiAnfragen(rumpf, { schluessel: 'sk-ant-test', api: 'http://127.0.0.1:1/attrappe' });
     await kiAnfragen(rumpf, { schluessel: 'sk-ant-test', api: ANBIETER.anthropic.api });
-    check(aus === 0 && gemeldet.length === 2 && gemeldet[0].kopf['x-anthropic-key'] === 'sk-ant-test' && gemeldet[0].koerper.app === 'boxenstopp' && Math.abs(gemeldet[0].koerper.usd - 0.092) < 1e-9 && gemeldet[0].koerper.modell === (rumpf.model || MODELL) && Object.keys(gemeldet[0].koerper).sort().join() === 'app,modell,usd',
+    await new Promise((f) => { setTimeout(f, 50); });
+    const summe = createHash('sha256').update('sk-ant-test').digest('hex');
+    check(await schluesselPruefsumme('sk-ant-test') === summe && gemeldet.every((g) => g.kopf['x-schluessel-hash'] === summe && !('x-anthropic-key' in g.kopf) && !JSON.stringify(g).includes('sk-ant-test')),
+      'Kosten melden: im Kopf nur die Prüfsumme (SHA-256) – der Schlüssel geht nirgends hin außer zu Anthropic');
+    check(aus === 0 && gemeldet.length === 2 && gemeldet[0].koerper.app === 'boxenstopp' && Math.abs(gemeldet[0].koerper.usd - 0.092) < 1e-9 && gemeldet[0].koerper.modell === (rumpf.model || MODELL) && Object.keys(gemeldet[0].koerper).sort().join() === 'app,modell,usd',
       `Kosten melden: nur eingeschaltet und ohne Test-Adresse, mit Betrag und Modell, sonst nichts (${gemeldet.length} Meldungen)`);
   } finally {
     kostenMeldenAn('');

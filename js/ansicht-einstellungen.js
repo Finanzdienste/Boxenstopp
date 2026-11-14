@@ -39,7 +39,7 @@ import { euro } from './kosten.js';
 import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon, eigeneListe } from './zugang.js';
 import { privatSchreiben, API } from './speicher.js';
 import { ladeGaeste } from './ansicht-gaeste.js';
-import { ANBIETER, anbieterVon } from './ki.js';
+import { ANBIETER, anbieterVon, schluesselPruefsumme } from './ki.js';
 import { tempoInfo, GRUPPEN_TEXT } from './tempo.js';
 import { preisJe } from './angebote.js';
 import { opBon, opBonWeg, opProfil, waageBereinigen } from './liste.js';
@@ -190,7 +190,17 @@ ${kiFormHTML(false)}
   return `<p class="e-ki-da"><span class="e-ok">✓</span> Ein Schlüssel von <b>${esc(ANBIETER[da].name)}</b> ist eingetragen.</p>
 ${kiOffen ? kiFormHTML(true) : '<div class="zugang-btns"><button type="button" class="btn" data-act="e-ki-aendern">Schlüssel ändern</button><button type="button" class="btn btn-quiet" data-act="e-ki-weg">Entfernen</button></div>'}
 ${kiTeilenHTML()}
+${da === 'anthropic' && !istEigen() ? pruefsummeHTML() : ''}
 <p class="fine">${wofuer} ${bleibt}</p>`;
+}
+
+/*
+ * „Frag mal“ zählt die Kosten mit (ki.js kostenMelden). Die App schickt dafür
+ * nur die Prüfsumme des Schlüssels; ist es ein anderer Schlüssel als der von
+ * „Frag mal“, gehört seine Prüfsumme in Supabase unter ERLAUBTE_SCHLUESSEL.
+ */
+function pruefsummeHTML() {
+  return `<p class="fine e-ki-summe">Für „Frag mal“: Die App meldet die Kosten mit der Prüfsumme des Schlüssels, nicht mit dem Schlüssel. Ist es ein anderer als dort, die Prüfsumme in Supabase unter <code>ERLAUBTE_SCHLUESSEL</code> eintragen. <button type="button" class="linkbtn" data-act="e-ki-summe">Prüfsumme kopieren</button></p>`;
 }
 
 /*
@@ -444,6 +454,11 @@ export function klickEinstellungen(el) {
   switch (d.act) {
     case 'e-ki-aendern': kiOffen = true; kiFehler = ''; einstellungenZeichnen(); $('#e-ki-feld')?.focus(); return true;
     case 'e-ki-zu': kiOffen = false; kiFehler = ''; einstellungenZeichnen(); return true;
+    case 'e-ki-summe': {
+      const s = ladeKi();
+      if (s) schluesselPruefsumme(s).then((h) => navigator.clipboard.writeText(h)).then(() => melde('Prüfsumme kopiert – in Supabase unter ERLAUBTE_SCHLUESSEL einfügen.'), () => melde('Kopieren ging nicht.'));
+      return true;
+    }
     case 'e-ki-teilen': { const s = ladeKi(); if (s) kiTeilen(s); return true; }
     case 'e-ki-teilen-weg': kiTeilen(''); return true;
     case 'e-waage-aendern': waageOffen = true; waageFehler = ''; einstellungenZeichnen(); $('#e-waage-url')?.focus(); return true;
