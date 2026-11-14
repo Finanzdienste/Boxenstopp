@@ -17,6 +17,10 @@ Bei normalen Aufgaben erwähnst du Ultracode nicht.
   (`liste.json`), der Katalog (`katalog.json`) und was die Actions schreiben.
 - **Finanzdienste/Boxenstopp-Marielle**: Marielles Liste – nie hineinschreiben.
   Den Katalog gleicht die App selbst ab (Tobis Handy, alle 5 Minuten).
+- **Finanzdienste/Amy**: Amys App „Frag mal“ und die Supabase-Funktionen, die
+  Boxenstopp nutzt (`api-kosten`, `produkt-bild`). Änderungen über einen PR;
+  ist die Prüfung grün und gibt es keine Konflikte, merged Claude ihn selbst.
+  Funktionen spielt Claude nach den Tests selbst in Supabase ein.
 
 ## Geheimnisse
 - Tokens, API-Schlüssel und Passwörter nie in Chat, Code, Commits oder Logs –
