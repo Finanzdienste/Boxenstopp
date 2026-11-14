@@ -126,12 +126,15 @@ check(erkanntBereinigen({ code: '4006381333932', liste: 'Bücher' }, listen).cod
 // Nachschlagen (inventar-netz.js): Open Beauty Facts & Co. – gegen ein nachgebautes Netz
 const LIPPEN = '4000000000013';
 const BUCH = '4000000000020';
-check(nachschlagenAdresse(LIPPEN) === `https://world.openbeautyfacts.org/api/v3/product/${LIPPEN}?fields=code,product_name,product_name_de,brands,image_front_url,product_type&lc=de` && produktSeite(BUCH, 'product') === `https://world.openproductsfacts.org/product/${BUCH}`, 'Adressen: zuerst Open Beauty Facts (API v3, nur die nötigen Felder), dazu die Seite zum Anschauen');
+check(nachschlagenAdresse(LIPPEN) === `https://world.openbeautyfacts.org/api/v3/product/${LIPPEN}?fields=code,product_name,product_name_de,generic_name,generic_name_de,brands,image_front_url,product_type,quantity,periods_after_opening,periods_after_opening_tags,labels_tags,categories_tags,ingredients_text,ingredients_text_de&lc=de` && produktSeite(BUCH, 'product') === `https://world.openproductsfacts.org/product/${BUCH}`, 'Adressen: zuerst Open Beauty Facts (API v3, die Felder, die die App nimmt), dazu die Seite zum Anschauen');
 const BILD_URL = `https://images.openbeautyfacts.org/images/products/${LIPPEN}/front_de.3.400.jpg`;
 check(bildAdresse(BILD_URL) === BILD_URL.replace('.400.jpg', '.full.jpg') && bildAdresse(BILD_URL, { sparen: true }) === BILD_URL && bildAdresse(BILD_URL.replace('https:', 'http:')) === '' && bildAdresse('https://boese.example/x.400.jpg') === '' && bildAdresse('https://images.openbeautyfacts.org/x.png') === '' && bildAdresse('') === '', 'Bilder: groß (full) oder klein (400) – nur https, nur von den Datenbanken, nur JPEG');
 const treffer = produktAus({ status: 'success', product: { product_name: 'lippenstift testrot', brands: 'testmarke,testkonzern', image_front_url: BILD_URL, product_type: 'beauty' } }, LIPPEN);
 check(treffer.name === 'Lippenstift testrot' && treffer.marke === 'Testmarke' && treffer.bild.endsWith('.full.jpg') && treffer.klein === BILD_URL && treffer.quelle.name === 'Open Beauty Facts' && treffer.quelle.url === `https://world.openbeautyfacts.org/product/${LIPPEN}` && treffer.liste === '' && !treffer.tags.length, 'Treffer: Name vorn groß, die erste Marke, das Bild groß und klein, die Quelle');
 check(produktAus({ status: 'success', product: { product_name: 'labial rojo', product_name_de: 'Lippenstift Rot', brands: 'Test Marke' } }, LIPPEN).name === 'Lippenstift Rot' && produktAus({ status: 'success', product: { brands: 'l\'test-marke paris' } }, LIPPEN).marke === "L'test-Marke Paris" && produktAus({ status: 'success', product: { brands: '' } }, LIPPEN) === null && produktAus({ status: 'failure' }, LIPPEN) === null && produktAus(null, LIPPEN) === null, 'der deutsche Name zuerst, kleine Marken vorn groß; ohne Name und Marke kein Treffer');
+const reich = produktAus({ status: 'success', product: { product_name_de: 'Deocreme mit Natron', brands: 'Testmarke', quantity: '50 ml', periods_after_opening_tags: ['en:12-months'], labels_tags: ['en:vegan', 'en:cruelty-free', 'en:unbekannt'], categories_tags: ['de:drogerie-produkt', 'de:deocreme'], ingredients_text_de: `Aqua, ${'Glycerin, '.repeat(120)}Parfum` } }, LIPPEN);
+check(reich.tags.join() === 'Deocreme,vegan,tierversuchsfrei' && reich.notiz.startsWith('Menge: 50 ml\nNach dem Öffnen 12 Monate haltbar\nInhaltsstoffe: Aqua, Glycerin') && reich.notiz.endsWith(' …') && reich.notiz.length < 900, 'Mehr aus der Datenbank: Kategorie und Siegel als Tags, in der Notiz Menge, Haltbarkeit nach dem Öffnen und die Inhaltsstoffe (gekürzt)');
+check(produktAus({ status: 'success', product: { generic_name: 'Shampoo', categories_tags: ['en:hair-care', 'en:shampoos'], periods_after_opening: '6 M' } }, LIPPEN).name === 'Shampoo' && produktAus({ status: 'success', product: { generic_name: 'Shampoo', categories_tags: ['en:hair-care', 'en:shampoos'] } }, LIPPEN).tags.join() === 'Shampoo' && produktAus({ status: 'success', product: { generic_name: 'x', periods_after_opening: '6 M' } }, LIPPEN).notiz === 'Nach dem Öffnen 6 Monate haltbar', 'ohne Namen die Art; englische Kategorien auf Deutsch; „6 M“ heißt sechs Monate');
 const anders = { status: 'failure', result: { id: 'product_found_with_a_different_product_type' }, errors: [{ message: { id: 'product_found_with_a_different_product_type' }, field: { id: 'product_type', value: 'product' } }] };
 check(andereDatenbank(anders) === 'product' && andereDatenbank({ errors: [{ message: { id: 'product_not_found' } }] }) === '' && andereDatenbank(null) === '', 'Steht die Nummer in einer anderen Datenbank, sagt die Antwort, in welcher');
 {
@@ -162,12 +165,14 @@ check(andereDatenbank(anders) === 'product' && andereDatenbank({ errors: [{ mess
 }
 // Kennt sie keine: Claude sucht
 const rn = rumpfNachschlagen({ code: ' 4000000000051 ', listen: ['Kleidung', 'Make-up'] });
-check(rn.model === ANBIETER.anthropic.modell && rn.tools.length === 1 && rn.tools[0].type === 'web_search_20250305' && rn.tools[0].max_uses === 3 && rn.tools[0].blocked_domains.includes('rossmann.de') && rn.tools[0].user_location.country === 'DE' && !rn.output_config, 'Claude sucht: nur die Websuche (höchstens dreimal, nicht bei Rossmann, aus Deutschland), das JSON im Text');
-check(rn.messages[0].content[0].text === 'Die Nummer unter dem Strichcode: 4000000000051' && /Kleidung, Make-up/.test(rn.system) && /genau diese Nummer/.test(rn.system) && /gefunden false/.test(rn.system), 'die Anfrage: nur die Nummer und die Namen der Listen – nichts raten');
+check(rn.model === ANBIETER.anthropic.modell && rn.tools.length === 2 && rn.tools[0].type === 'web_search_20250305' && rn.tools[0].max_uses === 5 && !rn.tools[0].blocked_domains && rn.tools[0].user_location.country === 'DE' && rn.tools[1].type === 'web_fetch_20250910' && rn.tools[1].max_uses === 3 && !rn.output_config, 'Claude sucht (höchstens fünfmal, aus Deutschland, überall) und liest die Produktseite (höchstens dreimal), das JSON im Text');
+check(rn.messages[0].content[0].text === 'Die Nummer unter dem Strichcode: 4000000000051' && /Kleidung, Make-up/.test(rn.system) && /genau diese Nummer/.test(rn.system) && /gefunden false/.test(rn.system) && /details/.test(rn.system) && /preis/.test(rn.system), 'die Anfrage: nur die Nummer und die Namen der Listen – nichts raten, möglichst viel (Angaben, Preis, Beschreibung)');
 const SEITE = 'https://www.beispiel-shop.de/p/wanderschuhe-grau-123';
-const gefunden = gesuchtBereinigen({ gefunden: true, name: ' Wanderschuhe  Grau ', marke: 'Bergfest', liste: 'kleidung', tags: ['grau', 'Wandern', 'Herbst', 'zu viel'], url: SEITE, seite: 'beispiel-shop.de' }, { quellen: [{ url: `${SEITE}?ref=suche` }], listen });
-check(gefunden?.name === 'Wanderschuhe Grau' && gefunden.marke === 'Bergfest' && gefunden.liste === 'sl-kleider1' && gefunden.tags.join() === 'grau,Wandern,Herbst' && gefunden.bild === '' && gefunden.quelle.name === 'beispiel-shop.de' && gefunden.quelle.url === SEITE, 'Claudes Treffer: Liste nach Namen, höchstens drei Tags, kein Bild, die Seite als Quelle');
-check(gesuchtBereinigen({ gefunden: true, name: 'Ausgedacht', url: 'https://anders.example/x' }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ gefunden: false, name: 'x', url: SEITE }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ name: 'x', url: SEITE }, { quellen: [] }) === null && gesuchtBereinigen(null) === null, 'Eine Seite, die in keinem Suchergebnis stand, zählt nicht (ausgedacht); „nicht gefunden“ ist nichts');
+const gefunden = gesuchtBereinigen({ gefunden: true, name: ' Wanderschuhe  Grau ', marke: 'Bergfest', liste: 'kleidung', tags: ['Schuhe', 'grau', 'Wandern', 'Herbst', 'zu viel'], details: ['Farbe: Grau', 'Größe: 39', 'kein Feld', 'Material: Leder'], preis: '89,95 €', beschreibung: 'Leichter Wanderschuh.', url: SEITE, seite: 'beispiel-shop.de' }, { quellen: [{ url: `${SEITE}?ref=suche` }], listen, heute: new Date('2026-11-14T12:00:00Z') });
+check(gefunden?.name === 'Wanderschuhe Grau' && gefunden.marke === 'Bergfest' && gefunden.liste === 'sl-kleider1' && gefunden.tags.join() === 'Schuhe,grau,Wandern,Herbst' && gefunden.bild === '' && gefunden.quelle.name === 'beispiel-shop.de' && gefunden.quelle.url === SEITE, 'Claudes Treffer: Liste nach Namen, bis zu vier Tags, kein Bild, die Seite als Quelle');
+check(gefunden.notiz === 'Farbe: Grau · Größe: 39 · Material: Leder\nPreis: 89,95 € bei beispiel-shop.de (Nov. 2026)\nLeichter Wanderschuh.', 'in der Notiz: die Angaben, der Preis mit Seite und Monat, die Beschreibung');
+check(gesuchtBereinigen({ gefunden: true, name: 'Andere Seite derselben Website', url: 'https://beispiel-shop.de/p/anders' }, { quellen: [{ url: SEITE }] })?.name === 'Andere Seite derselben Website', 'Eine andere Seite derselben Website zählt (die hat Claude gelesen)');
+check(gesuchtBereinigen({ gefunden: true, name: 'Ausgedacht', url: 'https://anders.example/x' }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ gefunden: false, name: 'x', url: SEITE }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ name: 'x', url: SEITE }, { quellen: [] }) === null && gesuchtBereinigen(null) === null, 'Eine Website, die in keinem Such- oder Leseergebnis stand, zählt nicht (ausgedacht); „nicht gefunden“ ist nichts');
 // Die Quelle in der Sache
 check(JSON.stringify(quelleBereinigen({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' })) === JSON.stringify({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' }) && quelleBereinigen({ name: 'x', url: 'javascript:alert(1)' }) === null && quelleBereinigen({ name: 'x', url: 'http://a.example' }) === null && quelleBereinigen({ url: 'https://a.example' }) === null && quelleBereinigen('x') === null, 'Quelle: Name und https-Adresse – javascript: oder http nicht');
 const mitQuelle = anwenden(s, opDing({ ...jacke, quelle: { name: 'Open Beauty Facts', url: `https://world.openbeautyfacts.org/product/${LIPPEN}` } }, 'Marielle', '2026-11-14T13:00:00.000Z'));
@@ -206,7 +211,7 @@ const dbRoute = async (r) => {
   const json = (status, body) => r.fulfill({ status, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
   if (!p) return json(404, { code, status: 'failure', result: { id: 'product_not_found' }, errors: [{ message: { id: 'product_not_found' }, field: { id: 'code', value: code } }] });
   if (p.art !== art) return json(404, { code, status: 'failure', result: { id: 'product_found_with_a_different_product_type' }, errors: [{ message: { id: 'product_found_with_a_different_product_type' }, field: { id: 'product_type', value: p.art } }] });
-  return json(200, { code, status: 'success', result: { id: 'product_found' }, product: { code, product_name: p.name, brands: p.marke, product_type: p.art, ...(p.bild ? { image_front_url: `https://images.${u.hostname.replace(/^world\./, '')}/images/products/${code}/front_de.3.400.jpg` } : {}) } });
+  return json(200, { code, status: 'success', result: { id: 'product_found' }, product: { code, product_name: p.name, brands: p.marke, product_type: p.art, ...(p.mehr || {}), ...(p.bild ? { image_front_url: `https://images.${u.hostname.replace(/^world\./, '')}/images/products/${code}/front_de.3.400.jpg` } : {}) } });
 };
 
 // Claude mit der Websuche (kiMitWerkzeugen, ohne Strom): antwortet mit claude.antwort
@@ -292,7 +297,7 @@ check(!JSON.stringify(mar.liste()).includes('base64') && JSON.stringify(mar.list
 // Der Strichcode: das Handy liest ihn selbst
 await m.setInputFiles('#inv-code-foto', BILD);
 check(await bis(() => ding('Lederjacke')?.code === CODE) && (await m.inputValue('#inv-code')) === CODE, 'Scannen: das Handy liest den Strichcode selbst (BarcodeDetector), die Nummer steht in der Sache');
-check(db.anfragen.length === 0 && (await m.locator('.inv-nachschlagen').count()) === 0, 'Hat die Sache Name, Marke und Foto, schlägt die App nicht nach (und bietet es nicht an)');
+check(db.anfragen.length === 0 && (await m.locator('.inv-nachschlagen').count()) === 1, 'Hat die Sache Name, Marke, Foto und Notiz, schlägt die App nicht von selbst nach – „Im Netz nachschlagen“ steht trotzdem da');
 
 // Zurück zur Liste: die Karte mit Foto, eine zweite Sache, sortieren, ordnen, filtern
 await m.click('[data-act="inv-ding-zu"]');
@@ -341,7 +346,7 @@ await m.click('[data-act="inv-ding-zu"]');
 check(await bis(async () => (await m.locator('#inv-titel').innerText()) === 'Kleidung' && (await namen()) === 'Abendkleid,Lederjacke,Gürtel'), 'Zurück führt in seine Liste');
 
 // Scannen in einer Liste: nachschlagen und gleich anlegen – mit dem Bild der Datenbank als Foto
-db.produkte[LIPPEN] = { art: 'beauty', name: 'lippenstift testrot', marke: 'testmarke,testkonzern', bild: true };
+db.produkte[LIPPEN] = { art: 'beauty', name: 'lippenstift testrot', marke: 'testmarke,testkonzern', bild: true, mehr: { quantity: '4 g', labels_tags: ['en:vegan'], categories_tags: ['en:make-up', 'en:lipsticks'], periods_after_opening_tags: ['en:24-months'], ingredients_text: 'Ricinus Communis Seed Oil, Cera Alba' } };
 await m.click('[data-act="inv-zu"]');
 await m.click('[data-inv-vorschlag="Make-up"]');
 check(await bis(async () => (await m.locator('#inv-titel').innerText()) === 'Make-up') && await bis(() => Object.values(mar.liste().inventar.listen).some((l) => l.name === 'Make-up')), 'eine zweite Liste: Make-up');
@@ -356,6 +361,7 @@ check(await bis(() => FOTO_PFAD.test(mitNummer(LIPPEN)?.foto?.pfad || '') && mar
 const fragen = db.anfragen.slice(vorLippen);
 check(fragen.length === 1 && fragen[0].art === 'beauty' && fragen[0].code === LIPPEN && fragen[0].kopf === KENNUNG, 'gefragt: einmal Open Beauty Facts – die App nennt sich (X-User-Agent)');
 check(mitNummer(LIPPEN).quelle?.name === 'Open Beauty Facts' && await bis(async () => (await m.locator('.inv-quelle a').getAttribute('href')) === `https://world.openbeautyfacts.org/product/${LIPPEN}`) && (await m.locator('.inv-quelle').innerText()) === 'Gefunden bei Open Beauty Facts', 'Die Sache zeigt, wo es herkommt – mit Link');
+check(mitNummer(LIPPEN).tags.join() === 'Lippenstift,vegan' && mitNummer(LIPPEN).notiz === 'Menge: 4 g\nNach dem Öffnen 24 Monate haltbar\nInhaltsstoffe: Ricinus Communis Seed Oil, Cera Alba' && await bis(async () => (await m.inputValue('#inv-notiz')) === mitNummer(LIPPEN).notiz), 'Alles, was die Datenbank weiß: Kategorie und Siegel als Tags, Menge, Haltbarkeit und Inhaltsstoffe in der Notiz – auch im offenen Formular');
 await m.click('[data-act="inv-ding-zu"]');
 await m.setInputFiles('#inv-neu-code', BILD);
 check(await bis(async () => (await m.locator('#toast').innerText()).includes('Hast du schon: Lippenstift testrot (Make-up)')) && (await m.inputValue('#inv-name')) === 'Lippenstift testrot' && dinge().filter((d) => d.code === LIPPEN).length === 1 && db.anfragen.length === vorLippen + 1, 'Noch einmal gescannt: „Hast du schon“, sie ist offen – keine zweite, nicht noch einmal nachgeschlagen');
@@ -371,7 +377,7 @@ check(await bis(async () => (await m.locator('#toast').innerText()).includes('No
 check(db.anfragen.slice(vorBuch).map((x) => x.art).join() === 'beauty,product', 'erst Open Beauty Facts, die verweist auf Open Products Facts');
 await m.click('#toast button');
 check(await bis(() => mitNummer(BUCH)?.name === 'Notizbuch A5' && mitNummer(BUCH)?.marke === 'Papierwerk' && !mitNummer(BUCH)?.liste && mitNummer(BUCH)?.quelle?.name === 'Open Products Facts') && !mitNummer(BUCH).foto && db.anfragen.length === vorBuch + 2, 'Eintragen: mit Name, Marke und Quelle, noch ohne Liste – ohne Bild kein Foto, nicht noch einmal gefragt');
-check(await bis(async () => (await m.locator('.inv-nachschlagen').count()) === 1), 'ohne Foto bietet die Sache „Im Netz nachschlagen“ an');
+check(await bis(async () => (await m.locator('.inv-nachschlagen').count()) === 1), 'unter dem Strichcode: „Im Netz nachschlagen“');
 await m.click('[data-act="inv-ding-zu"]');
 await m.click('[data-act="inv-zu"]');
 await m.click(`[data-inv-liste="${kleidungId}"]`);
@@ -416,19 +422,34 @@ const m3 = m3h.page;
 check((await m3.locator('.inv-fein').innerText()).includes('sucht Claude im Internet'), 'Der Hinweis sagt es: kennen die Datenbanken die Nummer nicht, sucht Claude');
 await m3.click(`[data-inv-liste="${kleidungId}"]`);
 const SCHUHE = '4000000000044';
-claude.antwort = claudeFindet({ gefunden: true, name: 'Wanderschuhe Grau', marke: 'Bergfest', liste: 'Kleidung', tags: ['grau', 'Wandern'], url: SEITE, seite: 'beispiel-shop.de' }, SEITE);
+claude.antwort = claudeFindet({ gefunden: true, name: 'Wanderschuhe Grau', marke: 'Bergfest', liste: 'Kleidung', tags: ['grau', 'Wandern'], details: ['Farbe: Grau', 'Größe: 39'], preis: '89,95 €', beschreibung: 'Leichter Wanderschuh.', url: SEITE, seite: 'beispiel-shop.de' }, SEITE);
 await m3.evaluate((c) => { window.__code = c; }, SCHUHE);
 const vorSchuhe = db.anfragen.length;
 await m3.setInputFiles('#inv-neu-code', BILD);
 check(await bis(() => mitNummer(SCHUHE)?.name === 'Wanderschuhe Grau' && mitNummer(SCHUHE)?.marke === 'Bergfest' && mitNummer(SCHUHE)?.liste === kleidungId && mitNummer(SCHUHE)?.tags.join() === 'grau,Wandern' && mitNummer(SCHUHE)?.quelle?.url === SEITE, 8000) && !mitNummer(SCHUHE).foto, 'Claude findet sie im Internet: Name, Marke, Tags, die Seite als Quelle – ohne Bild');
+check(/^Farbe: Grau · Größe: 39\nPreis: 89,95 € bei beispiel-shop\.de \(\S+ \d{4}\)\nLeichter Wanderschuh\.$/.test(mitNummer(SCHUHE).notiz), 'und in der Notiz Farbe, Größe, Preis (mit Seite und Monat) und eine Beschreibung');
 const cf = claude.anfragen.at(-1);
-check(db.anfragen.length === vorSchuhe + 1 && cf?.kopf['x-api-key'] === AKEY && cf.rumpf.tools.length === 1 && cf.rumpf.tools[0].name === 'web_search' && cf.rumpf.messages[0].content[0].text.endsWith(SCHUHE) && !!cf.rumpf.cache_control, 'erst die Datenbank, dann Claude: nur die Websuche (ohne Berater), nur die Nummer');
+check(db.anfragen.length === vorSchuhe + 1 && cf?.kopf['x-api-key'] === AKEY && cf.rumpf.tools.map((t) => t.name).join() === 'web_search,web_fetch' && cf.rumpf.messages[0].content[0].text.endsWith(SCHUHE) && !!cf.rumpf.cache_control, 'erst die Datenbank, dann Claude: Websuche und Seite lesen (ohne Berater), nur die Nummer');
 check(await bis(async () => (await m3.locator('.inv-quelle a').innerText()) === 'beispiel-shop.de'), 'die Quelle steht dabei');
 claude.antwort = claudeFindet({ gefunden: true, name: 'Ausgedacht', marke: 'X', url: 'https://anders.example/p/1' }, SEITE);
 await m3.click('[data-act="inv-ding-zu"]');
 await m3.evaluate(() => { window.__code = '4000000000051'; });
 await m3.setInputFiles('#inv-neu-code', BILD);
 check(await bis(async () => (await m3.locator('#toast').innerText()).includes('Zu 4000000000051 nichts gefunden')) && await bis(() => mitNummer('4000000000051')?.liste === kleidungId) && !mitNummer('4000000000051').name && !ding('Ausgedacht'), 'Nennt Claude eine Seite, die in keiner Suche stand: nichts eingetragen – die Sache hat nur die Nummer');
+// „Im Netz nachschlagen“ fragt beide – auch wenn die Datenbank die Nummer kennt
+await m3.click('[data-act="inv-ding-zu"]');
+await m3.click('[data-act="inv-zu"]');
+await m3.click(`[data-inv-liste="${makeupId}"]`);
+await m3.click('[data-inv-ding]:has-text("Lippenstift testrot")');
+const SHOP = 'https://www.beispiel-drogerie.de/p/lippenstift-testrot';
+claude.antwort = claudeFindet({ gefunden: true, name: 'Lippenstift Testrot 102', marke: 'Testmarke', tags: ['rot'], details: ['Nuance: 102 Testrot'], preis: '4,95 €', url: SHOP, seite: 'beispiel-drogerie.de' }, SHOP);
+const vorMehr = db.anfragen.length;
+const claudeVorher = claude.anfragen.length;
+await m3.click('[data-act="inv-nachschlagen"]');
+check(await bis(() => /Preis: 4,95 € bei beispiel-drogerie\.de/.test(mitNummer(LIPPEN)?.notiz || ''), 8000) && mitNummer(LIPPEN).notiz.startsWith('Menge: 4 g') && mitNummer(LIPPEN).notiz.includes('Nuance: 102 Testrot') && mitNummer(LIPPEN).name === 'Lippenstift testrot' && mitNummer(LIPPEN).tags.join() === 'Lippenstift,vegan,rot' && mitNummer(LIPPEN).quelle.name === 'Open Beauty Facts', 'Im Netz nachschlagen: Datenbank und Claude – Preis und Nuance kommen in die Notiz dazu, ein Tag dazu, Name und Quelle bleiben');
+check(db.anfragen.length === vorMehr + 1 && claude.anfragen.length === claudeVorher + 1 && dinge().filter((d) => d.code === LIPPEN).length === 1, 'dabei je einmal gefragt – keine zweite Sache');
+await m3.click('[data-act="inv-nachschlagen"]');
+check(await bis(() => claude.anfragen.length === claudeVorher + 2) && await bis(async () => (await m3.locator('#toast').innerText()).includes('Gefunden')) && (mitNummer(LIPPEN).notiz.match(/Preis:/g) || []).length === 1, 'Noch einmal: nichts doppelt in der Notiz');
 
 // Löschen mit Rückgängig – das Foto kommt erst danach weg
 await m.click('[data-inv-ding]:has-text("Lederjacke")');

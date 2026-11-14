@@ -25,12 +25,14 @@
  *
  * Nachschlagen (inventar-netz.js): „Scannen“ in einer Liste liest den Code,
  * schlägt ihn in Open Beauty Facts und den verwandten Datenbanken nach und
- * legt die Sache gleich an – mit Name, Marke und deren Bild als Foto. Kennen
- * sie ihn nicht, sucht mit einem Schlüssel von Anthropic Claude im Internet
- * (ohne Bild). Ebenso nach dem Scannen in einer Sache, der noch etwas fehlt
- * (Claude nur, wenn sie noch keinen Namen hat), mit „Im Netz nachschlagen“
- * und bei „Eintragen“ nach „Hab ich das schon?“. Eingetragen wird nur, was
- * noch leer ist; die Sache zeigt, wo es herkommt.
+ * legt die Sache gleich an – mit Name, Marke, deren Bild als Foto, Tags
+ * (Kategorie, Siegel) und in der Notiz Menge, Haltbarkeit und
+ * Inhaltsstoffe. Kennen sie ihn nicht, sucht mit einem Schlüssel von
+ * Anthropic Claude im Internet und liest die Produktseite (ohne Bild). Ebenso
+ * nach dem Scannen in einer Sache, der noch etwas fehlt, und bei „Eintragen“
+ * nach „Hab ich das schon?“; „Im Netz nachschlagen“ fragt beide, für alles,
+ * was es gibt. Name, Marke und Liste nur, wenn sie noch leer sind; Tags und
+ * Notiz kommen dazu. Die Sache zeigt, wo es herkommt.
  */
 import { app, $, $$, melde, lese, schreibe } from './kern.js';
 import { esc } from './format.js';
@@ -321,13 +323,13 @@ ${d.quelle ? `<p class="fine inv-quelle">Gefunden bei <a href="${esc(d.quelle.ur
 
 /** Eine Nummer, die sich nachschlagen lässt (8 bis 14 Ziffern). */
 const nachschlagbar = (d) => /^\d{8,14}$/.test(String(d?.code || ''));
-const fehltWas = (d) => !String(d.name || '').trim() || !String(d.marke || '').trim() || !d.foto;
+const fehltWas = (d) => !String(d.name || '').trim() || !String(d.marke || '').trim() || !d.foto || !String(d.notiz || '').trim();
 
-/** Unter dem Strichcode: welche Sachen ihn schon tragen – sonst, wenn noch etwas fehlt, „Im Netz nachschlagen“. */
+/** Unter dem Strichcode: welche Sachen ihn schon tragen – sonst „Im Netz nachschlagen“. */
 function gleichHTML(d) {
   const andere = d.code ? mitCode(inv(), d.code).filter((x) => x.id !== d.id) : [];
   if (andere.length) return `<p class="inv-gleich">Gibt es schon: ${andere.map((x) => `<button type="button" class="linkbtn" data-inv-ding="${esc(x.id)}">${esc(dingName(x))} (${esc(listenName(liste(x.liste)))})</button>`).join(', ')}</p>`;
-  return nachschlagbar(d) && fehltWas(d) ? '<button type="button" class="linkbtn inv-nachschlagen" data-act="inv-nachschlagen">Im Netz nachschlagen</button>' : '';
+  return nachschlagbar(d) ? '<button type="button" class="linkbtn inv-nachschlagen" data-act="inv-nachschlagen">Im Netz nachschlagen</button>' : '';
 }
 
 const listenOptionen = (d) => listenVon(inv()).map((x) => `<option value="${esc(x.id)}"${x.id === d.liste ? ' selected' : ''}>${esc(listenName(x))}</option>`).join('') + (liste(d.liste) ? '' : '<option value="" selected>Ohne Liste</option>');
@@ -676,16 +678,32 @@ async function bildHolen(t) {
 
 const gefundenText = (t) => `Gefunden: ${t.name || t.marke}${t.name && t.marke ? ` (${t.marke})` : ''}`;
 
+/** Zwei Treffer zusammen (Datenbank und Claude): was der erste nicht hat, vom zweiten; Tags und Notiz von beiden. */
+function zusammen(a, b) {
+  if (!a || !b) return a || b;
+  return { name: a.name || b.name, marke: a.marke || b.marke, liste: a.liste || b.liste, tags: tagsBereinigen([...(a.tags || []), ...(b.tags || [])]), notiz: [a.notiz, b.notiz].filter(Boolean).join('\n'), bild: a.bild || b.bild, klein: a.klein || b.klein, quelle: a.quelle || b.quelle };
+}
+
+/** Die Notiz mit dem, was dazukommt – nur Zeilen, die noch nicht drinstehen. */
+function notizDazu(alt, neu) {
+  const a = String(alt || '').trim();
+  const zeilen = String(neu || '').split('\n').map((z) => z.trim()).filter((z) => z && !a.includes(z));
+  if (!zeilen.length) return alt || '';
+  return (a ? `${a}\n\n${zeilen.join('\n')}` : zeilen.join('\n')).slice(0, MAX_NOTIZ);
+}
+
 /**
- * Zur Nummer einer Sache nachschlagen (inventar-netz.js) und eintragen, was
- * noch leer ist: Name, Marke, Liste, Tags, die Quelle – und als Foto das Bild
- * der Datenbank, wenn sie noch keins hat. vorher: der Treffer, den „Hab ich
- * das schon?“ schon hat; gefragt: die Datenbanken kennen die Nummer nicht
- * (nicht noch einmal fragen). suchen: Kennen sie sie nicht, sucht Claude im
- * Internet (nur mit Schlüssel von Anthropic; kostet ein paar Cent). still:
- * ohne Meldung, wenn nichts gefunden ist.
+ * Zur Nummer einer Sache nachschlagen (inventar-netz.js) und eintragen: Name,
+ * Marke und Liste, wenn sie noch leer sind, dazu Tags, die Notiz (Menge,
+ * Haltbarkeit, Inhaltsstoffe, Farbe, Größe, Preis …) und die Quelle – und als
+ * Foto das Bild der Datenbank, wenn sie noch keins hat. vorher: der Treffer,
+ * den „Hab ich das schon?“ schon hat; gefragt: die Datenbanken kennen die
+ * Nummer nicht (nicht noch einmal fragen). Kennen sie sie nicht, sucht Claude
+ * im Internet (nur mit Schlüssel von Anthropic; kostet ein paar Cent) – mit
+ * alles auch dann, für noch mehr („Im Netz nachschlagen“). still: ohne
+ * Meldung, wenn nichts gefunden ist.
  */
-async function nachschlagenFuer(id, { vorher = null, gefragt = false, suchen = true, still = false } = {}) {
+async function nachschlagenFuer(id, { vorher = null, gefragt = false, alles = false, still = false } = {}) {
   const code = aktuell(id)?.code;
   if (!code || laeuft.has(id)) return;
   laeuft.set(id, 'netz');
@@ -697,16 +715,16 @@ async function nachschlagenFuer(id, { vorher = null, gefragt = false, suchen = t
       try { t = await nachschlagen(code); } catch { fehler = 'Nachschlagen ging gerade nicht – ohne Netz?'; }
     }
     const schluessel = ladeKi();
-    if (!t && suchen && anbieterVon(schluessel) === 'anthropic') {
+    if ((!t || alles) && anbieterVon(schluessel) === 'anthropic') {
       laeuft.set(id, 'suche');
       fotoTeilNeu(id);
       const listen = listenVon(inv()).map((l) => ({ id: l.id, name: listenName(l) }));
       try {
         const a = await kiMitWerkzeugen(rumpfNachschlagen({ code, listen: listen.map((l) => l.name) }), { schluessel, berater: false });
-        t = gesuchtBereinigen(jsonAus(a.text), { quellen: a.quellen, listen });
+        t = zusammen(t, gesuchtBereinigen(jsonAus(a.text), { quellen: a.quellen, listen }));
         fehler = '';
       } catch (e) {
-        fehler = e?.message || 'Die Suche im Internet hat nicht geklappt.';
+        if (!t) fehler = e?.message || 'Die Suche im Internet hat nicht geklappt.';
       }
     }
   } finally {
@@ -719,14 +737,14 @@ async function nachschlagenFuer(id, { vorher = null, gefragt = false, suchen = t
     if (!still) melde(fehler || `Zu ${code} nichts gefunden – ${d.foto ? 'trag es von Hand ein' : `mach ein Foto${ladeKi() ? ', die KI erkennt es' : ''}`}.`);
     return;
   }
-  // Nur, was noch leer ist – was schon dasteht, bleibt
-  const neu = { ...d, name: d.name.trim() ? d.name : t.name, marke: d.marke.trim() ? d.marke : t.marke, tags: (d.tags || []).length ? d.tags : t.tags, liste: liste(d.liste) ? d.liste : t.liste || d.liste, quelle: d.quelle || t.quelle };
+  // Name, Marke und Liste nur, wenn sie noch leer sind; Tags und Notiz kommen dazu
+  const neu = { ...d, name: d.name.trim() ? d.name : t.name, marke: d.marke.trim() ? d.marke : t.marke, tags: tagsBereinigen([...(d.tags || []), ...(t.tags || [])]), notiz: notizDazu(d.notiz, t.notiz), liste: liste(d.liste) ? d.liste : t.liste || d.liste, quelle: d.quelle || t.quelle };
   clearTimeout(timer);
   timer = null;
   speichern(neu);
   if (liste(neu.liste) && neu.liste !== d.liste && zustand.ding === id) { zustand.liste = neu.liste; merken(); }
   if ($('#inv-ding')?.dataset.id === id) {
-    for (const [sel, k] of [['#inv-name', 'name'], ['#inv-marke', 'marke']]) { const f = $(sel); if (f) f.value = neu[k]; }
+    for (const [sel, k] of [['#inv-name', 'name'], ['#inv-marke', 'marke'], ['#inv-notiz', 'notiz']]) { const f = $(sel); if (f) f.value = neu[k]; }
   }
   melde(gefundenText(t));
   if (d.foto || vorschau.has(id) || !(t.bild || t.klein)) return;
@@ -750,8 +768,7 @@ async function codeFuerDing(id, datei) {
   if (f) f.value = code;
   const andere = mitCode(inv(), code).filter((x) => x.id !== id);
   melde(andere.length ? `${code} – das gibt es schon: ${dingName(andere[0])}` : `Strichcode ${code}`);
-  // Claude sucht nur, wenn noch kein Name da ist – das kostet
-  if (!andere.length && fehltWas(d)) nachschlagenFuer(id, { suchen: !d.name.trim(), still: !!d.name.trim() });
+  if (!andere.length && fehltWas(d)) nachschlagenFuer(id, { still: !!d.name.trim() });
 }
 
 /** Eine Sache öffnen (aus „Hab ich das schon?“ oder dem Scannen in einer Liste). */
@@ -875,7 +892,7 @@ export function klickInventar(el) {
     case 'inv-ding-weg': dingLoeschen(); return true;
     case 'inv-foto-weg': fotoWeg(); return true;
     case 'inv-ki': inventarJetztSpeichern(); kiAusfuellen(zustand.ding); return true;
-    case 'inv-nachschlagen': inventarJetztSpeichern(); nachschlagenFuer(zustand.ding); return true;
+    case 'inv-nachschlagen': inventarJetztSpeichern(); nachschlagenFuer(zustand.ding, { alles: true }); return true;
     default: return false;
   }
 }

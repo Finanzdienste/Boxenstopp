@@ -500,9 +500,11 @@ war, merkt sich das Gerät). Die Teile:
     Namen, wenn eine Datenbank ihn kennt, und „Eintragen“.
   - **Nachschlagen** (`js/inventar-netz.js`): **Scannen** in einer Liste
     liest den Strichcode – gibt es die Sache schon, ist sie offen –, schlägt
-    die Nummer nach und legt die Sache gleich an: Name, Marke und das Bild
-    der Datenbank als Foto (verkleinert ins Daten-Repo wie ein eigenes; im
-    Datensparmodus das kleine Bild). Gefragt wird zuerst **Open Beauty
+    die Nummer nach und legt die Sache gleich an: Name, Marke, das Bild der
+    Datenbank als Foto (verkleinert ins Daten-Repo wie ein eigenes; im
+    Datensparmodus das kleine Bild), Kategorie und Siegel (vegan,
+    tierversuchsfrei, Naturkosmetik …) als Tags und in der Notiz Menge,
+    Haltbarkeit nach dem Öffnen und Inhaltsstoffe. Gefragt wird zuerst **Open Beauty
     Facts**; steht die Nummer in Open Food Facts, Open Products Facts oder
     Open Pet Food Facts, sagt die Antwort das, und die App fragt dort. Frei,
     ohne Schlüssel, mit CORS – das Handy fragt selbst, eine Nummer auf
@@ -512,18 +514,22 @@ war, merkt sich das Gerät). Die Teile:
     nennt sich im Kopf `X-User-Agent` („Boxenstopp“ mit der Adresse dieses
     Repos – den echten User-Agent darf ein Browser nicht setzen). Kennt keine
     Datenbank die Nummer und ist ein Schlüssel von **Anthropic** eingetragen,
-    sucht **Claude im Internet** (Websuche, höchstens drei Suchen, ohne
-    Berater, ein paar Cent; nicht bei Rossmann): Ein Treffer zählt nur, wenn
-    seine Seite in den Suchergebnissen stand. Dabei gibt es kein Bild –
-    Bilder von Shops kann der Browser nicht holen, und sie gehören den Shops.
-    Mit Gemini sucht niemand im Internet. Eingetragen wird nur, was noch leer
-    ist; die Sache merkt sich die Quelle (`quelle`) und zeigt „Gefunden bei
-    Open Beauty Facts“ mit Link (Daten unter ODbL, Bilder unter CC BY-SA).
-    Ebenso nach dem Scannen in einer Sache, der noch Name, Marke oder Foto
-    fehlt (Claude nur, wenn sie noch keinen Namen hat), mit „Im Netz
-    nachschlagen“ unter dem Strichcode und bei „Eintragen“. An die
-    Datenbanken geht nur die Nummer, an Claude die Nummer und die Namen der
-    Listen.
+    sucht **Claude im Internet** und liest die Produktseite (höchstens fünf
+    Suchen und drei Seiten, ohne Berater, ein paar Cent): Name, Marke, Tags,
+    in die Notiz Farbe, Größe, Material und was sonst dasteht, der Preis mit
+    Seite und Monat und eine kurze Beschreibung. Ein Treffer zählt nur, wenn
+    seine Seite oder wenigstens die Website in den Such- oder
+    Leseergebnissen stand. Dabei gibt es kein Bild – Bilder von Shops kann
+    der Browser nicht holen (CORS), und Claude bekommt Seiten nur als Text.
+    Mit Gemini sucht niemand im Internet (Googles Bedingungen verbieten,
+    Treffer zu speichern). Name, Marke und Liste nur, wenn sie noch leer
+    sind; Tags und Notiz kommen dazu (nur, was noch nicht drinsteht). Die
+    Sache merkt sich die Quelle (`quelle`) und zeigt „Gefunden bei Open
+    Beauty Facts“ mit Link (Daten unter ODbL, Bilder unter CC BY-SA). Ebenso
+    nach dem Scannen in einer Sache, der noch etwas fehlt, und bei
+    „Eintragen“; **Im Netz nachschlagen** unter dem Strichcode fragt beide –
+    Datenbank und Claude – für alles, was es gibt. An die Datenbanken geht nur
+    die Nummer, an Claude die Nummer und die Namen der Listen.
   - In der gemeinsamen Liste sind es Amys Sachen (Tobi sieht sie auch, so
     sagt es der Hinweis), in einer eigenen Liste die des Gasts. Im Commit
     steht nur „Sachen“, nie, was es ist; keine Push-Nachricht.
@@ -1794,7 +1800,7 @@ liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
 Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
 Speichern mit Quelle, `pause_turn`, Ausweichen ohne Seiten lesen,
 Websuche aus, Abbrechen und der Hinweis mit Googles
-Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, Claudes Treffer nur mit einer Seite aus der Suche, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater) – und eine ausgedachte Seite zählt nicht. `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
+Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, mehr Daten (Kategorie, Siegel, Menge, Haltbarkeit, Inhaltsstoffe; bei Claude Angaben, Preis, Beschreibung), Claudes Treffer nur mit einer Seite oder Website aus Suche oder Lesen, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater), eine ausgedachte Seite zählt nicht, „Im Netz nachschlagen“ fragt beide und schreibt nichts doppelt in die Notiz. `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
 keine Zahlen auf der Karte, die Anfrage nur mit den offenen Zeilen, danach
 kcal und Preis, die Schätzung in der Liste und bei Tobi ohne eigene Anfrage,
 nach dem Bearbeiten nur die neue Zeile und nicht gleich noch einmal.
