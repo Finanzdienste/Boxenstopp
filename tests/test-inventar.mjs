@@ -260,7 +260,7 @@ const claudeFindet = (json, url) => ({
 });
 
 // Die KI (Gemini): antwortet mit dem, was in ki.antwort steht
-const ki = { anfragen: [], antwort: {} };
+const ki = { anfragen: [], antwort: {}, warten: 0 };
 const STROM = (json) => {
   const ev = (o) => `event: ${o.event_type}\r\ndata: ${JSON.stringify(o)}\r\n\r\n`;
   return ev({ event_type: 'interaction.created', interaction: { id: 'ia_1', status: 'in_progress' } })
@@ -272,6 +272,7 @@ const kiRoute = async (r) => {
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
   if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
   ki.anfragen.push(JSON.parse(req.postData() || '{}'));
+  if (ki.warten) await new Promise((f) => { setTimeout(f, ki.warten); });
   return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: STROM(JSON.stringify(ki.antwort)) });
 };
 
@@ -358,10 +359,34 @@ await m.setInputFiles('#inv-finden', BILD);
 check(await bis(async () => (await m.locator('#inv-name').count()) === 1 && (await m.inputValue('#inv-name')) === 'Lederjacke') && (await m.locator('#toast').innerText()).includes('Hast du schon'), 'Hab ich das schon? – scannen öffnet die Lederjacke: „Hast du schon“');
 await m.click('[data-act="inv-ding-zu"]');
 await m.click('[data-act="inv-zu"]');
+// Baut die App die Ansicht neu, während die Kamera offen ist (etwa beim Abgleich): Das Foto kommt trotzdem an
+await m.evaluate(() => { window.__altesFeld = document.querySelector('#inv-finden'); });
+await m.click('[data-act="inv-liste-neu"]');
+await m.click('[data-act="inv-form-zu"]');
+check(await bis(async () => (await m.locator('#inv-liste-form').count()) === 0), '„Abbrechen“ schließt das Formular „Neue Liste“ (auch wenn der Fokus darin steht)');
+check(await m.evaluate(() => !document.contains(window.__altesFeld) && !!document.querySelector('#inv-finden')), 'Neu gezeichnet: das Feld von vorher hängt nicht mehr im Dokument');
+await m.evaluate(async () => {
+  const f = new window.File([await (await fetch('icon-512.png')).blob()], 'foto.png', { type: 'image/png' });
+  const dt = new window.DataTransfer();
+  dt.items.add(f);
+  window.__altesFeld.files = dt.files;
+  window.__altesFeld.dispatchEvent(new window.Event('change', { bubbles: true }));
+});
+check(await bis(async () => (await m.locator('#inv-name').count()) === 1 && (await m.inputValue('#inv-name')) === 'Lederjacke'), 'das Foto am alten Feld kommt trotzdem an: „Hab ich das schon?“ öffnet die Lederjacke');
+await m.click('[data-act="inv-ding-zu"]');
+await m.click('[data-act="inv-zu"]');
+// Eine Liste über das Formular: „Anlegen“ öffnet sie (auch wenn der Fokus noch im Formular steht)
+await m.click('[data-act="inv-liste-neu"]');
+await m.fill('#inv-liste-name', 'Schmuck');
+await m.click('#inv-liste-form button[type="submit"]');
+check(await bis(async () => (await m.locator('#inv-titel').count()) === 1 && (await m.locator('#inv-titel').innerText()) === 'Schmuck') && await bis(() => Object.values(mar.liste().inventar.listen).some((l) => l.name === 'Schmuck')), 'Neue Liste über das Formular: „Anlegen“ legt „Schmuck“ an und öffnet sie');
+await m.click('[data-act="inv-zu"]');
 await m.evaluate(() => { window.__code = '73513537'; });
 await m.setInputFiles('#inv-finden', BILD);
-check(await bis(async () => (await m.locator('#toast').innerText()).includes('noch nicht in deinen Listen')), 'Ein unbekannter Code: „noch nicht in deinen Listen“ – mit „Eintragen“');
-await m.click('#toast button');
+check(await bis(async () => (await m.locator('#inv-scan').innerText()).includes('73513537: noch nicht in deinen Listen') && (await m.locator('#inv-scan [data-act="inv-scan-knopf"]').innerText()) === 'Eintragen'), 'Ein unbekannter Code: oben steht „noch nicht in deinen Listen“ – mit „Eintragen“');
+await m.waitForTimeout(6500);
+check((await m.locator('#inv-scan').innerText()).includes('noch nicht in deinen Listen'), 'und das bleibt stehen (eine Meldung unten wäre nach ein paar Sekunden weg)');
+await m.click('[data-act="inv-scan-knopf"]');
 check(await bis(() => dinge().some((d) => d.code === '73513537' && !d.liste)) && (await m.inputValue('#inv-code')) === '73513537', 'Eintragen: eine neue Sache mit dem Code, noch ohne Liste');
 check(await bis(async () => (await m.locator('#toast').innerText()).includes('Zu 73513537 nichts gefunden')) && db.anfragen.length === 1 && db.anfragen[0].art === 'beauty', 'Die Datenbanken kennen die Nummer nicht: einmal gefragt, „nichts gefunden“ (ohne Schlüssel sucht niemand im Internet)');
 const kleidungId = Object.values(mar.liste().inventar.listen)[0].id;
@@ -399,9 +424,9 @@ await m.click('[data-act="inv-zu"]');
 await m.evaluate((c) => { window.__code = c; }, BUCH);
 const vorBuch = db.anfragen.length;
 await m.setInputFiles('#inv-finden', BILD);
-check(await bis(async () => (await m.locator('#toast').innerText()).includes('Notizbuch A5 (Papierwerk): noch nicht in deinen Listen')), 'Hab ich das schon? – nein, und die App sagt gleich, was es ist');
+check(await bis(async () => (await m.locator('#inv-scan').innerText()).includes('Notizbuch A5 (Papierwerk): noch nicht in deinen Listen')), 'Hab ich das schon? – nein, und die App sagt gleich, was es ist');
 check(db.anfragen.slice(vorBuch).map((x) => x.art).join() === 'beauty,product', 'erst Open Beauty Facts, die verweist auf Open Products Facts');
-await m.click('#toast button');
+await m.click('[data-act="inv-scan-knopf"]');
 check(await bis(() => mitNummer(BUCH)?.name === 'Notizbuch A5' && mitNummer(BUCH)?.marke === 'Papierwerk' && !mitNummer(BUCH)?.liste && mitNummer(BUCH)?.quelle?.name === 'Open Products Facts') && !mitNummer(BUCH).foto && db.anfragen.length === vorBuch + 2, 'Eintragen: mit Name, Marke und Quelle, noch ohne Liste – ohne Bild kein Foto, nicht noch einmal gefragt');
 check(await bis(async () => (await m.locator('.inv-nachschlagen').count()) === 1), 'unter dem Strichcode: „Im Netz nachschlagen“');
 await m.click('[data-act="inv-ding-zu"]');
@@ -426,8 +451,14 @@ check(await bis(async () => (await m2.inputValue('#inv-name')) === 'Weiße Sneak
 await m2.click('[data-act="inv-ding-zu"]');
 await m2.click('[data-act="inv-zu"]');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: '4006381333932' };
+ki.warten = 4500;
 await m2.setInputFiles('#inv-finden', BILD);
-check(await bis(async () => (await m2.locator('#toast').innerText()).includes('Kein Strichcode erkannt')) && /Strichcode/.test(ki.anfragen.at(-1)?.system_instruction || ''), 'Liest die KI eine falsche Prüfziffer: „Kein Strichcode erkannt“');
+await m2.waitForTimeout(3800);
+check((await m2.locator('#inv-scan').innerText()).includes('Liest den Strichcode') && (await m2.locator('#inv-scan').innerText()).includes('die KI schaut sich das Foto an') && (await m2.locator('#inv-scan .inv-scan-rad').count()) === 1, 'Solange die KI liest, steht es oben – auch nach ein paar Sekunden noch (mit Rädchen)');
+ki.warten = 0;
+check(await bis(async () => (await m2.locator('#inv-scan').innerText()).includes('Kein Strichcode erkannt'), 8000) && /Strichcode/.test(ki.anfragen.at(-1)?.system_instruction || ''), 'Liest die KI eine falsche Prüfziffer: oben „Kein Strichcode erkannt“');
+await m2.click('[data-act="inv-scan-zu"]');
+check(await bis(async () => (await m2.locator('#inv-scan .inv-scan').count()) === 0), '× schließt den Hinweis');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: CODE };
 await m2.setInputFiles('#inv-finden', BILD);
 check(await bis(async () => (await m2.locator('#inv-name').count()) === 1 && (await m2.inputValue('#inv-name')) === 'Lederjacke'), 'Richtig gelesen: „Hast du schon“ – die Lederjacke ist offen');
@@ -437,8 +468,8 @@ await m2.click('[data-act="inv-zu"]');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: '4000000000037' };
 const kiVorher = ki.anfragen.length;
 await m2.setInputFiles('#inv-finden', BILD);
-check(await bis(async () => (await m2.locator('#toast').innerText()).includes('4000000000037: noch nicht in deinen Listen')), 'Gemini liest eine unbekannte Nummer: „noch nicht in deinen Listen“');
-await m2.click('#toast button');
+check(await bis(async () => (await m2.locator('#inv-scan').innerText()).includes('4000000000037: noch nicht in deinen Listen')), 'Gemini liest eine unbekannte Nummer: „noch nicht in deinen Listen“');
+await m2.click('[data-act="inv-scan-knopf"]');
 check(await bis(async () => (await m2.locator('#toast').innerText()).includes('nichts gefunden')) && ki.anfragen.length === kiVorher + 1 && await bis(() => !!mitNummer('4000000000037')), 'Eintragen: die Datenbanken kennen sie nicht – mit Gemini sucht niemand im Internet, die Sache hat nur die Nummer');
 
 // Mit einem Schlüssel von Anthropic: kennt keine Datenbank die Nummer, sucht Claude im Internet

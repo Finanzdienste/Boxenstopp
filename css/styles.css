@@ -1912,6 +1912,14 @@ html.pm-offen{overflow:hidden}
 .inv-code input{flex:1;min-width:0}
 .inv-gleich{margin:4px 0 0;font-size:14px}
 .inv-nachschlagen{margin-top:2px}
+.inv-scan{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px;padding:12px 14px;border-radius:18px;border:2px solid var(--accent);background:var(--surface);box-shadow:var(--shadow);font:600 15px/1.35 var(--f-body);color:var(--ink)}
+.inv-scan:empty,#inv-scan:empty{display:none}
+.inv-scan-text{flex:1;min-width:12em}
+.inv-scan .amy-btn{min-height:40px;padding:0 16px;font-size:15px}
+.inv-scan-zu{border:0;background:none;font-size:22px;line-height:1;padding:4px 6px;color:var(--muted);cursor:pointer}
+.inv-scan-rad{width:18px;height:18px;border-radius:50%;border:3px solid color-mix(in srgb,var(--accent) 30%,transparent);border-top-color:var(--accent);animation:inv-dreh .8s linear infinite}
+@keyframes inv-dreh{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.inv-scan-rad{animation-duration:2.4s}}
 .inv-quelle{margin:8px 0 0;text-align:center;font-size:13px}
 .inv-quelle a{color:inherit;font-weight:600;text-underline-offset:3px}
 .inv-fein,.inv-zahl{margin:0}

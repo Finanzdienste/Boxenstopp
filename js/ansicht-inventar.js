@@ -88,12 +88,23 @@ let zustand = (() => {
 })();
 let timer = null;
 let formBild = 'womans-clothes';
+/**
+ * Was gerade beim Scannen passiert – oben in „Sachen“, bis das Ergebnis da
+ * ist (eine Meldung unten steht nur ein paar Sekunden, die KI braucht auf dem
+ * iPhone oft länger): { text, laeuft, knopf, aktion } oder null.
+ */
+let scan = null;
 const merken = () => schreibe(ANSICHT, { liste: zustand.liste, ding: zustand.ding, tag: zustand.tag, sort: zustand.sort });
 const inv = () => app.stand.inventar || { listen: {}, dinge: {} };
 const liste = (id) => (id && inv().listen[id]) || null;
 const ding = (id) => (id && inv().dinge[id]) || null;
 const listenName = (l) => (l ? String(l.name || '').trim() || 'Ohne Namen' : 'Ohne Liste');
-const neuZeichnen = () => app.amyNeuZeichnen?.();
+/** Was man selbst antippt, zeichnet neu – auch wenn der Fokus in einem Formular steht (nur ein Abgleich von außen lässt es stehen). */
+let erzwingen = false;
+const neuZeichnen = () => {
+  erzwingen = true;
+  try { app.amyNeuZeichnen?.(); } finally { erzwingen = false; }
+};
 const ort = () => ortVon(app.zugang);
 
 /** Wie viele Sachen es gibt (für den Schalter oben). */
@@ -357,13 +368,39 @@ function pruefen() {
 }
 
 /** Der Teil „Sachen“ im Bereich. */
+/** Der Hinweis beim Scannen (leer, wenn gerade keiner da ist). */
+function scanHTML() {
+  if (!scan) return '';
+  return `<div class="inv-scan${scan.laeuft ? ' laeuft' : ''}" role="status">${scan.laeuft ? '<span class="inv-scan-rad" aria-hidden="true"></span>' : ''}<span class="inv-scan-text">${esc(scan.text)}</span>${scan.knopf ? `<button type="button" class="amy-btn" data-act="inv-scan-knopf">${esc(scan.knopf)}</button>` : ''}${scan.laeuft ? '' : '<button type="button" class="inv-scan-zu" data-act="inv-scan-zu" aria-label="Schließen">×</button>'}</div>`;
+}
+
+/** Den Hinweis setzen (null: weg) – an Ort und Stelle, ohne den Rest neu zu bauen. */
+function scanZeigen(neu) {
+  scan = neu;
+  const el = $('#inv-scan');
+  if (el) el.innerHTML = scanHTML();
+}
+
+/**
+ * Ein Feld für Fotos hört selbst auf „change“: Baut die App die Ansicht neu,
+ * während die Kamera offen ist (etwa weil die Liste sich abgleicht), hängt das
+ * alte Feld nicht mehr im Dokument – sein Foto käme sonst nirgends an.
+ */
+function dateiFelderAnbinden(wurzel = document) {
+  for (const f of wurzel.querySelectorAll('#inv input[type="file"]')) {
+    if (f.dataset.angebunden) continue;
+    f.dataset.angebunden = '1';
+    f.addEventListener('change', (ev) => { ev.stopPropagation(); aenderungInventar(f); });
+  }
+}
+
 export function inventarHTML() {
   if (!app.listeDa) return '<section class="inv" id="inv" aria-label="Sachen"><p class="loading">Wird geladen…</p></section>';
   pruefen();
   const d = ding(zustand.ding);
   const inhalt = d ? dingHTML(d) : zustand.liste ? listeHTML(zustand.liste === OHNE ? null : liste(zustand.liste)) : uebersichtHTML();
-  setTimeout(() => { fotosEinsetzen(); aufraeumen(); }, 0);
-  return `<section class="inv" id="inv" aria-label="Sachen">${inhalt}</section>`;
+  setTimeout(() => { dateiFelderAnbinden(); fotosEinsetzen(); aufraeumen(); }, 0);
+  return `<section class="inv" id="inv" aria-label="Sachen"><div id="inv-scan">${scanHTML()}</div>${inhalt}</section>`;
 }
 
 /**
@@ -373,6 +410,7 @@ export function inventarHTML() {
  * getippt wird. true, wenn so aktualisiert wurde (sonst baut ansicht-amy.js neu).
  */
 export function inventarAktualisieren(el) {
+  if (erzwingen) return false;
   const offen = el.querySelector('#inv-ding');
   const d = ding(zustand.ding);
   if (offen && d && offen.dataset.id === d.id) {
@@ -414,7 +452,7 @@ function fotoTeilNeu(id) {
   const d = ding(id);
   if (!t || !d || $('#inv-ding')?.dataset.id !== id) return;
   const neu = fotoTeilHTML(d);
-  if (t.dataset.html !== neu) { t.innerHTML = neu; t.dataset.html = neu; fotosEinsetzen(t); }
+  if (t.dataset.html !== neu) { t.innerHTML = neu; t.dataset.html = neu; dateiFelderAnbinden(t); fotosEinsetzen(t); }
 }
 
 /* -------------------------------------------------------------- Speichern */
@@ -617,7 +655,7 @@ async function kiAusfuellen(id) {
     const b64 = await fotoB64(d0);
     if (!b64) throw new Error('Das Foto ist gerade nicht da – ohne Netz?');
     const listen = listenVon(inv()).map((l) => ({ id: l.id, name: listenName(l) }));
-    const antwort = await kiAnfragen(rumpfErkennen({ anbieter: anbieterVon(schluessel), b64, listen: listen.map((l) => l.name) }), { schluessel, roh: true });
+    const antwort = await kiAnfragen(rumpfErkennen({ anbieter: anbieterVon(schluessel), b64, listen: listen.map((l) => l.name) }), { schluessel, roh: true, berater: false });
     const e = erkanntBereinigen(jsonAus(antwort.text), listen);
     const d = aktuell(id);
     if (!d) return;
@@ -656,12 +694,14 @@ async function codeLesen(datei) {
   try {
     const f = await fotoVorbereiten(datei, KANTE_CODE);
     URL.revokeObjectURL(f.url);
-    const antwort = await kiAnfragen(rumpfErkennen({ anbieter: anbieterVon(schluessel), b64: f.b64, nurCode: true }), { schluessel, roh: true });
+    const antwort = await kiAnfragen(rumpfErkennen({ anbieter: anbieterVon(schluessel), b64: f.b64, nurCode: true }), { schluessel, roh: true, berater: false });
     return erkanntBereinigen(jsonAus(antwort.text)).code;
   } catch { return ''; }
 }
 
-const keinCode = () => melde(ladeKi() || 'BarcodeDetector' in window ? 'Kein Strichcode erkannt – näher ran und gerade halten, oder die Ziffern darunter abtippen.' : 'Ohne KI-Schlüssel kann dieses Handy keinen Strichcode lesen – tipp die Ziffern darunter ab.');
+const keinCodeText = () => (ladeKi() || 'BarcodeDetector' in window ? 'Kein Strichcode erkannt – näher ran und gerade halten, oder die Ziffern darunter abtippen.' : 'Ohne KI-Schlüssel kann dieses Handy keinen Strichcode lesen – tipp die Ziffern darunter ab.');
+const keinCode = () => melde(keinCodeText());
+const liestText = () => ('BarcodeDetector' in window ? 'Liest den Strichcode …' : 'Liest den Strichcode … die KI schaut sich das Foto an, das dauert ein paar Sekunden.');
 
 /** Das Bild aus der Datenbank: groß – im Datensparmodus das kleine, und das kleine, wenn das große nicht kommt. null ohne Bild. */
 async function bildHolen(t) {
@@ -791,9 +831,10 @@ function oeffnen(d) {
 /** „Scannen“ in einer Liste: Gibt es die Sache schon, ist sie gleich offen – sonst legt die App sie an und schlägt nach. */
 async function scannenUndAnlegen(datei) {
   const listeId = liste(zustand.liste) ? zustand.liste : null;
-  melde('Liest den Strichcode …');
+  scanZeigen({ text: liestText(), laeuft: true });
   const code = await codeLesen(datei);
-  if (!code) { keinCode(); return; }
+  if (!code) { scanZeigen({ text: keinCodeText() }); return; }
+  scanZeigen(null);
   const da = mitCode(inv(), code);
   if (da.length) {
     oeffnen(da[0]);
@@ -808,32 +849,34 @@ async function scannenUndAnlegen(datei) {
 
 /** „Hab ich das schon?“ – scannen und nachsehen; was es nicht gibt, schlägt die App gleich nach (nur in den Datenbanken). */
 async function finden(datei) {
-  melde('Liest den Strichcode …');
+  scanZeigen({ text: liestText(), laeuft: true });
   const code = await codeLesen(datei);
-  if (!code) { keinCode(); return; }
+  if (!code) { scanZeigen({ text: keinCodeText() }); return; }
   const da = mitCode(inv(), code);
   if (da.length === 1) {
     const d = da[0];
+    scanZeigen(null);
     oeffnen(d);
     melde(`Hast du schon: ${dingName(d)} (${listenName(liste(d.liste))})`);
     return;
   }
   if (da.length > 1) {
+    scanZeigen({ text: `Hast du schon – ${da.length}-mal (siehe unten)` });
     zustand = { ...zustand, suche: code };
     neuZeichnen();
-    melde(`Hast du schon – ${da.length}-mal`);
     return;
   }
   let t = null;
   let gefragt = false;
   if (/^\d{8,14}$/.test(code)) {
-    melde(`${code}: noch nicht in deinen Listen – schlägt nach …`);
+    scanZeigen({ text: `${code}: noch nicht in deinen Listen – schlägt nach …`, laeuft: true });
     try { t = await nachschlagen(code); gefragt = true; } catch { /* ohne Netz: nur die Nummer */ }
   }
   const was = t ? `${t.name || t.marke}${t.name && t.marke ? ` (${t.marke})` : ''}` : code;
-  melde(`${was}: noch nicht in deinen Listen`, {
+  scanZeigen({
+    text: `${was}: noch nicht in deinen Listen`,
     knopf: 'Eintragen',
-    beiKnopf: () => {
+    aktion: () => {
       const id = dingNeu({ code, liste: liste(zustand.liste) ? zustand.liste : null });
       if (id) nachschlagenFuer(id, { vorher: t, gefragt });
     },
@@ -901,6 +944,8 @@ export function klickInventar(el) {
     case 'inv-foto-weg': fotoWeg(); return true;
     case 'inv-ki': inventarJetztSpeichern(); kiAusfuellen(zustand.ding); return true;
     case 'inv-nachschlagen': inventarJetztSpeichern(); nachschlagenFuer(zustand.ding, { alles: true }); return true;
+    case 'inv-scan-zu': scanZeigen(null); return true;
+    case 'inv-scan-knopf': { const aktion = scan?.aktion; scanZeigen(null); aktion?.(); return true; }
     default: return false;
   }
 }
