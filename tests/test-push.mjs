@@ -250,6 +250,15 @@ check(await bis(() => pj()?.abos?.tobi?.[0]?.endpoint === 'https://push.example/
 // Der Timer kommt erst beim Laden der Seite in den Speicher (8 s danach fällig) – so hängt die Probe nicht davon ab,
 // wie lange das Neuladen dauert (ist er beim Start schon abgelaufen, klingelt er in der App, die Mitteilung fehlt dann manchmal)
 await s.addInitScript(() => {
+  // Für die Fehlersuche, falls die Mitteilung fehlt: was die App beim Klingeln tut (steht dann in der Meldung)
+  const spur = [];
+  window.__spur = spur;
+  const zeigen = window.ServiceWorkerRegistration.prototype.showNotification;
+  window.ServiceWorkerRegistration.prototype.showNotification = function (titel, opt) {
+    spur.push(['zeigen', opt?.tag || '', this.active?.state || 'ohne aktiven Worker']);
+    return zeigen.call(this, titel, opt).then((x) => { spur.push(['gezeigt', opt?.tag || '']); return x; }, (e) => { spur.push(['abgelehnt', String(e?.message || e)]); throw e; });
+  };
+  if ('Notification' in window) window.Notification = new Proxy(window.Notification, { construct(Ziel, args) { spur.push(['direkt', args[1]?.tag || '']); return new Ziel(...args); } });
   if (sessionStorage.getItem('probe.timer')) return;
   sessionStorage.setItem('probe.timer', '1');
   localStorage.setItem('boxenstopp.timer.v1', JSON.stringify([{ id: 't-probe', rid: 'chili', schritt: 5, label: 'Chili: köcheln', minuten: 1, start: Date.now(), ende: Date.now() + 8000, fertig: false, dann: '', folge: [], stufe: 1, stufen: 1 }]));
@@ -258,7 +267,19 @@ await s.reload({ waitUntil: 'load' });
 await s.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
 check(await s.evaluate(() => { const t = JSON.parse(localStorage.getItem('boxenstopp.timer.v1') || '[]').find((x) => x.id === 't-probe'); return !!t && !t.fertig; }), 'der Timer läuft nach dem Laden noch');
 const timerMitteilung = await bis(() => s.evaluate(async () => { const r = await navigator.serviceWorker.ready; const ns = await r.getNotifications({ tag: 't-probe' }); return ns.length ? [ns[0].title, ns[0].body, ns[0].data?.ziel] : null; }), 20000);
-check(JSON.stringify(timerMitteilung) === JSON.stringify(['Timer fertig', 'Chili: köcheln', 'chili#5']), `Timer fertig: Mitteilung über den Service Worker (${JSON.stringify(timerMitteilung)})`);
+const timerSpur = timerMitteilung ? '' : await s.evaluate(async () => {
+  const r = await navigator.serviceWorker.getRegistration();
+  return JSON.stringify({
+    erlaubt: Notification.permission,
+    worker: r?.active?.state || '',
+    geladen: window.performance.getEntriesByType('navigation')[0]?.type || '',
+    neugeladen: sessionStorage.getItem('boxenstopp.neugeladen'),
+    timer: JSON.parse(localStorage.getItem('boxenstopp.timer.v1') || '[]').map((t) => [t.id, t.fertig, Math.round((t.ende - Date.now()) / 1000)]),
+    spur: window.__spur || [],
+    alle: r ? (await r.getNotifications()).map((n) => n.tag) : [],
+  });
+});
+check(JSON.stringify(timerMitteilung) === JSON.stringify(['Timer fertig', 'Chili: köcheln', 'chili#5']), `Timer fertig: Mitteilung über den Service Worker (${JSON.stringify(timerMitteilung)})${timerSpur ? ` – ${timerSpur}` : ''}`);
 
 // Ein weiteres Gerät: Push ist eingerichtet, hier noch aus – der Hinweis kommt einmal von selbst
 const hw = await handy(browser, { attrappe: gh, adresse: mitLink, ohneWorker: false, skript: fakePush, rechte: ['notifications'] });
