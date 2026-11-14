@@ -14,6 +14,7 @@
  */
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, ROOT } from './hilfe.mjs';
 import { leer, anwenden, bereinigen, beschreibung, opZusammen, bescheidNoetig } from '../js/liste.js';
 import {
@@ -21,7 +22,7 @@ import {
   sortiert, tagsVon, mitTag, suchen, mitCode, verschieben, dingLeer, dingName, naechsteReihe, MAX_DINGE, neueDingId, neueListeId, LISTE_ID, DING_ID, quelleBereinigen,
 } from '../js/inventar.js';
 import { rumpfErkennen, erkanntBereinigen, ERKENNEN_SCHEMA } from '../js/inventar-ki.js';
-import { nachschlagen, nachschlagenAdresse, produktSeite, bildAdresse, produktAus, andereDatenbank, rumpfNachschlagen, gesuchtBereinigen, DATENBANKEN, KENNUNG } from '../js/inventar-netz.js';
+import { nachschlagen, nachschlagenAdresse, produktSeite, bildAdresse, produktAus, andereDatenbank, rumpfNachschlagen, gesuchtBereinigen, shopBild, DATENBANKEN, KENNUNG, PRODUKT_BILD } from '../js/inventar-netz.js';
 import { ANBIETER } from '../js/ki.js';
 import { dateiHochladen, dateiHolen, dateiLoeschen } from '../js/speicher.js';
 import { INVENTAR_BILDER, ALLE_BILDER } from '../js/bilder.js';
@@ -173,6 +174,21 @@ check(gefunden?.name === 'Wanderschuhe Grau' && gefunden.marke === 'Bergfest' &&
 check(gefunden.notiz === 'Farbe: Grau · Größe: 39 · Material: Leder\nPreis: 89,95 € bei beispiel-shop.de (Nov. 2026)\nLeichter Wanderschuh.', 'in der Notiz: die Angaben, der Preis mit Seite und Monat, die Beschreibung');
 check(gesuchtBereinigen({ gefunden: true, name: 'Andere Seite derselben Website', url: 'https://beispiel-shop.de/p/anders' }, { quellen: [{ url: SEITE }] })?.name === 'Andere Seite derselben Website', 'Eine andere Seite derselben Website zählt (die hat Claude gelesen)');
 check(gesuchtBereinigen({ gefunden: true, name: 'Ausgedacht', url: 'https://anders.example/x' }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ gefunden: false, name: 'x', url: SEITE }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ name: 'x', url: SEITE }, { quellen: [] }) === null && gesuchtBereinigen(null) === null, 'Eine Website, die in keinem Such- oder Leseergebnis stand, zählt nicht (ausgedacht); „nicht gefunden“ ist nichts');
+check(gefunden.seite === SEITE && treffer.seite === '', 'Claudes Treffer kennt die Shopseite (für ihr Bild), die Datenbank nicht');
+// Das Bild von der Shopseite (shopBild): an die Funktion nur die Seite und die Prüfsumme
+{
+  const SCHLUESSEL = 'sk-ant-api03-NODETESTNODETESTNODETEST';
+  const rufe = [];
+  const holen = async (url, opt) => { rufe.push({ url, opt }); return new Response(new Uint8Array([0xff, 0xd8, 0xff]), { status: 200, headers: { 'content-type': 'image/jpeg' } }); };
+  const b = await shopBild(SEITE, { schluessel: SCHLUESSEL, holen });
+  check(b?.size === 3 && rufe.length === 1 && rufe[0].url === PRODUKT_BILD && rufe[0].opt.method === 'POST' && rufe[0].opt.headers['x-schluessel-hash'] === createHash('sha256').update(SCHLUESSEL).digest('hex') && JSON.parse(rufe[0].opt.body).seite === SEITE && !JSON.stringify(rufe[0]).includes(SCHLUESSEL), 'Shop-Bild: an die Funktion die Seite und die Prüfsumme – nie den Schlüssel');
+  const nein = async () => new Response('Kein Bild gefunden.', { status: 404 });
+  const text = async () => new Response('<html>', { status: 200, headers: { 'content-type': 'text/html' } });
+  const kaputt = async () => { throw new TypeError('Failed to fetch'); };
+  check(await shopBild(SEITE, { schluessel: SCHLUESSEL, holen: nein }) === null && await shopBild(SEITE, { schluessel: SCHLUESSEL, holen: text }) === null && await shopBild(SEITE, { schluessel: SCHLUESSEL, holen: kaputt }) === null, 'kein Bild, keins als Bild, kein Netz: null');
+  rufe.length = 0;
+  check(await shopBild(SEITE, { schluessel: 'AQ.gemini-test', holen }) === null && await shopBild('http://unsicher.example/p', { schluessel: SCHLUESSEL, holen }) === null && rufe.length === 0, 'ohne Schlüssel von Anthropic oder ohne https: gar nicht gefragt');
+}
 // Die Quelle in der Sache
 check(JSON.stringify(quelleBereinigen({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' })) === JSON.stringify({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' }) && quelleBereinigen({ name: 'x', url: 'javascript:alert(1)' }) === null && quelleBereinigen({ name: 'x', url: 'http://a.example' }) === null && quelleBereinigen({ url: 'https://a.example' }) === null && quelleBereinigen('x') === null, 'Quelle: Name und https-Adresse – javascript: oder http nicht');
 const mitQuelle = anwenden(s, opDing({ ...jacke, quelle: { name: 'Open Beauty Facts', url: `https://world.openbeautyfacts.org/product/${LIPPEN}` } }, 'Marielle', '2026-11-14T13:00:00.000Z'));
@@ -222,6 +238,16 @@ const claudeRoute = async (r) => {
   if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
   claude.anfragen.push({ kopf: req.headers(), rumpf: JSON.parse(req.postData() || '{}') });
   return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(claude.antwort) });
+};
+// Die Supabase-Funktion produkt-bild (das Bild von der Shopseite): antwortet mit dem Testbild – oder, mit shop.bild = false, „Kein Bild“
+const shop = { anfragen: [], bild: true };
+const shopRoute = async (r) => {
+  const req = r.request();
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, x-schluessel-hash', 'access-control-allow-methods': 'POST, OPTIONS' };
+  if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  shop.anfragen.push({ kopf: req.headers(), rumpf: JSON.parse(req.postData() || '{}') });
+  if (!shop.bild) return r.fulfill({ status: 404, headers: cors, body: 'Kein Bild gefunden.' });
+  return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'image/png' }, body: BILD_ROH });
 };
 const claudeFindet = (json, url) => ({
   id: 'msg_1', type: 'message', role: 'assistant', model: ANBIETER.anthropic.modell, stop_reason: 'end_turn',
@@ -418,6 +444,7 @@ check(await bis(async () => (await m2.locator('#toast').innerText()).includes('n
 // Mit einem Schlüssel von Anthropic: kennt keine Datenbank die Nummer, sucht Claude im Internet
 const m3h = await geraet({ leser: true, schluessel: AKEY });
 await m3h.ctx.route('https://api.anthropic.com/**', claudeRoute);
+await m3h.ctx.route(PRODUKT_BILD, shopRoute);
 const m3 = m3h.page;
 check((await m3.locator('.inv-fein').innerText()).includes('sucht Claude im Internet'), 'Der Hinweis sagt es: kennen die Datenbanken die Nummer nicht, sucht Claude');
 await m3.click(`[data-inv-liste="${kleidungId}"]`);
@@ -426,7 +453,9 @@ claude.antwort = claudeFindet({ gefunden: true, name: 'Wanderschuhe Grau', marke
 await m3.evaluate((c) => { window.__code = c; }, SCHUHE);
 const vorSchuhe = db.anfragen.length;
 await m3.setInputFiles('#inv-neu-code', BILD);
-check(await bis(() => mitNummer(SCHUHE)?.name === 'Wanderschuhe Grau' && mitNummer(SCHUHE)?.marke === 'Bergfest' && mitNummer(SCHUHE)?.liste === kleidungId && mitNummer(SCHUHE)?.tags.join() === 'grau,Wandern' && mitNummer(SCHUHE)?.quelle?.url === SEITE, 8000) && !mitNummer(SCHUHE).foto, 'Claude findet sie im Internet: Name, Marke, Tags, die Seite als Quelle – ohne Bild');
+check(await bis(() => mitNummer(SCHUHE)?.name === 'Wanderschuhe Grau' && mitNummer(SCHUHE)?.marke === 'Bergfest' && mitNummer(SCHUHE)?.liste === kleidungId && mitNummer(SCHUHE)?.tags.join() === 'grau,Wandern' && mitNummer(SCHUHE)?.quelle?.url === SEITE, 8000), 'Claude findet sie im Internet: Name, Marke, Tags, die Seite als Quelle');
+check(await bis(() => FOTO_PFAD.test(mitNummer(SCHUHE)?.foto?.pfad || '') && mar.zustand.roh[mitNummer(SCHUHE).foto.pfad]?.subarray(0, 3).toString('hex') === 'ffd8ff', 8000), 'und das Bild der Shopseite ist ihr Foto (über die Funktion produkt-bild) – als JPEG ins Repo');
+check(shop.anfragen.length === 1 && shop.anfragen[0].rumpf.seite === SEITE && shop.anfragen[0].kopf['x-schluessel-hash'] === createHash('sha256').update(AKEY).digest('hex') && !JSON.stringify(shop.anfragen[0]).includes(AKEY), 'an die Funktion: die Seite und die Prüfsumme – nie der Schlüssel');
 check(/^Farbe: Grau · Größe: 39\nPreis: 89,95 € bei beispiel-shop\.de \(\S+ \d{4}\)\nLeichter Wanderschuh\.$/.test(mitNummer(SCHUHE).notiz), 'und in der Notiz Farbe, Größe, Preis (mit Seite und Monat) und eine Beschreibung');
 const cf = claude.anfragen.at(-1);
 check(db.anfragen.length === vorSchuhe + 1 && cf?.kopf['x-api-key'] === AKEY && cf.rumpf.tools.map((t) => t.name).join() === 'web_search,web_fetch' && cf.rumpf.messages[0].content[0].text.endsWith(SCHUHE) && !!cf.rumpf.cache_control, 'erst die Datenbank, dann Claude: Websuche und Seite lesen (ohne Berater), nur die Nummer');
@@ -435,7 +464,17 @@ claude.antwort = claudeFindet({ gefunden: true, name: 'Ausgedacht', marke: 'X', 
 await m3.click('[data-act="inv-ding-zu"]');
 await m3.evaluate(() => { window.__code = '4000000000051'; });
 await m3.setInputFiles('#inv-neu-code', BILD);
-check(await bis(async () => (await m3.locator('#toast').innerText()).includes('Zu 4000000000051 nichts gefunden')) && await bis(() => mitNummer('4000000000051')?.liste === kleidungId) && !mitNummer('4000000000051').name && !ding('Ausgedacht'), 'Nennt Claude eine Seite, die in keiner Suche stand: nichts eingetragen – die Sache hat nur die Nummer');
+check(await bis(async () => (await m3.locator('#toast').innerText()).includes('Zu 4000000000051 nichts gefunden')) && await bis(() => mitNummer('4000000000051')?.liste === kleidungId) && !mitNummer('4000000000051').name && !ding('Ausgedacht') && shop.anfragen.length === 1, 'Nennt Claude eine Seite, die in keiner Suche stand: nichts eingetragen – die Sache hat nur die Nummer (und kein Bild wird geholt)');
+// Hat die Shopseite kein Bild: die Sache bleibt ohne Foto, ohne Fehlermeldung
+const MUETZE = '4000000000068';
+const SEITE2 = 'https://www.beispiel-shop.de/p/muetze-blau';
+claude.antwort = claudeFindet({ gefunden: true, name: 'Mütze Blau', marke: 'Bergfest', url: SEITE2, seite: 'beispiel-shop.de' }, SEITE2);
+shop.bild = false;
+await m3.click('[data-act="inv-ding-zu"]');
+await m3.evaluate((c) => { window.__code = c; }, MUETZE);
+await m3.setInputFiles('#inv-neu-code', BILD);
+check(await bis(() => mitNummer(MUETZE)?.name === 'Mütze Blau', 8000) && await bis(() => shop.anfragen.length === 2) && await bis(async () => (await m3.locator('#inv-lauf, .inv-lauf').count()) === 0) && !mitNummer(MUETZE).foto && !(await m3.locator('#toast').innerText()).includes('ließ sich nicht'), 'Hat die Shopseite kein Bild: ohne Foto, ohne Fehlermeldung');
+shop.bild = true;
 // „Im Netz nachschlagen“ fragt beide – auch wenn die Datenbank die Nummer kennt
 await m3.click('[data-act="inv-ding-zu"]');
 await m3.click('[data-act="inv-zu"]');

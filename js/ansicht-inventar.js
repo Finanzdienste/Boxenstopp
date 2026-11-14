@@ -28,7 +28,8 @@
  * legt die Sache gleich an – mit Name, Marke, deren Bild als Foto, Tags
  * (Kategorie, Siegel) und in der Notiz Menge, Haltbarkeit und
  * Inhaltsstoffe. Kennen sie ihn nicht, sucht mit einem Schlüssel von
- * Anthropic Claude im Internet und liest die Produktseite (ohne Bild). Ebenso
+ * Anthropic Claude im Internet und liest die Produktseite; ihr Hauptbild holt
+ * die Supabase-Funktion produkt-bild (shopBild in inventar-netz.js). Ebenso
  * nach dem Scannen in einer Sache, der noch etwas fehlt, und bei „Eintragen“
  * nach „Hab ich das schon?“; „Im Netz nachschlagen“ fragt beide, für alles,
  * was es gibt. Name, Marke und Liste nur, wenn sie noch leer sind; Tags und
@@ -46,7 +47,7 @@ import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
 import { fotoVorbereiten } from './ansicht-ki.js';
 import { jsonAus } from './amy-import.js';
 import { rumpfErkennen, erkanntBereinigen } from './inventar-ki.js';
-import { nachschlagen, rumpfNachschlagen, gesuchtBereinigen } from './inventar-netz.js';
+import { nachschlagen, rumpfNachschlagen, gesuchtBereinigen, shopBild } from './inventar-netz.js';
 import {
   FOTO_PFAD, LISTEN_VORSCHLAEGE, SORTEN, MAX_NAME, MAX_MARKE, MAX_NOTIZ, MAX_LISTEN, MAX_DINGE,
   neueListeId, neueDingId, fotoPfad, codeBereinigen, opInvListe, opInvListeWeg, opDing, opDingWeg,
@@ -104,7 +105,7 @@ const urls = new Map(); // pfad → Objekt-URL des Fotos
 const laedt = new Set();
 const vorschau = new Map(); // ding-id → Objekt-URL des Fotos, das gerade hochlädt
 const letztes = new Map(); // ding-id → das zuletzt aufgenommene Foto als base64 (für die KI, ohne es neu zu holen)
-const laeuft = new Map(); // ding-id → 'foto' | 'ki' | 'code' | 'netz' | 'suche'
+const laeuft = new Map(); // ding-id → 'foto' | 'ki' | 'code' | 'netz' | 'suche' | 'bild'
 const fotoSchluessel = (pfad) => new URL(`__sachen/${pfad}`, location.href).href;
 
 async function ausVorrat(pfad) {
@@ -315,7 +316,7 @@ ${da.length < MAX_TAGS && vorschlaege.length ? `<div class="nb-tag-vorschlaege">
 function fotoTeilHTML(d) {
   const lauf = laeuft.get(d.id);
   const hat = !!(d.foto || vorschau.has(d.id));
-  const text = { foto: 'Foto wird gespeichert …', ki: 'Die KI schaut es sich an …', code: 'Liest den Strichcode …', netz: 'Schlägt im Netz nach …', suche: 'Claude sucht im Internet …' }[lauf] || '';
+  const text = { foto: 'Foto wird gespeichert …', ki: 'Die KI schaut es sich an …', code: 'Liest den Strichcode …', netz: 'Schlägt im Netz nach …', suche: 'Claude sucht im Internet …', bild: 'Holt das Bild vom Shop …' }[lauf] || '';
   return `<div class="inv-gross">${bildHTML(d, true)}${text ? `<span class="inv-lauf" role="status">${text}</span>` : ''}</div>
 <div class="inv-foto-knoepfe"><label class="amy-btn inv-datei-btn" for="inv-foto-datei">${KAMERA}${hat ? 'Anderes Foto' : 'Foto'}</label><input class="vh" id="inv-foto-datei" type="file" accept="image/*"${lauf === 'foto' ? ' disabled' : ''}>${d.foto && ladeKi() ? `<button type="button" class="btn btn-quiet" data-act="inv-ki"${lauf ? ' disabled' : ''}>${FUNKEN}Mit KI ausfüllen</button>` : ''}${d.foto ? `<button type="button" class="btn btn-quiet" data-act="inv-foto-weg"${lauf ? ' disabled' : ''}>Foto weg</button>` : ''}</div>
 ${d.quelle ? `<p class="fine inv-quelle">Gefunden bei <a href="${esc(d.quelle.url)}" target="_blank" rel="noopener">${esc(d.quelle.name)}</a></p>` : ''}`;
@@ -558,11 +559,11 @@ function tagDazu(roh) {
 
 /* ------------------------------------------------------- Foto und KI */
 
-/** Ein Foto für eine Sache: verkleinern, gleich zeigen, ins Daten-Repo legen, dann in die Sache. */
-async function fotoSetzen(id, datei, { ki = false } = {}) {
+/** Ein Foto für eine Sache: verkleinern, gleich zeigen, ins Daten-Repo legen, dann in die Sache. still: ein Bild aus dem Netz, das sich nicht lesen lässt, ohne Meldung. */
+async function fotoSetzen(id, datei, { ki = false, still = false } = {}) {
   if (!app.zugang) { melde('Fotos gehen erst, wenn die Liste eingerichtet ist.'); return; }
   let f;
-  try { f = await fotoVorbereiten(datei, KANTE); } catch { melde('Das Bild ließ sich nicht lesen.'); return; }
+  try { f = await fotoVorbereiten(datei, KANTE); } catch { if (!still) melde('Das Bild ließ sich nicht lesen.'); return; }
   vorschau.set(id, f.url);
   letztes.set(id, f.b64);
   laeuft.set(id, 'foto');
@@ -681,7 +682,7 @@ const gefundenText = (t) => `Gefunden: ${t.name || t.marke}${t.name && t.marke ?
 /** Zwei Treffer zusammen (Datenbank und Claude): was der erste nicht hat, vom zweiten; Tags und Notiz von beiden. */
 function zusammen(a, b) {
   if (!a || !b) return a || b;
-  return { name: a.name || b.name, marke: a.marke || b.marke, liste: a.liste || b.liste, tags: tagsBereinigen([...(a.tags || []), ...(b.tags || [])]), notiz: [a.notiz, b.notiz].filter(Boolean).join('\n'), bild: a.bild || b.bild, klein: a.klein || b.klein, quelle: a.quelle || b.quelle };
+  return { name: a.name || b.name, marke: a.marke || b.marke, liste: a.liste || b.liste, tags: tagsBereinigen([...(a.tags || []), ...(b.tags || [])]), notiz: [a.notiz, b.notiz].filter(Boolean).join('\n'), bild: a.bild || b.bild, klein: a.klein || b.klein, seite: a.seite || b.seite, quelle: a.quelle || b.quelle };
 }
 
 /** Die Notiz mit dem, was dazukommt – nur Zeilen, die noch nicht drinstehen. */
@@ -747,9 +748,16 @@ async function nachschlagenFuer(id, { vorher = null, gefragt = false, alles = fa
     for (const [sel, k] of [['#inv-name', 'name'], ['#inv-marke', 'marke'], ['#inv-notiz', 'notiz']]) { const f = $(sel); if (f) f.value = neu[k]; }
   }
   melde(gefundenText(t));
-  if (d.foto || vorschau.has(id) || !(t.bild || t.klein)) return;
-  const blob = await bildHolen(t);
-  if (blob && aktuell(id) && !aktuell(id).foto && !vorschau.has(id)) await fotoSetzen(id, blob);
+  if (d.foto || vorschau.has(id)) return;
+  // Das Bild: aus der Datenbank, sonst – hat Claude eine Shopseite gefunden – deren Hauptbild
+  let blob = t.bild || t.klein ? await bildHolen(t) : null;
+  const schluessel = ladeKi();
+  if (!blob && t.seite && anbieterVon(schluessel) === 'anthropic' && !laeuft.has(id)) {
+    laeuft.set(id, 'bild');
+    fotoTeilNeu(id);
+    try { blob = await shopBild(t.seite, { schluessel }); } finally { laeuft.delete(id); fotoTeilNeu(id); }
+  }
+  if (blob && aktuell(id) && !aktuell(id).foto && !vorschau.has(id)) await fotoSetzen(id, blob, { still: true });
 }
 
 /** Scannen in einer Sache: der Code kommt ins Feld – und fehlt der Sache noch etwas, schlägt die App nach. */

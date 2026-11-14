@@ -519,8 +519,13 @@ war, merkt sich das Gerät). Die Teile:
     in die Notiz Farbe, Größe, Material und was sonst dasteht, der Preis mit
     Seite und Monat und eine kurze Beschreibung. Ein Treffer zählt nur, wenn
     seine Seite oder wenigstens die Website in den Such- oder
-    Leseergebnissen stand. Dabei gibt es kein Bild – Bilder von Shops kann
-    der Browser nicht holen (CORS), und Claude bekommt Seiten nur als Text.
+    Leseergebnissen stand. Das Hauptbild der Shopseite kann der Browser
+    nicht holen (CORS), und Claude bekommt Seiten nur als Text – das holt die
+    Supabase-Funktion `produkt-bild` (Repo Amy) wie eine Linkvorschau und
+    legt es als Foto ab (`shopBild`; an die Funktion gehen nur die Adresse
+    der Seite und die Prüfsumme des Schlüssels; bei Rossmann liest sie
+    nichts). Hat die Seite kein Bild oder weist sie ab, bleibt die Sache
+    ohne Foto.
     Mit Gemini sucht niemand im Internet (Googles Bedingungen verbieten,
     Treffer zu speichern). Name, Marke und Liste nur, wenn sie noch leer
     sind; Tags und Notiz kommen dazu (nur, was noch nicht drinsteht). Die
@@ -1681,7 +1686,7 @@ die Action „Rezeptfotos“.
 | `js/wuensche.js`, `js/ansicht-wuensche.js` | Vorschläge für Tobi: schreiben, abhaken, antworten |
 | `js/inventar.js`, `js/ansicht-inventar.js` | Sachen in eigenen Listen: Listen, Sachen, Ordnen, Suchen, Strichcode – und der Teil im Bereich mit Fotos im Daten-Repo |
 | `js/inventar-ki.js` | Sachen erkennen: das Foto an die KI (Name, Marke, Liste, Tags, Strichcode) – ohne DOM |
-| `js/inventar-netz.js` | Sachen nachschlagen: die Nummer in Open Beauty Facts & Co. (Name, Marke, Bild, Quelle), sonst Claudes Websuche – Anfrage und Treffer bereinigen, ohne DOM |
+| `js/inventar-netz.js` | Sachen nachschlagen: die Nummer in Open Beauty Facts & Co. (Name, Marke, Bild, Quelle), sonst Claudes Websuche – Anfrage und Treffer bereinigen; das Bild der Shopseite über die Supabase-Funktion `produkt-bild` – ohne DOM |
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
@@ -1800,7 +1805,7 @@ liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
 Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
 Speichern mit Quelle, `pause_turn`, Ausweichen ohne Seiten lesen,
 Websuche aus, Abbrechen und der Hinweis mit Googles
-Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, mehr Daten (Kategorie, Siegel, Menge, Haltbarkeit, Inhaltsstoffe; bei Claude Angaben, Preis, Beschreibung), Claudes Treffer nur mit einer Seite oder Website aus Suche oder Lesen, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater), eine ausgedachte Seite zählt nicht, „Im Netz nachschlagen“ fragt beide und schreibt nichts doppelt in die Notiz. `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
+Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, mehr Daten (Kategorie, Siegel, Menge, Haltbarkeit, Inhaltsstoffe; bei Claude Angaben, Preis, Beschreibung), Claudes Treffer nur mit einer Seite oder Website aus Suche oder Lesen, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater), eine ausgedachte Seite zählt nicht, „Im Netz nachschlagen“ fragt beide und schreibt nichts doppelt in die Notiz; das Bild der Shopseite über die nachgebaute Funktion (an sie nur Seite und Prüfsumme, ohne Bild auch ohne Fehlermeldung – `FUNKTIONEN` in `tests/hilfe.mjs` lässt keinen Test an die echten Supabase-Funktionen). `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
 keine Zahlen auf der Karte, die Anfrage nur mit den offenen Zeilen, danach
 kcal und Preis, die Schätzung in der Liste und bei Tobi ohne eigene Anfrage,
 nach dem Bearbeiten nur die neue Zeile und nicht gleich noch einmal.

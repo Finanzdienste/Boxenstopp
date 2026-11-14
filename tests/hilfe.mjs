@@ -196,6 +196,8 @@ export function githubMehrere(...attrappen) {
 export const TIER_HOSTS = /random\.dog|dog\.ceo|thecatapi|cataas|randomfox|bunnies|capy\.lol|bilder\.test/;
 /** Die offenen Produktdatenbanken (Open Beauty Facts & Co.) und ihre Bilder – in den Tests nie die echten. */
 export const DATENBANK_HOSTS = /^https:\/\/(?:world|images)\.open(?:beauty|food|products|petfood)facts\.org\//;
+/** Die Supabase-Funktionen (Kosten melden, Bilder von Shopseiten) – in den Tests nie die echten. */
+export const FUNKTIONEN = /^https:\/\/[a-z0-9]+\.supabase\.co\/functions\//;
 
 /**
  * Eine Attrappe für die Tierquellen: jede Antwort zeigt auf ein Bild unter
@@ -226,6 +228,7 @@ export async function handy(browser, { attrappe = null, tiere = null, datenbank 
   else await ctx.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
   await ctx.route(TIER_HOSTS, tiere ? tiere.route : (r) => r.abort('blockedbyclient'));
   await ctx.route(DATENBANK_HOSTS, datenbank ? datenbank.route : (r) => r.abort('blockedbyclient'));
+  await ctx.route(FUNKTIONEN, (r) => r.abort('blockedbyclient'));
   // Die Angebote der Woche: in den Tests immer dieselben (tests/daten/angebote.json), nie das echte Feld
   await ctx.route('**/daten/angebote.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote.json'), 'utf8') }));
   await ctx.route('**/daten/preisverlauf.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'preisverlauf.json'), 'utf8') }));

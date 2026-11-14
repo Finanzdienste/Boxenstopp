@@ -23,10 +23,13 @@
  * Produktseite (rumpfNachschlagen): Name, Marke, Farbe, Größe, Material,
  * Preis, eine kurze Beschreibung. Ein Treffer zählt nur, wenn seine Seite
  * (oder wenigstens die Website) in den Such- oder Leseergebnissen stand
- * (gesuchtBereinigen). Ein Bild gibt es dabei nicht: Bilder von Shops kann
- * der Browser nicht holen (CORS), und Claude bekommt die Seiten nur als Text.
+ * (gesuchtBereinigen). Das Bild der Shopseite kann der Browser nicht holen
+ * (CORS), und Claude bekommt Seiten nur als Text – das holt die
+ * Supabase-Funktion produkt-bild (Repo Amy) wie eine Linkvorschau
+ * (shopBild): Sie bekommt die Adresse der Seite und die Prüfsumme des
+ * Schlüssels, nie den Schlüssel.
  */
-import { ANBIETER } from './ki.js';
+import { ANBIETER, schluesselPruefsumme } from './ki.js';
 import { WEBSUCHE, SEITE_LESEN, sichereUrl, urlSchluessel } from './amy-import.js';
 import { tagsBereinigen } from './amy.js';
 import { codeBereinigen, quelleBereinigen, MAX_NAME, MAX_MARKE, MAX_NOTIZ } from './inventar.js';
@@ -147,6 +150,7 @@ export function produktAus(json, code, art = ZUERST) {
     notiz: notizVon(p),
     bild: bildAdresse(p.image_front_url),
     klein: bildAdresse(p.image_front_url, { sparen: true }),
+    seite: '',
     quelle: quelleBereinigen({ name: DATENBANKEN[typ].name, url: produktSeite(code, typ) }),
   };
 }
@@ -158,7 +162,7 @@ export function andereDatenbank(json) {
   return DATENBANKEN[art] ? art : '';
 }
 
-const zeitlimit = () => (typeof globalThis.AbortSignal?.timeout === 'function' ? globalThis.AbortSignal.timeout(WARTEN) : undefined);
+const zeitlimit = (ms = WARTEN) => (typeof globalThis.AbortSignal?.timeout === 'function' ? globalThis.AbortSignal.timeout(ms) : undefined);
 
 /**
  * Eine Nummer nachschlagen: erst in Open Beauty Facts – steht sie in einer
@@ -256,6 +260,35 @@ export function gesuchtBereinigen(roh, { quellen = [], listen = [], heute = new 
     notiz: zeilen.join('\n').slice(0, MAX_NOTIZ),
     bild: '',
     klein: '',
+    seite: url,
     quelle: quelleBereinigen({ name: seite, url }),
   };
+}
+
+/* --------------------------------------------- Das Bild von der Shopseite */
+
+/** Die Supabase-Funktion, die das Hauptbild einer Produktseite holt (Repo Amy, produkt-bild). */
+export const PRODUKT_BILD = 'https://vjyohppohmvhhxgwouti.supabase.co/functions/v1/produkt-bild';
+
+/**
+ * Das Hauptbild der Shopseite, die Claude gefunden hat: als Blob – oder
+ * null, wenn es keins gibt, die Seite die Funktion abweist oder kein Netz
+ * da ist. Nur mit einem Schlüssel von Anthropic (seine Prüfsumme weist aus).
+ * holen ist fetch (die Tests geben ihr eigenes).
+ */
+export async function shopBild(seite, { schluessel, adresse = PRODUKT_BILD, holen = (...a) => fetch(...a) } = {}) {
+  if (!sichereUrl(seite).startsWith('https://') || !/^sk-ant-/.test(String(schluessel || ''))) return null;
+  try {
+    const res = await holen(adresse, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-schluessel-hash': await schluesselPruefsumme(schluessel) },
+      body: JSON.stringify({ seite }),
+      signal: zeitlimit(30000),
+    });
+    if (!res.ok || !/^image\//.test(res.headers.get('content-type') || '')) return null;
+    const b = await res.blob();
+    return b.size ? b : null;
+  } catch {
+    return null;
+  }
 }
