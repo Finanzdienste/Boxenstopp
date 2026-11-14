@@ -39,10 +39,12 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v69';
+const VERSION = 'v70';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
+/** Die Fotos der Sachen (ansicht-inventar.js legt sie selbst hinein) – bleiben bei Updates stehen. */
+const SACHEN = 'boxenstopp-sachen-v1';
 const DATEN_DATEIEN = ['daten/rezepte.json', 'daten/angebote.json', 'daten/preisverlauf.json'];
 /** So lange wartet die App aufs Netz, dann nimmt sie den Vorrat (die Antwort kommt trotzdem noch hinein). */
 const GEDULD = 4000;
@@ -102,6 +104,9 @@ const SHELL = [
   './js/ansicht-essensplan.js',
   './js/notizbuch.js',
   './js/ansicht-notizen.js',
+  './js/inventar.js',
+  './js/inventar-ki.js',
+  './js/ansicht-inventar.js',
   './js/vertraeglich.js',
   './js/ansicht-vertraeglich.js',
   './js/wuensche.js',
@@ -175,7 +180,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const daten = await caches.open(DATEN);
-    const alte = (await caches.keys()).filter((k) => k.startsWith('boxenstopp-') && k !== CACHE && k !== BILDER && k !== DATEN);
+    const alte = (await caches.keys()).filter((k) => k.startsWith('boxenstopp-') && k !== CACHE && k !== BILDER && k !== DATEN && k !== SACHEN);
     for (const k of alte) {
       // Früher lagen Rezepte & Co. im Vorrat der Fassung – erst retten, dann wegräumen
       // (sonst wären sie ohne Netz weg, bis die App sie neu lädt)

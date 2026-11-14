@@ -15,7 +15,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | --- | --- |
 | **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben **Zwei auf einmal** (zwei Rezepte zusammen kochen – welche gut zusammen gehen, ein gemeinsamer Plan, siehe unten) und die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“), bei eigenen Einträgen **„Gemeint ist …“** („chicki nuggies“ sind Chicken Nuggets) – alles gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
-| **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Vorschläge** (in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe, ohne Vorschläge), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Im Internet suchen** – sag, worauf du Lust hast, Claude findet bis zu drei passende Rezepte und füllt den Editor; **Rezept übernehmen** aus einem Foto, einem Link oder Text; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
+| **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Sachen · Vorschläge** (in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe, ohne Vorschläge), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Im Internet suchen** – sag, worauf du Lust hast, Claude findet bis zu drei passende Rezepte und füllt den Editor; **Rezept übernehmen** aus einem Foto, einem Link oder Text; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Sachen:** eigene Listen für Kleidung, Make-up und was sie will – je Sache Foto, Name, Marke, Tags, Notiz und Strichcode, sortieren und suchen, „Hab ich das schon?“ per Scan (siehe unten). **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
 | **Essensplan** | Die nächsten Tage und Wochen: je Tag Mittag und Abend, wer isst mit, dazu **Kochtage** („Chili kochen, 8 Boxen“) mit **Boxen verteilen** auf die Tage danach – und mit einem Tipp **die Woche auf die Einkaufsliste** (siehe unten) |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
@@ -432,8 +432,8 @@ Angebot günstig ist.
 
 Der Reiter „Amys Bereich“ (am Rechner über die Kachel bei den Rezepten,
 direkt mit `#amy` in der Adresse) hat oben einen Schalter: **Rezepte ·
-Notizen · Verträglich · Vorschläge** (mit Zahlen; was zuletzt offen war,
-merkt sich das Gerät). Die Teile:
+Notizen · Verträglich · Sachen · Vorschläge** (mit Zahlen; was zuletzt offen
+war, merkt sich das Gerät). Die Teile:
 
 - **Notizen** (`js/notizbuch.js`, `js/ansicht-notizen.js`): Blätter wie bei
   OneNote – je Thema eins, mit Titel, Farbe (sechs, neue wechseln sich ab),
@@ -466,6 +466,41 @@ merkt sich das Gerät). Die Teile:
   „Erledigt (3)“ zum Aufklappen, „Alle offenen kopieren“ als Text zum
   Weitergeben. Push: „Vorschlag von Amy“ an Tobi, Antwort und „erledigt“
   an Amy (Art „Amys Bereich“).
+- **Sachen** (`js/inventar.js` rechnet, `js/ansicht-inventar.js` zeichnet,
+  `js/inventar-ki.js` fragt die KI): eigene Listen für alles, was sie hat –
+  Kleidung, Schuhe, Make-up, Pflege, Schmuck, Taschen, Bücher oder was sie
+  sich selbst anlegt, je mit Name und Bildchen (16 zur Wahl). Zum Anfangen
+  stehen Vorschläge da, ein Tipp legt die Liste an. Je Sache: **Foto**, Name,
+  Marke, Liste, Tags (wie bei ihren Rezepten), **Notiz** (Größe, wozu es
+  passt, was es gekostet hat …) und die **Nummer unter dem Strichcode**;
+  gespeichert wird beim Tippen, eine leere neue Sache verschwindet wieder.
+  In der Liste: **Sortieren** (eigene Reihenfolge mit ↑ ↓, Name, Neueste,
+  Marke, nach Tags in Abschnitten – je Liste gemerkt), nach Tags filtern;
+  über allen Listen eine **Suche** (Name, Marke, Tag, Notiz, Nummer).
+  - **Foto:** auf 1200 px verkleinert als eigene Datei ins Daten-Repo der
+    Liste (`sachen/sd-…-….jpg`, `dateiHochladen` in `js/speicher.js`, Commit
+    „…: Foto für die Sachen“) – in `liste.json` steht nur Pfad und
+    sha, so bleibt sie klein. Die anderen Geräte holen es mit dem Schlüssel
+    und legen es in einen eigenen Vorrat (`boxenstopp-sachen-v1`, auch
+    ohne Netz da, übersteht Updates). Ein Foto, das keine Sache mehr braucht
+    (gelöscht, ersetzt), löscht die App, wenn die Zeit für „Rückgängig“ um
+    ist.
+  - **Mit Foto** (in einer Liste): fotografieren – mit KI-Schlüssel füllt
+    die KI gleich Name, Marke, die passende Liste, bis zu drei Tags und die
+    Nummer aus, wenn ein Strichcode zu sehen ist; „Mit KI ausfüllen“ geht
+    auch später. Sie füllt nur, was noch leer ist, und bekommt nur das Foto
+    und die Namen der Listen.
+  - **Strichcode:** „Scannen“ fotografiert ihn. Chrome auf Android liest ihn
+    selbst (`BarcodeDetector`); Safari auf iPhone und iPad kann das nicht,
+    dort liest ihn die KI vom Foto – eine Nummer mit falscher Prüfziffer
+    (EAN-8, UPC-A, EAN-13) nimmt die App nicht. Sonst die Ziffern abtippen.
+    **Hab ich das schon?** (über allen Listen): scannen, und die App öffnet
+    die Sache – oder sagt „noch nicht in deinen Listen“ mit „Eintragen“.
+    Produktdaten aus Datenbanken wie Open Beauty Facts holt die App nicht
+    (deren robots.txt sperrt die Schnittstelle für Automaten).
+  - In der gemeinsamen Liste sind es Amys Sachen (Tobi sieht sie auch, so
+    sagt es der Hinweis), in einer eigenen Liste die des Gasts. Im Commit
+    steht nur „Sachen“, nie, was es ist; keine Push-Nachricht.
 
 Der Teil **Rezepte**: Amys eigene Rezepte. Alles ist rosa
 und rund: das Thema hängt an `html[data-tab="amy"]` und färbt auch Kopf,
@@ -789,6 +824,7 @@ konnte.
 | **Rezeptfotos** | alle 50 in einem eigenen Vorrat, der Updates übersteht – der Worker holt sie von selbst nach jedem frischen `rezepte.json`, nicht erst beim Ansehen (vorher fehlten ohne Netz 40 von 50); ein neues Foto hat eine neue Adresse, das alte fliegt raus; fehlt doch eins, steht das Ersatzbild aus den Zutaten-Bildchen da |
 | **schlechtes Netz** | Seite und Daten: erst das Netz, aber nach 4 s ohne Antwort aus dem Vorrat (die späte Antwort kommt trotzdem noch hinein) |
 | **die Liste** | wie zuletzt gesehen aus dem localStorage (`js/speicher.js`), Änderungen warten, bis wieder Netz da ist |
+| **Fotos der Sachen** | einmal geholt in einem eigenen Vorrat (`boxenstopp-sachen-v1`), der Updates übersteht (`js/ansicht-inventar.js`) |
 
 Auffrischen: Beim Öffnen sowieso; kommt die App nach einer halben Stunde
 oder mehr wieder nach vorn, holt der Worker Rezepte, Angebote,
@@ -1537,7 +1573,7 @@ Wunschpreise (`u`: kg, l oder Stk), `haushalt` Haushaltssachen und Putzplan (Woc
 `wer` leer: beide; siehe Haushalt), `leute` wer die Liste teilt, `profil` was die Liste festlegt: `ziel`
 (Makros pro Box, siehe Ziel pro Box), `boxen` (1–8, siehe Boxen pro Rezept; gespeichert wird es immer
 ausdrücklich, auch 8 – lässt eine ältere Fassung es weg, kommt es wieder dazu), in einer eigenen Liste auch `person` (wessen Rezepte der eigene Reiter
-zeigt) und `farbe` (`lila`). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
+zeigt) und `farbe` (`lila`); `inventar` die Sachen in eigenen Listen (`{ listen: { "sl-…": { name, bild, reihe } }, dinge: { "sd-…": { liste, name, marke, notiz, tags, code, foto: { pfad, sha }, reihe } } }`, siehe Amys Bereich → Sachen). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
 nicht passt; schreibt eine ältere App-Fassung die Liste ohne die neueren Teile, legt das Handy, das sie
 kennt, sie wieder dazu (`js/speicher.js`). Jeder Start liest die Datei einmal ganz frisch, bevor er
 schreibt: Der zwischengespeicherte Stand kann von einer älteren App-Fassung stammen, die beim Lesen
@@ -1605,6 +1641,8 @@ die Action „Rezeptfotos“.
 | `js/notizbuch.js`, `js/ansicht-notizen.js` | Amys Notizen: Blätter mit Farbe und Tags, Ideen fürs Planen |
 | `js/vertraeglich.js`, `js/ansicht-vertraeglich.js` | Was Amy verträgt: Liste, Abgleich mit Rezepten, Hinweise |
 | `js/wuensche.js`, `js/ansicht-wuensche.js` | Vorschläge für Tobi: schreiben, abhaken, antworten |
+| `js/inventar.js`, `js/ansicht-inventar.js` | Sachen in eigenen Listen: Listen, Sachen, Ordnen, Suchen, Strichcode – und der Teil im Bereich mit Fotos im Daten-Repo |
+| `js/inventar-ki.js` | Sachen erkennen: das Foto an die KI (Name, Marke, Liste, Tags, Strichcode) – ohne DOM |
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
 | `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
@@ -1723,7 +1761,7 @@ liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
 Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
 Speichern mit Quelle, `pause_turn`, Ausweichen ohne Seiten lesen,
 Websuche aus, Abbrechen und der Hinweis mit Googles
-Schlüssel. `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
+Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
 keine Zahlen auf der Karte, die Anfrage nur mit den offenen Zeilen, danach
 kcal und Preis, die Schätzung in der Liste und bei Tobi ohne eigene Anfrage,
 nach dem Bearbeiten nur die neue Zeile und nicht gleich noch einmal.

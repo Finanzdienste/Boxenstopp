@@ -346,7 +346,7 @@ check(await bis(() => gh.liste()?.amy?.[amyId]?.name === 'Kokos-Curry deluxe' &&
 
 // --- Amys Bereich: oben der Schalter – Notizen (Blätter), Verträglich, Vorschläge für Tobi
 await a.click('.tab[data-tab="amy"]');
-check(JSON.stringify(await a.locator('.amy-teil').evaluateAll((xs) => xs.map((x) => x.dataset.amyTeil))) === JSON.stringify(['rezepte', 'notizen', 'vertraeglich', 'wuensche']), 'oben: Rezepte · Notizen · Verträglich · Vorschläge');
+check(JSON.stringify(await a.locator('.amy-teil').evaluateAll((xs) => xs.map((x) => x.dataset.amyTeil))) === JSON.stringify(['rezepte', 'notizen', 'vertraeglich', 'sachen', 'wuensche']), 'oben: Rezepte · Notizen · Verträglich · Sachen · Vorschläge');
 await a.click('[data-amy-teil="notizen"]');
 check((await a.locator('.nb-leer').innerText()).includes('Noch keine Blätter'), 'Notizen: noch keine Blätter');
 await a.click('[data-act="nb-neu"]');

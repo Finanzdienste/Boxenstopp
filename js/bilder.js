@@ -101,9 +101,11 @@ export const AMY_BILDER = ['shortcake', 'pancakes', 'green-salad', 'steaming-bow
 export const AMY_DEKO = ['sparkles', 'ribbon', 'pink-heart'];
 /* Für den Haushalt: Räume und Bereiche (js/haushalt.js). */
 export const HAUS_BILDER = ['fork-and-knife-with-plate', 'bathtub', 'couch-and-lamp', 'bed', 'door', 'books', 't-shirt', 'potted-plant', 'house', 'sparkles', 'lotion-bottle', 'bucket', 'light-bulb'];
+/* Für die Listen der Sachen (js/inventar.js): ein Bildchen je Liste zum Aussuchen. */
+export const INVENTAR_BILDER = ['womans-clothes', 'dress', 't-shirt', 'jeans', 'coat', 'high-heeled-shoe', 'running-shoe', 'lipstick', 'nail-polish', 'lotion-bottle', 'ring', 'gem-stone', 'handbag', 'sunglasses', 'books', 'package'];
 
 /** Alle Bildchen, die die App braucht – für werkzeug/zutaten-bilder.mjs und die Tests. */
-export const ALLE_BILDER = [...new Set([...Object.values(ZUTAT_BILD), ...Object.values(KAT_BILD), ...WORTE.map(([, b]) => b), ...AMY_BILDER, ...AMY_DEKO, ...HAUS_BILDER])].sort();
+export const ALLE_BILDER = [...new Set([...Object.values(ZUTAT_BILD), ...Object.values(KAT_BILD), ...WORTE.map(([, b]) => b), ...AMY_BILDER, ...AMY_DEKO, ...HAUS_BILDER, ...INVENTAR_BILDER])].sort();
 
 /*
  * Bis zu drei Bildchen, die ein Rezept ausmachen – fürs Ersatzbild ohne Foto:

@@ -35,6 +35,7 @@
  *   stop()
  */
 import { leer, anwenden, bereinigen, opZusammen, bescheidNoetig, todoNoetig, hatHaushalt, planNachtrag, profilNachtrag, beschreibung } from './liste.js';
+import { hatInventar } from './inventar.js';
 
 export const API = 'https://api.github.com';
 export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: 'liste.json' };
@@ -113,6 +114,58 @@ export async function privatSchreiben(pfad, aendern, { token, api = API, ort = D
     await warte(300 * (versuch + 1));
   }
   throw new Error('GitHub hat das nicht gespeichert – gleich nochmal versuchen.');
+}
+
+/**
+ * Ein Bild (oder eine andere Datei) neu ins Daten-Repo legen: b64 ist der
+ * Inhalt als base64. Jede Datei bekommt einen eigenen Namen (inventar.js
+ * fotoPfad), darum ohne sha. Gibt { sha } zurück oder wirft mit einem Satz
+ * für die Anzeige.
+ */
+export async function dateiHochladen(pfad, b64, { token, api = API, ort = DATEN, nachricht = '' } = {}) {
+  if (!token) throw new Error('Erst die Liste einrichten.');
+  let r;
+  try {
+    r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/contents/${pfad}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: nachricht || `${pfad} dazu`, content: b64 }),
+      cache: 'no-store',
+    });
+  } catch { throw new Error('Keine Verbindung zu GitHub – das Foto ist noch nicht gespeichert.'); }
+  if (!r.ok) throw new Error('GitHub hat das Foto nicht gespeichert.');
+  const j = await r.json().catch(() => null);
+  return { sha: String(j?.content?.sha || '') };
+}
+
+/** Eine Datei aus dem Daten-Repo roh holen (ein Foto) – als Blob, oder null ohne Netz, ohne Datei, ohne Zugang. */
+export async function dateiHolen(pfad, { token, api = API, ort = DATEN } = {}) {
+  if (!token) return null;
+  try {
+    const r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/contents/${pfad}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.raw' },
+      cache: 'no-store',
+    });
+    return r.ok ? await r.blob() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Eine Datei im Daten-Repo löschen (ein altes Foto). true, wenn sie weg ist (oder schon weg war). */
+export async function dateiLoeschen(pfad, sha, { token, api = API, ort = DATEN, nachricht = '' } = {}) {
+  if (!token || !sha) return false;
+  try {
+    const r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/contents/${pfad}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: nachricht || `${pfad} weg`, sha }),
+      cache: 'no-store',
+    });
+    return r.ok || r.status === 404;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -276,6 +329,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, 
             if (fehlt('essensplan') && Object.keys(remote.stand?.essensplan?.tage || {}).length) mehr.essensplan = remote.stand.essensplan;
             if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
             if (fehlt('haushalt') && hatHaushalt(remote.stand?.haushalt)) mehr.haushalt = remote.stand.haushalt;
+            if (fehlt('inventar') && hatInventar(remote.stand?.inventar)) mehr.inventar = remote.stand.inventar;
             if (fehlt('leute') && Object.keys(remote.stand?.leute || {}).length) mehr.leute = remote.stand.leute;
             // Dasselbe in den Putztagen: Material und „jedes 2. Mal“
             const nachtrag = [...planNachtrag(roh, stand, remote.stand), ...profilNachtrag(roh, stand, remote.stand)];

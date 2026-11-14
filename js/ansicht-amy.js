@@ -1,7 +1,8 @@
 /*
- * Reiter „Amys Bereich“: oben ein Schalter Rezepte · Notizen · Verträglich ·
+ * Reiter „Amys Bereich“: oben ein Schalter Rezepte · Notizen · Verträglich · Sachen ·
  * Vorschläge. Die Notizen (Blätter wie bei OneNote) baut ansicht-notizen.js,
- * was Amy verträgt ansicht-vertraeglich.js, ihre Vorschläge für Tobi
+ * was Amy verträgt ansicht-vertraeglich.js, ihre Sachen in eigenen Listen
+ * ansicht-inventar.js, ihre Vorschläge für Tobi
  * ansicht-wuensche.js (nur in der gemeinsamen Liste) – hier die Rezepte, die Amy selbst
  * schreibt: rosa, mit Herzchen und Glitzer (das Thema hängt an
  * html[data-tab="amy"], siehe CSS).
@@ -47,6 +48,7 @@ import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { fotoVorbereiten, oeffneEinrichten } from './ansicht-ki.js';
 import { notizenHTML, notizenAktualisieren, klickNotizen, eingabeNotizen, tasteNotizen, notizenZahl, notizJetztSpeichern } from './ansicht-notizen.js';
+import { inventarHTML, inventarAktualisieren, klickInventar, eingabeInventar, aenderungInventar, tasteInventar, absendenInventar, inventarZahl, inventarJetztSpeichern } from './ansicht-inventar.js';
 import { wuenscheHTML, wuenscheAktualisieren, klickWuensche, absendenWuensche, wuenscheOffen } from './ansicht-wuensche.js';
 import { vertraeglichHTML, vertraeglichAktualisieren, klickVertraeglich, absendenVertraeglich, vertraeglichZahl, pruefeZutaten, hinweisHTML as vtHinweisHTML, zeichenHTML as vtZeichenHTML, stufeVon as vtStufeVon, wem } from './ansicht-vertraeglich.js';
 import { eintraegeVon, namenKurz } from './vertraeglich.js';
@@ -56,7 +58,7 @@ const ENTWURF = 'boxenstopp.amy.entwurf.v1';
 const FILTER = 'boxenstopp.amy.filter.v1'; // { tags: ['gesund'], sort: 'neu' } – nur auf diesem Handy
 const ARTEN = ['liste', 'detail', 'editor'];
 /** Die Teile des Bereichs – oben der Schalter. */
-const TEILE = [['rezepte', 'Rezepte'], ['notizen', 'Notizen'], ['vertraeglich', 'Verträglich'], ['wuensche', 'Vorschläge']];
+const TEILE = [['rezepte', 'Rezepte'], ['notizen', 'Notizen'], ['vertraeglich', 'Verträglich'], ['sachen', 'Sachen'], ['wuensche', 'Vorschläge']];
 /** In einer eigenen Liste (Gast) gibt es keine Vorschläge für Tobi. */
 const teile = () => TEILE.filter(([k]) => k !== 'wuensche' || !istEigen());
 const SORTEN = [['neu', 'Neueste zuerst'], ['name', 'Name A–Z'], ['schnell', 'Schnellste zuerst'], ['guenstig', 'Günstigste zuerst'], ['tags', 'Nach Tags']];
@@ -181,11 +183,12 @@ function nachTagsHTML(liste, gewaehlt) {
 /** Oben im Bereich: Titel und der Schalter Rezepte · Notizen · Verträglich (mit Zahlen). */
 function kopfHTML() {
   if (!teile().some(([k]) => k === zustand.teil)) zustand.teil = 'rezepte';
-  const zahl = { rezepte: Object.keys(app.stand.amy || {}).length, notizen: notizenZahl(), vertraeglich: vertraeglichZahl(), wuensche: wuenscheOffen() };
+  const zahl = { rezepte: Object.keys(app.stand.amy || {}).length, notizen: notizenZahl(), vertraeglich: vertraeglichZahl(), sachen: inventarZahl(), wuensche: wuenscheOffen() };
   const lead = {
     rezepte: `Deine eigenen Lieblingsrezepte. Mit einem Tipp landen die Zutaten auf ${istEigen() ? 'deiner' : 'eurer gemeinsamen'} Einkaufsliste – und beim Kochen lernt das Handy, wie lange du brauchst.`,
     notizen: 'Blätter für alles, was dich inspiriert – je Thema eins, mit Farbe und Tags.',
     vertraeglich: 'Was dir bekommt und was nicht – die App sagt es bei den Rezepten.',
+    sachen: 'Deine Sachen in eigenen Listen – Kleidung, Make-up, was du willst –, mit Foto, Strichcode und Notizen.',
     wuensche: 'Was besser werden soll – direkt an Tobi.',
   }[zustand.teil];
   return `<button type="button" class="back nur-breit" data-act="amy-zu">${ZURUECK}Alle Rezepte</button>
@@ -591,6 +594,10 @@ export function amyZeichnen() {
   } else if (zustand.teil === 'vertraeglich') {
     if (!vertraeglichAktualisieren(el)) el.innerHTML = kopfHTML() + vertraeglichHTML();
     else teileZahlen(el);
+  } else if (zustand.teil === 'sachen') {
+    // Eine offene Sache bleibt stehen, während darin getippt wird – wie ein Notizblatt
+    if (!inventarAktualisieren(el)) el.innerHTML = kopfHTML() + inventarHTML();
+    else teileZahlen(el);
   } else if (zustand.teil === 'wuensche' && !istEigen()) {
     if (!wuenscheAktualisieren(el)) el.innerHTML = kopfHTML() + wuenscheHTML();
     else teileZahlen(el);
@@ -667,6 +674,7 @@ function teileZahlen(el) {
 function teilZeigen(teil) {
   if (!TEILE.some(([k]) => k === teil)) return;
   notizJetztSpeichern();
+  inventarJetztSpeichern();
   zustand = { art: 'liste', id: null, teil };
   merken();
   if (ansicht.tab !== 'amy') zeigeReiter('amy');
@@ -744,7 +752,7 @@ export function klickAmy(el) {
   const d = el.dataset;
   if (d.amyOpen) { amyOeffnen(d.amyOpen); return true; }
   if (d.amyTeil) { teilZeigen(d.amyTeil); return true; }
-  if (klickNotizen(el) || klickVertraeglich(el) || klickWuensche(el)) return true;
+  if (klickNotizen(el) || klickVertraeglich(el) || klickWuensche(el) || klickInventar(el)) return true;
   if (!el.closest('#view-amy') && !d.act?.startsWith('amy-')) return false;
   const r = rezept(zustand.id);
   if ('amyFilter' in d) { filterUmschalten(d.amyFilter); return true; }
@@ -892,6 +900,7 @@ function filterUmschalten(t) {
 
 /** Sortierung der Liste und Fotos fürs Übernehmen (change). true, wenn es hierher gehörte. */
 export function aenderungAmy(ziel) {
+  if (aenderungInventar(ziel)) return true;
   if (ziel.id === 'amy-import-foto') { if (ziel.files?.length) importFotosDazu(ziel.files); return true; }
   if (ziel.id === 'amy-suche-ohne') { schreibe(SUCHE_OHNE, ziel.checked); return true; }
   if (ziel.id !== 'amy-sort') return false;
@@ -904,7 +913,7 @@ export function aenderungAmy(ziel) {
 
 /** Eingaben im Editor: Entwurf merken, erkannte Zutaten zeigen. true, wenn es hierher gehörte. */
 export function eingabeAmy(ziel) {
-  if (eingabeNotizen(ziel)) return true;
+  if (eingabeNotizen(ziel) || eingabeInventar(ziel)) return true;
   if (!ziel.closest?.('#amy-form')) return false;
   if (ziel.id === 'amy-import-text') { if (importFehler) { importFehler = ''; const f = $('#amy-import-inhalt .zugang-fehler'); if (f) f.remove(); } return true; }
   if (ziel.id === 'amy-suche-text') { suche.wunsch = ziel.value; if (suche.fehler) { suche.fehler = ''; $('#amy-suche-inhalt .zugang-fehler')?.remove(); } return true; }
@@ -926,7 +935,7 @@ export function eingabeAmy(ziel) {
 
 /** Enter im Tag-Feld: den Tag anlegen (app.js verhindert dann das Absenden). true, wenn es hierher gehörte. */
 export function tasteAmy(ziel) {
-  if (tasteNotizen(ziel)) return true;
+  if (tasteNotizen(ziel) || tasteInventar(ziel)) return true;
   if (ziel?.id === 'amy-suche-text') { if (!suche.lauf) suchen(); return true; }
   if (ziel?.id !== 'amy-tag-text') return false;
   if (ziel.value.trim()) tagDazu(ziel.value);
@@ -936,7 +945,7 @@ export function tasteAmy(ziel) {
 
 /** Speichern. true, wenn das Formular hierher gehörte. */
 export function absendenAmy(ev) {
-  if (absendenVertraeglich(ev) || absendenWuensche(ev)) return true;
+  if (absendenVertraeglich(ev) || absendenWuensche(ev) || absendenInventar(ev)) return true;
   if (ev.target.id !== 'amy-form') return false;
   ev.preventDefault();
   entwurfAusFormular();

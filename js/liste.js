@@ -27,7 +27,8 @@
  *     essensplan: { tage: { <JJJJ-MM-TT>: { mittag: [], abend: [], kochen: [] } } },   der Essensplan (essensplan.js)
  *     vertraeglich: { amy: { <Schlüssel>: { name, stufe, notiz, by, at } } },   was jemand verträgt (vertraeglich.js)
  *     wuensche:  { <w-…>: { id, text, by, at, erledigt, antwort } },   Amys Vorschläge für Tobi (wuensche.js)
- *     amyWerte:  { <amy-…>: { at, z: { <Zeile>: { g, kcal, p, kh, f, eur } } } } }   was die KI für Amys unbekannte Zutaten geschätzt hat (amy-werte.js)
+ *     amyWerte:  { <amy-…>: { at, z: { <Zeile>: { g, kcal, p, kh, f, eur } } } },   was die KI für Amys unbekannte Zutaten geschätzt hat (amy-werte.js)
+ *     inventar:  { listen: { <sl-…>: … }, dinge: { <sd-…>: … } } }   Sachen in eigenen Listen, nur in einer eigenen Liste (inventar.js)
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -89,12 +90,13 @@ import { RAUM, SACH_BEREICH, aufgabenAm } from './haushalt.js';
 import { zielBereinigen as makrosBereinigen } from './zielrechner.js';
 import { boxenBereinigen, BOXEN_STANDARD } from './boxen.js';
 import { notizbuchBereinigen, notizbuchAnwenden, notizbuchZusammen } from './notizbuch.js';
+import { inventarBereinigen, inventarAnwenden, inventarZusammen, leerInventar } from './inventar.js';
 import { essensplanBereinigen, essensplanAnwenden, essensplanZusammen } from './essensplan.js';
 import { vertraeglichBereinigen, vertraeglichAnwenden, vertraeglichZusammen } from './vertraeglich.js';
 import { wuenscheBereinigen, wuenscheAnwenden, wuenscheZusammen } from './wuensche.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {}, amyWerte: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {}, amyWerte: {}, inventar: leerInventar() });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
 const MAX_BONS = 200;
@@ -325,6 +327,8 @@ export function beschreibung(vorher, nachher, name = () => '') {
   const gemeintNeu = Object.entries(n.gemeint || {}).filter(([k, g]) => v.gemeint?.[k]?.name !== g.name).map(([, g]) => g.name);
   if (gemeintNeu.length) teile.push(`${aufzaehlen(gemeintNeu, 2)} gemerkt`);
   if (JSON.stringify(v.notizbuch || {}) !== JSON.stringify(n.notizbuch || {})) teile.push('Notizen');
+  // Die Sachen nur als Wort – was es ist, bleibt aus der Nachricht (wie bei den Notizen)
+  if (JSON.stringify(v.inventar || {}) !== JSON.stringify(n.inventar || {})) teile.push('Sachen');
   if (JSON.stringify(v.essensplan || {}) !== JSON.stringify(n.essensplan || {})) teile.push('Essensplan');
   if (JSON.stringify(v.vertraeglich || {}) !== JSON.stringify(n.vertraeglich || {})) teile.push('Verträglichkeit');
   const wNeu = Object.keys(n.wuensche || {}).filter((id) => !v.wuensche?.[id]).length;
@@ -513,6 +517,7 @@ export function bereinigen(roh) {
   s.vertraeglich = vertraeglichBereinigen(roh.vertraeglich);
   s.wuensche = wuenscheBereinigen(roh.wuensche);
   s.amyWerte = amyWerteBereinigen(roh.amyWerte, s.amy);
+  s.inventar = inventarBereinigen(roh.inventar);
   return s;
 }
 
@@ -817,14 +822,14 @@ export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || 
  * Einträge und behaltene KI-Rezepte von einem anderen Stand dazunehmen, ohne
  * Vorhandenes zu überschreiben – dazu, was sonst noch fehlt:
  * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich, kochen, fehlt, bons, preisalarm,
- * haushalt, leute, profil, gemeint, notizbuch, essensplan, vertraeglich, wuensche, amyWerte }.
+ * haushalt, leute, profil, gemeint, notizbuch, essensplan, vertraeglich, wuensche, amyWerte, inventar }.
  */
 export const opZusammen = (items, ki = {}, mehr = {}) => ({
   typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
   amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
   fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}), profil: klon(mehr.profil || {}),
   gemeint: klon(mehr.gemeint || {}), notizbuch: klon(mehr.notizbuch || {}), essensplan: klon(mehr.essensplan || {}), vertraeglich: klon(mehr.vertraeglich || {}), wuensche: klon(mehr.wuensche || {}),
-  amyWerte: klon(mehr.amyWerte || {}),
+  amyWerte: klon(mehr.amyWerte || {}), inventar: klon(mehr.inventar || {}),
 });
 /**
  * Eine ältere App-Fassung kennt Material und „jedes 2. Mal“ der Putztage
@@ -1226,6 +1231,7 @@ function aendere(s, op) {
         for (const [k, g] of Object.entries(gemeintBereinigen(op.gemeint))) if (!s.gemeint[k]) s.gemeint[k] = g;
       }
       if (istObj(op.notizbuch)) notizbuchZusammen(s, op.notizbuch);
+      if (istObj(op.inventar)) inventarZusammen(s, op.inventar);
       if (istObj(op.essensplan)) essensplanZusammen(s, op.essensplan);
       if (istObj(op.vertraeglich)) vertraeglichZusammen(s, op.vertraeglich);
       if (istObj(op.wuensche)) wuenscheZusammen(s, op.wuensche);
@@ -1458,6 +1464,12 @@ function aendere(s, op) {
     case 'blatt':
     case 'blattWeg':
       notizbuchAnwenden(s, op);
+      return;
+    case 'invListe':
+    case 'invListeWeg':
+    case 'ding':
+    case 'dingWeg':
+      inventarAnwenden(s, op);
       return;
     case 'essensplan':
       essensplanAnwenden(s, op);

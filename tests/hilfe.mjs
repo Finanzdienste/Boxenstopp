@@ -50,14 +50,15 @@ export async function bis(bedingung, ms = 6000) {
 const CORS = {
   'access-control-allow-origin': '*',
   'access-control-allow-headers': 'authorization, accept, content-type, if-none-match',
-  'access-control-allow-methods': 'GET, PUT, OPTIONS',
+  'access-control-allow-methods': 'GET, PUT, DELETE, OPTIONS',
   'access-control-expose-headers': 'etag, x-ratelimit-remaining',
 };
 
 export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste', repo = 'Boxenstopp-Daten', pfad = 'liste.json' } = {}) {
-  // dateien: weitere Dateien im Repo, die die App nur liest (z. B. angebote-privat.json) – Pfad → Inhalt (Text)
+  // dateien: weitere Dateien im Repo, die die App nur liest (z. B. angebote-privat.json) – Pfad → Inhalt (Text);
+  // roh: dieselben als Bytes (Fotos der Sachen), geloescht: was die App wieder gelöscht hat
   // fassungen: die Datei, wie sie nach jedem Commit war (Commit-sha → Text) – für ?ref= (Einzelheiten im Überblick)
-  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, shas: {}, lesen: {}, commits: [], leer: false, gibtEs: true, fassungen: {}, fassungAbrufe: 0 };
+  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, roh: {}, geloescht: [], shas: {}, lesen: {}, commits: [], leer: false, gibtEs: true, fassungen: {}, fassungAbrufe: 0 };
   const commit = (message, pfadC, sha) => zustand.commits.unshift({ sha: sha || `c${zustand.commits.length + 1}-${Math.random().toString(36).slice(2, 8)}`, message, date: new Date().toISOString(), pfad: pfadC });
   const basis = `https://api.github.com/repos/${owner}/${repo}`;
   let alt = null; // für staleEinmal: die Fassung vor dem letzten Schreiben
@@ -86,6 +87,8 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
       zustand.lesen[weitere] = (zustand.lesen[weitere] || 0) + 1;
       const inhalt = zustand.dateien[weitere];
       if (inhalt === undefined) return antwort(404, { message: 'Not Found' });
+      // Ein Bild kommt roh als Bytes zurück, wie bei GitHub
+      if (/raw/.test(req.headers().accept || '') && zustand.roh[weitere]) return r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/octet-stream' }, body: zustand.roh[weitere] });
       if (/raw/.test(req.headers().accept || '')) return r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/vnd.github.raw+json; charset=utf-8' }, body: inhalt });
       return antwort(200, { sha: zustand.shas[weitere] || 'weitere', encoding: 'base64', content: Buffer.from(inhalt).toString('base64') });
     }
@@ -96,10 +99,24 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
       const sha = zustand.shas[weitere] || 'weitere';
       if ((da && body.sha !== sha) || (!da && body.sha)) { zustand.konflikte++; return antwort(409, { message: `${weitere} does not match ${body.sha}` }); }
       zustand.dateien[weitere] = Buffer.from(body.content, 'base64').toString('utf8');
+      if (/\.(?:jpe?g|png|webp)$/i.test(weitere)) zustand.roh[weitere] = Buffer.from(body.content, 'base64');
       zustand.shas[weitere] = `w${(zustand.wVersion = (zustand.wVersion || 0) + 1)}`;
       zustand.nachrichten.push(body.message);
       commit(body.message, weitere);
       return antwort(da ? 200 : 201, { content: { sha: zustand.shas[weitere], path: weitere } });
+    }
+    // Andere Dateien löschen (alte Fotos der Sachen): mit der sha wie bei GitHub
+    if (weitere && weitere !== pfad && req.method() === 'DELETE') {
+      const body = JSON.parse(req.postData() || '{}');
+      if (zustand.dateien[weitere] === undefined) return antwort(404, { message: 'Not Found' });
+      if (body.sha !== (zustand.shas[weitere] || 'weitere')) { zustand.konflikte++; return antwort(409, { message: `${weitere} does not match ${body.sha}` }); }
+      delete zustand.dateien[weitere];
+      delete zustand.roh[weitere];
+      delete zustand.shas[weitere];
+      zustand.geloescht.push(weitere);
+      zustand.nachrichten.push(body.message);
+      commit(body.message, weitere);
+      return antwort(200, { content: null });
     }
     if (url === `${basis}/contents/${pfad}`) {
       const ref = new URL(req.url()).searchParams.get('ref');

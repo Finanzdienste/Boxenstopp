@@ -18,6 +18,7 @@ import { kostenMeldenAn, KOSTEN_MELDEN } from './ki.js';
 import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten, breiteAnwenden } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
 import { opZusammen, opPerson, opEinePerson } from './liste.js';
+import { hatInventar } from './inventar.js';
 import { preiseMitBons } from './kosten.js';
 import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe, KI_DATEI, geteiltenKiUebernehmen } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
@@ -193,9 +194,9 @@ app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
   speichereZugang(app.zugang);
   if (farbe) farbeSetzen(farbe === 'blau' ? '' : farbe);
   nimmSpeicher(speicherFuer(app.zugang));
-  // Auch Notizen, Essensplan, Verträglichkeit, Vorschläge und Wörter, die nur hier standen
-  const mehr = bisher ? { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege, gemeint: bisher.gemeint, notizbuch: bisher.notizbuch, essensplan: bisher.essensplan, vertraeglich: bisher.vertraeglich, wuensche: bisher.wuensche } : {};
-  const hatWas = bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(bisher[k] || {}).length) || Object.keys(bisher.essensplan?.tage || {}).length);
+  // Auch Notizen, Essensplan, Verträglichkeit, Vorschläge, Wörter und Sachen, die nur hier standen
+  const mehr = bisher ? { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege, gemeint: bisher.gemeint, notizbuch: bisher.notizbuch, essensplan: bisher.essensplan, vertraeglich: bisher.vertraeglich, wuensche: bisher.wuensche, inventar: bisher.inventar } : {};
+  const hatWas = bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(bisher[k] || {}).length) || Object.keys(bisher.essensplan?.tage || {}).length || hatInventar(bisher.inventar));
   if (hatWas) app.aendern(opZusammen(bisher.items, bisher.ki, mehr));
   try { localStorage.removeItem(GETRENNT); } catch { /* egal */ }
   lokalLoeschen();

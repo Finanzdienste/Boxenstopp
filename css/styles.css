@@ -1852,6 +1852,68 @@ html.pm-offen{overflow:hidden}
   .nb-seiten{position:sticky;top:calc(var(--header-h) + 16px)}
 }
 
+/* ---------------------------------------------------------------- Sachen in eigenen Listen (ansicht-inventar.js) */
+.inv{display:grid;gap:14px;container-type:inline-size}
+.inv-werkzeug{display:flex;flex-wrap:wrap;gap:8px}
+.inv-werkzeug .amy-btn,.inv-foto-knoepfe .amy-btn,.inv-code .amy-btn,.inv-form .amy-btn{min-height:42px;padding:0 18px;font-size:15px}
+.inv-datei-btn{cursor:pointer}
+.inv-datei-btn.aus{opacity:.5;pointer-events:none}
+.inv-suche-feld input{width:100%;min-height:44px;padding:8px 16px;border-radius:999px;border:2px solid var(--line);background:var(--surface);font:500 16px/1.3 var(--f-body);color:var(--ink)}
+.inv-listen{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.inv-liste-z,.inv-ding-z{display:flex;align-items:center;gap:6px;min-width:0}
+.inv-liste-k{flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:12px;align-items:center;min-height:64px;padding:10px 14px;border-radius:20px;border:2px solid var(--line);background:var(--surface);text-align:left;color:var(--ink)}
+.inv-liste-k img{grid-row:span 2;width:40px;height:40px}
+.inv-liste-k b{font:600 17px/1.2 var(--f-body);overflow-wrap:anywhere}
+.inv-liste-k small{font-size:13px;color:var(--muted)}
+.inv-pfeile{display:flex;flex-direction:column;gap:4px}
+.inv-pfeil{width:36px;height:30px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:600 15px/1 var(--f-body)}
+.inv-pfeil[disabled]{opacity:.35}
+.inv-ordnen{justify-self:start}
+.inv-vorschlaege{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
+.inv-vorschlaege.mehr{justify-content:flex-start;align-items:center}
+.inv-vorschlaege img{width:18px;height:18px}
+.inv-leer > img{width:44px;height:44px}
+.inv-kopf{display:flex;align-items:center;gap:12px}
+.inv-kopf h2{flex:1;min-width:0;margin:0;font:600 24px/1.2 var(--f-display,var(--f-body));overflow-wrap:anywhere}
+.inv-leiste{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.inv-sort{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.inv-sort select{min-height:38px;padding:4px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:500 15px/1 var(--f-body)}
+.inv-dinge{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.inv-ding-k{flex:1;min-width:0;display:grid;gap:8px;align-content:start;padding:8px 8px 10px;border-radius:20px;border:2px solid var(--line);background:var(--surface);text-align:left;color:var(--ink)}
+.inv-bild{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:14px;background:var(--surface-2);overflow:hidden}
+.inv-ersatz{width:44%;height:44%;opacity:.85}
+.inv-foto-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.inv-foto-img:not([src]){display:none}
+.inv-bild.hat-foto .inv-ersatz{visibility:hidden}
+.inv-ding-t{display:grid;gap:3px;min-width:0}
+.inv-ding-t b{font:600 15px/1.25 var(--f-body);overflow-wrap:anywhere}
+.inv-ding-t small{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.inv-ding-tags{display:flex;flex-wrap:wrap;gap:4px}
+.inv-abschnitt{display:grid;gap:8px}
+.inv-abschnitt h3{display:flex;align-items:center;gap:8px;margin:6px 0 0;font:600 15px/1 var(--f-body)}
+.inv-abschnitt h3 .n{font-size:12px;color:var(--muted)}
+.inv-form,.inv-ding{display:grid;gap:12px;padding:16px;border-radius:24px;border:2px solid var(--line);background:var(--surface);box-shadow:var(--shadow);min-width:0}
+.inv-feld{display:grid;gap:5px;min-width:0}
+.inv-feld > span{font:600 13px/1.2 var(--f-body);color:var(--muted)}
+.inv-feld input,.inv-feld select,.inv-feld textarea{width:100%;min-height:44px;padding:9px 13px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font:500 16px/1.35 var(--f-body);color:var(--ink)}
+.inv-feld textarea{min-height:110px;resize:vertical}
+.inv-bilder{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
+.inv-bild-wahl{display:grid;place-items:center;height:46px;border-radius:14px;border:2px solid var(--line);background:var(--surface)}
+.inv-bild-wahl[aria-checked="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.inv-form-knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.inv-weg{margin-left:auto}
+.inv-ding > .back{justify-self:start}
+.inv-gross{position:relative;width:100%;max-width:420px;justify-self:center}
+.inv-bild.gross{border-radius:20px}
+.inv-bild.gross .inv-ersatz{width:34%;height:34%}
+.inv-lauf{position:absolute;left:10px;right:10px;bottom:10px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--surface) 88%,transparent);font:600 14px/1.2 var(--f-body);text-align:center;color:var(--ink)}
+.inv-foto-knoepfe{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.inv-code{display:flex;gap:8px;align-items:stretch}
+.inv-code input{flex:1;min-width:0}
+.inv-gleich{margin:4px 0 0;font-size:14px}
+.inv-fein,.inv-zahl{margin:0}
+@container (min-width:640px){.inv-dinge{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
+
 /* ---------------------------------------------------------------- Was Amy verträgt */
 .vt{display:grid;gap:14px}
 .vt-lead{color:var(--muted);font-size:15px;line-height:1.5;text-align:center;max-width:52ch;justify-self:center}
