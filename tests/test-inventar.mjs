@@ -276,9 +276,31 @@ const kiRoute = async (r) => {
   return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: STROM(JSON.stringify(ki.antwort)) });
 };
 
-async function geraet({ leser = false, schluessel = '' } = {}) {
-  // Chrome auf Android kann Strichcodes lesen – hier nachgebaut; ohne ist es wie Safari auf dem iPhone
-  const skript = leser ? 'window.BarcodeDetector = class { static async getSupportedFormats() { return ["ean_13", "ean_8", "qr_code"]; } async detect() { return [{ rawValue: window.__code || "4006381333931", format: "ean_13" }]; } };' : null;
+// Eine Kamera (nachgebaut): ein Bild mit Strichen, eine Taschenlampe (außer mit __kamera.ohneLicht) – was mit ihr geschieht, steht in __kamera
+const KAMERA = `(() => {
+  window.__kamera = { licht: [], gestoppt: 0, anfragen: 0, ohneLicht: false };
+  navigator.mediaDevices.getUserMedia = async () => {
+    window.__kamera.anfragen++;
+    const cv = document.createElement('canvas');
+    cv.width = 640;
+    cv.height = 480;
+    const g = cv.getContext('2d');
+    const malen = () => { g.fillStyle = '#fff'; g.fillRect(0, 0, 640, 480); g.fillStyle = '#000'; for (let x = 80; x < 560; x += 14) g.fillRect(x, 150, 7, 180); };
+    malen();
+    const takt = setInterval(malen, 100);
+    const s = cv.captureStream(15);
+    const t = s.getVideoTracks()[0];
+    t.getCapabilities = () => (window.__kamera.ohneLicht ? {} : { torch: true });
+    t.applyConstraints = async (k) => { window.__kamera.licht.push(k?.advanced?.[0]?.torch); };
+    const stop = t.stop.bind(t);
+    t.stop = () => { window.__kamera.gestoppt++; clearInterval(takt); stop(); };
+    return s;
+  };
+})();`;
+
+async function geraet({ leser = false, schluessel = '', kamera = false } = {}) {
+  // Chrome auf Android kann Strichcodes lesen – hier nachgebaut (mit __still: noch keiner im Bild); ohne ist es wie Safari auf dem iPhone
+  const skript = [leser ? 'window.BarcodeDetector = class { static async getSupportedFormats() { return ["ean_13", "ean_8", "qr_code"]; } async detect() { return window.__still ? [] : [{ rawValue: window.__code || "4006381333931", format: "ean_13" }]; } };' : '', kamera ? KAMERA : ''].filter(Boolean).join('\n') || null;
   const h = await handy(browser, { attrappe: mar, skript, datenbank: { route: dbRoute } });
   await h.ctx.route('https://generativelanguage.googleapis.com/**', kiRoute);
   const p = h.page;
@@ -293,6 +315,13 @@ async function geraet({ leser = false, schluessel = '' } = {}) {
   await p.click('.tab[data-tab="amy"]');
   await p.click('[data-amy-teil="sachen"]');
   return h;
+}
+
+/** Scannen über den Scanner: Der Test-Browser hat keine Kamera – das Foto geht über „Mit der Kamera-App“ hinein. */
+async function scanne(p, zweck) {
+  await p.click(`[data-act="inv-scannen"][data-zweck="${zweck}"]`);
+  await p.waitForSelector('#scan-dlg[open]');
+  await p.setInputFiles('#scan-datei', BILD);
 }
 
 const m1 = await geraet({ leser: true });
@@ -322,7 +351,7 @@ check(await bis(async () => (await m.locator('#inv-foto-teil img.inv-foto-img').
 check(!JSON.stringify(mar.liste()).includes('base64') && JSON.stringify(mar.liste()).length < 5000, 'liste.json bleibt klein – kein Bild darin');
 
 // Der Strichcode: das Handy liest ihn selbst
-await m.setInputFiles('#inv-code-foto', BILD);
+await scanne(m, 'code');
 check(await bis(() => ding('Lederjacke')?.code === CODE) && (await m.inputValue('#inv-code')) === CODE, 'Scannen: das Handy liest den Strichcode selbst (BarcodeDetector), die Nummer steht in der Sache');
 check(db.anfragen.length === 0 && (await m.locator('.inv-nachschlagen').count()) === 1, 'Hat die Sache Name, Marke, Foto und Notiz, schlägt die App nicht von selbst nach – „Im Netz nachschlagen“ steht trotzdem da');
 
@@ -355,16 +384,15 @@ check(await bis(async () => (await m.locator('.inv-liste-k').first().innerText()
 await m.fill('#inv-suche', 'zara');
 check(await bis(async () => (await m.locator('#inv-inhalt .inv-ding-k b').allInnerTexts()).join() === 'Lederjacke') && (await m.locator('#inv-inhalt .inv-ding-k').innerText()).includes('Kleidung'), 'Suche „zara“ findet die Lederjacke – mit ihrer Liste');
 await m.fill('#inv-suche', '');
-await m.setInputFiles('#inv-finden', BILD);
+await scanne(m, 'finden');
 check(await bis(async () => (await m.locator('#inv-name').count()) === 1 && (await m.inputValue('#inv-name')) === 'Lederjacke') && (await m.locator('#toast').innerText()).includes('Hast du schon'), 'Hab ich das schon? – scannen öffnet die Lederjacke: „Hast du schon“');
+check(await m.locator('#scan-dlg[open]').count() === 0, 'der Scanner ist danach zu');
+// Baut die App die Ansicht neu, während die Kamera für ein Foto offen ist (etwa beim Abgleich): Das Foto kommt trotzdem an
+const fotoVorher = pfad();
+await m.evaluate(() => { window.__altesFeld = document.querySelector('#inv-foto-datei'); });
 await m.click('[data-act="inv-ding-zu"]');
-await m.click('[data-act="inv-zu"]');
-// Baut die App die Ansicht neu, während die Kamera offen ist (etwa beim Abgleich): Das Foto kommt trotzdem an
-await m.evaluate(() => { window.__altesFeld = document.querySelector('#inv-finden'); });
-await m.click('[data-act="inv-liste-neu"]');
-await m.click('[data-act="inv-form-zu"]');
-check(await bis(async () => (await m.locator('#inv-liste-form').count()) === 0), '„Abbrechen“ schließt das Formular „Neue Liste“ (auch wenn der Fokus darin steht)');
-check(await m.evaluate(() => !document.contains(window.__altesFeld) && !!document.querySelector('#inv-finden')), 'Neu gezeichnet: das Feld von vorher hängt nicht mehr im Dokument');
+await m.click('[data-inv-ding]:has-text("Lederjacke")');
+check(await bis(async () => (await m.locator('#inv-name').count()) === 1) && await m.evaluate(() => !document.contains(window.__altesFeld) && !!document.querySelector('#inv-foto-datei')), 'Neu gezeichnet: das Feld von vorher hängt nicht mehr im Dokument');
 await m.evaluate(async () => {
   const f = new window.File([await (await fetch('icon-512.png')).blob()], 'foto.png', { type: 'image/png' });
   const dt = new window.DataTransfer();
@@ -372,9 +400,12 @@ await m.evaluate(async () => {
   window.__altesFeld.files = dt.files;
   window.__altesFeld.dispatchEvent(new window.Event('change', { bubbles: true }));
 });
-check(await bis(async () => (await m.locator('#inv-name').count()) === 1 && (await m.inputValue('#inv-name')) === 'Lederjacke'), 'das Foto am alten Feld kommt trotzdem an: „Hab ich das schon?“ öffnet die Lederjacke');
+check(await bis(() => FOTO_PFAD.test(pfad()) && pfad() !== fotoVorher && !!mar.zustand.roh[pfad()], 8000), 'das Foto am alten Feld kommt trotzdem an: die Lederjacke hat das neue Foto');
 await m.click('[data-act="inv-ding-zu"]');
 await m.click('[data-act="inv-zu"]');
+await m.click('[data-act="inv-liste-neu"]');
+await m.click('[data-act="inv-form-zu"]');
+check(await bis(async () => (await m.locator('#inv-liste-form').count()) === 0), '„Abbrechen“ schließt das Formular „Neue Liste“ (auch wenn der Fokus darin steht)');
 // Eine Liste über das Formular: „Anlegen“ öffnet sie (auch wenn der Fokus noch im Formular steht)
 await m.click('[data-act="inv-liste-neu"]');
 await m.fill('#inv-liste-name', 'Schmuck');
@@ -382,7 +413,7 @@ await m.click('#inv-liste-form button[type="submit"]');
 check(await bis(async () => (await m.locator('#inv-titel').count()) === 1 && (await m.locator('#inv-titel').innerText()) === 'Schmuck') && await bis(() => Object.values(mar.liste().inventar.listen).some((l) => l.name === 'Schmuck')), 'Neue Liste über das Formular: „Anlegen“ legt „Schmuck“ an und öffnet sie');
 await m.click('[data-act="inv-zu"]');
 await m.evaluate(() => { window.__code = '73513537'; });
-await m.setInputFiles('#inv-finden', BILD);
+await scanne(m, 'finden');
 check(await bis(async () => (await m.locator('#inv-scan').innerText()).includes('73513537: noch nicht in deinen Listen') && (await m.locator('#inv-scan [data-act="inv-scan-knopf"]').innerText()) === 'Eintragen'), 'Ein unbekannter Code: oben steht „noch nicht in deinen Listen“ – mit „Eintragen“');
 await m.waitForTimeout(6500);
 check((await m.locator('#inv-scan').innerText()).includes('noch nicht in deinen Listen'), 'und das bleibt stehen (eine Meldung unten wäre nach ein paar Sekunden weg)');
@@ -405,7 +436,7 @@ const makeupId = Object.values(mar.liste().inventar.listen).find((l) => l.name =
 check((await m.locator('.inv-leer').innerText()).includes('„Scannen“ liest den Strichcode'), 'die leere Liste sagt, was „Scannen“ tut');
 await m.evaluate((c) => { window.__code = c; }, LIPPEN);
 const vorLippen = db.anfragen.length;
-await m.setInputFiles('#inv-neu-code', BILD);
+await scanne(m, 'neu');
 check(await bis(() => mitNummer(LIPPEN)?.name === 'Lippenstift testrot' && mitNummer(LIPPEN)?.marke === 'Testmarke' && mitNummer(LIPPEN)?.liste === makeupId), 'Scannen in „Make-up“: nachgeschlagen und gleich angelegt – Name (vorn groß), die erste Marke, in dieser Liste');
 check(await bis(async () => (await m.locator('#toast').innerText()).includes('Gefunden: Lippenstift testrot (Testmarke)')) && (await m.inputValue('#inv-name')) === 'Lippenstift testrot' && (await m.inputValue('#inv-code')) === LIPPEN, '„Gefunden: …“ – und die Sache ist gleich offen, mit Name und Nummer');
 check(await bis(() => FOTO_PFAD.test(mitNummer(LIPPEN)?.foto?.pfad || '') && mar.zustand.roh[mitNummer(LIPPEN).foto.pfad]?.subarray(0, 3).toString('hex') === 'ffd8ff', 8000) && db.bilder === 1, 'das Bild der Datenbank ist ihr Foto – verkleinert als JPEG ins Repo, wie ein eigenes');
@@ -414,7 +445,7 @@ check(fragen.length === 1 && fragen[0].art === 'beauty' && fragen[0].code === LI
 check(mitNummer(LIPPEN).quelle?.name === 'Open Beauty Facts' && await bis(async () => (await m.locator('.inv-quelle a').getAttribute('href')) === `https://world.openbeautyfacts.org/product/${LIPPEN}`) && (await m.locator('.inv-quelle').innerText()) === 'Gefunden bei Open Beauty Facts', 'Die Sache zeigt, wo es herkommt – mit Link');
 check(mitNummer(LIPPEN).tags.join() === 'Lippenstift,vegan' && mitNummer(LIPPEN).notiz === 'Menge: 4 g\nNach dem Öffnen 24 Monate haltbar\nInhaltsstoffe: Ricinus Communis Seed Oil, Cera Alba' && await bis(async () => (await m.inputValue('#inv-notiz')) === mitNummer(LIPPEN).notiz), 'Alles, was die Datenbank weiß: Kategorie und Siegel als Tags, Menge, Haltbarkeit und Inhaltsstoffe in der Notiz – auch im offenen Formular');
 await m.click('[data-act="inv-ding-zu"]');
-await m.setInputFiles('#inv-neu-code', BILD);
+await scanne(m, 'neu');
 check(await bis(async () => (await m.locator('#toast').innerText()).includes('Hast du schon: Lippenstift testrot (Make-up)')) && (await m.inputValue('#inv-name')) === 'Lippenstift testrot' && dinge().filter((d) => d.code === LIPPEN).length === 1 && db.anfragen.length === vorLippen + 1, 'Noch einmal gescannt: „Hast du schon“, sie ist offen – keine zweite, nicht noch einmal nachgeschlagen');
 
 // „Hab ich das schon?“ mit einer Nummer aus einer anderen Datenbank: die App sagt gleich, was es ist
@@ -423,7 +454,7 @@ await m.click('[data-act="inv-ding-zu"]');
 await m.click('[data-act="inv-zu"]');
 await m.evaluate((c) => { window.__code = c; }, BUCH);
 const vorBuch = db.anfragen.length;
-await m.setInputFiles('#inv-finden', BILD);
+await scanne(m, 'finden');
 check(await bis(async () => (await m.locator('#inv-scan').innerText()).includes('Notizbuch A5 (Papierwerk): noch nicht in deinen Listen')), 'Hab ich das schon? – nein, und die App sagt gleich, was es ist');
 check(db.anfragen.slice(vorBuch).map((x) => x.art).join() === 'beauty,product', 'erst Open Beauty Facts, die verweist auf Open Products Facts');
 await m.click('[data-act="inv-scan-knopf"]');
@@ -437,7 +468,7 @@ check(await bis(async () => (await m.locator('#inv-titel').innerText()) === 'Kle
 // Ihr zweites Gerät, ohne Strichcode-Leser (wie Safari), mit KI-Schlüssel
 const m2h = await geraet({ schluessel: GKEY });
 const m2 = m2h.page;
-check((await m2.locator('.inv-fein').innerText()).includes('die KI vom Foto'), '2. Gerät: ohne Leser im Browser liest die KI den Strichcode');
+check((await m2.locator('.inv-fein').innerText()).includes('die KI vom Bild') && (await m2.locator('.inv-fein').innerText()).includes('Taschenlampe'), '2. Gerät: ohne Leser im Browser liest die KI den Strichcode (der Hinweis nennt auch die Taschenlampe)');
 await m2.click('.inv-liste-k >> nth=0');
 check(await bis(async () => (await m2.locator('.inv-ding-k').count()) === 3), '2. Gerät: die Liste mit ihren drei Sachen');
 check(await bis(async () => (await m2.locator('.inv-ding-k img.inv-foto-img[src^="blob:"]').count()) === 1) && mar.zustand.lesen[pfad()] >= 1, 'das Foto holt es mit dem Schlüssel aus dem Repo');
@@ -452,22 +483,22 @@ await m2.click('[data-act="inv-ding-zu"]');
 await m2.click('[data-act="inv-zu"]');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: '4006381333932' };
 ki.warten = 4500;
-await m2.setInputFiles('#inv-finden', BILD);
+await scanne(m2, 'finden');
 await m2.waitForTimeout(3800);
-check((await m2.locator('#inv-scan').innerText()).includes('Liest den Strichcode') && (await m2.locator('#inv-scan').innerText()).includes('die KI schaut sich das Foto an') && (await m2.locator('#inv-scan .inv-scan-rad').count()) === 1, 'Solange die KI liest, steht es oben – auch nach ein paar Sekunden noch (mit Rädchen)');
+check((await m2.locator('#inv-scan').innerText()).includes('Liest den Strichcode') && (await m2.locator('#inv-scan').innerText()).includes('die KI schaut sich das Bild an') && (await m2.locator('#inv-scan .inv-scan-rad').count()) === 1, 'Solange die KI liest, steht es oben – auch nach ein paar Sekunden noch (mit Rädchen)');
 ki.warten = 0;
 check(await bis(async () => (await m2.locator('#inv-scan').innerText()).includes('Kein Strichcode erkannt'), 8000) && /Strichcode/.test(ki.anfragen.at(-1)?.system_instruction || ''), 'Liest die KI eine falsche Prüfziffer: oben „Kein Strichcode erkannt“');
 await m2.click('[data-act="inv-scan-zu"]');
 check(await bis(async () => (await m2.locator('#inv-scan .inv-scan').count()) === 0), '× schließt den Hinweis');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: CODE };
-await m2.setInputFiles('#inv-finden', BILD);
+await scanne(m2, 'finden');
 check(await bis(async () => (await m2.locator('#inv-name').count()) === 1 && (await m2.inputValue('#inv-name')) === 'Lederjacke'), 'Richtig gelesen: „Hast du schon“ – die Lederjacke ist offen');
 // Mit Gemini sucht niemand im Internet (die Internetsuche läuft nur über Claude)
 await m2.click('[data-act="inv-ding-zu"]');
 await m2.click('[data-act="inv-zu"]');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: '4000000000037' };
 const kiVorher = ki.anfragen.length;
-await m2.setInputFiles('#inv-finden', BILD);
+await scanne(m2, 'finden');
 check(await bis(async () => (await m2.locator('#inv-scan').innerText()).includes('4000000000037: noch nicht in deinen Listen')), 'Gemini liest eine unbekannte Nummer: „noch nicht in deinen Listen“');
 await m2.click('[data-act="inv-scan-knopf"]');
 check(await bis(async () => (await m2.locator('#toast').innerText()).includes('nichts gefunden')) && ki.anfragen.length === kiVorher + 1 && await bis(() => !!mitNummer('4000000000037')), 'Eintragen: die Datenbanken kennen sie nicht – mit Gemini sucht niemand im Internet, die Sache hat nur die Nummer');
@@ -483,7 +514,7 @@ const SCHUHE = '4000000000044';
 claude.antwort = claudeFindet({ gefunden: true, name: 'Wanderschuhe Grau', marke: 'Bergfest', liste: 'Kleidung', tags: ['grau', 'Wandern'], details: ['Farbe: Grau', 'Größe: 39'], preis: '89,95 €', beschreibung: 'Leichter Wanderschuh.', url: SEITE, seite: 'beispiel-shop.de' }, SEITE);
 await m3.evaluate((c) => { window.__code = c; }, SCHUHE);
 const vorSchuhe = db.anfragen.length;
-await m3.setInputFiles('#inv-neu-code', BILD);
+await scanne(m3, 'neu');
 check(await bis(() => mitNummer(SCHUHE)?.name === 'Wanderschuhe Grau' && mitNummer(SCHUHE)?.marke === 'Bergfest' && mitNummer(SCHUHE)?.liste === kleidungId && mitNummer(SCHUHE)?.tags.join() === 'grau,Wandern' && mitNummer(SCHUHE)?.quelle?.url === SEITE, 8000), 'Claude findet sie im Internet: Name, Marke, Tags, die Seite als Quelle');
 check(await bis(() => FOTO_PFAD.test(mitNummer(SCHUHE)?.foto?.pfad || '') && mar.zustand.roh[mitNummer(SCHUHE).foto.pfad]?.subarray(0, 3).toString('hex') === 'ffd8ff', 8000), 'und das Bild der Shopseite ist ihr Foto (über die Funktion produkt-bild) – als JPEG ins Repo');
 check(shop.anfragen.length === 1 && shop.anfragen[0].rumpf.seite === SEITE && shop.anfragen[0].kopf['x-schluessel-hash'] === createHash('sha256').update(AKEY).digest('hex') && !JSON.stringify(shop.anfragen[0]).includes(AKEY), 'an die Funktion: die Seite und die Prüfsumme – nie der Schlüssel');
@@ -494,7 +525,7 @@ check(await bis(async () => (await m3.locator('.inv-quelle a').innerText()) === 
 claude.antwort = claudeFindet({ gefunden: true, name: 'Ausgedacht', marke: 'X', url: 'https://anders.example/p/1' }, SEITE);
 await m3.click('[data-act="inv-ding-zu"]');
 await m3.evaluate(() => { window.__code = '4000000000051'; });
-await m3.setInputFiles('#inv-neu-code', BILD);
+await scanne(m3, 'neu');
 check(await bis(async () => (await m3.locator('#toast').innerText()).includes('Zu 4000000000051 nichts gefunden')) && await bis(() => mitNummer('4000000000051')?.liste === kleidungId) && !mitNummer('4000000000051').name && !ding('Ausgedacht') && shop.anfragen.length === 1, 'Nennt Claude eine Seite, die in keiner Suche stand: nichts eingetragen – die Sache hat nur die Nummer (und kein Bild wird geholt)');
 // Hat die Shopseite kein Bild: die Sache bleibt ohne Foto, ohne Fehlermeldung
 const MUETZE = '4000000000068';
@@ -503,7 +534,7 @@ claude.antwort = claudeFindet({ gefunden: true, name: 'Mütze Blau', marke: 'Ber
 shop.bild = false;
 await m3.click('[data-act="inv-ding-zu"]');
 await m3.evaluate((c) => { window.__code = c; }, MUETZE);
-await m3.setInputFiles('#inv-neu-code', BILD);
+await scanne(m3, 'neu');
 check(await bis(() => mitNummer(MUETZE)?.name === 'Mütze Blau', 8000) && await bis(() => shop.anfragen.length === 2) && await bis(async () => (await m3.locator('#inv-lauf, .inv-lauf').count()) === 0) && !mitNummer(MUETZE).foto && !(await m3.locator('#toast').innerText()).includes('ließ sich nicht'), 'Hat die Shopseite kein Bild: ohne Foto, ohne Fehlermeldung');
 shop.bild = true;
 // „Im Netz nachschlagen“ fragt beide – auch wenn die Datenbank die Nummer kennt
@@ -520,6 +551,39 @@ check(await bis(() => /Preis: 4,95 € bei beispiel-drogerie\.de/.test(mitNummer
 check(db.anfragen.length === vorMehr + 1 && claude.anfragen.length === claudeVorher + 1 && dinge().filter((d) => d.code === LIPPEN).length === 1, 'dabei je einmal gefragt – keine zweite Sache');
 await m3.click('[data-act="inv-nachschlagen"]');
 check(await bis(() => claude.anfragen.length === claudeVorher + 2) && await bis(async () => (await m3.locator('#toast').innerText()).includes('Gefunden')) && (mitNummer(LIPPEN).notiz.match(/Preis:/g) || []).length === 1, 'Noch einmal: nichts doppelt in der Notiz');
+
+// Der Scanner mit Kamera (nachgebaut): Live-Bild, Taschenlampe – das Handy liest den Code von selbst
+const m4h = await geraet({ leser: true, kamera: true });
+const m4 = m4h.page;
+await m4.evaluate(() => { window.__still = true; });
+await m4.click('[data-act="inv-scannen"][data-zweck="finden"]');
+check(await bis(async () => (await m4.locator('#scan-text').innerText()).includes('das Handy liest ihn von selbst')) && await m4.evaluate(() => document.querySelector('#scan-video').srcObject instanceof window.MediaStream && window.__kamera.anfragen === 1), 'Scanner: das Live-Bild der Kamera – „das Handy liest ihn von selbst“');
+check(await bis(() => m4.locator('[data-scan="licht"]').isVisible()) && (await m4.locator('#scan-app-text').innerText()) === '', 'die Kamera hat eine Taschenlampe: der Knopf ist da');
+await m4.click('[data-scan="licht"]');
+check(await bis(async () => (await m4.locator('[data-scan="licht"]').getAttribute('aria-pressed')) === 'true') && JSON.stringify(await m4.evaluate(() => window.__kamera.licht)) === '[true]' && (await m4.locator('[data-scan="licht"]').innerText()).includes('Licht aus'), 'Taschenlampe an (torch: true)');
+await m4.click('[data-scan="licht"]');
+check(await bis(async () => (await m4.locator('[data-scan="licht"]').getAttribute('aria-pressed')) === 'false') && JSON.stringify(await m4.evaluate(() => window.__kamera.licht)) === '[true,false]', 'und wieder aus');
+await m4.click('[data-scan="licht"]');
+await m4.evaluate(() => { window.__code = '4006381333931'; window.__still = false; });
+check(await bis(async () => (await m4.locator('#scan-dlg[open]').count()) === 0) && await bis(async () => (await m4.locator('#inv-name').count()) === 1 && (await m4.inputValue('#inv-name')) === 'Lederjacke'), 'Das Handy liest den Code im Live-Bild: der Scanner geht von selbst zu, „Hast du schon“ – die Lederjacke');
+check(await m4.evaluate(() => window.__kamera.gestoppt >= 1 && window.__kamera.licht.at(-1) === false), 'danach ist die Kamera aus – die Taschenlampe auch');
+
+// Wie auf dem iPhone: ohne Leser im Browser und ohne Taschenlampe – „Auslösen“, die KI liest das Bild
+const m5h = await geraet({ kamera: true, schluessel: GKEY });
+const m5 = m5h.page;
+await m5.evaluate(() => { window.__kamera.ohneLicht = true; });
+await m5.click('[data-act="inv-scannen"][data-zweck="finden"]');
+check(await bis(async () => (await m5.locator('#scan-text').innerText()).includes('dann „Auslösen“')) && await m5.locator('[data-scan="licht"]').isHidden() && (await m5.locator('#scan-app-text').innerText()).includes('Blitz'), 'Ohne Leser: „Auslösen“ – ohne Taschenlampe der Tipp mit dem Blitz der Kamera-App');
+ki.antwort = { name: '', marke: '', liste: '', tags: [], code: CODE };
+const vorKi = ki.anfragen.length;
+await m5.click('[data-scan="ausloesen"]');
+check(await bis(async () => (await m5.locator('#inv-name').count()) === 1 && (await m5.inputValue('#inv-name')) === 'Lederjacke', 8000) && ki.anfragen.length === vorKi + 1 && ki.anfragen.at(-1).input[0].type === 'image' && ki.anfragen.at(-1).input[0].mime_type === 'image/jpeg', 'Auslösen: das Bild im Rahmen geht an die KI, die liest den Code – die Lederjacke');
+check(await m5.evaluate(() => window.__kamera.gestoppt >= 1) && (await m5.locator('#scan-dlg[open]').count()) === 0, 'danach ist die Kamera aus und der Scanner zu');
+await m5.click('[data-act="inv-scannen"][data-zweck="code"]');
+await bis(async () => (await m5.locator('#scan-text').innerText()).includes('Auslösen'));
+const gestoppt = await m5.evaluate(() => window.__kamera.gestoppt);
+await m5.click('[data-scan="zu"]');
+check(await bis(async () => (await m5.locator('#scan-dlg[open]').count()) === 0) && await m5.evaluate((v) => window.__kamera.gestoppt > v, gestoppt), '× schließt den Scanner, die Kamera geht aus');
 
 // Löschen mit Rückgängig – das Foto kommt erst danach weg
 await m.click('[data-inv-ding]:has-text("Lederjacke")');
@@ -540,10 +604,12 @@ mar.zustand.datei = JSON.stringify(alt);
 mar.zustand.version++;
 mar.zustand.sha = `sha${mar.zustand.version}`;
 check(zahl > 3 && await bis(() => Object.keys(mar.liste()?.inventar?.dinge || {}).length === zahl, 10000), 'Lässt eine ältere Fassung die Sachen weg, schreibt Marielles Handy sie wieder dazu');
-check(m1.fehler.length === 0 && m2h.fehler.length === 0 && m3h.fehler.length === 0, `Keine Fehler im Browser (${[...m1.fehler, ...m2h.fehler, ...m3h.fehler].join(' | ')})`);
+check(m1.fehler.length === 0 && m2h.fehler.length === 0 && m3h.fehler.length === 0 && m4h.fehler.length === 0 && m5h.fehler.length === 0, `Keine Fehler im Browser (${[...m1.fehler, ...m2h.fehler, ...m3h.fehler, ...m4h.fehler, ...m5h.fehler].join(' | ')})`);
 await m1.ctx.close();
 await m2h.ctx.close();
 await m3h.ctx.close();
+await m4h.ctx.close();
+await m5h.ctx.close();
 
 // Amy will es auch: in Amys Bereich, in der gemeinsamen Liste
 const tobi = await handy(browser);

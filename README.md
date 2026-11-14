@@ -491,10 +491,17 @@ war, merkt sich das Gerät). Die Teile:
     Nummer aus, wenn ein Strichcode zu sehen ist; „Mit KI ausfüllen“ geht
     auch später. Sie füllt nur, was noch leer ist, und bekommt nur das Foto
     und die Namen der Listen.
-  - **Strichcode:** „Scannen“ fotografiert ihn. Chrome auf Android liest ihn
-    selbst (`BarcodeDetector`); Safari auf iPhone und iPad kann das nicht,
-    dort liest ihn die KI vom Foto – eine Nummer mit falscher Prüfziffer
-    (EAN-8, UPC-A, EAN-13) nimmt die App nicht. Sonst die Ziffern abtippen.
+  - **Strichcode:** „Scannen“ öffnet den **Scanner in der App**
+    (`js/scanner.js`, statt der Kamera-App): Live-Bild mit Rahmen und – wo die
+    Kamera sie anbietet (`getCapabilities().torch`, etwa Chrome auf Android)
+    – der **Taschenlampe**; ohne steht der Tipp, dass die Kamera-App einen
+    Blitz hat. Chrome auf Android liest den Code selbst im Live-Bild
+    (`BarcodeDetector`, alle 250 ms) und schließt von selbst; Safari auf
+    iPhone und iPad kann das nicht – dort „Auslösen“: Das Bild im Rahmen geht
+    an die KI. Eine Nummer mit falscher Prüfziffer (EAN-8, UPC-A, EAN-13)
+    nimmt die App nicht. Geht die Kamera nicht (keine Erlaubnis, kein Gerät),
+    bleibt „Mit der Kamera-App“ (dafür geht die eigene Kamera aus); im
+    Hintergrund ist die Kamera aus. Sonst die Ziffern abtippen.
     **Hab ich das schon?** (über allen Listen): scannen, und die App öffnet
     die Sache – oder sagt „noch nicht in deinen Listen“, gleich mit dem
     Namen, wenn eine Datenbank ihn kennt, und „Eintragen“. Was beim Scannen
@@ -1694,6 +1701,7 @@ die Action „Rezeptfotos“.
 | `js/wuensche.js`, `js/ansicht-wuensche.js` | Vorschläge für Tobi: schreiben, abhaken, antworten |
 | `js/inventar.js`, `js/ansicht-inventar.js` | Sachen in eigenen Listen: Listen, Sachen, Ordnen, Suchen, Strichcode – und der Teil im Bereich mit Fotos im Daten-Repo |
 | `js/inventar-ki.js` | Sachen erkennen: das Foto an die KI (Name, Marke, Liste, Tags, Strichcode) – ohne DOM |
+| `js/scanner.js` | Der Scanner für Strichcodes: Kamera in der App mit Rahmen, Taschenlampe, Live-Lesen (BarcodeDetector) oder „Auslösen“, sonst die Kamera-App |
 | `js/inventar-netz.js` | Sachen nachschlagen: die Nummer in Open Beauty Facts & Co. (Name, Marke, Bild, Quelle), sonst Claudes Websuche – Anfrage und Treffer bereinigen; das Bild der Shopseite über die Supabase-Funktion `produkt-bild` – ohne DOM |
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
@@ -1813,7 +1821,7 @@ liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
 Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
 Speichern mit Quelle, `pause_turn`, Ausweichen ohne Seiten lesen,
 Websuche aus, Abbrechen und der Hinweis mit Googles
-Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, mehr Daten (Kategorie, Siegel, Menge, Haltbarkeit, Inhaltsstoffe; bei Claude Angaben, Preis, Beschreibung), Claudes Treffer nur mit einer Seite oder Website aus Suche oder Lesen, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater), eine ausgedachte Seite zählt nicht, „Im Netz nachschlagen“ fragt beide und schreibt nichts doppelt in die Notiz; der Hinweis beim Scannen bleibt stehen (auch nach ein paar Sekunden), ein Foto am neu gezeichneten Feld kommt an, „Abbrechen“ und „Anlegen“ im Formular „Neue Liste“; das Bild der Shopseite über die nachgebaute Funktion (an sie nur Seite und Prüfsumme, ohne Bild auch ohne Fehlermeldung – `FUNKTIONEN` in `tests/hilfe.mjs` lässt keinen Test an die echten Supabase-Funktionen). `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
+Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, mehr Daten (Kategorie, Siegel, Menge, Haltbarkeit, Inhaltsstoffe; bei Claude Angaben, Preis, Beschreibung), Claudes Treffer nur mit einer Seite oder Website aus Suche oder Lesen, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater), eine ausgedachte Seite zählt nicht, „Im Netz nachschlagen“ fragt beide und schreibt nichts doppelt in die Notiz; der Hinweis beim Scannen bleibt stehen (auch nach ein paar Sekunden), ein Foto am neu gezeichneten Feld kommt an, der Scanner mit nachgebauter Kamera (Live-Bild, Taschenlampe an und aus, das Handy liest den Code von selbst; ohne Leser und Taschenlampe „Auslösen“ an die KI und der Tipp mit dem Blitz; × macht die Kamera aus – ohne Kamera geht das Foto über „Mit der Kamera-App“), „Abbrechen“ und „Anlegen“ im Formular „Neue Liste“; das Bild der Shopseite über die nachgebaute Funktion (an sie nur Seite und Prüfsumme, ohne Bild auch ohne Fehlermeldung – `FUNKTIONEN` in `tests/hilfe.mjs` lässt keinen Test an die echten Supabase-Funktionen). `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
 keine Zahlen auf der Karte, die Anfrage nur mit den offenen Zeilen, danach
 kcal und Preis, die Schätzung in der Liste und bei Tobi ohne eigene Anfrage,
 nach dem Bearbeiten nur die neue Zeile und nicht gleich noch einmal.

@@ -17,8 +17,10 @@
  * (gelöscht, ersetzt), räumt die App weg, wenn die Zeit für „Rückgängig“ um
  * ist (WEG).
  *
- * Strichcode: Chrome auf Android liest ihn selbst (BarcodeDetector), sonst –
- * Safari auf iPhone und iPad kann das nicht – liest ihn die KI vom Foto
+ * Strichcode: Scannen öffnet den Scanner in der App (scanner.js: Live-Bild,
+ * Rahmen, Taschenlampe, wo das Handy sie hergibt). Chrome auf Android liest
+ * ihn selbst (BarcodeDetector) im Live-Bild, sonst – Safari auf iPhone und
+ * iPad kann das nicht – liest ihn die KI vom ausgelösten Bild
  * (inventar-ki.js), oder man tippt die Ziffern ab. Mit dem Code sagt die App,
  * ob es die Sache schon gibt („Hab ich das schon?“). Ein Foto füllt mit der KI
  * auch Name, Marke, Liste und Tags aus – nur, was noch leer ist.
@@ -48,6 +50,7 @@ import { fotoVorbereiten } from './ansicht-ki.js';
 import { jsonAus } from './amy-import.js';
 import { rumpfErkennen, erkanntBereinigen } from './inventar-ki.js';
 import { nachschlagen, rumpfNachschlagen, gesuchtBereinigen, shopBild } from './inventar-netz.js';
+import { scannen } from './scanner.js';
 import {
   FOTO_PFAD, LISTEN_VORSCHLAEGE, SORTEN, MAX_NAME, MAX_MARKE, MAX_NOTIZ, MAX_LISTEN, MAX_DINGE,
   neueListeId, neueDingId, fotoPfad, codeBereinigen, opInvListe, opInvListeWeg, opDing, opDingWeg,
@@ -270,7 +273,7 @@ function trefferHTML(q) {
 function hinweisHTML() {
   const wem = istEigen() ? 'Die Fotos liegen in deinem Daten-Repo bei GitHub, wie deine Liste.' : 'Die Sachen liegen in eurer gemeinsamen Liste – Tobi sieht sie auch. Die Fotos liegen im Daten-Repo bei GitHub.';
   const netz = `Zur Nummer schlägt die App Name, Marke und Bild in Open Beauty Facts und den verwandten offenen Datenbanken nach${anbieterVon(ladeKi()) === 'anthropic' ? ' – kennen die sie nicht, sucht Claude im Internet' : ''}.`;
-  return `<p class="fine inv-fein">${wem} Den Strichcode liest ${'BarcodeDetector' in window ? 'dein Handy selbst' : ladeKi() ? 'die KI vom Foto' : 'die KI vom Foto, wenn ein KI-Schlüssel eingetragen ist – sonst tippst du die Ziffern ab'}. ${netz}</p>`;
+  return `<p class="fine inv-fein">${wem} Zum Scannen öffnet die App die Kamera – mit Taschenlampe, wo das Handy sie hergibt. Den Strichcode liest ${'BarcodeDetector' in window ? 'dein Handy selbst' : ladeKi() ? 'die KI vom Bild' : 'die KI vom Bild, wenn ein KI-Schlüssel eingetragen ist – sonst tippst du die Ziffern ab'}. ${netz}</p>`;
 }
 
 function uebersichtHTML() {
@@ -278,7 +281,7 @@ function uebersichtHTML() {
   const voll = Object.keys(inv().dinge).length >= MAX_DINGE;
   return `<div class="inv-werkzeug">
 <button type="button" class="amy-btn" data-act="inv-liste-neu"${da && listenVon(inv()).length < MAX_LISTEN ? '' : ' disabled'}>${PLUS}Neue Liste</button>
-<label class="amy-btn inv-datei-btn" for="inv-finden">${STRICHCODE}Hab ich das schon?</label><input class="vh" id="inv-finden" type="file" accept="image/*" capture="environment"${da ? '' : ' disabled'}>
+<button type="button" class="amy-btn" data-act="inv-scannen" data-zweck="finden"${da ? '' : ' disabled'}>${STRICHCODE}Hab ich das schon?</button>
 </div>
 ${zustand.neu ? listeFormHTML(null) : ''}
 <label class="inv-suche-feld"><span class="vh">In deinen Sachen suchen</span><input type="search" id="inv-suche" value="${esc(zustand.suche)}" placeholder="Suchen – Name, Marke, Tag, Nummer" autocomplete="off" enterkeyhint="search"></label>
@@ -310,7 +313,7 @@ function listeHTML(l) {
   return `<button type="button" class="back" data-act="inv-zu">${ZURUECK}Alle Listen</button>
 <header class="inv-kopf"><img src="${bildPfad(l?.bild || 'package')}" alt="" width="44" height="44"><h2 id="inv-titel">${esc(listenName(l))}</h2>${l ? '<button type="button" class="linkbtn" data-act="inv-liste-bearbeiten">Bearbeiten</button>' : ''}</header>
 ${zustand.bearbeiten && l ? listeFormHTML(l) : ''}
-${l ? `<div class="inv-werkzeug"><button type="button" class="amy-btn" data-act="inv-ding-neu"${voll ? ' disabled' : ''}>${PLUS}Neue Sache</button><label class="amy-btn inv-datei-btn${voll ? ' aus' : ''}" for="inv-neu-code">${STRICHCODE}Scannen</label><input class="vh" id="inv-neu-code" type="file" accept="image/*" capture="environment"${voll ? ' disabled' : ''}><label class="amy-btn inv-datei-btn${voll ? ' aus' : ''}" for="inv-neu-foto">${KAMERA}Mit Foto</label><input class="vh" id="inv-neu-foto" type="file" accept="image/*"${voll ? ' disabled' : ''}></div>` : ''}
+${l ? `<div class="inv-werkzeug"><button type="button" class="amy-btn" data-act="inv-ding-neu"${voll ? ' disabled' : ''}>${PLUS}Neue Sache</button><button type="button" class="amy-btn" data-act="inv-scannen" data-zweck="neu"${voll ? ' disabled' : ''}>${STRICHCODE}Scannen</button><label class="amy-btn inv-datei-btn${voll ? ' aus' : ''}" for="inv-neu-foto">${KAMERA}Mit Foto</label><input class="vh" id="inv-neu-foto" type="file" accept="image/*"${voll ? ' disabled' : ''}></div>` : ''}
 ${alle.length > 1 ? `<div class="inv-leiste"><label class="inv-sort"><span>Sortieren</span><select id="inv-sort">${SORTEN.map(([k, n]) => `<option value="${k}"${k === sort ? ' selected' : ''}>${n}</option>`).join('')}</select></label>${sort === 'eigen' && !tag ? `<button type="button" class="linkbtn inv-ordnen" data-act="inv-ordnen" aria-pressed="${zustand.ordnen}">${zustand.ordnen ? 'Fertig' : 'Reihenfolge ändern'}</button>` : ''}</div>` : ''}
 ${tags.length ? `<div class="amy-filter" role="group" aria-label="Nach Tags filtern"><button type="button" class="amy-chip" data-inv-tag="" aria-pressed="${!tag}">Alle</button>${tags.map(([t, n]) => `<button type="button" class="amy-chip tf${tagFarbe(t)}" data-inv-tag="${esc(t)}" aria-pressed="${gleich(t, tag)}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</div>` : ''}
 ${inhalt}`;
@@ -355,7 +358,7 @@ function dingHTML(d) {
 <label class="inv-feld"><span>Liste</span><select id="inv-liste">${listenOptionen(d)}</select></label>
 <div class="inv-feld"><span>Tags</span><div class="nb-tag-teil" id="inv-tag-teil">${tagsHTML(d)}</div></div>
 <label class="inv-feld"><span>Notiz</span><textarea id="inv-notiz" maxlength="${MAX_NOTIZ}" placeholder="Größe, wozu es passt, wann gekauft, was es gekostet hat …">${esc(d.notiz)}</textarea></label>
-<div class="inv-feld"><span>Strichcode</span><div class="inv-code"><input id="inv-code" type="text" inputmode="numeric" maxlength="40" value="${esc(d.code)}" placeholder="Nummer unter dem Strichcode" autocomplete="off" aria-label="Nummer unter dem Strichcode"><label class="amy-btn inv-datei-btn" for="inv-code-foto">${STRICHCODE}Scannen</label><input class="vh" id="inv-code-foto" type="file" accept="image/*" capture="environment"></div><div id="inv-gleich">${gleichHTML(d)}</div></div>
+<div class="inv-feld"><span>Strichcode</span><div class="inv-code"><input id="inv-code" type="text" inputmode="numeric" maxlength="40" value="${esc(d.code)}" placeholder="Nummer unter dem Strichcode" autocomplete="off" aria-label="Nummer unter dem Strichcode"><button type="button" class="amy-btn" data-act="inv-scannen" data-zweck="code">${STRICHCODE}Scannen</button></div><div id="inv-gleich">${gleichHTML(d)}</div></div>
 <div class="nb-fuss"><span class="nb-stand" id="inv-stand" role="status">${esc(standText(d))}</span><button type="button" class="btn btn-quiet" data-act="inv-ding-weg">Sache löschen</button></div>
 </div>`;
 }
@@ -701,7 +704,7 @@ async function codeLesen(datei) {
 
 const keinCodeText = () => (ladeKi() || 'BarcodeDetector' in window ? 'Kein Strichcode erkannt – näher ran und gerade halten, oder die Ziffern darunter abtippen.' : 'Ohne KI-Schlüssel kann dieses Handy keinen Strichcode lesen – tipp die Ziffern darunter ab.');
 const keinCode = () => melde(keinCodeText());
-const liestText = () => ('BarcodeDetector' in window ? 'Liest den Strichcode …' : 'Liest den Strichcode … die KI schaut sich das Foto an, das dauert ein paar Sekunden.');
+const liestText = () => ('BarcodeDetector' in window ? 'Liest den Strichcode …' : 'Liest den Strichcode … die KI schaut sich das Bild an, das dauert ein paar Sekunden.');
 
 /** Das Bild aus der Datenbank: groß – im Datensparmodus das kleine, und das kleine, wenn das große nicht kommt. null ohne Bild. */
 async function bildHolen(t) {
@@ -800,12 +803,28 @@ async function nachschlagenFuer(id, { vorher = null, gefragt = false, alles = fa
   if (blob && aktuell(id) && !aktuell(id).foto && !vorschau.has(id)) await fotoSetzen(id, blob, { still: true });
 }
 
+/** Was der Scanner gebracht hat: den Code, den das Gerät im Live-Bild gelesen hat, sonst den vom Foto. */
+async function codeAus(quelle) {
+  if (quelle?.code) return codeBereinigen(quelle.code);
+  return quelle?.datei ? codeLesen(quelle.datei) : '';
+}
+
+/** Den Scanner öffnen – was er bringt, geht an „Hab ich das schon?“, an „Scannen“ in der Liste oder in die offene Sache. */
+async function scannerOeffnen(zweck) {
+  const id = zustand.ding;
+  const quelle = await scannen({ titel: zweck === 'finden' ? 'Hab ich das schon?' : 'Strichcode scannen' });
+  if (!quelle) return;
+  if (zweck === 'finden') finden(quelle);
+  else if (zweck === 'neu') scannenUndAnlegen(quelle);
+  else if (zweck === 'code' && id && ding(id)) codeFuerDing(id, quelle);
+}
+
 /** Scannen in einer Sache: der Code kommt ins Feld – und fehlt der Sache noch etwas, schlägt die App nach. */
-async function codeFuerDing(id, datei) {
+async function codeFuerDing(id, quelle) {
   laeuft.set(id, 'code');
   fotoTeilNeu(id);
   let code = '';
-  try { code = await codeLesen(datei); } finally { laeuft.delete(id); fotoTeilNeu(id); }
+  try { code = await codeAus(quelle); } finally { laeuft.delete(id); fotoTeilNeu(id); }
   if (!code) { keinCode(); $('#inv-code')?.focus(); return; }
   const d = aktuell(id);
   if (!d) return;
@@ -829,10 +848,10 @@ function oeffnen(d) {
 }
 
 /** „Scannen“ in einer Liste: Gibt es die Sache schon, ist sie gleich offen – sonst legt die App sie an und schlägt nach. */
-async function scannenUndAnlegen(datei) {
+async function scannenUndAnlegen(quelle) {
   const listeId = liste(zustand.liste) ? zustand.liste : null;
   scanZeigen({ text: liestText(), laeuft: true });
-  const code = await codeLesen(datei);
+  const code = await codeAus(quelle);
   if (!code) { scanZeigen({ text: keinCodeText() }); return; }
   scanZeigen(null);
   const da = mitCode(inv(), code);
@@ -848,9 +867,9 @@ async function scannenUndAnlegen(datei) {
 }
 
 /** „Hab ich das schon?“ – scannen und nachsehen; was es nicht gibt, schlägt die App gleich nach (nur in den Datenbanken). */
-async function finden(datei) {
+async function finden(quelle) {
   scanZeigen({ text: liestText(), laeuft: true });
-  const code = await codeLesen(datei);
+  const code = await codeAus(quelle);
   if (!code) { scanZeigen({ text: keinCodeText() }); return; }
   const da = mitCode(inv(), code);
   if (da.length === 1) {
@@ -945,6 +964,7 @@ export function klickInventar(el) {
     case 'inv-ki': inventarJetztSpeichern(); kiAusfuellen(zustand.ding); return true;
     case 'inv-nachschlagen': inventarJetztSpeichern(); nachschlagenFuer(zustand.ding, { alles: true }); return true;
     case 'inv-scan-zu': scanZeigen(null); return true;
+    case 'inv-scannen': inventarJetztSpeichern(); scannerOeffnen(d.zweck); return true;
     case 'inv-scan-knopf': { const aktion = scan?.aktion; scanZeigen(null); aktion?.(); return true; }
     default: return false;
   }
@@ -987,9 +1007,6 @@ export function aenderungInventar(ziel) {
     if (id) fotoSetzen(id, datei, { ki: true });
     return true;
   }
-  if (ziel.id === 'inv-code-foto') { if (datei && zustand.ding) codeFuerDing(zustand.ding, datei); ziel.value = ''; return true; }
-  if (ziel.id === 'inv-neu-code') { ziel.value = ''; if (datei) scannenUndAnlegen(datei); return true; }
-  if (ziel.id === 'inv-finden') { if (datei) finden(datei); ziel.value = ''; return true; }
   if (ziel.id === 'inv-liste') {
     clearTimeout(timer);
     timer = null;
