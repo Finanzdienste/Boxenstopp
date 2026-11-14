@@ -328,16 +328,16 @@ export function einzelheiten(vorher, nachher, hilfe = {}) {
   const listenName = (id) => kurz(ln[id]?.name || lv[id]?.name || 'Ohne Liste', 40);
   const sache = (d) => kurz(String(d?.name || '').trim() || String(d?.marke || '').trim() || 'Ohne Namen', 60);
   const mitMarke = (d) => (String(d?.name || '').trim() && String(d?.marke || '').trim() ? `${sache(d)} (${kurz(d.marke, 30)})` : sache(d));
-  for (const [id, l] of Object.entries(ln)) {
-    if (!istObj(l)) continue;
+  // Wie angelegt (die Datei hat die neuesten zuerst) – sonst hinge die Reihenfolge an der Uhr
+  const wieAngelegt = (o) => Object.entries(o).filter(([, x]) => istObj(x)).sort(([, a], [, b]) => String(a.at || '').localeCompare(String(b.at || '')) || (Number(a.reihe) || 0) - (Number(b.reihe) || 0));
+  for (const [id, l] of wieAngelegt(ln)) {
     if (!lv[id]) dazu('Sachen', 'Liste angelegt', kurz(l.name, 40));
     else if ((lv[id].name || '') !== (l.name || '')) dazu('Sachen', 'Liste umbenannt', `${kurz(lv[id].name, 40)} → ${kurz(l.name, 40)}`);
   }
-  for (const [id, l] of Object.entries(lv)) if (istObj(l) && !ln[id]) dazu('Sachen', 'Liste gelöscht', kurz(l.name, 40));
+  for (const [id, l] of wieAngelegt(lv)) if (!ln[id]) dazu('Sachen', 'Liste gelöscht', kurz(l.name, 40));
   const FELDER = [['name', 'Name'], ['marke', 'Marke'], ['notiz', 'Notiz'], ['tags', 'Tags'], ['foto', 'Foto'], ['code', 'Strichcode']];
   let umsortiert = false;
-  for (const [id, d] of Object.entries(dn)) {
-    if (!istObj(d)) continue;
+  for (const [id, d] of wieAngelegt(dn)) {
     const alt = dv[id];
     if (!istObj(alt)) { dazu('Sachen', 'Dazu', `${mitMarke(d)} – ${listenName(d.liste)}`); continue; }
     const felder = FELDER.filter(([k]) => !gleich(alt[k], d[k])).map(([, t]) => t);
@@ -345,7 +345,7 @@ export function einzelheiten(vorher, nachher, hilfe = {}) {
     if (felder.length) dazu('Sachen', 'Geändert', `${mitMarke(d)}: ${felder.join(', ')}`);
     else if (alt.reihe !== d.reihe) umsortiert = true;
   }
-  for (const [id, d] of Object.entries(dv)) if (istObj(d) && !dn[id]) dazu('Sachen', 'Gelöscht', mitMarke(d));
+  for (const [id, d] of wieAngelegt(dv)) if (!dn[id]) dazu('Sachen', 'Gelöscht', mitMarke(d));
   if (umsortiert) dazu('Sachen', 'Reihenfolge geändert');
 
   /* ------------------------------------------------------------- Ziel */

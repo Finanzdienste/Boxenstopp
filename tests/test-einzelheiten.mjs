@@ -156,10 +156,11 @@ e = einzelheiten(i3, i4, hilfe);
 check(zeile(e, 'Liste umbenannt')?.x.join() === 'Kleidung → Klamotten' && zeile(e, 'Gelöscht')?.x.join() === 'Rock (Zara)', `Liste umbenannt, Sache gelöscht (${text(e)})`);
 e = einzelheiten(i4, nach(i4, [opInvListeWeg(SCHUH.id)]), hilfe);
 check(zeile(e, 'Liste gelöscht')?.x.join() === 'Schuhe' && e.length === 1, `Liste gelöscht (${text(e)})`);
-const i5 = nach(i4, [opDing({ id: 'sd-hose0001', liste: KLEID.id, name: 'Hose', reihe: 1 }, 'Marielle'), opDing({ id: 'sd-mantel01', liste: KLEID.id, name: '', marke: 'Mango', reihe: 2 }, 'Marielle')]);
+const spaeter = new Date(Date.now() + 1000).toISOString();
+const i5 = nach(i4, [opDing({ id: 'sd-hose0001', liste: KLEID.id, name: 'Hose', reihe: 1 }, 'Marielle'), opDing({ id: 'sd-mantel01', liste: KLEID.id, name: '', marke: 'Mango', reihe: 2 }, 'Marielle', spaeter)]);
 e = einzelheiten(i4, i5, hilfe);
-check(zeile(e, 'Dazu')?.x.join() === 'Hose – Klamotten,Mango – Klamotten', `Ohne Namen heißt die Sache nach der Marke (${text(e)})`);
-e = einzelheiten(i5, nach(i5, [opDing({ id: 'sd-hose0001', liste: KLEID.id, name: 'Hose', reihe: 3 }, 'Marielle')]), hilfe);
+check(Object.keys(i5.inventar.dinge)[0] === 'sd-mantel01' && zeile(e, 'Dazu')?.x.join() === 'Hose – Klamotten,Mango – Klamotten', `Ohne Namen heißt die Sache nach der Marke; in der Reihenfolge, in der sie dazukamen – auch wenn die Datei die neueste vorn hat (${text(e)})`);
+e = einzelheiten(i5, nach(i5, [opDing({ id: 'sd-hose0001', liste: KLEID.id, name: 'Hose', reihe: 3 }, 'Marielle', new Date(Date.now() + 2000).toISOString())]), hilfe);
 check(text(e) === 'Sachen|Reihenfolge geändert', `Nur umsortiert: „Reihenfolge geändert“ (${text(e)})`);
 
 // Nichts geändert (nur rev): nichts
