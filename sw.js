@@ -39,7 +39,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v71';
+const VERSION = 'v72';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -106,6 +106,7 @@ const SHELL = [
   './js/ansicht-notizen.js',
   './js/inventar.js',
   './js/inventar-ki.js',
+  './js/inventar-netz.js',
   './js/ansicht-inventar.js',
   './js/vertraeglich.js',
   './js/ansicht-vertraeglich.js',

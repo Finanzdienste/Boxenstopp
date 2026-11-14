@@ -589,9 +589,10 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
  *
  * Hakt nur das Lesen von Seiten (web_fetch), einmal ohne. Gibt { text,
  * quellen: [{ url, titel }], usage: { ein, aus, suchen, cacheLesen,
- * cacheSchreiben, berater… } } zurück.
+ * cacheSchreiben, berater… } } zurück. berater: false für Kleinigkeiten, bei
+ * denen der Rat nichts besser macht (etwa einen Strichcode nachschlagen).
  */
-export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, runden = 4 }) {
+export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, runden = 4, berater = true }) {
   const fehler = (art, detail) => kiFehler(art, detail, 'anthropic');
   const usage = { ein: 0, aus: 0, suchen: 0 };
   const quellen = [];
@@ -603,7 +604,7 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
       res = await fetch(api || ANBIETER.anthropic.api, {
         method: 'POST',
         headers: claudeKoepfe(schluessel),
-        body: JSON.stringify({ ...fuerClaude(rumpf), messages }),
+        body: JSON.stringify({ ...fuerClaude(rumpf, { berater }), messages }),
         signal,
       });
     } catch (e) {
@@ -619,7 +620,7 @@ export async function kiMitWerkzeugen(rumpf, { schluessel, api = '', signal, run
       // Hakt nur das Lesen von Seiten (unbekannt oder ausgeschaltet): einmal ohne – wenn dann noch ein Werkzeug bleibt
       const ohneLesen = (rumpf.tools || []).filter((t) => !/^web_fetch/.test(t.type || ''));
       if (!bisher.length && res.status === 400 && /web[ _]fetch/i.test(text) && ohneLesen.length && ohneLesen.length < (rumpf.tools || []).length) {
-        return kiMitWerkzeugen({ ...rumpf, tools: ohneLesen }, { schluessel, api, signal, runden });
+        return kiMitWerkzeugen({ ...rumpf, tools: ohneLesen }, { schluessel, api, signal, runden, berater });
       }
       throw fehler(art, text);
     }

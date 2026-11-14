@@ -1911,6 +1911,9 @@ html.pm-offen{overflow:hidden}
 .inv-code{display:flex;gap:8px;align-items:stretch}
 .inv-code input{flex:1;min-width:0}
 .inv-gleich{margin:4px 0 0;font-size:14px}
+.inv-nachschlagen{margin-top:2px}
+.inv-quelle{margin:8px 0 0;text-align:center;font-size:13px}
+.inv-quelle a{color:inherit;font-weight:600;text-underline-offset:3px}
 .inv-fein,.inv-zahl{margin:0}
 @container (min-width:640px){.inv-dinge{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
 

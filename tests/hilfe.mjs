@@ -194,6 +194,8 @@ export function githubMehrere(...attrappen) {
  */
 /** Die Tierquellen der Belohnung (js/lob.js) – in den Tests nie das echte Netz. */
 export const TIER_HOSTS = /random\.dog|dog\.ceo|thecatapi|cataas|randomfox|bunnies|capy\.lol|bilder\.test/;
+/** Die offenen Produktdatenbanken (Open Beauty Facts & Co.) und ihre Bilder – in den Tests nie die echten. */
+export const DATENBANK_HOSTS = /^https:\/\/(?:world|images)\.open(?:beauty|food|products|petfood)facts\.org\//;
 
 /**
  * Eine Attrappe für die Tierquellen: jede Antwort zeigt auf ein Bild unter
@@ -215,7 +217,7 @@ export function tierAttrappe() {
   };
 }
 
-export async function handy(browser, { attrappe = null, tiere = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null } = {}) {
+export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null } = {}) {
   const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow', ...(userAgent ? { userAgent } : {}) });
   if (skript) await ctx.addInitScript(skript);
   // z. B. ['notifications', 'clipboard-read', 'clipboard-write'] – Headless-Chromium verweigert Mitteilungen sonst
@@ -223,6 +225,7 @@ export async function handy(browser, { attrappe = null, tiere = null, takt = 400
   if (attrappe) await ctx.route('https://api.github.com/**', attrappe.route);
   else await ctx.route('https://api.github.com/**', (r) => r.abort('blockedbyclient'));
   await ctx.route(TIER_HOSTS, tiere ? tiere.route : (r) => r.abort('blockedbyclient'));
+  await ctx.route(DATENBANK_HOSTS, datenbank ? datenbank.route : (r) => r.abort('blockedbyclient'));
   // Die Angebote der Woche: in den Tests immer dieselben (tests/daten/angebote.json), nie das echte Feld
   await ctx.route('**/daten/angebote.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote.json'), 'utf8') }));
   await ctx.route('**/daten/preisverlauf.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'preisverlauf.json'), 'utf8') }));

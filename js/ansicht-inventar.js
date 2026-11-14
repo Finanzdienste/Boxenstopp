@@ -22,6 +22,15 @@
  * (inventar-ki.js), oder man tippt die Ziffern ab. Mit dem Code sagt die App,
  * ob es die Sache schon gibt („Hab ich das schon?“). Ein Foto füllt mit der KI
  * auch Name, Marke, Liste und Tags aus – nur, was noch leer ist.
+ *
+ * Nachschlagen (inventar-netz.js): „Scannen“ in einer Liste liest den Code,
+ * schlägt ihn in Open Beauty Facts und den verwandten Datenbanken nach und
+ * legt die Sache gleich an – mit Name, Marke und deren Bild als Foto. Kennen
+ * sie ihn nicht, sucht mit einem Schlüssel von Anthropic Claude im Internet
+ * (ohne Bild). Ebenso nach dem Scannen in einer Sache, der noch etwas fehlt
+ * (Claude nur, wenn sie noch keinen Namen hat), mit „Im Netz nachschlagen“
+ * und bei „Eintragen“ nach „Hab ich das schon?“. Eingetragen wird nur, was
+ * noch leer ist; die Sache zeigt, wo es herkommt.
  */
 import { app, $, $$, melde, lese, schreibe } from './kern.js';
 import { esc } from './format.js';
@@ -31,10 +40,11 @@ import { bildPfad, INVENTAR_BILDER } from './bilder.js';
 import { tagsBereinigen, tagFarbe, MAX_TAGS } from './amy.js';
 import { dateiHochladen, dateiHolen, dateiLoeschen } from './speicher.js';
 import { ortVon, ladeKi } from './zugang.js';
-import { kiAnfragen, anbieterVon } from './ki.js';
+import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
 import { fotoVorbereiten } from './ansicht-ki.js';
 import { jsonAus } from './amy-import.js';
 import { rumpfErkennen, erkanntBereinigen } from './inventar-ki.js';
+import { nachschlagen, rumpfNachschlagen, gesuchtBereinigen } from './inventar-netz.js';
 import {
   FOTO_PFAD, LISTEN_VORSCHLAEGE, SORTEN, MAX_NAME, MAX_MARKE, MAX_NOTIZ, MAX_LISTEN, MAX_DINGE,
   neueListeId, neueDingId, fotoPfad, codeBereinigen, opInvListe, opInvListeWeg, opDing, opDingWeg,
@@ -92,7 +102,7 @@ const urls = new Map(); // pfad → Objekt-URL des Fotos
 const laedt = new Set();
 const vorschau = new Map(); // ding-id → Objekt-URL des Fotos, das gerade hochlädt
 const letztes = new Map(); // ding-id → das zuletzt aufgenommene Foto als base64 (für die KI, ohne es neu zu holen)
-const laeuft = new Map(); // ding-id → 'foto' | 'ki' | 'code'
+const laeuft = new Map(); // ding-id → 'foto' | 'ki' | 'code' | 'netz' | 'suche'
 const fotoSchluessel = (pfad) => new URL(`__sachen/${pfad}`, location.href).href;
 
 async function ausVorrat(pfad) {
@@ -245,7 +255,8 @@ function trefferHTML(q) {
 
 function hinweisHTML() {
   const wem = istEigen() ? 'Die Fotos liegen in deinem Daten-Repo bei GitHub, wie deine Liste.' : 'Die Sachen liegen in eurer gemeinsamen Liste – Tobi sieht sie auch. Die Fotos liegen im Daten-Repo bei GitHub.';
-  return `<p class="fine inv-fein">${wem} Den Strichcode liest ${'BarcodeDetector' in window ? 'dein Handy selbst' : ladeKi() ? 'die KI vom Foto' : 'die KI vom Foto, wenn ein KI-Schlüssel eingetragen ist – sonst tippst du die Ziffern ab'}.</p>`;
+  const netz = `Zur Nummer schlägt die App Name, Marke und Bild in Open Beauty Facts und den verwandten offenen Datenbanken nach${anbieterVon(ladeKi()) === 'anthropic' ? ' – kennen die sie nicht, sucht Claude im Internet' : ''}.`;
+  return `<p class="fine inv-fein">${wem} Den Strichcode liest ${'BarcodeDetector' in window ? 'dein Handy selbst' : ladeKi() ? 'die KI vom Foto' : 'die KI vom Foto, wenn ein KI-Schlüssel eingetragen ist – sonst tippst du die Ziffern ab'}. ${netz}</p>`;
 }
 
 function uebersichtHTML() {
@@ -278,14 +289,14 @@ function listeHTML(l) {
   const ki = ladeKi();
   const voll = Object.keys(inv().dinge).length >= MAX_DINGE;
   let inhalt;
-  if (!alle.length) inhalt = `<div class="amy-leer inv-leer"><p><b>Noch nichts in dieser Liste.</b></p><p>„Mit Foto“ fotografiert eine Sache${ki ? ' – die KI trägt Name, Marke und Tags gleich ein' : ''}. Oder „Neue Sache“ und von Hand.</p></div>`;
+  if (!alle.length) inhalt = `<div class="amy-leer inv-leer"><p><b>Noch nichts in dieser Liste.</b></p><p>„Scannen“ liest den Strichcode und schlägt die Sache nach – mit Bild, wenn es eins gibt. „Mit Foto“ fotografiert sie${ki ? ' – die KI trägt Name, Marke und Tags gleich ein' : ''}. Oder „Neue Sache“ und von Hand.</p></div>`;
   else if (!zeigen.length) inhalt = '<p class="nb-nichts">Nichts mit diesem Tag.</p>';
   else if (sort === 'tags') inhalt = nachTagsHTML(zeigen);
   else inhalt = `<ul class="inv-dinge">${zeigen.map((d, i) => dingKarte(d, { extra: ordnen ? pfeileHTML('ding', d.id, i, zeigen.length) : '' })).join('')}</ul>`;
   return `<button type="button" class="back" data-act="inv-zu">${ZURUECK}Alle Listen</button>
 <header class="inv-kopf"><img src="${bildPfad(l?.bild || 'package')}" alt="" width="44" height="44"><h2 id="inv-titel">${esc(listenName(l))}</h2>${l ? '<button type="button" class="linkbtn" data-act="inv-liste-bearbeiten">Bearbeiten</button>' : ''}</header>
 ${zustand.bearbeiten && l ? listeFormHTML(l) : ''}
-${l ? `<div class="inv-werkzeug"><button type="button" class="amy-btn" data-act="inv-ding-neu"${voll ? ' disabled' : ''}>${PLUS}Neue Sache</button><label class="amy-btn inv-datei-btn${voll ? ' aus' : ''}" for="inv-neu-foto">${KAMERA}Mit Foto</label><input class="vh" id="inv-neu-foto" type="file" accept="image/*"${voll ? ' disabled' : ''}></div>` : ''}
+${l ? `<div class="inv-werkzeug"><button type="button" class="amy-btn" data-act="inv-ding-neu"${voll ? ' disabled' : ''}>${PLUS}Neue Sache</button><label class="amy-btn inv-datei-btn${voll ? ' aus' : ''}" for="inv-neu-code">${STRICHCODE}Scannen</label><input class="vh" id="inv-neu-code" type="file" accept="image/*" capture="environment"${voll ? ' disabled' : ''}><label class="amy-btn inv-datei-btn${voll ? ' aus' : ''}" for="inv-neu-foto">${KAMERA}Mit Foto</label><input class="vh" id="inv-neu-foto" type="file" accept="image/*"${voll ? ' disabled' : ''}></div>` : ''}
 ${alle.length > 1 ? `<div class="inv-leiste"><label class="inv-sort"><span>Sortieren</span><select id="inv-sort">${SORTEN.map(([k, n]) => `<option value="${k}"${k === sort ? ' selected' : ''}>${n}</option>`).join('')}</select></label>${sort === 'eigen' && !tag ? `<button type="button" class="linkbtn inv-ordnen" data-act="inv-ordnen" aria-pressed="${zustand.ordnen}">${zustand.ordnen ? 'Fertig' : 'Reihenfolge ändern'}</button>` : ''}</div>` : ''}
 ${tags.length ? `<div class="amy-filter" role="group" aria-label="Nach Tags filtern"><button type="button" class="amy-chip" data-inv-tag="" aria-pressed="${!tag}">Alle</button>${tags.map(([t, n]) => `<button type="button" class="amy-chip tf${tagFarbe(t)}" data-inv-tag="${esc(t)}" aria-pressed="${gleich(t, tag)}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</div>` : ''}
 ${inhalt}`;
@@ -302,14 +313,21 @@ ${da.length < MAX_TAGS && vorschlaege.length ? `<div class="nb-tag-vorschlaege">
 function fotoTeilHTML(d) {
   const lauf = laeuft.get(d.id);
   const hat = !!(d.foto || vorschau.has(d.id));
-  const text = { foto: 'Foto wird gespeichert …', ki: 'Die KI schaut es sich an …', code: 'Liest den Strichcode …' }[lauf] || '';
+  const text = { foto: 'Foto wird gespeichert …', ki: 'Die KI schaut es sich an …', code: 'Liest den Strichcode …', netz: 'Schlägt im Netz nach …', suche: 'Claude sucht im Internet …' }[lauf] || '';
   return `<div class="inv-gross">${bildHTML(d, true)}${text ? `<span class="inv-lauf" role="status">${text}</span>` : ''}</div>
-<div class="inv-foto-knoepfe"><label class="amy-btn inv-datei-btn" for="inv-foto-datei">${KAMERA}${hat ? 'Anderes Foto' : 'Foto'}</label><input class="vh" id="inv-foto-datei" type="file" accept="image/*"${lauf === 'foto' ? ' disabled' : ''}>${d.foto && ladeKi() ? `<button type="button" class="btn btn-quiet" data-act="inv-ki"${lauf ? ' disabled' : ''}>${FUNKEN}Mit KI ausfüllen</button>` : ''}${d.foto ? `<button type="button" class="btn btn-quiet" data-act="inv-foto-weg"${lauf ? ' disabled' : ''}>Foto weg</button>` : ''}</div>`;
+<div class="inv-foto-knoepfe"><label class="amy-btn inv-datei-btn" for="inv-foto-datei">${KAMERA}${hat ? 'Anderes Foto' : 'Foto'}</label><input class="vh" id="inv-foto-datei" type="file" accept="image/*"${lauf === 'foto' ? ' disabled' : ''}>${d.foto && ladeKi() ? `<button type="button" class="btn btn-quiet" data-act="inv-ki"${lauf ? ' disabled' : ''}>${FUNKEN}Mit KI ausfüllen</button>` : ''}${d.foto ? `<button type="button" class="btn btn-quiet" data-act="inv-foto-weg"${lauf ? ' disabled' : ''}>Foto weg</button>` : ''}</div>
+${d.quelle ? `<p class="fine inv-quelle">Gefunden bei <a href="${esc(d.quelle.url)}" target="_blank" rel="noopener">${esc(d.quelle.name)}</a></p>` : ''}`;
 }
 
+/** Eine Nummer, die sich nachschlagen lässt (8 bis 14 Ziffern). */
+const nachschlagbar = (d) => /^\d{8,14}$/.test(String(d?.code || ''));
+const fehltWas = (d) => !String(d.name || '').trim() || !String(d.marke || '').trim() || !d.foto;
+
+/** Unter dem Strichcode: welche Sachen ihn schon tragen – sonst, wenn noch etwas fehlt, „Im Netz nachschlagen“. */
 function gleichHTML(d) {
   const andere = d.code ? mitCode(inv(), d.code).filter((x) => x.id !== d.id) : [];
-  return andere.length ? `<p class="inv-gleich">Gibt es schon: ${andere.map((x) => `<button type="button" class="linkbtn" data-inv-ding="${esc(x.id)}">${esc(dingName(x))} (${esc(listenName(liste(x.liste)))})</button>`).join(', ')}</p>` : '';
+  if (andere.length) return `<p class="inv-gleich">Gibt es schon: ${andere.map((x) => `<button type="button" class="linkbtn" data-inv-ding="${esc(x.id)}">${esc(dingName(x))} (${esc(listenName(liste(x.liste)))})</button>`).join(', ')}</p>`;
+  return nachschlagbar(d) && fehltWas(d) ? '<button type="button" class="linkbtn inv-nachschlagen" data-act="inv-nachschlagen">Im Netz nachschlagen</button>' : '';
 }
 
 const listenOptionen = (d) => listenVon(inv()).map((x) => `<option value="${esc(x.id)}"${x.id === d.liste ? ' selected' : ''}>${esc(listenName(x))}</option>`).join('') + (liste(d.liste) ? '' : '<option value="" selected>Ohne Liste</option>');
@@ -422,7 +440,7 @@ function speichern(d) {
   const alt = ding(d.id);
   // In eine andere Liste: dort ans Ende
   const neu = alt && d.liste !== alt.liste ? { ...d, reihe: naechsteReihe(dingeIn(inv(), d.liste)) } : d;
-  if (alt && ['name', 'marke', 'notiz', 'code', 'liste', 'reihe'].every((k) => (alt[k] ?? '') === (neu[k] ?? '')) && JSON.stringify(alt.tags) === JSON.stringify(tagsBereinigen(neu.tags)) && JSON.stringify(alt.foto) === JSON.stringify(neu.foto || null)) return;
+  if (alt && ['name', 'marke', 'notiz', 'code', 'liste', 'reihe'].every((k) => (alt[k] ?? '') === (neu[k] ?? '')) && JSON.stringify(alt.tags) === JSON.stringify(tagsBereinigen(neu.tags)) && JSON.stringify(alt.foto) === JSON.stringify(neu.foto || null) && JSON.stringify(alt.quelle || null) === JSON.stringify(neu.quelle || null)) return;
   app.aendern(opDing(neu, app.name()));
 }
 
@@ -642,7 +660,81 @@ async function codeLesen(datei) {
 
 const keinCode = () => melde(ladeKi() || 'BarcodeDetector' in window ? 'Kein Strichcode erkannt – näher ran und gerade halten, oder die Ziffern darunter abtippen.' : 'Ohne KI-Schlüssel kann dieses Handy keinen Strichcode lesen – tipp die Ziffern darunter ab.');
 
-/** Scannen in einer Sache: der Code kommt ins Feld. */
+/** Das Bild aus der Datenbank: groß – im Datensparmodus das kleine, und das kleine, wenn das große nicht kommt. null ohne Bild. */
+async function bildHolen(t) {
+  const sparen = !!navigator.connection?.saveData;
+  for (const u of [...new Set([sparen ? t.klein : t.bild, t.klein].filter(Boolean))]) {
+    try {
+      const res = await fetch(u);
+      if (!res.ok) continue;
+      const b = await res.blob();
+      if (b.size && (!b.type || /^image\//.test(b.type))) return b;
+    } catch { /* das nächste */ }
+  }
+  return null;
+}
+
+const gefundenText = (t) => `Gefunden: ${t.name || t.marke}${t.name && t.marke ? ` (${t.marke})` : ''}`;
+
+/**
+ * Zur Nummer einer Sache nachschlagen (inventar-netz.js) und eintragen, was
+ * noch leer ist: Name, Marke, Liste, Tags, die Quelle – und als Foto das Bild
+ * der Datenbank, wenn sie noch keins hat. vorher: der Treffer, den „Hab ich
+ * das schon?“ schon hat; gefragt: die Datenbanken kennen die Nummer nicht
+ * (nicht noch einmal fragen). suchen: Kennen sie sie nicht, sucht Claude im
+ * Internet (nur mit Schlüssel von Anthropic; kostet ein paar Cent). still:
+ * ohne Meldung, wenn nichts gefunden ist.
+ */
+async function nachschlagenFuer(id, { vorher = null, gefragt = false, suchen = true, still = false } = {}) {
+  const code = aktuell(id)?.code;
+  if (!code || laeuft.has(id)) return;
+  laeuft.set(id, 'netz');
+  fotoTeilNeu(id);
+  let t = vorher;
+  let fehler = '';
+  try {
+    if (!t && !gefragt) {
+      try { t = await nachschlagen(code); } catch { fehler = 'Nachschlagen ging gerade nicht – ohne Netz?'; }
+    }
+    const schluessel = ladeKi();
+    if (!t && suchen && anbieterVon(schluessel) === 'anthropic') {
+      laeuft.set(id, 'suche');
+      fotoTeilNeu(id);
+      const listen = listenVon(inv()).map((l) => ({ id: l.id, name: listenName(l) }));
+      try {
+        const a = await kiMitWerkzeugen(rumpfNachschlagen({ code, listen: listen.map((l) => l.name) }), { schluessel, berater: false });
+        t = gesuchtBereinigen(jsonAus(a.text), { quellen: a.quellen, listen });
+        fehler = '';
+      } catch (e) {
+        fehler = e?.message || 'Die Suche im Internet hat nicht geklappt.';
+      }
+    }
+  } finally {
+    laeuft.delete(id);
+    fotoTeilNeu(id);
+  }
+  const d = aktuell(id);
+  if (!d) return;
+  if (!t) {
+    if (!still) melde(fehler || `Zu ${code} nichts gefunden – ${d.foto ? 'trag es von Hand ein' : `mach ein Foto${ladeKi() ? ', die KI erkennt es' : ''}`}.`);
+    return;
+  }
+  // Nur, was noch leer ist – was schon dasteht, bleibt
+  const neu = { ...d, name: d.name.trim() ? d.name : t.name, marke: d.marke.trim() ? d.marke : t.marke, tags: (d.tags || []).length ? d.tags : t.tags, liste: liste(d.liste) ? d.liste : t.liste || d.liste, quelle: d.quelle || t.quelle };
+  clearTimeout(timer);
+  timer = null;
+  speichern(neu);
+  if (liste(neu.liste) && neu.liste !== d.liste && zustand.ding === id) { zustand.liste = neu.liste; merken(); }
+  if ($('#inv-ding')?.dataset.id === id) {
+    for (const [sel, k] of [['#inv-name', 'name'], ['#inv-marke', 'marke']]) { const f = $(sel); if (f) f.value = neu[k]; }
+  }
+  melde(gefundenText(t));
+  if (d.foto || vorschau.has(id) || !(t.bild || t.klein)) return;
+  const blob = await bildHolen(t);
+  if (blob && aktuell(id) && !aktuell(id).foto && !vorschau.has(id)) await fotoSetzen(id, blob);
+}
+
+/** Scannen in einer Sache: der Code kommt ins Feld – und fehlt der Sache noch etwas, schlägt die App nach. */
 async function codeFuerDing(id, datei) {
   laeuft.set(id, 'code');
   fotoTeilNeu(id);
@@ -658,9 +750,38 @@ async function codeFuerDing(id, datei) {
   if (f) f.value = code;
   const andere = mitCode(inv(), code).filter((x) => x.id !== id);
   melde(andere.length ? `${code} – das gibt es schon: ${dingName(andere[0])}` : `Strichcode ${code}`);
+  // Claude sucht nur, wenn noch kein Name da ist – das kostet
+  if (!andere.length && fehltWas(d)) nachschlagenFuer(id, { suchen: !d.name.trim(), still: !!d.name.trim() });
 }
 
-/** „Hab ich das schon?“ – scannen und nachsehen. */
+/** Eine Sache öffnen (aus „Hab ich das schon?“ oder dem Scannen in einer Liste). */
+function oeffnen(d) {
+  verlassen();
+  zustand = { ...zustand, ding: d.id, liste: liste(d.liste) ? d.liste : OHNE, suche: '', ordnen: false };
+  merken();
+  neuZeichnen();
+  window.scrollTo(0, 0);
+}
+
+/** „Scannen“ in einer Liste: Gibt es die Sache schon, ist sie gleich offen – sonst legt die App sie an und schlägt nach. */
+async function scannenUndAnlegen(datei) {
+  const listeId = liste(zustand.liste) ? zustand.liste : null;
+  melde('Liest den Strichcode …');
+  const code = await codeLesen(datei);
+  if (!code) { keinCode(); return; }
+  const da = mitCode(inv(), code);
+  if (da.length) {
+    oeffnen(da[0]);
+    melde(`Hast du schon: ${dingName(da[0])} (${listenName(liste(da[0].liste))})`);
+    return;
+  }
+  const id = dingNeu({ code, liste: listeId });
+  if (!id) return;
+  melde(`Strichcode ${code} – schlägt nach …`);
+  nachschlagenFuer(id);
+}
+
+/** „Hab ich das schon?“ – scannen und nachsehen; was es nicht gibt, schlägt die App gleich nach (nur in den Datenbanken). */
 async function finden(datei) {
   melde('Liest den Strichcode …');
   const code = await codeLesen(datei);
@@ -668,10 +789,7 @@ async function finden(datei) {
   const da = mitCode(inv(), code);
   if (da.length === 1) {
     const d = da[0];
-    zustand = { ...zustand, ding: d.id, liste: liste(d.liste) ? d.liste : OHNE, suche: '' };
-    merken();
-    neuZeichnen();
-    window.scrollTo(0, 0);
+    oeffnen(d);
     melde(`Hast du schon: ${dingName(d)} (${listenName(liste(d.liste))})`);
     return;
   }
@@ -681,7 +799,20 @@ async function finden(datei) {
     melde(`Hast du schon – ${da.length}-mal`);
     return;
   }
-  melde(`${code}: noch nicht in deinen Listen`, { knopf: 'Eintragen', beiKnopf: () => dingNeu({ code, liste: liste(zustand.liste) ? zustand.liste : null }) });
+  let t = null;
+  let gefragt = false;
+  if (/^\d{8,14}$/.test(code)) {
+    melde(`${code}: noch nicht in deinen Listen – schlägt nach …`);
+    try { t = await nachschlagen(code); gefragt = true; } catch { /* ohne Netz: nur die Nummer */ }
+  }
+  const was = t ? `${t.name || t.marke}${t.name && t.marke ? ` (${t.marke})` : ''}` : code;
+  melde(`${was}: noch nicht in deinen Listen`, {
+    knopf: 'Eintragen',
+    beiKnopf: () => {
+      const id = dingNeu({ code, liste: liste(zustand.liste) ? zustand.liste : null });
+      if (id) nachschlagenFuer(id, { vorher: t, gefragt });
+    },
+  });
 }
 
 /* ------------------------------------------------------------------ Klicks */
@@ -744,6 +875,7 @@ export function klickInventar(el) {
     case 'inv-ding-weg': dingLoeschen(); return true;
     case 'inv-foto-weg': fotoWeg(); return true;
     case 'inv-ki': inventarJetztSpeichern(); kiAusfuellen(zustand.ding); return true;
+    case 'inv-nachschlagen': inventarJetztSpeichern(); nachschlagenFuer(zustand.ding); return true;
     default: return false;
   }
 }
@@ -786,6 +918,7 @@ export function aenderungInventar(ziel) {
     return true;
   }
   if (ziel.id === 'inv-code-foto') { if (datei && zustand.ding) codeFuerDing(zustand.ding, datei); ziel.value = ''; return true; }
+  if (ziel.id === 'inv-neu-code') { ziel.value = ''; if (datei) scannenUndAnlegen(datei); return true; }
   if (ziel.id === 'inv-finden') { if (datei) finden(datei); ziel.value = ''; return true; }
   if (ziel.id === 'inv-liste') {
     clearTimeout(timer);

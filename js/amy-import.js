@@ -203,7 +203,7 @@ export function sichereUrl(u) {
 
 const seiteVon = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
 /** Zum Vergleichen: Seite ohne www., Pfad ohne / am Ende, ohne ?… und #… */
-const urlSchluessel = (u) => { try { const x = new URL(u); return `${x.hostname.replace(/^(?:www|m)\./, '')}${x.pathname.replace(/\/+$/, '')}`.toLowerCase(); } catch { return ''; } };
+export const urlSchluessel = (u) => { try { const x = new URL(u); return `${x.hostname.replace(/^(?:www|m)\./, '')}${x.pathname.replace(/\/+$/, '')}`.toLowerCase(); } catch { return ''; } };
 
 /**
  * Die Treffer der Suche: { rezepte: [{ name, quelle, url, kurz, …Entwurf }], fehler }.

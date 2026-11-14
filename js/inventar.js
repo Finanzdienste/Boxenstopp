@@ -5,13 +5,15 @@
  * (ansicht-inventar.js). In liste.json unter `inventar`:
  *
  *   { listen: { 'sl-…': { id, name, bild, reihe, at, geaendert, by } },
- *     dinge:  { 'sd-…': { id, liste, name, marke, notiz, tags, code, foto, reihe, at, geaendert, by } } }
+ *     dinge:  { 'sd-…': { id, liste, name, marke, notiz, tags, code, foto, quelle, reihe, at, geaendert, by } } }
  *
  * bild ist das Bildchen der Liste (Fluent Emoji, INVENTAR_BILDER in
  * bilder.js), reihe die eigene Reihenfolge (kleinere zuerst), code die Nummer
  * unter dem Strichcode (EAN, UPC). foto ist { pfad, sha }: Das Foto liegt als
  * eigene Datei im Daten-Repo (sachen/sd-…-….jpg), damit liste.json klein
  * bleibt – ansicht-inventar.js lädt es hoch und holt es mit dem Schlüssel.
+ * quelle ist { name, url } oder null: wo die App Name, Marke und Bild zum
+ * Strichcode gefunden hat (inventar-netz.js) – etwa Open Beauty Facts.
  *
  * Wie die Notizblätter wird eine Liste oder eine Sache immer ganz geschrieben;
  * eine noch nicht gesendete Fassung ersetzt die vorige (ersetzt), und eine
@@ -30,6 +32,7 @@ export const MAX_DINGE = 400;
 export const MAX_NAME = 80;
 export const MAX_MARKE = 60;
 export const MAX_NOTIZ = 2000;
+export const MAX_QUELLE = 60;
 /** Zum Anfangen – antippen legt die Liste an. */
 export const LISTEN_VORSCHLAEGE = [['Kleidung', 'womans-clothes'], ['Schuhe', 'high-heeled-shoe'], ['Make-up', 'lipstick'], ['Pflege', 'lotion-bottle'], ['Schmuck', 'ring'], ['Taschen', 'handbag'], ['Bücher', 'books']];
 /** Wie eine Liste sortiert sein kann – die Wahl merkt sich das Gerät je Liste. */
@@ -69,6 +72,18 @@ export function fotoBereinigen(f) {
   return { pfad: f.pfad, sha: kurz(f.sha, 64) };
 }
 
+/** Woher Name, Marke oder Bild kamen: { name, url } – nur mit Namen und einer https-Adresse, sonst null. */
+export function quelleBereinigen(q) {
+  if (!istObj(q)) return null;
+  const name = einzeilig(q.name, MAX_QUELLE).trim();
+  let url = '';
+  try {
+    const u = new URL(String(q.url || ''));
+    if (u.protocol === 'https:' && u.href.length <= 300) url = u.href;
+  } catch { /* ohne Adresse keine Quelle */ }
+  return name && url ? { name, url } : null;
+}
+
 export function listeBereinigen(l) {
   if (!istObj(l) || !LISTE_ID.test(String(l.id))) return null;
   const at = kurz(l.at, 40) || jetzt();
@@ -95,6 +110,7 @@ export function dingBereinigen(d) {
     tags: tagsBereinigen(d.tags),
     code: codeBereinigen(d.code),
     foto: fotoBereinigen(d.foto),
+    quelle: quelleBereinigen(d.quelle),
     reihe: reiheVon(d.reihe),
     at,
     geaendert: kurz(d.geaendert, 40) || at,
@@ -122,10 +138,10 @@ export const hatInventar = (x) => !!x && (Object.keys(x.listen || {}).length > 0
 /** Eine Liste anlegen oder ändern – immer ganz: { id, name, bild, reihe }. */
 export const opInvListe = (l, by, at = jetzt()) => ({ typ: 'invListe', l: { id: l.id, name: einzeilig(l.name, MAX_NAME), bild: l.bild, reihe: reiheVon(l.reihe) }, by: by || null, at, ersetzt: `invListe:${l.id}` });
 export const opInvListeWeg = (id, at = jetzt()) => ({ typ: 'invListeWeg', id, at });
-/** Eine Sache anlegen oder ändern – immer ganz: { id, liste, name, marke, notiz, tags, code, foto, reihe }. */
+/** Eine Sache anlegen oder ändern – immer ganz: { id, liste, name, marke, notiz, tags, code, foto, quelle, reihe }. */
 export const opDing = (d, by, at = jetzt()) => ({
   typ: 'ding',
-  d: { id: d.id, liste: d.liste || null, name: einzeilig(d.name, MAX_NAME), marke: einzeilig(d.marke, MAX_MARKE), notiz: kurz(d.notiz, MAX_NOTIZ), tags: tagsBereinigen(d.tags), code: codeBereinigen(d.code), foto: fotoBereinigen(d.foto), reihe: reiheVon(d.reihe) },
+  d: { id: d.id, liste: d.liste || null, name: einzeilig(d.name, MAX_NAME), marke: einzeilig(d.marke, MAX_MARKE), notiz: kurz(d.notiz, MAX_NOTIZ), tags: tagsBereinigen(d.tags), code: codeBereinigen(d.code), foto: fotoBereinigen(d.foto), quelle: quelleBereinigen(d.quelle), reihe: reiheVon(d.reihe) },
   by: by || null,
   at,
   ersetzt: `ding:${d.id}`,

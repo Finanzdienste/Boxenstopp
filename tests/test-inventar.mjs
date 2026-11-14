@@ -6,16 +6,23 @@
  * Marke, Notiz und Tags, ein Foto ins Repo, den Strichcode lesen (das Handy
  * selbst und ohne Leser die KI), sortieren, suchen, „Hab ich das schon?“,
  * ihr zweites Gerät, Löschen mit Rückgängig (das Foto kommt danach weg),
- * eine ältere App-Fassung – und die Sachen in Amys Bereich.
+ * eine ältere App-Fassung – und die Sachen in Amys Bereich. Dazu das
+ * Nachschlagen (js/inventar-netz.js): Open Beauty Facts & Co. und Claudes
+ * Suche gegen ein nachgebautes Netz, im Browser „Scannen“ in einer Liste
+ * (gleich angelegt, mit dem Bild als Foto), „Hab ich das schon?“ mit Namen,
+ * eine Nummer aus einer anderen Datenbank und Claude, wenn keine sie kennt.
  */
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, ROOT } from './hilfe.mjs';
 import { leer, anwenden, bereinigen, beschreibung, opZusammen, bescheidNoetig } from '../js/liste.js';
 import {
   inventarBereinigen, opInvListe, opInvListeWeg, opDing, opDingWeg, eanOk, codeBereinigen, fotoPfad, FOTO_PFAD, listenVon, dingeIn,
-  sortiert, tagsVon, mitTag, suchen, mitCode, verschieben, dingLeer, dingName, naechsteReihe, MAX_DINGE, neueDingId, neueListeId, LISTE_ID, DING_ID,
+  sortiert, tagsVon, mitTag, suchen, mitCode, verschieben, dingLeer, dingName, naechsteReihe, MAX_DINGE, neueDingId, neueListeId, LISTE_ID, DING_ID, quelleBereinigen,
 } from '../js/inventar.js';
 import { rumpfErkennen, erkanntBereinigen, ERKENNEN_SCHEMA } from '../js/inventar-ki.js';
+import { nachschlagen, nachschlagenAdresse, produktSeite, bildAdresse, produktAus, andereDatenbank, rumpfNachschlagen, gesuchtBereinigen, DATENBANKEN, KENNUNG } from '../js/inventar-netz.js';
+import { ANBIETER } from '../js/ki.js';
 import { dateiHochladen, dateiHolen, dateiLoeschen } from '../js/speicher.js';
 import { INVENTAR_BILDER, ALLE_BILDER } from '../js/bilder.js';
 
@@ -116,6 +123,56 @@ check(erkanntBereinigen({ code: '4006381333932', liste: 'Bücher' }, listen).cod
   }
 }
 
+// Nachschlagen (inventar-netz.js): Open Beauty Facts & Co. – gegen ein nachgebautes Netz
+const LIPPEN = '4000000000013';
+const BUCH = '4000000000020';
+check(nachschlagenAdresse(LIPPEN) === `https://world.openbeautyfacts.org/api/v3/product/${LIPPEN}?fields=code,product_name,product_name_de,brands,image_front_url,product_type&lc=de` && produktSeite(BUCH, 'product') === `https://world.openproductsfacts.org/product/${BUCH}`, 'Adressen: zuerst Open Beauty Facts (API v3, nur die nötigen Felder), dazu die Seite zum Anschauen');
+const BILD_URL = `https://images.openbeautyfacts.org/images/products/${LIPPEN}/front_de.3.400.jpg`;
+check(bildAdresse(BILD_URL) === BILD_URL.replace('.400.jpg', '.full.jpg') && bildAdresse(BILD_URL, { sparen: true }) === BILD_URL && bildAdresse(BILD_URL.replace('https:', 'http:')) === '' && bildAdresse('https://boese.example/x.400.jpg') === '' && bildAdresse('https://images.openbeautyfacts.org/x.png') === '' && bildAdresse('') === '', 'Bilder: groß (full) oder klein (400) – nur https, nur von den Datenbanken, nur JPEG');
+const treffer = produktAus({ status: 'success', product: { product_name: 'lippenstift testrot', brands: 'testmarke,testkonzern', image_front_url: BILD_URL, product_type: 'beauty' } }, LIPPEN);
+check(treffer.name === 'Lippenstift testrot' && treffer.marke === 'Testmarke' && treffer.bild.endsWith('.full.jpg') && treffer.klein === BILD_URL && treffer.quelle.name === 'Open Beauty Facts' && treffer.quelle.url === `https://world.openbeautyfacts.org/product/${LIPPEN}` && treffer.liste === '' && !treffer.tags.length, 'Treffer: Name vorn groß, die erste Marke, das Bild groß und klein, die Quelle');
+check(produktAus({ status: 'success', product: { product_name: 'labial rojo', product_name_de: 'Lippenstift Rot', brands: 'Test Marke' } }, LIPPEN).name === 'Lippenstift Rot' && produktAus({ status: 'success', product: { brands: 'l\'test-marke paris' } }, LIPPEN).marke === "L'test-Marke Paris" && produktAus({ status: 'success', product: { brands: '' } }, LIPPEN) === null && produktAus({ status: 'failure' }, LIPPEN) === null && produktAus(null, LIPPEN) === null, 'der deutsche Name zuerst, kleine Marken vorn groß; ohne Name und Marke kein Treffer');
+const anders = { status: 'failure', result: { id: 'product_found_with_a_different_product_type' }, errors: [{ message: { id: 'product_found_with_a_different_product_type' }, field: { id: 'product_type', value: 'product' } }] };
+check(andereDatenbank(anders) === 'product' && andereDatenbank({ errors: [{ message: { id: 'product_not_found' } }] }) === '' && andereDatenbank(null) === '', 'Steht die Nummer in einer anderen Datenbank, sagt die Antwort, in welcher');
+{
+  const rufe = [];
+  const antworten = {
+    [`beauty:${BUCH}`]: { status: 404, body: anders },
+    [`product:${BUCH}`]: { status: 200, body: { status: 'success', product: { product_name: 'Notizbuch A5', brands: 'Papierwerk', product_type: 'product' } } },
+    [`beauty:${LIPPEN}`]: { status: 200, body: { status: 'success', product: { product_name: 'lippenstift testrot', brands: 'testmarke', image_front_url: BILD_URL, product_type: 'beauty' } } },
+    'beauty:4000000000044': { status: 500, body: 'kaputt' },
+  };
+  const holen = async (url, opt) => {
+    rufe.push({ url, opt });
+    const art = Object.entries(DATENBANKEN).find(([, d]) => url.startsWith(d.web))?.[0];
+    const a = antworten[`${art}:${url.split('/product/')[1].split('?')[0]}`] || { status: 404, body: { status: 'failure', result: { id: 'product_not_found' } } };
+    return new Response(JSON.stringify(a.body), { status: a.status });
+  };
+  const buch = await nachschlagen(BUCH, { holen });
+  check(buch?.name === 'Notizbuch A5' && buch.marke === 'Papierwerk' && buch.quelle.name === 'Open Products Facts' && rufe.length === 2 && rufe[0].url.startsWith('https://world.openbeautyfacts.org/') && rufe[1].url.startsWith('https://world.openproductsfacts.org/'), 'Nachschlagen: erst Open Beauty Facts – die sagt „steht in Open Products Facts“, dort ist es');
+  check(rufe.every((r) => r.opt.headers['X-User-Agent'] === KENNUNG) && KENNUNG === 'Boxenstopp (https://github.com/Finanzdienste/Boxenstopp)', 'die App nennt sich (X-User-Agent) – mit der Adresse ihres Repos, ohne Namen oder Mail');
+  rufe.length = 0;
+  check((await nachschlagen(LIPPEN, { holen }))?.marke === 'Testmarke' && rufe.length === 1, 'steht es gleich in Open Beauty Facts: eine Frage');
+  rufe.length = 0;
+  check(await nachschlagen('4000000000037', { holen }) === null && rufe.length === 1, 'kennt keine die Nummer: null, nach einer Frage');
+  check(await nachschlagen('abc', { holen }) === null && await nachschlagen('1234', { holen }) === null && rufe.length === 1, 'Buchstaben oder zu kurz: gar nicht erst gefragt');
+  let fehler = null;
+  try { await nachschlagen('4000000000044', { holen }); } catch (err) { fehler = err; }
+  check(fehler && /500/.test(fehler.message), 'Antwortet eine nicht richtig: ein Fehler (die App sagt dann „ohne Netz?“)');
+}
+// Kennt sie keine: Claude sucht
+const rn = rumpfNachschlagen({ code: ' 4000000000051 ', listen: ['Kleidung', 'Make-up'] });
+check(rn.model === ANBIETER.anthropic.modell && rn.tools.length === 1 && rn.tools[0].type === 'web_search_20250305' && rn.tools[0].max_uses === 3 && rn.tools[0].blocked_domains.includes('rossmann.de') && rn.tools[0].user_location.country === 'DE' && !rn.output_config, 'Claude sucht: nur die Websuche (höchstens dreimal, nicht bei Rossmann, aus Deutschland), das JSON im Text');
+check(rn.messages[0].content[0].text === 'Die Nummer unter dem Strichcode: 4000000000051' && /Kleidung, Make-up/.test(rn.system) && /genau diese Nummer/.test(rn.system) && /gefunden false/.test(rn.system), 'die Anfrage: nur die Nummer und die Namen der Listen – nichts raten');
+const SEITE = 'https://www.beispiel-shop.de/p/wanderschuhe-grau-123';
+const gefunden = gesuchtBereinigen({ gefunden: true, name: ' Wanderschuhe  Grau ', marke: 'Bergfest', liste: 'kleidung', tags: ['grau', 'Wandern', 'Herbst', 'zu viel'], url: SEITE, seite: 'beispiel-shop.de' }, { quellen: [{ url: `${SEITE}?ref=suche` }], listen });
+check(gefunden?.name === 'Wanderschuhe Grau' && gefunden.marke === 'Bergfest' && gefunden.liste === 'sl-kleider1' && gefunden.tags.join() === 'grau,Wandern,Herbst' && gefunden.bild === '' && gefunden.quelle.name === 'beispiel-shop.de' && gefunden.quelle.url === SEITE, 'Claudes Treffer: Liste nach Namen, höchstens drei Tags, kein Bild, die Seite als Quelle');
+check(gesuchtBereinigen({ gefunden: true, name: 'Ausgedacht', url: 'https://anders.example/x' }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ gefunden: false, name: 'x', url: SEITE }, { quellen: [{ url: SEITE }] }) === null && gesuchtBereinigen({ name: 'x', url: SEITE }, { quellen: [] }) === null && gesuchtBereinigen(null) === null, 'Eine Seite, die in keinem Suchergebnis stand, zählt nicht (ausgedacht); „nicht gefunden“ ist nichts');
+// Die Quelle in der Sache
+check(JSON.stringify(quelleBereinigen({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' })) === JSON.stringify({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' }) && quelleBereinigen({ name: 'x', url: 'javascript:alert(1)' }) === null && quelleBereinigen({ name: 'x', url: 'http://a.example' }) === null && quelleBereinigen({ url: 'https://a.example' }) === null && quelleBereinigen('x') === null, 'Quelle: Name und https-Adresse – javascript: oder http nicht');
+const mitQuelle = anwenden(s, opDing({ ...jacke, quelle: { name: 'Open Beauty Facts', url: `https://world.openbeautyfacts.org/product/${LIPPEN}` } }, 'Marielle', '2026-11-14T13:00:00.000Z'));
+check(mitQuelle.inventar.dinge['sd-jacke001'].quelle?.name === 'Open Beauty Facts' && bereinigen(JSON.parse(JSON.stringify(mitQuelle))).inventar.dinge['sd-jacke001'].quelle?.url.endsWith(LIPPEN) && s.inventar.dinge['sd-jacke001'].quelle === null, 'Die Sache merkt sich die Quelle – gespeichert und gelesen; ohne ist sie null');
+
 /* --------------------------------------------------------------- Browser */
 
 const browser = await starteBrowser();
@@ -129,6 +186,47 @@ mar.zustand.version = 1;
 mar.zustand.sha = 'sha1';
 const dinge = () => Object.values(mar.liste()?.inventar?.dinge || {});
 const ding = (name) => dinge().find((d) => d.name === name);
+const mitNummer = (c) => dinge().find((d) => d.code === c);
+const AKEY = 'sk-ant-api03-TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST-TESTTEST';
+
+// Die offenen Datenbanken (Open Beauty Facts & Co.) – nachgebaut: je Nummer, in welcher sie steht und was
+const db = { anfragen: [], bilder: 0, produkte: {} };
+const BILD_ROH = readFileSync(BILD);
+const ARTEN = { 'world.openbeautyfacts.org': 'beauty', 'world.openfoodfacts.org': 'food', 'world.openproductsfacts.org': 'product', 'world.openpetfoodfacts.org': 'petfood' };
+const dbRoute = async (r) => {
+  const req = r.request();
+  const u = new URL(req.url());
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'X-User-Agent', 'access-control-allow-methods': 'GET, OPTIONS' };
+  if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  if (u.hostname.startsWith('images.')) { db.bilder++; return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'image/png' }, body: BILD_ROH }); }
+  const art = ARTEN[u.hostname];
+  const code = u.pathname.split('/').pop();
+  db.anfragen.push({ art, code, kopf: req.headers()['x-user-agent'] || '' });
+  const p = db.produkte[code];
+  const json = (status, body) => r.fulfill({ status, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  if (!p) return json(404, { code, status: 'failure', result: { id: 'product_not_found' }, errors: [{ message: { id: 'product_not_found' }, field: { id: 'code', value: code } }] });
+  if (p.art !== art) return json(404, { code, status: 'failure', result: { id: 'product_found_with_a_different_product_type' }, errors: [{ message: { id: 'product_found_with_a_different_product_type' }, field: { id: 'product_type', value: p.art } }] });
+  return json(200, { code, status: 'success', result: { id: 'product_found' }, product: { code, product_name: p.name, brands: p.marke, product_type: p.art, ...(p.bild ? { image_front_url: `https://images.${u.hostname.replace(/^world\./, '')}/images/products/${code}/front_de.3.400.jpg` } : {}) } });
+};
+
+// Claude mit der Websuche (kiMitWerkzeugen, ohne Strom): antwortet mit claude.antwort
+const claude = { anfragen: [], antwort: null };
+const claudeRoute = async (r) => {
+  const req = r.request();
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
+  if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  claude.anfragen.push({ kopf: req.headers(), rumpf: JSON.parse(req.postData() || '{}') });
+  return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(claude.antwort) });
+};
+const claudeFindet = (json, url) => ({
+  id: 'msg_1', type: 'message', role: 'assistant', model: ANBIETER.anthropic.modell, stop_reason: 'end_turn',
+  usage: { input_tokens: 2000, output_tokens: 90, server_tool_use: { web_search_requests: 1 } },
+  content: [
+    { type: 'server_tool_use', id: 'srvtoolu_1', name: 'web_search', input: { query: 'Strichcode' } },
+    { type: 'web_search_tool_result', tool_use_id: 'srvtoolu_1', content: [{ type: 'web_search_result', url, title: 'Treffer', encrypted_content: 'e' }] },
+    { type: 'text', text: JSON.stringify(json) },
+  ],
+});
 
 // Die KI (Gemini): antwortet mit dem, was in ki.antwort steht
 const ki = { anfragen: [], antwort: {} };
@@ -149,7 +247,7 @@ const kiRoute = async (r) => {
 async function geraet({ leser = false, schluessel = '' } = {}) {
   // Chrome auf Android kann Strichcodes lesen – hier nachgebaut; ohne ist es wie Safari auf dem iPhone
   const skript = leser ? 'window.BarcodeDetector = class { static async getSupportedFormats() { return ["ean_13", "ean_8", "qr_code"]; } async detect() { return [{ rawValue: window.__code || "4006381333931", format: "ean_13" }]; } };' : null;
-  const h = await handy(browser, { attrappe: mar, skript });
+  const h = await handy(browser, { attrappe: mar, skript, datenbank: { route: dbRoute } });
   await h.ctx.route('https://generativelanguage.googleapis.com/**', kiRoute);
   const p = h.page;
   await p.evaluate(([k, g]) => {
@@ -169,6 +267,7 @@ const m1 = await geraet({ leser: true });
 const m = m1.page;
 check(await bis(() => m.locator('#inv .inv-leer').isVisible()) && (await m.locator('#amy-titel').innerText()) === 'Marielles Bereich' && (await m.locator('.amy-lead').innerText()).includes('Kleidung, Make-up'), 'Marielles Bereich → Sachen: noch leer, mit Vorschlägen zum Anfangen');
 check((await m.locator('.inv-fein').innerText()).includes('deinem Daten-Repo') && (await m.locator('.inv-fein').innerText()).includes('dein Handy selbst'), 'Der Hinweis: Fotos in ihrem Repo, den Strichcode liest das Handy');
+check((await m.locator('.inv-fein').innerText()).includes('Open Beauty Facts') && !(await m.locator('.inv-fein').innerText()).includes('Claude'), 'und zur Nummer schlägt die App in Open Beauty Facts & Co. nach – ohne Schlüssel von Anthropic ohne Claude');
 await m.click('[data-inv-vorschlag="Kleidung"]');
 check(await bis(() => Object.values(mar.liste()?.inventar?.listen || {}).some((l) => l.name === 'Kleidung' && l.bild === 'womans-clothes')) && (await m.locator('#inv-titel').innerText()) === 'Kleidung', 'Antippen legt „Kleidung“ an (mit Bildchen) und öffnet sie');
 
@@ -193,6 +292,7 @@ check(!JSON.stringify(mar.liste()).includes('base64') && JSON.stringify(mar.list
 // Der Strichcode: das Handy liest ihn selbst
 await m.setInputFiles('#inv-code-foto', BILD);
 check(await bis(() => ding('Lederjacke')?.code === CODE) && (await m.inputValue('#inv-code')) === CODE, 'Scannen: das Handy liest den Strichcode selbst (BarcodeDetector), die Nummer steht in der Sache');
+check(db.anfragen.length === 0 && (await m.locator('.inv-nachschlagen').count()) === 0, 'Hat die Sache Name, Marke und Foto, schlägt die App nicht nach (und bietet es nicht an)');
 
 // Zurück zur Liste: die Karte mit Foto, eine zweite Sache, sortieren, ordnen, filtern
 await m.click('[data-act="inv-ding-zu"]');
@@ -232,12 +332,50 @@ await m.setInputFiles('#inv-finden', BILD);
 check(await bis(async () => (await m.locator('#toast').innerText()).includes('noch nicht in deinen Listen')), 'Ein unbekannter Code: „noch nicht in deinen Listen“ – mit „Eintragen“');
 await m.click('#toast button');
 check(await bis(() => dinge().some((d) => d.code === '73513537' && !d.liste)) && (await m.inputValue('#inv-code')) === '73513537', 'Eintragen: eine neue Sache mit dem Code, noch ohne Liste');
+check(await bis(async () => (await m.locator('#toast').innerText()).includes('Zu 73513537 nichts gefunden')) && db.anfragen.length === 1 && db.anfragen[0].art === 'beauty', 'Die Datenbanken kennen die Nummer nicht: einmal gefragt, „nichts gefunden“ (ohne Schlüssel sucht niemand im Internet)');
 const kleidungId = Object.values(mar.liste().inventar.listen)[0].id;
 await m.fill('#inv-name', 'Gürtel');
 await m.selectOption('#inv-liste', kleidungId);
 check(await bis(() => ding('Gürtel')?.liste === kleidungId && ding('Gürtel')?.reihe === 3), 'Die Liste wählen: der Gürtel kommt in „Kleidung“, ans Ende');
 await m.click('[data-act="inv-ding-zu"]');
 check(await bis(async () => (await m.locator('#inv-titel').innerText()) === 'Kleidung' && (await namen()) === 'Abendkleid,Lederjacke,Gürtel'), 'Zurück führt in seine Liste');
+
+// Scannen in einer Liste: nachschlagen und gleich anlegen – mit dem Bild der Datenbank als Foto
+db.produkte[LIPPEN] = { art: 'beauty', name: 'lippenstift testrot', marke: 'testmarke,testkonzern', bild: true };
+await m.click('[data-act="inv-zu"]');
+await m.click('[data-inv-vorschlag="Make-up"]');
+check(await bis(async () => (await m.locator('#inv-titel').innerText()) === 'Make-up') && await bis(() => Object.values(mar.liste().inventar.listen).some((l) => l.name === 'Make-up')), 'eine zweite Liste: Make-up');
+const makeupId = Object.values(mar.liste().inventar.listen).find((l) => l.name === 'Make-up').id;
+check((await m.locator('.inv-leer').innerText()).includes('„Scannen“ liest den Strichcode'), 'die leere Liste sagt, was „Scannen“ tut');
+await m.evaluate((c) => { window.__code = c; }, LIPPEN);
+const vorLippen = db.anfragen.length;
+await m.setInputFiles('#inv-neu-code', BILD);
+check(await bis(() => mitNummer(LIPPEN)?.name === 'Lippenstift testrot' && mitNummer(LIPPEN)?.marke === 'Testmarke' && mitNummer(LIPPEN)?.liste === makeupId), 'Scannen in „Make-up“: nachgeschlagen und gleich angelegt – Name (vorn groß), die erste Marke, in dieser Liste');
+check(await bis(async () => (await m.locator('#toast').innerText()).includes('Gefunden: Lippenstift testrot (Testmarke)')) && (await m.inputValue('#inv-name')) === 'Lippenstift testrot' && (await m.inputValue('#inv-code')) === LIPPEN, '„Gefunden: …“ – und die Sache ist gleich offen, mit Name und Nummer');
+check(await bis(() => FOTO_PFAD.test(mitNummer(LIPPEN)?.foto?.pfad || '') && mar.zustand.roh[mitNummer(LIPPEN).foto.pfad]?.subarray(0, 3).toString('hex') === 'ffd8ff', 8000) && db.bilder === 1, 'das Bild der Datenbank ist ihr Foto – verkleinert als JPEG ins Repo, wie ein eigenes');
+const fragen = db.anfragen.slice(vorLippen);
+check(fragen.length === 1 && fragen[0].art === 'beauty' && fragen[0].code === LIPPEN && fragen[0].kopf === KENNUNG, 'gefragt: einmal Open Beauty Facts – die App nennt sich (X-User-Agent)');
+check(mitNummer(LIPPEN).quelle?.name === 'Open Beauty Facts' && await bis(async () => (await m.locator('.inv-quelle a').getAttribute('href')) === `https://world.openbeautyfacts.org/product/${LIPPEN}`) && (await m.locator('.inv-quelle').innerText()) === 'Gefunden bei Open Beauty Facts', 'Die Sache zeigt, wo es herkommt – mit Link');
+await m.click('[data-act="inv-ding-zu"]');
+await m.setInputFiles('#inv-neu-code', BILD);
+check(await bis(async () => (await m.locator('#toast').innerText()).includes('Hast du schon: Lippenstift testrot (Make-up)')) && (await m.inputValue('#inv-name')) === 'Lippenstift testrot' && dinge().filter((d) => d.code === LIPPEN).length === 1 && db.anfragen.length === vorLippen + 1, 'Noch einmal gescannt: „Hast du schon“, sie ist offen – keine zweite, nicht noch einmal nachgeschlagen');
+
+// „Hab ich das schon?“ mit einer Nummer aus einer anderen Datenbank: die App sagt gleich, was es ist
+db.produkte[BUCH] = { art: 'product', name: 'Notizbuch A5', marke: 'Papierwerk', bild: false };
+await m.click('[data-act="inv-ding-zu"]');
+await m.click('[data-act="inv-zu"]');
+await m.evaluate((c) => { window.__code = c; }, BUCH);
+const vorBuch = db.anfragen.length;
+await m.setInputFiles('#inv-finden', BILD);
+check(await bis(async () => (await m.locator('#toast').innerText()).includes('Notizbuch A5 (Papierwerk): noch nicht in deinen Listen')), 'Hab ich das schon? – nein, und die App sagt gleich, was es ist');
+check(db.anfragen.slice(vorBuch).map((x) => x.art).join() === 'beauty,product', 'erst Open Beauty Facts, die verweist auf Open Products Facts');
+await m.click('#toast button');
+check(await bis(() => mitNummer(BUCH)?.name === 'Notizbuch A5' && mitNummer(BUCH)?.marke === 'Papierwerk' && !mitNummer(BUCH)?.liste && mitNummer(BUCH)?.quelle?.name === 'Open Products Facts') && !mitNummer(BUCH).foto && db.anfragen.length === vorBuch + 2, 'Eintragen: mit Name, Marke und Quelle, noch ohne Liste – ohne Bild kein Foto, nicht noch einmal gefragt');
+check(await bis(async () => (await m.locator('.inv-nachschlagen').count()) === 1), 'ohne Foto bietet die Sache „Im Netz nachschlagen“ an');
+await m.click('[data-act="inv-ding-zu"]');
+await m.click('[data-act="inv-zu"]');
+await m.click(`[data-inv-liste="${kleidungId}"]`);
+check(await bis(async () => (await m.locator('#inv-titel').innerText()) === 'Kleidung'), 'zurück in „Kleidung“');
 
 // Ihr zweites Gerät, ohne Strichcode-Leser (wie Safari), mit KI-Schlüssel
 const m2h = await geraet({ schluessel: GKEY });
@@ -261,6 +399,36 @@ check(await bis(async () => (await m2.locator('#toast').innerText()).includes('K
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: CODE };
 await m2.setInputFiles('#inv-finden', BILD);
 check(await bis(async () => (await m2.locator('#inv-name').count()) === 1 && (await m2.inputValue('#inv-name')) === 'Lederjacke'), 'Richtig gelesen: „Hast du schon“ – die Lederjacke ist offen');
+// Mit Gemini sucht niemand im Internet (die Internetsuche läuft nur über Claude)
+await m2.click('[data-act="inv-ding-zu"]');
+await m2.click('[data-act="inv-zu"]');
+ki.antwort = { name: '', marke: '', liste: '', tags: [], code: '4000000000037' };
+const kiVorher = ki.anfragen.length;
+await m2.setInputFiles('#inv-finden', BILD);
+check(await bis(async () => (await m2.locator('#toast').innerText()).includes('4000000000037: noch nicht in deinen Listen')), 'Gemini liest eine unbekannte Nummer: „noch nicht in deinen Listen“');
+await m2.click('#toast button');
+check(await bis(async () => (await m2.locator('#toast').innerText()).includes('nichts gefunden')) && ki.anfragen.length === kiVorher + 1 && await bis(() => !!mitNummer('4000000000037')), 'Eintragen: die Datenbanken kennen sie nicht – mit Gemini sucht niemand im Internet, die Sache hat nur die Nummer');
+
+// Mit einem Schlüssel von Anthropic: kennt keine Datenbank die Nummer, sucht Claude im Internet
+const m3h = await geraet({ leser: true, schluessel: AKEY });
+await m3h.ctx.route('https://api.anthropic.com/**', claudeRoute);
+const m3 = m3h.page;
+check((await m3.locator('.inv-fein').innerText()).includes('sucht Claude im Internet'), 'Der Hinweis sagt es: kennen die Datenbanken die Nummer nicht, sucht Claude');
+await m3.click(`[data-inv-liste="${kleidungId}"]`);
+const SCHUHE = '4000000000044';
+claude.antwort = claudeFindet({ gefunden: true, name: 'Wanderschuhe Grau', marke: 'Bergfest', liste: 'Kleidung', tags: ['grau', 'Wandern'], url: SEITE, seite: 'beispiel-shop.de' }, SEITE);
+await m3.evaluate((c) => { window.__code = c; }, SCHUHE);
+const vorSchuhe = db.anfragen.length;
+await m3.setInputFiles('#inv-neu-code', BILD);
+check(await bis(() => mitNummer(SCHUHE)?.name === 'Wanderschuhe Grau' && mitNummer(SCHUHE)?.marke === 'Bergfest' && mitNummer(SCHUHE)?.liste === kleidungId && mitNummer(SCHUHE)?.tags.join() === 'grau,Wandern' && mitNummer(SCHUHE)?.quelle?.url === SEITE, 8000) && !mitNummer(SCHUHE).foto, 'Claude findet sie im Internet: Name, Marke, Tags, die Seite als Quelle – ohne Bild');
+const cf = claude.anfragen.at(-1);
+check(db.anfragen.length === vorSchuhe + 1 && cf?.kopf['x-api-key'] === AKEY && cf.rumpf.tools.length === 1 && cf.rumpf.tools[0].name === 'web_search' && cf.rumpf.messages[0].content[0].text.endsWith(SCHUHE) && !!cf.rumpf.cache_control, 'erst die Datenbank, dann Claude: nur die Websuche (ohne Berater), nur die Nummer');
+check(await bis(async () => (await m3.locator('.inv-quelle a').innerText()) === 'beispiel-shop.de'), 'die Quelle steht dabei');
+claude.antwort = claudeFindet({ gefunden: true, name: 'Ausgedacht', marke: 'X', url: 'https://anders.example/p/1' }, SEITE);
+await m3.click('[data-act="inv-ding-zu"]');
+await m3.evaluate(() => { window.__code = '4000000000051'; });
+await m3.setInputFiles('#inv-neu-code', BILD);
+check(await bis(async () => (await m3.locator('#toast').innerText()).includes('Zu 4000000000051 nichts gefunden')) && await bis(() => mitNummer('4000000000051')?.liste === kleidungId) && !mitNummer('4000000000051').name && !ding('Ausgedacht'), 'Nennt Claude eine Seite, die in keiner Suche stand: nichts eingetragen – die Sache hat nur die Nummer');
 
 // Löschen mit Rückgängig – das Foto kommt erst danach weg
 await m.click('[data-inv-ding]:has-text("Lederjacke")');
@@ -274,15 +442,17 @@ check(await bis(() => mar.zustand.geloescht.includes(altesFoto), 16000) && !mar.
 
 // Eine ältere App-Fassung schreibt die Liste ohne „inventar“: es kommt wieder dazu
 const alt = mar.liste();
+const zahl = Object.keys(alt.inventar.dinge).length;
 delete alt.inventar;
 alt.rev += 1;
 mar.zustand.datei = JSON.stringify(alt);
 mar.zustand.version++;
 mar.zustand.sha = `sha${mar.zustand.version}`;
-check(await bis(() => Object.keys(mar.liste()?.inventar?.dinge || {}).length === 3, 10000), 'Lässt eine ältere Fassung die Sachen weg, schreibt Marielles Handy sie wieder dazu');
-check(m1.fehler.length === 0 && m2h.fehler.length === 0, `Keine Fehler im Browser (${[...m1.fehler, ...m2h.fehler].join(' | ')})`);
+check(zahl > 3 && await bis(() => Object.keys(mar.liste()?.inventar?.dinge || {}).length === zahl, 10000), 'Lässt eine ältere Fassung die Sachen weg, schreibt Marielles Handy sie wieder dazu');
+check(m1.fehler.length === 0 && m2h.fehler.length === 0 && m3h.fehler.length === 0, `Keine Fehler im Browser (${[...m1.fehler, ...m2h.fehler, ...m3h.fehler].join(' | ')})`);
 await m1.ctx.close();
 await m2h.ctx.close();
+await m3h.ctx.close();
 
 // Amy will es auch: in Amys Bereich, in der gemeinsamen Liste
 const tobi = await handy(browser);
