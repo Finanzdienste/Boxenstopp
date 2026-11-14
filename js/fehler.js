@@ -4,15 +4,17 @@
  * (die letzten fünf; derselbe Fehler gleich danach zählt nur mit) und steht
  * unter Einstellungen → Über die App, zum Kopieren und Weiterschicken. So
  * lässt sich auf iPhone und iPad sehen, was hakt – dort gibt es keine
- * Konsole. Schlüssel (GitHub, KI) werden vorher unkenntlich gemacht; nichts
- * davon verlässt das Gerät von selbst.
+ * Konsole. Schlüssel (GitHub, KI) und die Kennung der Bildschirmzeit
+ * (…#bildschirmzeit=…, ansicht-bildschirmzeit.js) werden vorher unkenntlich
+ * gemacht; nichts davon verlässt das Gerät von selbst.
  */
 import { lese, schreibe } from './kern.js';
 
 export const FEHLER = 'boxenstopp.fehler.v1';
 const MAX = 5;
 const SCHLUESSEL = /gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,}|AIza[0-9A-Za-z_-]{16,}|sk-ant-[A-Za-z0-9_-]{8,}/g;
-const sauber = (s, n = 240) => String(s ?? '').replace(SCHLUESSEL, '…').replace(/\s+/g, ' ').trim().slice(0, n);
+const KENNUNG = /(bildschirmzeit=)[A-Za-z0-9_-]+/g;
+const sauber = (s, n = 240) => String(s ?? '').replace(SCHLUESSEL, '…').replace(KENNUNG, '$1…').replace(/\s+/g, ' ').trim().slice(0, n);
 
 /** Die gemerkten Fehler, der neueste zuerst: { at, wo, text, stelle, mal? } */
 export function letzteFehler() {

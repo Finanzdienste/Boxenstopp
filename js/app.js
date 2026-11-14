@@ -49,6 +49,17 @@ import { katalogStart, katalogVorab, katalogLaden, klickKatalog } from './ansich
 import { klickDoppel, doppelNeu } from './ansicht-doppel.js';
 import { planZeichnen, planGezeigt, klickPlan, eingabePlan, tastePlan } from './ansicht-essensplan.js';
 import { boxenText } from './boxen.js';
+import { bildschirmzeitStart, klickBildschirmzeit } from './ansicht-bildschirmzeit.js';
+
+/*
+ * Als Erstes nach den Importen, vor allem, was die Adresse liest (start()
+ * unten: #zugang=, #ki=, #gaeste=, Reiter, Rezept): Ein Link aus Tobis
+ * Bildschirmzeit-Widget (#bildschirmzeit=…) verbindet und ist danach aus der
+ * Adresse – die App startet, als wäre er nie da gewesen. Ohne ihn passiert
+ * nichts (ansicht-bildschirmzeit.js). Die Module oben lesen die Adresse beim
+ * Laden nicht, und keins hört auf hashchange (test-bildschirmzeit.mjs).
+ */
+sicher('Bildschirmzeit', bildschirmzeitStart);
 
 const apiBasis = () => lese('__api', null) || API;
 /** Rewe und Edeka (kaufDA) liegen nur im privaten Daten-Repo – mit dem Schlüssel nebenbei holen (eine eigene Liste hat sie nicht). */
@@ -253,6 +264,7 @@ document.addEventListener('click', (ev) => {
   if (klickIphone(el)) return;
   if (klickPush(el)) return;
   if (klickTodo(el)) return;
+  if (klickBildschirmzeit(el)) return;
   if (klickEinstellungen(el)) return;
   if (klickWillkommen(el)) return;
   if (klickBoxen(el)) return;

@@ -19,7 +19,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | **Essensplan** | Die nächsten Tage und Wochen: je Tag Mittag und Abend, wer isst mit, dazu **Kochtage** („Chili kochen, 8 Boxen“) mit **Boxen verteilen** auf die Tage danach – und mit einem Tipp **die Woche auf die Einkaufsliste** (siehe unten) |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
-| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen; das **Dashboard**: wer wann was macht und was bei Amy und den Gästen drinsteht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, hell oder dunkel, breit die Liste rechts daneben oder als Reiter (auf dem iPad von selbst als Reiter), welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen; das **Dashboard**: wer wann was macht und was bei Amy und den Gästen drinsteht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, nur auf einem Gerät, das mit Tobis Widget verbunden ist, die **Bildschirmzeit**, hell oder dunkel, breit die Liste rechts daneben oder als Reiter (auf dem iPad von selbst als Reiter), welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
 Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat, ein
@@ -1109,11 +1109,93 @@ einstellt, an einem Ort (`js/ansicht-einstellungen.js`):
 - **Gelernt und gemerkt:** dein Tempo („Tempo vergessen“), die Wege durch
   die Läden (je Laden „Vergessen“), die Preisalarme und eure Preise vom Bon
   (je löschen) – alles mit Rückgängig.
+- **Bildschirmzeit:** nur auf einem Gerät, das mit Tobis Widget verbunden
+  ist – sonst gibt es die Karte nicht (siehe „Bildschirmzeit“ gleich unten).
 - **Über die App:** die laufende Fassung (aus dem Vorrat des Service Workers)
   und „Nach Updates suchen“; hakte in den letzten zwei Wochen etwas, steht
   hier „Zuletzt hakte etwas …“ mit „Fehler kopieren“ (Fassung, Gerät, je
   Fehler Zeit, Teil, Text, Stelle – für iPhone und iPad, die keine Konsole
   haben) und „Vergessen“ (`js/fehler.js`, `boxenstopp.fehler.v1`).
+
+### Bildschirmzeit
+
+Tobi: „Ich will ein eigenes Bildschirmzeit-Widget für meinen Startbildschirm
+(Samsung Galaxy S24), weil Androids Bildschirmzeit meine Web-Apps Boxenstopp,
+Freizeit und Workout nur als „Chrome“ zählt.“ Und: „Push, Daten und alles
+andere in den drei Apps müssen weiter funktionieren wie bisher.“
+
+**Vorher** wusste nur Chrome, dass Boxenstopp offen war – Androids
+Bildschirmzeit zählte die App als „Chrome“, zusammen mit Freizeit, Workout und
+allem anderen im Browser.
+
+**Jetzt** (v78) meldet Boxenstopp auf einem Gerät, das mit dem Widget
+verbunden ist, wie lange es heute zu sehen war. Die Widget-App (Repo
+Finanzdienste/Bildschirmzeit) holt das bei Supabase, zieht die drei Web-Apps
+bei Chrome ab und zeigt sie mit eigenem Namen und Symbol im Ring.
+
+- **Ohne Verbinden-Link passiert nichts:** keine Anfrage, kein Eintrag im
+  Speicher, keine Uhr – und in der App kein Wort davon; die Karte in den
+  Einstellungen gibt es dann nicht, auch nicht versteckt. Für Amy, Marielle
+  und alle anderen bleibt Boxenstopp, wie es war.
+- **Verbunden wird aus der Widget-App** (je App ein Knopf „Verbinden“), die
+  `https://finanzdienste.github.io/Boxenstopp/#bildschirmzeit=<Kennung>`
+  öffnet. Boxenstopp nimmt den Link als Erstes aus der Adresse – `app.js`
+  startet das Modul gleich nach den Importen, vor `start()`, das danach
+  `#zugang=`, `#ki=`, `#gaeste=`, Reiter und Rezept liest – und startet, als
+  wäre er nie da gewesen; unten steht kurz „Bildschirmzeit verbunden …“. Das
+  geht auch bei offener App (`hashchange`; sonst hört kein Teil der App
+  darauf). Die bisherigen Links wirken wie vorher, und der neue löst keinen
+  davon aus.
+- **Die Kennung** (43 Zeichen, von der Widget-App zufällig erzeugt) liegt nur
+  im localStorage dieses Geräts unter `bildschirmzeit.boxenstopp`, mit den
+  Sekunden der letzten acht Tage, was davon gemeldet ist, wann zuletzt und dem
+  letzten Fehler. Sie geht nur an Supabase – nie in `liste.json`, einen Link
+  (fürs zweite Handy, Gäste, Umzug), ein Repo oder den Fehlerbericht
+  (`js/fehler.js` macht `bildschirmzeit=…` unkenntlich); kein Teil der App
+  sammelt den ganzen Speicher ein. Freizeit und Workout liegen auf derselben
+  Adresse (finanzdienste.github.io) und teilen sich den Speicher; ihre
+  Einträge (`bildschirmzeit.freizeit`, `bildschirmzeit.workout`) fasst
+  Boxenstopp nicht an.
+- **Gemessen** wird nur, solange die App zu sehen ist (alle 15 s; eine Lücke
+  zählt höchstens 60 s, falls das Handy schlief, ohne dass die Seite es
+  merkte; an Mitternacht geteilt). Geschickt wird der Tagesstand an
+  `bildschirmzeit_melden` (dasselbe Supabase-Projekt wie die Kosten für
+  „Frag mal“, der öffentliche Schlüssel im Kopf `apikey`): alle 5 Minuten,
+  beim Zurückkommen und beim Wegschalten (mit `keepalive`, gut 100 Byte),
+  gleich nach dem Verbinden auch mit 0, damit die Widget-App „verbunden“
+  sieht. Supabase nimmt je Tag den größeren Wert – doppelt schicken schadet
+  nicht. Die lila Fassung (Marielle) ist derselbe Code und meldet genauso als
+  `boxenstopp`. Der Service Worker fasst die Anfragen nicht an (fremde
+  Adresse, POST).
+- **In den Einstellungen**, nur verbunden: die Karte **Bildschirmzeit** nach
+  der Waage – „Verbunden mit deinem Widget. Heute 1 Std. 5 Min. offen,
+  zuletzt gemeldet um 14:05.“ (vor der ersten Meldung „noch nichts
+  gemeldet“; war die letzte an einem anderen Tag, mit Datum), kam die letzte
+  nicht durch, darunter „Zuletzt nicht durchgekommen: kein Netz.“ (oder
+  „Fehler 503“), und **Trennen**. Sie zeichnet sich neu, wenn das Modul etwas
+  meldet und die Einstellungen offen sind.
+- **Trennen:** der Knopf auf der Karte – die App misst und schickt nichts
+  mehr, `bildschirmzeit.boxenstopp` ist weg; die Zahlen bei Supabase bleiben
+  (löschen kann sie die Widget-App). Hat die Widget-App ihre Daten gelöscht,
+  antwortet Supabase `false`, dann trennt sich Boxenstopp von selbst
+  („Bildschirmzeit getrennt: Die Widget-App kennt diese Verbindung nicht
+  mehr.“). Wieder verbinden: in der Widget-App noch einmal „Verbinden“.
+
+**Warum so:** Android sieht in Chrome nicht, welche Web-App gerade vorn ist –
+das weiß nur die App selbst (`visibilityState`). Verbunden wird über einen
+Link aus der Widget-App, damit niemand außer Tobi etwas einrichten muss und
+die App ohne ihn still bleibt. Gemeldet wird der Tagesstand statt eines
+Zuwachses, damit nichts doppelt zählt, wenn eine Meldung zweimal ankommt.
+
+**Wo der Code liegt:** `js/bildschirmzeit.js` ist eine wortgleiche Kopie aus
+dem Repo **Finanzdienste/Bildschirmzeit** (`web/bildschirmzeit.js`, dort mit
+eigenen Tests und dem SQL für Supabase) – dieselbe Datei in Boxenstopp,
+Freizeit und Workout; geändert wird nur dort, dann in alle drei kopiert.
+`js/ansicht-bildschirmzeit.js` bindet sie hier ein (Start, Karte, Trennen).
+
+**Geprüft** in `tests/test-bildschirmzeit.mjs`, gegen eine nachgebaute
+Supabase-API (`BILDSCHIRMZEIT` in `tests/hilfe.mjs` lässt keinen Test an die
+echte) und mit erfundenen Kennungen – siehe „Tests“.
 
 ## Resteverwertung
 
@@ -1756,6 +1838,8 @@ die Action „Rezeptfotos“.
 | `js/einzelheiten.js` | Dashboard: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
 | `js/dashboard.js` | Dashboard: was in einer Liste steht (Sachen, Einkaufsliste, Essensplan, Rezepte, Notiztitel, Vorschläge) – ohne Gesundheit, ohne KI-Texte, ohne DOM |
 | `js/ansicht-willkommen.js` | das Willkommen für einen Gast (Makros, aufs Handy, wem die Liste gehört) |
+| `js/bildschirmzeit.js` | Bildschirmzeit fürs Widget: messen, solange sichtbar, an Supabase melden, trennen – wortgleiche Kopie aus Finanzdienste/Bildschirmzeit (`web/bildschirmzeit.js`), nur dort ändern |
+| `js/ansicht-bildschirmzeit.js` | Bildschirmzeit in Boxenstopp: als Erstes beim Start, die Karte in den Einstellungen (nur verbunden), Trennen |
 | `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel – und die Ansicht |
 | `icon-lila*.png`, `icon-lila.svg`, `manifest-lila.webmanifest` | Symbol und Manifest einer lila Liste |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
@@ -1931,5 +2015,18 @@ Putzplan, Sachen (Liste angelegt, umbenannt, gelöscht; Sache dazu, geändert �
 nur welche Felder –, in eine andere Liste, gelöscht, umsortiert), Ziel, eine
 zusammengeführte eigene Liste und eine Sitzung aus mehreren Commits. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
-Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel. Der Workflow „Prüfung“ lässt
+Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel.
+`test-bildschirmzeit.mjs` prüft ohne Browser, dass das Modul seinen Link
+nimmt, bevor die App die Adresse liest (kein anderes Modul hört auf
+`hashchange` oder liest die Adresse beim Laden), und dass kein Teil der App
+den ganzen Speicher einsammelt; im Browser gegen eine nachgebaute
+Supabase-API: ohne Link nichts (keine Anfrage, kein Speicher, kein Wort in
+der App), der Link (Startansicht wie ohne, Adresse sauber, Hinweis, die
+Karte nach der Waage, `p_app`, `apikey` ohne Authorization, heute mit 0),
+die Zeit nur sichtbar, Wegschalten mit `keepalive`, ein Fehler auf der
+Karte und wieder weg, „false“ trennt von selbst, ein Link bei offener App,
+„Trennen“ (die Einträge von Freizeit und Workout bleiben), die bisherigen
+Links `#zugang=`, `#ki=`, `#gaeste=`, `#einkauf` wie vorher, die Kennung
+weder in GitHub noch im Link fürs zweite Handy noch im Fehlerbericht, und
+die lila Fassung. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

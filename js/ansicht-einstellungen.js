@@ -17,6 +17,9 @@
  *   Waage              die Küchenwaage (waage.js): Supabase-Adresse, Schlüssel,
  *                      Kanal – für alle Geräte der Liste (profil.waage), mit
  *                      „Verbindung testen“
+ *   Bildschirmzeit     nur, wenn dieses Gerät mit Tobis Widget verbunden ist:
+ *                      heute, zuletzt gemeldet, Trennen (ansicht-bildschirmzeit.js
+ *                      legt die Karte an und nimmt sie wieder weg)
  *   Darstellung        hell, dunkel oder wie das Gerät – nur dieses Gerät
  *                      (html[data-design], gesetzt schon im Kopf von index.html);
  *                      die Farbe der App (blau, lila) gilt für die Liste; breit
@@ -53,6 +56,7 @@ import { boxenZeichnen } from './ansicht-boxen.js';
 import { gaesteZeichnen } from './ansicht-gaeste.js';
 import { istEigen, person, wessen, farbe, farbeSetzen } from './profil.js';
 import { letzteFehler, fehlerVergessen } from './fehler.js';
+import { bildschirmzeitZeichnen } from './ansicht-bildschirmzeit.js';
 
 /* ------------------------------------------------------------ Reiter */
 
@@ -417,6 +421,8 @@ export function einstellungenZeichnen() {
   if (u) u.innerHTML = ueberHTML();
   // Microsoft To Do: was in liste.json steht (App-ID, Wünsche), kann sich geändert haben
   todoZeichnen();
+  // Bildschirmzeit: die Karte nur, wenn dieses Gerät mit Tobis Widget verbunden ist
+  bildschirmzeitZeichnen();
   // Beim ersten Besuch ist der Service Worker evtl. erst nach dem Start fertig – dann jetzt nachsehen
   if (!fassung && ansicht.tab === 'einstellungen' && !fassungLaeuft) {
     fassungLaeuft = true;

@@ -39,7 +39,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v77';
+const VERSION = 'v78';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -125,6 +125,8 @@ const SHELL = [
   './js/einzelheiten.js',
   './js/dashboard.js',
   './js/ansicht-willkommen.js',
+  './js/bildschirmzeit.js',
+  './js/ansicht-bildschirmzeit.js',
   './schrift/bricolage-grotesque.woff2',
   './schrift/figtree.woff2',
   './schrift/ibm-plex-mono-400.woff2',

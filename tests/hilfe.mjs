@@ -191,7 +191,8 @@ export function githubMehrere(...attrappen) {
 
 /**
  * Ein „Handy“: eigener Browser-Kontext mit leerem Speicher. `attrappe` hängt
- * die GitHub-Attrappe davor; `takt` ist der Abgleich in ms (in der App sonst 8 s);
+ * die GitHub-Attrappe davor, `bildschirmzeit` eine für Supabase (sonst geht
+ * dorthin nichts durch); `takt` ist der Abgleich in ms (in der App sonst 8 s);
  * `userAgent` macht daraus etwa ein iPhone oder iPad, `skript` läuft vor jeder
  * Seite (etwa um navigator.maxTouchPoints wie auf einem iPad zu setzen).
  */
@@ -201,6 +202,8 @@ export const TIER_HOSTS = /random\.dog|dog\.ceo|thecatapi|cataas|randomfox|bunni
 export const DATENBANK_HOSTS = /^https:\/\/(?:world|images)\.open(?:beauty|food|products|petfood)facts\.org\//;
 /** Die Supabase-Funktionen (Kosten melden, Bilder von Shopseiten) – in den Tests nie die echten. */
 export const FUNKTIONEN = /^https:\/\/[a-z0-9]+\.supabase\.co\/functions\//;
+/** Die Bildschirmzeit fürs Widget (js/bildschirmzeit.js: bildschirmzeit_melden & Co.) – in den Tests nie die echte. */
+export const BILDSCHIRMZEIT = /^https:\/\/[a-z0-9]+\.supabase\.co\/rest\/v1\/rpc\/bildschirmzeit_/;
 
 /**
  * Eine Attrappe für die Tierquellen: jede Antwort zeigt auf ein Bild unter
@@ -222,7 +225,7 @@ export function tierAttrappe() {
   };
 }
 
-export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null, hinweise = false } = {}) {
+export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, bildschirmzeit = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null, hinweise = false } = {}) {
   const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow', ...(userAgent ? { userAgent } : {}) });
   if (skript) await ctx.addInitScript(skript);
   // z. B. ['notifications', 'clipboard-read', 'clipboard-write'] – Headless-Chromium verweigert Mitteilungen sonst
@@ -232,6 +235,7 @@ export async function handy(browser, { attrappe = null, tiere = null, datenbank 
   await ctx.route(TIER_HOSTS, tiere ? tiere.route : (r) => r.abort('blockedbyclient'));
   await ctx.route(DATENBANK_HOSTS, datenbank ? datenbank.route : (r) => r.abort('blockedbyclient'));
   await ctx.route(FUNKTIONEN, (r) => r.abort('blockedbyclient'));
+  await ctx.route(BILDSCHIRMZEIT, bildschirmzeit ? bildschirmzeit.route : (r) => r.abort('blockedbyclient'));
   // Die Angebote der Woche: in den Tests immer dieselben (tests/daten/angebote.json), nie das echte Feld
   await ctx.route('**/daten/angebote.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote.json'), 'utf8') }));
   await ctx.route('**/daten/preisverlauf.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'preisverlauf.json'), 'utf8') }));
