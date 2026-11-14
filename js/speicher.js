@@ -551,15 +551,18 @@ export async function commitsLesen(token, ort, { api = API, bis = '', seit = '',
 /**
  * liste.json, wie sie bei einem Commit war – für die Einzelheiten im
  * Überblick (ansicht-gaeste.js, einzelheiten.js). ref: die sha eines Commits
- * oder „<sha>~1“ für den Stand davor. Zurück kommt das JSON, wie es dort lag
- * (noch nicht bereinigt), oder null, wenn es die Datei dort noch nicht gab.
+ * oder „<sha>~1“ für den Stand davor, '' für den Stand jetzt (Dashboard).
+ * Zurück kommt das JSON, wie es dort lag (noch nicht bereinigt), oder null,
+ * wenn es die Datei dort noch nicht gab.
  * Wirft 'falsch' (Schlüssel), 'netz' oder 'kaputt' (kein JSON).
  */
 export async function fassungLesen(token, ort, ref, { api = API } = {}) {
   let r;
   try {
-    r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/contents/${ort.pfad || DATEN.pfad}?ref=${encodeURIComponent(ref)}`, {
+    // Ohne ref der Stand jetzt (Dashboard) – dann nicht aus dem Zwischenspeicher des Browsers
+    r = await fetch(`${api}/repos/${ort.owner}/${ort.repo}/contents/${ort.pfad || DATEN.pfad}${ref ? `?ref=${encodeURIComponent(ref)}` : ''}`, {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.raw+json' },
+      ...(ref ? {} : { cache: 'no-store' }),
     });
   } catch { throw new Error('netz'); }
   if (r.status === 404) return null;

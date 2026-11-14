@@ -6,8 +6,10 @@
  *               auch, dass er NICHT an Tobis und Amys Liste kommt –, legt die
  *               Liste mit Name und Farbe an und macht den Link zum Schicken.
  *               Wen dieses Gerät eingeladen hat, merkt es sich (gaeste.js).
- *   Überblick   Wer wann was gemacht hat, in allen Listen, die dieses Gerät
- *               kennt – aus den Commits (gaeste.js zusammenfassen). Was das
+ *   Dashboard   Reiter „Aktivität“: wer wann was gemacht hat, in allen
+ *               Listen, die dieses Gerät kennt – aus den Commits (gaeste.js
+ *               zusammenfassen). Daneben je Person ein Reiter mit dem, was in
+ *               ihrer Liste steht (dashboard.js, siehe unten). Was das
  *               Gerät schon geholt hat, merkt es sich (VERLAUF); beim Öffnen
  *               kommt nur das Neue dazu. Unter jeder Sitzung steht im Detail,
  *               was passiert ist: Dafür holt das Gerät liste.json, wie sie
@@ -20,19 +22,24 @@
  *               (…#gaeste=…, gaeste.js); auf dem neuen öffnet man ihn (die
  *               App fragt einmal nach) oder fügt ihn unter „Vom alten Handy
  *               übernehmen“ ein. Verlauf und Einzelheiten holt das neue Gerät
- *               beim ersten Überblick selbst.
+ *               beim ersten Öffnen des Dashboards selbst.
  *
  * Schlüssel stehen nur im localStorage dieses Geräts, im Link für den Gast
  * und – solange man ihn nicht löscht – im Link fürs neue Handy.
  */
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { esc, tagKurz } from './format.js';
-import { DATEN, API, listeAnlegen, commitsLesen, pruefeSchluessel, fassungLesen } from './speicher.js';
+import { DATEN, API, listeAnlegen, commitsLesen, pruefeSchluessel, fassungLesen, dateiHolen } from './speicher.js';
 import { bereinigen, leer } from './liste.js';
 import { schluesselAus, einladungsLink, ladeKi, ortVon, HAUPTLISTE } from './zugang.js';
 import { gaesteBereinigen, gaesteFuerLink, gaesteAusLink, repoVorschlag, zusammenfassen, verlaufMischen, BEREICHE } from './gaeste.js';
-import { einzelheiten, zusammenlegen, EINZELHEITEN_FASSUNG } from './einzelheiten.js';
+import { einzelheiten, zusammenlegen, kurz, EINZELHEITEN_FASSUNG } from './einzelheiten.js';
 import { istEigen, wessen } from './profil.js';
+import { inhaltVon } from './dashboard.js';
+import { bildPfad } from './bilder.js';
+import { FOTO_PFAD } from './inventar.js';
+import { tagFarbe } from './amy.js';
+import { sachenFotosEinsetzen } from './ansicht-inventar.js';
 
 const GAESTE = 'boxenstopp.gaeste.v1';
 const VERLAUF = 'boxenstopp.verlauf.v1'; // { <id>: [{ sha, at, nachricht }] }
@@ -113,7 +120,7 @@ function umzugHTML() {
 function angebotenHTML() {
   const viele = angeboten.length > 1;
   return `<div class="g-fertig" role="group" aria-label="Gäste vom alten Handy">
-<p><b>Vom alten Handy: ${esc(namenText(angeboten))}.</b> Übernehmen? Dann siehst du ${viele ? 'ihre Listen' : 'die Liste'} auch hier im Überblick.</p>
+<p><b>Vom alten Handy: ${esc(namenText(angeboten))}.</b> Übernehmen? Dann siehst du ${viele ? 'ihre Listen' : 'die Liste'} auch hier im Dashboard.</p>
 <div class="zugang-btns"><button type="button" class="btn btn-primary" data-act="g-uebernehmen">Übernehmen</button><button type="button" class="btn btn-quiet" data-act="g-nicht">Nicht übernehmen</button></div>
 </div>`;
 }
@@ -147,7 +154,7 @@ export function gaesteZeichnen() {
   else if (einladen) rumpf = einladenHTML();
   else if (umzug) rumpf = umzugHTML();
   const offen = einladen || fertig || umzug || angeboten;
-  const knoepfe = offen ? '' : `<div class="zugang-btns"><button type="button" class="btn" data-act="g-einladen"${app.zugang ? '' : ' disabled'}>Jemanden einladen</button><button type="button" class="btn" data-act="ub-oeffnen"${app.zugang ? '' : ' disabled'}>Überblick</button>${gaeste.length ? '<button type="button" class="btn" data-act="g-umzug">Aufs neue Handy</button>' : ''}</div>`;
+  const knoepfe = offen ? '' : `<div class="zugang-btns"><button type="button" class="btn" data-act="g-einladen"${app.zugang ? '' : ' disabled'}>Jemanden einladen</button><button type="button" class="btn" data-act="ub-oeffnen"${app.zugang ? '' : ' disabled'}>Dashboard</button>${gaeste.length ? '<button type="button" class="btn" data-act="g-umzug">Aufs neue Handy</button>' : ''}</div>`;
   const einfuegen = offen || gaeste.length ? '' : einfuegenHTML(!!el.querySelector('details.g-umzug')?.open);
   el.innerHTML = `${kopf}${liste}${rumpf}${knoepfe}${einfuegen}${app.zugang ? '' : '<p class="fine">Erst die gemeinsame Liste einrichten.</p>'}`;
 }
@@ -173,7 +180,7 @@ function uebernehmen(gs) {
   angeboten = null;
   umzugFehler = '';
   gaesteZeichnen();
-  melde(`${namenText(gs)} übernommen – der Überblick kennt ${gs.length > 1 ? 'ihre Listen' : 'die Liste'} jetzt auch hier.`);
+  melde(`${namenText(gs)} übernommen – das Dashboard kennt ${gs.length > 1 ? 'ihre Listen' : 'die Liste'} jetzt auch hier.`);
 }
 
 function umzugEinfuegen() {
@@ -310,9 +317,21 @@ export function klickGaeste(el) {
     case 'g-uebernehmen': if (angeboten) uebernehmen(angeboten); return true;
     case 'g-nicht': angeboten = null; gaesteZeichnen(); return true;
     case 'ub-oeffnen': ueberblickOeffnen(); return true;
-    case 'ub-zu': { const dlg = $('#ueberblick-dlg'); if (dlg?.open) dlg.close(); fassungen.clear(); return true; }
-    case 'ub-neu': versucht.clear(); detailsFehler = ''; ueberblickLaden(true); return true;
+    case 'ub-zu': { const dlg = $('#ueberblick-dlg'); if (dlg?.open) dlg.close(); else dashboardZu(); return true; }
+    case 'ub-neu': {
+      versucht.clear();
+      detailsFehler = '';
+      // Im Reiter eines Gasts auch, was gerade in seiner Liste steht
+      const g = reiterListe().find((x) => x.id === reiter)?.gast;
+      if (g) inhaltHolen(g);
+      ueberblickLaden(true);
+      return true;
+    }
+    case 'dash-hinweis-zu': { const dlg = $('#dash-hinweis-dlg'); if (dlg?.open) { if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open'); } return true; }
     default:
+      if (d.ubReiter) { reiter = d.ubReiter; ueberblickZeichnen(); $(`#ueberblick-dlg [data-ub-reiter][aria-selected="true"]`)?.focus(); $('#ueberblick-dlg').scrollTop = 0; return true; }
+      if (d.ubGanz) { ganz.add(d.ubGanz); ueberblickZeichnen(); return true; }
+      if (el.hasAttribute('data-ub-verlauf')) { reiter = 'aktivitaet'; wer = d.ubVerlauf || ''; mehr = false; ueberblickZeichnen(); $('#ueberblick-dlg [data-ub-reiter="aktivitaet"]')?.focus(); return true; }
       if (d.ubTage) { tage = Number(d.ubTage) === 30 ? 30 : 7; ueberblickZeichnen(); return true; }
       if (d.act === 'ub-mehr') { mehr = true; ueberblickZeichnen(); return true; }
       if (el.hasAttribute('data-ub-wer')) { wer = d.ubWer || ''; mehr = false; ueberblickZeichnen(); return true; }
@@ -497,15 +516,18 @@ function ueberblickOeffnen() {
   const dlg = $('#ueberblick-dlg');
   if (!dlg) return;
   mehr = false;
+  // Erst die Aktivität – die Personen daneben als Reiter
+  if (!dlg.open) reiter = 'aktivitaet';
   // Was beim letzten Öffnen nicht kam (kein Netz), darf es jetzt noch einmal versuchen
   versucht.clear();
   detailsFehler = '';
-  ueberblickZeichnen();
   if (!dlg.open) {
+    runde++;
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
-    // Auch mit Esc oder Zurück zu: die geholten Stände nicht im Speicher behalten
-    dlg.addEventListener('close', () => fassungen.clear(), { once: true });
+    // Auch mit Esc oder Zurück zu: die geholten Stände und Fotos nicht im Speicher behalten
+    dlg.addEventListener('close', dashboardZu, { once: true });
   }
+  ueberblickZeichnen();
   ueberblickLaden();
 }
 
@@ -531,34 +553,58 @@ function zuletztText(iso) {
 const listenName = (l) => (!l || l.id === 'haupt' ? 'eure Liste' : `${wessen(l.name)} Liste`);
 const farbeVon = (l, name) => (l?.farbe === 'lila' ? 'lila' : /^amy$/i.test(name) ? 'rosa' : 'blau');
 
-export function ueberblickZeichnen() {
-  const dlg = $('#ueberblick-dlg');
-  if (!dlg) return;
+/** Was der Verlauf hergibt: Personen, Sitzungen (die neueste zuerst), Automatik. */
+function auswerten() {
   const ls = listen();
   const nachId = Object.fromEntries(ls.map((l) => [l.id, l]));
   const verlauf = gemerkterVerlauf();
   // In der Liste eines Gasts ist jeder dort der Gast (gaeste.js) – auch auf einem Gerät, auf dem er sich anders nennt
   const z = zusammenfassen(ls.map((l) => ({ id: l.id, name: l.name, farbe: l.farbe, gast: l.id === 'haupt' ? '' : l.name, eintraege: verlauf[l.id] || [] })), { tage });
-  const keiner = !z.personen.length;
-  const personen = z.personen.map((p) => {
-    const l = nachId[p.liste];
-    const max = Math.max(1, ...p.jeTag);
-    const balken = p.jeTag.map((n, i) => {
-      const tag = z.tage[i];
-      const d = new Date(`${tag}T12:00:00`);
-      return `<span class="ub-tag" title="${esc(`${WOCHENTAG[d.getDay()]} ${tagKurz(tag)}: ${n}`)}"><i style="height:${Math.round((n / max) * 100)}%"></i>${tage === 7 ? `<small>${WOCHENTAG[d.getDay()]}</small>` : ''}</span>`;
-    }).join('');
-    const bereiche = BEREICHE.filter((b) => p.bereiche[b]).map((b) => `${b} ${p.bereiche[b]}`).join(' · ');
-    return `<article class="ub-person ub-${farbeVon(l, p.name)}">
+  const sitzungen = [];
+  for (const t of z.verlauf) for (const s of t.sitzungen) sitzungen.push({ tag: t.tag, ...s });
+  return { ls, nachId, z, sitzungen };
+}
+
+/** Die Karte einer Person: zuletzt, Änderungen je Tag, Bereiche. */
+function personKarte(p, l, tageListe) {
+  const max = Math.max(1, ...p.jeTag);
+  const balken = p.jeTag.map((n, i) => {
+    const tag = tageListe[i];
+    const d = new Date(`${tag}T12:00:00`);
+    return `<span class="ub-tag" title="${esc(`${WOCHENTAG[d.getDay()]} ${tagKurz(tag)}: ${n}`)}"><i style="height:${Math.round((n / max) * 100)}%"></i>${tage === 7 ? `<small>${WOCHENTAG[d.getDay()]}</small>` : ''}</span>`;
+  }).join('');
+  const bereiche = BEREICHE.filter((b) => p.bereiche[b]).map((b) => `${b} ${p.bereiche[b]}`).join(' · ');
+  return `<article class="ub-person ub-${farbeVon(l, p.name)}">
 <div class="ub-kopf"><span class="ub-kreis" aria-hidden="true">${esc(p.name.slice(0, 1).toUpperCase())}</span><div class="ub-wer"><b>${esc(p.name)}</b><small>${esc(listenName(l))} · zuletzt ${esc(zuletztText(p.zuletzt))}</small></div><span class="ub-zahl"><b>${p.anzahl}</b><small>${p.anzahl === 1 ? 'Änderung' : 'Änderungen'}</small></span></div>
 <div class="ub-balken${tage === 30 ? ' dicht' : ''}" role="img" aria-label="${esc(`Änderungen je Tag: ${p.jeTag.join(', ')}`)}">${balken}</div>
 ${bereiche ? `<p class="ub-bereiche">${esc(bereiche)}</p>` : ''}
 </article>`;
-  }).join('');
-  // Wer in einer Liste noch nichts gemacht hat
-  const still = ls.filter((l) => l.id !== 'haupt' && !z.personen.some((p) => p.liste === l.id)).map((l) => `<article class="ub-person ub-${farbeVon(l, l.name)} ub-still"><div class="ub-kopf"><span class="ub-kreis" aria-hidden="true">${esc(l.name.slice(0, 1).toUpperCase())}</span><div class="ub-wer"><b>${esc(l.name)}</b><small>${esc(listenName(l))} · in ${tage} Tagen nichts geändert</small></div></div></article>`).join('');
-  const sitzungen = [];
-  for (const t of z.verlauf) for (const s of t.sitzungen) sitzungen.push({ tag: t.tag, ...s });
+}
+
+/** Wer in einer Liste in der Zeit nichts gemacht hat. */
+const stillKarte = (name, l, farbe) => `<article class="ub-person ub-${farbe} ub-still"><div class="ub-kopf"><span class="ub-kreis" aria-hidden="true">${esc(name.slice(0, 1).toUpperCase())}</span><div class="ub-wer"><b>${esc(name)}</b><small>${esc(listenName(l))} · in ${tage} Tagen nichts geändert</small></div></div></article>`;
+
+/** Sitzungen nach Tagen, mit den Einzelheiten darunter. */
+function sitzungenHTML(zeigen, nachId) {
+  let tagJetzt = '';
+  return zeigen.map((s) => {
+    const kopf = s.tag !== tagJetzt ? `${tagJetzt ? '</ul>' : ''}<h4 class="ub-tag-k">${esc(tagName(s.tag))}</h4><ul class="ub-liste">` : '';
+    tagJetzt = s.tag;
+    const l = nachId[s.liste];
+    const zeit = uhr(s.von) === uhr(s.bis) ? uhr(s.von) : `${uhr(s.von)}–${uhr(s.bis)}`;
+    const was = s.was.length ? s.was.join(', ') : `${s.anzahl} ${s.anzahl === 1 ? 'Änderung' : 'Änderungen'}`;
+    return `${kopf}<li class="ub-${farbeVon(l, s.wer)}"><time>${esc(zeit)}</time><span class="ub-name">${esc(s.wer)}</span><span class="ub-was">${esc(was)}${s.was.length && s.anzahl > 1 ? ` <small>(${s.anzahl})</small>` : ''}</span>${detailsHTML(s)}</li>`;
+  }).join('') + (zeigen.length ? '</ul>' : '');
+}
+
+const zeitraumHTML = () => `<div class="e-design ub-zeitraum" role="group" aria-label="Zeitraum"><button type="button" class="e-wahl${tage === 7 ? ' an' : ''}" data-ub-tage="7" aria-pressed="${tage === 7}">7 Tage</button><button type="button" class="e-wahl${tage === 30 ? ' an' : ''}" data-ub-tage="30" aria-pressed="${tage === 30}">30 Tage</button></div>`;
+
+/** Der Reiter „Aktivität“: wer wann was gemacht hat, in allen Listen. */
+function aktivitaetHTML() {
+  const { ls, nachId, z, sitzungen } = auswerten();
+  const keiner = !z.personen.length;
+  const personen = z.personen.map((p) => personKarte(p, nachId[p.liste], z.tage)).join('');
+  const still = ls.filter((l) => l.id !== 'haupt' && !z.personen.some((p) => p.liste === l.id)).map((l) => stillKarte(l.name, l, farbeVon(l, l.name))).join('');
   // Nur eine Person: oben wählbar, sobald mehr als eine etwas gemacht hat
   const namen = [...new Map([...z.personen.map((p) => p.name), ...sitzungen.map((s) => s.wer)].map((x) => [x.toLowerCase(), x])).entries()];
   if (wer && !namen.some(([k]) => k === wer)) wer = '';
@@ -567,24 +613,14 @@ ${bereiche ? `<p class="ub-bereiche">${esc(bereiche)}</p>` : ''}
     : '';
   const gefiltert = wer ? sitzungen.filter((s) => s.wer.toLowerCase() === wer) : sitzungen;
   const zeigen = mehr ? gefiltert : gefiltert.slice(0, 25);
-  let tagJetzt = '';
-  const zeilen = zeigen.map((s) => {
-    const kopf = s.tag !== tagJetzt ? `${tagJetzt ? '</ul>' : ''}<h4 class="ub-tag-k">${esc(tagName(s.tag))}</h4><ul class="ub-liste">` : '';
-    tagJetzt = s.tag;
-    const l = nachId[s.liste];
-    const zeit = uhr(s.von) === uhr(s.bis) ? uhr(s.von) : `${uhr(s.von)}–${uhr(s.bis)}`;
-    const was = s.was.length ? s.was.join(', ') : `${s.anzahl} ${s.anzahl === 1 ? 'Änderung' : 'Änderungen'}`;
-    return `${kopf}<li class="ub-${farbeVon(l, s.wer)}"><time>${esc(zeit)}</time><span class="ub-name">${esc(s.wer)}</span><span class="ub-was">${esc(was)}${s.was.length && s.anzahl > 1 ? ` <small>(${s.anzahl})</small>` : ''}</span>${detailsHTML(s)}</li>`;
-  }).join('') + (zeigen.length ? '</ul>' : '');
+  const zeilen = sitzungenHTML(zeigen, nachId);
   const auto = Object.entries(z.automatik).map(([id, a]) => {
     const teile = Object.entries(a).map(([w, n]) => `${n}× ${AUTO_TEXT[w.toLowerCase()] || w}`);
     return teile.length ? `<p class="fine">${esc(nachId[id]?.name || id)}, automatisch: ${esc(teile.join(', '))}.</p>` : '';
   }).join('');
   const fehler = Object.entries(fehlerJe).map(([id, t]) => `<p class="zugang-fehler">${esc(nachId[id]?.name || id)}: ${esc(t)}</p>`).join('');
-  dlg.innerHTML = `<button type="button" class="tablet-zu" data-act="ub-zu" aria-label="Schließen">${X}</button>
-<h2 class="ub-titel" id="ub-titel">Überblick</h2>
-<p class="ub-lead">Wer wann was gemacht hat – aus dem, was in den Listen gespeichert wurde. Unter jedem Eintrag steht, was genau passiert ist.</p>
-<div class="e-design ub-zeitraum" role="group" aria-label="Zeitraum"><button type="button" class="e-wahl${tage === 7 ? ' an' : ''}" data-ub-tage="7" aria-pressed="${tage === 7}">7 Tage</button><button type="button" class="e-wahl${tage === 30 ? ' an' : ''}" data-ub-tage="30" aria-pressed="${tage === 30}">30 Tage</button></div>
+  const html = `<p class="ub-lead">Wer wann was gemacht hat – aus dem, was in den Listen gespeichert wurde. Unter jedem Eintrag steht, was genau passiert ist.</p>
+${zeitraumHTML()}
 ${fehler}
 ${laedt && keiner ? '<p class="loading">Holt die Änderungen …</p>' : ''}
 ${!laedt && keiner && !still ? `<p class="sk-leer">In den letzten ${tage} Tagen hat niemand etwas geändert.</p>` : ''}
@@ -592,5 +628,288 @@ ${!laedt && keiner && !still ? `<p class="sk-leer">In den letzten ${tage} Tagen 
 ${zeilen ? `<section class="ub-verlauf" aria-labelledby="ub-verlauf-t"><h3 id="ub-verlauf-t" class="sub-h">Verlauf</h3>${filter}${detailsFehler ? `<p class="zugang-fehler">${esc(detailsFehler)}</p>` : ''}${zeilen}${!mehr && gefiltert.length > zeigen.length ? `<button type="button" class="linkbtn" data-act="ub-mehr">Alle ${gefiltert.length} zeigen</button>` : ''}</section>` : ''}
 ${auto}
 <p class="fine">Gezählt wird, was gespeichert wird – nicht, wer die App nur anschaut. Die Einzelheiten kommen aus dem Vergleich der Liste vor und nach jeder Änderung, auch bei älteren Einträgen.${geholt ? ` Stand ${esc(uhr(geholt.toISOString()))}.` : ''} <button type="button" class="linkbtn" data-act="ub-neu"${laedt ? ' disabled' : ''}>${laedt ? 'Holt …' : 'Neu holen'}</button></p>`;
+  return { html, zeigen };
+}
+
+/* ----------------------------------------------- Dashboard: je Person */
+
+/**
+ * Neben „Aktivität“ ein Reiter je Person: Amy (in eurer Liste, auf einem
+ * Gerät, das nicht ihres ist – ihr Bereich, wie in der App) und jeder Gast,
+ * den dieses Gerät kennt – mit dem, was gerade in seiner Liste steht
+ * (liste.json jetzt, dashboard.js inhaltVon). Nur zum Ansehen; was jemand
+ * verträgt und was jemand der KI geschrieben hat, steht nicht darin. Stände
+ * und Fotos der Gäste bleiben nur, solange das Dashboard offen ist.
+ */
+const istAmy = (n) => /^amy\b/i.test(String(n || '').trim());
+function amyName() {
+  if (istAmy(app.name())) return '';
+  return Object.values(app.stand?.leute || {}).map(String).find(istAmy) || 'Amy';
+}
+function reiterListe() {
+  const rs = [{ id: 'aktivitaet', name: 'Aktivität' }];
+  const amy = amyName();
+  if (amy) rs.push({ id: 'amy', name: amy, farbe: 'rosa', liste: 'haupt' });
+  for (const g of ladeGaeste()) rs.push({ id: `gast:${g.daten}`, name: g.name, farbe: g.farbe === 'lila' ? 'lila' : 'blau', liste: g.daten, gast: g });
+  return rs;
+}
+
+let reiter = 'aktivitaet';
+let runde = 0; // zählt jedes Öffnen und Schließen – was danach ankommt, gehört nicht mehr hierher
+const inhalte = new Map(); // Repo des Gasts → { stand, at, laedt, fehler }
+const gastFotos = new Map(); // `${repo}|${pfad}` → Objekt-URL ('' – kam nicht)
+const fotoReihe = []; // [{ g, pfad, k }] – höchstens drei zugleich
+const fotoLaeuft = new Set();
+const ganz = new Set(); // was ganz zu sehen ist: `${reiter}|${teil}`
+const FEHLER_TEXT = { falsch: 'Der Schlüssel geht nicht mehr (abgelaufen oder gelöscht).', kaputt: 'Die Liste lässt sich gerade nicht lesen.' };
+
+/** liste.json des Gasts, wie sie jetzt ist. */
+async function inhaltHolen(g) {
+  const alt = inhalte.get(g.daten);
+  if (alt?.laedt) return;
+  const r = runde;
+  inhalte.set(g.daten, { ...alt, laedt: true, fehler: '' });
+  let neu;
+  try {
+    const roh = await fassungLesen(g.token, ortVon({ daten: g.daten }), '', { api: api() });
+    neu = { stand: bereinigen(roh), at: new Date(), laedt: false, fehler: '' };
+  } catch (e) {
+    neu = { ...alt, laedt: false, fehler: FEHLER_TEXT[e?.message] || 'Gerade keine Verbindung zu GitHub.' };
+  }
+  if (r !== runde) return; // inzwischen zu
+  inhalte.set(g.daten, neu);
+  ueberblickZeichnen();
+}
+
+function fotoPumpe() {
+  while (fotoLaeuft.size < 3 && fotoReihe.length) {
+    const { g, pfad, k } = fotoReihe.shift();
+    if (gastFotos.has(k) || fotoLaeuft.has(k)) continue;
+    fotoLaeuft.add(k);
+    const r = runde;
+    dateiHolen(pfad, { token: g.token, api: api(), ort: ortVon({ daten: g.daten }) })
+      .then((roh) => {
+        if (r !== runde) return;
+        gastFotos.set(k, roh ? URL.createObjectURL(new window.Blob([roh], { type: 'image/jpeg' })) : '');
+        gastFotosEinsetzen();
+      })
+      .finally(() => { fotoLaeuft.delete(k); fotoPumpe(); });
+  }
+}
+
+/** Die Fotos der Sachen eines Gasts: was da ist, einsetzen – das andere mit seinem Schlüssel holen. */
+function gastFotosEinsetzen() {
+  const dlg = $('#ueberblick-dlg');
+  const g = reiterListe().find((x) => x.id === reiter)?.gast;
+  if (!dlg?.open || !g) return;
+  for (const img of dlg.querySelectorAll('img[data-ub-foto]')) {
+    const pfad = img.dataset.ubFoto;
+    const k = `${g.daten}|${pfad}`;
+    if (!gastFotos.has(k)) {
+      if (FOTO_PFAD.test(pfad) && !fotoLaeuft.has(k) && !fotoReihe.some((x) => x.k === k)) fotoReihe.push({ g, pfad, k });
+      continue;
+    }
+    const u = gastFotos.get(k);
+    if (u && img.getAttribute('src') !== u) { img.src = u; img.closest('.inv-bild')?.classList.add('hat-foto'); }
+  }
+  fotoPumpe();
+}
+
+/** Zu: die Stände und Fotos der Gäste nicht im Speicher behalten. */
+function dashboardZu() {
+  runde++;
+  reiter = 'aktivitaet';
+  fassungen.clear();
+  inhalte.clear();
+  for (const u of gastFotos.values()) if (u) URL.revokeObjectURL(u);
+  gastFotos.clear();
+  fotoReihe.length = 0;
+  ganz.clear();
+}
+
+const tagPille = (t) => `<span class="amy-tag klein tf${tagFarbe(t)}">${esc(t)}</span>`;
+const zahl = (n, eins, viele) => `${n} ${n === 1 ? eins : viele}`;
+const kachel = (n, text) => `<div class="ub-kachel"><b>${n}</b><small>${esc(text)}</small></div>`;
+let teilNr = 0;
+const teil = (titel, neben, inhalt) => { const id = `ub-teil-${++teilNr}`; return `<section class="ub-teil" aria-labelledby="${id}"><h3 class="sub-h" id="${id}">${esc(titel)}${neben ? ` <small>${esc(neben)}</small>` : ''}</h3>${inhalt}</section>`; };
+const mehrKnopf = (schl, rest) => (rest > 0 ? `<button type="button" class="linkbtn ub-ganz" data-ub-ganz="${esc(schl)}">+ ${rest} weitere</button>` : '');
+
+/** Die ersten n – oder alle, wenn schon aufgeklappt. */
+function ersteVon(r, k, xs, n) {
+  const schl = `${r.id}|${k}`;
+  const zeigen = ganz.has(schl) ? xs : xs.slice(0, n);
+  return { zeigen, mehr: mehrKnopf(schl, xs.length - zeigen.length) };
+}
+
+function planTag(tag) {
+  const d = new Date(`${tag}T12:00:00`);
+  const heute = new Date();
+  heute.setHours(12, 0, 0, 0);
+  const diff = Math.round((d - heute) / 86400000);
+  if (diff === 0) return 'Heute';
+  if (diff === 1) return 'Morgen';
+  return `${WOCHENTAG[d.getDay()]} ${tagKurz(tag)}`;
+}
+
+function sacheHTML(r, d, l) {
+  let foto = '';
+  let da = false;
+  if (d.foto && r.gast) {
+    const u = gastFotos.get(`${r.gast.daten}|${d.foto}`) || '';
+    da = !!u;
+    foto = `<img class="inv-foto-img" data-ub-foto="${esc(d.foto)}"${u ? ` src="${esc(u)}"` : ''} alt="">`;
+  } else if (d.foto) foto = `<img class="inv-foto-img" data-inv-foto="${esc(d.foto)}" alt="">`;
+  const tags = d.tags.length ? `<span class="inv-ding-tags">${d.tags.slice(0, 3).map(tagPille).join('')}</span>` : '';
+  return `<li class="ub-sache"><span class="inv-bild${da ? ' hat-foto' : ''}"><img class="inv-ersatz" src="${esc(bildPfad(l.bild || 'package'))}" alt="" aria-hidden="true">${foto}</span><span class="ub-sache-t"><b>${esc(d.name)}</b>${d.marke ? `<small>${esc(d.marke)}</small>` : ''}${tags}${d.notiz ? `<span class="ub-sache-n">${esc(kurz(d.notiz, 140))}</span>` : ''}</span></li>`;
+}
+
+function sachenHTML(r, sachen) {
+  if (!sachen.anzahl) return teil('Sachen', '', '<p class="fine">Noch keine Sachen.</p>');
+  const inhalt = sachen.listen.filter((l) => l.dinge.length).map((l) => {
+    const { zeigen, mehr: weiter } = ersteVon(r, `sachen:${l.id}`, l.dinge, 12);
+    return `<h4 class="ub-sl-k"><img src="${esc(bildPfad(l.bild || 'package'))}" alt="" aria-hidden="true" width="22" height="22">${esc(l.name)} <small>${l.dinge.length}</small></h4><ul class="ub-sachen">${zeigen.map((d) => sacheHTML(r, d, l)).join('')}</ul>${weiter}`;
+  }).join('');
+  return teil('Sachen', String(sachen.anzahl), inhalt);
+}
+
+function einkaufHTML(r, e) {
+  const abgehakt = e.erledigt ? `<p class="fine">${zahl(e.erledigt, 'Sache', 'Sachen')} abgehakt.</p>` : '';
+  if (!e.offen.length) return teil('Einkaufsliste', '', `<p class="fine">Nichts offen.</p>${abgehakt}`);
+  const { zeigen, mehr: weiter } = ersteVon(r, 'einkauf', e.offen, 30);
+  return teil('Einkaufsliste', `${e.offen.length} offen`, `<ul class="ub-chips">${zeigen.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>${weiter}${abgehakt}`);
+}
+
+function planHTML(plan) {
+  if (!plan.length) return teil('Essensplan', 'nächste 7 Tage', '<p class="fine">Für die nächsten sieben Tage ist nichts geplant.</p>');
+  const zeilen = plan.map((t) => {
+    const was = [t.mittag.length ? `Mittag: ${t.mittag.join(', ')}` : '', t.abend.length ? `Abend: ${t.abend.join(', ')}` : ''].filter(Boolean).join(' · ');
+    return `<li><b>${esc(planTag(t.tag))}</b><span>${esc(was)}</span></li>`;
+  }).join('');
+  return teil('Essensplan', 'nächste 7 Tage', `<ul class="ub-namen ub-plan">${zeilen}</ul>`);
+}
+
+function rezepteHTML(r, rezepte) {
+  if (!rezepte.length) return teil('Rezepte', '', '<p class="fine">Noch keine eigenen Rezepte.</p>');
+  const { zeigen, mehr: weiter } = ersteVon(r, 'rezepte', rezepte, 20);
+  return teil('Rezepte', String(rezepte.length), `<ul class="ub-namen">${zeigen.map((x) => `<li><b>${esc(x.name)}</b>${x.tags.slice(0, 4).map(tagPille).join('')}</li>`).join('')}</ul>${weiter}`);
+}
+
+function notizenHTML(r, notizen) {
+  if (!notizen.length) return teil('Notizen', '', '<p class="fine">Noch keine Notizen.</p>');
+  const { zeigen, mehr: weiter } = ersteVon(r, 'notizen', notizen, 20);
+  const wann = (iso) => (Number.isNaN(Date.parse(iso)) ? '' : `<small>${esc(zuletztText(iso))}</small>`);
+  return teil('Notizen', String(notizen.length), `<ul class="ub-namen">${zeigen.map((x) => `<li><b>${esc(x.titel)}</b>${x.tags.slice(0, 4).map(tagPille).join('')}${wann(x.geaendert)}</li>`).join('')}</ul>${weiter}<p class="fine">Nur die Titel – was in den Notizen steht, zeigt das Dashboard nicht.</p>`);
+}
+
+function wuenscheHTML(r, w) {
+  const text = w.offen || w.erledigt ? `${zahl(w.offen, 'Vorschlag', 'Vorschläge')} offen, ${w.erledigt} erledigt – was drinsteht, steht in ${wessen(r.name)} Bereich unter „Vorschläge“.` : 'Noch keine Vorschläge.';
+  return teil('Vorschläge', '', `<p class="fine">${esc(text)}</p>`);
+}
+
+const TEILE = {
+  sachen: [(c) => kachel(c.sachen.anzahl, c.sachen.anzahl === 1 ? 'Sache' : 'Sachen'), (r, c) => sachenHTML(r, c.sachen)],
+  einkauf: [(c) => kachel(c.einkauf.offen.length, 'auf der Einkaufsliste'), (r, c) => einkaufHTML(r, c.einkauf)],
+  plan: [(c) => kachel(c.plan.length, c.plan.length === 1 ? 'Tag geplant' : 'Tage geplant'), (r, c) => planHTML(c.plan)],
+  rezepte: [(c) => kachel(c.rezepte.length, c.rezepte.length === 1 ? 'Rezept' : 'Rezepte'), (r, c) => rezepteHTML(r, c.rezepte)],
+  notizen: [(c) => kachel(c.notizen.length, c.notizen.length === 1 ? 'Notiz' : 'Notizen'), (r, c) => notizenHTML(r, c.notizen)],
+  wuensche: [(c) => kachel(c.wuensche.offen, c.wuensche.offen === 1 ? 'Vorschlag offen' : 'Vorschläge offen'), (r, c) => wuenscheHTML(r, c.wuensche)],
+};
+const teileHTML = (r, c, teile) => `<div class="ub-kacheln">${teile.map((t) => TEILE[t][0](c)).join('')}</div>${teile.map((t) => TEILE[t][1](r, c)).join('')}`;
+
+/** Der Reiter einer Person: Karte, was in der Liste steht, die letzten Sitzungen. */
+function personHTML(r) {
+  const { nachId, z, sitzungen } = auswerten();
+  const l = nachId[r.liste];
+  const p = z.personen.find((x) => x.liste === r.liste && (r.gast || istAmy(x.name)));
+  const karte = p ? personKarte(p, l, z.tage) : stillKarte(r.name, l, r.farbe);
+  let inhalt;
+  let fuss;
+  if (r.gast) {
+    const x = inhalte.get(r.gast.daten);
+    if (!x?.stand) inhalt = x?.fehler ? `<p class="zugang-fehler">${esc(x.fehler)}</p>` : '<p class="loading">Holt, was in der Liste steht …</p>';
+    else inhalt = `${x.fehler ? `<p class="zugang-fehler">${esc(x.fehler)}</p>` : ''}${teileHTML(r, inhaltVon(x.stand, { hilfe: hilfe() }), ['sachen', 'einkauf', 'plan', 'rezepte', 'notizen'])}`;
+    fuss = `<p class="fine">So steht es gerade in ${esc(wessen(r.name))} Liste – nur zum Ansehen. Nicht dabei: was jemand verträgt und was jemand der KI geschrieben hat.${x?.at ? ` Stand ${esc(uhr(x.at.toISOString()))}.` : ''} <button type="button" class="linkbtn" data-act="ub-neu"${x?.laedt || laedt ? ' disabled' : ''}>${x?.laedt || laedt ? 'Holt …' : 'Neu holen'}</button></p>`;
+  } else {
+    inhalt = teileHTML(r, inhaltVon(app.stand, { hilfe: hilfe() }), ['sachen', 'notizen', 'rezepte', 'wuensche']);
+    fuss = `<p class="fine">${esc(wessen(r.name))} Bereich in eurer Liste – dasselbe wie in der App. Nicht dabei: was jemand verträgt und was jemand der KI geschrieben hat.</p>`;
+  }
+  // Die letzten Sitzungen – der ganze Verlauf unter „Aktivität“
+  const ihre = sitzungen.filter((s) => s.liste === r.liste && (r.gast ? s.wer.toLowerCase() === r.name.toLowerCase() : istAmy(s.wer)));
+  const zeigen = ihre.slice(0, 5);
+  const zuletzt = zeigen.length
+    ? teil('Zuletzt', `${tage} Tage`, `${sitzungenHTML(zeigen, nachId)}${ihre.length > zeigen.length ? `<button type="button" class="linkbtn" data-ub-verlauf="${esc(ihre[0].wer.toLowerCase())}">Ganzer Verlauf (${ihre.length})</button>` : ''}`)
+    : '';
+  return { html: `${karte}${inhalt}${zuletzt}${fuss}`, zeigen };
+}
+
+export function ueberblickZeichnen() {
+  const dlg = $('#ueberblick-dlg');
+  // Zu: nichts zeichnen und nichts mehr holen (kommt etwas noch an, gehört es nicht mehr hierher)
+  if (!dlg?.open) return;
+  const rs = reiterListe();
+  const r = rs.find((x) => x.id === reiter) || rs[0];
+  reiter = r.id;
+  teilNr = 0;
+  const knopf = (x) => `<button type="button" role="tab" class="ub-r ub-${x.farbe || 'blau'}${x.liste ? '' : ' ohne-kreis'}" id="ub-r-${esc(x.id.replace(/[^a-z0-9]/gi, '-'))}" data-ub-reiter="${esc(x.id)}" aria-selected="${x.id === reiter}">${x.liste ? `<span class="ub-kreis" aria-hidden="true">${esc(x.name.slice(0, 1).toUpperCase())}</span>` : ''}<span class="ub-r-name">${esc(x.name)}</span></button>`;
+  const nav = rs.length > 1 ? `<div class="ub-reiter" role="tablist" aria-label="Dashboard">${rs.map(knopf).join('')}</div>` : '';
+  const { html, zeigen } = r.id === 'aktivitaet' ? aktivitaetHTML() : personHTML(r);
+  dlg.innerHTML = `<button type="button" class="tablet-zu" data-act="ub-zu" aria-label="Schließen">${X}</button>
+<h2 class="ub-titel" id="ub-titel">Dashboard</h2>
+${nav}
+<div class="ub-panel${r.liste ? ` ub-p ub-${r.farbe}` : ''}" role="${nav ? 'tabpanel' : 'region'}" aria-labelledby="${nav ? `ub-r-${esc(r.id.replace(/[^a-z0-9]/gi, '-'))}` : 'ub-titel'}">${html}</div>`;
   detailsAnstossen(zeigen);
+  if (r.gast) {
+    if (!inhalte.has(r.gast.daten)) inhaltHolen(r.gast);
+    gastFotosEinsetzen();
+  } else if (r.id === 'amy') sachenFotosEinsetzen(dlg);
+}
+
+/** Nach einem neuen Stand eurer Liste (app.js): Amys Reiter zeigt ihn gleich – nur, wenn er offen ist. */
+export function dashboardMitziehen() {
+  if (reiter === 'amy' && $('#ueberblick-dlg')?.open) ueberblickZeichnen();
+}
+
+/* ------------------------------------ Hinweis: Tobi sieht ein Dashboard */
+
+/**
+ * Wem das Dashboard etwas zeigt, der erfährt es einmal je Gerät: ein Gast in
+ * seiner eigenen Liste (Tobi sieht, was drinsteht und wann er was ändert)
+ * und Amy in eurer (ihr Bereich zusammengefasst – das sieht Tobi in der App
+ * ohnehin). Ein neuer Gast liest es schon im Willkommen (ansicht-willkommen.js).
+ */
+export const DASH_HINWEIS = 'boxenstopp.dashboard.hinweis.v1';
+const AUGE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+let hinweisGeprueft = false;
+const gezeigt = () => (istEigen() ? 'gast' : istAmy(app.name()) ? 'amy' : '');
+
+function dashHinweisHTML(wem) {
+  const text = wem === 'gast'
+    ? '<p class="tablet-lead">Tobi hat jetzt ein Dashboard. Darin sieht er, was in deiner Liste steht – deine Sachen mit Fotos, die Einkaufsliste, den Essensplan, deine Rezepte und die Titel deiner Notizen – und wann du was änderst. Nur zum Ansehen.</p><p class="tablet-fein">Was du der KI schreibst und was du verträgst, zeigt es ihm nicht.</p>'
+    : '<p class="tablet-lead">Tobi hat jetzt ein Dashboard: wann ihr was in eurer Liste ändert, und dein Bereich auf einen Blick – Sachen, Notizen, Rezepte, Vorschläge. Das sieht er in der App ohnehin.</p><p class="tablet-fein">Was du der KI schreibst und was du verträgst, steht dort nicht. Die Aktivität siehst du auch selbst: Einstellungen → Gäste &amp; Überblick → Dashboard.</p>';
+  return `<button type="button" class="tablet-zu" data-act="dash-hinweis-zu" aria-label="Schließen">${X}</button>
+<p class="push-dlg-ic" aria-hidden="true">${AUGE}</p>
+<h2 class="push-dlg-titel" id="dash-hinweis-titel">Gut zu wissen</h2>
+${text}
+<div class="tablet-knoepfe"><button type="button" class="btn btn-primary" data-act="dash-hinweis-zu">Alles klar</button></div>`;
+}
+
+function dashHinweisZeigen(n = 0) {
+  const dlg = $('#dash-hinweis-dlg');
+  const wem = gezeigt();
+  if (!dlg || dlg.open || !wem || lese(DASH_HINWEIS, false)) return;
+  // Erst, wenn kein anderes Fenster offen ist (Willkommen, Push, Kochmodus) – sonst etwas später noch einmal
+  if (document.querySelector('dialog[open]')) { if (n < 30) setTimeout(() => dashHinweisZeigen(n + 1), 4000); return; }
+  dlg.classList.toggle('amy-thema', wem === 'amy');
+  dlg.innerHTML = dashHinweisHTML(wem);
+  schreibe(DASH_HINWEIS, true);
+  if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  dlg.querySelector('.btn-primary')?.focus();
+}
+
+/** Einmal je App-Start (app.js, sobald die Liste abgeglichen ist). */
+export function dashboardHinweisPruefen() {
+  if (hinweisGeprueft || !app.zugang || !app.listeDa) return;
+  hinweisGeprueft = true;
+  if (!gezeigt() || lese(DASH_HINWEIS, false)) return;
+  setTimeout(dashHinweisZeigen, Number(lese('__hinweis', 5000)) || 5000);
 }

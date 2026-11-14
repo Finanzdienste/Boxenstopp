@@ -7,8 +7,9 @@
  *                      um – ansicht-ziel.js in #e-ziel
  *   Boxen pro Rezept   für wie viele Boxen gekocht wird (1–8) – ansicht-boxen.js
  *                      in #e-boxen
- *   Gäste & Überblick  jemanden mit eigener Liste einladen, wer wann was
- *                      macht – ansicht-gaeste.js (nur bei Tobi und Amy)
+ *   Gäste & Überblick  jemanden mit eigener Liste einladen, das Dashboard
+ *                      (wer wann was macht, was bei Amy und den Gästen
+ *                      drinsteht) – ansicht-gaeste.js (nur bei Tobi und Amy)
  *   Push-Nachrichten   ansicht-push.js in #push-bereich (nicht in einer
  *                      eigenen Liste: Push und To Do laufen über die Abläufe
  *                      in Boxenstopp-Daten)

@@ -6,7 +6,8 @@
  * 2 abgehakt“), ältere gar nicht („1 Änderung“). Hier steht es aus den beiden
  * Ständen von liste.json vor und nach dem Commit: welche Sachen auf die Liste
  * kamen und mit welcher Menge, was abgehakt wurde, welcher Schritt beim
- * Kochen dran war, welche Aufgabe im Putzplan, welches Ziel. Das geht auch
+ * Kochen dran war, welche Aufgabe im Putzplan, welches Ziel, welche Sachen
+ * (Kleidung, Make-up … in eigenen Listen) dazukamen oder sich änderten. Das geht auch
  * für alte Commits und für Commits von einer älteren App-Fassung – es braucht
  * nur die beiden Stände (speicher.js fassungLesen).
  *
@@ -34,7 +35,7 @@ import { ABTEILUNG_NAME } from './weg.js';
 import { BEREICHE } from './gaeste.js';
 
 /** Hochzählen, wenn sich ändert, was hier herauskommt – dann rechnet der Überblick neu (ansicht-gaeste.js). */
-export const EINZELHEITEN_FASSUNG = 1;
+export const EINZELHEITEN_FASSUNG = 2;
 
 const DAUMEN_TEXT = { hoch: 'Daumen hoch', mittel: 'geht so', runter: 'Daumen runter' };
 const TODO_ART = { verbinden: 'verbinden', trennen: 'trennen', abgleichen: 'abgleichen' };
@@ -315,6 +316,37 @@ export function einzelheiten(vorher, nachher, hilfe = {}) {
   for (const [k, w] of Object.entries(hn.todoWunsch || {})) if (!gleich(w, hv.todoWunsch?.[k])) dazu('Haushalt', 'Microsoft To Do', `${w.name || k}: ${TODO_ART[w.art] || w.art}`);
   for (const [k, z] of Object.entries(hn.todoZiel || {})) if (!gleich(z, hv.todoZiel?.[k])) dazu('Haushalt', 'Microsoft To Do', `Liste ${zitat(z.name)}${z.geteilt ? ' (geteilt)' : ''}`);
   if (hn.todoApp && hn.todoApp !== hv.todoApp) dazu('Haushalt', 'Microsoft To Do', 'App-ID eingetragen');
+
+  /* ----------------------------------------------------------- Sachen */
+  // Sachen in eigenen Listen (inventar.js): was dazukam, was sich änderte (welche Felder), was wegkam
+  const iv = istObj(v.inventar) ? v.inventar : {};
+  const inn = istObj(n.inventar) ? n.inventar : {};
+  const lv = istObj(iv.listen) ? iv.listen : {};
+  const ln = istObj(inn.listen) ? inn.listen : {};
+  const dv = istObj(iv.dinge) ? iv.dinge : {};
+  const dn = istObj(inn.dinge) ? inn.dinge : {};
+  const listenName = (id) => kurz(ln[id]?.name || lv[id]?.name || 'Ohne Liste', 40);
+  const sache = (d) => kurz(String(d?.name || '').trim() || String(d?.marke || '').trim() || 'Ohne Namen', 60);
+  const mitMarke = (d) => (String(d?.name || '').trim() && String(d?.marke || '').trim() ? `${sache(d)} (${kurz(d.marke, 30)})` : sache(d));
+  for (const [id, l] of Object.entries(ln)) {
+    if (!istObj(l)) continue;
+    if (!lv[id]) dazu('Sachen', 'Liste angelegt', kurz(l.name, 40));
+    else if ((lv[id].name || '') !== (l.name || '')) dazu('Sachen', 'Liste umbenannt', `${kurz(lv[id].name, 40)} → ${kurz(l.name, 40)}`);
+  }
+  for (const [id, l] of Object.entries(lv)) if (istObj(l) && !ln[id]) dazu('Sachen', 'Liste gelöscht', kurz(l.name, 40));
+  const FELDER = [['name', 'Name'], ['marke', 'Marke'], ['notiz', 'Notiz'], ['tags', 'Tags'], ['foto', 'Foto'], ['code', 'Strichcode']];
+  let umsortiert = false;
+  for (const [id, d] of Object.entries(dn)) {
+    if (!istObj(d)) continue;
+    const alt = dv[id];
+    if (!istObj(alt)) { dazu('Sachen', 'Dazu', `${mitMarke(d)} – ${listenName(d.liste)}`); continue; }
+    const felder = FELDER.filter(([k]) => !gleich(alt[k], d[k])).map(([, t]) => t);
+    if ((alt.liste || '') !== (d.liste || '')) felder.push(`nach ${listenName(d.liste)}`);
+    if (felder.length) dazu('Sachen', 'Geändert', `${mitMarke(d)}: ${felder.join(', ')}`);
+    else if (alt.reihe !== d.reihe) umsortiert = true;
+  }
+  for (const [id, d] of Object.entries(dv)) if (istObj(d) && !dn[id]) dazu('Sachen', 'Gelöscht', mitMarke(d));
+  if (umsortiert) dazu('Sachen', 'Reihenfolge geändert');
 
   /* ------------------------------------------------------------- Ziel */
   const zv = v.profil?.ziel;

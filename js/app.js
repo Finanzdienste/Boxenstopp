@@ -41,7 +41,7 @@ import { todoHolen, klickTodo, absendenTodo } from './ansicht-todo.js';
 import { zielAnwenden, klickZiel, absendenZiel, eingabeZiel, aenderungZiel } from './ansicht-ziel.js';
 import { profilAnwenden, farbeSetzen, istEigen } from './profil.js';
 import { klickSpeisekarte, absendenSpeisekarte, eingabeSpeisekarte, aenderungSpeisekarte, speisekarteNeu } from './ansicht-speisekarte.js';
-import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste, gaesteAusAdresse } from './ansicht-gaeste.js';
+import { klickGaeste, absendenGaeste, eingabeGaeste, aenderungGaeste, gaesteAusAdresse, dashboardHinweisPruefen, dashboardMitziehen } from './ansicht-gaeste.js';
 import { klickWillkommen, absendenWillkommen, aenderungWillkommen, eingabeWillkommen, willkommenPruefen } from './ansicht-willkommen.js';
 import { boxenZeichnen, klickBoxen } from './ansicht-boxen.js';
 import { klickReste } from './ansicht-reste.js';
@@ -153,12 +153,15 @@ function beiAenderung(stand) {
   if (ansicht.tab === 'einstellungen') einstellungenZeichnen();
   // Ein Gast mit eigener Liste: einmal das Willkommen
   willkommenPruefen();
+  // Steht im Dashboard gerade Amys Reiter offen, zieht er mit (ansicht-gaeste.js)
+  dashboardMitziehen();
 }
 function beiStatus(s) {
   app.status = s;
   sicher('Status', statusZeichnen);
-  // Abgeglichen: Ist Push eingerichtet, aber hier noch aus, fragt die App einmal (ansicht-push.js)
-  if (s.zustand === 'ok') setTimeout(pushHinweisPruefen, 2500);
+  // Abgeglichen: Ist Push eingerichtet, aber hier noch aus, fragt die App einmal (ansicht-push.js);
+  // wem Tobis Dashboard etwas zeigt, der erfährt es einmal (ansicht-gaeste.js)
+  if (s.zustand === 'ok') { setTimeout(pushHinweisPruefen, 2500); setTimeout(dashboardHinweisPruefen, 2500); }
 }
 
 function nimmSpeicher(neu) {

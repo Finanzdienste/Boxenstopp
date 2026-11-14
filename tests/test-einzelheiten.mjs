@@ -3,7 +3,7 @@
  * Node. Aus zwei Ständen von liste.json – vor und nach einem Commit – kommt
  * heraus, was genau passiert ist: welche Sachen auf die Liste kamen und mit
  * welcher Menge, was abgehakt wurde, welcher Schritt beim Kochen, welche
- * Aufgabe im Putzplan, welches Ziel. Gebaut wird jeder Stand mit denselben
+ * Aufgabe im Putzplan, welches Ziel, welche Sachen. Gebaut wird jeder Stand mit denselben
  * Änderungen, die die App macht (liste.js), und dann bereinigt – so, wie der
  * Überblick ihn aus GitHub holt.
  */
@@ -13,6 +13,7 @@ import {
   opAmy, opAmyWeg, opAmyTags, opKochen, opPlan, opPutzHaken, opSache, opProfil, opPerson, opZusammen, opEinePerson, opAbteilung, opFehlt, opBon, opPreisalarm,
 } from '../js/liste.js';
 import { einzelheiten, zusammenlegen } from '../js/einzelheiten.js';
+import { opInvListe, opInvListeWeg, opDing, opDingWeg } from '../js/inventar.js';
 
 const { check, ende } = pruefer();
 const KAT = { rinderhack: { n: 'Rinderhackfleisch', c: 'fleisch' }, zwiebeln: { n: 'Zwiebeln', c: 'obst' }, reis: { n: 'Basmatireis', c: 'trocken' }, sahne: { n: 'Schlagsahne', c: 'kuehl' } };
@@ -136,11 +137,36 @@ const mitMarielli = nach(bereinigen(zwei), [opTeil('reis', 'x-marielli', { q: 25
 e = einzelheiten(mitMarielli, nach(mitMarielli, [opEinePerson('Marielle')]), hilfe);
 check(zeile(e, 'Umbenannt')?.x.join() === 'Marielli → Marielle' && !zeile(e, 'Mehr davon'), `Zusammengeführt: „Marielli → Marielle“, kein Rauschen (${text(e)})`);
 
+/* ----------------------------------------------------------- Sachen */
+
+const KLEID = { id: 'sl-kleid01', name: 'Kleidung', bild: 'womans-clothes', reihe: 1 };
+const SCHUH = { id: 'sl-schuh01', name: 'Schuhe', bild: 'high-heeled-shoe', reihe: 2 };
+const ROCK = { id: 'sd-rock0001', liste: KLEID.id, name: 'Rock', marke: 'Zara', notiz: '', tags: ['Sommer'], reihe: 1 };
+const i1 = nach(s0, [opInvListe(KLEID, 'Marielle'), opDing(ROCK, 'Marielle')]);
+e = einzelheiten(s0, i1, hilfe);
+check(zeile(e, 'Liste angelegt')?.x.join() === 'Kleidung' && zeile(e, 'Dazu')?.x.join() === 'Rock (Zara) – Kleidung' && e.every((x) => x.b === 'Sachen'), `Sachen: Liste angelegt, „Rock (Zara) – Kleidung“ dazu (${text(e)})`);
+const i2 = nach(i1, [opDing({ ...ROCK, notiz: 'Größe 38, zurückgelegt', tags: ['Sommer', 'Lieblingsstück'] }, 'Marielle')]);
+e = einzelheiten(i1, i2, hilfe);
+check(zeile(e, 'Geändert')?.x.join() === 'Rock (Zara): Notiz, Tags' && !text(e).includes('Größe 38'), `Sache geändert: welche Felder – nicht, was in der Notiz steht (${text(e)})`);
+const i3 = nach(i2, [opInvListe(SCHUH, 'Marielle'), opDing({ ...ROCK, liste: SCHUH.id, notiz: 'Größe 38, zurückgelegt', tags: ['Sommer', 'Lieblingsstück'] }, 'Marielle')]);
+e = einzelheiten(i2, i3, hilfe);
+check(zeile(e, 'Liste angelegt')?.x.join() === 'Schuhe' && zeile(e, 'Geändert')?.x.join() === 'Rock (Zara): nach Schuhe', `Sache in eine andere Liste: „nach Schuhe“ (${text(e)})`);
+const i4 = nach(i3, [opInvListe({ ...KLEID, name: 'Klamotten' }, 'Marielle'), opDingWeg(ROCK.id)]);
+e = einzelheiten(i3, i4, hilfe);
+check(zeile(e, 'Liste umbenannt')?.x.join() === 'Kleidung → Klamotten' && zeile(e, 'Gelöscht')?.x.join() === 'Rock (Zara)', `Liste umbenannt, Sache gelöscht (${text(e)})`);
+e = einzelheiten(i4, nach(i4, [opInvListeWeg(SCHUH.id)]), hilfe);
+check(zeile(e, 'Liste gelöscht')?.x.join() === 'Schuhe' && e.length === 1, `Liste gelöscht (${text(e)})`);
+const i5 = nach(i4, [opDing({ id: 'sd-hose0001', liste: KLEID.id, name: 'Hose', reihe: 1 }, 'Marielle'), opDing({ id: 'sd-mantel01', liste: KLEID.id, name: '', marke: 'Mango', reihe: 2 }, 'Marielle')]);
+e = einzelheiten(i4, i5, hilfe);
+check(zeile(e, 'Dazu')?.x.join() === 'Hose – Klamotten,Mango – Klamotten', `Ohne Namen heißt die Sache nach der Marke (${text(e)})`);
+e = einzelheiten(i5, nach(i5, [opDing({ id: 'sd-hose0001', liste: KLEID.id, name: 'Hose', reihe: 3 }, 'Marielle')]), hilfe);
+check(text(e) === 'Sachen|Reihenfolge geändert', `Nur umsortiert: „Reihenfolge geändert“ (${text(e)})`);
+
 // Nichts geändert (nur rev): nichts
 check(einzelheiten(s5, nach(s5, []), hilfe).length === 0, 'Nur neu geschrieben: keine Einzelheiten');
 // Bereiche in der Reihenfolge des Überblicks
-e = einzelheiten(s0, nach(s0, [opProfil({ ziel: { kcal: 400, p: 30, kh: 40, f: 14 } }, 'Tobi'), opGekocht('chili', '2026-11-06', 'Tobi'), opEigener('c-x', 'Milch', 'kuehl')]), hilfe);
-check(e.map((x) => x.b).join() === 'Einkauf,Kochen,Ziel', `Reihenfolge: Einkauf, Kochen, Ziel (${e.map((x) => x.b).join()})`);
+e = einzelheiten(s0, nach(s0, [opProfil({ ziel: { kcal: 400, p: 30, kh: 40, f: 14 } }, 'Tobi'), opGekocht('chili', '2026-11-06', 'Tobi'), opEigener('c-x', 'Milch', 'kuehl'), opDing(ROCK, 'Tobi')]), hilfe);
+check(e.map((x) => x.b).join() === 'Einkauf,Kochen,Sachen,Ziel', `Reihenfolge: Einkauf, Kochen, Sachen, Ziel (${e.map((x) => x.b).join()})`);
 
 /* ----------------------------------------------- Sitzung: zusammen */
 

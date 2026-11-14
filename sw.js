@@ -39,7 +39,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v76';
+const VERSION = 'v77';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -123,6 +123,7 @@ const SHELL = [
   './js/gaeste.js',
   './js/ansicht-gaeste.js',
   './js/einzelheiten.js',
+  './js/dashboard.js',
   './js/ansicht-willkommen.js',
   './schrift/bricolage-grotesque.woff2',
   './schrift/figtree.woff2',

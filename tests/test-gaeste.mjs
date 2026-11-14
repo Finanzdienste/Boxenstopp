@@ -3,12 +3,22 @@
  * (js/gaeste.js, direkt in Node) und im Browser die ganze Geschichte –
  * Tobi lädt Marielle ein (falscher Schlüssel, Schlüssel für zu viel, dann
  * richtig), Marielle öffnet den Link (gleich verbunden, lila, Willkommen,
- * ihre Makros), ihre Liste bleibt ihre, Tobi sieht im Überblick, wer was
- * gemacht hat. Und: Marielles zweites Gerät über das Schlüsselfeld.
+ * ihre Makros), ihre Liste bleibt ihre, Tobi sieht im Dashboard, wer was
+ * gemacht hat und was in ihrer Liste steht (Sachen mit Foto, Einkaufsliste,
+ * Essensplan, Rezepte, Notiztitel) – und Amys Bereich. Wem das Dashboard
+ * etwas zeigt, erfährt es einmal. Und: Marielles zweites Gerät über das
+ * Schlüsselfeld.
  */
-import { pruefer, handy, githubAttrappe, githubMehrere, starteBrowser, bis, SCHLUESSEL, APP_URL } from './hilfe.mjs';
-import { nachrichtLesen, bereichVon, zusammenfassen, verlaufMischen, repoVorschlag, gaesteBereinigen, gaesteFuerLink, gaesteAusLink } from '../js/gaeste.js';
-import { leer, anwenden, opPerson, opZusammen, opEinePerson, opTeil, beschreibung } from '../js/liste.js';
+import { readFileSync } from 'node:fs';
+import { pruefer, handy, githubAttrappe, githubMehrere, starteBrowser, bis, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
+import { nachrichtLesen, bereichVon, zusammenfassen, verlaufMischen, repoVorschlag, gaesteBereinigen, gaesteFuerLink, gaesteAusLink, BEREICHE } from '../js/gaeste.js';
+import { leer, anwenden, bereinigen, opPerson, opZusammen, opEinePerson, opTeil, opEigener, opHaken, opAmy, opAmyTags, beschreibung } from '../js/liste.js';
+import { inhaltVon } from '../js/dashboard.js';
+import { opInvListe, opDing } from '../js/inventar.js';
+import { opBlatt } from '../js/notizbuch.js';
+import { opEssensplan } from '../js/essensplan.js';
+import { opWunsch, opWunschErledigt } from '../js/wuensche.js';
+import { opVertraeglich } from '../js/vertraeglich.js';
 
 const { check, ende } = pruefer();
 const M_KEY = 'github_pat_11MARIELLE000000000000_abcdefghijklmnopqrstuvwxyz';
@@ -22,6 +32,7 @@ check(nachrichtLesen('Tobi: Einkaufsliste, 1 Änderung').was.length === 0 && nac
 check(nachrichtLesen('Push: gesendet').auto && nachrichtLesen('Haushalt: erinnert und abgeglichen').auto && nachrichtLesen('Angebote (privat): Rewe 73').auto, 'Die Abläufe im Daten-Repo zählen als automatisch');
 check(nachrichtLesen('liste.json geändert').wer === '' && nachrichtLesen('Tobi: Einladung für Marielle').was[0] === 'Einladung für Marielle', 'Von Hand ohne Namen: niemand; die Einladung');
 check(bereichVon('Chili auf die Liste') === 'Einkauf' && bereichVon('Chili gekocht') === 'Kochen' && bereichVon('Rezept „Kokos-Curry“') === 'Rezepte' && bereichVon('Putzplan abgehakt') === 'Haushalt' && bereichVon('Ziel pro Box geändert') === 'Ziel', 'Bereiche');
+check(bereichVon('Sachen') === 'Sachen' && bereichVon('Sachen; 2 abgehakt') === 'Sachen' && BEREICHE.join() === 'Einkauf,Kochen,Rezepte,Sachen,Haushalt,Ziel,Sonstiges', 'Bereich „Sachen“ – nach Rezepte');
 check(repoVorschlag('Marielle') === 'Boxenstopp-Marielle' && repoVorschlag('Jörg Müller') === 'Boxenstopp-Joerg-Mueller' && repoVorschlag('') === '', 'Repo-Vorschlag aus dem Namen');
 check(gaesteBereinigen([{ name: 'Marielle', daten: 'Finanzdienste/Boxenstopp-Marielle', token: M_KEY, farbe: 'lila' }, { name: 'X', daten: 'kaputt', token: M_KEY }, { name: 'Doppelt', daten: 'Finanzdienste/Boxenstopp-Marielle', token: M_KEY }]).length === 1, 'Gäste bereinigen: kaputte und doppelte fallen weg');
 // Aufs neue Handy: die Gäste in den Link und zurück
@@ -101,6 +112,44 @@ check(zfNeu.kochen.marielle?.schritte?.chili?.length === 2 && !zfNeu.kochen.mari
 check(beschreibung(zf, zfNeu) === 'Marielli heißt jetzt Marielle', 'Commit: „Marielli heißt jetzt Marielle“ – nicht „Ziel pro Box geändert“');
 check(JSON.stringify(anwenden(eure, opEinePerson('Tobi')).leute) === JSON.stringify(eure.leute) && JSON.stringify(anwenden(zf, opEinePerson('Marielli')).leute) === JSON.stringify(zf.leute), 'Nur in einer eigenen Liste und nur auf den Namen aus dem Profil');
 
+/* ------------------------------------------ Dashboard: was drinsteht */
+
+const tagIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const tagIn = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return tagIso(d); };
+const FOTO = 'sachen/sd-kleid001-abc123.jpg';
+/** Was Marielle in ihrer Liste hat – so, wie es ihre App schreibt (erfunden). */
+const ihreSachen = () => [
+  opInvListe({ id: 'sl-kleid01', name: 'Kleidung', bild: 'womans-clothes', reihe: 2 }, 'Marielle'),
+  opInvListe({ id: 'sl-schmuck1', name: 'Schmuck', bild: 'ring', reihe: 1 }, 'Marielle'),
+  opDing({ id: 'sd-kleid001', liste: 'sl-kleid01', name: 'Sommerkleid', marke: 'Zara', tags: ['Sommer'], notiz: 'Für die Hochzeit', foto: { pfad: FOTO, sha: 'f1' }, code: '4006381333931', reihe: 1 }, 'Marielle'),
+  opDing({ id: 'sd-ring0001', liste: 'sl-schmuck1', name: 'Silberring', reihe: 1 }, 'Marielle'),
+  opDing({ id: 'sd-ohne0001', liste: null, name: '', marke: 'Mango', reihe: 1 }, 'Marielle'),
+  opBlatt({ id: 'nb-geschenk1', titel: 'Geschenkideen', text: 'NOTIZ-TEXT-GEHEIM', farbe: 'rosa', tags: ['Familie'] }, 'Marielle'),
+  opAmy({ id: 'amy-bowl-ab12', name: 'Marielles Bowl', zutaten: ['200 g Reis'], schritte: ['Reis kochen'] }, 'Marielle'),
+  opAmyTags('amy-bowl-ab12', ['schnell']),
+  opEssensplan({ setzen: [
+    { tag: tagIn(0), mahlzeit: 'mittag', e: { id: 'ep-heute01', text: 'Linsensuppe', wer: 'beide' } },
+    { tag: tagIn(1), mahlzeit: 'abend', e: { id: 'ep-morgen1', rid: 'chili', wer: 'beide' } },
+    { tag: tagIn(10), mahlzeit: 'mittag', e: { id: 'ep-spaet01', text: 'Viel später', wer: 'beide' } },
+  ] }, 'Marielle'),
+  opVertraeglich('Marielle', { zwiebeln: { name: 'Zwiebeln', stufe: 'nicht', notiz: 'VERTRAEGLICH-GEHEIM' } }, 'Marielle'),
+];
+let dash = anwenden(leer(), [opEigener('c-aepfel', 'Äpfel', 'obst'), opEigener('c-milch', 'Milch', 'kuehl'), opTeil('rinderhack', 'chili', { q: 500, u: 'g', h: '' }, { n: 'Rinderhackfleisch', c: 'fleisch' }), ...ihreSachen(), opWunsch('w-eins0001', 'WUNSCH-TEXT', 'Amy'), opWunsch('w-zwei0001', 'Weniger Reis', 'Amy')]);
+dash = anwenden(dash, [opHaken(dash, 'c-milch', true, 'Marielle'), opWunschErledigt('w-zwei0001', true, 'Tobi')]);
+const ih = inhaltVon(bereinigen(JSON.parse(JSON.stringify(dash))), { hilfe: { zutatName: (k) => (k === 'rinderhack' ? 'Rinderhackfleisch' : ''), rezeptName: (rid) => (rid === 'chili' ? 'Chili' : '') } });
+const ihText = JSON.stringify(ih);
+check(ih.sachen.anzahl === 3 && ih.sachen.listen.map((l) => `${l.name}:${l.dinge.length}`).join() === 'Schmuck:1,Kleidung:1,Ohne Liste:1', `Dashboard: Sachen in ihren Listen, in ihrer Reihenfolge, „Ohne Liste“ zuletzt (${ih.sachen.listen.map((l) => l.name).join()})`);
+const kleid = ih.sachen.listen[1].dinge[0];
+check(kleid.name === 'Sommerkleid' && kleid.marke === 'Zara' && kleid.foto === FOTO && kleid.tags.join() === 'Sommer' && kleid.notiz === 'Für die Hochzeit' && kleid.code === '4006381333931', 'Dashboard: eine Sache mit Marke, Foto, Tags, Notiz, Strichcode');
+check(ih.sachen.listen[2].dinge[0].name === 'Mango' && ih.sachen.listen[2].dinge[0].marke === '', 'Dashboard: ohne Namen heißt die Sache nach der Marke');
+check(ih.einkauf.offen.join() === 'Äpfel,Rinderhackfleisch' && ih.einkauf.erledigt === 1, `Dashboard: Einkaufsliste offen nach Namen, eins abgehakt (${ih.einkauf.offen.join()})`);
+check(ih.rezepte.length === 1 && ih.rezepte[0].name === 'Marielles Bowl' && ih.rezepte[0].tags.join() === 'schnell', 'Dashboard: eigene Rezepte mit Tags');
+check(ih.notizen.length === 1 && ih.notizen[0].titel === 'Geschenkideen' && ih.notizen[0].tags.join() === 'Familie' && !ihText.includes('NOTIZ-TEXT'), 'Dashboard: Notizen nur mit Titel und Tags – nicht, was drinsteht');
+check(ih.plan.map((t) => `${t.tag}:${t.mittag.join('+')}/${t.abend.join('+')}`).join() === `${tagIn(0)}:Linsensuppe/,${tagIn(1)}:/Chili`, `Dashboard: Essensplan ab heute, sieben Tage, Rezepte mit Namen (${ih.plan.map((t) => t.tag).join()})`);
+check(ih.wuensche.offen === 1 && ih.wuensche.erledigt === 1 && !ihText.includes('WUNSCH-TEXT'), 'Dashboard: Vorschläge nur gezählt');
+check(!ihText.includes('VERTRAEGLICH') && !ihText.includes('Zwiebeln'), 'Dashboard: was jemand verträgt, steht nicht drin');
+check(JSON.stringify(inhaltVon(null)) === JSON.stringify(inhaltVon(leer())) && inhaltVon(null).sachen.anzahl === 0, 'Dashboard: ohne Stand alles leer');
+
 /* ============================================================ Browser */
 
 const browser = await starteBrowser();
@@ -157,7 +206,7 @@ await t.click('[data-act="g-fertig-zu"]');
 check((await t.locator('#e-gaeste .g-liste').innerText()).includes('Marielle'), 'In der Liste der Gäste: Marielle');
 
 // --- Marielle öffnet den Link
-const marielle = await handy(browser, { attrappe: beide, adresse: `${APP_URL}${u.hash}` });
+const marielle = await handy(browser, { attrappe: beide, adresse: `${APP_URL}${u.hash}`, hinweise: true });
 const m = marielle.page;
 check(await bis(() => m.evaluate(() => document.querySelector('#willkommen-dlg')?.open), 8000), 'Marielle: gleich verbunden, das Willkommen ist da');
 check(await m.evaluate(() => document.documentElement.dataset.farbe === 'lila' && document.documentElement.dataset.liste === 'eigen'), 'Lila, eigene Liste');
@@ -174,8 +223,11 @@ check(await bis(async () => (await m.locator('#wk-vorschau').innerText()).includ
 await m.click('[data-act="wk-weiter"]');
 check(await bis(() => mar.liste()?.profil?.ziel?.p === 30), 'Ihr Ziel steht in ihrer liste.json');
 check(!haupt.liste()?.profil?.ziel, '… nicht in eurer');
-for (let i = 0; i < 4 && await m.evaluate(() => document.querySelector('#willkommen-dlg')?.open); i++) await m.click('[data-act="wk-weiter"]');
+const wkTexte = [];
+for (let i = 0; i < 4 && await m.evaluate(() => document.querySelector('#willkommen-dlg')?.open); i++) { wkTexte.push(await m.locator('#willkommen-dlg').innerText()); await m.click('[data-act="wk-weiter"]'); }
 check(!(await m.evaluate(() => document.querySelector('#willkommen-dlg')?.open)) && await m.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.willkommen.v1')) === true), 'Willkommen durch, gemerkt');
+check(wkTexte.some((x) => x.includes('Tobi sieht in seinem Dashboard, was drinsteht') && x.includes('nur zum Ansehen')) && !wkTexte.some((x) => x.includes('sehen davon in ihrer App nichts')), 'Willkommen: ehrlich – Tobi sieht im Dashboard, was in ihrer Liste steht');
+check(await m.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.dashboard.hinweis.v1')) === true && !document.querySelector('#dash-hinweis-dlg').open), 'Der Hinweis aufs Dashboard kommt nicht noch extra – das Willkommen hat es gesagt');
 check((await m.locator('.tab-amy .tab-l').innerText()) === 'Marielles Bereich' && (await m.locator('.tab-amy .tab-k').innerText()) === 'Marielle', 'Der Reiter heißt „Marielles Bereich“');
 check((await m.locator('#r-ziel').innerText()).replace(/\s+/g, ' ').includes('368 kcal 30 g P 35 g KH 12 g F'), 'Oben ihr Ziel');
 check((await m.locator('#sync-text').innerText()) === 'Gespeichert', 'Oben „Gespeichert“ statt „Geteilt“');
@@ -311,6 +363,51 @@ const lang = t.locator('#ueberblick-dlg .ub-det-z', { hasText: 'Testzeile' });
 check(await bis(() => lang.count()) && (await lang.innerText()).includes('Sache 12') && !(await lang.innerText()).includes('Sache 13') && (await lang.innerText()).includes('+ 3 weitere'), `Lange Zeile: zwölf Sachen und „+ 3 weitere“ (${await lang.innerText().catch(() => '')})`);
 await lang.locator('.ub-det-mehr').click();
 check((await lang.innerText()).includes('Sache 15') && !(await lang.locator('.ub-det-mehr').count()), '„+ 3 weitere“ zeigt die ganze Zeile');
+await t.click('[data-act="ub-zu"]');
+
+// --- Das Dashboard: je Person ein Reiter, mit dem, was gerade in der Liste steht
+// Marielle hat Sachen (eine mit Foto), eine Notiz, ein Rezept, den Essensplan und was sie verträgt – wie ihre App es schreibt
+const ihrStand = mar.liste();
+const mitSachen = anwenden(bereinigen(ihrStand), ihreSachen());
+mitSachen.rev = ihrStand.rev + 1;
+mar.zustand.datei = JSON.stringify(mitSachen);
+mar.zustand.version++;
+mar.zustand.sha = `sha${mar.zustand.version}`;
+mar.zustand.dateien[FOTO] = 'foto';
+mar.zustand.roh[FOTO] = readFileSync(`${ROOT}/icon-192.png`);
+// Amy hat in eurer Liste eine Sache, eine Notiz und einen offenen Vorschlag
+const euer = haupt.liste();
+const mitAmy = anwenden(bereinigen(euer), [opDing({ id: 'sd-lippe001', name: 'Lippenstift', marke: 'Catrice', tags: ['Rot'], reihe: 1 }, 'Amy'), opBlatt({ id: 'nb-urlaub01', titel: 'Urlaub', text: 'AMY-NOTIZ-TEXT', farbe: 'rosa' }, 'Amy'), opWunsch('w-amy00001', 'AMY-WUNSCH', 'Amy')]);
+mitAmy.rev = euer.rev + 1;
+haupt.zustand.datei = JSON.stringify(mitAmy);
+haupt.zustand.version++;
+haupt.zustand.sha = `sha${haupt.zustand.version}`;
+const rohVorher = mar.zustand.rohGets;
+await t.click('[data-act="ub-oeffnen"]');
+const reiterTexte = await bis(async () => { const x = await t.locator('#ueberblick-dlg [data-ub-reiter] .ub-r-name').allInnerTexts(); return x.length === 3 ? x : null; });
+check(reiterTexte && reiterTexte.join() === 'Aktivität,Amy,Marielle' && await t.locator('#ub-titel').innerText() === 'Dashboard' && await t.locator('#ueberblick-dlg [data-ub-reiter="aktivitaet"]').getAttribute('aria-selected') === 'true', `Dashboard: Reiter Aktivität, Amy, Marielle – erst die Aktivität (${reiterTexte?.join(' | ')})`);
+check(mar.zustand.rohGets === rohVorher, 'Ihre Liste wird erst geholt, wenn ihr Reiter offen ist');
+await t.click('#ueberblick-dlg [data-ub-reiter="gast:Finanzdienste/Boxenstopp-Marielle"]');
+const panel = async () => (await t.locator('#ueberblick-dlg .ub-panel').innerText()).replace(/\s+/g, ' ');
+const ihrs = await bis(async () => { const x = await panel(); return x.includes('Sommerkleid') ? x : null; }, 8000);
+check(ihrs && ihrs.includes('Zara') && ihrs.includes('Kleidung') && ihrs.includes('Schmuck') && ihrs.includes('Silberring') && ihrs.includes('Mango') && ihrs.includes('Für die Hochzeit'), `Marielle: ihre Sachen in ihren Listen, mit Marke und Notiz${ihrs ? '' : ` (${(await panel()).slice(0, 300)})`}`);
+check(mar.zustand.rohGets > rohVorher, 'Ihre Liste kommt, wie sie jetzt ist (ohne ?ref=)');
+check(ihrs && /Äpfel Bananen/.test(ihrs) && /Einkaufsliste \d+ offen/i.test(ihrs) && await t.locator('#ueberblick-dlg .ub-chips li', { hasText: 'Kidneybohnen' }).count() === 1, `Marielle: ihre Einkaufsliste, je Sache eine Pille${ihrs && /Äpfel Bananen/.test(ihrs) ? '' : ` (${(ihrs || '').slice(0, 600)})`}`);
+check(ihrs && ihrs.includes('Heute') && ihrs.includes('Linsensuppe') && ihrs.includes('Morgen') && ihrs.includes('Chili') && !ihrs.includes('Viel später'), 'Marielle: ihr Essensplan, die nächsten sieben Tage');
+check(ihrs && ihrs.includes('Marielles Bowl') && ihrs.includes('Geschenkideen') && !ihrs.includes('NOTIZ-TEXT'), 'Marielle: ihre Rezepte und die Titel der Notizen – nicht, was drinsteht');
+check(ihrs && !ihrs.includes('VERTRAEGLICH') && /Zuletzt \d+ Tage/i.test(ihrs) && ihrs.includes('nur zum Ansehen'), 'Marielle: nicht, was sie verträgt; die letzten Sitzungen; „nur zum Ansehen“');
+check(await bis(() => t.evaluate(() => document.querySelector('#ueberblick-dlg img[data-ub-foto]')?.src.startsWith('blob:'))) && mar.zustand.lesen[FOTO] >= 1 && await t.evaluate(() => document.querySelector('#ueberblick-dlg img[data-ub-foto]').closest('.inv-bild').classList.contains('hat-foto')), 'Marielle: das Foto kommt mit ihrem Schlüssel aus ihrem Repo');
+// Amy: ihr Bereich in eurer Liste
+await t.click('#ueberblick-dlg [data-ub-reiter="amy"]');
+const amys = await bis(async () => { const x = await panel(); return x.includes('Lippenstift') ? x : null; }, 8000);
+check(amys && amys.includes('Catrice') && amys.includes('Urlaub') && amys.includes('1 Vorschlag offen') && !amys.includes('AMY-NOTIZ-TEXT') && !amys.includes('AMY-WUNSCH') && !amys.includes('Einkaufsliste'), `Amy: ihre Sachen, die Titel ihrer Notizen, wie viele Vorschläge offen sind${amys ? '' : ` (${(await panel()).slice(0, 300)})`}`);
+check(await t.locator('#ueberblick-dlg [data-ub-reiter="amy"]').getAttribute('aria-selected') === 'true' && await t.evaluate(() => document.activeElement?.dataset?.ubReiter === 'amy'), 'Der gewählte Reiter ist markiert und hat den Fokus');
+await t.click('[data-act="ub-zu"]');
+// Neu geöffnet: nichts aus ihrer Liste ist geblieben – es kommt neu
+const rohZu = mar.zustand.rohGets;
+await t.click('[data-act="ub-oeffnen"]');
+await t.click('#ueberblick-dlg [data-ub-reiter="gast:Finanzdienste/Boxenstopp-Marielle"]');
+check(await bis(async () => (await panel()).includes('Sommerkleid')) && mar.zustand.rohGets > rohZu, 'Neu geöffnet: ihre Liste kommt neu – gemerkt wird sie nicht');
 check(tobi.fehler.length === 0, `Tobi: keine Fehler im Browser (${tobi.fehler.join(' | ')})`);
 await t.click('[data-act="ub-zu"]');
 
@@ -361,6 +458,53 @@ await einfuegen.ctx.close();
 // Gast entfernen (nur von Tobis Gerät)
 await t.click('[data-g-weg="Finanzdienste/Boxenstopp-Marielle"]');
 check(!(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.gaeste.v1')))).length && !!mar.liste(), 'Entfernen: weg von Tobis Gerät, ihre Liste bleibt');
+
+// --- Wem das Dashboard etwas zeigt, erfährt es einmal: ein Gast, der das Willkommen schon kennt …
+const gastAlt = await handy(browser, { attrappe: beide, hinweise: true });
+const ga = gastAlt.page;
+await ga.evaluate(() => { localStorage.setItem('boxenstopp.willkommen.v1', 'true'); localStorage.setItem('__hinweis', '300'); });
+await ga.click('.tabbar .tab[data-tab="einstellungen"]');
+await ga.fill('#z-token', zweit);
+await ga.dispatchEvent('#z-token', 'input');
+await ga.click('#z-los');
+check(await bis(() => ga.evaluate(() => document.querySelector('#dash-hinweis-dlg')?.open), 8000), 'Gast mit älterer App: einmal der Hinweis aufs Dashboard');
+const gaText = (await ga.locator('#dash-hinweis-dlg').innerText()).replace(/\s+/g, ' ');
+check(gaText.includes('Tobi hat jetzt ein Dashboard') && gaText.includes('deine Sachen mit Fotos') && gaText.includes('Nur zum Ansehen') && gaText.includes('Was du der KI schreibst und was du verträgst, zeigt es ihm nicht'), 'Hinweis für den Gast: was Tobi sieht und was nicht');
+await ga.click('#dash-hinweis-dlg .btn-primary');
+check(!(await ga.evaluate(() => document.querySelector('#dash-hinweis-dlg').open)) && await ga.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.dashboard.hinweis.v1')) === true), '„Alles klar“ schließt, gemerkt');
+await ga.click('.tabbar .tab[data-tab="amy"]');
+await ga.click('[data-amy-teil="sachen"]');
+check(await bis(async () => (await ga.locator('.inv-fein').innerText().catch(() => '')).includes('Tobi sieht deine Sachen in seinem Dashboard')), 'Bei ihren Sachen steht es auch');
+await ga.reload();
+await ga.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await ga.waitForTimeout(1500);
+check(!(await ga.evaluate(() => document.querySelector('#dash-hinweis-dlg').open)), 'Nach dem Neuladen kein zweites Mal');
+check(gastAlt.fehler.length === 0, `Gast mit älterer App: keine Fehler (${gastAlt.fehler.join(' | ')})`);
+await gastAlt.ctx.close();
+// … Amy in eurer Liste – Tobi nicht
+const amyH = await handy(browser, { attrappe: beide, hinweise: true });
+const ah = amyH.page;
+await ah.evaluate((k) => { localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: k, name: 'Amy' })); localStorage.setItem('__hinweis', '300'); }, SCHLUESSEL);
+await ah.reload();
+await ah.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+check(await bis(() => ah.evaluate(() => document.querySelector('#dash-hinweis-dlg')?.open), 8000), 'Amy: einmal der Hinweis aufs Dashboard');
+const ahText = (await ah.locator('#dash-hinweis-dlg').innerText()).replace(/\s+/g, ' ');
+check(ahText.includes('Sachen, Notizen, Rezepte, Vorschläge') && ahText.includes('Das sieht er in der App ohnehin') && ahText.includes('Einstellungen → Gäste & Überblick → Dashboard') && await ah.evaluate(() => document.querySelector('#dash-hinweis-dlg').classList.contains('amy-thema')), 'Hinweis für Amy, in Rosa');
+await ah.click('#dash-hinweis-dlg [data-act="dash-hinweis-zu"]');
+await ah.click('.tabbar .tab[data-tab="einstellungen"]');
+await ah.click('[data-act="ub-oeffnen"]');
+check(await bis(() => ah.evaluate(() => document.querySelector('#ueberblick-dlg')?.open)) && !(await ah.locator('#ueberblick-dlg [data-ub-reiter]').count()) && (await ah.locator('#ueberblick-dlg').innerText()).includes('Wer wann was gemacht hat'), 'Amys Dashboard: die Aktivität – kein Reiter für sie selbst');
+check(amyH.fehler.length === 0, `Amy: keine Fehler (${amyH.fehler.join(' | ')})`);
+await amyH.ctx.close();
+const tobiH = await handy(browser, { attrappe: beide, hinweise: true });
+const th = tobiH.page;
+await th.evaluate((k) => { localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: k, name: 'Tobi' })); localStorage.setItem('__hinweis', '300'); }, SCHLUESSEL);
+await th.reload();
+await th.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+await bis(async () => (await th.locator('#sync-text').innerText()) === 'Geteilt');
+await th.waitForTimeout(1500);
+check(!(await th.evaluate(() => document.querySelector('#dash-hinweis-dlg').open || localStorage.getItem('boxenstopp.dashboard.hinweis.v1'))), 'Tobi bekommt keinen Hinweis – es ist sein Dashboard');
+await tobiH.ctx.close();
 
 await browser.close();
 ende();

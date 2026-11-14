@@ -163,6 +163,9 @@ function fotosEinsetzen(wurzel = document) {
   }
 }
 
+/** Fürs Dashboard (ansicht-gaeste.js): die Fotos der Sachen eurer Liste auch dort einsetzen. */
+export const sachenFotosEinsetzen = (wurzel) => fotosEinsetzen(wurzel);
+
 /** Das Foto einer Sache als base64 (für die KI) – das eben aufgenommene oder das gespeicherte. */
 async function fotoB64(d) {
   if (letztes.has(d.id)) return letztes.get(d.id);
@@ -271,7 +274,7 @@ function trefferHTML(q) {
 }
 
 function hinweisHTML() {
-  const wem = istEigen() ? 'Die Fotos liegen in deinem Daten-Repo bei GitHub, wie deine Liste.' : 'Die Sachen liegen in eurer gemeinsamen Liste – Tobi sieht sie auch. Die Fotos liegen im Daten-Repo bei GitHub.';
+  const wem = istEigen() ? 'Die Fotos liegen in deinem Daten-Repo bei GitHub, wie deine Liste. Tobi sieht deine Sachen in seinem Dashboard – nur zum Ansehen.' : 'Die Sachen liegen in eurer gemeinsamen Liste – Tobi sieht sie auch. Die Fotos liegen im Daten-Repo bei GitHub.';
   const netz = `Zur Nummer schlägt die App Name, Marke und Bild in Open Beauty Facts und den verwandten offenen Datenbanken nach${anbieterVon(ladeKi()) === 'anthropic' ? ' – kennen die sie nicht, sucht Claude im Internet' : ''}.`;
   return `<p class="fine inv-fein">${wem} Zum Scannen öffnet die App die Kamera – mit Taschenlampe, wo das Handy sie hergibt. Den Strichcode liest ${'BarcodeDetector' in window ? 'dein Handy selbst' : ladeKi() ? 'die KI vom Bild' : 'die KI vom Bild, wenn ein KI-Schlüssel eingetragen ist – sonst tippst du die Ziffern ab'}. ${netz}</p>`;
 }

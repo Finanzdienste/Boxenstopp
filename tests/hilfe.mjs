@@ -58,7 +58,8 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
   // dateien: weitere Dateien im Repo, die die App nur liest (z. B. angebote-privat.json) – Pfad → Inhalt (Text);
   // roh: dieselben als Bytes (Fotos der Sachen), geloescht: was die App wieder gelöscht hat
   // fassungen: die Datei, wie sie nach jedem Commit war (Commit-sha → Text) – für ?ref= (Einzelheiten im Überblick)
-  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, roh: {}, geloescht: [], shas: {}, lesen: {}, commits: [], leer: false, gibtEs: true, fassungen: {}, fassungAbrufe: 0 };
+  // rohGets: die Datei, wie sie jetzt ist, roh geholt (das Dashboard) – die App selbst holt sie mit sha
+  const zustand = { datei: null, sha: null, version: 0, puts: 0, gets: 0, rohGets: 0, konflikte: 0, nachrichten: [], netzWeg: false, staleEinmal: false, dateien: {}, roh: {}, geloescht: [], shas: {}, lesen: {}, commits: [], leer: false, gibtEs: true, fassungen: {}, fassungAbrufe: 0 };
   const commit = (message, pfadC, sha) => zustand.commits.unshift({ sha: sha || `c${zustand.commits.length + 1}-${Math.random().toString(36).slice(2, 8)}`, message, date: new Date().toISOString(), pfad: pfadC });
   const basis = `https://api.github.com/repos/${owner}/${repo}`;
   let alt = null; // für staleEinmal: die Fassung vor dem letzten Schreiben
@@ -140,6 +141,8 @@ export function githubAttrappe({ schluessel = SCHLUESSEL, owner = 'Finanzdienste
           return antwort(200, { sha: alt.sha, encoding: 'base64', content: Buffer.from(alt.datei).toString('base64') }, { etag: `"${alt.sha}"` });
         }
         if (!zustand.datei) return antwort(404, { message: 'Not Found' });
+        // Roh, wie bei GitHub: nur der Inhalt, ohne sha
+        if (/raw/.test(req.headers().accept || '')) { zustand.rohGets++; return r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/vnd.github.raw+json; charset=utf-8' }, body: zustand.datei }); }
         const etag = `"${zustand.sha}"`;
         if (req.headers()['if-none-match'] === etag) return r.fulfill({ status: 304, headers: { ...CORS, etag } });
         return antwort(200, { sha: zustand.sha, encoding: 'base64', content: Buffer.from(zustand.datei).toString('base64').replace(/(.{60})/g, '$1\n') }, { etag });
@@ -219,7 +222,7 @@ export function tierAttrappe() {
   };
 }
 
-export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null } = {}) {
+export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, takt = 400, adresse = APP_URL, viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null, hinweise = false } = {}) {
   const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow', ...(userAgent ? { userAgent } : {}) });
   if (skript) await ctx.addInitScript(skript);
   // z. B. ['notifications', 'clipboard-read', 'clipboard-write'] – Headless-Chromium verweigert Mitteilungen sonst
@@ -243,7 +246,8 @@ export async function handy(browser, { attrappe = null, tiere = null, datenbank 
   // neu (auch wenn sich die Adresse nur hinter # unterscheidet).
   const grund = APP_URL.replace(/index\.html$/, '');
   await page.goto(`${grund}icon.svg`, { waitUntil: 'load' });
-  await page.evaluate((t) => { localStorage.clear(); localStorage.setItem('__takt', String(t)); }, takt);
+  // Der Hinweis auf Tobis Dashboard (bei Gästen und Amy) käme sonst mitten in jeden Test – nur mit hinweise: true
+  await page.evaluate(([t, h]) => { localStorage.clear(); localStorage.setItem('__takt', String(t)); if (!h) localStorage.setItem('boxenstopp.dashboard.hinweis.v1', 'true'); }, [takt, hinweise]);
   await page.goto(adresse, { waitUntil: 'load' });
   await page.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
   return { ctx, page, fehler };

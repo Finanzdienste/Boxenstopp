@@ -21,6 +21,7 @@ import { zielAusFeldern, zielSpeichern, eigenesZiel } from './ansicht-ziel.js';
 import { zielText, MAKROS } from './zielrechner.js';
 import { boxenBereinigen } from './boxen.js';
 import { boxenChips } from './ansicht-boxen.js';
+import { DASH_HINWEIS } from './ansicht-gaeste.js';
 
 const GESEHEN = 'boxenstopp.willkommen.v1';
 const KREUZ = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
@@ -106,8 +107,8 @@ function gutHTML() {
   return `<p class="amy-eyebrow">${deko('sparkles')} gut zu wissen ${deko('sparkles')}</p>
 <h2 class="tablet-titel" id="wk-titel">Deine Liste ist deine</h2>
 <ul class="tablet-schritte wk-punkte">
-<li><b>Getrennt von Tobi und Amy</b><small>Deine Einkaufsliste, deine Rezepte, deine Makros – die beiden sehen davon in ihrer App nichts. Nur neue Rezepte nach Wunsch kommen in den gemeinsamen Katalog, für alle.</small></li>
-<li><b>Wo sie liegt</b><small>In einem privaten Speicher bei GitHub, den Tobi für dich angelegt hat. Er sieht in seinem Überblick, wann du was änderst – sonst niemand.</small></li>
+<li><b>Getrennt von Tobi und Amy</b><small>Deine Einkaufsliste, deine Rezepte, deine Makros – in ihrer gemeinsamen Liste taucht davon nichts auf. Nur neue Rezepte nach Wunsch kommen in den gemeinsamen Katalog, für alle.</small></li>
+<li><b>Wo sie liegt</b><small>In einem privaten Speicher bei GitHub, den Tobi für dich angelegt hat. Tobi sieht in seinem Dashboard, was drinsteht und wann du was änderst – nur zum Ansehen. Was du der KI schreibst und was du verträgst, zeigt es ihm nicht.</small></li>
 <li><b>Auf mehreren Geräten</b><small>Unter Einstellungen gibt es den Link fürs iPad oder ein zweites Handy.</small></li>
 </ul>`;
 }
@@ -134,6 +135,8 @@ export function willkommenZeigen() {
   seiten = seitenFuer();
   seite = 0;
   makros = null;
+  // Was Tobis Dashboard zeigt, steht hier schon – der Hinweis dazu kommt dann nicht extra
+  schreibe(DASH_HINWEIS, true);
   zeichnen();
   // Mit Escape oder dem Kreuz zu: gilt auch als gesehen
   dlg.onclose = () => schreibe(GESEHEN, true);

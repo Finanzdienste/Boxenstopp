@@ -19,7 +19,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 | **Essensplan** | Die nächsten Tage und Wochen: je Tag Mittag und Abend, wer isst mit, dazu **Kochtage** („Chili kochen, 8 Boxen“) mit **Boxen verteilen** auf die Tage danach – und mit einem Tipp **die Woche auf die Einkaufsliste** (siehe unten) |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
-| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen, wer wann was macht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, hell oder dunkel, breit die Liste rechts daneben oder als Reiter (auf dem iPad von selbst als Reiter), welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
+| **Einstellungen** | Gemeinsame Liste (Einrichten, Link fürs zweite Handy, Aufs iPad, Trennen), **Ziel pro Box**, **Gäste & Überblick** (jemanden mit eigener Liste einladen; das **Dashboard**: wer wann was macht und was bei Amy und den Gästen drinsteht), Push-Nachrichten, Microsoft To Do, KI-Schlüssel, **Waage**, hell oder dunkel, breit die Liste rechts daneben oder als Reiter (auf dem iPad von selbst als Reiter), welche Reiter unten stehen und in welcher Reihenfolge, was die App gelernt hat (Tempo, Wege durch die Läden, Preisalarme, Preise vom Bon – mit Vergessen und Löschen), Fassung und „Nach Updates suchen“ (siehe unten) |
 
 Dazu **Push-Nachrichten** aufs Handy und iPad: wenn der andere etwas auf die
 Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat, ein
@@ -551,8 +551,11 @@ war, merkt sich das Gerät). Die Teile:
     Datenbank und Claude – für alles, was es gibt. An die Datenbanken geht nur
     die Nummer, an Claude die Nummer und die Namen der Listen.
   - In der gemeinsamen Liste sind es Amys Sachen (Tobi sieht sie auch, so
-    sagt es der Hinweis), in einer eigenen Liste die des Gasts. Im Commit
-    steht nur „Sachen“, nie, was es ist; keine Push-Nachricht.
+    sagt es der Hinweis), in einer eigenen Liste die des Gasts – Tobi sieht
+    sie in seinem Dashboard, auch das steht im Hinweis. Im Commit steht nur
+    „Sachen“, nie, was es ist; keine Push-Nachricht. Was dazukam oder sich
+    änderte, steht in den Einzelheiten des Dashboards (bei einer Änderung nur,
+    welche Felder, nie der Text der Notiz).
 
 Der Teil **Rezepte**: Amys eigene Rezepte. Alles ist rosa
 und rund: das Thema hängt an `html[data-tab="amy"]` und färbt auch Kopf,
@@ -876,7 +879,7 @@ konnte.
 | **Rezeptfotos** | alle 50 in einem eigenen Vorrat, der Updates übersteht – der Worker holt sie von selbst nach jedem frischen `rezepte.json`, nicht erst beim Ansehen (vorher fehlten ohne Netz 40 von 50); ein neues Foto hat eine neue Adresse, das alte fliegt raus; fehlt doch eins, steht das Ersatzbild aus den Zutaten-Bildchen da |
 | **schlechtes Netz** | Seite und Daten: erst das Netz, aber nach 4 s ohne Antwort aus dem Vorrat (die späte Antwort kommt trotzdem noch hinein) |
 | **die Liste** | wie zuletzt gesehen aus dem localStorage (`js/speicher.js`), Änderungen warten, bis wieder Netz da ist |
-| **Fotos der Sachen** | einmal geholt in einem eigenen Vorrat (`boxenstopp-sachen-v1`), der Updates übersteht (`js/ansicht-inventar.js`) |
+| **Fotos der Sachen** | einmal geholt in einem eigenen Vorrat (`boxenstopp-sachen-v1`), der Updates übersteht (`js/ansicht-inventar.js`); die eines Gasts im Dashboard nur, solange es offen ist |
 
 Auffrischen: Beim Öffnen sowieso; kommt die App nach einer halben Stunde
 oder mehr wieder nach vorn, holt der Worker Rezepte, Angebote,
@@ -1191,7 +1194,7 @@ beim Start, nach jeder eigenen Änderung und alle fünf Minuten, solange die App
 offen ist. Was Marielle sich wünscht, sehen Tobi und Amy also, sobald Tobis
 Handy die App offen hat; was Tobi oder Amy sich wünschen, kommt bei Marielle
 genauso an. Commits: „Tobi: Katalog – „Kürbissuppe“ dazu“, „… raus“,
-„Tobi: Katalog abgeglichen – Kürbissuppe dazu“ (nicht im Überblick, der liest
+„Tobi: Katalog abgeglichen – Kürbissuppe dazu“ (nicht im Dashboard, das liest
 nur `liste.json`).
 
 ### Speisekarte
@@ -1419,7 +1422,9 @@ samt Symbol und Manifest für den Home-Bildschirm – und begrüßt sie einmal
 (`js/ansicht-willkommen.js`): was die App kann, ihre Makros pro Box, aufs
 Handy (auf dem iPhone mit „Link kopieren“, die App vom Home-Bildschirm hat
 ihren eigenen Speicher; dort reicht „Einfügen“ über der Liste), und wem die
-Liste gehört – ehrlich: Tobi sieht in seinem Überblick, wann sie was ändert.
+Liste gehört – ehrlich: Tobi sieht in seinem Dashboard, was in ihrer Liste
+steht und wann sie was ändert, nur zum Ansehen; was sie der KI schreibt und
+was sie verträgt, nicht.
 In ihrer Liste heißt der eigene Reiter „Marielles Rezepte“; Push, To Do und
 die privaten Angebote (Rewe, Edeka) gibt es dort nicht, die laufen über die
 Abläufe in Boxenstopp-Daten. Ihr zweites Gerät bekommt sie über „Link fürs
@@ -1435,7 +1440,8 @@ unter dem anderen Namen gemacht hat, führt die App einmal zusammen
 jedes Gerät im Zugang (`daten`); der zwischengespeicherte Stand gilt nur für
 dieselbe Liste.
 
-**Überblick** (dasselbe Menü): wer wann was gemacht hat, in eurer Liste und
+**Dashboard** (dasselbe Menü, Knopf „Dashboard“). Oben Reiter: **Aktivität**
+und je Person einer (siehe unten). Die Aktivität: wer wann was gemacht hat, in eurer Liste und
 in denen der Gäste, die dieses Gerät eingeladen hat – je Person zuletzt
 aktiv, Änderungen je Tag (7 oder 30 Tage), Bereiche, und ein Verlauf mit
 Sitzungen („18:38–18:58 Amy: 9 abgehakt, Reis auf die Liste“). Gelesen wird
@@ -1464,7 +1470,7 @@ eigenen Speicher), fügt man ihn in der App unter **Vom alten Handy
 übernehmen** ein – das Feld steht da, solange das Gerät noch keine Gäste
 kennt, und nimmt auch Text um den Link herum. Eure eigene Liste kommt nie als
 Gast herein; steht ein Gast schon da, gilt der Schlüssel aus dem Link. Verlauf
-und Einzelheiten holt das neue Gerät beim ersten Überblick selbst. Im Link
+und Einzelheiten holt das neue Gerät beim ersten Öffnen des Dashboards selbst. Im Link
 stecken die Schlüssel: nur an sich selbst schicken und die Nachricht danach
 löschen.
 
@@ -1477,7 +1483,8 @@ Schritte): 3. Eier und Zucker aufschlagen …“, „Neues Rezept: „Bueno Kuch
 5 Zutaten, 10 Schritte“, „Putzplan Küche: ✓ Arbeitsflächen abwischen“, „Ziel
 pro Box: 400 kcal … → 420 kcal …“, dazu Mengen, wieder Geöffnetes,
 Weggeräumtes, verschobene Abteilungen, Bons, Notizen mit Text, Daumen,
-Timer. Die Stände holt das Gerät mit `GET …/contents/liste.json?ref=<sha>`
+Timer, Sachen („Dazu: Sommerkleid (Zara) – Kleidung“, „Geändert: Rock: Notiz,
+Tags“ – welche Felder, nicht der Text). Die Stände holt das Gerät mit `GET …/contents/liste.json?ref=<sha>`
 (`speicher.js fassungLesen`): den Stand nach dem Commit und als Stand davor
 den nächstälteren im Verlauf – wenn dessen `rev` genau eins kleiner ist, sonst
 `<sha>~1`. Je Commit einmal; was herauskommt, merkt sich das Gerät
@@ -1486,6 +1493,33 @@ Geholt wird nur für die Sitzungen, die gerade zu sehen sind, höchstens vier
 zugleich; lange Zeilen zeigen zwölf Sachen und „+ … weitere“. Oben über dem
 Verlauf lässt er sich auf eine Person beschränken (Alle, Amy, Marielle,
 Tobi).
+
+**Je Person ein Reiter** (`js/dashboard.js` rechnet, `js/ansicht-gaeste.js`
+zeichnet): oben ihre Karte aus der Aktivität, Kacheln mit Zahlen, dann, was
+gerade in der Liste steht – bei einem **Gast** (Marielle) die Sachen in ihren
+Listen mit Foto, Marke, Tags und Notiz, die offene Einkaufsliste, der
+Essensplan der nächsten sieben Tage, die eigenen Rezepte und die Titel der
+Notizen; bei **Amy** (in eurer Liste, auf einem Gerät, das nicht ihres ist)
+ihr Bereich wie in der App: Sachen, Notiztitel, Rezepte und wie viele
+Vorschläge offen sind. Darunter ihre letzten Sitzungen mit Einzelheiten und
+„Ganzer Verlauf“. Lange Listen zeigen die ersten und „+ … weitere“. Die Liste
+eines Gasts holt das Gerät erst, wenn ihr Reiter offen ist, so wie sie jetzt
+ist (`GET …/contents/liste.json` ohne `?ref=`), die Fotos mit dem Schlüssel des
+Gasts aus seinem Repo, höchstens drei zugleich; beides bleibt nur, solange
+das Dashboard offen ist, und kommt beim nächsten Öffnen neu. Nur zum Ansehen –
+ändern lässt sich von dort nichts. Nicht dabei: was jemand verträgt, der Text
+der Notizen und was jemand der KI geschrieben hat. Amys Reiter zieht mit,
+wenn sich eure Liste ändert.
+
+**Wer es erfährt:** Wem das Dashboard etwas zeigt, dem sagt es die App einmal
+je Gerät, sobald die Liste abgeglichen ist und kein anderes Fenster offen
+(„Gut zu wissen“, `boxenstopp.dashboard.hinweis.v1`): einem Gast, was Tobi
+sieht (Sachen mit Fotos, Einkaufsliste, Essensplan, Rezepte, Notiztitel, wann
+er was ändert) und was nicht, Amy in Rosa, dass Tobi ihren Bereich auf einen
+Blick sieht – wie in der App – und sie die Aktivität selbst unter Einstellungen
+→ Gäste & Überblick → Dashboard findet. Ein neuer Gast liest es schon im
+Willkommen, der Hinweis kommt dann nicht extra; auf Tobis Gerät kommt keiner.
+Auch unter „Sachen“ steht es bei einem Gast.
 
 ### Wie der Abgleich funktioniert (js/speicher.js)
 
@@ -1718,8 +1752,9 @@ die Action „Rezeptfotos“.
 | `js/doppel.js` | Zwei auf einmal: Arbeit und Warten je Schritt, der Plan für zwei Rezepte (ein Koch, ein Ofen), Partner und beste Paare, Schalen, Geräte – ohne DOM |
 | `js/ansicht-doppel.js` | Zwei auf einmal in der App: die Partner im Rezept, der Plan mit Ablauf, je halbe Boxen, beide auf die Liste, Kochmodus für beide |
 | `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
-| `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; der Überblick aus den Commits |
-| `js/einzelheiten.js` | Überblick: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
+| `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; das Dashboard – die Aktivität aus den Commits, je Person ein Reiter, der Hinweis für Gäste und Amy |
+| `js/einzelheiten.js` | Dashboard: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
+| `js/dashboard.js` | Dashboard: was in einer Liste steht (Sachen, Einkaufsliste, Essensplan, Rezepte, Notiztitel, Vorschläge) – ohne Gesundheit, ohne KI-Texte, ohne DOM |
 | `js/ansicht-willkommen.js` | das Willkommen für einen Gast (Makros, aufs Handy, wem die Liste gehört) |
 | `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel – und die Ansicht |
 | `icon-lila*.png`, `icon-lila.svg`, `manifest-lila.webmanifest` | Symbol und Manifest einer lila Liste |
@@ -1875,18 +1910,26 @@ schneidet, was für sich steht, die Zwiebeln in einem Rutsch, nie länger),
 Partner und beste Paare, Reste für 2 Boxen, je 4 Boxen, Schalen und Geräte, und
 spielt im Browser durch: die Partner im Gulasch, der Plan, je 4 Boxen, beide
 auf die Liste, der Kochmodus für beide (ein Schritt für beide, Haken im
-jeweiligen Rezept, kein Tempo, Timer, eins fertig), zurück, die Kachel. `test-gaeste.mjs` liest Commit-Nachrichten und fasst den
-Überblick in Node zusammen und spielt dann die Einladung durch (euer
+jeweiligen Rezept, kein Tempo, Timer, eins fertig), zurück, die Kachel. `test-gaeste.mjs` liest Commit-Nachrichten und fasst die
+Aktivität in Node zusammen und spielt dann die Einladung durch (euer
 Schlüssel, ein Schlüssel für alles, fehlendes Repo, dann richtig), Marielles
 ersten Start mit Willkommen und Makros, ihre getrennte Liste, ihr zweites
 Gerät, ein drittes als „Marielli“ (heißt dann Marielle, die alten Einträge
-werden zusammengeführt) und Tobis Überblick (Einzelheiten aus den Ständen
+werden zusammengeführt) und Tobis Dashboard (Einzelheiten aus den Ständen
 mit `?ref=`, nur eine Person, lange Zeilen, das Neue beim nächsten Öffnen ohne
-alles neu zu holen). `test-einzelheiten.mjs` rechnet die Einzelheiten in
+alles neu zu holen; die Reiter Aktivität, Amy und Marielle: ihre Liste erst
+mit dem Reiter und ohne `?ref=`, Sachen mit Foto aus ihrem Repo,
+Einkaufsliste, Essensplan, Rezepte, Notiztitel ohne Text, nichts, was sie
+verträgt, beim nächsten Öffnen neu geholt; Amys Bereich) – dazu
+`inhaltVon` in Node und der Hinweis: im Willkommen statt extra, für einen Gast
+mit älterer App einmal (und bei den Sachen), für Amy in Rosa, für Tobi keiner.
+Damit er nicht mitten in andere Tests fällt, setzt `handy()` ihn als gesehen
+(`hinweise: true` lässt ihn kommen). `test-einzelheiten.mjs` rechnet die Einzelheiten in
 Node: Einkauf (mit Mengen, abgehakt, wieder offen, weggeräumt, Abteilung, Bon,
 Preisalarm), Kochen (Schritte fester und eigener Rezepte, Timer), Rezepte,
-Putzplan, Ziel, eine zusammengeführte eigene Liste und eine Sitzung aus
-mehreren Commits. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
+Putzplan, Sachen (Liste angelegt, umbenannt, gelöscht; Sache dazu, geändert –
+nur welche Felder –, in eine andere Liste, gelöscht, umsortiert), Ziel, eine
+zusammengeführte eigene Liste und eine Sitzung aus mehreren Commits. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
 Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

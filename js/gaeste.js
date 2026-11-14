@@ -26,7 +26,7 @@ const NAME = /^[\p{L}\p{N} ._-]{1,30}$/u;
 const REPO = /^[A-Za-z0-9_.-]{1,100}\/[A-Za-z0-9_.-]{1,100}$/;
 /** Was nicht von einer Person kommt, sondern von den Abläufen im Daten-Repo. */
 const AUTOMATIK = /^(?:Push|Haushalt|Angebote(?: \(privat\))?|To Do|Microsoft|Bescheid)$/i;
-export const BEREICHE = ['Einkauf', 'Kochen', 'Rezepte', 'Haushalt', 'Ziel', 'Sonstiges'];
+export const BEREICHE = ['Einkauf', 'Kochen', 'Rezepte', 'Sachen', 'Haushalt', 'Ziel', 'Sonstiges'];
 /** So lange gehören zwei Commits derselben Person zu einer Sitzung. */
 const SITZUNG_MIN = 20;
 
@@ -110,6 +110,7 @@ export function nachrichtLesen(text) {
 /** Zu welchem Bereich ein Stück „was“ gehört. */
 export function bereichVon(was) {
   const s = String(was || '');
+  if (/^Sachen\b/.test(s)) return 'Sachen';
   if (/Putzplan|Haushalt/.test(s)) return 'Haushalt';
   if (/auf die Liste|abgehakt|von der Liste|Liste geleert|eingekauft|Bon|Preisalarm|Weg durch/.test(s)) return 'Einkauf';
   if (/gekocht|^kocht /.test(s)) return 'Kochen';
