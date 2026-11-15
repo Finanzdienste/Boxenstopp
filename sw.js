@@ -10,6 +10,8 @@
  *
  *   Seitenaufrufe    erst Netz, bei Fehlschlag (oder nach GEDULD ohne
  *                    Antwort – schlechtes Netz im Laden) der Zwischenspeicher.
+ *                    Abgelegt ohne den Teil hinter # (Zugänge, Kennung fürs
+ *                    Widget).
  *   daten/*.json     genauso – neue Rezepte sollen sofort da sein, alte nur
  *                    ohne Netz. In einem eigenen Vorrat (DATEN), der ein
  *                    Update der App übersteht; gefragt wird mit „no-cache“
@@ -307,6 +309,9 @@ self.addEventListener('fetch', (event) => {
 
   const imVorrat = (req, name = CACHE) => caches.open(name).then((c) => c.match(req, { ignoreSearch: true }));
   const ablegen = (req, res) => { const kopie = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopie)); };
+  // Abgelegt wird ohne den Teil hinter # – darin stehen Zugänge (#zugang=)
+  // und die Kennung fürs Widget (#bildschirmzeit=); sie gehören nicht in den Vorrat.
+  const schluessel = url.href.includes('#') ? url.href.split('#')[0] : request;
 
   /*
    * Erst das Netz – aber nicht ewig: Antwortet es nach GEDULD noch nicht, nimmt
@@ -318,7 +323,7 @@ self.addEventListener('fetch', (event) => {
     const netz = laden().then((res) => {
       if (gut(res)) {
         const kopie = res.clone();
-        ablage = caches.open(name).then((c) => c.put(request, kopie)).then(() => danach?.()).catch(() => null);
+        ablage = caches.open(name).then((c) => c.put(schluessel, kopie)).then(() => danach?.()).catch(() => null);
       }
       return res;
     });

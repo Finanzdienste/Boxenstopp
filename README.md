@@ -878,6 +878,7 @@ konnte.
 | **Rezepte, Angebote, Preisverlauf** | `daten/*.json` in einem eigenen Vorrat, der Updates der App übersteht (bis v39 lagen sie im Vorrat der Fassung und waren nach einem Update weg, bis die App sie neu lud – beim Update ziehen sie um); gefragt wird mit „no-cache“: unverändert nur ein kurzes 304 statt 600 KB |
 | **Rezeptfotos** | alle 50 in einem eigenen Vorrat, der Updates übersteht – der Worker holt sie von selbst nach jedem frischen `rezepte.json`, nicht erst beim Ansehen (vorher fehlten ohne Netz 40 von 50); ein neues Foto hat eine neue Adresse, das alte fliegt raus; fehlt doch eins, steht das Ersatzbild aus den Zutaten-Bildchen da |
 | **schlechtes Netz** | Seite und Daten: erst das Netz, aber nach 4 s ohne Antwort aus dem Vorrat (die späte Antwort kommt trotzdem noch hinein) |
+| **Links** | eine Seite, die mit `#zugang=…` oder `#bildschirmzeit=…` geöffnet wurde, liegt ohne den Teil hinter `#` im Vorrat (seit v78; vorher stand dort die Adresse samt Schlüssel bzw. Kennung, bis die App das nächste Mal ohne Link mit Netz geladen wurde) |
 | **die Liste** | wie zuletzt gesehen aus dem localStorage (`js/speicher.js`), Änderungen warten, bis wieder Netz da ist |
 | **Fotos der Sachen** | einmal geholt in einem eigenen Vorrat (`boxenstopp-sachen-v1`), der Updates übersteht (`js/ansicht-inventar.js`); die eines Gasts im Dashboard nur, solange es offen ist |
 
@@ -1152,7 +1153,10 @@ bei Chrome ab und zeigt sie mit eigenem Namen und Symbol im Ring.
   letzten Fehler. Sie geht nur an Supabase – nie in `liste.json`, einen Link
   (fürs zweite Handy, Gäste, Umzug), ein Repo oder den Fehlerbericht
   (`js/fehler.js` macht `bildschirmzeit=…` unkenntlich); kein Teil der App
-  sammelt den ganzen Speicher ein. Freizeit und Workout liegen auf derselben
+  sammelt den ganzen Speicher ein. Auch der Service Worker legt den Aufruf
+  mit dem Link ohne den Teil hinter `#` ab – bis dahin stand dort die ganze
+  Adresse samt Kennung (und bei `#zugang=` samt Schlüssel), bis die App
+  wieder ohne Link geladen wurde. Freizeit und Workout liegen auf derselben
   Adresse (finanzdienste.github.io) und teilen sich den Speicher; ihre
   Einträge (`bildschirmzeit.freizeit`, `bildschirmzeit.workout`) fasst
   Boxenstopp nicht an.
@@ -2017,9 +2021,12 @@ zusammengeführte eigene Liste und eine Sitzung aus mehreren Commits. `test-spei
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
 Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel.
 `test-bildschirmzeit.mjs` prüft ohne Browser, dass das Modul seinen Link
-nimmt, bevor die App die Adresse liest (kein anderes Modul hört auf
-`hashchange` oder liest die Adresse beim Laden), und dass kein Teil der App
-den ganzen Speicher einsammelt; im Browser gegen eine nachgebaute
+nimmt, bevor die App die Adresse liest (es ist die erste Anweisung in
+`app.js`; kein anderes Modul hört auf `hashchange` oder liest die Adresse
+beim Laden – der Code wird dafür zerlegt, auch Rückrufe, die gleich laufen,
+und Funktionen, die beim Laden über Importe aufgerufen werden, zählen mit;
+an drei Gegenbeispielen prüft die Prüfung sich selbst), und dass kein Teil
+der App den ganzen Speicher einsammelt; im Browser gegen eine nachgebaute
 Supabase-API: ohne Link nichts (keine Anfrage, kein Speicher, kein Wort in
 der App), der Link (Startansicht wie ohne, Adresse sauber, Hinweis, die
 Karte nach der Waage, `p_app`, `apikey` ohne Authorization, heute mit 0),
@@ -2027,6 +2034,7 @@ die Zeit nur sichtbar, Wegschalten mit `keepalive`, ein Fehler auf der
 Karte und wieder weg, „false“ trennt von selbst, ein Link bei offener App,
 „Trennen“ (die Einträge von Freizeit und Workout bleiben), die bisherigen
 Links `#zugang=`, `#ki=`, `#gaeste=`, `#einkauf` wie vorher, die Kennung
-weder in GitHub noch im Link fürs zweite Handy noch im Fehlerbericht, und
-die lila Fassung. Der Workflow „Prüfung“ lässt
+weder in GitHub noch im Link fürs zweite Handy noch im Fehlerbericht, die
+lila Fassung, und mit Service Worker: Der Aufruf mit dem Link liegt im
+Vorrat, aber ohne den Teil hinter `#`. Der Workflow „Prüfung“ lässt
 Linter und alle Tests bei jedem Push laufen.

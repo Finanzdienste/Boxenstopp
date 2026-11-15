@@ -18,10 +18,12 @@
  * Links (#zugang=, #ki=, #gaeste=, #einkauf) wirken wie vorher, der neue löst
  * keinen davon aus. Die Kennung landet nie in der Liste bei GitHub, im Link
  * fürs zweite Handy oder im Fehlerbericht; die lila Fassung meldet als
- * „boxenstopp“.
+ * „boxenstopp“. Mit Service Worker: Er legt den Aufruf mit dem Link ab, aber
+ * ohne den Teil hinter # – die Kennung steht in keinem Vorrat.
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import * as espree from 'espree';
 import { pruefer, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
 import { gaesteFuerLink } from '../js/gaeste.js';
 
@@ -39,9 +41,74 @@ const js = readdirSync(path.join(ROOT, 'js')).filter((f) => f.endsWith('.js'));
 const quelle = Object.fromEntries(js.map((f) => [f, readFileSync(path.join(ROOT, 'js', f), 'utf8')]));
 const andere = js.filter((f) => f !== 'bildschirmzeit.js');
 check(!andere.some((f) => /addEventListener\(\s*['"]hashchange|onhashchange/.test(quelle[f])), 'außer dem Modul hört kein Teil der App auf hashchange');
-const lesenHash = andere.filter((f) => /location\.hash/.test(quelle[f])).sort();
-check(JSON.stringify(lesenHash) === JSON.stringify(['ansicht-gaeste.js', 'app.js', 'zugang.js']), `die Adresse lesen nur app.js, zugang.js und ansicht-gaeste.js – aus start() heraus (${lesenHash.join(', ')})`);
+/*
+ * Wer liest die Adresse (location.hash) – und läuft das schon beim Laden?
+ * Beim Laden laufen erst alle importierten Module, dann app.js von oben; nur
+ * dort darf es geschehen (nach dem Modul, siehe unten). Für jedes Modul: was
+ * auf oberster Ebene steht und gleich läuft („datei:“, auch Rückrufe darin –
+ * sicher('…', () => …) ruft sofort), und jede Funktion oben im Modul
+ * („datei:name“). Liest eine die Adresse oder nennt eine, die es tut (auch
+ * über Importe, über beliebig viele Stufen), liest sie mit.
+ */
+const FUNKTION = /^(?:FunctionDeclaration|FunctionExpression|ArrowFunctionExpression)$/;
+const istHash = (n) => n.type === 'MemberExpression' && !n.computed && n.property.name === 'hash'
+  && (n.object.type === 'Identifier' ? n.object.name === 'location'
+    : n.object.type === 'MemberExpression' && !n.object.computed && n.object.property.name === 'location' && /^(?:window|document|globalThis|self)$/.test(n.object.object.name || ''));
+function wasLiestDieAdresse(quellen) {
+  const besitzer = new Map();
+  for (const [datei, text] of Object.entries(quellen)) {
+    if (datei === 'bildschirmzeit.js') continue;
+    const baum = espree.parse(text, { ecmaVersion: 'latest', sourceType: 'module' });
+    const oben = new Map(); // Name oben im Modul (auch importiert) → 'datei:name'
+    const teile = [];
+    for (const s of baum.body) {
+      if (s.type === 'ImportDeclaration') {
+        for (const sp of s.specifiers) if (sp.type === 'ImportSpecifier') oben.set(sp.local.name, `${path.basename(s.source.value)}:${sp.imported.name}`);
+        continue;
+      }
+      const d = /^Export(?:Named|Default)Declaration$/.test(s.type) ? s.declaration : s;
+      if (d?.type === 'FunctionDeclaration' && d.id) { oben.set(d.id.name, `${datei}:${d.id.name}`); teile.push([`${datei}:${d.id.name}`, d.body]); continue; }
+      if (d?.type === 'VariableDeclaration') {
+        for (const v of d.declarations) {
+          if (v.id.type === 'Identifier') oben.set(v.id.name, `${datei}:${v.id.name}`);
+          teile.push([v.id.type === 'Identifier' && FUNKTION.test(v.init?.type || '') ? `${datei}:${v.id.name}` : `${datei}:`, v.init]);
+        }
+        continue;
+      }
+      teile.push([`${datei}:`, s]);
+    }
+    for (const [wer, knoten] of teile) {
+      if (!besitzer.has(wer)) besitzer.set(wer, { liest: false, nennt: new Set() });
+      const b = besitzer.get(wer);
+      const geh = (n, eltern, feld) => {
+        if (!n || typeof n.type !== 'string') return;
+        if (istHash(n)) b.liest = true;
+        const nurName = (eltern?.type === 'MemberExpression' && feld === 'property' && !eltern.computed)
+          || (/^(?:Property|MethodDefinition|PropertyDefinition)$/.test(eltern?.type || '') && feld === 'key' && !eltern.computed);
+        if (n.type === 'Identifier' && !nurName && oben.has(n.name)) b.nennt.add(oben.get(n.name));
+        for (const [k, v] of Object.entries(n)) for (const kind of Array.isArray(v) ? v : [v]) if (kind && typeof kind.type === 'string') geh(kind, n, k);
+      };
+      geh(knoten, null, '');
+    }
+  }
+  const liest = new Set([...besitzer].filter(([, b]) => b.liest).map(([w]) => w));
+  for (let neu = true; neu;) {
+    neu = false;
+    for (const [w, b] of besitzer) if (!liest.has(w) && [...b.nennt].some((x) => liest.has(x))) { liest.add(w); neu = true; }
+  }
+  return [...liest].sort();
+}
+const beimLaden = (q) => wasLiestDieAdresse(q).filter((w) => w.endsWith(':'));
+const lesenHash = wasLiestDieAdresse(quelle);
+check(JSON.stringify(beimLaden(quelle)) === '["app.js:"]', `beim Laden liest nur app.js die Adresse, kein importiertes Modul – die anderen nur in Funktionen, die erst start() aufruft (${lesenHash.join(', ')})`);
+// Die Prüfung selbst: Sie fände, was sie finden soll
+const zugang = quelle['zugang.js'];
+check(JSON.stringify(beimLaden({ ...quelle, 'zugang.js': `const h = location.hash;\n${zugang}` })) === '["app.js:","zugang.js:"]'
+  && beimLaden({ ...quelle, 'zugang.js': `${zugang}\nsicher('x', () => window.location.hash);` }).includes('zugang.js:')
+  && beimLaden({ ...quelle, 'kern.js': `import { linkAusAdresse } from './zugang.js';\nconst hilf = () => linkAusAdresse();\n${quelle['kern.js']}\nexport const x = hilf();` }).includes('kern.js:'), 'die Prüfung fände es: oben in zugang.js gelesen, in einem Rückruf, der gleich läuft, oder über einen Import und eine Hilfsfunktion beim Laden aufgerufen');
 const appJs = quelle['app.js'];
+const ersteAnweisung = espree.parse(appJs, { ecmaVersion: 'latest', sourceType: 'module' }).body.find((s) => s.type !== 'ImportDeclaration');
+check(ersteAnweisung?.type === 'ExpressionStatement' && ersteAnweisung.expression.callee?.name === 'sicher' && ersteAnweisung.expression.arguments[1]?.name === 'bildschirmzeitStart', 'app.js: die erste Anweisung nach den Importen ist sicher(\'Bildschirmzeit\', bildschirmzeitStart)');
 const aufruf = appJs.indexOf("sicher('Bildschirmzeit', bildschirmzeitStart);");
 check(aufruf > 0 && aufruf < appJs.indexOf('location.hash') && aufruf < appJs.indexOf('\nstart();') && aufruf < appJs.indexOf("addEventListener('visibilitychange'"), 'app.js: das Modul startet als Erstes nach den Importen – vor start(), das die Adresse liest');
 check(/^import \{[^}]*bildschirmzeitStart[^}]*\} from '\.\/ansicht-bildschirmzeit\.js';$/m.test(appJs) && /import \{[^}]*bildschirmzeitStarten[^}]*\} from '\.\/bildschirmzeit\.js';/.test(quelle['ansicht-bildschirmzeit.js'] || ''), 'app.js holt ansicht-bildschirmzeit.js, das holt js/bildschirmzeit.js');
@@ -289,6 +356,28 @@ check(await bis(async () => (await l.page.locator('#sync-text').innerText()) ===
 check(await bis(() => melden(sbL).length >= 1) && melden(sbL).every((x) => x.body?.p_app === 'boxenstopp' && x.body?.p_kennung === K2) && JSON.stringify(Object.keys(await eintraege(l.page))) === JSON.stringify(['bildschirmzeit.boxenstopp']), 'lila: meldet als „boxenstopp“, gemerkt unter bildschirmzeit.boxenstopp');
 check(l.fehler.length === 0, `lila: keine Fehler im Browser (${l.fehler.join(' | ')})`);
 await l.ctx.close();
+
+// --- (h) Mit Service Worker: Er legt den Seitenaufruf ab, aber ohne den Teil hinter # – die Kennung bleibt nur im localStorage
+const VORRAT = `boxenstopp-${readFileSync(path.join(ROOT, 'sw.js'), 'utf8').match(/const VERSION = '([^']+)'/)[1]}`;
+const sbW = supabaseAttrappe();
+const w = await handy(browser, { bildschirmzeit: sbW, ohneWorker: false });
+const wp = w.page;
+check(await bis(() => wp.evaluate(async (v) => !!navigator.serviceWorker.controller && await caches.has(v), VORRAT), 20000), `mit Service Worker: er steuert die App, der Vorrat ${VORRAT} ist da`);
+// Die abgelegte Seite weg – dann zeigt ihr Wiederkommen, dass der Aufruf mit dem Link abgelegt wurde
+await wp.evaluate((v) => caches.open(v).then((c) => c.delete('index.html')), VORRAT);
+await wp.goto(grund);
+await wp.goto(`${APP_URL}#bildschirmzeit=${K}`);
+await wp.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+const abgelegt = await bis(() => wp.evaluate(async (v) => (await (await caches.open(v)).keys()).some((r) => new URL(r.url).pathname.endsWith('/index.html')), VORRAT), 10000);
+const mitAnker = await wp.evaluate(async (k) => {
+  const treffer = [];
+  for (const n of await caches.keys()) for (const r of await (await caches.open(n)).keys()) if (r.url.includes('#') || r.url.includes(k)) treffer.push(`${n}: ${r.url.replace(k, '<Kennung>')}`);
+  return treffer;
+}, K);
+check(abgelegt && !mitAnker.length, `mit Service Worker: der Aufruf mit dem Link liegt im Vorrat – ohne den Teil hinter #, die Kennung steht in keinem Vorrat (${mitAnker.join(', ') || 'keiner'})`);
+check(await bis(() => melden(sbW).length >= 1) && (await gespeichert(wp))?.kennung === K && await wp.evaluate(() => location.hash === ''), 'mit Service Worker: der Link verbindet wie ohne, die Adresse ist sauber');
+check(w.fehler.length === 0, `mit Service Worker: keine Fehler im Browser (${w.fehler.join(' | ')})`);
+await w.ctx.close();
 
 await browser.close();
 ende();
