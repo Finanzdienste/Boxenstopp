@@ -152,6 +152,8 @@ const VERARBEITET = /sauce|soße|sosse|creme|crème|shot|drink|smoothie|rolle\b|
 export function schluesselRaten(name, katalog = {}) {
   const n = String(name || '').toLowerCase().replace(/ß/g, 'ß');
   const verarbeitet = VERARBEITET.test(n);
+  // Gemischtes Hack oder Schwein ist kein Rinderhack und kein Rindergulasch
+  const schwein = /schwein|gemischt|halb und halb/.test(n);
   // [Muster, Schlüssel, nur roh?]
   const REGELN = [
     [/hähnchen.?brust|hühnerbrust|chicken breast|hähnchen.?innenfilet|hähnchen.?geschnetz|hähnchen.?streifen|hähnchen.?filet/, 'haehnchenbrust', true],
@@ -256,7 +258,7 @@ export function schluesselRaten(name, katalog = {}) {
     [/senf/, 'senf', false],
   ];
   for (const [re, k, roh] of REGELN) {
-    if (!re.test(n) || !katalog[k]) continue;
+    if (!re.test(n) || !katalog[k] || (schwein && /^rind/.test(k))) continue;
     if (roh && verarbeitet) return '';
     return k;
   }
@@ -289,7 +291,7 @@ export function mengeAus(text) {
   return { menge: null, einheit: '' };
 }
 
-/** Schwein, Fisch & Co. – was die beiden nicht essen – fliegt aus den Angeboten raus. */
+/** Fisch, Putenhack & Co. – was die beiden nicht essen – fliegt aus den Angeboten raus (Schwein nicht). */
 export const istTabu = (name) => VERBOTEN.test(String(name || ''));
 
 /** Eine feste id aus Laden, Name und Preis – damit derselbe Artikel bei jedem Abruf dieselbe hat. */
@@ -634,7 +636,7 @@ export function systemTextAngebote({ katalog }) {
     .join('; ');
   return `Du liest Supermarkt-Angebote aus Fotos von Prospektseiten, Screenshots aus Supermarkt-Apps und getippten Zeilen heraus und gibst sie als JSON genau nach dem vorgegebenen Schema aus.
 
-Nimm nur Lebensmittel, die sich zum Kochen eignen: Fleisch (kein Schwein, kein Fisch), Geflügel, Eier, Milchprodukte, Käse, Gemüse, Obst, Hülsenfrüchte, Reis, Nudeln, Kartoffeln, Konserven, Öl, Saucen, Nüsse. Keine Süßigkeiten, Getränke, Fertiggerichte, Wurst, Fisch, Schweinefleisch, Non-Food.
+Nimm nur Lebensmittel, die sich zum Kochen eignen: Fleisch (auch Schwein), Geflügel, Eier, Milchprodukte, Käse, Gemüse, Obst, Hülsenfrüchte, Reis, Nudeln, Kartoffeln, Konserven, Öl, Saucen, Nüsse. Keinen Fisch, kein Putenhack, keine Süßigkeiten, Getränke, Fertiggerichte, Wurst, Aufschnitt, Non-Food.
 
 Je Angebot: laden (steht meist auf der Seite oder im Screenshot; wenn nicht erkennbar, aus dem Text des Nutzers), name kurz wie im Prospekt, preis als Zahl in Euro (der Angebotspreis für alle, nicht der Streichpreis und nicht ein Preis, der nur mit App oder Kundenkarte gilt – Lidl Plus, Kaufland Card, Payback), menge und einheit der Packung (1 kg → menge 1, einheit kg; 500 g → 500, g; 3 Stück → 3, Stk; Dose → 1, Dose), bis als JJJJ-MM-TT, wenn eine Gültigkeit zu sehen ist, sonst leer.
 katalog: der passende Schlüssel aus dieser Liste, wenn das Produkt dieser Zutat entspricht (Hähnchenbrustfilet → haehnchenbrust, Basmati → reis), sonst leer: ${kat}

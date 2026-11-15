@@ -118,7 +118,7 @@ const rg = rumpfAngebote('gemini', { fotos: ['abc'], text: 'Aldi', katalog, mode
 check(rg.model === 'g' && rg.response_format.schema === ANGEBOTE_SCHEMA && rg.input.length === 2 && rg.input[0].type === 'image' && /Prospekt/.test(rg.system_instruction) && /haehnchenbrust=/.test(rg.system_instruction), 'Gemini-Anfrage: Bild, Text, Schema, Katalog im Auftrag');
 const ra = rumpfAngebote('anthropic', { fotos: [], text: 'Aldi Hähnchen 1 kg 7,49', katalog, modell: { gemini: 'g', anthropic: 'a' } });
 check(ra.model === 'a' && ra.output_config.format.type === 'json_schema' && ra.output_config.format.schema.title === undefined && ra.output_config.format.schema.properties.angebote.items.additionalProperties === false && !ra.tools && ra.messages[0].content.length === 1 && /Antworte nur mit dem JSON/.test(ra.system), 'Claude-Anfrage: JSON nach dem Schema, ohne title, Objekte geschlossen');
-check(/kein Schwein, kein Fisch/.test(systemTextAngebote({ katalog })) && !/salz=/.test(systemTextAngebote({ katalog })), 'Auftrag: kein Schwein, kein Fisch; Gewürze nicht im Katalog');
+check(/Fleisch \(auch Schwein\)/.test(systemTextAngebote({ katalog })) && /Keinen Fisch, kein Putenhack/.test(systemTextAngebote({ katalog })) && /Wurst, Aufschnitt/.test(systemTextAngebote({ katalog })) && !/salz=/.test(systemTextAngebote({ katalog })), 'Auftrag: Fleisch auch vom Schwein, kein Fisch, kein Putenhack, keine Wurst; Gewürze nicht im Katalog');
 const sys = systemText({ portionen: 8, ziel: daten.ziel, dazukaufen: true, katalog, anbieter: 'gemini', modus: 'angebote' });
 check(/Angeboten der Woche/.test(sys) && /quelle: kaufen/.test(sys) && !/Kühlschrank und im Vorrat ist, machst/.test(sys), 'Rezept aus Angeboten: eigener Auftrag, alles zu kaufen');
 check(nutzerText({ text: 'Aldi: X', portionen: 8, dazukaufen: true, modus: 'angebote' }).startsWith('Das ist diese Woche im Angebot:'), 'und der Nutzertext sagt, dass es Angebote sind');
@@ -145,7 +145,7 @@ check(kl.some((a) => a.menge && a.einheit), 'Kaufland: Packung aus „je 250-g-P
 
 const pe = pennyLesen([['fleisch-und-wurst', JSON.parse(fix('penny-fleisch-und-wurst.json'))], ['obst-und-gemuese', JSON.parse(fix('penny-obst-und-gemuese.json'))]], bezug);
 const peNamen = pe.map((a) => a.name);
-check(peNamen.includes('Zitronen') && !peNamen.some((n) => /Schweine|Kaffee|Coca|Pringles/i.test(n)), `Penny: Zitronen ja, Schwein, Kaffee, Cola, Chips nein (${peNamen.join(' · ')})`);
+check(peNamen.includes('Zitronen') && peNamen.some((n) => /Schweine-Filet/.test(n)) && !peNamen.some((n) => /Käsefleischkäse|Kaffee|Coca|Pringles/i.test(n)), `Penny: Zitronen und Schweinefilet ja – Fleischkäse, Kaffee, Cola, Chips nein (${peNamen.join(' · ')})`);
 check(pe.find((a) => a.name === 'Zitronen')?.k === 'zitrone' && pe.every((a) => a.bis === '2026-10-31'), 'Penny: Schlüssel, Gültigkeit bis Samstag der Woche');
 // --- Produktfotos der Händler
 const alH = aldiLesen(fix('aldi.html'), bezug).find((a) => /Hähnchen/.test(a.name));
@@ -166,7 +166,7 @@ check(lp.length === 2 && lp[0].von === '2026-10-26' && lp[0].bis === '2026-10-31
 const kd = kaufdaLesen(fix('kaufda-stichwort.html'));
 const kdNamen = kd.map((a) => `${a.laden}: ${a.name}`);
 check(kd.length && kd.every((a) => ['Rewe', 'Edeka'].includes(a.laden)) && !kdNamen.some((n) => /Musterhof|Hackfleisch vom Hähnchen/i.test(n)), `kaufDA: nur Rewe und Edeka – Penny haben wir direkt, Netto nicht (${kdNamen.join(' · ')})`);
-check(!kdNamen.some((n) => /gemischt|Schweine|Aufschnitt|Puten Hack/.test(n)) && kdNamen.includes('Rewe: Rinder-Hackfleisch') && kdNamen.includes('Edeka: Hofgut Muster Rinder-Hackfleisch'), 'kaufDA: Schwein (auch nur „vom Rind und Schwein“ in der Beschreibung), Putenhack und Aufschnitt bleiben draußen');
+check(!kdNamen.some((n) => /Aufschnitt|Puten Hack/.test(n)) && kdNamen.includes('Rewe: Gut Beispiel Schweine-Hackfleisch') && kdNamen.includes('Rewe: Hausmarke Bio Hackfleisch gemischt') && kd.filter((a) => /gemischt|Schwein/.test(a.name)).every((a) => a.k !== 'rinderhack') && kdNamen.includes('Rewe: Rinder-Hackfleisch') && kdNamen.includes('Edeka: Hofgut Muster Rinder-Hackfleisch'), 'kaufDA: Schwein und gemischtes Hack sind dabei (aber nicht als Rinderhack), Putenhack und Aufschnitt bleiben draußen');
 const rh = kd.find((a) => a.laden === 'Rewe' && a.name === 'Rinder-Hackfleisch');
 check(rh && rh.preis === 1.49 && rh.menge === 100 && rh.einheit === 'g' && rh.k === 'rinderhack' && rh.von === '2026-10-26' && rh.bis === '2026-10-31', `kaufDA: Preis je 100 g, Schlüssel, Gültigkeit in Berliner Tagen (${JSON.stringify(rh)})`);
 const ed = kd.find((a) => a.laden === 'Edeka' && /Mastortehof/.test(a.name));
@@ -219,7 +219,7 @@ const anfragenMock = (zuViel) => {
   check(roh.length === 4 && ruempfe.length === 3 && meldungen.some((m) => /Seiten 1–4: Antwort zu lang, halbiert/.test(m)) && meldungen.some((m) => /Seiten 3–4: 2 gelesen, 100\/50\+7 Tokens/.test(m)), `Lidl: zu lange Antwort → Stapel halbiert, alle 4 Seiten in 2 Anfragen gelesen (${ruempfe.length} Anfragen)`);
   const r = ruempfe[0];
   const g = r.generationConfig;
-  check(g.thinkingConfig.thinkingLevel === 'LOW' && g.maxOutputTokens >= 32000 && g.temperature === undefined && g.responseMimeType === 'application/json' && g.responseSchema.title === 'angebote' && /Seiten 1–4/.test(r.contents[0].parts.at(-1).text) && /kein Schwein/.test(r.system_instruction.parts[0].text) && r.contents[0].parts[0].inline_data.mime_type === 'image/jpeg', 'Lidl: generateContent-Anfrage mit wenig Nachdenken, großer Ausgabegrenze, JSON-Schema, Seitenbereich im Text');
+  check(g.thinkingConfig.thinkingLevel === 'LOW' && g.maxOutputTokens >= 32000 && g.temperature === undefined && g.responseMimeType === 'application/json' && g.responseSchema.title === 'angebote' && /Seiten 1–4/.test(r.contents[0].parts.at(-1).text) && /Keinen Fisch, kein Putenhack/.test(r.system_instruction.parts[0].text) && r.contents[0].parts[0].inline_data.mime_type === 'image/jpeg', 'Lidl: generateContent-Anfrage mit wenig Nachdenken, großer Ausgabegrenze, JSON-Schema, Seitenbereich im Text');
 }
 {
   const { anfragen, ruempfe } = anfragenMock(0);
@@ -337,7 +337,7 @@ const anfragenMock = (zuViel) => {
 // --- Claude liest den Prospekt: Rumpf, Anfrage gegen einen Mock von /v1/messages (Strom), Wahl des Anbieters
 {
   const r = claudeRumpf({ fotos: ['abc'], text: 'Lidl, Seiten 1–6', katalog });
-  check(r.model === 'claude-opus-5-5' && r.output_config?.format?.type === 'json_schema' && r.output_config.format.schema.required.includes('angebote') && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /kein Schwein/.test(r.system), 'Claude-Rumpf: Fable, JSON nach dem Schema, Seitenbilder, Seitenbereich im Text');
+  check(r.model === 'claude-opus-5-5' && r.output_config?.format?.type === 'json_schema' && r.output_config.format.schema.required.includes('angebote') && r.messages[0].content[0].source.data === 'abc' && /Seiten 1–6/.test(r.messages[0].content.at(-1).text) && /Keinen Fisch, kein Putenhack/.test(r.system), 'Claude-Rumpf: Fable, JSON nach dem Schema, Seitenbilder, Seitenbereich im Text');
   const { anfragen: mock, ruempfe } = (() => {
     const liste = [];
     return { anfragen: async (rumpf) => { liste.push(rumpf); return { eingabe: { angebote: [{ laden: 'Lidl', name: 'Skyr', preis: 0.99 }] }, usage: { ein: 1, aus: 2, cacheLesen: 2500, cacheSchreiben: 14000, berater: 1 } }; }, ruempfe: liste };

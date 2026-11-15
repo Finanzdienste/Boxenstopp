@@ -9,7 +9,7 @@
  * kcal durch 8). So kommt bei derselben Antwort immer dieselbe Reihenfolge
  * heraus, und ändert man sein Ziel, sortiert die App neu, ohne die KI.
  *
- * Fisch, Schwein, Putenhack und Hüttenkäse markiert die KI (enthaelt); diese
+ * Fisch, Putenhack und Hüttenkäse markiert die KI (enthaelt); diese
  * Gerichte stehen nicht oben, sondern für sich (wie alle Rezepte der App
  * ohne sie).
  *
@@ -32,8 +32,8 @@ import { linkAus, WEBSUCHE, SEITE_LESEN } from './amy-import.js';
 export const ARTEN = ['hauptgang', 'salat', 'suppe', 'vorspeise', 'snack', 'beilage', 'dessert'];
 export const ART_NAME = { hauptgang: 'Hauptgang', salat: 'Salat', suppe: 'Suppe', vorspeise: 'Vorspeise', snack: 'Snack', beilage: 'Beilage', dessert: 'Dessert' };
 export const SICHER = ['grob', 'mittel', 'gut'];
-export const ENTHAELT = ['fisch', 'schwein', 'putenhack', 'huettenkaese'];
-export const ENTHAELT_NAME = { fisch: 'Fisch', schwein: 'Schwein', putenhack: 'Putenhack', huettenkaese: 'Hüttenkäse' };
+export const ENTHAELT = ['fisch', 'putenhack', 'huettenkaese'];
+export const ENTHAELT_NAME = { fisch: 'Fisch', putenhack: 'Putenhack', huettenkaese: 'Hüttenkäse' };
 /** Was als Mahlzeit oben stehen kann – Desserts und Beilagen nicht. */
 const MAHLZEIT = new Set(['hauptgang', 'salat', 'suppe', 'vorspeise', 'snack']);
 const MAX_GERICHTE = 80;
@@ -77,7 +77,7 @@ export const KARTE_SCHEMA = {
 };
 
 const zahl1 = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
-const REGEL_ENTHAELT = '- enthaelt: fisch (auch Meeresfrüchte, Hering, Sardellen, Fischsauce), schwein (auch Speck, Schinken, Wurst, Brät, Maultaschen mit Fleisch, Gelatine), putenhack, huettenkaese – wenn es drin ist oder sehr wahrscheinlich drin ist. Das Gericht bleibt trotzdem in der Liste.';
+const REGEL_ENTHAELT = '- enthaelt: fisch (auch Meeresfrüchte, Hering, Sardellen, Fischsauce), putenhack, huettenkaese – wenn es drin ist oder sehr wahrscheinlich drin ist. Schwein ist kein Problem. Das Gericht bleibt trotzdem in der Liste.';
 const REGEL_TIPP = '- tipp: eine konkrete Bestellung, die es näher ans Ziel bringt (Sauce extra, halbe Portion Beilage, Salat statt Pommes, Dressing weglassen) – und mit_tipp die Werte dann. Kein Tipp, wenn es schon gut passt.';
 const zielSatz = (ziel) => `${Math.round(ziel.kcal)} kcal, ${zahl1(ziel.p)} g Protein, ${zahl1(ziel.kh)} g Kohlenhydrate, ${zahl1(ziel.f)} g Fett`;
 
@@ -233,7 +233,7 @@ export function bewerten(g, ziel) {
 
 /**
  * Sortiert: oben, was als Mahlzeit am nächsten am Ziel liegt; Desserts und
- * Beilagen danach; was Fisch, Schwein & Co. enthält, für sich.
+ * Beilagen danach; was Fisch & Co. enthält, für sich.
  * → { oben: [...], rest: [...], ohne: [...] } – je Eintrag { g, b }.
  */
 export function sortieren(gerichte, ziel) {

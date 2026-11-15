@@ -172,7 +172,7 @@ function ergebnisHTML() {
   const erste = oben[0] ? gerichtKarte(oben[0], true) : `<p class="sk-leer">${va ? 'Dort gibt es wohl nichts, was als Mahlzeit passt.' : 'Auf der Karte ist nichts, was als Mahlzeit passt.'}</p>`;
   const auch = oben.length > 1 ? `<h3 class="sub-h">Danach am nächsten</h3><div class="sk-auch">${oben.slice(1).map((x) => gerichtKarte(x)).join('')}</div>` : '';
   const alle = rest.length ? `<details class="sk-alle"><summary>Alle weiteren Gerichte (${rest.length}), nächstes zuerst</summary><ul class="sk-liste">${rest.map(zeileHTML).join('')}</ul></details>` : '';
-  const nicht = ohne.length ? `<details class="sk-alle sk-ohne"><summary>${istEigen() ? 'Mit Fisch, Schwein & Co.' : 'Esst ihr nicht'} (${ohne.length})</summary><ul class="sk-liste">${ohne.map(zeileHTML).join('')}</ul></details>` : '';
+  const nicht = ohne.length ? `<details class="sk-alle sk-ohne"><summary>${istEigen() ? 'Mit Fisch & Co.' : 'Esst ihr nicht'} (${ohne.length})</summary><ul class="sk-liste">${ohne.map(zeileHTML).join('')}</ul></details>` : '';
   const quellen = va ? quellenVon(ergebnis) : [];
   const fuss = va
     ? `${quellen.length ? `<p class="fine sk-quellen">Gefunden auf: ${quellen.map((q) => `<a href="${esc(q.url)}" target="_blank" rel="noopener noreferrer">${esc(q.host)}</a>`).join(', ')}</p>` : ''}

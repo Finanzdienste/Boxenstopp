@@ -23,7 +23,7 @@
  * Teriyaki-Sauce statt selbst gemacht“), die KI bekommt das Rezept, wie es
  * gerade steht (alsVorlage, im Format ihrer Antwort), und gibt es geändert
  * zurück – nur das Verlangte, der Rest bleibt. Die App prüft es wie jedes
- * KI-Rezept (kein Fisch, kein Schwein …), schließt es ans Original an
+ * KI-Rezept (kein Fisch, kein Putenhack …), schließt es ans Original an
  * (aenderungUebernehmen: neu, weggelassen) und rechnet die Mengen wieder auf
  * die Ziele. Danach steht es im Editor wie jede andere Änderung: ansehen,
  * nachbessern, speichern.

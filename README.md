@@ -26,8 +26,8 @@ Liste setzt, alles eingekauft ist, Amy ein neues Rezept hat, ein
 Preisalarm zuschlägt oder im Putzplan etwas dran ist (siehe unten).
 
 Jedes Rezept ergibt 8 Boxen. Ziel pro Box: **443 kcal, 33 g Protein, 39 g KH,
-15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein Schwein,
-kein Putenhack. Ein anderes Ziel trägt man in den Einstellungen ein, dann
+15,4 g Fett**; alle Rezepte liegen bei 434–453 kcal. Kein Fisch, kein
+Putenhack (Schwein geht). Ein anderes Ziel trägt man in den Einstellungen ein, dann
 rechnen sich alle Rezepte darauf um (siehe „Ziel pro Box“) – und wer für
 weniger kocht, stellt dort ein, für wie viele Boxen (siehe „Boxen pro
 Rezept“).
@@ -809,7 +809,9 @@ nicht, wenn es teurer ist als das, was ihr sonst zahlt). Der Verlauf
 wächst mit jeder Woche – am Anfang steht dort noch nichts.
 
 Getränke, Süßes, Drogerie,
-Schwein und Fisch fliegen raus; jedes Angebot bekommt, wenn es eine
+Fisch und Putenhack fliegen raus (Schweinefleisch zum Kochen bleibt, Wurst,
+Fleischkäse und Aufschnitt nicht; gemischtes Hack zählt nie als Rinderhack);
+jedes Angebot bekommt, wenn es eine
 Rezeptzutat ist, den Katalog-Schlüssel (`schluesselRaten` in
 `js/angebote.js`, mit Sperre für Verarbeitetes wie Saucen und Chips). Die
 Ansicht zeigt erst die Rezeptzutaten, auf Wunsch nur Hähnchen oder alle
@@ -1214,7 +1216,7 @@ und im Vorrat liegt (bis zu 4 Fotos), Portionen wählen (2, 4, 6 oder 8),
 sagen, ob dazugekauft werden darf, und Wünsche. Die KI macht daraus **ein**
 Rezept im selben Format wie alle anderen – Mise en place mit Schalen, ein
 Schritt pro Zeile, Minuten – und mit denselben Regeln: kein Fisch, kein
-Schwein, kein Putenhack, kein Hüttenkäse in warmen Saucen, ordentlich
+Putenhack, kein Hüttenkäse in warmen Saucen (Schwein geht), ordentlich
 gewürzt. Was ihr mit Daumen hoch oder runter bewertet habt, geht als
 Geschmackshinweis mit.
 
@@ -1298,8 +1300,8 @@ schätzt je Portion kcal, Protein, KH und Fett, so wie sie im Restaurant kommt
 Tipp zum Bestellen („Remoulade weglassen“) mit den Werten dann. Was am nächsten
 am Ziel pro Box liegt, rechnet die App (`js/speisekarte.js`, dieselbe
 Abweichung wie beim Anpassen) – oben das Gericht, darunter die nächsten zwei,
-dann alle; Desserts und Beilagen nie oben, Fisch und Schwein für sich („Esst
-ihr nicht“). Das Ergebnis merkt sich das Gerät (`boxenstopp.speisekarte.v1`,
+dann alle; Desserts und Beilagen nie oben, Fisch, Putenhack und Hüttenkäse
+für sich („Esst ihr nicht“; Schwein ist ganz normal). Das Ergebnis merkt sich das Gerät (`boxenstopp.speisekarte.v1`,
 nicht in liste.json): Im Restaurant ohne Netz ist es noch da, und mit einem
 anderen Ziel sortiert die App neu, ohne die KI. Restaurantportionen
 schwanken – die App sagt ±20 %. PDFs bis 15 MB (Gemini: `type: document`,
@@ -1364,7 +1366,7 @@ Resteverwertung) bekommt das Rezept, wie es gerade steht, im Format ihrer
 Antwort (`alsVorlage()` in `js/ki-rezept.js`; Auftrag im Modus `aendern` in
 `js/ki.js`): Sie ändert nur, was verlangt ist, und lässt alles andere mit
 denselben ids, Mengen und Schritten stehen. Die App prüft die Antwort wie jedes
-KI-Rezept (kein Fisch, kein Schwein, kein Putenhack, kein Hüttenkäse),
+KI-Rezept (kein Fisch, kein Putenhack, kein Hüttenkäse),
 schließt sie ans Original an (`aenderungUebernehmen()`: neue Zutaten „neu“,
 verschwundene „weggelassen“, mit „zurück“ wiederzuholen) und rechnet die
 Mengen wieder auf die Ziele – im Beispiel 441 kcal / 33,0 P / 39,2 KH /
@@ -1830,8 +1832,8 @@ Döschen, Spieße) kommt mit `H(...)` ins Rezept und steht dann unter
 `haushalt` → Extras (js/bereiche.js).
 `daten/rezepte.json` steht nicht im Offline-Vorrat von `sw.js`: Für ein
 neues Rezept muss dort nichts geändert werden. Dafür braucht es ein Motiv
-fürs Foto in `werkzeug/bilder.mjs` (`MOTIVE`, auf Englisch, ohne Schwein und
-Fisch – `test-bilder.mjs` prüft das); das Foto selbst macht nach dem Push
+fürs Foto in `werkzeug/bilder.mjs` (`MOTIVE`, auf Englisch, ohne Fisch –
+`test-bilder.mjs` prüft das); das Foto selbst macht nach dem Push
 die Action „Rezeptfotos“.
 
 ## Dateien

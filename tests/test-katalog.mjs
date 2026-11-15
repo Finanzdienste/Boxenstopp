@@ -30,7 +30,7 @@ const { r: k } = kiBereinigen({ ...SUPPE, portionen: 8 });
 
 const sys = systemText({ portionen: 8, ziel: STANDARD, dazukaufen: true, katalog: daten.katalog, modus: 'wunsch', wer: 'Tobi und Amy' });
 check(sys.includes('nach dem Wunsch von Tobi oder Amy') && sys.includes('„Kürbissuppe“') && sys.includes('mageres Protein oder eine Sättigungsbeilage') && sys.includes('Katalog der App'), 'Auftrag: ein Rezept nach Wunsch – nur ein Gericht wird eine ganze Mahlzeit, es kommt in den Katalog');
-check(sys.includes('Alles wird eingekauft') && sys.includes('ganze Supermarkt-Packungen') && sys.includes('großzügig') && sys.includes('Kein Fisch') && sys.includes('Kein Schweinefleisch') && sys.includes('Ziel pro Box: 443 kcal'), 'Regeln: alles kaufen, ganze Packungen, Spielraum für andere Ziele – und wie immer kein Fisch, kein Schwein, das Ziel');
+check(sys.includes('Alles wird eingekauft') && sys.includes('ganze Supermarkt-Packungen') && sys.includes('großzügig') && sys.includes('Kein Fisch') && sys.includes('Kein Putenhack') && sys.includes('Ziel pro Box: 443 kcal'), 'Regeln: alles kaufen, ganze Packungen, Spielraum für andere Ziele – und wie immer kein Fisch, kein Putenhack, das Ziel');
 const nut = nutzerText({ text: 'Kürbissuppe', portionen: 8, modus: 'wunsch', mag: ['Chili'], vermeiden: ['Kürbissuppe mit Hähnchen'] });
 check(nut.startsWith('Der Wunsch:\nKürbissuppe') && nut.includes('Portionen: 8') && nut.includes('Das mögen sie (Daumen hoch): Chili') && nut.includes('Diesmal anders als: Kürbissuppe mit Hähnchen') && !nut.includes('Dazukaufen'), 'Nachricht: der Wunsch, 8 Portionen, Daumen, „diesmal anders“ – nichts von Kühlschrank und Dazukaufen');
 const rumpf = rumpfFuer('gemini', { text: 'Etwas Cremiges mit Hähnchen und Spinat, ohne Ofen', fotos: [], portionen: 8, dazukaufen: true, ziel: STANDARD, katalog: {}, modus: 'wunsch', wer: 'Marielle' });
@@ -41,8 +41,8 @@ check(rumpf.input.length === 1 && rumpf.input[0].text.includes('ohne Ofen') && r
 const at = (t) => new Date(Date.UTC(2026, 10, 7, 10, t)).toISOString();
 const k1 = katalogDazu(leererKatalog(), 'kat-suppe0001', { k, wunsch: 'Kürbissuppe', by: 'Tobi', ziel: STANDARD, at: at(0) });
 check(Object.keys(k1.rezepte).length === 1 && k1.rezepte['kat-suppe0001'].wunsch === 'Kürbissuppe' && k1.rezepte['kat-suppe0001'].k.zutaten.length === 9, 'Ein Eintrag: das Rezept im KI-Format, der Wunsch, wer, wann, das Ziel');
-const kaputt = katalogBereinigen({ rezepte: { 'falsche id': k1.rezepte['kat-suppe0001'], 'kat-ohnedatum': { ...k1.rezepte['kat-suppe0001'], at: 'gestern' }, 'kat-schwein01': { ...k1.rezepte['kat-suppe0001'], k: { ...k, name: 'Kürbissuppe mit Speck' } }, 'kat-gut00001': k1.rezepte['kat-suppe0001'] }, weg: { 'kat-kaputt1': 'irgendwann' } });
-check(JSON.stringify(Object.keys(kaputt.rezepte)) === '["kat-gut00001"]' && !Object.keys(kaputt.weg).length, 'Bereinigen: falsche id, ohne Datum, mit Speck – fällt weg');
+const kaputt = katalogBereinigen({ rezepte: { 'falsche id': k1.rezepte['kat-suppe0001'], 'kat-ohnedatum': { ...k1.rezepte['kat-suppe0001'], at: 'gestern' }, 'kat-fisch001': { ...k1.rezepte['kat-suppe0001'], k: { ...k, name: 'Kürbissuppe mit Garnelen' } }, 'kat-speck001': { ...k1.rezepte['kat-suppe0001'], k: { ...k, name: 'Kürbissuppe mit Speck' } }, 'kat-gut00001': k1.rezepte['kat-suppe0001'] }, weg: { 'kat-kaputt1': 'irgendwann' } });
+check(JSON.stringify(Object.keys(kaputt.rezepte)) === '["kat-gut00001","kat-speck001"]' && !Object.keys(kaputt.weg).length, 'Bereinigen: falsche id, ohne Datum, mit Garnelen – fällt weg; mit Speck bleibt (Schwein essen sie)');
 const viele = { rezepte: {} };
 for (let i = 0; i < MAX_KATALOG + 5; i++) viele.rezepte[`kat-v${String(i).padStart(4, '0')}`] = { ...k1.rezepte['kat-suppe0001'], at: new Date(Date.UTC(2026, 0, 1, 0, i)).toISOString() };
 const gekappt = katalogBereinigen(viele);

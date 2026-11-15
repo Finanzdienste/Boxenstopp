@@ -4,7 +4,7 @@
  *
  *   KI-Antwort (Werkzeug „rezept_ausgeben“, siehe SCHEMA)
  *     → kiBereinigen()    alles, was nicht passt, fällt weg, Längen begrenzt;
- *                         Fisch, Schwein und Putenhack lassen das Rezept platzen
+ *                         Fisch, Putenhack und Hüttenkäse lassen das Rezept platzen
  *     → mengenAnpassen()  die Mengen mit `anpassbar` (Fleisch, Reis, Öl, Käse …)
  *                         zwischen min und max so, dass jede Box das Ziel trifft
  *     → alsRezept()       Zutaten, Nährwertrechnung, Schritte mit echten Mengen
@@ -27,11 +27,12 @@ export const KI_ID = /^ki-[a-z0-9]{4,16}$/;
 export const MAX_GESPEICHERT = 12;
 
 /*
- * Was Tobi und Amy nicht essen. Steht das in einem Namen, gilt das Rezept
+ * Was Tobi und Amy nicht essen: Fisch und Meeresfrüchte, Putenhack,
+ * Hüttenkäse (Schwein ja). Steht das in einem Namen, gilt das Rezept
  * nicht – die KI kennt die Regel, das hier ist das Netz darunter. „ohne …“
  * zählt nicht („Currypaste ohne Garnelen“).
  */
-export const VERBOTEN = /schwein|speck|schinken|bacon|salami|chorizo|pancetta|guanciale|mortadella|leberkäse|leberwurst|mett\b|bratwurst|wiener würstchen|kassler|kasseler|gelatine|gemischtes hack|hackfleisch,? gemischt|halb und halb|fisch|lachs|thunfisch|forelle|kabeljau|seelachs|garnele|shrimp|krabbe|sardelle|anchovi|muschel|tintenfisch|calamar|puten.?hack|hack\w* (?:von|aus) der pute|hüttenkäse/i;
+export const VERBOTEN = /fisch|lachs|thunfisch|forelle|kabeljau|seelachs|garnele|shrimp|krabbe|sardelle|anchovi|muschel|tintenfisch|calamar|puten.?hack|hack\w* (?:von|aus) der pute|hüttenkäse/i;
 const ohneOhne = (s) => String(s).replace(/ohne [\wäöüß-]+(?: (?:und|oder) [\wäöüß-]+)?/gi, '');
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);

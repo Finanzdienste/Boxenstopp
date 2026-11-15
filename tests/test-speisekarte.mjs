@@ -61,7 +61,7 @@ const QUELLEN = [{ url: 'https://seemannskirche.example/basar-2026', titel: 'Bas
 /* ----------------------------------------------------------- Anfrage */
 
 const sys = karteSystem({ ziel: ZIEL, wer: 'Tobi' });
-check(sys.includes('443 kcal, 33 g Protein, 39 g Kohlenhydrate, 15,4 g Fett') && /mehr Fett als zu Hause/.test(sys) && /fisch/.test(sys) && /schwein/.test(sys), 'System: Ziel, ehrliche Restaurant-Portionen, Fisch und Schwein markieren');
+check(sys.includes('443 kcal, 33 g Protein, 39 g Kohlenhydrate, 15,4 g Fett') && /mehr Fett als zu Hause/.test(sys) && /fisch/.test(sys) && /Schwein ist kein Problem/.test(sys), 'System: Ziel, ehrliche Restaurant-Portionen, Fisch markieren – Schwein nicht');
 const g1 = rumpfKarte({ anbieter: 'gemini', ziel: ZIEL, wer: 'Tobi', pdf: 'UERG', fotos: [] });
 check(g1.input[0].type === 'document' && g1.input[0].mime_type === 'application/pdf' && g1.input[0].data === 'UERG' && g1.response_format?.schema === KARTE_SCHEMA && g1.store === false && g1.stream === true, 'Gemini mit PDF: document mit application/pdf, Schema, nicht gespeichert, gestreamt');
 const g2 = rumpfKarte({ anbieter: 'gemini', ziel: ZIEL, fotos: ['AAA', 'BBB'] });
@@ -75,7 +75,7 @@ check(a1.messages[0].content[0].type === 'document' && a1.messages[0].content[0]
 
 const b = karteBereinigen(KARTE);
 check(b.restaurant === 'Brauhaus am Hafen' && b.gerichte.length === 7, `Bereinigen: ohne Namen, mit unsinnigen Werten und doppelt fällt weg (${b.gerichte.length})`);
-check(b.gerichte.find((g) => g.name.startsWith('Schweine')).enthaelt.join() === 'schwein', 'Bereinigen: nur bekannte Markierungen');
+check(b.gerichte.find((g) => g.name.startsWith('Schweine')).enthaelt.join() === '', 'Bereinigen: nur bekannte Markierungen – „schwein“ ist keine mehr');
 check(b.gerichte[0].mitTipp?.kcal === 540 && !b.gerichte[2].mitTipp, 'Bereinigen: Werte mit Tipp nur, wenn es einen Tipp gibt');
 check(karteBereinigen({ gerichte: [] }).fehler && karteBereinigen(null).fehler, 'Keine Gerichte: ein Satz statt eines Ergebnisses');
 const be = bewerten(b.gerichte[0], ZIEL);
@@ -83,7 +83,7 @@ check(be.tipp && be.werte.kcal === 540 && be.abweichung.kcal === 97, 'Bewerten: 
 const s = sortieren(b.gerichte, ZIEL);
 check(s.oben[0].g.name === 'Brauhaussalat mit Backhendl', `Am nächsten: der Salat (${s.oben[0].g.name})`);
 check(!s.oben.some((x) => x.g.art === 'dessert') && s.rest.some((x) => x.g.art === 'dessert'), 'Desserts stehen nicht oben');
-check(s.ohne.map((x) => x.g.name).sort().join() === 'Hamburger Labskaus,Schweineschnitzel Wiener Art' && !s.oben.some((x) => x.g.enthaelt.length), 'Fisch und Schwein für sich, nicht oben');
+check(s.ohne.map((x) => x.g.name).join() === 'Hamburger Labskaus' && !s.oben.some((x) => x.g.enthaelt.length) && [...s.oben, ...s.rest].some((x) => x.g.name.startsWith('Schweine')), 'Fisch für sich, nicht oben – das Schweineschnitzel ganz normal');
 const viel = sortieren(b.gerichte, { kcal: 1100, p: 65, kh: 90, f: 50 });
 check(viel.oben[0].g.name === 'Zwiebelrostbraten mit Spätzle', 'Anderes Ziel, andere Reihenfolge');
 
@@ -149,7 +149,7 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
 const TAG = tagText('2026-11-15');
 check(TAG === 'Sonntag, 15. November 2026' && tagText('kaputt') === '', 'Der Tag für die KI: „Sonntag, 15. November 2026“');
 const vsys = veranstaltungSystem({ ziel: ZIEL, wer: 'Tobi', tag: TAG });
-check(vsys.includes('am Sonntag, 15. November 2026') && vsys.includes('443 kcal, 33 g Protein') && /Websuche/.test(vsys) && /„typisch“/.test(vsys) && /Wikipedia/.test(vsys) && /schwein/.test(vsys) && /Nichts als „seite“ ausgeben, was nicht auf einer Seite stand/.test(vsys), 'System Veranstaltung: Tag, Ziel, suchen, sonst „typisch“, Wikipedia-Titel, Schwein markieren, nichts erfinden');
+check(vsys.includes('am Sonntag, 15. November 2026') && vsys.includes('443 kcal, 33 g Protein') && /Websuche/.test(vsys) && /„typisch“/.test(vsys) && /Wikipedia/.test(vsys) && /Schwein ist kein Problem/.test(vsys) && /Nichts als „seite“ ausgeben, was nicht auf einer Seite stand/.test(vsys), 'System Veranstaltung: Tag, Ziel, suchen, sonst „typisch“, Wikipedia-Titel, Schwein markieren, nichts erfinden');
 check(/nicht im Netz nachsehen/.test(veranstaltungSystem({ ziel: ZIEL, suchen: false })), 'Ohne Suche (Gemini): schätzen, was es dort meistens gibt');
 const va1 = rumpfVeranstaltung({ anbieter: 'anthropic', ziel: ZIEL, wer: 'Tobi', was: '  God Jul Seemannskirche  ', tag: TAG });
 check(va1.model === ANBIETER.anthropic.modell && va1.tools.map((t) => t.type).join() === 'web_search_20250305,web_fetch_20250910' && va1.tools[0].max_uses === 6 && va1.tools[0].user_location?.country === 'DE' && va1.messages[0].content[0].text === 'Die Veranstaltung: God Jul Seemannskirche\nWann: Sonntag, 15. November 2026', 'Claude: Websuche (6) und Seiten lesen, in der Frage nur die Veranstaltung und der Tag');
@@ -163,7 +163,7 @@ check(vb.staende.map((x) => x.name).join() === 'Waffelstand,Hotdog-Stand,Glögg,
 const wrap = vb.gerichte.find((g) => g.name.startsWith('Hähnchen'));
 check(wrap.quelle === 'typisch' && !wrap.url && vb.gerichte[0].quelle === 'seite' && vb.gerichte[0].url === SEITE && vb.gerichte[0].wiki === 'Waffel' && vb.gerichte[0].stand === 'Waffelstand', 'Gerichte: Adresse aus der Suche „laut Seite“, ausgedacht „vermutlich“; Stand und Wikipedia-Titel bleiben');
 check(vb.gerichte.filter((g) => g.name === 'Waffel mit Marmelade und Sahne').length === 2, 'Dasselbe Gericht an zwei Ständen bleibt zweimal');
-check(sortieren(vb.gerichte, ZIEL).oben[0].g.name === 'Hähnchen-Wrap mit Krautsalat' && sortieren(vb.gerichte, ZIEL).ohne.length === 2, 'Sortiert wie bei der Karte: der Wrap vorn, Köttbullar und Smørrebrød für sich');
+check(sortieren(vb.gerichte, ZIEL).oben[0].g.name === 'Hähnchen-Wrap mit Krautsalat' && sortieren(vb.gerichte, ZIEL).ohne.map((x) => x.g.name).join() === 'Smørrebrød mit Krabben', 'Sortiert wie bei der Karte: der Wrap vorn, Smørrebrød (Krabben) für sich, Köttbullar normal');
 check(JSON.stringify(quellenVon(vb)) === JSON.stringify([{ host: 'seemannskirche.example', url: SEITE }]), 'Gefunden auf: nur die Websites, die belegt sind, je einmal');
 const vg = veranstaltungBereinigen(JSON.parse(JSON.stringify(VA)), { quellen: [] });
 check(!vg.gefunden && !vg.veranstaltung.url && vg.staende.every((x) => x.quelle === 'typisch') && vg.gerichte.every((g) => g.quelle === 'typisch' && !g.url), 'Ohne Suche (Gemini): nichts belegt – alles „vermutlich“, keine Adresse');
@@ -216,7 +216,7 @@ const an = anfragen[0];
 check(an.input[0].type === 'document' && an.input[0].mime_type === 'application/pdf' && Buffer.from(an.input[0].data, 'base64').toString('utf8').startsWith('%PDF') && /443 kcal/.test(an.system_instruction), 'Die Anfrage: das PDF als document, das Ziel im Auftrag');
 const erste = await p.locator('.sk-erste').innerText();
 check(erste.includes('Brauhaussalat mit Backhendl') && erste.includes('So bestellen') && erste.includes('Remoulade weglassen') && erste.includes('540'), 'Oben: der Salat – mit Tipp, mit den Werten dann');
-check((await p.locator('.sk-ergebnis').innerText()).includes('Esst ihr nicht (2)'), 'Fisch und Schwein für sich: „Esst ihr nicht (2)“');
+check((await p.locator('.sk-ergebnis').innerText()).includes('Esst ihr nicht (1)'), 'Fisch für sich: „Esst ihr nicht (1)“');
 // gemerkt
 await p.reload();
 await p.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
@@ -267,7 +267,7 @@ check(kopfText.includes('God Jul – Weihnachtsbasar der Seemannskirche') && kop
 const ersteVa = (await vp.locator('.sk-erste').innerText()).replace(/\s+/g, ' ');
 check(ersteVa.includes('Hähnchen-Wrap') && ersteVa.includes('Stand: Kirchenküche') && ersteVa.includes('vermutlich'), `Am nächsten am Ziel: der Wrap, mit Stand – „vermutlich“ (die Adresse war ausgedacht) (${ersteVa.slice(0, 120)})`);
 const staendeText = (await vp.locator('.sk-staende').innerText()).replace(/\s+/g, ' ');
-check(/Waffelstand laut Seite/.test(staendeText) && /Hotdog-Stand vermutlich/.test(staendeText) && staendeText.includes('Kirchenküche') && (await vp.locator('.sk-ohne').textContent()).includes('Köttbullar'), 'Die Stände: „laut Seite“ und „vermutlich“; Köttbullar unter „Esst ihr nicht“');
+check(/Waffelstand laut Seite/.test(staendeText) && /Hotdog-Stand vermutlich/.test(staendeText) && staendeText.includes('Kirchenküche') && (await vp.locator('.sk-ohne').textContent()).includes('Smørrebrød') && !(await vp.locator('.sk-ohne').textContent()).includes('Köttbullar'), 'Die Stände: „laut Seite“ und „vermutlich“; Smørrebrød unter „Esst ihr nicht“, Köttbullar nicht');
 check(await bis(() => vp.evaluate(() => [...document.querySelectorAll('.sk-ergebnis .sk-bild img')].some((i) => i.src === 'https://upload.wikimedia.org/test/waffel.jpg'))) && wiki.anfragen.length === 1 && wiki.anfragen[0].kopf['api-user-agent'] === KENNUNG, 'Bilder aus Wikipedia – eine Anfrage, mit der Kennung der App');
 check(await vp.evaluate(() => !!document.querySelector('.sk-ergebnis .sk-bild.symbol img[src*="bilder/zutaten/"]')), 'Ohne Wikipedia-Bild (Smørrebrød, der Wrap): ein Bildchen der App');
 check(await bis(() => vp.evaluate(() => document.querySelector('.sk-va-bild')?.src.startsWith('blob:'))) && shop.anfragen.length === 1 && shop.anfragen[0].seite === SEITE, 'Oben das Bild der Seite – über die Funktion, mit der Seite');

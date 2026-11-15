@@ -38,7 +38,9 @@ check(riesig.name.length === 70 && riesig.zutaten[0].menge === 5000 && riesig.zu
 const doppelt = kiBereinigen({ ...ANTWORT, zutaten: [ANTWORT.zutaten[0], { ...ANTWORT.zutaten[0], name: 'Noch mehr Hähnchen' }] }).r;
 check(doppelt.zutaten[0].id !== doppelt.zutaten[1].id, `doppelte ids werden eindeutig (${doppelt.zutaten.map((z) => z.id).join(', ')})`);
 const mitSpeck = kiBereinigen({ ...ANTWORT, zutaten: [...ANTWORT.zutaten, { ...ANTWORT.zutaten[0], id: 'speck', name: 'Speckwürfel' }] });
-check(mitSpeck.r === null && mitSpeck.art === 'verboten' && /Speck/.test(mitSpeck.fehler), 'Speck in den Zutaten: kein Rezept („das esst ihr nicht“)');
+check(mitSpeck.r && mitSpeck.art !== 'verboten', 'Speck in den Zutaten: geht – Schwein essen sie');
+const mitPutenhack = kiBereinigen({ ...ANTWORT, zutaten: [...ANTWORT.zutaten, { ...ANTWORT.zutaten[0], id: 'putenhack', name: 'Putenhackfleisch' }] });
+check(mitPutenhack.r === null && mitPutenhack.art === 'verboten' && /Putenhack/.test(mitPutenhack.fehler), 'Putenhack in den Zutaten: kein Rezept („das esst ihr nicht“)');
 const mitFisch = kiBereinigen({ ...ANTWORT, gewuerze: [...ANTWORT.gewuerze, { name: 'Fischsauce', menge: '1 EL' }] });
 check(mitFisch.art === 'verboten', 'Fischsauce bei den Gewürzen: kein Rezept');
 check(kiBereinigen({ ...ANTWORT, zutaten: [...ANTWORT.zutaten, { ...ANTWORT.zutaten[0], id: 'paste', name: 'Rote Currypaste ohne Garnelen' }] }).r !== null, '„ohne Garnelen“ ist erlaubt');
@@ -122,7 +124,7 @@ const inhalt = rumpf.messages[0].content;
 check(inhalt.length === 3 && inhalt[0].type === 'image' && inhalt[0].source.media_type === 'image/jpeg' && inhalt[2].type === 'text', 'erst die Fotos, dann der Text');
 check(/Portionen: 4/.test(inhalt[2].text) && /Dazukaufen: nein/.test(inhalt[2].text) && /was Griechisches/.test(inhalt[2].text) && /Daumen hoch\): Butter Chicken/.test(inhalt[2].text) && /nicht noch einmal: Feta-Reispfanne/.test(inhalt[2].text), 'im Text: Portionen, Dazukaufen, Wünsche, was ihr mögt und was nicht');
 const sys = rumpf.system;
-check(/Kein Fisch/.test(sys) && /Kein Schweinefleisch/.test(sys) && /kein Putenhack/.test(sys) && /Hüttenkäse/.test(sys), 'die Regeln gehen mit: kein Fisch, kein Schwein, kein Putenhack, kein Hüttenkäse');
+check(/Kein Fisch/.test(sys) && /Kein Putenhack/.test(sys) && /Hüttenkäse/.test(sys) && /Rind, Schwein, Eier/.test(sys) && !/Kein Schweinefleisch/.test(sys), 'die Regeln gehen mit: kein Fisch, kein Putenhack, kein Hüttenkäse – Schwein ist gut');
 check(sys.includes('443 kcal') && sys.includes('33 g Protein') && /Mise en place/.test(sys) && /Schale 2/.test(sys) && /\{id\}/.test(sys) && /nichts dazugekauft/.test(sys), 'Ziel, Mise en place, Schalen, Platzhalter und „nichts dazukaufen“ stehen im Auftrag');
 check(sys.includes('haehnchenbrust=Hähnchenbrustfilet') && !sys.includes('backpapier='), 'der Katalog geht mit (ohne Haushalt)');
 
@@ -157,7 +159,7 @@ check(!JSON.stringify(vorlage).includes('"kauf"') && !JSON.stringify(vorlage).in
 const WUNSCH = 'fertige Teriyaki-Sauce statt selbst gemacht';
 const ra = anfrageBauenGemini({ modus: 'aendern', rezept: vorlage, wunsch: WUNSCH, portionen: 8, ziel: ZIEL, katalog: daten.katalog });
 const raText = ra.input.at(-1).text;
-check(/änderst ein bestehendes Rezept/.test(ra.system_instruction) && /Kein Fisch/.test(ra.system_instruction) && /Kein Schweinefleisch/.test(ra.system_instruction) && /443 kcal/.test(ra.system_instruction) && /Platzhalter/.test(ra.system_instruction), 'Ändern: der Auftrag, mit allen Regeln und dem Ziel');
+check(/änderst ein bestehendes Rezept/.test(ra.system_instruction) && /Kein Fisch/.test(ra.system_instruction) && /Kein Putenhack/.test(ra.system_instruction) && /443 kcal/.test(ra.system_instruction) && /Platzhalter/.test(ra.system_instruction), 'Ändern: der Auftrag, mit allen Regeln und dem Ziel');
 check(raText.endsWith(`Was anders sein soll: ${WUNSCH}`) && JSON.parse(raText.split('\n')[1]).zutaten.length === vorlage.zutaten.length && raText.includes('"id":"sojasauce"') && ra.input.length === 1, 'Ändern: das Rezept als JSON und der Wunsch, kein Foto');
 const rc = anfrageBauen({ modus: 'aendern', rezept: vorlage, wunsch: WUNSCH, portionen: 8, ziel: ZIEL, katalog: daten.katalog });
 check(/änderst ein bestehendes Rezept/.test(rc.system) && rc.output_config.format.type === 'json_schema' && rc.messages[0].content.at(-1).text.includes(WUNSCH), 'Ändern geht auch mit Claude');
@@ -510,9 +512,9 @@ check(await bis(async () => (await t.locator('.ki-lauf').count()) === 1), 'währ
 await t.click('[data-act="k-abbrechen"]');
 check(await bis(async () => (await t.locator('#k-form').count()) === 1) && (await t.locator('#k-fehler').isHidden()), 'Abbrechen: zurück zum Formular, ohne Fehler');
 ki.z.verzoegerung = 0;
-ki.z.antwort = { ...ANTWORT, zutaten: [...ANTWORT.zutaten, { ...ANTWORT.zutaten[0], id: 'speck', name: 'Speckwürfel' }] };
+ki.z.antwort = { ...ANTWORT, zutaten: [...ANTWORT.zutaten, { ...ANTWORT.zutaten[0], id: 'putenhack', name: 'Putenhackfleisch' }] };
 await t.click('#k-los');
-check(await bis(async () => (await t.locator('#k-fehler').innerText().catch(() => '')).includes('das esst ihr nicht')), 'Speck im Rezept: Hinweis statt Rezept');
+check(await bis(async () => (await t.locator('#k-fehler').innerText().catch(() => '')).includes('das esst ihr nicht')), 'Putenhack im Rezept: Hinweis statt Rezept');
 ki.z.antwort = ANTWORT;
 
 // --- Anpassen im Browser: Teriyaki mit 200 g Brokkoli und Erbsen

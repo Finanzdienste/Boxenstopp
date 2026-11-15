@@ -9,7 +9,7 @@ Jedes Rezept ergibt 8 Boxen. Ziel pro Box: 443 kcal, 33 g Protein, 39 g KH,
 `nutrows` aus den Werten pro 100 g in naehrwerte.py.
 
 Mengen immer in Supermarkt-Packungen denken: 400 g Hähnchen, 500 g Hack,
-Dosen, Becher. Kein Fisch, kein Schwein, kein Putenhack. Wer ein Rezept
+Dosen, Becher. Kein Fisch, kein Putenhack (Schwein geht). Wer ein Rezept
 ändert, lässt das Skript laufen und schaut in die Tabelle am Ende: kcal, P,
 KH, F pro Box und die Zeiten. tests/test-rezepte.mjs prüft die Grenzen.
 

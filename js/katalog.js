@@ -46,7 +46,7 @@ function wegBereinigen(w) {
 
 /**
  * Aus beliebigem JSON ein gültiger Katalog: kaputte oder verbotene Rezepte
- * (Fisch, Schwein – kiBereinigen) fallen weg, Herausgenommenes auch, höchstens
+ * (Fisch, Putenhack – kiBereinigen) fallen weg, Herausgenommenes auch, höchstens
  * MAX_KATALOG (die neuesten). Schlüssel sortiert, damit gleiche Kataloge
  * gleich aussehen (gleicherKatalog).
  */

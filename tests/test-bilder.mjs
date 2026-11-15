@@ -62,6 +62,6 @@ check(rezepte.every((r) => MOTIVE[r.id]), `jedes Rezept hat ein Motiv auf Englis
 check(Object.keys(MOTIVE).every((id) => rezepte.some((r) => r.id === id)), 'kein Motiv für ein Rezept, das es nicht gibt');
 const a = auftrag(rezepte.find((r) => r.id === 'chili'));
 check(a.length < 2048 && /meal prep container/.test(a) && /no text/.test(a) && /chili con carne/.test(a), 'der Auftrag: Box von oben, kein Text, das Motiv; unter 2048 Zeichen');
-check(!Object.values(MOTIVE).some((m) => /pork|bacon|ham\b|fish|salmon|tuna|shrimp/i.test(m)), 'kein Schwein, kein Fisch in den Motiven');
+check(!Object.values(MOTIVE).some((m) => /fish|salmon|tuna|shrimp|prawn/i.test(m)), 'kein Fisch in den Motiven');
 
 ende();
