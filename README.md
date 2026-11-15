@@ -1305,6 +1305,27 @@ anderen Ziel sortiert die App neu, ohne die KI. Restaurantportionen
 schwanken – die App sagt ±20 %. PDFs bis 15 MB (Gemini: `type: document`,
 Claude: `document`-Block).
 
+**Veranstaltung** (Umschalter oben, das Gerät merkt sich die Wahl): Statt
+einer Karte sagt man, wohin man geht und wann (Standard heute) – ein Basar,
+ein Weihnachtsmarkt, ein Fest. Claude sucht sie im Netz (Websuche bis sechs
+Mal, bis vier Seiten lesen): offizielle Seite, Programm, Stände, Speisen,
+Preise, Berichte vom letzten Mal – und schätzt, was nicht dasteht, als
+„typisch“ für so eine Veranstaltung. Oben die Veranstaltung mit dem Bild ihrer
+Seite (über die Supabase-Funktion `produkt-bild`, nur mit einem Schlüssel von
+Anthropic, nur im Speicher), Ort, Zeit und „Im Netz gefunden“ oder „Nicht
+gefunden – geschätzt“; dann wie bei der Karte das Gericht, das dem Ziel am
+nächsten kommt – mit Stand und „laut Seite“ oder „vermutlich“ –, die Stände
+mit ihren Gerichten, alle weiteren, „Esst ihr nicht“ und „Gefunden auf“.
+„Laut Seite“ zählt nur mit einer Adresse, deren Website in den Such- oder
+Leseergebnissen vorkam (sonst wäre sie ausgedacht). Bilder: je Gericht das
+Bild seines deutschen Wikipedia-Artikels (eine Anfrage für alle an
+`de.wikipedia.org/w/api.php` mit `origin=*`, nur frei lizenzierte Bilder, mit
+der Kennung der App als `Api-User-Agent`; gemerkt wird die Adresse), ohne
+Bild ein Bildchen der App nach Name oder Art. Mit Gemini sucht die App nicht
+(Google-Suche ist tabu) – dann ist alles geschätzt. An die KI geht nur, was
+man getippt hat, der Tag und das Ziel; gemerkt wird nur das Ergebnis, nicht
+die Frage.
+
 ### Rezept anpassen
 
 Im Rezept „Anpassen“: Jede Zutat mit Menge, Schloss und ✕. Nur 200 g Brokkoli
@@ -1850,7 +1871,7 @@ die Action „Rezeptfotos“.
 | `js/ansicht-willkommen.js` | das Willkommen für einen Gast (Makros, aufs Handy, wem die Liste gehört) |
 | `js/bildschirmzeit.js` | Bildschirmzeit fürs Widget: messen, solange sichtbar, an Supabase melden, trennen – wortgleiche Kopie aus Finanzdienste/Bildschirmzeit (`web/bildschirmzeit.js`), nur dort ändern |
 | `js/ansicht-bildschirmzeit.js` | Bildschirmzeit in Boxenstopp: als Erstes beim Start, die Karte in den Einstellungen (nur verbunden), Trennen |
-| `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel – und die Ansicht |
+| `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel; Veranstaltung (Claude sucht Stände und Gerichte, Bilder aus Wikipedia) – und die Ansicht |
 | `icon-lila*.png`, `icon-lila.svg`, `manifest-lila.webmanifest` | Symbol und Manifest einer lila Liste |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
 | `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten (mit der Schätzung der KI), Schritte – ohne DOM |
@@ -2025,7 +2046,15 @@ Putzplan, Sachen (Liste angelegt, umbenannt, gelöscht; Sache dazu, geändert �
 nur welche Felder –, in eine andere Liste, gelöscht, umsortiert), Ziel, eine
 zusammengeführte eigene Liste und eine Sitzung aus mehreren Commits. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
-Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel.
+Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel – und die
+Veranstaltung: die Anfrage (Websuche und Seiten lesen bei Claude, bei Gemini
+ohne Werkzeuge), „laut Seite“ nur mit einer Adresse aus der Suche, Stände aus
+den Gerichten, dasselbe Gericht an zwei Ständen, Bilder aus Wikipedia
+(Weiterleitungen, nur upload.wikimedia.org, ohne Bild ein Bildchen, nicht noch
+einmal gefragt), im Browser mit nachgebautem Claude, Wikipedia (`WIKI_HOSTS` in
+`tests/hilfe.mjs` – kein Test fragt die echten) und `produkt-bild`: Kopf mit
+Bild der Seite, Stände, „Gefunden auf“, gemerkt ohne neue Anfrage, mit Gemini
+alles geschätzt.
 `test-bildschirmzeit.mjs` prüft ohne Browser, dass das Modul seinen Link
 nimmt, bevor die App die Adresse liest (es ist die erste Anweisung in
 `app.js`; kein anderes Modul hört auf `hashchange` oder liest die Adresse
