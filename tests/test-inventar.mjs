@@ -276,11 +276,24 @@ const kiRoute = async (r) => {
   return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/event-stream' }, body: STROM(JSON.stringify(ki.antwort)) });
 };
 
-// Eine Kamera (nachgebaut): ein Bild mit Strichen, eine Taschenlampe (außer mit __kamera.ohneLicht) – was mit ihr geschieht, steht in __kamera
+// Eine Kamera (nachgebaut): ein Bild mit Strichen, eine Taschenlampe (außer mit __kamera.ohneLicht) – was mit ihr geschieht, steht in __kamera.
+// Mit __kamera.mehrere wie bei Samsung: hinten drei Kameras, der Browser nimmt zuerst die Weitwinkel-Kamera ohne Licht – Licht hat die Hauptkamera „camera2 0“
 const KAMERA = `(() => {
-  window.__kamera = { licht: [], gestoppt: 0, anfragen: 0, ohneLicht: false };
-  navigator.mediaDevices.getUserMedia = async () => {
+  window.__kamera = { licht: [], gestoppt: 0, anfragen: 0, ohneLicht: false, mehrere: false, geoeffnet: [] };
+  const GERAETE = [
+    { deviceId: 'weit', label: 'camera2 2, facing back' },
+    { deviceId: 'vorn', label: 'camera2 1, facing front' },
+    { deviceId: 'tele', label: 'camera2 3, facing back' },
+    { deviceId: 'haupt', label: 'camera2 0, facing back' },
+  ];
+  const liste = () => (window.__kamera.mehrere ? GERAETE : [GERAETE[3]]);
+  navigator.mediaDevices.enumerateDevices = async () => liste().map((d) => ({ ...d, kind: 'videoinput', groupId: 'g' }));
+  navigator.mediaDevices.getUserMedia = async (k) => {
     window.__kamera.anfragen++;
+    const wunsch = k?.video?.deviceId?.exact;
+    if (wunsch && !liste().some((d) => d.deviceId === wunsch)) throw Object.assign(new Error('Die Kamera gibt es nicht'), { name: 'OverconstrainedError' });
+    const id = wunsch || liste()[0].deviceId;
+    window.__kamera.geoeffnet.push(id);
     const cv = document.createElement('canvas');
     cv.width = 640;
     cv.height = 480;
@@ -290,8 +303,9 @@ const KAMERA = `(() => {
     const takt = setInterval(malen, 100);
     const s = cv.captureStream(15);
     const t = s.getVideoTracks()[0];
-    t.getCapabilities = () => (window.__kamera.ohneLicht ? {} : { torch: true });
-    t.applyConstraints = async (k) => { window.__kamera.licht.push(k?.advanced?.[0]?.torch); };
+    t.getSettings = () => ({ deviceId: id, width: 640, height: 480 });
+    t.getCapabilities = () => (window.__kamera.ohneLicht || id !== 'haupt' ? {} : { torch: true });
+    t.applyConstraints = async (k) => { const a = k?.advanced?.[0] || {}; if ('torch' in a) window.__kamera.licht.push(a.torch); };
     const stop = t.stop.bind(t);
     t.stop = () => { window.__kamera.gestoppt++; clearInterval(takt); stop(); };
     return s;
@@ -573,7 +587,8 @@ const m5h = await geraet({ kamera: true, schluessel: GKEY });
 const m5 = m5h.page;
 await m5.evaluate(() => { window.__kamera.ohneLicht = true; });
 await m5.click('[data-act="inv-scannen"][data-zweck="finden"]');
-check(await bis(async () => (await m5.locator('#scan-text').innerText()).includes('dann „Auslösen“')) && await m5.locator('[data-scan="licht"]').isHidden() && (await m5.locator('#scan-app-text').innerText()).includes('Blitz'), 'Ohne Leser: „Auslösen“ – ohne Taschenlampe der Tipp mit dem Blitz der Kamera-App');
+check(await bis(async () => (await m5.locator('#scan-text').innerText()).includes('dann „Auslösen“')) && await m5.locator('[data-scan="licht"]').isHidden() && await bis(async () => (await m5.locator('#scan-app-text').innerText()).includes('Blitz')), 'Ohne Leser: „Auslösen“ – ohne Taschenlampe der Tipp mit dem Blitz der Kamera-App');
+check(await m5.evaluate(() => window.__kamera.anfragen === 1 && !!JSON.parse(localStorage.getItem('boxenstopp.scanner.kamera.v1'))?.ohne), 'Nur eine Kamera, ohne Licht: keine Suche – das Gerät merkt es sich');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: CODE };
 const vorKi = ki.anfragen.length;
 await m5.click('[data-scan="ausloesen"]');
@@ -584,6 +599,22 @@ await bis(async () => (await m5.locator('#scan-text').innerText()).includes('Aus
 const gestoppt = await m5.evaluate(() => window.__kamera.gestoppt);
 await m5.click('[data-scan="zu"]');
 check(await bis(async () => (await m5.locator('#scan-dlg[open]').count()) === 0) && await m5.evaluate((v) => window.__kamera.gestoppt > v, gestoppt), '× schließt den Scanner, die Kamera geht aus');
+
+// Wie auf einem Samsung: hinten mehrere Kameras, der Browser nimmt die Weitwinkel-Kamera ohne Licht – die App sucht die mit Taschenlampe
+const m6h = await geraet({ leser: true, kamera: true });
+const m6 = m6h.page;
+await m6.evaluate(() => { window.__still = true; window.__kamera.mehrere = true; });
+await m6.click('[data-act="inv-scannen"][data-zweck="finden"]');
+check(await bis(() => m6.locator('[data-scan="licht"]').isVisible(), 8000) && JSON.stringify(await m6.evaluate(() => window.__kamera.geoeffnet)) === '["weit","haupt"]', `Mehrere Kameras hinten: erst die Weitwinkel-Kamera, dann die Hauptkamera („camera2 0“) – die hat Licht, der Knopf ist da (${await m6.evaluate(() => window.__kamera.geoeffnet.join())})`);
+check(await m6.evaluate(() => window.__kamera.gestoppt >= 1 && JSON.parse(localStorage.getItem('boxenstopp.scanner.kamera.v1'))?.id === 'haupt') && (await m6.locator('#scan-text').innerText()).includes('das Handy liest ihn von selbst') && (await m6.locator('#scan-app-text').innerText()) === '', 'Die Weitwinkel-Kamera ist aus, die Hauptkamera gemerkt, kein Tipp mehr mit der Kamera-App');
+await m6.click('[data-scan="licht"]');
+check(await bis(async () => (await m6.locator('[data-scan="licht"]').getAttribute('aria-pressed')) === 'true') && JSON.stringify(await m6.evaluate(() => window.__kamera.licht)) === '[true]', 'Taschenlampe an der Hauptkamera');
+await m6.click('[data-scan="zu"]');
+await m6.click('[data-act="inv-scannen"][data-zweck="finden"]');
+check(await bis(() => m6.locator('[data-scan="licht"]').isVisible()) && JSON.stringify(await m6.evaluate(() => window.__kamera.geoeffnet)) === '["weit","haupt","haupt"]', 'Beim nächsten Scannen gleich die Hauptkamera – ohne zu suchen');
+check(!(await m6.evaluate(() => window.__kamera.geoeffnet.includes('vorn'))) && m6h.fehler.length === 0, `Die Kamera vorn bleibt aus; keine Fehler (${m6h.fehler.join(' | ')})`);
+await m6.click('[data-scan="zu"]');
+await m6h.ctx.close();
 
 // Löschen mit Rückgängig – das Foto kommt erst danach weg
 await m.click('[data-inv-ding]:has-text("Lederjacke")');
