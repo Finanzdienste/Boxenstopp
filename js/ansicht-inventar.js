@@ -1,8 +1,11 @@
 /*
- * Ihr Bereich → Sachen: eigene Listen für alles, was sie hat – Kleidung,
- * Make-up, Schmuck, Bücher … (inventar.js rechnet, hier wird gezeichnet).
- * Bei Tobi und Amy sind es Amys Sachen (in der gemeinsamen Liste, Tobi sieht
- * sie auch), in einer eigenen Liste die des Gasts (Marielle).
+ * Sachen: eigene Listen für alles, was sie hat – Kleidung, Make-up, Schmuck,
+ * Bücher … (inventar.js rechnet, hier wird gezeichnet). Die Ansicht läuft an
+ * zwei Stellen: in Amys eigener App Sachen (sachen/, seit v83 – ihre Sachen
+ * liegen in sachen.json im Daten-Repo, Tobi sieht sie auch) und in Boxenstopp
+ * nur noch in der eigenen Liste eines Gasts (Marielle, „Marielles Bereich“ →
+ * Sachen, in ihrer liste.json). Was hier steht, liest app.stand.inventar und
+ * schreibt mit app.aendern – welche Datei das ist, entscheidet die App drumherum.
  *
  * Drei Ansichten: alle Listen (mit Suche und „Hab ich das schon?“), eine
  * Liste (sortiert, nach Tags gefiltert, in eigener Reihenfolge) und eine
@@ -46,7 +49,7 @@ import { tagsBereinigen, tagFarbe, MAX_TAGS } from './amy.js';
 import { dateiHochladen, dateiHolen, dateiLoeschen } from './speicher.js';
 import { ortVon, ladeKi } from './zugang.js';
 import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
-import { fotoVorbereiten } from './ansicht-ki.js';
+import { fotoVorbereiten } from './foto.js';
 import { jsonAus } from './amy-import.js';
 import { rumpfErkennen, erkanntBereinigen } from './inventar-ki.js';
 import { nachschlagen, rumpfNachschlagen, gesuchtBereinigen, shopBild } from './inventar-netz.js';
@@ -59,7 +62,7 @@ import {
 
 const ANSICHT = 'boxenstopp.inventar.ansicht.v1'; // { liste, ding, tag, sort: { <sl-…>: 'name' } } – nur auf diesem Gerät
 const WEG = 'boxenstopp.inventar.weg.v1'; // Fotos zum Wegräumen: [{ pfad, sha, at }]
-const FOTOS = 'boxenstopp-sachen-v1'; // der Vorrat der Fotos (sw.js lässt ihn bei Updates stehen)
+const FOTOS = 'boxenstopp-sachen-v1'; // der Vorrat der Fotos (sw.js lässt ihn bei Updates stehen) – Boxenstopp und die Sachen-App teilen ihn
 const OHNE = 'ohne'; // „Ohne Liste“: Sachen, deren Liste es nicht mehr gibt
 const SPEICHERN_NACH = 700;
 const KANTE = 1200; // Fotos der Sachen
@@ -120,7 +123,9 @@ const laedt = new Set();
 const vorschau = new Map(); // ding-id → Objekt-URL des Fotos, das gerade hochlädt
 const letztes = new Map(); // ding-id → das zuletzt aufgenommene Foto als base64 (für die KI, ohne es neu zu holen)
 const laeuft = new Map(); // ding-id → 'foto' | 'ki' | 'code' | 'netz' | 'suche' | 'bild'
-const fotoSchluessel = (pfad) => new URL(`__sachen/${pfad}`, location.href).href;
+// Der Schlüssel im Vorrat hängt nicht an der Adresse der Seite: Boxenstopp (/Boxenstopp/) und die Sachen-App
+// (/Boxenstopp/sachen/) finden dieselben Einträge – /Boxenstopp/__sachen/…, wie bisher bei Boxenstopp
+const fotoSchluessel = (pfad) => new URL(`../__sachen/${pfad}`, import.meta.url).href;
 
 async function ausVorrat(pfad) {
   try {
@@ -274,7 +279,7 @@ function trefferHTML(q) {
 }
 
 function hinweisHTML() {
-  const wem = istEigen() ? 'Die Fotos liegen in deinem Daten-Repo bei GitHub, wie deine Liste. Tobi sieht deine Sachen in seinem Dashboard – nur zum Ansehen.' : 'Die Sachen liegen in eurer gemeinsamen Liste – Tobi sieht sie auch. Die Fotos liegen im Daten-Repo bei GitHub.';
+  const wem = istEigen() ? 'Die Fotos liegen in deinem Daten-Repo bei GitHub, wie deine Liste. Tobi sieht deine Sachen in seinem Dashboard – nur zum Ansehen.' : 'Deine Sachen liegen in einer eigenen Datei im Daten-Repo bei GitHub (sachen.json), die Fotos daneben – Tobi sieht sie auch, in dieser App und in seinem Dashboard.';
   const netz = `Zur Nummer schlägt die App Name, Marke und Bild in Open Beauty Facts und den verwandten offenen Datenbanken nach${anbieterVon(ladeKi()) === 'anthropic' ? ' – kennen die sie nicht, sucht Claude im Internet' : ''}.`;
   return `<p class="fine inv-fein">${wem} Zum Scannen öffnet die App die Kamera – mit Taschenlampe, wo das Handy sie hergibt. Den Strichcode liest ${'BarcodeDetector' in window ? 'dein Handy selbst' : ladeKi() ? 'die KI vom Bild' : 'die KI vom Bild, wenn ein KI-Schlüssel eingetragen ist – sonst tippst du die Ziffern ab'}. ${netz}</p>`;
 }
@@ -536,7 +541,8 @@ function listeLoeschen() {
   const l = liste(zustand.liste);
   if (!l) return;
   const drin = dingeIn(inv(), l.id);
-  app.aendern(opInvListeWeg(l.id));
+  const weg = opInvListeWeg(l.id);
+  app.aendern(weg);
   for (const d of drin) wegMerken(d.foto);
   if (drin.some((d) => d.foto)) aufraeumenBald();
   zustand = { ...zustand, liste: null, ding: null, bearbeiten: false, tag: '' };
@@ -544,7 +550,8 @@ function listeLoeschen() {
   neuZeichnen();
   melde(drin.length ? `„${listenName(l)}“ mit ${drin.length === 1 ? 'einer Sache' : `${drin.length} Sachen`} gelöscht` : `„${listenName(l)}“ gelöscht`, {
     knopf: 'Rückgängig',
-    beiKnopf: () => { app.aendern(opZusammen({}, {}, { inventar: { listen: { [l.id]: l }, dinge: Object.fromEntries(drin.map((d) => [d.id, d])) } })); zustand = { ...zustand, liste: l.id }; merken(); neuZeichnen(); },
+    // at: die Zeit der Löschung – eine spätere von einem anderen Gerät nimmt das Rückgängig nicht zurück (sachen.js)
+    beiKnopf: () => { app.aendern({ ...opZusammen({}, {}, { inventar: { listen: { [l.id]: l }, dinge: Object.fromEntries(drin.map((d) => [d.id, d])) } }), at: weg.at }); zustand = { ...zustand, liste: l.id }; merken(); neuZeichnen(); },
   });
 }
 
@@ -567,13 +574,14 @@ function dingLoeschen() {
   inventarJetztSpeichern();
   const d = ding(zustand.ding);
   if (!d) return;
-  app.aendern(opDingWeg(d.id));
+  const weg = opDingWeg(d.id);
+  app.aendern(weg);
   if (d.foto) { wegMerken(d.foto); aufraeumenBald(); }
   zustand = { ...zustand, ding: null };
   merken();
   neuZeichnen();
   if (!dingLeer(d)) {
-    melde(`„${dingName(d)}“ gelöscht`, { knopf: 'Rückgängig', beiKnopf: () => { app.aendern(opZusammen({}, {}, { inventar: { listen: {}, dinge: { [d.id]: d } } })); zustand = { ...zustand, ding: d.id }; merken(); neuZeichnen(); } });
+    melde(`„${dingName(d)}“ gelöscht`, { knopf: 'Rückgängig', beiKnopf: () => { app.aendern({ ...opZusammen({}, {}, { inventar: { listen: {}, dinge: { [d.id]: d } } }), at: weg.at }); zustand = { ...zustand, ding: d.id }; merken(); neuZeichnen(); } });
   }
 }
 

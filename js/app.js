@@ -9,16 +9,23 @@
  * Gast seine Einladung auf einem Gerät ohne Liste, verbindet die App gleich
  * und begrüßt ihn (ansicht-willkommen.js).
  *
- * Für die Tests lassen sich zwei Dinge über den localStorage verstellen:
- * __api (statt https://api.github.com) und __takt (Abgleich in ms).
+ * Amys Sachen sind seit v83 eine eigene App (sachen/) mit eigener Datei
+ * sachen.json im Daten-Repo. Was in der gemeinsamen Liste noch unter
+ * inventar steht – von vor v83 oder von einer älteren App-Fassung wieder
+ * hingeschrieben –, zieht diese App dorthin um (sachenUmzug, sachen.js).
+ *
+ * Für die Tests lassen sich drei Dinge über den localStorage verstellen:
+ * __api (statt https://api.github.com), __takt (Abgleich in ms) und
+ * __umzugPause (die Pause des Umzugs der Sachen in ms, sonst 60 s).
  */
 // Als erstes: Fehler mitschreiben (Einstellungen → Über die App), auch beim Laden der anderen Teile
-import { sicher } from './fehler.js';
+import { sicher, fehlerMerken } from './fehler.js';
 import { kostenMeldenAn, KOSTEN_MELDEN } from './ki.js';
-import { app, $, ansicht, zeigeReiter, melde, lese, reiterBeobachten, breiteAnwenden } from './kern.js';
-import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, API } from './speicher.js';
+import { app, $, ansicht, zeigeReiter, melde, lese, schreibe, reiterBeobachten, breiteAnwenden } from './kern.js';
+import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, offeneListe, API } from './speicher.js';
 import { opZusammen, opPerson, opEinePerson } from './liste.js';
-import { hatInventar } from './inventar.js';
+import { hatInventar, opUmgezogen, inventarZusammen } from './inventar.js';
+import { umzugInSachen, umzugNoetig, umzugZusammen, wegInSachen, ART_SACHEN } from './sachen.js';
 import { preiseMitBons } from './kosten.js';
 import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe, KI_DATEI, geteiltenKiUebernehmen } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
@@ -50,6 +57,7 @@ import { klickDoppel, doppelNeu } from './ansicht-doppel.js';
 import { planZeichnen, planGezeigt, klickPlan, eingabePlan, tastePlan } from './ansicht-essensplan.js';
 import { boxenText } from './boxen.js';
 import { bildschirmzeitStart, klickBildschirmzeit } from './ansicht-bildschirmzeit.js';
+import { klickSachenApp, sachenHinweisPruefen } from './ansicht-sachen-app.js';
 
 /*
  * Als Erstes nach den Importen, vor allem, was die Adresse liest (start()
@@ -88,7 +96,110 @@ const geteiltenKiHolen = async () => {
 const takt = () => Number(lese('__takt', 0)) || 8000;
 /** Der kurze Name eines Rezepts für die Commit-Nachricht („Chili auf die Liste“). */
 const rezeptName = (rid) => app.nachId[rid]?.short || app.amyNach?.[rid]?.short || app.extras?.[rid]?.short || '';
-const speicherFuer = (z) => github({ ...z, ort: ortVon(z), api: apiBasis(), takt: takt(), rezeptName });
+// Die gemeinsame Liste legt fehlendes inventar nie wieder dazu – Amys Sachen liegen in sachen.json. Lässt eine sehr alte
+// Fassung (vor v70) sie weg, bevor sie umgezogen sind, gehen sie an den Umzug (sachenVormerken, speicher.js listeNachtrag)
+const speicherFuer = (z) => github({ ...z, ort: ortVon(z), api: apiBasis(), takt: takt(), rezeptName, ohneInventar: eigeneListe(z) ? false : (inv) => sachenVormerken(inv) });
+
+/*
+ * Der Umzug der Sachen (sachen.js): Steht in der gemeinsamen Liste noch etwas
+ * unter inventar, kommt es nach sachen.json (nach id und geaendert
+ * zusammengeführt, Gelöschtes bleibt gelöscht) – erst danach nimmt diese App
+ * genau das Umgezogene aus liste.json (opUmgezogen, ein eigener Commit
+ * „Umzug: Sachen nach sachen.json“). Klappt sachen.json nicht, bleibt
+ * liste.json, wie sie ist. Beides geht beliebig oft: Schreibt eine ältere
+ * App-Fassung die Sachen zurück, zieht sie das nächste Mal wieder um.
+ *
+ * Angestoßen bei jeder Änderung und jedem Abgleich, aber erst, wenn die Liste
+ * in dieser Sitzung einmal frisch gelesen ist (status.zuletzt – der
+ * zwischengespeicherte Stand kann veraltet sein und Gelöschtes wiederbringen).
+ * Nie zweimal gleichzeitig; mit denselben Sachen wie beim letzten Versuch
+ * frühestens nach umzugPause() wieder (nach einem Fehler, und damit eine ältere
+ * App-Fassung, die sie zurückschreibt, nicht alle paar Sekunden einen Commit
+ * auslöst). UMZUG_REST: Sachen, die vor dem Verbinden nur auf diesem Gerät
+ * standen (app.verbinden) – bis sie in sachen.json sind.
+ */
+const UMZUG_REST = 'boxenstopp.sachen.umzug.v1';
+/*
+ * UMZUG_WEG: Löschungen von Sachen, die dieses Gerät noch mit einer älteren
+ * Fassung gemacht und nicht abgeschickt hatte (dingWeg, invListeWeg in
+ * boxenstopp.offen.v1). Sie gehen weiter an liste.json – ist die Sache dort
+ * schon umgezogen, liefen sie ins Leere; darum auch auf sachen.json (wegInSachen).
+ */
+const UMZUG_WEG = 'boxenstopp.sachen.umzug.weg.v1';
+// 60 s; für die Tests kürzer (localStorage __umzugPause in ms, wie __takt) – test-umzug.mjs wartet sonst minutenlang
+const umzugPause = () => Number(lese('__umzugPause', 0)) || 60 * 1000;
+let umzugLaeuft = false;
+let umzugZuletzt = { at: 0, abdruck: '' };
+let umzugMelden = false;
+/** Sachen für den Umzug auf dem Gerät vormerken (UMZUG_REST) – je Liste und Sache die neuere Fassung. */
+function sachenVormerken(inventar) {
+  if (!hatInventar(inventar)) return;
+  const rest = umzugZusammen({ inventar: lese(UMZUG_REST, null) || {} }, inventar).stand.inventar;
+  schreibe(UMZUG_REST, rest);
+  umzugZuletzt = { at: 0, abdruck: '' };
+  setTimeout(() => sicher('Umzug der Sachen', sachenUmzug), 0);
+}
+
+/** Beim Start: Löschungen der Sachen, die aus einer älteren Fassung noch offen sind, für sachen.json vormerken. */
+function loeschungenVormerken() {
+  const neu = offeneListe().filter((o) => o && (o.typ === 'dingWeg' || o.typ === 'invListeWeg') && typeof o.id === 'string');
+  if (!neu.length) return;
+  const alt = lese(UMZUG_WEG, []);
+  const alle = [...(Array.isArray(alt) ? alt : []), ...neu];
+  const k = (o) => `${o.typ}|${o.id}|${o.at || ''}`;
+  schreibe(UMZUG_WEG, alle.filter((o, i) => alle.findIndex((x) => k(x) === k(o)) === i).slice(-200));
+}
+
+function sachenUmzug() {
+  const z = app.zugang;
+  if (umzugLaeuft || !z?.token || eigeneListe(z) || !app.listeDa || !app.status?.zuletzt) return;
+  const rest = lese(UMZUG_REST, null);
+  const wegOps = (() => { const w = lese(UMZUG_WEG, []); return Array.isArray(w) ? w : []; })();
+  const inventar = umzugNoetig(app.stand) ? app.stand.inventar : null;
+  if (!inventar && !hatInventar(rest) && !wegOps.length) return;
+  const abdruck = JSON.stringify([inventar, rest, wegOps]);
+  if (abdruck === umzugZuletzt.abdruck && Date.now() - umzugZuletzt.at < umzugPause()) return;
+  umzugZuletzt = { at: Date.now(), abdruck };
+  umzugLaeuft = true;
+  const api = apiBasis();
+  // Die Meldung nur für die Sachen von diesem Gerät (nach dem Verbinden) – der Rest geht still, bis es klappt
+  let melden = umzugMelden && hatInventar(rest);
+  (async () => {
+    // Erst die offenen Löschungen (dann bleibt, was gelöscht ist, auch beim Umzug weg), dann die Sachen
+    if (wegOps.length) {
+      await wegInSachen(wegOps, { token: z.token, api });
+      const jetzt = lese(UMZUG_WEG, []);
+      const erledigt = new Set(wegOps.map((o) => JSON.stringify(o)));
+      const bleibt = (Array.isArray(jetzt) ? jetzt : []).filter((o) => !erledigt.has(JSON.stringify(o)));
+      if (bleibt.length) schreibe(UMZUG_WEG, bleibt); else { try { localStorage.removeItem(UMZUG_WEG); } catch { /* egal */ } }
+    }
+    if (hatInventar(rest)) {
+      const { umgezogen: drueben } = await umzugInSachen(rest, { token: z.token, api });
+      melden = false;
+      umzugMelden = false;
+      // Vergessen wird nur, was drüben ist: Passt etwas nicht mehr hinein (sachen.json voll, MAX_LISTEN/MAX_DINGE),
+      // bleibt es hier gemerkt, bis Platz ist – sonst wäre es weg (die lokale Liste ist seit dem Verbinden gelöscht)
+      const ohne = (xs, da) => Object.fromEntries(Object.entries(xs || {}).filter(([id]) => !da?.[id]));
+      const bleibt = { listen: ohne(rest.listen, drueben.listen), dinge: ohne(rest.dinge, drueben.dinge) };
+      if (JSON.stringify(lese(UMZUG_REST, null)) === JSON.stringify(rest)) {
+        if (hatInventar(bleibt)) schreibe(UMZUG_REST, bleibt);
+        else { try { localStorage.removeItem(UMZUG_REST); } catch { /* egal */ } }
+      }
+    }
+    if (!inventar) return;
+    const { umgezogen } = await umzugInSachen(inventar, { token: z.token, api });
+    // Inzwischen getrennt oder mit einer anderen Liste verbunden: dort nichts herausnehmen
+    if (app.zugang?.token !== z.token || eigeneListe(app.zugang)) return;
+    // Nur, was noch in der Liste steht – sonst ein Commit ohne Änderung
+    const da = app.stand.inventar || {};
+    const nur = (art) => Object.fromEntries(Object.entries(umgezogen[art] || {}).filter(([id]) => da[art]?.[id]));
+    const weg = { listen: nur('listen'), dinge: nur('dinge') };
+    if (Object.keys(weg.listen).length || Object.keys(weg.dinge).length) app.aendern(opUmgezogen(weg));
+  })().catch((e) => {
+    fehlerMerken('Umzug der Sachen', e);
+    if (melden) { umzugMelden = false; melde(`Die Sachen von diesem Gerät sind noch nicht in der Sachen-App: ${e?.message || 'GitHub wollte nicht.'} Die App versucht es gleich noch einmal.`); }
+  }).finally(() => { umzugLaeuft = false; });
+}
 
 const eyebrowZeichnen = () => { $('#r-eyebrow').textContent = `${app.rezepte.length} Rezepte · je ${boxenText(app.boxen)}`; };
 /*
@@ -166,13 +277,22 @@ function beiAenderung(stand) {
   willkommenPruefen();
   // Steht im Dashboard gerade Amys Reiter offen, zieht er mit (ansicht-gaeste.js)
   dashboardMitziehen();
+  // Stehen in der gemeinsamen Liste noch Sachen, ziehen sie nach sachen.json um
+  sicher('Umzug der Sachen', sachenUmzug);
 }
 function beiStatus(s) {
   app.status = s;
   sicher('Status', statusZeichnen);
   // Abgeglichen: Ist Push eingerichtet, aber hier noch aus, fragt die App einmal (ansicht-push.js);
-  // wem Tobis Dashboard etwas zeigt, der erfährt es einmal (ansicht-gaeste.js)
-  if (s.zustand === 'ok') { setTimeout(pushHinweisPruefen, 2500); setTimeout(dashboardHinweisPruefen, 2500); }
+  // wem Tobis Dashboard etwas zeigt, der erfährt es einmal (ansicht-gaeste.js), und Amy, dass Sachen
+  // jetzt eine eigene App ist (ansicht-sachen-app.js – wartet, bis kein anderes Fenster offen ist);
+  // stehen noch Sachen in der Liste, ziehen sie um
+  if (s.zustand === 'ok') {
+    setTimeout(pushHinweisPruefen, 2500);
+    setTimeout(dashboardHinweisPruefen, 2500);
+    setTimeout(sachenHinweisPruefen, 2500);
+    sicher('Umzug der Sachen', sachenUmzug);
+  }
 }
 
 function nimmSpeicher(neu) {
@@ -208,12 +328,8 @@ app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
   speichereZugang(app.zugang);
   if (farbe) farbeSetzen(farbe === 'blau' ? '' : farbe);
   nimmSpeicher(speicherFuer(app.zugang));
-  // Auch Notizen, Essensplan, Verträglichkeit, Vorschläge, Wörter und Sachen, die nur hier standen
-  const mehr = bisher ? { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege, gemeint: bisher.gemeint, notizbuch: bisher.notizbuch, essensplan: bisher.essensplan, vertraeglich: bisher.vertraeglich, wuensche: bisher.wuensche, inventar: bisher.inventar } : {};
-  const hatWas = bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(bisher[k] || {}).length) || Object.keys(bisher.essensplan?.tage || {}).length || hatInventar(bisher.inventar));
-  if (hatWas) app.aendern(opZusammen(bisher.items, bisher.ki, mehr));
+  lokalUebernehmen(bisher);
   try { localStorage.removeItem(GETRENNT); } catch { /* egal */ }
-  lokalLoeschen();
   statusZeichnen();
   privateAngebote();
   geteiltenKiHolen();
@@ -223,11 +339,41 @@ app.verbinden = async (token, name, { daten = '', farbe = '' } = {}) => {
   return 'ok';
 };
 
+/*
+ * Was bisher nur auf diesem Gerät stand (lokalerStand), in die Liste: auch
+ * Notizen, Essensplan, Verträglichkeit, Vorschläge, Wörter und Sachen – die
+ * Sachen nur in eine eigene Liste (Gast); in der gemeinsamen Liste kommen sie
+ * nach sachen.json (sachenUmzug, Fehler: Meldung). Danach ist die lokale Liste
+ * leer. Beim Verbinden – und beim Start, wenn ein Zugang da ist, aber noch
+ * eine lokale Liste: Dann hat die Sachen-App verbunden (Android, derselbe
+ * Speicher), ohne das hier zu können.
+ */
+function lokalUebernehmen(bisher) {
+  if (!bisher || !app.zugang) return;
+  const gemeinsam = !eigeneListe(app.zugang);
+  const sachen = bisher && hatInventar(bisher.inventar) ? bisher.inventar : null;
+  const mehr = bisher ? { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege, gemeint: bisher.gemeint, notizbuch: bisher.notizbuch, essensplan: bisher.essensplan, vertraeglich: bisher.vertraeglich, wuensche: bisher.wuensche, ...(gemeinsam ? {} : { inventar: bisher.inventar }) } : {};
+  const hatWas = bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(bisher[k] || {}).length) || Object.keys(bisher.essensplan?.tage || {}).length || (!gemeinsam && !!sachen));
+  if (hatWas) app.aendern(opZusammen(bisher.items, bisher.ki, mehr));
+  if (gemeinsam && sachen) {
+    // Erst auf dem Gerät merken (lokalLoeschen räumt gleich die Liste weg), dann umziehen, sobald die Liste gelesen ist –
+    // dazu, was von einem früheren Versuch noch wartet
+    const rest = { inventar: lese(UMZUG_REST, null) };
+    inventarZusammen(rest, sachen);
+    schreibe(UMZUG_REST, rest.inventar);
+    umzugMelden = true;
+    umzugZuletzt = { at: 0, abdruck: '' };
+  }
+  lokalLoeschen();
+}
+
 app.trennen = () => {
   // Gemerkt, damit der Hinweis über der Liste sagen kann, dass dieses Gerät schon verbunden war
   try { localStorage.setItem(GETRENNT, JSON.stringify({ at: new Date().toISOString(), name: app.zugang?.name || '' })); } catch { /* egal */ }
   loescheZugang();
   githubVergessen();
+  // Auch Amys Sachen auf diesem Gerät (die Sachen-App teilt hier den Speicher) – was nur auf dem Gerät auf den Umzug wartet, bleibt
+  for (const k of Object.values(ART_SACHEN.speicher)) { try { localStorage.removeItem(k); } catch { /* egal */ } }
   app.zugang = null;
   app.kiGeteilt = null;
   app.listeDa = false;
@@ -269,6 +415,7 @@ document.addEventListener('click', (ev) => {
   if (klickWillkommen(el)) return;
   if (klickBoxen(el)) return;
   if (klickGaeste(el)) return;
+  if (klickSachenApp(el)) return;
   if (klickZiel(el)) return;
   if (klickSpeisekarte(el)) return;
   if (klickHaushalt(el)) return;
@@ -439,8 +586,13 @@ async function start() {
   if (kiLink && !einladung) melde('KI-Schlüssel übernommen – die Resteverwertung ist bereit.');
 
   // Der Abgleich startet auf jeden Fall
-  if (app.zugang) nimmSpeicher(speicherFuer(app.zugang));
-  else nimmSpeicher(lokal());
+  if (app.zugang) {
+    // Gemeinsame Liste: Löschungen der Sachen, die eine ältere Fassung noch nicht abgeschickt hat, auch für sachen.json
+    if (!eigeneListe(app.zugang)) sicher('Umzug der Sachen', loeschungenVormerken);
+    nimmSpeicher(speicherFuer(app.zugang));
+    // Hat die Sachen-App verbunden (gleicher Speicher), steht hier vielleicht noch eine lokale Liste – jetzt übernehmen
+    sicher('Lokale Liste', () => { const l = lokalerStand(); if (Object.keys(l.items || {}).length || Object.keys(l.ki || {}).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(l[k] || {}).length) || Object.keys(l.essensplan?.tage || {}).length || hatInventar(l.inventar)) lokalUebernehmen(l); });
+  } else nimmSpeicher(lokal());
   sicher('Angebote (privat)', privateAngebote);
   sicher('Katalog', () => katalogLaden({ abgleich: true }));
 

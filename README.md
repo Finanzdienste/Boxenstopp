@@ -9,13 +9,22 @@ Listen für Gäste“).
 (in Chrome öffnen, dann Menü ⋮ → „App installieren“; auf dem iPhone in
 Safari: Teilen → „Zum Home-Bildschirm“).
 
+**Amys Sachen** sind seit v83 eine eigene App mit eigenem Symbol:
+<https://finanzdienste.github.io/Boxenstopp/sachen/> – auf Android in Chrome
+öffnen, dann Menü ⋮ → „App installieren“ oder „Zum Startbildschirm
+hinzufügen“ (Chrome teilt den Speicher mit Boxenstopp, sie ist gleich
+verbunden); auf dem iPhone in Boxenstopp den Knopf in Amys Bereich tippen
+(er öffnet Safari und kopiert den Link), in Safari Teilen → „Zum
+Home-Bildschirm“, dann in der App vom Home-Bildschirm „Einfügen“. Siehe
+„Amys Bereich“ → **Sachen** und `sachen/README.md`.
+
 Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes Gerät in den Einstellungen):
 
 | Reiter | Inhalt |
 | --- | --- |
 | **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben **Zwei auf einmal** (zwei Rezepte zusammen kochen – welche gut zusammen gehen, ein gemeinsamer Plan, siehe unten) und die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“), bei eigenen Einträgen **„Gemeint ist …“** („chicki nuggies“ sind Chicken Nuggets) – alles gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
-| **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Sachen · Vorschläge** (in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe, ohne Vorschläge), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Im Internet suchen** – sag, worauf du Lust hast, Claude findet bis zu drei passende Rezepte und füllt den Editor; **Rezept übernehmen** aus einem Foto, einem Link oder Text; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Sachen:** eigene Listen für Kleidung, Make-up und was sie will – je Sache Foto, Name, Marke, Tags, Notiz und Strichcode, sortieren und suchen; **Scannen** schlägt die Sache nach (Open Beauty Facts & Co., sonst Claude) und legt sie gleich an, mit Bild; „Hab ich das schon?“ per Scan (siehe unten). **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
+| **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Vorschläge**, darunter der Knopf **„Sachen ist jetzt eine eigene App – öffnen“** (seit v83; in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe: **Rezepte · Notizen · Verträglich · Sachen**, ohne Vorschläge und ohne den Knopf), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Im Internet suchen** – sag, worauf du Lust hast, Claude findet bis zu drei passende Rezepte und füllt den Editor; **Rezept übernehmen** aus einem Foto, einem Link oder Text; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Sachen** (Amys in der eigenen App, siehe oben; in einer Gästeliste hier im Bereich): eigene Listen für Kleidung, Make-up und was sie will – je Sache Foto, Name, Marke, Tags, Notiz und Strichcode, sortieren und suchen; **Scannen** schlägt die Sache nach (Open Beauty Facts & Co., sonst Claude) und legt sie gleich an, mit Bild; „Hab ich das schon?“ per Scan (siehe unten). **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
 | **Essensplan** | Die nächsten Tage und Wochen: je Tag Mittag und Abend, wer isst mit, dazu **Kochtage** („Chili kochen, 8 Boxen“) mit **Boxen verteilen** auf die Tage danach – und mit einem Tipp **die Woche auf die Einkaufsliste** (siehe unten) |
 | **Angebote** | Die Angebote dieser und der nächsten Woche, die Empfehlung, wo es sich lohnt, welche Rezepte davon profitieren, **Preisalarm** (die Glocke am Angebot) und **Preisverlauf** („Tiefstpreis seit 8 Wochen“) (siehe unten) |
 | **Haushalt** | Der **Putzplan**: je Raum oder Putztag eine Liste zum Abhaken, an festen Wochentagen (jede, jede 2./3./4. Woche) oder ohne festen Tag, für euch beide oder einen; oben, was heute dran ist („Heute ist Küche dran“), was noch offen ist und was demnächst kommt. Ein Putztag geht im **eigenen Fenster** auf: oben, was man an Material braucht (fehlt etwas: auf die Einkaufsliste), darunter die Aufgaben – einzelne auch nur **jedes 2. Mal** (die Armaturen); Aufgaben und Material selbst dazu, weg, umstellen. Auf Wunsch eine Push-Nachricht morgens, mittags oder abends und alles auch in **Microsoft To Do**. Dazu die **Haushaltssachen**: was ihr so braucht, nach Bereichen, mit Vorschlägen – antippen setzt es auf die Einkaufsliste (siehe unten) |
@@ -432,8 +441,50 @@ Angebot günstig ist.
 
 Der Reiter „Amys Bereich“ (am Rechner über die Kachel bei den Rezepten,
 direkt mit `#amy` in der Adresse) hat oben einen Schalter: **Rezepte ·
-Notizen · Verträglich · Sachen · Vorschläge** (mit Zahlen; was zuletzt offen
-war, merkt sich das Gerät). Die Teile:
+Notizen · Verträglich · Vorschläge** (mit Zahlen; was zuletzt offen war,
+merkt sich das Gerät). In der eigenen Liste eines Gasts („Marielles
+Bereich“) heißt er **Rezepte · Notizen · Verträglich · Sachen** – ohne
+Vorschläge, aber mit den Sachen.
+
+**Sachen als eigene App** (v83): Amy wollte ihre Sachen als eigene App
+haben, nicht als Teil von Boxenstopp. **Vorher** (bis v82) standen sie im
+Schalter als Teil **Sachen** (`Rezepte · Notizen · Verträglich · Sachen ·
+Vorschläge`) und in `liste.json` unter `inventar`. **Jetzt** liegen sie in
+einer eigenen App unter `sachen/`
+(<https://finanzdienste.github.io/Boxenstopp/sachen/>, eigenes Manifest mit
+der Kennung `/Boxenstopp/sachen/`, eigenes Symbol, eigener Service Worker,
+siehe `sachen/README.md`) und in einer eigenen Datei `sachen.json` im
+Daten-Repo (siehe „Der Umzug der Sachen“ und „`liste.json`“). In der
+gemeinsamen Liste – und ohne Liste – hat der Schalter keinen Teil „Sachen“
+mehr; ein gemerkter Teil „Sachen“ öffnet die Rezepte
+(`js/ansicht-amy.js`). Was die Sachen können, ist dasselbe geblieben – der
+Teil **Sachen** unten beschreibt es; der Code dafür ist derselbe
+(`js/ansicht-inventar.js` und Co. laufen in beiden Apps).
+
+- **Der Knopf** (`js/ansicht-sachen-app.js`): unter dem Schalter
+  „Sachen ist jetzt eine eigene App – öffnen“ (`data-act="sachen-app"`) mit
+  dem Tipp für den Home-Bildschirm darunter – auf Android „Im Browser:
+  Menü ⋮ → „App installieren“ (oder „Zum Startbildschirm hinzufügen“) – dann
+  hat Sachen ein eigenes Symbol. Kommt ein kleines Fenster: dort ⋮ → „In
+  Chrome öffnen“.“, auf iPhone und iPad „In Safari: Teilen → „Zum
+  Home-Bildschirm“, die App dort öffnen und „Einfügen“ tippen – der Link ist
+  schon kopiert.“ Auf Android teilen sich Boxenstopp und die Sachen-App den
+  Speicher (gleicher Ursprung): Der Knopf öffnet `…/sachen/` ohne `#`, die
+  App nimmt Zugang und KI-Schlüssel von hier. Auf iPhone und iPad hat eine
+  App vom Home-Bildschirm ihren eigenen Speicher – dort öffnet der Knopf
+  `…/sachen/#zugang=…&fuer=Amy&ki=…` (wie der Link fürs zweite Gerät) und
+  legt denselben Link in die Zwischenablage.
+- **Der Hinweis** (`#sachen-hinweis-dlg`, in Rosa): einmal je Gerät für
+  Amy (der Name beginnt mit „Amy“), in eurer gemeinsamen Liste – „Sachen ist
+  jetzt eine eigene App“, mit „Sachen öffnen“ und „Später“. Er kommt erst,
+  wenn die Liste abgeglichen ist, kein anderes Fenster offen ist (etwa der
+  Hinweis aufs Dashboard – dann ein paar Sekunden danach) und in
+  `liste.json` nichts mehr umziehen muss („Alles kam mit“ soll stimmen).
+  Gemerkt wird er beim Zeigen (`boxenstopp.sachen.hinweis.v1`). Tobi und
+  Gäste bekommen ihn nie; in einer Gästeliste gibt es weder Knopf noch
+  Hinweis.
+
+Die Teile:
 
 - **Notizen** (`js/notizbuch.js`, `js/ansicht-notizen.js`): Blätter wie bei
   OneNote – je Thema eins, mit Titel, Farbe (sechs, neue wechseln sich ab),
@@ -467,8 +518,11 @@ war, merkt sich das Gerät). Die Teile:
   Weitergeben. Push: „Vorschlag von Amy“ an Tobi, Antwort und „erledigt“
   an Amy (Art „Amys Bereich“).
 - **Sachen** (`js/inventar.js` rechnet, `js/ansicht-inventar.js` zeichnet,
-  `js/inventar-ki.js` fragt die KI, `js/inventar-netz.js` schlägt nach):
-  eigene Listen für alles, was sie hat –
+  `js/inventar-ki.js` fragt die KI, `js/inventar-netz.js` schlägt nach): bei
+  Amy seit v83 die eigene **Sachen-App** (`sachen/`, Daten in `sachen.json`,
+  siehe oben) – in der eigenen Liste eines Gasts (Marielle) weiter dieser
+  Teil in Boxenstopp, mit den Sachen in ihrer `liste.json`. Beide können
+  dasselbe: eigene Listen für alles, was sie hat –
   Kleidung, Schuhe, Make-up, Pflege, Schmuck, Taschen, Bücher oder was sie
   sich selbst anlegt, je mit Name und Bildchen (16 zur Wahl). Zum Anfangen
   stehen Vorschläge da, ein Tipp legt die Liste an. Je Sache: **Foto**, Name,
@@ -480,10 +534,14 @@ war, merkt sich das Gerät). Die Teile:
   über allen Listen eine **Suche** (Name, Marke, Tag, Notiz, Nummer).
   - **Foto:** auf 1200 px verkleinert als eigene Datei ins Daten-Repo der
     Liste (`sachen/sd-…-….jpg`, `dateiHochladen` in `js/speicher.js`, Commit
-    „…: Foto für die Sachen“) – in `liste.json` steht nur Pfad und
-    sha, so bleibt sie klein. Die anderen Geräte holen es mit dem Schlüssel
-    und legen es in einen eigenen Vorrat (`boxenstopp-sachen-v1`, auch
-    ohne Netz da, übersteht Updates). Ein Foto, das keine Sache mehr braucht
+    „…: Foto für die Sachen“) – in `sachen.json` (in einer Gästeliste
+    `liste.json`) steht nur Pfad und sha, so bleibt sie klein; beim Umzug
+    bleiben die Fotos, wo sie sind. Die anderen Geräte holen es mit dem
+    Schlüssel und legen es in einen eigenen Vorrat (`boxenstopp-sachen-v1`,
+    auch ohne Netz da, übersteht Updates). Den teilen sich Boxenstopp und
+    die Sachen-App: Der Schlüssel darin hängt nicht an der Adresse der Seite
+    (`/Boxenstopp/__sachen/…`, aus `import.meta.url`), beide finden
+    dieselben Fotos. Ein Foto, das keine Sache mehr braucht
     (gelöscht, ersetzt), löscht die App, wenn die Zeit für „Rückgängig“ um
     ist.
   - **Mit Foto** (in einer Liste): fotografieren – mit KI-Schlüssel füllt
@@ -556,12 +614,39 @@ war, merkt sich das Gerät). Die Teile:
     „Eintragen“; **Im Netz nachschlagen** unter dem Strichcode fragt beide –
     Datenbank und Claude – für alles, was es gibt. An die Datenbanken geht nur
     die Nummer, an Claude die Nummer und die Namen der Listen.
-  - In der gemeinsamen Liste sind es Amys Sachen (Tobi sieht sie auch, so
-    sagt es der Hinweis), in einer eigenen Liste die des Gasts – Tobi sieht
-    sie in seinem Dashboard, auch das steht im Hinweis. Im Commit steht nur
-    „Sachen“, nie, was es ist; keine Push-Nachricht. Was dazukam oder sich
+  - In der Sachen-App sind es Amys Sachen in `sachen.json` (Tobi sieht sie
+    auch – in der Sachen-App mit demselben Schlüssel und in seinem Dashboard,
+    so sagt es der Hinweis über den Listen), in einer eigenen Liste die des
+    Gasts – Tobi sieht sie in seinem Dashboard, auch das steht im Hinweis.
+    Im Commit steht nur „Sachen“ („Amy: Sachen, 2 Änderungen“ an
+    `sachen.json`, in einer Gästeliste „…: Einkaufsliste, 1 Änderung –
+    Sachen“), nie, was es ist; keine Push-Nachricht. Was dazukam oder sich
     änderte, steht in den Einzelheiten des Dashboards (bei einer Änderung nur,
     welche Felder, nie der Text der Notiz).
+  - **Die Sachen-App** (`sachen/app.js`, mehr in `sachen/README.md`): eine
+    Seite in Amys Rosa ohne Reiter, oben der Status („Geteilt“, „Speichert…“,
+    „Offline“, „Schlüssel prüfen“), darunter die Sachen. Verbunden ist sie
+    mit demselben Schlüssel wie Boxenstopp (`boxenstopp.zugang.v1`, der
+    KI-Schlüssel ebenso, auch der für alle Handys geteilte aus `ki.json`):
+    über den Link aus dem Knopf, „Einfügen“ in der App vom Home-Bildschirm
+    auf dem iPhone oder die Karte „Mit eurer Liste verbinden“ (Link oder
+    Schlüssel und Name). Nach einem Link in Safari sagt sie, was die App vom
+    Home-Bildschirm noch braucht („Jetzt noch auf den Home-Bildschirm“ mit
+    „Link kopieren“). Der Link oder Zugang einer eigenen Liste (ein Gast)
+    verbindet hier nicht – die Karte zeigt den Weg zurück zu Boxenstopp, wo
+    die Sachen des Gasts stehen. Steht beim ersten Start noch nichts da,
+    wartet die Ansicht auf den ersten Abgleich und den Umzug, statt kurz die
+    leeren Vorschläge zu zeigen (ein Tipp darauf legte sonst eine Liste
+    doppelt an); geht der Umzug schief, versucht sie es beim nächsten
+    Abgleich noch einmal (frühestens nach einer Minute). Ohne Netz zeigt
+    sie, was das Gerät zuletzt kannte – kennt es noch nichts, statt der
+    Vorschläge „Ohne Netz – deine Sachen kommen, sobald das Handy wieder
+    online ist.“ War auf dem Gerät vorher ein Gast verbunden, vergisst
+    „Verbinden“ erst, was von dessen Liste noch offen ist. Neue Fassungen
+    bekommt sie nur mit einer neuen `VERSION` in `sachen/sw.js`: Ihr Worker
+    gibt die App nur aus seinem Vorrat, immer als Ganzes; beim ersten Besuch
+    unter Boxenstopps Worker meldet sie ihren gleich an und lädt einmal neu
+    (siehe `sachen/README.md`).
 
 Der Teil **Rezepte**: Amys eigene Rezepte. Alles ist rosa
 und rund: das Thema hängt an `html[data-tab="amy"]` und färbt auch Kopf,
@@ -888,7 +973,8 @@ konnte.
 | **schlechtes Netz** | Seite und Daten: erst das Netz, aber nach 4 s ohne Antwort aus dem Vorrat (die späte Antwort kommt trotzdem noch hinein) |
 | **Links** | eine Seite, die mit `#zugang=…` oder `#bildschirmzeit=…` geöffnet wurde, liegt ohne den Teil hinter `#` im Vorrat (seit v78; vorher stand dort die Adresse samt Schlüssel bzw. Kennung, bis die App das nächste Mal ohne Link mit Netz geladen wurde) |
 | **die Liste** | wie zuletzt gesehen aus dem localStorage (`js/speicher.js`), Änderungen warten, bis wieder Netz da ist |
-| **Fotos der Sachen** | einmal geholt in einem eigenen Vorrat (`boxenstopp-sachen-v1`), der Updates übersteht (`js/ansicht-inventar.js`); die eines Gasts im Dashboard nur, solange es offen ist |
+| **Fotos der Sachen** | einmal geholt in einem eigenen Vorrat (`boxenstopp-sachen-v1`), der Updates übersteht (`js/ansicht-inventar.js`) – seit v83 teilen ihn Boxenstopp und die Sachen-App, keiner der beiden Worker räumt ihn weg; die eines Gasts im Dashboard nur, solange es offen ist |
+| **die Sachen-App** | hat seit v83 ihren eigenen Worker (`sachen/sw.js`, Bereich `/Boxenstopp/sachen/`, Vorräte `sachen-…`, siehe `sachen/README.md`) – der gibt die App nur aus seinem Vorrat, immer als Ganzes, eine neue Fassung nur mit neuer `VERSION`. Dieser hier fasst unter `sachen/` nichts an – vor allem bekommt `/Boxenstopp/sachen/` ohne Netz nie Boxenstopps Seite (bis ihr eigener Worker da ist, geht es ans Netz) – und lässt beim Aufräumen alles stehen, was nicht mit „boxenstopp-“ beginnt; ein Fenster der Sachen-App zählt beim Antippen einer Mitteilung nicht als Boxenstopp |
 
 Auffrischen: Beim Öffnen sowieso; kommt die App nach einer halben Stunde
 oder mehr wieder nach vorn, holt der Worker Rezepte, Angebote,
@@ -1470,7 +1556,8 @@ Liste nur auf dem einen Handy („Nur lokal“).
    - Ablauf so lange wie möglich
 3. In der App: Einstellungen → **Gemeinsame Liste** (oder über der Liste
    „Einrichten“) → Name und Schlüssel → Verbinden. Was schon lokal auf der
-   Liste stand, kommt mit; danach zeigt die App die Liste.
+   Liste stand, kommt mit (Sachen seit v83 nach `sachen.json`, siehe „Der
+   Umzug der Sachen“); danach zeigt die App die Liste.
 4. Zweites Handy: in den Einstellungen **„Link fürs zweite Handy kopieren“**
    (oder „Per WhatsApp schicken“). Der Link öffnet die App in den
    Einstellungen mit eingetragenem Schlüssel, dort fehlt nur noch der Name.
@@ -1570,7 +1657,27 @@ bei Tobi. „Zum ersten Mal dabei“ steht je Person einmal, das nächste heißt
 „auf einem weiteren Gerät dabei“. Gezählt wird, was
 gespeichert wird, nicht wer die App nur anschaut. Das Gerät merkt sich, was
 es schon geholt hat (`boxenstopp.verlauf.v1`), und holt beim Öffnen nur das
-Neue. Die Schlüssel der Gäste stehen nur in Tobis localStorage
+Neue.
+
+Eure Liste sind seit v83 **zwei Dateien**: `liste.json` und `sachen.json`
+(Amys Sachen-App, „Amy: Sachen, 2 Änderungen“ – nie, was es ist). Die
+Aktivität liest die Commits an beiden – eine Liste, zwei Verläufe: Jede Datei
+hat ihren eigenen (in `boxenstopp.verlauf.v1` unter `haupt` und
+`haupt:sachen`, je mit eigenem „bis hier geholt“), für Personen, Sitzungen
+und Bereiche zählen sie gemischt als eure Liste – Amy steht einmal da, ein
+Commit der Sachen-App im Bereich Sachen, in derselben Sitzung wie ihre
+Einkaufsliste („Äpfel auf die Liste, Sachen“). Vorher (bis v82) gab es nur
+die Commits an `liste.json`. Der Umzug der Sachen (siehe unten) ist ein
+Ablauf wie Push und Angebote, niemandes Arbeit: je ein Commit an beiden
+Dateien, gezählt einmal – über den an `sachen.json` („Umzug: Sachen aus der
+Liste – …“, `Umzug` in `AUTOMATIK`, `js/gaeste.js`): „Eure Liste,
+automatisch: 1× Sachen umgezogen“. Der an `liste.json` heißt „Umzug der
+Sachen nach sachen.json“, ohne „Name:“ vorn – so übergeht ihn jedes
+Dashboard (`nachrichtLesen`: niemand, kein Ablauf), auch das von v82, das
+„Umzug“ noch nicht als Ablauf kennt und sonst eine Person „Umzug“ mit
+lauter gelöschten Sachen zeigte. Die nachgeholten Löschungen („Umzug:
+Sachen – 1 Löschung von vorher“) zählen dort ebenfalls als „Sachen
+umgezogen“. Die Schlüssel der Gäste stehen nur in Tobis localStorage
 (`boxenstopp.gaeste.v1`); „Entfernen“ vergisst den Gast auf diesem Gerät,
 seine Liste bleibt.
 
@@ -1603,7 +1710,12 @@ Timer, Sachen („Dazu: Sommerkleid (Zara) – Kleidung“, „Geändert: Rock: 
 Tags“ – welche Felder, nicht der Text). Die Stände holt das Gerät mit `GET …/contents/liste.json?ref=<sha>`
 (`speicher.js fassungLesen`): den Stand nach dem Commit und als Stand davor
 den nächstälteren im Verlauf – wenn dessen `rev` genau eins kleiner ist, sonst
-`<sha>~1`. Je Commit einmal; was herauskommt, merkt sich das Gerät
+`<sha>~1`. Für einen Commit an `sachen.json` (seit v83) ebenso aus
+`sachen.json` – welche Datei, sagt der Verlauf, in dem die sha steht;
+bereinigt wie `liste.json` bleiben davon `rev` und die Sachen, verglichen
+werden also nur die Sachen. Vor dem ersten Commit an `sachen.json` (dem
+Umzug) gab es sie nicht – dann zählt der Vergleich mit einer leeren Liste.
+Je Commit einmal; was herauskommt, merkt sich das Gerät
 (`boxenstopp.einzelheiten.v1`, nur für Commits, die noch im Verlauf stehen).
 Geholt wird nur für die Sitzungen, die gerade zu sehen sind, höchstens vier
 zugleich; lange Zeilen zeigen zwölf Sachen und „+ … weitere“. Oben über dem
@@ -1616,8 +1728,22 @@ gerade in der Liste steht – bei einem **Gast** (Marielle) die Sachen in ihren
 Listen mit Foto, Marke, Tags und Notiz, die offene Einkaufsliste, der
 Essensplan der nächsten sieben Tage, die eigenen Rezepte und die Titel der
 Notizen; bei **Amy** (in eurer Liste, auf einem Gerät, das nicht ihres ist)
-ihr Bereich wie in der App: Sachen, Notiztitel, Rezepte und wie viele
-Vorschläge offen sind. Darunter ihre letzten Sitzungen mit Einzelheiten und
+ihr Bereich wie in der App – Notiztitel, Rezepte und wie viele Vorschläge
+offen sind – und ihre Sachen aus der Sachen-App. Die stehen seit v83 in
+`sachen.json`: Ihr Reiter holt die Datei, wie sie jetzt ist
+(`GET …/contents/sachen.json` ohne `?ref=`), beim Öffnen und mit „Neu holen“;
+bis sie da ist, steht „Holt Amys Sachen …“ und auf der Kachel „…“. Dazu
+kommt, was in `liste.json` noch nicht umgezogen ist (je Sache die neuere
+Fassung, Gelöschtes bleibt weg – wie beim Umzug). Was gerade umzieht – erst
+nach `sachen.json`, dann aus `liste.json` heraus –, bleibt im Reiter stehen,
+bis `sachen.json` neu geholt ist. Eine veraltete Kopie von GitHub (kleineres
+`rev`, direkt nach dem Schreiben auch ein 404) ersetzt den bekannten Stand
+nicht, und was in `liste.json` stand, bleibt dann dazu gemerkt – sonst
+verschwände gerade Umgezogenes kurz. Gibt es `sachen.json` noch nicht (nichts
+umgezogen), steht „Noch keine Sachen.“; ist sie nicht zu holen, ein Satz
+dazu im Teil Sachen, der Rest steht trotzdem. Auch das bleibt nur, solange
+das Dashboard offen ist (vorher, bis v82, kamen ihre Sachen aus
+`liste.json` wie der Rest). Darunter ihre letzten Sitzungen mit Einzelheiten und
 „Ganzer Verlauf“. Lange Listen zeigen die ersten und „+ … weitere“. Die Liste
 eines Gasts holt das Gerät erst, wenn ihr Reiter offen ist, so wie sie jetzt
 ist (`GET …/contents/liste.json` ohne `?ref=`), die Fotos mit dem Schlüssel des
@@ -1635,7 +1761,9 @@ er was ändert) und was nicht, Amy in Rosa, dass Tobi ihren Bereich auf einen
 Blick sieht – wie in der App – und sie die Aktivität selbst unter Einstellungen
 → Gäste & Überblick → Dashboard findet. Ein neuer Gast liest es schon im
 Willkommen, der Hinweis kommt dann nicht extra; auf Tobis Gerät kommt keiner.
-Auch unter „Sachen“ steht es bei einem Gast.
+Auch unter „Sachen“ steht es bei einem Gast. Bei Amy kommt danach (seit
+v83) noch einmal der Hinweis, dass Sachen jetzt eine eigene App ist – nie
+zwei Fenster zugleich (siehe Amys Bereich).
 
 ### Wie der Abgleich funktioniert (js/speicher.js)
 
@@ -1643,7 +1771,12 @@ Auch unter „Sachen“ steht es bei einem Gast.
   „abhaken“, „löschen“ …). Sie wird sofort angezeigt und vorgemerkt – auch
   im localStorage, damit offline nichts verloren geht.
 - Nach ~0,7 s geht alles Vorgemerkte als **ein** Commit nach GitHub, mit der
-  sha der Datei, auf die es sich bezieht.
+  sha der Datei, auf die es sich bezieht. Nur der Umzug der Sachen
+  (`inventarUmgezogen`, siehe unten) geht immer als eigener Commit, nie mit
+  eigenen Änderungen in einem Paket (`senden`): Verglichen sieht er aus wie
+  lauter gelöschte Sachen und stünde sonst in den Einzelheiten des
+  Dashboards bei dieser Person. Stünde doch ein gemischtes Paket an, zählt
+  und beschreibt die Nachricht nur die eigenen Änderungen.
 - War das andere Handy schneller, antwortet GitHub mit 409. Die App holt den
   neuen Stand und wendet ihre Änderungen darauf noch einmal an. Abhaken nennt
   dabei die Teile, die beim Tippen da waren: Hat das andere Handy inzwischen
@@ -1652,6 +1785,119 @@ Auch unter „Sachen“ steht es bei einem Gast.
   kostet nichts), und sofort, wenn man zurück in die App kommt.
 - `rev` zählt jeden Commit hoch. Eine Antwort mit kleinerem `rev` ist eine
   veraltete Kopie von GitHub und wird ignoriert.
+- **`sachen.json`** (seit v83, Amys Sachen-App) gleicht dieselbe Maschine ab:
+  `github()` bekommt eine `art` – welche Datei, wie ein leerer Stand
+  aussieht, wie bereinigt und angewendet wird, was in der Commit-Nachricht
+  steht, was eine ältere Fassung weggelassen haben kann, und unter welchen
+  Schlüsseln das Gerät Stand und Offenes merkt (`ART_LISTE` in
+  `js/speicher.js`, `ART_SACHEN` in `js/sachen.js`; ohne `art` ist es
+  `liste.json` wie immer). `sachen.json` hat eigene Speicher-Schlüssel
+  (`boxenstopp.sachen.github.v1`, `boxenstopp.sachen.offen.v1`), getrennt von
+  denen der Liste – auf Android teilen sich Boxenstopp und die Sachen-App
+  den localStorage; „Trennen“ in Boxenstopp vergisst auch diese beiden.
+  Sonst alles wie oben: sofort angezeigt, ein Commit nach ~0,7 s, 409 → neu
+  holen, alle 8 s nachsehen, `rev` + 1. Die Nachricht sagt
+  nur „Amy: Sachen, 2 Änderungen“ – nie, was es ist, ohne „· Bescheid“ und
+  „· To Do“ (keine Push-Nachricht, kein To Do). Gelöschtes merkt sich die
+  Datei unter `weg`, damit eine ältere Fassung einer Sache (von einem Gerät,
+  das offline war) nicht zurückkommt.
+
+### Der Umzug der Sachen (v83)
+
+Bis v82 standen Amys Sachen in `liste.json` unter `inventar`, seit v83 in
+`sachen.json` (siehe Amys Bereich). Was in der gemeinsamen Liste noch unter
+`inventar` steht – von vor v83 oder von einer älteren App-Fassung wieder
+hingeschrieben –, zieht dorthin um (`js/sachen.js`, in Boxenstopp
+`sachenUmzug` in `js/app.js`):
+
+- **Zusammenführen** (`umzugZusammen`): je Liste und Sache nach `id` – fehlt
+  sie in `sachen.json`, kommt sie dazu; ist die aus der Liste neuer
+  (`geaendert`), ersetzt sie die alte, sonst bleibt die aus `sachen.json`.
+  Ist sie dort nach dieser Fassung gelöscht worden (Grabstein in `weg`),
+  bleibt sie gelöscht – ebenso eine Sache, deren Liste dort nach ihrer
+  Fassung gelöscht wurde: Sie ging mit der Liste und kommt nicht als „Ohne
+  Liste“ zurück (zählt aber als umgezogen). Ist `sachen.json` voll (30
+  Listen, 400 Sachen), bleibt der Rest in der Liste, bis Platz ist. Die Fotos bleiben, wo sie
+  sind (`sachen/…` im selben Repo).
+- **Erst `sachen.json`, dann `liste.json`:** `umzugInSachen` holt
+  `sachen.json`, führt zusammen und schreibt mit sha und `rev` + 1 zurück
+  (war jemand schneller: noch einmal) – nur, wenn etwas Neues dabei ist.
+  Commit „Umzug: Sachen aus der Liste – 2 Listen, 5 Sachen“ (gezählt wird
+  nur das Neue). Erst danach nimmt Boxenstopp genau das Umgezogene aus
+  `liste.json` (`opUmgezogen` in `js/inventar.js`, Commit „Umzug der Sachen
+  nach sachen.json“ – immer für sich, nie mit eigenen Änderungen zusammen,
+  siehe Wie der Abgleich funktioniert) – und nur in der Fassung, die
+  umgezogen ist: Was eine ältere Fassung inzwischen dort noch geändert hat,
+  bleibt für den nächsten Umzug.
+  Klappt `sachen.json` nicht, bleibt `liste.json`, wie sie ist; der Fehler
+  steht unter Einstellungen → Über die App („Umzug der Sachen“).
+- **Beliebig oft ohne Schaden:** Schreibt eine ältere App-Fassung (bis v82 auf
+  einem Handy ohne Update) wieder Sachen in `liste.json`, zieht das nächste
+  Gerät mit der neuen Fassung sie wieder um – eine inzwischen geänderte
+  Sache gewinnt, eine in `sachen.json` gelöschte bleibt weg, nichts kommt
+  doppelt. Dieselben Sachen noch einmal: `liste.json` räumt wieder auf,
+  `sachen.json` bleibt, wie sie ist (kein Commit).
+- **Nie zurück** (`ohneInventar`): Lässt eine ältere Fassung `inventar` beim
+  Schreiben weg, legt Boxenstopp es in der gemeinsamen Liste nicht wieder
+  dazu (`listeNachtrag` in `js/speicher.js`) – bis v82 tat es das wie für
+  jeden Teil, den es kannte. Was das Gerät davon kannte, geht stattdessen an
+  den Umzug: In der gemeinsamen Liste ist `ohneInventar` eine Funktion
+  (`sachenVormerken` in `js/app.js`), die es in `boxenstopp.sachen.umzug.v1`
+  vormerkt und nach `sachen.json` bringt. So gehen die Sachen nicht verloren, wenn eine
+  Fassung vor v70 (die `inventar` gar nicht kennt) sie weglässt, bevor sie
+  umgezogen sind; was `sachen.json` schon hat, bleibt (die neuere Fassung
+  gewinnt). In `liste.json` kommen sie nie zurück. Für alles andere (Amys
+  Rezepte, Wege …) bleibt der Nachtrag, wie er war, in der eigenen Liste
+  eines Gasts auch für `inventar`.
+- **Löschungen von vorher:** Hat ein Gerät mit einer älteren Fassung
+  (bis v82) Sachen gelöscht und das noch nicht abgeschickt (`dingWeg`,
+  `invListeWeg` in `boxenstopp.offen.v1`), gehen diese Änderungen weiter an
+  `liste.json` – sind die Sachen dort schon umgezogen, liefen sie ins Leere.
+  Darum merkt Boxenstopp sie beim Start (gemeinsame Liste) auch in
+  `boxenstopp.sachen.umzug.weg.v1` vor und wendet sie vor dem Umzug auf
+  `sachen.json` an (`wegInSachen` in `js/sachen.js`, mit Grabstein; Commit
+  „Umzug: Sachen – 1 Löschung von vorher“, nur wenn sich etwas ändert). Was
+  gelöscht ist, bleibt so auch beim nächsten Umzug weg.
+- **Wann:** bei jeder Änderung und jedem Abgleich, aber erst, wenn die Liste
+  in dieser Sitzung einmal frisch gelesen ist (der zwischengespeicherte
+  Stand kann veraltet sein und Gelöschtes wiederbringen); nur in der
+  gemeinsamen Liste, nie zweimal gleichzeitig, und mit denselben Sachen wie
+  beim letzten Versuch frühestens nach **60 s** wieder – nach einem Fehler,
+  und damit eine ältere Fassung, die sie zurückschreibt, nicht alle paar
+  Sekunden zwei Commits auslöst (für die Tests kürzer: `__umzugPause` im
+  localStorage). Ist das Gerät inzwischen getrennt oder mit einer anderen
+  Liste verbunden, nimmt es dort nichts heraus.
+- **Sachen nur auf dem Gerät:** Verbindet sich ein Gerät, auf dem schon
+  Sachen lokal standen, mit der gemeinsamen Liste, kommen sie nicht nach
+  `liste.json`: Das Gerät merkt sie sich (`boxenstopp.sachen.umzug.v1`, die
+  lokale Liste ist danach weg) und bringt sie nach `sachen.json`, sobald die
+  Liste gelesen ist; was dort nicht mehr hineinpasst, bleibt gemerkt, bis
+  Platz ist. Geht es nicht, sagt die App „Die Sachen von diesem Gerät sind
+  noch nicht in der Sachen-App: … Die App versucht es gleich noch einmal.“
+  In eine eigene Liste (Gast) kommen sie wie bisher in ihre `liste.json`.
+  Dasselbe beim Start, wenn ein Zugang da ist und noch eine lokale Liste
+  (`boxenstopp.liste.lokal.v1`): So ist es, wenn die Sachen-App auf Android
+  verbunden hat (derselbe Speicher) – Boxenstopp übernimmt sie wie beim
+  Verbinden (`lokalUebernehmen`: der Rest in die Liste, die Sachen nach
+  `sachen.json`, danach ist die lokale Liste leer).
+- **Trennen** vergisst auch Stand und Offenes der Sachen-App
+  (`boxenstopp.sachen.github.v1`, `boxenstopp.sachen.offen.v1` – auf Android
+  derselbe Speicher); was nur auf dem Gerät auf den Umzug wartet
+  (`boxenstopp.sachen.umzug.v1`), bleibt.
+- **Die Sachen-App führt nur zusammen:** Nach dem ersten Abgleich je Start
+  liest sie `liste.json` (nur lesen, nie schreiben) und bringt, was dort
+  noch unter `inventar` steht, nach `sachen.json` (`umzugAusListe`); kam
+  etwas Neues, holt sie `sachen.json` gleich frisch. Geht das schief, beim
+  nächsten Abgleich noch einmal (frühestens nach einer Minute). Aus
+  `liste.json` heraus nimmt es nur Boxenstopp.
+- **Marielle bleibt unberührt:** Ihre Sachen stehen weiter in ihrer
+  `liste.json` – kein Umzug, keine `sachen.json`, kein Knopf, kein Hinweis.
+- Im Dashboard ist der Umzug ein Ablauf („Sachen umgezogen“), einmal
+  gezählt über den Commit an `sachen.json`; den an `liste.json` übergeht es
+  (ohne „Name:“, siehe Eigene Listen für Gäste).
+
+Geprüft in `tests/test-umzug.mjs`; die Rechnung in Node auch in
+`tests/test-sachen.mjs`.
 
 ### Push-Nachrichten
 
@@ -1781,12 +2027,45 @@ Wunschpreise (`u`: kg, l oder Stk), `haushalt` Haushaltssachen und Putzplan (Woc
 `wer` leer: beide; siehe Haushalt), `leute` wer die Liste teilt, `profil` was die Liste festlegt: `ziel`
 (Makros pro Box, siehe Ziel pro Box), `boxen` (1–8, siehe Boxen pro Rezept; gespeichert wird es immer
 ausdrücklich, auch 8 – lässt eine ältere Fassung es weg, kommt es wieder dazu), in einer eigenen Liste auch `person` (wessen Rezepte der eigene Reiter
-zeigt) und `farbe` (`lila`); `inventar` die Sachen in eigenen Listen (`{ listen: { "sl-…": { name, bild, reihe } }, dinge: { "sd-…": { liste, name, marke, notiz, tags, code, foto: { pfad, sha }, quelle: { name, url }, reihe } } }`, siehe Amys Bereich → Sachen). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
+zeigt) und `farbe` (`lila`); `inventar` die Sachen in eigenen Listen (`{ listen: { "sl-…": { name, bild, reihe, at, geaendert, by } }, dinge: { "sd-…": { liste, name, marke, notiz, tags, code, foto: { pfad, sha }, quelle: { name, url }, reihe, at, geaendert, by } } }`, siehe Amys Bereich → Sachen) – seit v83 nur noch in der eigenen Liste eines Gasts; in eurer gemeinsamen Liste ist es leer, Amys Sachen liegen in `sachen.json` (unten), und was hier noch steht, zieht dorthin um (siehe Der Umzug der Sachen). Von Hand bearbeiten geht, die App bereinigt beim Lesen alles, was
 nicht passt; schreibt eine ältere App-Fassung die Liste ohne die neueren Teile, legt das Handy, das sie
-kennt, sie wieder dazu (`js/speicher.js`). Jeder Start liest die Datei einmal ganz frisch, bevor er
-schreibt: Der zwischengespeicherte Stand kann von einer älteren App-Fassung stammen, die beim Lesen
-weggeräumt hat, was sie nicht kannte – darauf weiterzuschreiben löschte es (so ging am 29.10. Amys
-„Chicken Ceasar Wrap“ verloren; am 1.11. wiederhergestellt).
+kennt, sie wieder dazu (`js/speicher.js`) – in eurer gemeinsamen Liste außer `inventar`: Das geht an den
+Umzug nach `sachen.json` (siehe Der Umzug der Sachen, „Nie zurück“). Jeder Start liest die Datei einmal
+ganz frisch, bevor er schreibt: Der zwischengespeicherte Stand kann von einer älteren App-Fassung
+stammen, die beim Lesen weggeräumt hat, was sie nicht kannte – darauf weiterzuschreiben löschte es (so
+ging am 29.10. Amys „Chicken Ceasar Wrap“ verloren; am 1.11. wiederhergestellt).
+
+**`sachen.json`** (seit v83, `js/sachen.js`) liegt neben `liste.json` im
+selben privaten Repo und hält Amys Sachen für die Sachen-App:
+
+```json
+{
+ "version": 1,
+ "rev": 7,
+ "inventar": {
+  "listen": { "sl-mh9x2k1a": { "id": "sl-mh9x2k1a", "name": "Kleidung", "bild": "dress", "reihe": 1, "at": "…", "geaendert": "…", "by": "Amy" } },
+  "dinge": { "sd-mh9x3b7c": { "id": "sd-mh9x3b7c", "liste": "sl-mh9x2k1a", "name": "Sommerkleid", "marke": "Testmarke", "notiz": "Größe S", "tags": ["Sommer"], "code": "4006381333931", "foto": { "pfad": "sachen/sd-mh9x3b7c-k2.jpg", "sha": "…" }, "quelle": null, "reihe": 1, "at": "…", "geaendert": "…", "by": "Amy" } }
+ },
+ "weg": { "sd-mh9x0a1b": "2026-11-15T09:00:00.000Z" }
+}
+```
+
+`inventar` hat dasselbe Format wie in `liste.json`, die Fotos liegen wie
+bisher unter `sachen/` im Repo. `rev` zählt jedes Schreiben um genau 1
+hoch, wie bei `liste.json`; JSON mit 1 Leerzeichen Einrückung und
+Zeilenumbruch am Ende. `weg` sind die Grabsteine: was gelöscht ist und wann
+(höchstens 1000, die neuesten) – eine ältere Fassung einer Sache, von einem
+Gerät, das offline war, oder aus `liste.json`, wo eine ältere App-Fassung
+sie wieder hingeschrieben hat, kommt dann nicht zurück; eine neuere schon
+(dann ist sie nicht mehr gelöscht), und Rückgängig nimmt den Grabstein
+wieder heraus. Es schickt die Zeit der Löschung mit, die es zurücknimmt
+(`at`): Hat ein anderes Gerät die Sache danach noch einmal gelöscht (es war
+offline, sein Grabstein ist neuer), bleibt sie weg. Von Hand bearbeiten geht
+auch hier, die App bereinigt beim Lesen (fehlt die Datei oder ist sie
+kaputt, gilt ein leerer Stand). Ihre
+Commits: „Amy: Sachen, 2 Änderungen“ aus der Sachen-App, „Umzug: Sachen
+aus der Liste – …“ vom Umzug und „Umzug: Sachen – 1 Löschung von vorher“
+für Löschungen, die eine ältere Fassung nicht mehr abgeschickt hatte.
 
 Daneben liegen im Daten-Repo `angebote-privat.json` (Rewe und Edeka über
 kaufDA), `push.json` (Push-Nachrichten: `schluessel`, `abos` je Person,
@@ -1842,20 +2121,24 @@ die Action „Rezeptfotos“.
 | Datei | Inhalt |
 | --- | --- |
 | `index.html`, `css/styles.css` | Gerüst und Aussehen, Schriften in `schrift/` (OFL bzw. Apache 2.0, Lizenzen daneben) |
-| `js/app.js` | Start, Speicher wählen, Klicks verteilen, Service Worker |
+| `js/app.js` | Start, Speicher wählen, Klicks verteilen, Service Worker; der Umzug der Sachen nach `sachen.json` (`sachenUmzug`, `sachenVormerken` für `ohneInventar`, Löschungen von vorher), eine lokale Liste beim Verbinden oder Start übernehmen (`lokalUebernehmen`) |
 | `js/kern.js` | gemeinsamer Zustand, Meldung unten, Reiter |
 | `js/fehler.js` | Fehler merken (nur auf dem Gerät), `sicher` für die Teile des Starts |
 | `js/essensplan.js`, `js/ansicht-essensplan.js` | Essensplan: Tage, Kochtage, Boxen verteilen, Einkauf der Woche – und der Reiter |
 | `js/notizbuch.js`, `js/ansicht-notizen.js` | Amys Notizen: Blätter mit Farbe und Tags, Ideen fürs Planen |
 | `js/vertraeglich.js`, `js/ansicht-vertraeglich.js` | Was Amy verträgt: Liste, Abgleich mit Rezepten, Hinweise |
 | `js/wuensche.js`, `js/ansicht-wuensche.js` | Vorschläge für Tobi: schreiben, abhaken, antworten |
-| `js/inventar.js`, `js/ansicht-inventar.js` | Sachen in eigenen Listen: Listen, Sachen, Ordnen, Suchen, Strichcode – und der Teil im Bereich mit Fotos im Daten-Repo |
+| `js/inventar.js`, `js/ansicht-inventar.js` | Sachen in eigenen Listen: Listen, Sachen, Ordnen, Suchen, Strichcode, `opUmgezogen` – und die Ansicht mit Fotos im Daten-Repo, in der Sachen-App und im Bereich eines Gasts |
+| `js/sachen.js` | Amys Sachen in `sachen.json`: bereinigen, anwenden, Grabsteine (`weg`), Commit-Nachricht, `ART_SACHEN` für den Abgleich, der Umzug aus `liste.json` (`umzugZusammen`, `umzugInSachen`, `umzugAusListe`) und Löschungen von vorher (`wegInSachen`) – ohne DOM |
+| `js/ansicht-sachen-app.js` | In Amys Bereich (gemeinsame Liste): der Knopf zur Sachen-App mit dem Tipp zum Home-Bildschirm, der einmalige Hinweis für Amy |
+| `js/foto.js` | Fotos verkleinern, als JPEG und base64 – für die Sachen-App ohne den Rest; `js/ansicht-ki.js` gibt es weiter |
+| `sachen/` | Amys Sachen-App (siehe `sachen/README.md`): `index.html` (mit dem Skript für den ersten Besuch unter einem fremden Worker), `app.js` (Zugang, Abgleich, Umzug, Service Worker anmelden), `sw.js` (eigener Worker, Vorrat `sachen-<VERSION>`, gibt die App nur ganz aus dem Vorrat), `manifest.webmanifest` (Kennung `/Boxenstopp/sachen/`), `icon.svg` und die PNGs, `sachen.css` – den Rest lädt sie aus `js/` und `css/styles.css` |
 | `js/inventar-ki.js` | Sachen erkennen: das Foto an die KI (Name, Marke, Liste, Tags, Strichcode) – ohne DOM |
 | `js/scanner.js` | Der Scanner für Strichcodes: Kamera in der App mit Rahmen, Taschenlampe, Live-Lesen (BarcodeDetector) oder „Auslösen“, sonst die Kamera-App |
 | `js/inventar-netz.js` | Sachen nachschlagen: die Nummer in Open Beauty Facts & Co. (Name, Marke, Bild, Quelle), sonst Claudes Websuche – Anfrage und Treffer bereinigen; das Bild der Shopseite über die Supabase-Funktion `produkt-bild` – ohne DOM |
 | `js/liste.js` | die Liste als Daten und alle Änderungen – ohne DOM, in Node getestet |
 | `js/bereiche.js` | Bereiche in Einkaufsreihenfolge und der Text zum Kopieren |
-| `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline |
+| `js/speicher.js` | lokal oder GitHub, Abgleich, Konflikte, offline – mit `art` auch für `sachen.json` (`ART_LISTE`, `ohneInventar`); der Umzug geht als eigener Commit |
 | `js/zugang.js` | Schlüssel, Name und wo die Liste liegt (eigene Listen), Einladungslink |
 | `js/zielrechner.js` | Ziel pro Box: die festen Rezepte auf andere Makros rechnen (Mengen, Packungen, Texte, Nährwerte, Kosten) – ohne DOM |
 | `js/ansicht-ziel.js` | Ziel pro Box: anwenden (danach die Boxen), Einstellungen, oben bei den Rezepten, im Rezept, die Liste nachziehen |
@@ -1868,8 +2151,8 @@ die Action „Rezeptfotos“.
 | `js/doppel.js` | Zwei auf einmal: Arbeit und Warten je Schritt, der Plan für zwei Rezepte (ein Koch, ein Ofen), Partner und beste Paare, Schalen, Geräte – ohne DOM |
 | `js/ansicht-doppel.js` | Zwei auf einmal in der App: die Partner im Rezept, der Plan mit Ablauf, je halbe Boxen, beide auf die Liste, Kochmodus für beide |
 | `js/profil.js` | wessen Liste: eigene Liste, Name am eigenen Reiter, Farbe samt Symbol und Manifest, Link fürs zweite Gerät |
-| `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; das Dashboard – die Aktivität aus den Commits, je Person ein Reiter, der Hinweis für Gäste und Amy |
-| `js/einzelheiten.js` | Dashboard: was ein Commit genau getan hat, aus liste.json davor und danach – ohne DOM |
+| `js/gaeste.js`, `js/ansicht-gaeste.js` | Gäste mit eigener Liste: einladen, merken; das Dashboard – die Aktivität aus den Commits (an `liste.json` und `sachen.json`), je Person ein Reiter (Amys Sachen aus `sachen.json`), der Hinweis für Gäste und Amy |
+| `js/einzelheiten.js` | Dashboard: was ein Commit genau getan hat, aus liste.json (oder sachen.json) davor und danach – ohne DOM |
 | `js/dashboard.js` | Dashboard: was in einer Liste steht (Sachen, Einkaufsliste, Essensplan, Rezepte, Notiztitel, Vorschläge) – ohne Gesundheit, ohne KI-Texte, ohne DOM |
 | `js/ansicht-willkommen.js` | das Willkommen für einen Gast (Makros, aufs Handy, wem die Liste gehört) |
 | `js/bildschirmzeit.js` | Bildschirmzeit fürs Widget: messen, solange sichtbar, an Supabase melden, trennen – wortgleiche Kopie aus Finanzdienste/Bildschirmzeit (`web/bildschirmzeit.js`), nur dort ändern |
@@ -1879,7 +2162,7 @@ die Action „Rezeptfotos“.
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
 | `js/amy.js` | Amys Rezepte: Zeilen lesen, Einkaufsliste, Nährwerte, Kosten (mit der Schätzung der KI), Schritte – ohne DOM |
 | `js/amy-werte.js` | Werte schätzen: die Anfrage an die KI für unbekannte Zutaten und ihre Antwort – ohne DOM |
-| `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor |
+| `js/ansicht-amy.js` | Reiter Amys Rezepte: Liste mit Tags zum Filtern und Sortieren, Rezept, Editor; der Schalter oben (Sachen nur in der Liste eines Gasts) |
 | `js/ansicht-tablet.js` | Popup: die App aufs iPad oder Tablet |
 | `js/ansicht-iphone.js` | iPhone/iPad: nach dem Link in Safari „Jetzt noch deine App“, in der App vom Home-Bildschirm ohne Liste gleich „Einfügen“ |
 | `js/amy-import.js` | Rezept übernehmen: Anfrage aus Foto, Link oder Text, Antwort als Entwurf; Im Internet suchen: Anfrage, Treffer bereinigen, Quelle in die Notiz – ohne DOM |
@@ -1902,7 +2185,7 @@ die Action „Rezeptfotos“.
 | `js/kosten.js` | Richtpreise auf Mengen: Liste, eigene Rezepte, Euro-Format |
 | `js/angebote.js` | Angebote: Zeilen lesen, Schlüssel raten, Treffer und Ersparnis, Anfrage an die KI – ohne DOM |
 | `js/ansicht-angebote.js` | Reiter Angebote: automatischer Abruf, eigene Angebote, passende Rezepte, Rezept daraus |
-| `js/bilder.js` | Bildchen je Zutat (Schlüssel, Stichwort, Abteilung) und für Rezepte ohne Foto – ohne DOM |
+| `js/bilder.js` | Bildchen je Zutat (Schlüssel, Stichwort, Abteilung) und für Rezepte ohne Foto – ohne DOM; die Sachen-App setzt `bildBasis('../')` |
 | `werkzeug/bilder.mjs`, `.github/workflows/bilder.yml` | Rezeptfotos per KI (Cloudflare Workers AI) → bilder/rezepte |
 | `werkzeug/zutaten-bilder.mjs` | Bildchen aus Fluent Emoji → bilder/zutaten (mit alle.json für den Offline-Vorrat) |
 | `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny; Lidl liest Claude oder Gemini aus dem Prospekt) → daten/angebote.json |
@@ -1914,7 +2197,7 @@ die Action „Rezeptfotos“.
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
 | `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |
 | `js/ansicht-anpassen.js` | Rezept anpassen: Mengen, Zutaten tauschen, auf Ziel rechnen, als eigenes Rezept speichern |
-| `sw.js` | Offline-Betrieb; `VERSION` hochzählen, wenn sich eine Datei aus `SHELL` ändert |
+| `sw.js` | Offline-Betrieb; `VERSION` hochzählen, wenn sich eine Datei aus `SHELL` ändert. Lässt `sachen/` in Ruhe (seit v83). Ändert sich eine Datei, die die Sachen-App mitlädt (`js/…`, `css/styles.css`), zählen **beide** `VERSION` hoch – hier und in `sachen/sw.js` (dazu `tests/daten/sachen-fassung.json` nachziehen, `test-sachen.mjs` nennt die Werte); ohne neue `VERSION` bekommt kein Handy die Änderung in der Sachen-App, und sie zählt nur hoch |
 
 ## Tests
 
@@ -1944,7 +2227,8 @@ Timer bekommen, und spielt einen Kochabend mit vorgestellter Uhr durch.
 `test-amy.mjs` liest Amys Zeilen in Node und spielt ihren Reiter dann auf
 zwei Handys durch (Editor, Entwurf, Liste zusammen mit einem festen Rezept,
 Timer, Tags mit Filter und Sortierung, Löschen, eine ältere App-Fassung ohne
-`amy`, `amyTags` und `wege`). `test-gleich.mjs` vergleicht Namen und legt in
+`amy`, `amyTags` und `wege`; oben der Schalter Rezepte · Notizen ·
+Verträglich · Vorschläge mit dem Knopf zur Sachen-App, kein Teil „Sachen“). `test-gleich.mjs` vergleicht Namen und legt in
 Node zusammen, dann im Browser auf zwei Handys (Kackbürste zum Haushalt,
 „leckere Dino nuggies“ und „Dino nuggets“ zusammen, Rückgängig, von Hand,
 gemerkt fürs nächste Mal, „Nein, verschieden“). `test-tablet.mjs` spielt das
@@ -1974,7 +2258,7 @@ liest einen Link) und „Im Internet suchen“: die Anfrage mit und ohne
 Unverträgliches, ausgedachte Treffer fallen weg, Nehmen, Rückgängig,
 Speichern mit Quelle, `pause_turn`, Ausweichen ohne Seiten lesen,
 Websuche aus, Abbrechen und der Hinweis mit Googles
-Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – und Amys Bereich mit Sachen. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, mehr Daten (Kategorie, Siegel, Menge, Haltbarkeit, Inhaltsstoffe; bei Claude Angaben, Preis, Beschreibung), Claudes Treffer nur mit einer Seite oder Website aus Suche oder Lesen, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater), eine ausgedachte Seite zählt nicht, „Im Netz nachschlagen“ fragt beide und schreibt nichts doppelt in die Notiz; der Hinweis beim Scannen bleibt stehen (auch nach ein paar Sekunden), ein Foto am neu gezeichneten Feld kommt an, der Scanner mit nachgebauter Kamera (Live-Bild, Taschenlampe an und aus, das Handy liest den Code von selbst; ohne Leser und Taschenlampe „Auslösen“ an die KI und der Tipp mit dem Blitz, ohne zu suchen; mehrere Kameras hinten wie bei Samsung – die App wechselt von der Weitwinkel-Kamera zur Hauptkamera mit Licht, merkt sie sich und nimmt sie beim nächsten Mal gleich, die vorn nie; × macht die Kamera aus – ohne Kamera geht das Foto über „Mit der Kamera-App“), „Abbrechen“ und „Anlegen“ im Formular „Neue Liste“; das Bild der Shopseite über die nachgebaute Funktion (an sie nur Seite und Prüfsumme, ohne Bild auch ohne Fehlermeldung – `FUNKTIONEN` in `tests/hilfe.mjs` lässt keinen Test an die echten Supabase-Funktionen). `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
+Schlüssel. `test-inventar.mjs` prüft die Sachen in Node (Bereinigen, Änderungen von zwei Geräten, eine gelöschte Liste, höchstens 400, Sortieren, Suchen, Prüfziffern, die Anfrage an die KI, Fotos hochladen, holen, löschen) und spielt im Browser Marielle durch: eine Liste aus dem Vorschlag, eine Sache mit Name, Marke, Notiz und Tag, das Foto ins Repo, den Strichcode (das Handy selbst), sortieren, ordnen, filtern, suchen, „Hab ich das schon?“, ihr zweites Gerät ohne Leser (die KI liest Foto und Code, eine falsche Prüfziffer nicht), Löschen mit Rückgängig (das Foto kommt danach weg), eine ältere Fassung ohne `inventar` – im Browser also nur noch die Sachen einer Gästeliste (Amys spielt seit v83 `test-sachen.mjs` in der Sachen-App durch); in Amys Bereich der gemeinsamen Liste kein Teil „Sachen“, nur der Knopf zur Sachen-App. Dazu das Nachschlagen gegen nachgebaute Datenbanken (Open Beauty Facts & Co., `DATENBANK_HOSTS` in `tests/hilfe.mjs` – die echten fragt kein Test) und eine nachgebaute Claude-Suche: Adressen, Bilder nur von den Datenbanken, der Verweis auf eine andere Datenbank, die Kennung im Kopf, mehr Daten (Kategorie, Siegel, Menge, Haltbarkeit, Inhaltsstoffe; bei Claude Angaben, Preis, Beschreibung), Claudes Treffer nur mit einer Seite oder Website aus Suche oder Lesen, die Quelle in der Sache; im Browser „Scannen“ in einer Liste (gleich angelegt, das Bild als Foto im Repo, noch einmal gescannt „Hast du schon“), „Hab ich das schon?“ mit Namen und „Eintragen“, mit Gemini keine Suche, mit Anthropic Claude (ohne Berater), eine ausgedachte Seite zählt nicht, „Im Netz nachschlagen“ fragt beide und schreibt nichts doppelt in die Notiz; der Hinweis beim Scannen bleibt stehen (auch nach ein paar Sekunden), ein Foto am neu gezeichneten Feld kommt an, der Scanner mit nachgebauter Kamera (Live-Bild, Taschenlampe an und aus, das Handy liest den Code von selbst; ohne Leser und Taschenlampe „Auslösen“ an die KI und der Tipp mit dem Blitz, ohne zu suchen; mehrere Kameras hinten wie bei Samsung – die App wechselt von der Weitwinkel-Kamera zur Hauptkamera mit Licht, merkt sie sich und nimmt sie beim nächsten Mal gleich, die vorn nie; × macht die Kamera aus – ohne Kamera geht das Foto über „Mit der Kamera-App“), „Abbrechen“ und „Anlegen“ im Formular „Neue Liste“; das Bild der Shopseite über die nachgebaute Funktion (an sie nur Seite und Prüfsumme, ohne Bild auch ohne Fehlermeldung – `FUNKTIONEN` in `tests/hilfe.mjs` lässt keinen Test an die echten Supabase-Funktionen). `test-werte.mjs` prüft das Schätzen unbekannter Zutaten: erst
 keine Zahlen auf der Karte, die Anfrage nur mit den offenen Zeilen, danach
 kcal und Preis, die Schätzung in der Liste und bei Tobi ohne eigene Anfrage,
 nach dem Bearbeiten nur die neue Zeile und nicht gleich noch einmal.
@@ -2041,13 +2325,31 @@ Einkaufsliste, Essensplan, Rezepte, Notiztitel ohne Text, nichts, was sie
 verträgt, beim nächsten Öffnen neu geholt; Amys Bereich) – dazu
 `inhaltVon` in Node und der Hinweis: im Willkommen statt extra, für einen Gast
 mit älterer App einmal (und bei den Sachen), für Amy in Rosa, für Tobi keiner.
-Damit er nicht mitten in andere Tests fällt, setzt `handy()` ihn als gesehen
-(`hinweise: true` lässt ihn kommen). `test-einzelheiten.mjs` rechnet die Einzelheiten in
+Seit v83 auch das Dashboard mit `sachen.json`: in Node die Nachricht der
+Sachen-App („Amy: Sachen, 2 Änderungen“ → Amy, 2 Änderungen, Bereich
+Sachen), der Umzug als Automatik, beide Dateien als eine Liste (Amy einmal,
+eine Sitzung, der Umzug einmal gezählt, sein Commit an `liste.json` bei
+niemandem im Verlauf); im Browser Tobis Gerät, das umzieht, Amys Karte mit
+dem Commit der Sachen-App, die Einzelheiten aus beiden Dateien in einer
+Sitzung (die zur Sachen-App aus `sachen.json` mit `?ref=`, nur Sachen, nicht
+der Text der Notiz), „1× Sachen umgezogen“, der Verlauf je Datei gemerkt,
+Amys Reiter mit den Sachen aus `sachen.json` und dem, was noch in
+`liste.json` steht (auch, solange `sachen.json` nicht zu schreiben ist, und
+während es umzieht), „Neu holen“ – liefert GitHub danach eine ältere Fassung
+(kleineres `rev`) oder ein 404, bleibt alles stehen –, ohne `sachen.json`
+„Noch keine Sachen.“ ohne Fehler; der Hinweis auf die Sachen-App kommt bei
+Amy erst nach dem aufs Dashboard, Tobi bekommt ihn nie.
+Damit die Hinweise nicht mitten in andere Tests fallen, setzt `handy()` sie als gesehen
+(`hinweise: true` lässt sie kommen). `test-einzelheiten.mjs` rechnet die Einzelheiten in
 Node: Einkauf (mit Mengen, abgehakt, wieder offen, weggeräumt, Abteilung, Bon,
 Preisalarm), Kochen (Schritte fester und eigener Rezepte, Timer), Rezepte,
 Putzplan, Sachen (Liste angelegt, umbenannt, gelöscht; Sache dazu, geändert –
 nur welche Felder –, in eine andere Liste, gelöscht, umsortiert), Ziel, eine
-zusammengeführte eigene Liste und eine Sitzung aus mehreren Commits. `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
+zusammengeführte eigene Liste und eine Sitzung aus mehreren Commits – dazu
+Sachen aus `sachen.json` (bereinigt wie `liste.json`, der erste Commit gegen
+eine leere Liste, dazu, geändert, gelöscht, ohne `inventar` kein Fehler) und der Umzug als Commit für sich
+(der eigene davor zeigt nur „Auf die Liste: Tomaten“, der Umzug nur Sachen-Zeilen, die wie gelöschte
+aussehen). `test-speisekarte.mjs` prüft Anfragen (PDF, Fotos,
 Link, Claude), Bereinigen und Sortieren in Node und im Browser PDF wählen,
 Ergebnis, gemerkt, neu sortiert mit einem anderen Ziel – und die
 Veranstaltung: die Anfrage (Websuche und Seiten lesen bei Claude, bei Gemini
@@ -2074,5 +2376,98 @@ Karte und wieder weg, „false“ trennt von selbst, ein Link bei offener App,
 Links `#zugang=`, `#ki=`, `#gaeste=`, `#einkauf` wie vorher, die Kennung
 weder in GitHub noch im Link fürs zweite Handy noch im Fehlerbericht, die
 lila Fassung, und mit Service Worker: Der Aufruf mit dem Link liegt im
-Vorrat, aber ohne den Teil hinter `#`. Der Workflow „Prüfung“ lässt
-Linter und alle Tests bei jedem Push laufen.
+Vorrat, aber ohne den Teil hinter `#`.
+
+Seit v83, für Amys Sachen-App: `test-sachen.mjs` prüft ohne Browser
+`sachen.json` (bereinigen – kaputt gibt einen leeren Stand, `weg` nur mit
+ids und Zeitpunkt, höchstens 1000 –, Änderungen anwenden: Löschen setzt den
+Grabstein, eine ältere Fassung kommt danach nicht zurück, eine neuere schon,
+eine Liste nimmt ihre Sachen mit, Rückgängig), die Commit-Nachricht (nie,
+was es ist), die eigenen Speicher-Schlüssel, den Umzug (`umzugZusammen`,
+`opUmgezogen`, sachen.json voll) und die beiden Service Worker in einer
+nachgebauten Worker-Umgebung: `SHELL` nennt jedes Modul, das `sachen/app.js`
+über seine Importe lädt, jeden Eintrag gibt es, Schriften und Bildchen sind
+dabei, aufgeräumt werden nur alte `sachen-…`, ein Seitenaufruf ohne Netz
+bekommt `./index.html` der Sachen-App, Boxenstopps Worker beantwortet unter
+`sachen/` nichts und lässt `sachen-…` und `boxenstopp-sachen-v1` stehen. Dazu
+die **Versionspflicht**: ein Abdruck (SHA-256) über alle Dateien aus `SHELL`
+und die Bildchen gegen `tests/daten/sachen-fassung.json`
+(`{ "version", "abdruck" }`) – ändert sich eine davon, auch unter `js/` oder
+`css/styles.css`, ohne dass `VERSION` in `sachen/sw.js` hochzählt, schlägt
+er fehl und nennt die neuen Werte zum Eintragen; `VERSION` zählt nur hoch
+(`vN` als Zahl): kleiner oder gleich groß (`v01`) schlägt fehl, ohne je
+vorzuschlagen, die gemerkte zurückzusetzen, eine größere bleibt rot, bis
+die Datei nachgezogen ist. Manifest (eigene Kennung,
+die Symbole mit ihrer Größe laut PNG-Kopf) und Seite (nichts aus Boxenstopps
+Wurzel). Im Browser unter `sachen/index.html` gegen die nachgebaute
+GitHub-API: ohne Zugang die Karte, Links ohne und mit Namen, der
+KI-Schlüssel aus dem Link, ein Gast und der Link einer eigenen Liste (keine
+Anfrage an GitHub), Amy legt eine Liste aus dem Vorschlag und Sachen an (in
+`sachen.json`, „Amy: Sachen, n Änderungen“, `rev` je Schreiben + 1, 1
+Leerzeichen Einrückung, `liste.json` nie geschrieben), sortiert, sucht, „Hab
+ich das schon?“, ein Foto ins Repo, Tobis Handy sieht alles samt Foto,
+Löschen mit Rückgängig (`weg`), Scannen mit Kamera, Taschenlampe, Open
+Beauty Facts, Claude und dem Bild der Shopseite, „Mit KI ausfüllen“ (alles
+nachgebaut), das iPhone (das Popup in Safari, „Link kopieren“, „Einfügen“
+vom Home-Bildschirm), der Umzug beim Start (ein Commit an `sachen.json`,
+`liste.json` nur gelesen, ein zweiter Start schreibt nichts doppelt; schlägt
+er zweimal fehl, klappt er im selben Start beim dritten Versuch, nach der
+Pause), der erste Start ohne Netz (der Satz statt der Vorschläge, mit Netz
+dann die Sachen, wieder ohne Netz der gemerkte Stand) und „Verbinden“ nach
+einem Gast (was von dessen Liste offen war, ist weg, `liste.json` bleibt
+ungeschrieben). Dann mit Service Worker gegen einen eigenen Server auf Port 8137, der
+abgeschaltet wird (Playwrights Offline-Schalter trifft den Worker nicht):
+eigener Worker und Vorrat, ohne Netz die Sachen-App aus dem Vorrat (auch
+unter einer anderen Adresse darunter), ohne ihren Worker nie Boxenstopps
+Seite, mit beiden Workern über ein Update von Boxenstopp (ihr Vorrat und die
+Fotos bleiben), Boxenstopp selbst geht ohne Netz weiter; ein Deploy, während
+der Worker läuft – ohne neue `VERSION` bleiben Seite, `app.js` und
+`js/format.js` alt, auch nach `update()` und Neuladen, mit neuer kommt alles
+neu, der alte Vorrat ist weg, die Seite lädt genau einmal neu –, und der
+erste Besuch unter Boxenstopps Worker: unter dem heutigen (genau ein
+Neuladen, danach hält der eigene; mit einem Link, dessen Verbinden beim
+Neuladen noch unterwegs war, ist Amy danach verbunden) und unter dem von
+v79 (`git archive 382449e`, in einem flachen Checkout erst mit `git fetch
+--depth=1` geholt: ein Neuladen, dann läuft die Sachen-App). `test-umzug.mjs`
+spielt den Umzug in Node durch – ein ganzer Durchgang, dann schreibt eine
+ältere App-Fassung die Sachen zurück (eine inzwischen geändert, eine in
+`sachen.json` gelöscht), und der zweite räumt wieder auf: die geänderte
+gewinnt, die gelöschte bleibt weg, nichts geht verloren, dreimal dasselbe
+ändert nichts, was inzwischen in `liste.json` geändert wurde, bleibt für den
+nächsten; eine Sache, deren Liste in `sachen.json` danach gelöscht wurde,
+kommt nicht zurück; Rückgängig mit `at` lässt einen späteren Grabstein
+stehen; der Nachtrag legt `inventar` in der gemeinsamen Liste nie wieder
+dazu (als Funktion bekommt `ohneInventar` die bekannten Sachen), in einer
+Gästeliste schon; die Nachricht nur des Umzugs ohne „Name:“ (niemand, kein
+Ablauf), gemischt nur die eigene Änderung, gezählt einmal über den Commit an
+`sachen.json` – und im Browser (Boxenstopp): Tobis Gerät zieht um (erst
+`sachen.json`, dann `liste.json`, je `rev` + 1), eine eigene Änderung im
+selben Augenblick geht als eigener Commit vor dem Umzug, eine ältere Fassung
+schreibt zurück und es zieht wieder um (in der Nachricht nur das Neue), ein
+Gerät kennt `inventar` noch aus dem Zwischenspeicher und legt nichts zurück,
+eine Fassung vor v70 lässt `inventar` ganz weg (die Sachen kommen trotzdem
+nach `sachen.json`, nie zurück in `liste.json`), eine Löschung aus einer älteren Fassung
+wartet noch auf dem Gerät (sie kommt auf `sachen.json`, „Umzug: Sachen – 1
+Löschung von vorher“), Trennen vergisst auch Stand und Offenes der
+Sachen-App, `sachen.json` geht kurz nicht (mehrere Versuche, höchstens einer je Pause –
+im Test `__umzugPause` –, `liste.json` bleibt, der Fehler unter „Über die
+App“, der Hinweis wartet), dann klappt es; Amy bekommt danach den Hinweis
+(„Sachen öffnen“ öffnet die Sachen-App, gemerkt, nach dem Neuladen nicht
+wieder), im Schalter kein Teil „Sachen“ (ein gemerkter zeigt die Rezepte),
+der Knopf mit dem Tipp öffnet `…/sachen/` ohne `#`, auf dem iPhone mit dem
+Link, der auch in der Zwischenablage liegt; Marielles Liste bleibt, wie sie
+ist (ihr `inventar`, ihr Teil „Sachen“ ohne Knopf, kein Hinweis, keine
+`sachen.json`); Sachen nur auf dem Gerät kommen beim Verbinden nach
+`sachen.json`, nie in `liste.json` (geht es nicht: eine Meldung, gemerkt bis
+danach), ebenso beim Start, wenn die Sachen-App auf Android verbunden hat
+(Zugang da, die lokale Liste noch voll), und bei voller `sachen.json`
+bleibt, was nicht passt, gemerkt, bis Platz ist. `tests/hilfe.mjs` hat dafür `SACHEN_URL` (die Sachen-App auf
+demselben Testserver), `handy({ adresse: SACHEN_URL })` wartet auf
+`html[data-bereit]` statt auf die Boxen (`bereit`: ein anderer Selektor oder
+`false`), `githubAttrappe()` liefert `?ref=` auch für weitere Textdateien
+(`sachen.json`, `push.json` … – je Commit in `zustand.fassungen`; strenger
+als GitHub: eine sha, die die Datei nicht anfasst, gibt 404), zählt die
+PUTs je Datei (`zustand.schreiben`) und liest eine weitere mit
+`datei('sachen.json')`; `handy()` setzt auch den Hinweis auf die Sachen-App
+als gesehen. Der Workflow „Prüfung“ lässt
+Linter (auch über `sachen/`) und alle Tests bei jedem Push laufen.

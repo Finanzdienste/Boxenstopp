@@ -1,11 +1,16 @@
 /*
  * Reiter „Amys Bereich“: oben ein Schalter Rezepte · Notizen · Verträglich · Sachen ·
  * Vorschläge. Die Notizen (Blätter wie bei OneNote) baut ansicht-notizen.js,
- * was Amy verträgt ansicht-vertraeglich.js, ihre Sachen in eigenen Listen
- * ansicht-inventar.js, ihre Vorschläge für Tobi
+ * was Amy verträgt ansicht-vertraeglich.js, die Sachen in eigenen Listen
+ * ansicht-inventar.js (nur in der eigenen Liste eines Gasts), ihre Vorschläge für Tobi
  * ansicht-wuensche.js (nur in der gemeinsamen Liste) – hier die Rezepte, die Amy selbst
  * schreibt: rosa, mit Herzchen und Glitzer (das Thema hängt an
  * html[data-tab="amy"], siehe CSS).
+ *
+ * Amys Sachen sind seit v83 eine eigene App (sachen/, Daten in sachen.json):
+ * In der gemeinsamen Liste – und ohne Liste – gibt es den Teil „Sachen“
+ * nicht mehr; unter dem Schalter steht der Knopf dorthin
+ * (ansicht-sachen-app.js, die Klicks verteilt app.js).
  *
  * Drei Ansichten: die Liste ihrer Rezepte, ein Rezept (Zutaten mit + auf die
  * gemeinsame Einkaufsliste, Schritte zum Abhaken mit Timern, die Zeit in
@@ -50,6 +55,7 @@ import { fotoVorbereiten, oeffneEinrichten } from './ansicht-ki.js';
 import { notizenHTML, notizenAktualisieren, klickNotizen, eingabeNotizen, tasteNotizen, notizenZahl, notizJetztSpeichern } from './ansicht-notizen.js';
 import { inventarHTML, inventarAktualisieren, klickInventar, eingabeInventar, aenderungInventar, tasteInventar, absendenInventar, inventarZahl, inventarJetztSpeichern } from './ansicht-inventar.js';
 import { wuenscheHTML, wuenscheAktualisieren, klickWuensche, absendenWuensche, wuenscheOffen } from './ansicht-wuensche.js';
+import { sachenAppHTML } from './ansicht-sachen-app.js';
 import { vertraeglichHTML, vertraeglichAktualisieren, klickVertraeglich, absendenVertraeglich, vertraeglichZahl, pruefeZutaten, hinweisHTML as vtHinweisHTML, zeichenHTML as vtZeichenHTML, stufeVon as vtStufeVon, wem } from './ansicht-vertraeglich.js';
 import { eintraegeVon, namenKurz } from './vertraeglich.js';
 
@@ -59,8 +65,13 @@ const FILTER = 'boxenstopp.amy.filter.v1'; // { tags: ['gesund'], sort: 'neu' } 
 const ARTEN = ['liste', 'detail', 'editor'];
 /** Die Teile des Bereichs – oben der Schalter. */
 const TEILE = [['rezepte', 'Rezepte'], ['notizen', 'Notizen'], ['vertraeglich', 'Verträglich'], ['sachen', 'Sachen'], ['wuensche', 'Vorschläge']];
-/** In einer eigenen Liste (Gast) gibt es keine Vorschläge für Tobi. */
-const teile = () => TEILE.filter(([k]) => k !== 'wuensche' || !istEigen());
+/**
+ * In einer eigenen Liste (Gast) gibt es keine Vorschläge für Tobi. Die Sachen nur dort: In der
+ * gemeinsamen Liste (und ohne Liste) sind Amys Sachen seit v83 eine eigene App (ansicht-sachen-app.js).
+ */
+const teile = () => TEILE.filter(([k]) => (k !== 'wuensche' || !istEigen()) && (k !== 'sachen' || istEigen()));
+/** Ein gemerkter Teil, den es hier nicht (mehr) gibt – „Sachen“ in der gemeinsamen Liste –, wird zu den Rezepten. */
+const teilPruefen = () => { if (!teile().some(([k]) => k === zustand.teil)) zustand.teil = 'rezepte'; };
 const SORTEN = [['neu', 'Neueste zuerst'], ['name', 'Name A–Z'], ['schnell', 'Schnellste zuerst'], ['guenstig', 'Günstigste zuerst'], ['tags', 'Nach Tags']];
 
 let zustand = (() => {
@@ -180,9 +191,9 @@ function nachTagsHTML(liste, gewaehlt) {
     + (ohne.length ? abschnitt('<span class="amy-tag ohne">ohne Tag</span>', ohne.length, ohne) : '');
 }
 
-/** Oben im Bereich: Titel und der Schalter Rezepte · Notizen · Verträglich (mit Zahlen). */
+/** Oben im Bereich: Titel und der Schalter Rezepte · Notizen · Verträglich (mit Zahlen) – in der gemeinsamen Liste darunter der Knopf zur Sachen-App. */
 function kopfHTML() {
-  if (!teile().some(([k]) => k === zustand.teil)) zustand.teil = 'rezepte';
+  teilPruefen();
   const zahl = { rezepte: Object.keys(app.stand.amy || {}).length, notizen: notizenZahl(), vertraeglich: vertraeglichZahl(), sachen: inventarZahl(), wuensche: wuenscheOffen() };
   const lead = {
     rezepte: `Deine eigenen Lieblingsrezepte. Mit einem Tipp landen die Zutaten auf ${istEigen() ? 'deiner' : 'eurer gemeinsamen'} Einkaufsliste – und beim Kochen lernt das Handy, wie lange du brauchst.`,
@@ -197,6 +208,7 @@ function kopfHTML() {
 <h1 class="amy-titel" id="amy-titel">${esc(wessen(person()))} Bereich</h1>
 <p class="amy-lead">${esc(lead)}</p>
 <div class="amy-teile" role="tablist" aria-label="Teile">${teile().map(([k, name]) => `<button type="button" class="amy-teil" role="tab" data-amy-teil="${k}" aria-selected="${zustand.teil === k}">${esc(name)}${app.listeDa && zahl[k] ? `<span class="n">${zahl[k]}</span>` : ''}</button>`).join('')}</div>
+${istEigen() ? '' : sachenAppHTML()}
 </header>`;
 }
 
@@ -578,6 +590,7 @@ export function amyZeichnen() {
   const el = $('#view-amy');
   if (!el) return;
   nachIdNeu();
+  teilPruefen();
   if (zustand.art === 'detail' && !rezept(zustand.id) && app.listeDa) zustand = { art: 'liste', id: null, teil: 'rezepte' };
   if (zustand.art === 'editor' && !entwurf) zustand = { art: 'liste', id: null, teil: 'rezepte' };
   if (zustand.art === 'detail' && rezept(zustand.id)) {
@@ -594,8 +607,8 @@ export function amyZeichnen() {
   } else if (zustand.teil === 'vertraeglich') {
     if (!vertraeglichAktualisieren(el)) el.innerHTML = kopfHTML() + vertraeglichHTML();
     else teileZahlen(el);
-  } else if (zustand.teil === 'sachen') {
-    // Eine offene Sache bleibt stehen, während darin getippt wird – wie ein Notizblatt
+  } else if (zustand.teil === 'sachen' && istEigen()) {
+    // Eine offene Sache bleibt stehen, während darin getippt wird – wie ein Notizblatt (nur in der eigenen Liste eines Gasts)
     if (!inventarAktualisieren(el)) el.innerHTML = kopfHTML() + inventarHTML();
     else teileZahlen(el);
   } else if (zustand.teil === 'wuensche' && !istEigen()) {
@@ -675,7 +688,8 @@ function teilZeigen(teil) {
   if (!TEILE.some(([k]) => k === teil)) return;
   notizJetztSpeichern();
   inventarJetztSpeichern();
-  zustand = { art: 'liste', id: null, teil };
+  // „Sachen“ gibt es in der gemeinsamen Liste nicht mehr (eigene App) – dann die Rezepte
+  zustand = { art: 'liste', id: null, teil: teile().some(([k]) => k === teil) ? teil : 'rezepte' };
   merken();
   if (ansicht.tab !== 'amy') zeigeReiter('amy');
   amyZeichnen();

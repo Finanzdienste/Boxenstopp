@@ -1883,6 +1883,12 @@ html.pm-offen{overflow:hidden}
 .amy-teil[aria-selected="true"] .n{background:rgba(255,255,255,.3);color:#fff}
 .amy-rezepte-kopf{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px}
 @media (max-width:539.98px){.amy-teile{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;border-radius:22px}.amy-teil{justify-content:center;padding:0 10px}}
+/* Unter dem Schalter (gemeinsame Liste): der Knopf zur Sachen-App mit dem Tipp zum Home-Bildschirm (ansicht-sachen-app.js) */
+.sachen-app{position:relative;z-index:1;display:grid;gap:4px;justify-items:center;max-width:44ch}
+.sachen-app .amy-btn{min-height:42px;padding:9px 18px;font-size:15px;line-height:1.25;text-align:center;text-wrap:balance}
+.sachen-app .amy-btn .ic{flex:none}
+.sachen-app .fine{margin:0;text-align:center}
+.sachen-dlg-ic img{display:block;width:36px;height:36px}
 
 /* ---------------------------------------------------------------- Amys Notizen: Blätter wie bei OneNote */
 .nb{container-type:inline-size}

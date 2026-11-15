@@ -14,7 +14,8 @@ Bei normalen Aufgaben erwähnst du Ultracode nicht.
 - **Finanzdienste/Boxenstopp** (dieses, öffentlich): die App – Vanilla-JS-PWA
   ohne Bauschritt, live über GitHub Pages. Alles hier ist für jeden lesbar.
 - **Finanzdienste/Boxenstopp-Daten** (privat): die gemeinsame Liste
-  (`liste.json`), der Katalog (`katalog.json`) und was die Actions schreiben.
+  (`liste.json`), Amys Sachen (`sachen.json`, die Sachen-App unter `sachen/`, Fotos
+  unter `sachen/`), der Katalog (`katalog.json`) und was die Actions schreiben.
 - **Finanzdienste/Boxenstopp-Marielle**: Marielles Liste – nie hineinschreiben.
   Den Katalog gleicht die App selbst ab (Tobis Handy, alle 5 Minuten).
 - **Finanzdienste/Bildschirmzeit** (öffentlich): Tobis Widget-App (Android)
@@ -70,7 +71,10 @@ Bei normalen Aufgaben erwähnst du Ultracode nicht.
    `node tests/lauf.mjs katalog ki` (einzelne). Der Testserver braucht Port 8099.
    Neue Funktionen bekommen Tests, die README wird mitgezogen.
 2. In `sw.js` die `VERSION` um eins hochzählen (z. B. `'v66'` → `'v67'`); neue JS-Dateien in
-   `SHELL` eintragen.
+   `SHELL` eintragen. Die Sachen-App (`sachen/`, eigener Worker) lädt viele Dateien aus
+   `js/` und `css/styles.css` mit: Ändert sich eine davon, auch `VERSION` in `sachen/sw.js`
+   hochzählen und `tests/daten/sachen-fassung.json` nachziehen (`test-sachen.mjs` sagt die
+   neuen Werte); ein neuer Import gehört auch in ihre `SHELL`.
 3. Committen und vor dem Push `git pull --rebase origin main`; gepusht wird
    auf `main`. Keine History umschreiben (kein amend, kein force).
 4. Erst die App pushen, dann Daten, die alte App-Versionen kaputt machen

@@ -33,6 +33,7 @@ import { opKiBehalten, opKiWeg, opTeil, opTeilWeg } from './liste.js';
 import { oeffneRezept, schliesseRezept, offenesRezept, rasterZeichnen, ic } from './ansicht-rezepte.js';
 import { fuerWen, linkFuerGeraet, istEigen } from './profil.js';
 import { hatEigenesZiel } from './ansicht-ziel.js';
+import { fotoVorbereiten } from './foto.js';
 
 const EINGABE = 'boxenstopp.ki.eingabe.v1';
 const ENTWURF = 'boxenstopp.ki.entwurf.v1';
@@ -40,7 +41,6 @@ const ENTWURF = 'boxenstopp.ki.entwurf.v1';
 const portionenWahl = () => [...new Set([2, 4, 6, 8, app.boxen || 8])].sort((a, b) => a - b);
 const gueltig = (n) => Number.isInteger(n) && n >= 1 && n <= 8;
 const MAX_FOTOS = 4;
-const KANTE = 1280;
 
 const KAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg>';
 const BILD = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l4.5-4.5 3.5 3.5 2.5-2.5L20 17"/><circle cx="15.5" cy="9.5" r="1.4"/></svg>';
@@ -318,43 +318,8 @@ export function resteZeichnen() {
 
 /* ------------------------------------------------------- Fotos */
 
-export const blobZuB64 = (blob) => new Promise((ok, nein) => {
-  const r = new FileReader();
-  r.onload = () => ok(String(r.result).split(',')[1] || '');
-  r.onerror = () => nein(r.error);
-  r.readAsDataURL(blob);
-});
-
-async function bildLaden(datei) {
-  if (typeof createImageBitmap === 'function') {
-    try { return await createImageBitmap(datei); } catch { /* weiter mit <img> */ }
-  }
-  const url = URL.createObjectURL(datei);
-  try {
-    const img = new Image();
-    img.src = url;
-    await img.decode();
-    return img;
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-/** Auf höchstens 1280 px verkleinern und als JPEG – das spart Zeit und Geld (Speisekarten: größer, sonst ist die Schrift weg). */
-export async function fotoVorbereiten(datei, kante = KANTE) {
-  const bild = await bildLaden(datei);
-  const b = bild.width || bild.naturalWidth;
-  const h = bild.height || bild.naturalHeight;
-  const s = Math.min(1, kante / Math.max(b, h));
-  const c = document.createElement('canvas');
-  c.width = Math.max(1, Math.round(b * s));
-  c.height = Math.max(1, Math.round(h * s));
-  c.getContext('2d').drawImage(bild, 0, 0, c.width, c.height);
-  if (typeof bild.close === 'function') bild.close();
-  const blob = await new Promise((ok) => { c.toBlob(ok, 'image/jpeg', 0.82); });
-  if (!blob) throw new Error('kein Bild');
-  return { url: URL.createObjectURL(blob), b64: await blobZuB64(blob) };
-}
+// Verkleinern und base64 stehen in foto.js (die Sachen-App braucht nur das) – hier für die anderen Teile weitergegeben
+export { blobZuB64, fotoVorbereiten } from './foto.js';
 
 async function fotosDazu(dateien) {
   const neu = [...dateien].filter((d) => /^image\//.test(d.type) || !d.type).slice(0, MAX_FOTOS - fotos.length);

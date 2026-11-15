@@ -7,8 +7,9 @@
  * es eingeladen hat – mit dem Schlüssel des Gasts, nur in seinem
  * localStorage, damit der Überblick ihre Liste lesen kann.
  *
- * Der Überblick liest keine Inhalte, sondern die Commits an liste.json
- * (speicher.js commitsLesen): Jeder Commit der App heißt
+ * Der Überblick liest keine Inhalte, sondern die Commits an liste.json und
+ * – in eurer Liste – an sachen.json (speicher.js commitsLesen; die Sachen-App
+ * schreibt „Amy: Sachen, 2 Änderungen“). Jeder Commit der App heißt
  * „Amy: Einkaufsliste, 3 Änderungen – Chili auf die Liste; 2 abgehakt“ –
  * wer, wann, wie viel, was. Ältere Commits haben das „was“ noch nicht.
  * Daraus: je Person zuletzt, Änderungen je Tag und Bereich, und ein Verlauf
@@ -24,8 +25,8 @@
 
 const NAME = /^[\p{L}\p{N} ._-]{1,30}$/u;
 const REPO = /^[A-Za-z0-9_.-]{1,100}\/[A-Za-z0-9_.-]{1,100}$/;
-/** Was nicht von einer Person kommt, sondern von den Abläufen im Daten-Repo. */
-const AUTOMATIK = /^(?:Push|Haushalt|Angebote(?: \(privat\))?|To Do|Microsoft|Bescheid)$/i;
+/** Was nicht von einer Person kommt – dazu der Umzug der Sachen nach sachen.json (sachen.js), den irgendein Gerät erledigt. */
+const AUTOMATIK = /^(?:Push|Haushalt|Angebote(?: \(privat\))?|To Do|Microsoft|Bescheid|Umzug)$/i;
 export const BEREICHE = ['Einkauf', 'Kochen', 'Rezepte', 'Sachen', 'Haushalt', 'Ziel', 'Sonstiges'];
 /** So lange gehören zwei Commits derselben Person zu einer Sitzung. */
 const SITZUNG_MIN = 20;
@@ -97,13 +98,15 @@ export function nachrichtLesen(text) {
   const wer = m[1].trim();
   let rest = m[2].replace(/\s*·\s*(?:Bescheid|To Do|Test)\b/g, '').trim();
   if (AUTOMATIK.test(wer)) return { wer, auto: true, anzahl: 1, was: rest ? [rest] : [] };
-  const n = /^Einkaufsliste,\s*(\d+)\s+Änderung(?:en)?/.exec(rest);
-  const anzahl = n ? Math.max(1, Number(n[1])) : 1;
+  // „Einkaufsliste, 3 Änderungen – …“ (liste.json) oder „Sachen, 2 Änderungen“ (sachen.json, die Sachen-App: nie, was es ist)
+  const n = /^(Einkaufsliste|Sachen),\s*(\d+)\s+Änderung(?:en)?/.exec(rest);
+  const anzahl = n ? Math.max(1, Number(n[2])) : 1;
   if (n) {
     const i = rest.indexOf(' – ');
     rest = i >= 0 ? rest.slice(i + 3) : '';
   }
   const was = rest.split(/;\s*/).map((s) => s.trim()).filter(Boolean).slice(0, 8);
+  if (n?.[1] === 'Sachen' && !was.includes('Sachen')) was.unshift('Sachen');
   return { wer, auto: false, anzahl, was };
 }
 

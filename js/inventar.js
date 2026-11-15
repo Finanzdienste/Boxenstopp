@@ -147,6 +147,13 @@ export const opDing = (d, by, at = jetzt()) => ({
   ersetzt: `ding:${d.id}`,
 });
 export const opDingWeg = (id, at = jetzt()) => ({ typ: 'dingWeg', id, at });
+/**
+ * Umgezogen nach sachen.json (sachen.js umzugZusammen): diese Listen und
+ * Sachen aus `inventar` nehmen – aber nur in der Fassung, die umgezogen ist
+ * (geaendert höchstens so neu). Was eine ältere App-Fassung inzwischen noch
+ * geändert hat, bleibt für den nächsten Umzug. { listen: { id: geaendert }, dinge: { id: geaendert } }
+ */
+export const opUmgezogen = (u) => ({ typ: 'inventarUmgezogen', listen: { ...(u?.listen || {}) }, dinge: { ...(u?.dinge || {}) } });
 
 export function inventarAnwenden(s, op) {
   if (!istObj(s.inventar) || !istObj(s.inventar.listen) || !istObj(s.inventar.dinge)) s.inventar = inventarBereinigen(s.inventar);
@@ -177,6 +184,11 @@ export function inventarAnwenden(s, op) {
     if (!alt && Object.keys(dinge).length >= MAX_DINGE) return;
     const d = dingBereinigen({ ...op.d, at: alt?.at || op.at, geaendert: op.at, by: op.by });
     if (d) dinge[id] = d;
+    return;
+  }
+  if (op.typ === 'inventarUmgezogen') {
+    for (const [id, g] of Object.entries(istObj(op.listen) ? op.listen : {})) if (listen[id] && String(listen[id].geaendert) <= String(g)) delete listen[id];
+    for (const [id, g] of Object.entries(istObj(op.dinge) ? op.dinge : {})) if (dinge[id] && String(dinge[id].geaendert) <= String(g)) delete dinge[id];
     return;
   }
   if (op.typ === 'dingWeg') {

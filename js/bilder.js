@@ -89,7 +89,14 @@ export function bildName(k, { name = '', cat = '', katalog = null } = {}) {
   return KAT_BILD[c] || KAT_BILD.sonstiges;
 }
 
-export const bildPfad = (b) => `bilder/zutaten/${b}.svg`;
+/*
+ * Die Bildchen liegen unter bilder/zutaten/ neben index.html. Die Sachen-App
+ * (sachen/index.html) liegt eine Ebene tiefer und setzt beim Start
+ * bildBasis('../') – Boxenstopp selbst lässt es leer.
+ */
+let basis = '';
+export const bildBasis = (b) => { basis = typeof b === 'string' ? b : ''; };
+export const bildPfad = (b) => `${basis}bilder/zutaten/${b}.svg`;
 
 /** <img> fürs Bildchen; dekorativ (alt=""), der Name steht daneben. */
 export function zutatImg(k, { name = '', cat = '', katalog = null, klasse = 'zb', groesse = 28 } = {}) {

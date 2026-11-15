@@ -14,7 +14,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['js/**/*.js', 'sw.js', 'tests/**/*.mjs', 'werkzeug/**/*.mjs'],
+    files: ['js/**/*.js', 'sw.js', 'sachen/**/*.js', 'tests/**/*.mjs', 'werkzeug/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',

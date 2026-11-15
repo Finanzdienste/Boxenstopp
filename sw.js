@@ -6,6 +6,16 @@
  * die Bereiche überschneiden sich nicht, und beim Aufräumen fasst dieser
  * Worker nur Vorräte an, die mit „boxenstopp-“ beginnen.
  *
+ * Darin liegt seit v83 Amys Sachen-App (sachen/, eigenes Manifest, eigener
+ * Worker sachen/sw.js mit dem Geltungsbereich /Boxenstopp/sachen/ – für
+ * Seiten dort gewinnt der genauere). Dieser Worker fasst unter sachen/
+ * nichts an: keine Antwort aus seinem Vorrat, und vor allem bekommt
+ * /Boxenstopp/sachen/ ohne Netz nie Boxenstopps index.html (so lange, bis der
+ * Worker der Sachen-App da ist, geht es ans Netz). Ihre Vorräte heißen
+ * „sachen-…“, das Aufräumen hier lässt sie stehen; den Vorrat der Fotos
+ * (SACHEN) teilen sich beide Apps. Ein Fenster der Sachen-App zählt beim
+ * Antippen einer Mitteilung nicht als Boxenstopp.
+ *
  * Vier Strategien:
  *
  *   Seitenaufrufe    erst Netz, bei Fehlschlag (oder nach GEDULD ohne
@@ -41,12 +51,15 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v82';
+const VERSION = 'v83';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
-/** Die Fotos der Sachen (ansicht-inventar.js legt sie selbst hinein) – bleiben bei Updates stehen. */
+/** Die Fotos der Sachen (ansicht-inventar.js legt sie selbst hinein) – bleiben bei Updates stehen; die Sachen-App nutzt ihn mit. */
 const SACHEN = 'boxenstopp-sachen-v1';
+/** Amys Sachen-App mit eigenem Worker – darunter fasst dieser nichts an (s. o.). */
+const SACHEN_APP = new URL('./sachen/', self.location).pathname;
+const zurSachenApp = (url) => { const p = new URL(url).pathname; return p === SACHEN_APP.slice(0, -1) || p.startsWith(SACHEN_APP); };
 const DATEN_DATEIEN = ['daten/rezepte.json', 'daten/angebote.json', 'daten/preisverlauf.json'];
 /** So lange wartet die App aufs Netz, dann nimmt sie den Vorrat (die Antwort kommt trotzdem noch hinein). */
 const GEDULD = 4000;
@@ -107,6 +120,9 @@ const SHELL = [
   './js/notizbuch.js',
   './js/ansicht-notizen.js',
   './js/inventar.js',
+  './js/sachen.js',
+  './js/foto.js',
+  './js/ansicht-sachen-app.js',
   './js/inventar-ki.js',
   './js/inventar-netz.js',
   './js/scanner.js',
@@ -291,7 +307,8 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const ziel = event.notification.data?.ziel || '';
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((fenster) => {
-    const da = fenster.find((c) => c.url.startsWith(self.registration.scope));
+    // Ein Fenster der Sachen-App (sachen/) ist nicht Boxenstopp
+    const da = fenster.find((c) => c.url.startsWith(self.registration.scope) && !zurSachenApp(c.url));
     if (da) { da.postMessage({ boxenstopp: 'zeige', ziel }); return da.focus(); }
     // Ein Timer („chili#5“) öffnet das Rezept
     const anker = ziel.split('#')[0];
@@ -306,6 +323,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   // GitHub-API und alles Fremde: nicht anfassen.
   if (url.origin !== self.location.origin) return;
+  // Die Sachen-App (sachen/) hat ihren eigenen Worker – vor allem keine Seite von hier (s. o.)
+  if (zurSachenApp(url.href)) return;
 
   const imVorrat = (req, name = CACHE) => caches.open(name).then((c) => c.match(req, { ignoreSearch: true }));
   const ablegen = (req, res) => { const kopie = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopie)); };

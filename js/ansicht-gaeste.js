@@ -8,15 +8,18 @@
  *               Wen dieses Gerät eingeladen hat, merkt es sich (gaeste.js).
  *   Dashboard   Reiter „Aktivität“: wer wann was gemacht hat, in allen
  *               Listen, die dieses Gerät kennt – aus den Commits (gaeste.js
- *               zusammenfassen). Daneben je Person ein Reiter mit dem, was in
- *               ihrer Liste steht (dashboard.js, siehe unten). Was das
- *               Gerät schon geholt hat, merkt es sich (VERLAUF); beim Öffnen
- *               kommt nur das Neue dazu. Unter jeder Sitzung steht im Detail,
- *               was passiert ist: Dafür holt das Gerät liste.json, wie sie
- *               vor und nach jedem Commit war (speicher.js fassungLesen), und
- *               vergleicht (einzelheiten.js) – je Commit einmal, dann ist es
- *               gemerkt (DETAILS). Oben lässt sich der Verlauf auf eine
- *               Person beschränken.
+ *               zusammenfassen). Eure Liste sind seit v83 zwei Dateien:
+ *               liste.json und sachen.json (Amys Sachen-App, sachen.js) – je
+ *               mit eigenem Verlauf, gezählt als eine Liste. Daneben je
+ *               Person ein Reiter mit dem, was in ihrer Liste steht
+ *               (dashboard.js, siehe unten). Was das Gerät schon geholt hat,
+ *               merkt es sich (VERLAUF, je Datei); beim Öffnen kommt nur das
+ *               Neue dazu. Unter jeder Sitzung steht im Detail, was passiert
+ *               ist: Dafür holt das Gerät die Datei des Commits, wie sie vor
+ *               und nach ihm war (speicher.js fassungLesen), und vergleicht
+ *               (einzelheiten.js) – je Commit einmal, dann ist es gemerkt
+ *               (DETAILS). Oben lässt sich der Verlauf auf eine Person
+ *               beschränken.
  *   Umzug       Ein neues Handy kennt die Gäste nicht – ihre Schlüssel
  *               stehen nur hier. „Aufs neue Handy“ packt sie in einen Link
  *               (…#gaeste=…, gaeste.js); auf dem neuen öffnet man ihn (die
@@ -40,9 +43,10 @@ import { bildPfad } from './bilder.js';
 import { FOTO_PFAD } from './inventar.js';
 import { tagFarbe } from './amy.js';
 import { sachenFotosEinsetzen } from './ansicht-inventar.js';
+import { SACHEN_ORT, sachenBereinigen, umzugZusammen, leerSachen } from './sachen.js';
 
 const GAESTE = 'boxenstopp.gaeste.v1';
-const VERLAUF = 'boxenstopp.verlauf.v1'; // { <id>: [{ sha, at, nachricht }] }
+const VERLAUF = 'boxenstopp.verlauf.v1'; // { <id>: [{ sha, at, nachricht }] } – id einer Liste oder eines Teils ('haupt:sachen')
 const DETAILS = 'boxenstopp.einzelheiten.v1'; // { f: EINZELHEITEN_FASSUNG, d: { <sha>: [{ b, a, x }] } }
 const api = () => lese('__api', null) || API;
 const X = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
@@ -321,9 +325,10 @@ export function klickGaeste(el) {
     case 'ub-neu': {
       versucht.clear();
       detailsFehler = '';
-      // Im Reiter eines Gasts auch, was gerade in seiner Liste steht
+      // Im Reiter eines Gasts auch, was gerade in seiner Liste steht – in Amys ihre Sachen (sachen.json)
       const g = reiterListe().find((x) => x.id === reiter)?.gast;
       if (g) inhaltHolen(g);
+      else if (reiter === 'amy') amySachenHolen();
       ueberblickLaden(true);
       return true;
     }
@@ -355,14 +360,24 @@ let detailsFehler = '';
 const versucht = new Set(); // Commits, die dieses Öffnen schon geholt hat (oder versucht)
 const fassungen = new Map(); // `${liste}|${ref}` → Promise<Stand | null>, solange der Überblick offen ist
 
-/** Die Listen, die dieses Gerät kennt: eure (mit eurem Schlüssel) und die der Gäste. */
+/**
+ * Die Listen, die dieses Gerät kennt: eure (mit eurem Schlüssel) und die der
+ * Gäste. Dazu ein Teil eurer Liste: Amys Sachen in sachen.json (dasselbe
+ * Repo, derselbe Schlüssel) – mit eigenem Verlauf (eigenes „bis“) und eigenen
+ * Ständen für die Einzelheiten, aber für Personen, Sitzungen und Automatik
+ * eure Liste (teilVon, auswerten) – sonst stünde Amy zweimal da.
+ */
 function listen() {
   if (!app.zugang) return [];
+  const token = app.zugang.token;
   return [
-    { id: 'haupt', name: 'Eure Liste', farbe: '', token: app.zugang.token, ort: DATEN },
+    { id: 'haupt', name: 'Eure Liste', farbe: '', token, ort: DATEN },
+    { id: 'haupt:sachen', teilVon: 'haupt', name: 'Amys Sachen', farbe: '', token, ort: SACHEN_ORT },
     ...ladeGaeste().map((g) => ({ id: g.daten, name: g.name, farbe: g.farbe, token: g.token, ort: ortVon({ daten: g.daten }) })),
   ];
 }
+
+const reiheVon = (verlauf, id) => (Array.isArray(verlauf[id]) ? verlauf[id] : []);
 
 const gemerkterVerlauf = () => { const v = lese(VERLAUF, {}); return v && typeof v === 'object' ? v : {}; };
 
@@ -385,7 +400,12 @@ const hilfe = () => ({
   zutatName: (k) => app.katalog?.[k]?.n || '',
 });
 
-/** liste.json bei einem Commit (ref: sha oder „sha~1“), bereinigt – jede Fassung nur einmal geholt. */
+/**
+ * Die Datei einer Liste (l.ort: liste.json oder sachen.json) bei einem Commit
+ * (ref: sha oder „sha~1“), bereinigt – jede Fassung nur einmal geholt.
+ * bereinigen (liste.js) macht aus sachen.json einen Stand nur mit rev und
+ * inventar; verglichen werden dann nur die Sachen.
+ */
 function fassung(l, ref) {
   const k = `${l.id}|${ref}`;
   if (!fassungen.has(k)) {
@@ -404,24 +424,28 @@ async function nebeneinander(xs, n, f) {
 
 /**
  * Die Einzelheiten zu diesen Commits holen ([{ liste, sha }], die oben
- * zuerst): liste.json nach dem Commit und davor. Davor ist meist der
- * nächstältere Commit im Verlauf – genau dann, wenn sein rev eins kleiner ist
- * (jeder Commit zählt rev hoch); sonst (Lücke im Verlauf, von Hand
- * bearbeitet) der Stand direkt vor dem Commit („sha~1“).
+ * zuerst): die Datei des Commits nach ihm und davor. In eurer Liste ist das
+ * liste.json oder sachen.json – je nachdem, in wessen Verlauf die sha steht.
+ * Davor ist meist der nächstältere Commit im Verlauf derselben Datei – genau
+ * dann, wenn sein rev eins kleiner ist (jeder Commit zählt rev hoch); sonst
+ * (Lücke im Verlauf, von Hand bearbeitet) der Stand direkt vor dem Commit
+ * („sha~1“; der erste Commit an sachen.json: davor gab es sie nicht).
  */
 async function detailsHolen(noetig) {
   detailsLaeuft = true;
   detailsFehler = '';
-  const ls = Object.fromEntries(listen().map((l) => [l.id, l]));
+  const alle = listen();
   const verlauf = gemerkterVerlauf();
+  // Die Liste selbst oder einer ihrer Teile (sachen.json) – wessen Verlauf die sha hat
+  const dateiVon = (liste, sha) => alle.find((l) => (l.id === liste || l.teilVon === liste) && reiheVon(verlauf, l.id).some((e) => e.sha === sha)) || alle.find((l) => l.id === liste);
   const d = detailsCache();
   const h = hilfe();
   let geschafft = 0;
   await nebeneinander(noetig, 4, async ({ liste, sha }) => {
     versucht.add(sha);
-    const l = ls[liste];
+    const l = dateiVon(liste, sha);
     if (!l || detailsFehler || d[sha]) return;
-    const reihe = Array.isArray(verlauf[liste]) ? verlauf[liste] : [];
+    const reihe = reiheVon(verlauf, l.id);
     const i = reihe.findIndex((e) => e.sha === sha);
     const davor = i >= 0 ? reihe[i + 1]?.sha || '' : '';
     try {
@@ -531,7 +555,8 @@ function ueberblickOeffnen() {
   ueberblickLaden();
 }
 
-const AUTO_TEXT = { push: 'Push-Nachrichten', haushalt: 'Putzplan erinnert', 'angebote (privat)': 'Angebote geholt', angebote: 'Angebote geholt', 'to do': 'To Do abgeglichen' };
+// umzug: Amys Sachen aus liste.json nach sachen.json (sachen.js) – ein Commit an jeder der beiden Dateien
+const AUTO_TEXT = { push: 'Push-Nachrichten', haushalt: 'Putzplan erinnert', 'angebote (privat)': 'Angebote geholt', angebote: 'Angebote geholt', 'to do': 'To Do abgeglichen', umzug: 'Sachen umgezogen' };
 const WOCHENTAG = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 const uhr = (iso) => new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 function tagName(tag) {
@@ -553,13 +578,19 @@ function zuletztText(iso) {
 const listenName = (l) => (!l || l.id === 'haupt' ? 'eure Liste' : `${wessen(l.name)} Liste`);
 const farbeVon = (l, name) => (l?.farbe === 'lila' ? 'lila' : /^amy$/i.test(name) ? 'rosa' : 'blau');
 
-/** Was der Verlauf hergibt: Personen, Sitzungen (die neueste zuerst), Automatik. */
+/**
+ * Was der Verlauf hergibt: Personen, Sitzungen (die neueste zuerst), Automatik.
+ * ls: nur die Listen selbst – die Commits eines Teils (sachen.json) gehören
+ * gemischt zu seiner Liste; nachId kennt auch die Teile (für Fehlertexte).
+ */
 function auswerten() {
-  const ls = listen();
-  const nachId = Object.fromEntries(ls.map((l) => [l.id, l]));
+  const alle = listen();
+  const ls = alle.filter((l) => !l.teilVon);
+  const nachId = Object.fromEntries(alle.map((l) => [l.id, l]));
   const verlauf = gemerkterVerlauf();
+  const eintraege = (l) => alle.filter((x) => x.id === l.id || x.teilVon === l.id).flatMap((x) => reiheVon(verlauf, x.id));
   // In der Liste eines Gasts ist jeder dort der Gast (gaeste.js) – auch auf einem Gerät, auf dem er sich anders nennt
-  const z = zusammenfassen(ls.map((l) => ({ id: l.id, name: l.name, farbe: l.farbe, gast: l.id === 'haupt' ? '' : l.name, eintraege: verlauf[l.id] || [] })), { tage });
+  const z = zusammenfassen(ls.map((l) => ({ id: l.id, name: l.name, farbe: l.farbe, gast: l.id === 'haupt' ? '' : l.name, eintraege: eintraege(l) })), { tage });
   const sitzungen = [];
   for (const t of z.verlauf) for (const s of t.sitzungen) sitzungen.push({ tag: t.tag, ...s });
   return { ls, nachId, z, sitzungen };
@@ -635,11 +666,12 @@ ${auto}
 
 /**
  * Neben „Aktivität“ ein Reiter je Person: Amy (in eurer Liste, auf einem
- * Gerät, das nicht ihres ist – ihr Bereich, wie in der App) und jeder Gast,
- * den dieses Gerät kennt – mit dem, was gerade in seiner Liste steht
- * (liste.json jetzt, dashboard.js inhaltVon). Nur zum Ansehen; was jemand
- * verträgt und was jemand der KI geschrieben hat, steht nicht darin. Stände
- * und Fotos der Gäste bleiben nur, solange das Dashboard offen ist.
+ * Gerät, das nicht ihres ist – ihr Bereich, wie in der App, und ihre Sachen
+ * aus der Sachen-App) und jeder Gast, den dieses Gerät kennt – mit dem, was
+ * gerade in seiner Liste steht (liste.json jetzt, dashboard.js inhaltVon).
+ * Nur zum Ansehen; was jemand verträgt und was jemand der KI geschrieben
+ * hat, steht nicht darin. Stände und Fotos der Gäste und Amys Sachen bleiben
+ * nur, solange das Dashboard offen ist.
  */
 const istAmy = (n) => /^amy\b/i.test(String(n || '').trim());
 function amyName() {
@@ -681,6 +713,64 @@ async function inhaltHolen(g) {
   ueberblickZeichnen();
 }
 
+/*
+ * Amys Sachen stehen seit v83 in sachen.json (sachen.js): Ihr Reiter holt die
+ * Datei, wie sie jetzt ist (beim ersten Zeichnen und mit „Neu holen“). Gibt
+ * es sie noch nicht, ist nur noch nichts umgezogen. Was in liste.json noch
+ * nicht umgezogen ist (app.stand.inventar), gehört dazu – je Liste und Sache
+ * die neuere Fassung, Gelöschtes (weg) bleibt weg (umzugZusammen).
+ * amyListe merkt sich, was seit dem Holen in liste.json stand: Zieht es
+ * gerade um – erst nach sachen.json, dann aus liste.json heraus, von diesem
+ * oder einem anderen Gerät –, bleibt es im Reiter, bis sachen.json neu da ist.
+ */
+let amySachen = null; // { stand, at, laedt, fehler } – sachen.json
+let amyListe = null; // Stand wie sachen.json: was seit dem letzten Holen in liste.json stand
+let amySeit = null; // dasselbe seit dem Start des Holens, das gerade läuft – danach gilt es
+const SACHEN_FEHLER = { ...FEHLER_TEXT, kaputt: 'Die Sachen lassen sich gerade nicht lesen.' };
+
+function amyListeMerken() {
+  if (!app.stand) return;
+  amyListe = umzugZusammen(amyListe || leerSachen(), app.stand.inventar).stand;
+  if (amySeit) amySeit = umzugZusammen(amySeit, app.stand.inventar).stand;
+}
+
+async function amySachenHolen() {
+  if (amySachen?.laedt || !app.zugang) return;
+  const r = runde;
+  amySachen = { ...amySachen, laedt: true, fehler: '' };
+  amySeit = umzugZusammen(leerSachen(), app.stand?.inventar).stand;
+  let neu;
+  try {
+    const roh = await fassungLesen(app.zugang.token, SACHEN_ORT, '', { api: api() });
+    neu = { stand: roh === null ? leerSachen() : sachenBereinigen(roh), at: new Date(), laedt: false, fehler: '' };
+  } catch (e) {
+    neu = { ...amySachen, laedt: false, fehler: SACHEN_FEHLER[e?.message] || 'Gerade keine Verbindung zu GitHub.' };
+  }
+  if (r !== runde) return; // inzwischen zu
+  // Eine veraltete Kopie von GitHub (kleineres rev, direkt nach dem Schreiben auch ein 404) ersetzt den bekannten Stand
+  // nicht – und was in liste.json stand, bleibt dann dazu gemerkt (sonst verschwände gerade Umgezogenes kurz)
+  const vorher = amySachen?.stand;
+  const nichtNeuer = !neu.fehler && vorher && neu.stand.rev <= vorher.rev;
+  if (nichtNeuer && neu.stand.rev < vorher.rev) neu.stand = vorher;
+  // Geholt: Was vor dem Holen aus liste.json wegging, steht in sachen.json (oder ist gelöscht)
+  if (!neu.fehler) amyListe = nichtNeuer ? umzugZusammen(amyListe || leerSachen(), amySeit.inventar).stand : amySeit;
+  amySeit = null;
+  amySachen = neu;
+  ueberblickZeichnen();
+}
+
+/** Was in Amys Reiter steht: ihr Bereich aus eurer Liste, die Sachen aus sachen.json und dem, was noch umzieht. */
+function amyInhalt() {
+  amyListeMerken();
+  const s = amySachen;
+  const inventar = umzugZusammen(s?.stand || leerSachen(), amyListe?.inventar).stand.inventar;
+  const c = inhaltVon({ ...app.stand, inventar }, { hilfe: hilfe() });
+  // Noch nicht da (oder nicht zu holen): keine Zahl, die nicht stimmt
+  c.sachen.offen = !s?.stand;
+  c.sachen.fehler = s?.fehler || '';
+  return c;
+}
+
 function fotoPumpe() {
   while (fotoLaeuft.size < 3 && fotoReihe.length) {
     const { g, pfad, k } = fotoReihe.shift();
@@ -715,12 +805,15 @@ function gastFotosEinsetzen() {
   fotoPumpe();
 }
 
-/** Zu: die Stände und Fotos der Gäste nicht im Speicher behalten. */
+/** Zu: die Stände und Fotos der Gäste und Amys Sachen nicht im Speicher behalten. */
 function dashboardZu() {
   runde++;
   reiter = 'aktivitaet';
   fassungen.clear();
   inhalte.clear();
+  amySachen = null;
+  amyListe = null;
+  amySeit = null;
   for (const u of gastFotos.values()) if (u) URL.revokeObjectURL(u);
   gastFotos.clear();
   fotoReihe.length = 0;
@@ -763,13 +856,16 @@ function sacheHTML(r, d, l) {
   return `<li class="ub-sache"><span class="inv-bild${da ? ' hat-foto' : ''}"><img class="inv-ersatz" src="${esc(bildPfad(l.bild || 'package'))}" alt="" aria-hidden="true">${foto}</span><span class="ub-sache-t"><b>${esc(d.name)}</b>${d.marke ? `<small>${esc(d.marke)}</small>` : ''}${tags}${d.notiz ? `<span class="ub-sache-n">${esc(kurz(d.notiz, 140))}</span>` : ''}</span></li>`;
 }
 
+/** sachen.offen/fehler: nur bei Amy – ihre Sachen kommen erst noch aus sachen.json (amyInhalt). */
 function sachenHTML(r, sachen) {
-  if (!sachen.anzahl) return teil('Sachen', '', '<p class="fine">Noch keine Sachen.</p>');
+  const fehler = sachen.fehler ? `<p class="zugang-fehler">${esc(sachen.fehler)}</p>` : '';
+  if (sachen.offen) return teil('Sachen', '', fehler || `<p class="loading">Holt ${esc(wessen(r.name))} Sachen …</p>`);
+  if (!sachen.anzahl) return teil('Sachen', '', `${fehler}<p class="fine">Noch keine Sachen.</p>`);
   const inhalt = sachen.listen.filter((l) => l.dinge.length).map((l) => {
     const { zeigen, mehr: weiter } = ersteVon(r, `sachen:${l.id}`, l.dinge, 12);
     return `<h4 class="ub-sl-k"><img src="${esc(bildPfad(l.bild || 'package'))}" alt="" aria-hidden="true" width="22" height="22">${esc(l.name)} <small>${l.dinge.length}</small></h4><ul class="ub-sachen">${zeigen.map((d) => sacheHTML(r, d, l)).join('')}</ul>${weiter}`;
   }).join('');
-  return teil('Sachen', String(sachen.anzahl), inhalt);
+  return teil('Sachen', String(sachen.anzahl), `${fehler}${inhalt}`);
 }
 
 function einkaufHTML(r, e) {
@@ -807,7 +903,7 @@ function wuenscheHTML(r, w) {
 }
 
 const TEILE = {
-  sachen: [(c) => kachel(c.sachen.anzahl, c.sachen.anzahl === 1 ? 'Sache' : 'Sachen'), (r, c) => sachenHTML(r, c.sachen)],
+  sachen: [(c) => (c.sachen.offen ? kachel('…', 'Sachen') : kachel(c.sachen.anzahl, c.sachen.anzahl === 1 ? 'Sache' : 'Sachen')), (r, c) => sachenHTML(r, c.sachen)],
   einkauf: [(c) => kachel(c.einkauf.offen.length, 'auf der Einkaufsliste'), (r, c) => einkaufHTML(r, c.einkauf)],
   plan: [(c) => kachel(c.plan.length, c.plan.length === 1 ? 'Tag geplant' : 'Tage geplant'), (r, c) => planHTML(c.plan)],
   rezepte: [(c) => kachel(c.rezepte.length, c.rezepte.length === 1 ? 'Rezept' : 'Rezepte'), (r, c) => rezepteHTML(r, c.rezepte)],
@@ -830,8 +926,10 @@ function personHTML(r) {
     else inhalt = `${x.fehler ? `<p class="zugang-fehler">${esc(x.fehler)}</p>` : ''}${teileHTML(r, inhaltVon(x.stand, { hilfe: hilfe() }), ['sachen', 'einkauf', 'plan', 'rezepte', 'notizen'])}`;
     fuss = `<p class="fine">So steht es gerade in ${esc(wessen(r.name))} Liste – nur zum Ansehen. Nicht dabei: was jemand verträgt und was jemand der KI geschrieben hat.${x?.at ? ` Stand ${esc(uhr(x.at.toISOString()))}.` : ''} <button type="button" class="linkbtn" data-act="ub-neu"${x?.laedt || laedt ? ' disabled' : ''}>${x?.laedt || laedt ? 'Holt …' : 'Neu holen'}</button></p>`;
   } else {
-    inhalt = teileHTML(r, inhaltVon(app.stand, { hilfe: hilfe() }), ['sachen', 'notizen', 'rezepte', 'wuensche']);
-    fuss = `<p class="fine">${esc(wessen(r.name))} Bereich in eurer Liste – dasselbe wie in der App. Nicht dabei: was jemand verträgt und was jemand der KI geschrieben hat.</p>`;
+    // Notizen, Rezepte, Vorschläge aus eurer Liste (wie in der App), die Sachen aus sachen.json
+    const s = amySachen;
+    inhalt = teileHTML(r, amyInhalt(), ['sachen', 'notizen', 'rezepte', 'wuensche']);
+    fuss = `<p class="fine">${esc(wessen(r.name))} Bereich in eurer Liste, die Sachen aus ihrer Sachen-App – nur zum Ansehen. Nicht dabei: was jemand verträgt und was jemand der KI geschrieben hat.${s?.at ? ` Stand ${esc(uhr(s.at.toISOString()))}.` : ''} <button type="button" class="linkbtn" data-act="ub-neu"${s?.laedt || laedt ? ' disabled' : ''}>${s?.laedt || laedt ? 'Holt …' : 'Neu holen'}</button></p>`;
   }
   // Die letzten Sitzungen – der ganze Verlauf unter „Aktivität“
   const ihre = sitzungen.filter((s) => s.liste === r.liste && (r.gast ? s.wer.toLowerCase() === r.name.toLowerCase() : istAmy(s.wer)));
@@ -842,10 +940,20 @@ function personHTML(r) {
   return { html: `${karte}${inhalt}${zuletzt}${fuss}`, zeigen };
 }
 
+/** Wo im Dashboard der Fokus steht – als Selektor, der nach dem Neuzeichnen dasselbe Element findet. */
+function fokusVon(dlg) {
+  const el = document.activeElement;
+  if (!el || el === dlg || !dlg.contains(el)) return '';
+  const a = ['data-ub-reiter', 'data-ub-tage', 'data-ub-wer', 'data-act'].find((x) => el.hasAttribute(x));
+  return a ? `[${a}="${window.CSS.escape(el.getAttribute(a))}"]` : '';
+}
+
 export function ueberblickZeichnen() {
   const dlg = $('#ueberblick-dlg');
   // Zu: nichts zeichnen und nichts mehr holen (kommt etwas noch an, gehört es nicht mehr hierher)
   if (!dlg?.open) return;
+  // Kommt etwas nach (Verlauf, Einzelheiten, eine Liste, Amys Sachen) und zeichnet neu: Der Fokus bleibt, wo er war
+  const fokus = fokusVon(dlg);
   const rs = reiterListe();
   const r = rs.find((x) => x.id === reiter) || rs[0];
   reiter = r.id;
@@ -857,16 +965,27 @@ export function ueberblickZeichnen() {
 <h2 class="ub-titel" id="ub-titel">Dashboard</h2>
 ${nav}
 <div class="ub-panel${r.liste ? ` ub-p ub-${r.farbe}` : ''}" role="${nav ? 'tabpanel' : 'region'}" aria-labelledby="${nav ? `ub-r-${esc(r.id.replace(/[^a-z0-9]/gi, '-'))}` : 'ub-titel'}">${html}</div>`;
+  if (fokus) dlg.querySelector(fokus)?.focus({ preventScroll: true });
   detailsAnstossen(zeigen);
   if (r.gast) {
     if (!inhalte.has(r.gast.daten)) inhaltHolen(r.gast);
     gastFotosEinsetzen();
-  } else if (r.id === 'amy') sachenFotosEinsetzen(dlg);
+  } else if (r.id === 'amy') {
+    if (!amySachen) amySachenHolen();
+    // Die Fotos liegen unter sachen/ im Daten-Repo – mit eurem Schlüssel (ansicht-inventar.js)
+    sachenFotosEinsetzen(dlg);
+  }
 }
 
-/** Nach einem neuen Stand eurer Liste (app.js): Amys Reiter zeigt ihn gleich – nur, wenn er offen ist. */
+/**
+ * Nach einem neuen Stand eurer Liste (app.js): merken, was in liste.json noch
+ * an Sachen steht (zieht es gleich um, bleibt es in Amys Reiter), und Amys
+ * Reiter zeigt ihn gleich – nur, wenn er offen ist.
+ */
 export function dashboardMitziehen() {
-  if (reiter === 'amy' && $('#ueberblick-dlg')?.open) ueberblickZeichnen();
+  if (!$('#ueberblick-dlg')?.open) return;
+  amyListeMerken();
+  if (reiter === 'amy') ueberblickZeichnen();
 }
 
 /* ------------------------------------ Hinweis: Tobi sieht ein Dashboard */

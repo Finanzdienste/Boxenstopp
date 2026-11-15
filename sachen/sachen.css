@@ -1,0 +1,32 @@
+/*
+ * Sachen – nur, was die eigene App zusätzlich zu ../css/styles.css braucht.
+ *
+ * Das rosa Thema kommt von dort: <html data-tab="amy"> wie Amys Bereich in
+ * Boxenstopp (Pacifico, Fredoka, Pünktchen, hell und dunkel), die Sachen
+ * selbst (.inv …), Knöpfe (.amy-btn), Meldung unten (.toast), Scanner
+ * (.scan-dlg) und Popup (.tablet-dlg). Hier: eine schmale Seite ohne Reiter
+ * unten, die Karte zum Verbinden und der Fuß.
+ */
+
+/* Keine Reiterleiste unten – die Meldung und das Ende der Seite brauchen ihren Platz nicht */
+:root{--tabbar-h:0px}
+
+.s-top-in{max-width:760px}
+
+/* Die Seite: eine Spalte in Lesebreite, an den Rändern Platz für Kerbe und Home-Leiste */
+.s-seite{max-width:760px;margin:0 auto;padding-top:18px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.s-inhalt{min-width:0}
+.s-karte-platz{min-width:0}
+
+/* Verbinden – und der Weg zu Boxenstopp für eine eigene Liste */
+.s-karte{display:grid;gap:12px;padding:18px 16px 20px;border-radius:28px;background:var(--amy-karte);border:2px solid var(--line);box-shadow:var(--shadow)}
+.s-k-titel{font:600 21px/1.2 var(--f-body);color:var(--accent)}
+.s-k-text{color:var(--ink);line-height:1.5}
+.s-k-fein{margin:0}
+.s-form{display:grid;gap:12px}
+.s-form .zugang-fehler{margin:0}
+.s-karte a.amy-btn{text-decoration:none}
+
+/* Unten: was das ist und der Weg zurück zu Boxenstopp */
+.s-fuss{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 14px;margin-top:10px;font-size:13px;color:var(--muted)}
+.s-fuss a{color:var(--accent);font-weight:600;text-underline-offset:3px}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de" data-tab="amy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF1F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#231019" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Amys Sachen in eigenen Listen – Kleidung, Make-up, Schmuck und mehr, mit Foto, Strichcode und Notizen.">
+<meta name="apple-mobile-web-app-title" content="Sachen">
+<title>Sachen</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="sachen.css">
+<!-- Hell oder dunkel, wenn in Boxenstopp fest gewählt (Einstellungen → Darstellung, derselbe Speicher) – vor dem ersten Bild, sonst flackert es; die Leiste oben dann in derselben Farbe -->
+<script>try{var d=JSON.parse(localStorage.getItem('boxenstopp.design.v1'));if(d==='hell'||d==='dunkel'){document.documentElement.setAttribute('data-design',d);var f=d==='dunkel'?'#231019':'#FFF1F7';[].forEach.call(document.querySelectorAll('meta[name="theme-color"]'),function(m){m.content=f})}}catch(e){}</script>
+</head>
+<body>
+<div id="app" data-tab="amy">
+  <header class="top">
+    <div class="top-in s-top-in">
+      <div class="brand"><span class="brand-name">Sachen</span><span class="brand-tag" data-fuer="für Amy ♡">Amys Listen</span></div>
+      <button type="button" class="sync" id="sync" data-state="lokal" data-act="s-status" title="Mit eurer gemeinsamen Liste"><span class="dot" aria-hidden="true"></span><span id="sync-text">Nicht verbunden</span></button>
+    </div>
+  </header>
+  <!-- Mit Schlüssel auf diesem Gerät (derselbe wie in Boxenstopp) steht oben gleich „Geteilt“, bis der Abgleich etwas sagt (app.js) -->
+  <script>try{var z=JSON.parse(localStorage.getItem('boxenstopp.zugang.v1')||'null');if(z&&typeof z.token==='string'&&z.token){var s=document.getElementById('sync');s.setAttribute('data-state',z.daten?'lokal':'ok');document.getElementById('sync-text').textContent=z.daten?'In Boxenstopp':'Geteilt'}}catch(e){}</script>
+
+  <main class="s-seite amy-pane" id="s-seite">
+    <header class="amy-kopf" id="s-kopf">
+      <p class="amy-eyebrow">Amys Listen</p>
+      <h1 class="amy-titel" id="s-titel">Amys Sachen</h1>
+      <p class="amy-lead">Listen für alles, was du hast – mit Foto, Strichcode und Notizen.</p>
+    </header>
+    <div class="s-karte-platz" id="s-karte" hidden></div>
+    <section class="s-inhalt" id="sachen" aria-labelledby="s-titel"><p class="loading">Sachen werden geladen…</p></section>
+    <footer class="s-fuss"><span>Sachen · Amys Listen</span><a href="../">Zu Boxenstopp</a></footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<dialog class="scan-dlg" id="scan-dlg" aria-labelledby="scan-titel"></dialog>
+<dialog class="tablet-dlg push-dlg ios-dlg amy-thema" id="s-ios-dlg" aria-labelledby="s-ios-titel"></dialog>
+<!-- Erster Besuch, und ein fremder Worker hält die Seite (Boxenstopps – sein Bereich schließt sachen/ ein): Er gibt ../js/ aus seinem Vorrat, und passt der nicht zu app.js, bliebe die App bei „wird geladen“ stehen. Darum gleich den eigenen Worker anmelden und einmal neu laden, sobald er die Seite hält – mit dem Link (#zugang=…), wie er kam. Ganz ohne Worker nichts: Dann kommt alles aus dem Netz und passt. -->
+<script>(function(){try{var w=navigator.serviceWorker,c=w&&w.controller,eigen=new URL('sw.js',location.href).href,K='sachen.ersterBesuch',h=location.hash;if(!c||c.scriptURL===eigen)return;w.addEventListener('controllerchange',function(){if(!w.controller||w.controller.scriptURL!==eigen)return;try{if(sessionStorage.getItem(K))return;sessionStorage.setItem(K,'1')}catch(e){return}if(h&&location.hash!==h)history.replaceState(history.state,'',location.href.split('#')[0]+h);location.reload()});w.register('sw.js').catch(function(){})}catch(e){}})();</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

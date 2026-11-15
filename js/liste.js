@@ -28,7 +28,8 @@
  *     vertraeglich: { amy: { <Schlüssel>: { name, stufe, notiz, by, at } } },   was jemand verträgt (vertraeglich.js)
  *     wuensche:  { <w-…>: { id, text, by, at, erledigt, antwort } },   Amys Vorschläge für Tobi (wuensche.js)
  *     amyWerte:  { <amy-…>: { at, z: { <Zeile>: { g, kcal, p, kh, f, eur } } } },   was die KI für Amys unbekannte Zutaten geschätzt hat (amy-werte.js)
- *     inventar:  { listen: { <sl-…>: … }, dinge: { <sd-…>: … } } }   Sachen in eigenen Listen, nur in einer eigenen Liste (inventar.js)
+ *     inventar:  { listen: { <sl-…>: … }, dinge: { <sd-…>: … } } }   Sachen in eigenen Listen (inventar.js) – nur in der eigenen Liste
+ *                eines Gasts; Amys Sachen liegen seit v83 in sachen.json (sachen.js), was hier noch steht, zieht dorthin um
  *
  * Die Bewertung gilt für beide: Es gibt pro Gericht einen Daumen, und wer
  * zuletzt gedrückt hat, steht dabei. Unter `ki` liegen die Rezepte aus der
@@ -1469,6 +1470,7 @@ function aendere(s, op) {
     case 'invListeWeg':
     case 'ding':
     case 'dingWeg':
+    case 'inventarUmgezogen':
       inventarAnwenden(s, op);
       return;
     case 'essensplan':

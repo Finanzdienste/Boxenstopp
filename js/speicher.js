@@ -28,6 +28,12 @@
  *     bekannten ist eine veraltete Kopie (GitHub verteilt Änderungen nicht in
  *     derselben Sekunde überall hin) und wird ignoriert.
  *
+ * Dieselbe Maschine gleicht auch sachen.json ab (Amys Sachen, die eigene App
+ * unter sachen/): `art` sagt, welche Datei, wie ein leerer Stand aussieht, wie
+ * bereinigt und angewendet wird, was in der Commit-Nachricht steht und unter
+ * welchen Schlüsseln das Gerät Stand und Offenes merkt (ART_LISTE hier,
+ * ART_SACHEN in sachen.js). Ohne `art` ist es liste.json wie immer.
+ *
  * Beide Speicher haben dieselbe Form:
  *   start(beiAenderung, beiStatus)  beiAenderung(stand), beiStatus({ zustand, offen, zuletzt })
  *   aendern(op | [op, …])
@@ -42,14 +48,6 @@ export const DATEN = { owner: 'Finanzdienste', repo: 'Boxenstopp-Daten', pfad: '
 
 const LOKAL = 'boxenstopp.liste.lokal.v1';
 const GITHUB = 'boxenstopp.liste.github.v1';
-/*
- * Woran man sieht, welche App-Fassung den zwischengespeicherten Stand gelesen
- * hat: das Gerüst eines leeren Stands. Bekommt liste.json neue Teile (wie
- * `haushalt`), ändert es sich von selbst. Neue Felder innerhalb von Einträgen
- * sieht man daran nicht – darum liest jede Sitzung die Datei ohnehin einmal
- * frisch, bevor sie schreibt (frischGelesen in github()).
- */
-const FORMAT = JSON.stringify(leer());
 const OFFEN = 'boxenstopp.offen.v1';
 
 const lese = (k, d) => {
@@ -84,7 +82,9 @@ export async function privatLesen(pfad, { token, api = API, ort = DATEN } = {}) 
 /**
  * Eine weitere JSON-Datei im Daten-Repo ändern (push.json): holen,
  * aendern(alt) → neu, mit der sha zurückschreiben; war jemand schneller,
- * noch einmal. Wirft mit einem Satz für die Anzeige, wenn es nicht geht.
+ * noch einmal. Gibt aendern undefined zurück, schreibt es nichts (zurück kommt
+ * dann der gelesene Stand). Wirft mit einem Satz für die Anzeige, wenn es
+ * nicht geht.
  */
 export async function privatSchreiben(pfad, aendern, { token, api = API, ort = DATEN, nachricht = '' } = {}) {
   if (!token) throw new Error('Erst die gemeinsame Liste einrichten.');
@@ -106,7 +106,11 @@ export async function privatSchreiben(pfad, aendern, { token, api = API, ort = D
     let alt = null;
     try { alt = text ? JSON.parse(text) : null; } catch { alt = null; }
     const neu = aendern(alt);
-    const body = { message: nachricht || `${pfad} geändert`, content: zuB64(`${JSON.stringify(neu, null, 1)}\n`), ...(j?.sha ? { sha: j.sha } : {}) };
+    // Nichts zu ändern (undefined): nichts schreiben – zurück kommt, was dort steht
+    if (neu === undefined) return alt;
+    // nachricht darf auch eine Funktion sein – dann mit dem, was geschrieben wird (der Umzug nennt seine Zahlen)
+    const botschaft = typeof nachricht === 'function' ? nachricht(neu, alt) : nachricht;
+    const body = { message: botschaft || `${pfad} geändert`, content: zuB64(`${JSON.stringify(neu, null, 1)}\n`), ...(j?.sha ? { sha: j.sha } : {}) };
     let w;
     try { w = await fetch(url, { method: 'PUT', headers: { ...kopf, 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' }); } catch { throw new Error('Keine Verbindung zu GitHub.'); }
     if (w.ok) return neu;
@@ -187,6 +191,8 @@ export const lokalerStand = () => bereinigen(lese(LOKAL, null));
 export function lokalLoeschen() { weg(LOKAL); }
 /** Beim Trennen: Zwischenstand und Offenes der gemeinsamen Liste vergessen. */
 export function githubVergessen() { weg(GITHUB); weg(OFFEN); }
+/** Was für die Liste noch vorgemerkt ist (die Änderungen selbst) – app.js sieht darin nach Löschungen der Sachen aus einer älteren Fassung. */
+export const offeneListe = () => { const o = lese(OFFEN, []); return Array.isArray(o) ? o : []; };
 export const offeneAenderungen = () => {
   const o = lese(OFFEN, []);
   return Array.isArray(o) ? o.length : 0;
@@ -228,12 +234,89 @@ const ausB64 = (b64) => {
 };
 
 /**
+ * Was der Umzug der Sachen (sachen.js) in liste.json schreibt – niemandes Arbeit. Ohne „Name:“ vorn:
+ * So übergeht ihn jedes Dashboard (gaeste.js nachrichtLesen, auch das von v82, das „Umzug“ noch nicht als
+ * Ablauf kennt und sonst eine Person „Umzug“ mit lauter gelöschten Sachen zeigte). Gezählt wird der Umzug
+ * über seinen Commit an sachen.json („Umzug: Sachen aus der Liste – …“).
+ */
+export const UMZUG_NACHRICHT = 'Umzug der Sachen nach sachen.json';
+
+/*
+ * Eine ältere App-Fassung kennt die neueren Teile (Amys Rezepte und Tags,
+ * Wege, verschobene und zusammengelegte Zeilen …) nicht und lässt sie beim
+ * Schreiben weg. Dann kommt, was dieses Handy davon kannte (bekannt), wieder
+ * dazu – als Änderungen, die gleich mitgehen. ohneInventar: die gemeinsame
+ * Liste von Tobi und Amy – deren Sachen liegen seit v83 in sachen.json, in
+ * liste.json kommen sie nie wieder zurück (nur eigene Listen von Gästen haben
+ * inventar). Lässt eine Fassung vor v70 (die inventar gar nicht kennt) die
+ * Sachen weg, bevor sie umgezogen sind, wären sie sonst aus beiden Dateien
+ * verschwunden: Darum ist ohneInventar eine Funktion, die bekommt, was dieses
+ * Handy davon kannte – app.js gibt es dem Umzug nach sachen.json.
+ */
+function listeNachtrag(roh, stand, bekannt, { ohneInventar = false } = {}) {
+  const fehlt = (k) => roh && typeof roh === 'object' && !(k in roh);
+  const mehr = {};
+  for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm', 'profil', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche', 'amyWerte']) if (fehlt(k) && Object.keys(bekannt?.[k] || {}).length) mehr[k] = bekannt[k];
+  if (fehlt('essensplan') && Object.keys(bekannt?.essensplan?.tage || {}).length) mehr.essensplan = bekannt.essensplan;
+  if (fehlt('ungleich') && bekannt?.ungleich?.length) mehr.ungleich = bekannt.ungleich;
+  if (fehlt('haushalt') && hatHaushalt(bekannt?.haushalt)) mehr.haushalt = bekannt.haushalt;
+  if (fehlt('inventar') && hatInventar(bekannt?.inventar)) {
+    if (typeof ohneInventar === 'function') ohneInventar(bekannt.inventar);
+    else if (!ohneInventar) mehr.inventar = bekannt.inventar;
+  }
+  if (fehlt('leute') && Object.keys(bekannt?.leute || {}).length) mehr.leute = bekannt.leute;
+  // Dasselbe in den Putztagen: Material und „jedes 2. Mal“
+  const nachtrag = [...planNachtrag(roh, stand, bekannt), ...profilNachtrag(roh, stand, bekannt)];
+  if (Object.keys(mehr).length) nachtrag.unshift(opZusammen({}, {}, mehr));
+  return nachtrag;
+}
+
+/*
+ * „Amy: Einkaufsliste, 3 Änderungen – Chili auf die Liste; 2 abgehakt“ –
+ * mit „· Bescheid“ am Ende, wenn es eine Nachricht an die anderen wert ist
+ * (Neues auf der Liste, ein neues Rezept, eine Notiz, alles eingekauft):
+ * Daran erkennt der Push im Daten-Repo, dass er laufen soll
+ * (.github/workflows/benachrichtigen.yml). „· To Do“, wenn Microsoft To Do
+ * nachziehen muss (haushalt.yml). Was nach „–“ steht, liest der Überblick
+ * des Gastgebers (gaeste.js).
+ */
+function listeNachricht(paket, vorher, nachher, { name = '', rezeptName = () => '' } = {}) {
+  // Nur der Umzug der Sachen nach sachen.json: als Ablauf, nicht als jemandes Änderung
+  if (paket.length && paket.every((o) => o?.typ === 'inventarUmgezogen')) return UMZUG_NACHRICHT;
+  // Fällt der Umzug mit eigenen Änderungen in einen Commit, zählt und beschreibt die Nachricht nur die eigenen –
+  // sonst stünde bei dieser Person „Sachen“, obwohl nur umgezogen wurde
+  const eigene = paket.filter((o) => o?.typ !== 'inventarUmgezogen');
+  const danach = eigene.length === paket.length ? nachher : anwenden(vorher, eigene);
+  const wer = name ? `${name.replace(/[:\n\r]/g, ' ').trim()}: ` : '';
+  let was = '';
+  try { was = beschreibung(vorher, danach, rezeptName).replace(/·/g, '-'); } catch { was = ''; }
+  return `${wer}Einkaufsliste, ${eigene.length} ${eigene.length === 1 ? 'Änderung' : 'Änderungen'}${was ? ` – ${was}` : ''}${bescheidNoetig(vorher, danach) ? ' · Bescheid' : ''}${todoNoetig(vorher, danach) ? ' · To Do' : ''}`;
+}
+
+/** liste.json – die Einkaufsliste mit allem anderen (liste.js). */
+export const ART_LISTE = { pfad: '', leer, bereinigen, anwenden, nachricht: listeNachricht, nachtrag: listeNachtrag, speicher: { github: GITHUB, offen: OFFEN } };
+
+/**
  * rezeptName(rid): der kurze Name eines Rezepts für die Commit-Nachricht
  * („Chili auf die Liste“) – die App kennt ihn, die Datei nicht.
+ * art: welche Datei (ART_LISTE, sachen.js ART_SACHEN). ohneInventar: die
+ * gemeinsame Liste – fehlendes inventar kommt nicht wieder dazu, sondern geht an
+ * diese Funktion (listeNachtrag; true: einfach weglassen).
  */
-export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, rezeptName = () => '' }) {
+export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, rezeptName = () => '', art = ART_LISTE, ohneInventar = false }) {
+  const { leer, bereinigen, anwenden } = art;
+  const GITHUB = art.speicher.github;
+  const OFFEN = art.speicher.offen;
+  /*
+   * Woran man sieht, welche App-Fassung den zwischengespeicherten Stand gelesen
+   * hat: das Gerüst eines leeren Stands. Bekommt liste.json neue Teile (wie
+   * `haushalt`), ändert es sich von selbst. Neue Felder innerhalb von Einträgen
+   * sieht man daran nicht – darum liest jede Sitzung die Datei ohnehin einmal
+   * frisch, bevor sie schreibt (frischGelesen).
+   */
+  const FORMAT = JSON.stringify(leer());
   const basis = `${api}/repos/${ort.owner}/${ort.repo}`;
-  const datei = `${basis}/contents/${ort.pfad || DATEN.pfad}`;
+  const datei = `${basis}/contents/${art.pfad || ort.pfad || DATEN.pfad}`;
   const kopf = (mehr = {}) => ({ Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...mehr });
   // Der zwischengespeicherte Stand gilt nur für dieselbe Liste (eigene Listen liegen woanders)
   const ortName = `${ort.owner}/${ort.repo}`;
@@ -320,20 +403,8 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, 
         const etag = r.headers.get('ETag');
         if (j.sha !== remote.sha) {
           if (!remote.sha || stand.rev >= remote.stand.rev) {
-            // Eine ältere App-Fassung kennt die neueren Teile (Amys Rezepte und Tags,
-            // Wege, verschobene und zusammengelegte Zeilen) nicht und lässt sie beim
-            // Schreiben weg. Dann kommt, was dieses Handy davon kannte, wieder dazu.
-            const fehlt = (k) => roh && typeof roh === 'object' && !(k in roh);
-            const mehr = {};
-            for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm', 'profil', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche', 'amyWerte']) if (fehlt(k) && Object.keys(remote.stand?.[k] || {}).length) mehr[k] = remote.stand[k];
-            if (fehlt('essensplan') && Object.keys(remote.stand?.essensplan?.tage || {}).length) mehr.essensplan = remote.stand.essensplan;
-            if (fehlt('ungleich') && remote.stand?.ungleich?.length) mehr.ungleich = remote.stand.ungleich;
-            if (fehlt('haushalt') && hatHaushalt(remote.stand?.haushalt)) mehr.haushalt = remote.stand.haushalt;
-            if (fehlt('inventar') && hatInventar(remote.stand?.inventar)) mehr.inventar = remote.stand.inventar;
-            if (fehlt('leute') && Object.keys(remote.stand?.leute || {}).length) mehr.leute = remote.stand.leute;
-            // Dasselbe in den Putztagen: Material und „jedes 2. Mal“
-            const nachtrag = [...planNachtrag(roh, stand, remote.stand), ...profilNachtrag(roh, stand, remote.stand)];
-            if (Object.keys(mehr).length) nachtrag.unshift(opZusammen({}, {}, mehr));
+            // Was eine ältere App-Fassung weggelassen hat, kommt wieder dazu (art.nachtrag, für liste.json listeNachtrag)
+            const nachtrag = art.nachtrag(roh, stand, remote.stand, { ohneInventar });
             if (nachtrag.length) {
               for (const op of nachtrag) { stand = anwenden(stand, op); offen.push(op); }
               merkeOffen();
@@ -370,21 +441,7 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, 
     sendeTimer = setTimeout(() => { sendeTimer = null; senden(); }, ms);
   };
 
-  /*
-   * „Amy: Einkaufsliste, 3 Änderungen – Chili auf die Liste; 2 abgehakt“ –
-   * mit „· Bescheid“ am Ende, wenn es eine Nachricht an die anderen wert ist
-   * (Neues auf der Liste, ein neues Rezept, eine Notiz, alles eingekauft):
-   * Daran erkennt der Push im Daten-Repo, dass er laufen soll
-   * (.github/workflows/benachrichtigen.yml). „· To Do“, wenn Microsoft To Do
-   * nachziehen muss (haushalt.yml). Was nach „–“ steht, liest der Überblick
-   * des Gastgebers (gaeste.js).
-   */
-  function nachricht(paket, vorher, nachher) {
-    const wer = name ? `${name.replace(/[:\n\r]/g, ' ').trim()}: ` : '';
-    let was = '';
-    try { was = beschreibung(vorher, nachher, rezeptName).replace(/·/g, '-'); } catch { was = ''; }
-    return `${wer}Einkaufsliste, ${paket.length} ${paket.length === 1 ? 'Änderung' : 'Änderungen'}${was ? ` – ${was}` : ''}${bescheidNoetig(vorher, nachher) ? ' · Bescheid' : ''}${todoNoetig(vorher, nachher) ? ' · To Do' : ''}`;
-  }
+  const nachricht = (paket, vorher, nachher) => art.nachricht(paket, vorher, nachher, { name, rezeptName });
 
   async function senden() {
     if (aus || sendet || !offen.length) return;
@@ -398,7 +455,12 @@ export function github({ token, name = '', api = API, takt = 8000, ort = DATEN, 
         if (!frischGelesen) { if (zustand !== 'zugang') plane(zustand === 'offline' ? 15000 : 5000); return; }
       }
       for (let versuch = 0; versuch < 6 && offen.length; versuch++) {
-        const paket = offen.slice();
+        // Der Umzug der Sachen (inventarUmgezogen) geht immer als eigener Commit – nie mit eigenen Änderungen
+        // zusammen, sonst stünde er im Dashboard als „Sachen gelöscht“ bei dieser Person (einzelheiten.js)
+        const umzug = (o) => o?.typ === 'inventarUmgezogen';
+        let bis = 1;
+        while (bis < offen.length && umzug(offen[bis]) === umzug(offen[0])) bis++;
+        const paket = offen.slice(0, bis);
         imFlug = paket.length;
         const neu = anwenden(remote.stand, paket);
         neu.rev = (remote.stand.rev || 0) + 1;

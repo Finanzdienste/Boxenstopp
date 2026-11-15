@@ -5,9 +5,15 @@
  * richtig), Marielle öffnet den Link (gleich verbunden, lila, Willkommen,
  * ihre Makros), ihre Liste bleibt ihre, Tobi sieht im Dashboard, wer was
  * gemacht hat und was in ihrer Liste steht (Sachen mit Foto, Einkaufsliste,
- * Essensplan, Rezepte, Notiztitel) – und Amys Bereich. Wem das Dashboard
- * etwas zeigt, erfährt es einmal. Und: Marielles zweites Gerät über das
- * Schlüsselfeld.
+ * Essensplan, Rezepte, Notiztitel) – und Amys Bereich. Amys Sachen sind seit
+ * v83 eine eigene App mit eigener Datei (sachen.json neben liste.json): Das
+ * Dashboard liest die Commits beider Dateien als eine Liste, die Einzelheiten
+ * aus der Datei des Commits, den Umzug als Automatik (einmal – sein Commit an
+ * liste.json hat kein „Name:“) und Amys Sachen aus sachen.json samt dem, was
+ * noch in liste.json steht; liefert GitHub kurz eine ältere Fassung von
+ * sachen.json (oder 404), verschwindet nichts. Wem das Dashboard
+ * etwas zeigt, erfährt es einmal (Amy danach auch, dass Sachen eine eigene
+ * App ist). Und: Marielles zweites Gerät über das Schlüsselfeld.
  */
 import { readFileSync } from 'node:fs';
 import { pruefer, handy, githubAttrappe, githubMehrere, starteBrowser, bis, SCHLUESSEL, APP_URL, ROOT } from './hilfe.mjs';
@@ -19,11 +25,14 @@ import { opBlatt } from '../js/notizbuch.js';
 import { opEssensplan } from '../js/essensplan.js';
 import { opWunsch, opWunschErledigt } from '../js/wuensche.js';
 import { opVertraeglich } from '../js/vertraeglich.js';
+import { leerSachen, sachenAnwenden, sachenBereinigen, sachenNachricht } from '../js/sachen.js';
 
 const { check, ende } = pruefer();
 const M_KEY = 'github_pat_11MARIELLE000000000000_abcdefghijklmnopqrstuvwxyz';
 const ALLES_KEY = 'github_pat_11ALLESALLES00000000000_abcdefghijklmnopqrstuvwxyz';
 const GKEY = 'AQ.Ab8RN6TESTTESTTESTTESTTESTTESTTEST';
+/** So heißt der Commit des Umzugs an liste.json (speicher.js UMZUG_NACHRICHT) – ohne „Name:“. */
+const UMZUG_LISTE = 'Umzug der Sachen nach sachen.json';
 
 /* ----------------------------------------------------------- Rechnung */
 
@@ -33,6 +42,11 @@ check(nachrichtLesen('Push: gesendet').auto && nachrichtLesen('Haushalt: erinner
 check(nachrichtLesen('liste.json geändert').wer === '' && nachrichtLesen('Tobi: Einladung für Marielle').was[0] === 'Einladung für Marielle', 'Von Hand ohne Namen: niemand; die Einladung');
 check(bereichVon('Chili auf die Liste') === 'Einkauf' && bereichVon('Chili gekocht') === 'Kochen' && bereichVon('Rezept „Kokos-Curry“') === 'Rezepte' && bereichVon('Putzplan abgehakt') === 'Haushalt' && bereichVon('Ziel pro Box geändert') === 'Ziel', 'Bereiche');
 check(bereichVon('Sachen') === 'Sachen' && bereichVon('Sachen; 2 abgehakt') === 'Sachen' && BEREICHE.join() === 'Einkauf,Kochen,Rezepte,Sachen,Haushalt,Ziel,Sonstiges', 'Bereich „Sachen“ – nach Rezepte');
+// Amys Sachen-App schreibt sachen.json: „Amy: Sachen, 2 Änderungen“ – mit der Zahl, nie was es ist; der Umzug ist ein Ablauf
+check(JSON.stringify(nachrichtLesen('Amy: Sachen, 2 Änderungen')) === JSON.stringify({ wer: 'Amy', auto: false, anzahl: 2, was: ['Sachen'] }) && bereichVon(nachrichtLesen('Amy: Sachen, 1 Änderung').was[0]) === 'Sachen', 'Nachricht der Sachen-App: Amy, 2 Änderungen, im Bereich Sachen');
+check(nachrichtLesen('Umzug: Sachen aus der Liste – 1 Liste, 3 Sachen').auto && nachrichtLesen('Umzug: Sachen – 1 Löschung von vorher').auto, 'Der Umzug der Sachen (Commits an sachen.json) zählt als automatisch');
+// Der Commit an liste.json hat kein „Name:“ – niemand, kein Ablauf: Jedes Dashboard übergeht ihn (auch das von v82)
+check(JSON.stringify(nachrichtLesen(UMZUG_LISTE)) === JSON.stringify({ wer: '', auto: false, anzahl: 1, was: [] }), `Der Umzug-Commit an liste.json: niemandes (${JSON.stringify(nachrichtLesen(UMZUG_LISTE))})`);
 check(repoVorschlag('Marielle') === 'Boxenstopp-Marielle' && repoVorschlag('Jörg Müller') === 'Boxenstopp-Joerg-Mueller' && repoVorschlag('') === '', 'Repo-Vorschlag aus dem Namen');
 check(gaesteBereinigen([{ name: 'Marielle', daten: 'Finanzdienste/Boxenstopp-Marielle', token: M_KEY, farbe: 'lila' }, { name: 'X', daten: 'kaputt', token: M_KEY }, { name: 'Doppelt', daten: 'Finanzdienste/Boxenstopp-Marielle', token: M_KEY }]).length === 1, 'Gäste bereinigen: kaputte und doppelte fallen weg');
 // Aufs neue Handy: die Gäste in den Link und zurück
@@ -71,6 +85,19 @@ check(z.personen.find((p) => p.name === 'Tobi')?.anzahl === 5, 'Tobi: 4 + 1 – 
 const heute = z.verlauf[0];
 check(heute.tag === '2026-11-05' && heute.sitzungen[0].wer === 'Amy' && heute.sitzungen[0].von === um('05', '18:48') && heute.sitzungen[0].anzahl === 3, 'Verlauf: Amys zwei Commits um 18:48 und 18:58 sind eine Sitzung mit 3 Änderungen');
 check(heute.sitzungen.some((s) => s.wer === 'Tobi' && s.was[0] === 'Einladung für Marielle'), 'Verlauf: die Einladung steht drin');
+// Eure Liste sind zwei Dateien: die Commits an sachen.json (Sachen-App, Umzug) gemischt mit denen an liste.json
+const zweiDateien = zusammenfassen([{ id: 'haupt', name: 'Eure Liste', gast: '', eintraege: [
+  { sha: 's2', at: um('05', '18:30'), nachricht: 'Amy: Sachen, 2 Änderungen' },
+  { sha: 'k2', at: um('05', '18:20'), nachricht: 'Amy: Einkaufsliste, 1 Änderung – Äpfel auf die Liste' },
+  { sha: 'k1', at: um('05', '12:00'), nachricht: UMZUG_LISTE },
+  { sha: 's1', at: um('05', '11:59'), nachricht: 'Umzug: Sachen aus der Liste – 1 Liste, 3 Sachen' },
+] }], { tage: 7, jetzt });
+const amyS = zweiDateien.personen.find((p) => p.name === 'Amy');
+check(zweiDateien.personen.length === 1 && amyS?.anzahl === 3 && amyS.bereiche.Sachen === 1 && amyS.bereiche.Einkauf === 1, `Sachen-App: Amy einmal, 1 + 2 Änderungen, Bereiche Einkauf und Sachen (${JSON.stringify(amyS)})`);
+const sitzS = zweiDateien.verlauf[0]?.sitzungen || [];
+check(sitzS.length === 1 && sitzS[0].was.join() === 'Äpfel auf die Liste,Sachen' && sitzS[0].anzahl === 3 && sitzS[0].shas.join() === 'k2,s2', `Sachen-App: eine Sitzung mit den Commits beider Dateien (${JSON.stringify(sitzS)})`);
+check(JSON.stringify(zweiDateien.automatik) === JSON.stringify({ haupt: { Umzug: 1 } }), `Der Umzug (ein Commit an jeder Datei) zählt einmal – über den an sachen.json (${JSON.stringify(zweiDateien.automatik)})`);
+check(!zweiDateien.verlauf.flatMap((t) => t.sitzungen).some((x) => x.shas.includes('k1') || x.shas.includes('s1')), 'Der Umzug steht bei niemandem im Verlauf');
 const gemischt = verlaufMischen([{ sha: 'x', at: um('01', '10:00'), nachricht: 'alt' }], [{ sha: 'y', at: um('05', '10:00'), nachricht: 'neu' }, { sha: 'x', at: um('01', '10:00'), nachricht: 'alt' }, { sha: 'kaputt', at: 'gestern' }], { jetzt });
 check(gemischt.length === 2 && gemischt[0].sha === 'y', 'Verlauf mischen: neu vorn, doppelt und kaputt fallen weg');
 
@@ -151,6 +178,21 @@ check(!ihText.includes('VERTRAEGLICH') && !ihText.includes('Zwiebeln'), 'Dashboa
 check(JSON.stringify(inhaltVon(null)) === JSON.stringify(inhaltVon(leer())) && inhaltVon(null).sachen.anzahl === 0, 'Dashboard: ohne Stand alles leer');
 
 /* ============================================================ Browser */
+
+/**
+ * Ein Commit der Sachen-App an sachen.json in der Attrappe – so, wie sie schreibt: die ganze Datei (JSON mit
+ * 1 Leerzeichen, Zeilenumbruch am Ende), mit neuer sha, als Fassung für ?ref= (die Einzelheiten).
+ */
+function sachenCommit(att, stand, nachricht) {
+  const z = att.zustand;
+  const sha = `sa${z.commits.length + 1}-amy`;
+  const text = `${JSON.stringify(stand, null, 1)}\n`;
+  z.dateien['sachen.json'] = text;
+  z.shas['sachen.json'] = `w-${sha}`;
+  z.fassungen[sha] = text;
+  z.commits.unshift({ sha, message: nachricht, date: new Date().toISOString(), pfad: 'sachen.json' });
+  return sha;
+}
 
 const browser = await starteBrowser();
 const haupt = githubAttrappe();
@@ -318,6 +360,7 @@ check(await bis(async () => (await t.locator('#ueberblick-dlg .ub-person').count
 const ub = await t.locator('#ueberblick-dlg').innerText();
 check(ub.includes('Marielle') && ub.includes('Marielles Liste') && ub.includes('Tobi') && ub.includes('eure Liste'), 'Überblick: Marielle in ihrer Liste, Tobi in eurer');
 check(ub.includes('Chili') && ub.includes('Ziel pro Box geändert') && ub.includes('Einladung für Marielle'), 'Überblick: was passiert ist, im Verlauf');
+check(!(await t.locator('#ueberblick-dlg .zugang-fehler').count()) && !ub.includes('Amys Sachen'), 'Noch keine sachen.json (nichts umgezogen): kein Fehler, keine Karte dafür');
 const karten = await t.locator('#ueberblick-dlg .ub-person .ub-wer b').allInnerTexts();
 check(karten.length === 2 && karten.includes('Marielle') && !karten.includes('Marielli') && ub.includes('Äpfel') && ub.includes('Marielli heißt jetzt Marielle'), `Überblick: Marielle einmal, mit „Marielli heißt jetzt Marielle“ (${karten.join(', ')})`);
 // Die Einzelheiten: was genau – aus liste.json vor und nach jedem Commit (?ref=), nicht aus der Nachricht
@@ -375,9 +418,13 @@ mar.zustand.version++;
 mar.zustand.sha = `sha${mar.zustand.version}`;
 mar.zustand.dateien[FOTO] = 'foto';
 mar.zustand.roh[FOTO] = readFileSync(`${ROOT}/icon-192.png`);
-// Amy hat in eurer Liste eine Sache, eine Notiz und einen offenen Vorschlag
+// Amy hat in eurer Liste eine Notiz und einen offenen Vorschlag, ihre Sachen in sachen.json (die Sachen-App, mit Commit) –
+// und eine ältere App-Fassung hat ihr eine Sache noch in liste.json gelegt (Tobis Gerät zieht sie gleich um)
+const lippe = sachenAnwenden(leerSachen(), opDing({ id: 'sd-lippe001', name: 'Lippenstift', marke: 'Catrice', tags: ['Rot'], reihe: 1 }, 'Amy'));
+lippe.rev = 1;
+sachenCommit(haupt, lippe, 'Amy: Sachen, 1 Änderung');
 const euer = haupt.liste();
-const mitAmy = anwenden(bereinigen(euer), [opDing({ id: 'sd-lippe001', name: 'Lippenstift', marke: 'Catrice', tags: ['Rot'], reihe: 1 }, 'Amy'), opBlatt({ id: 'nb-urlaub01', titel: 'Urlaub', text: 'AMY-NOTIZ-TEXT', farbe: 'rosa' }, 'Amy'), opWunsch('w-amy00001', 'AMY-WUNSCH', 'Amy')]);
+const mitAmy = anwenden(bereinigen(euer), [opDing({ id: 'sd-buerst01', name: 'Haarbürste', marke: 'Tangle', reihe: 2 }, 'Amy'), opBlatt({ id: 'nb-urlaub01', titel: 'Urlaub', text: 'AMY-NOTIZ-TEXT', farbe: 'rosa' }, 'Amy'), opWunsch('w-amy00001', 'AMY-WUNSCH', 'Amy')]);
 mitAmy.rev = euer.rev + 1;
 haupt.zustand.datei = JSON.stringify(mitAmy);
 haupt.zustand.version++;
@@ -397,10 +444,11 @@ check(ihrs && ihrs.includes('Heute') && ihrs.includes('Linsensuppe') && ihrs.inc
 check(ihrs && ihrs.includes('Marielles Bowl') && ihrs.includes('Geschenkideen') && !ihrs.includes('NOTIZ-TEXT'), 'Marielle: ihre Rezepte und die Titel der Notizen – nicht, was drinsteht');
 check(ihrs && !ihrs.includes('VERTRAEGLICH') && /Zuletzt \d+ Tage/i.test(ihrs) && ihrs.includes('nur zum Ansehen'), 'Marielle: nicht, was sie verträgt; die letzten Sitzungen; „nur zum Ansehen“');
 check(await bis(() => t.evaluate(() => document.querySelector('#ueberblick-dlg img[data-ub-foto]')?.src.startsWith('blob:'))) && mar.zustand.lesen[FOTO] >= 1 && await t.evaluate(() => document.querySelector('#ueberblick-dlg img[data-ub-foto]').closest('.inv-bild').classList.contains('hat-foto')), 'Marielle: das Foto kommt mit ihrem Schlüssel aus ihrem Repo');
-// Amy: ihr Bereich in eurer Liste
+// Amy: ihr Bereich in eurer Liste, die Sachen aus sachen.json – und die aus liste.json, ob schon umgezogen oder nicht
 await t.click('#ueberblick-dlg [data-ub-reiter="amy"]');
-const amys = await bis(async () => { const x = await panel(); return x.includes('Lippenstift') ? x : null; }, 8000);
-check(amys && amys.includes('Catrice') && amys.includes('Urlaub') && amys.includes('1 Vorschlag offen') && !amys.includes('AMY-NOTIZ-TEXT') && !amys.includes('AMY-WUNSCH') && !amys.includes('Einkaufsliste'), `Amy: ihre Sachen, die Titel ihrer Notizen, wie viele Vorschläge offen sind${amys ? '' : ` (${(await panel()).slice(0, 300)})`}`);
+const amys = await bis(async () => { const x = await panel(); return x.includes('Lippenstift') && x.includes('Haarbürste') ? x : null; }, 8000);
+check(amys && amys.includes('Catrice') && amys.includes('Tangle') && amys.includes('Urlaub') && amys.includes('1 Vorschlag offen') && !amys.includes('AMY-NOTIZ-TEXT') && !amys.includes('AMY-WUNSCH') && !amys.includes('Einkaufsliste'), `Amy: ihre Sachen (sachen.json und liste.json), die Titel ihrer Notizen, wie viele Vorschläge offen sind${amys ? '' : ` (${(await panel()).slice(0, 300)})`}`);
+check(await t.locator('#ueberblick-dlg .ub-kachel', { hasText: 'Sachen' }).innerText().then((k) => /^2\s/.test(k)), 'Amy: Kachel „2 Sachen“');
 check(await t.locator('#ueberblick-dlg [data-ub-reiter="amy"]').getAttribute('aria-selected') === 'true' && await t.evaluate(() => document.activeElement?.dataset?.ubReiter === 'amy'), 'Der gewählte Reiter ist markiert und hat den Fokus');
 await t.click('[data-act="ub-zu"]');
 // Neu geöffnet: nichts aus ihrer Liste ist geblieben – es kommt neu
@@ -459,6 +507,159 @@ await einfuegen.ctx.close();
 await t.click('[data-g-weg="Finanzdienste/Boxenstopp-Marielle"]');
 check(!(await t.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.gaeste.v1')))).length && !!mar.liste(), 'Entfernen: weg von Tobis Gerät, ihre Liste bleibt');
 
+/* ---------------------------------------- Dashboard: Amys Sachen-App */
+
+// Seit v83 sind Amys Sachen eine eigene App (sachen/) mit eigener Datei: sachen.json neben liste.json. In Tobis Dashboard
+// sind beide eure Liste – die Commits gemischt (Amy einmal), die Einzelheiten aus der Datei des Commits (?ref=), der
+// Umzug als Automatik, Amys Reiter mit den Sachen aus sachen.json und dem, was noch in liste.json steht.
+const sg = githubAttrappe();
+const sz = sg.zustand;
+const vor = (min) => new Date(Date.now() - min * 60000).toISOString();
+const alsDatei = (x) => `${JSON.stringify(x, null, 1)}\n`;
+/** Ein Commit an liste.json, wie ihn ein anderes Gerät schreibt (rev + 1) – Tobis Gerät holt ihn beim nächsten Abgleich. */
+function listeCommit(stand, nachricht) {
+  const neu = { ...stand, rev: sg.liste().rev + 1 };
+  sz.version++;
+  sz.sha = `sha${sz.version}`;
+  sz.datei = alsDatei(neu);
+  sz.fassungen[`k${sz.version}`] = sz.datei;
+  sz.commits.unshift({ sha: `k${sz.version}`, message: nachricht, date: new Date().toISOString(), pfad: 'liste.json' });
+}
+const KLEIDUNG = { id: 'sl-kleid001', name: 'Kleidung', bild: 'womans-clothes', reihe: 1 };
+const ROCK = { id: 'sd-rock0001', liste: KLEIDUNG.id, name: 'Rock', marke: 'Zara', reihe: 1 };
+// liste.json: Tobi, dann Amy mit einer älteren App-Fassung – ihre Sachen stehen noch hier
+let sl = anwenden(leer(), opPerson('Tobi'));
+sl.rev = 1;
+sz.fassungen.k1 = alsDatei(sl);
+sl = anwenden(sl, [opPerson('Amy'), opInvListe(KLEIDUNG, 'Amy', vor(400)), opDing(ROCK, 'Amy', vor(400))]);
+sl.rev = 2;
+sz.fassungen.k2 = alsDatei(sl);
+sz.datei = sz.fassungen.k2;
+sz.version = 2;
+sz.sha = 'sha2';
+sz.commits.push(
+  { sha: 'k2', message: 'Amy: Einkaufsliste, 1 Änderung – zum ersten Mal dabei', date: vor(400), pfad: 'liste.json' },
+  { sha: 'k1', message: 'Tobi: Einkaufsliste, 1 Änderung – zum ersten Mal dabei', date: vor(500), pfad: 'liste.json' },
+);
+// sperre: GitHub nimmt sachen.json gerade nicht (503) – dann bleibt, was noch in liste.json steht, dort
+// veraltet: GitHub liefert sachen.json roh in einer älteren Fassung (Text) oder gar nicht (404), wie direkt nach dem Schreiben
+const sx = { sperre: false, gesperrt: 0, roh: 0, ref: 0, veraltet: null };
+async function sachenRoute(r) {
+  const q = r.request();
+  if (q.url().split('?')[0] === `${sg.basis}/contents/sachen.json`) {
+    if (q.method() === 'PUT' && sx.sperre) {
+      sx.gesperrt++;
+      return r.fulfill({ status: 503, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '{"message":"Service Unavailable"}' });
+    }
+    if (q.method() === 'GET' && new URL(q.url()).searchParams.get('ref')) sx.ref++;
+    // Roh, ohne ref: so holt das Dashboard sachen.json, wie sie jetzt ist (der Umzug holt sie als JSON mit sha)
+    else if (q.method() === 'GET' && /raw/.test(q.headers().accept || '')) {
+      sx.roh++;
+      if (sx.veraltet === 404) return r.fulfill({ status: 404, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '{"message":"Not Found"}' });
+      if (sx.veraltet) return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/vnd.github.raw+json; charset=utf-8' }, body: sx.veraltet });
+    }
+  }
+  return sg.route(r);
+}
+const sTobi = await handy(browser, { attrappe: { route: sachenRoute } });
+const st = sTobi.page;
+await st.evaluate((k) => { localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: k, name: 'Tobi' })); localStorage.setItem('__umzugPause', '300'); }, SCHLUESSEL);
+await st.reload();
+await st.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+check(await bis(async () => (await st.locator('#sync-text').innerText()) === 'Geteilt'), 'Sachen-App: Tobi ist verbunden');
+// Tobis Gerät zieht Amys Sachen um – je ein Commit an sachen.json und an liste.json
+check(await bis(() => !!sg.datei('sachen.json')?.inventar?.dinge?.[ROCK.id] && !Object.keys(sg.liste()?.inventar?.dinge || {}).length && sz.nachrichten.includes(UMZUG_LISTE), 10000), `Umzug: der Rock steht in sachen.json, nicht mehr in liste.json (${sz.nachrichten.join(' | ')})`);
+// Amy, eben: Äpfel auf die Einkaufsliste – und in der Sachen-App ein Sommerkleid dazu, beim Rock Notiz und Tags
+listeCommit(anwenden(sg.liste(), opEigener('c-aepfel', 'Äpfel', 'obst')), 'Amy: Einkaufsliste, 1 Änderung – Äpfel auf die Liste');
+const sVorher = sachenBereinigen(sg.datei('sachen.json'));
+const sPaket = [opDing({ id: 'sd-kleid001', liste: KLEIDUNG.id, name: 'Sommerkleid', marke: 'Zara', tags: ['Sommer'], reihe: 2 }, 'Amy'), opDing({ ...ROCK, notiz: 'Größe 36, zur Reinigung', tags: ['Büro'] }, 'Amy')];
+const sNachher = sachenAnwenden(sVorher, sPaket);
+sNachher.rev = sVorher.rev + 1;
+const sNachricht = sachenNachricht(sPaket, sVorher, sNachher, { name: 'Amy' });
+check(sNachricht === 'Amy: Sachen, 2 Änderungen', `So schreibt die Sachen-App: „${sNachricht}“`);
+const sSha = sachenCommit(sg, sNachher, sNachricht);
+
+await st.click('.tabbar .tab[data-tab="einstellungen"]');
+await st.click('[data-act="ub-oeffnen"]');
+check(await bis(async () => (await st.locator('#ueberblick-dlg .ub-person').count()) >= 2), 'Sachen-App: die Personen');
+const sKarten = await st.locator('#ueberblick-dlg .ub-person .ub-wer b').allInnerTexts();
+check(sKarten.length === 2 && sKarten.filter((k) => k === 'Amy').length === 1 && sKarten.includes('Tobi'), `Amy steht einmal da – sachen.json ist keine eigene Liste (${sKarten.join(', ')})`);
+const sAmyKarte = (await st.locator('#ueberblick-dlg .ub-person', { hasText: 'Amy' }).innerText()).replace(/\s+/g, ' ');
+check(/eure Liste/.test(sAmyKarte) && /\b4 Änderungen/.test(sAmyKarte) && /Sachen 1/.test(sAmyKarte) && /Einkauf 1/.test(sAmyKarte), `Amys Karte: der Commit der Sachen-App zählt mit 2 Änderungen, im Bereich Sachen (${sAmyKarte})`);
+const sVerlauf = async () => (await st.locator('#ueberblick-dlg .ub-verlauf').innerText().catch(() => '')).replace(/\s+/g, ' ');
+const sDet = await bis(async () => { const v = await sVerlauf(); return v.includes('Dazu: Sommerkleid (Zara) – Kleidung') && v.includes('Auf die Liste: Äpfel') ? v : null; }, 10000);
+check(sDet, `Einzelheiten aus beiden Dateien in einer Sitzung (${sDet ? '' : (await sVerlauf()).slice(0, 500)})`);
+check(sDet && sDet.includes('Geändert: Rock (Zara): Notiz, Tags') && !sDet.includes('Größe 36'), 'Einzelheiten: „Geändert: Rock (Zara): Notiz, Tags“ – nicht, was in der Notiz steht');
+check(sDet && /Äpfel auf die Liste, Sachen \(3\)/.test(sDet), `Die Sitzung: „Äpfel auf die Liste, Sachen (3)“ (${(sDet || '').slice(0, 200)})`);
+const sGemerkt = await st.evaluate((sha) => JSON.parse(localStorage.getItem('boxenstopp.einzelheiten.v1')).d[sha], sSha);
+check(sx.ref >= 1 && Array.isArray(sGemerkt) && sGemerkt.length > 0 && sGemerkt.every((e) => e.b === 'Sachen'), `Die Einzelheiten zum Commit der Sachen-App: aus sachen.json mit ?ref=, nur Sachen (${sx.ref} Abrufe, ${JSON.stringify(sGemerkt)})`);
+const sAlles = (await st.locator('#ueberblick-dlg').innerText()).replace(/\s+/g, ' ');
+check(/Eure Liste, automatisch: 1× Sachen umgezogen\./.test(sAlles), `Der Umzug: „1× Sachen umgezogen“ – zwei Commits, einmal gezählt (${(sAlles.match(/automatisch:[^.]*\./) || [''])[0]})`);
+check(!(await st.locator('#ueberblick-dlg .zugang-fehler').count()) && !sAlles.includes('Amys Sachen'), 'Kein Fehler, keine eigene Karte für sachen.json');
+const sVerlaufGemerkt = await st.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.verlauf.v1')));
+// Je Datei ihr eigener Verlauf: in „haupt“ die Commits an liste.json, in „haupt:sachen“ die an sachen.json (Umzug, Sachen-App)
+const shasVon = (pfad) => sz.commits.filter((c) => c.pfad === pfad).map((c) => c.sha).sort().join();
+const gemerkteShas = (id) => (sVerlaufGemerkt[id] || []).map((e) => e.sha).sort().join();
+check(gemerkteShas('haupt') === shasVon('liste.json') && gemerkteShas('haupt:sachen') === shasVon('sachen.json') && sVerlaufGemerkt['haupt:sachen'].length === 2 && sVerlaufGemerkt['haupt:sachen'].some((e) => e.sha === sSha), `Verlauf je Datei gemerkt (liste.json ${sVerlaufGemerkt.haupt?.length}, sachen.json ${sVerlaufGemerkt['haupt:sachen']?.length})`);
+
+// Eine ältere App-Fassung legt Amy noch einen Gürtel in liste.json – und GitHub nimmt sachen.json gerade nicht
+sx.sperre = true;
+listeCommit(anwenden(sg.liste(), opDing({ id: 'sd-guert001', liste: KLEIDUNG.id, name: 'Gürtel', marke: 'Mango', reihe: 3 }, 'Amy')), 'Amy: Einkaufsliste, 1 Änderung – Sachen');
+check(await bis(() => sx.gesperrt > 0, 8000) && !!sg.liste().inventar?.dinge?.['sd-guert001'] && !sg.datei('sachen.json').inventar.dinge['sd-guert001'], 'Tobis Gerät will den Gürtel umziehen – geht gerade nicht, er bleibt in liste.json');
+const sRoh0 = sx.roh;
+await st.click('#ueberblick-dlg [data-ub-reiter="amy"]');
+const sTeil = async () => (await st.locator('#ueberblick-dlg .ub-teil', { has: st.locator('h3', { hasText: /^Sachen/ }) }).innerText().catch(() => '')).replace(/\s+/g, ' ');
+const sAmys = await bis(async () => { const x = await sTeil(); return x.includes('Sommerkleid') && x.includes('Gürtel') ? x : null; }, 8000);
+check(sAmys && sAmys.includes('Rock') && sAmys.includes('Größe 36') && sAmys.includes('Mango') && sAmys.includes('Kleidung') && !sAmys.includes('Holt'), `Amys Reiter: die Sachen aus sachen.json und der Gürtel, der noch in liste.json steht (${(sAmys || await sTeil()).slice(0, 300)})`);
+check(await st.locator('#ueberblick-dlg .ub-kachel', { hasText: 'Sachen' }).innerText().then((k) => /^3\s/.test(k)) && sx.roh === sRoh0 + 1, `Kachel „3 Sachen“; sachen.json einmal geholt, wie sie jetzt ist (${sx.roh - sRoh0})`);
+check((await st.locator('#ueberblick-dlg .ub-panel').innerText()).includes('die Sachen aus ihrer Sachen-App'), 'Darunter: die Sachen aus ihrer Sachen-App');
+// GitHub nimmt sachen.json wieder: Der Gürtel zieht um – im Reiter bleibt er die ganze Zeit
+const sGesehen = [];
+const sBeob = setInterval(async () => { try { sGesehen.push((await sTeil()).includes('Gürtel')); } catch { /* egal */ } }, 100);
+sx.sperre = false;
+check(await bis(() => !!sg.datei('sachen.json').inventar.dinge['sd-guert001'] && !sg.liste().inventar?.dinge?.['sd-guert001'], 10000), 'GitHub geht wieder: der Gürtel ist in sachen.json, nicht mehr in liste.json');
+// Noch gut eine Sekunde danach: Tobis Gerät hat liste.json ohne den Gürtel, sachen.json ist noch nicht neu geholt
+const sBisher = sGesehen.length;
+await bis(() => sGesehen.length >= sBisher + 10);
+clearInterval(sBeob);
+check(sGesehen.length > 0 && sGesehen.every(Boolean), `Der Gürtel bleibt im Reiter, während er umzieht (${sGesehen.filter((g) => !g).length}× weg)`);
+// Neu holen: sachen.json kommt neu – jetzt mit dem Gürtel
+const sRoh1 = sx.roh;
+await st.click('#ueberblick-dlg .ub-panel [data-act="ub-neu"]');
+check(await bis(() => sx.roh > sRoh1) && await bis(async () => (await sTeil()).includes('Gürtel') && (await st.locator('#ueberblick-dlg .ub-panel').innerText()).includes('Neu holen')), 'Neu holen: sachen.json kommt neu, der Gürtel steht drin');
+// Noch einmal „Neu holen“ – GitHub liefert aber eine ältere Fassung von sachen.json (die vom ersten Umzug, kleineres rev):
+// Sie ersetzt den bekannten Stand nicht, nichts verschwindet
+const sErster = sz.commits.filter((c) => c.pfad === 'sachen.json').at(-1);
+const sAlt = JSON.parse(sz.fassungen[sErster.sha]);
+check(sErster.message.startsWith('Umzug: Sachen aus der Liste') && sAlt.rev < sg.datei('sachen.json').rev && !sAlt.inventar.dinge['sd-kleid001'] && !sAlt.inventar.dinge['sd-guert001'], `die ältere Fassung: rev ${sAlt.rev} (jetzt ${sg.datei('sachen.json').rev}), ohne Sommerkleid und Gürtel`);
+const sAllesDa = async () => { const x = await sTeil(); return ['Sommerkleid', 'Gürtel', 'Rock', 'Größe 36', 'Mango'].every((w) => x.includes(w)) && /^3\s/.test(await st.locator('#ueberblick-dlg .ub-kachel', { hasText: 'Sachen' }).innerText()); };
+const sFertig = async () => (await st.locator('#ueberblick-dlg .ub-panel').innerText()).includes('Neu holen');
+for (const [veraltet, wie] of [[sz.fassungen[sErster.sha], 'eine ältere Fassung (kleineres rev)'], [404, 'ein 404 (direkt nach dem Schreiben)']]) {
+  sx.veraltet = veraltet;
+  const sRohV = sx.roh;
+  await st.click('#ueberblick-dlg .ub-panel [data-act="ub-neu"]');
+  check(await bis(() => sx.roh > sRohV) && await bis(sFertig), `Neu holen: GitHub liefert ${wie}`);
+  await st.waitForTimeout(300);
+  check(await sAllesDa() && !(await st.locator('#ueberblick-dlg .zugang-fehler').count()), `… nichts verschwindet: Sommerkleid, Gürtel, der Rock mit Notiz, „3 Sachen“ (${(await sTeil()).slice(0, 300)})`);
+}
+sx.veraltet = null;
+const sRoh4 = sx.roh;
+await st.click('#ueberblick-dlg .ub-panel [data-act="ub-neu"]');
+check(await bis(() => sx.roh > sRoh4) && await bis(sFertig) && await sAllesDa(), 'Und wieder richtig geholt: alles da');
+await st.click('[data-act="ub-zu"]');
+// Ohne sachen.json (noch nichts umgezogen): kein Fehler, „Noch keine Sachen.“
+const sSicher = sz.dateien['sachen.json'];
+delete sz.dateien['sachen.json'];
+const sRoh2 = sx.roh;
+await st.click('[data-act="ub-oeffnen"]');
+await st.click('#ueberblick-dlg [data-ub-reiter="amy"]');
+const sLeer = await bis(async () => { const x = await sTeil(); return x.includes('Noch keine Sachen.') ? x : null; }, 8000);
+check(sLeer && !sLeer.includes('Sommerkleid') && sx.roh === sRoh2 + 1 && !(await st.locator('#ueberblick-dlg .zugang-fehler').count()), `Ohne sachen.json: „Noch keine Sachen.“, kein Fehler (${(sLeer || await sTeil()).slice(0, 200)})`);
+sz.dateien['sachen.json'] = sSicher;
+await st.click('[data-act="ub-zu"]');
+check(sTobi.fehler.length === 0, `Sachen-App: keine Fehler bei Tobi (${sTobi.fehler.join(' | ')})`);
+await sTobi.ctx.close();
+
 // --- Wem das Dashboard etwas zeigt, erfährt es einmal: ein Gast, der das Willkommen schon kennt …
 const gastAlt = await handy(browser, { attrappe: beide, hinweise: true });
 const ga = gastAlt.page;
@@ -490,7 +691,13 @@ await ah.waitForFunction(() => document.querySelectorAll('#grid .box').length > 
 check(await bis(() => ah.evaluate(() => document.querySelector('#dash-hinweis-dlg')?.open), 8000), 'Amy: einmal der Hinweis aufs Dashboard');
 const ahText = (await ah.locator('#dash-hinweis-dlg').innerText()).replace(/\s+/g, ' ');
 check(ahText.includes('Sachen, Notizen, Rezepte, Vorschläge') && ahText.includes('Das sieht er in der App ohnehin') && ahText.includes('Einstellungen → Gäste & Überblick → Dashboard') && await ah.evaluate(() => document.querySelector('#dash-hinweis-dlg').classList.contains('amy-thema')), 'Hinweis für Amy, in Rosa');
+check(!(await ah.evaluate(() => document.querySelector('#sachen-hinweis-dlg')?.open)), 'Der Hinweis auf die Sachen-App wartet, solange der aufs Dashboard offen ist');
 await ah.click('#dash-hinweis-dlg [data-act="dash-hinweis-zu"]');
+// Ein paar Sekunden danach der zweite: Sachen ist jetzt eine eigene App (ansicht-sachen-app.js) – nie zwei Fenster zugleich
+check(await bis(() => ah.evaluate(() => document.querySelector('#sachen-hinweis-dlg')?.open), 8000) && !(await ah.evaluate(() => document.querySelector('#dash-hinweis-dlg').open)), 'Amy: danach der Hinweis auf die Sachen-App');
+check((await ah.locator('#sachen-hinweis-dlg').innerText()).includes('Sachen ist jetzt eine eigene App') && await ah.locator('#sachen-hinweis-dlg [data-act="sachen-app"]').count() === 1, 'Sachen-Hinweis: „Sachen ist jetzt eine eigene App“, mit „Sachen öffnen“');
+await ah.click('#sachen-hinweis-dlg .btn-quiet');
+check(!(await ah.evaluate(() => document.querySelector('#sachen-hinweis-dlg').open)) && await ah.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.sachen.hinweis.v1')) === true), '„Später“ schließt ihn, gemerkt');
 await ah.click('.tabbar .tab[data-tab="einstellungen"]');
 await ah.click('[data-act="ub-oeffnen"]');
 check(await bis(() => ah.evaluate(() => document.querySelector('#ueberblick-dlg')?.open)) && !(await ah.locator('#ueberblick-dlg [data-ub-reiter]').count()) && (await ah.locator('#ueberblick-dlg').innerText()).includes('Wer wann was gemacht hat'), 'Amys Dashboard: die Aktivität – kein Reiter für sie selbst');
@@ -502,8 +709,10 @@ await th.evaluate((k) => { localStorage.setItem('boxenstopp.zugang.v1', JSON.str
 await th.reload();
 await th.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
 await bis(async () => (await th.locator('#sync-text').innerText()) === 'Geteilt');
-await th.waitForTimeout(1500);
+// Die Hinweise kämen 2,5 s nach dem Abgleich und dann nach __hinweis (300 ms) – so lange warten
+await th.waitForTimeout(3500);
 check(!(await th.evaluate(() => document.querySelector('#dash-hinweis-dlg').open || localStorage.getItem('boxenstopp.dashboard.hinweis.v1'))), 'Tobi bekommt keinen Hinweis – es ist sein Dashboard');
+check(!(await th.evaluate(() => document.querySelector('#sachen-hinweis-dlg').open || localStorage.getItem('boxenstopp.sachen.hinweis.v1'))), 'Tobi bekommt auch den Hinweis auf die Sachen-App nicht – es sind Amys Sachen');
 await tobiH.ctx.close();
 
 await browser.close();

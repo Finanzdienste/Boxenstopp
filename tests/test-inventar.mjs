@@ -6,7 +6,8 @@
  * Marke, Notiz und Tags, ein Foto ins Repo, den Strichcode lesen (das Handy
  * selbst und ohne Leser die KI), sortieren, suchen, „Hab ich das schon?“,
  * ihr zweites Gerät, Löschen mit Rückgängig (das Foto kommt danach weg),
- * eine ältere App-Fassung – und die Sachen in Amys Bereich. Dazu das
+ * eine ältere App-Fassung – und dass Amys Bereich der gemeinsamen Liste
+ * keine Sachen mehr hat (seit v83 eine eigene App, test-sachen.mjs). Dazu das
  * Nachschlagen (js/inventar-netz.js): Open Beauty Facts & Co. und Claudes
  * Suche gegen ein nachgebautes Netz, im Browser „Scannen“ in einer Liste
  * (gleich angelegt, mit dem Bild als Foto), „Hab ich das schon?“ mit Namen,
@@ -642,12 +643,18 @@ await m3h.ctx.close();
 await m4h.ctx.close();
 await m5h.ctx.close();
 
-// Amy will es auch: in Amys Bereich, in der gemeinsamen Liste
+// Amy hat ihre Sachen seit v83 in einer eigenen App (sachen/, tests/test-sachen.mjs): in Amys Bereich (gemeinsame
+// Liste, auch noch ohne Verbindung) kein Teil „Sachen“ mehr, nur der Knopf dorthin. Hatte das Gerät sich den Teil
+// „Sachen“ gemerkt (vor v83 dort stehen geblieben), öffnet der Bereich mit den Rezepten
 const tobi = await handy(browser);
 const t = tobi.page;
+await t.evaluate(() => localStorage.setItem('boxenstopp.amy.ansicht.v1', JSON.stringify({ art: 'liste', id: null, teil: 'sachen' })));
+await t.reload();
+await t.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
 await t.click('.tab[data-tab="amy"]');
-await t.click('[data-amy-teil="sachen"]');
-check(await bis(() => t.locator('#inv .inv-leer').isVisible()) && (await t.locator('#amy-titel').innerText()) === 'Amys Bereich' && (await t.locator('.inv-fein').innerText()).includes('Tobi sieht sie auch'), 'Amys Bereich hat die Sachen auch – mit dem Hinweis, dass Tobi sie sieht');
+check(await bis(async () => (await t.locator('#amy-titel').innerText().catch(() => '')) === 'Amys Bereich') && !(await t.locator('[data-amy-teil="sachen"]').count()) && !(await t.locator('#inv').count()), 'Amys Bereich in der gemeinsamen Liste: kein Teil „Sachen“');
+check(await t.locator('[data-amy-teil="rezepte"]').getAttribute('aria-selected') === 'true', 'Gemerkt war „Sachen“: jetzt die Rezepte');
+check(await t.locator('.amy-kopf [data-act="sachen-app"]').isVisible() && (await t.locator('.amy-kopf [data-act="sachen-app"]').innerText()).includes('Sachen ist jetzt eine eigene App'), 'Stattdessen der Knopf zur Sachen-App');
 check(tobi.fehler.length === 0, `Keine Fehler bei Tobi (${tobi.fehler.join(' | ')})`);
 await tobi.ctx.close();
 

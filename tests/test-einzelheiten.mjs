@@ -3,7 +3,8 @@
  * Node. Aus zwei Ständen von liste.json – vor und nach einem Commit – kommt
  * heraus, was genau passiert ist: welche Sachen auf die Liste kamen und mit
  * welcher Menge, was abgehakt wurde, welcher Schritt beim Kochen, welche
- * Aufgabe im Putzplan, welches Ziel, welche Sachen. Gebaut wird jeder Stand mit denselben
+ * Aufgabe im Putzplan, welches Ziel, welche Sachen – auch aus Amys sachen.json
+ * (seit v83 eine eigene Datei, js/sachen.js). Gebaut wird jeder Stand mit denselben
  * Änderungen, die die App macht (liste.js), und dann bereinigt – so, wie der
  * Überblick ihn aus GitHub holt.
  */
@@ -13,7 +14,8 @@ import {
   opAmy, opAmyWeg, opAmyTags, opKochen, opPlan, opPutzHaken, opSache, opProfil, opPerson, opZusammen, opEinePerson, opAbteilung, opFehlt, opBon, opPreisalarm,
 } from '../js/liste.js';
 import { einzelheiten, zusammenlegen } from '../js/einzelheiten.js';
-import { opInvListe, opInvListeWeg, opDing, opDingWeg } from '../js/inventar.js';
+import { opInvListe, opInvListeWeg, opDing, opDingWeg, opUmgezogen, hatInventar } from '../js/inventar.js';
+import { leerSachen, sachenAnwenden, sachenBereinigen, umzugZusammen } from '../js/sachen.js';
 
 const { check, ende } = pruefer();
 const KAT = { rinderhack: { n: 'Rinderhackfleisch', c: 'fleisch' }, zwiebeln: { n: 'Zwiebeln', c: 'obst' }, reis: { n: 'Basmatireis', c: 'trocken' }, sahne: { n: 'Schlagsahne', c: 'kuehl' } };
@@ -162,6 +164,50 @@ e = einzelheiten(i4, i5, hilfe);
 check(Object.keys(i5.inventar.dinge)[0] === 'sd-mantel01' && zeile(e, 'Dazu')?.x.join() === 'Hose – Klamotten,Mango – Klamotten', `Ohne Namen heißt die Sache nach der Marke; in der Reihenfolge, in der sie dazukamen – auch wenn die Datei die neueste vorn hat (${text(e)})`);
 e = einzelheiten(i5, nach(i5, [opDing({ id: 'sd-hose0001', liste: KLEID.id, name: 'Hose', reihe: 3 }, 'Marielle', new Date(Date.now() + 2000).toISOString())]), hilfe);
 check(text(e) === 'Sachen|Reihenfolge geändert', `Nur umsortiert: „Reihenfolge geändert“ (${text(e)})`);
+
+/* --------------------------------------------- Sachen aus sachen.json */
+
+// Amys Sachen stehen seit v83 in einer eigenen Datei (sachen.json, js/sachen.js). Der Überblick holt sie zu einem
+// Commit an sachen.json wie liste.json und bereinigt sie mit bereinigen aus liste.js (ansicht-gaeste.js fassung):
+// übrig bleiben rev und inventar – version und weg fallen weg, verglichen werden nur die Sachen.
+const alsFassung = (sa) => bereinigen(JSON.parse(`${JSON.stringify(sa, null, 1)}\n`));
+const sa1 = sachenAnwenden(leerSachen(), [opInvListe(KLEID, 'Amy'), opDing(ROCK, 'Amy')]);
+sa1.rev = 1;
+const sa2 = sachenAnwenden(sa1, [opDing({ id: 'sd-kleid001', liste: KLEID.id, name: 'Sommerkleid', marke: 'Zara', tags: ['Sommer'], reihe: 2 }, 'Amy'), opDing({ ...ROCK, notiz: 'SACHEN-NOTIZ-GEHEIM', tags: ['Sommer', 'Büro'] }, 'Amy')]);
+sa2.rev = 2;
+check(alsFassung(sa2).rev === 2 && Object.keys(alsFassung(sa2).inventar.dinge).length === 2 && !('weg' in alsFassung(sa2)), 'sachen.json bereinigt wie liste.json: rev und die Sachen, kein weg');
+// Der erste Commit an sachen.json (der Umzug): davor gab es die Datei nicht – verglichen wird mit einer leeren Liste
+e = einzelheiten(leer(), alsFassung(sa1), hilfe);
+check(text(e) === 'Sachen|Liste angelegt: Kleidung\nSachen|Dazu: Rock (Zara) – Kleidung', `sachen.json, erster Commit: nur Sachen-Zeilen (${text(e)})`);
+// Ein Commit der Sachen-App („Amy: Sachen, 2 Änderungen“): was dazukam und was sich geändert hat
+e = einzelheiten(alsFassung(sa1), alsFassung(sa2), hilfe);
+check(e.length > 0 && e.every((x) => x.b === 'Sachen'), `sachen.json: nur Sachen-Zeilen (${text(e)})`);
+check(zeile(e, 'Dazu')?.x.join() === 'Sommerkleid (Zara) – Kleidung' && zeile(e, 'Geändert')?.x.join() === 'Rock (Zara): Notiz, Tags' && !text(e).includes('SACHEN-NOTIZ'), `sachen.json: „Dazu: Sommerkleid (Zara) – Kleidung“, „Geändert: Rock (Zara): Notiz, Tags“ – nicht, was in der Notiz steht (${text(e)})`);
+// Gelöscht: sachen.json merkt es sich unter weg – im Vergleich nur „Gelöscht“, kein Rauschen
+const sa3 = sachenAnwenden(sa2, opDingWeg('sd-kleid001'));
+sa3.rev = 3;
+e = einzelheiten(alsFassung(sa2), alsFassung(sa3), hilfe);
+check(Object.keys(sa3.weg).join() === 'sd-kleid001' && text(e) === 'Sachen|Gelöscht: Sommerkleid (Zara)', `sachen.json: gelöscht – nur „Gelöscht: Sommerkleid (Zara)“ (${text(e)})`);
+// Von Hand kaputt oder ohne inventar: bereinigt eine leere Liste, kein Fehler
+check(einzelheiten(alsFassung(sa3), bereinigen({ rev: 4, weg: 'kaputt' }), hilfe).every((x) => x.b === 'Sachen') && JSON.stringify(sachenBereinigen({ rev: 4, weg: 'kaputt' }).weg) === '{}', 'sachen.json ohne inventar: nur Sachen-Zeilen, kein Fehler');
+
+/* ------------------------------------- Umzug: ein Commit für sich */
+
+// Nach dem Umzug nimmt Boxenstopp Amys Sachen aus liste.json (inventar.js opUmgezogen) – verglichen sähe das aus wie lauter
+// gelöschte Sachen. Darum geht der Umzug immer als eigener Commit (speicher.js senden), den das Dashboard übergeht
+// („Umzug der Sachen nach sachen.json“, ohne „Name:“ – tests/test-umzug.mjs); der Commit mit der eigenen Änderung im
+// selben Augenblick zeigt nur, was die Person getan hat.
+const u0 = nach(s0, [opInvListe(KLEID, 'Amy'), opDing(ROCK, 'Amy'), opEigener('c-bananen', 'Bananen', 'obst')]);
+const u1 = nach(u0, [opEigener('c-tomaten', 'Tomaten', 'obst')]);
+const umzugOp = opUmgezogen(umzugZusammen(leerSachen(), u1.inventar).umgezogen);
+const u2 = nach(u1, [umzugOp]);
+e = einzelheiten(u0, u1, hilfe);
+check(text(e) === 'Einkauf|Auf die Liste: Tomaten', `der eigene Commit (vor dem Umzug): nur „Auf die Liste: Tomaten“, keine Sachen (${text(e)})`);
+e = einzelheiten(u1, u2, hilfe);
+check(!hatInventar(u2.inventar) && JSON.stringify(u2.items) === JSON.stringify(u1.items) && e.length > 0 && e.every((x) => x.b === 'Sachen'), `der Umzug für sich: nur Sachen-Zeilen, die Einkaufsliste bleibt (${text(e)})`);
+check(/Gelöscht|Liste gelöscht/.test(text(e)), `… und die sähen aus wie gelöschte Sachen – darum ein eigener Commit, den das Dashboard übergeht (${text(e)})`);
+// Ein Umzug, bei dem nichts mehr in liste.json stand (schon umgezogen): keine Einzelheiten
+check(einzelheiten(u2, nach(u2, [umzugOp]), hilfe).length === 0, 'der Umzug noch einmal: nichts');
 
 // Nichts geändert (nur rev): nichts
 check(einzelheiten(s5, nach(s5, []), hilfe).length === 0, 'Nur neu geschrieben: keine Einzelheiten');
