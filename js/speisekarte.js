@@ -143,6 +143,8 @@ export function rumpfKarte(e) {
 
 const txt = (v, n) => (typeof v === 'string' ? v.replace(/[\p{Cc}<>]/gu, ' ').replace(/\s+/g, ' ').trim().slice(0, n) : '');
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+/** Ein Preis ohne Währung („10“, „3.5“) bekommt Euro: „10 €“, „3,5 €“. */
+const preisText = (v) => { const t = txt(v, 20); return /^\d{1,4}(?:[.,]\d{1,2})?$/.test(t) ? `${t.replace('.', ',')} €` : t; };
 /** Nur http(s), ohne Zugangsdaten in der Adresse. */
 export function sichereUrl(u) {
   try {
@@ -196,7 +198,7 @@ export function karteBereinigen(roh) {
       id: `g${gerichte.length + 1}`,
       name,
       art: ARTEN.includes(g.art) ? g.art : 'hauptgang',
-      preis: txt(g.preis, 20),
+      preis: preisText(g.preis),
       was: txt(g.was, 140),
       portion: txt(g.portion, 40),
       sicher: SICHER.includes(g.sicher) ? g.sicher : 'mittel',

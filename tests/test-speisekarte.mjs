@@ -49,7 +49,7 @@ const VA = {
   ],
   gerichte: [
     { name: 'Waffel mit Marmelade und Sahne', stand: 'Waffelstand', art: 'dessert', preis: '3,50 €', was: 'Herzwaffel', kcal: 420, p: 7, kh: 50, f: 21, sicher: 'mittel', enthaelt: [], quelle: 'seite', url: SEITE, wiki: 'Waffel' },
-    { name: 'Köttbullar mit Kartoffelpüree', stand: 'Kirchenküche', art: 'hauptgang', was: 'Preiselbeeren, Rahmsauce', kcal: 650, p: 30, kh: 50, f: 36, sicher: 'mittel', enthaelt: ['schwein'], quelle: 'typisch', wiki: 'Köttbullar' },
+    { name: 'Köttbullar-Weihnachtsteller: Weihnachtsschinkenplattenauswahl mit Kartoffelpüree (Porkkanalaatikko)', stand: 'Finnische Seemannskirche – Weihnachtsbasar', art: 'hauptgang', preis: '10', was: 'Preiselbeeren, Rahmsauce, Steckrübenauflauf (Lanttulaatikko)', kcal: 650, p: 30, kh: 50, f: 36, sicher: 'mittel', enthaelt: ['schwein'], quelle: 'typisch', wiki: 'Köttbullar' },
     { name: 'Hähnchen-Wrap mit Krautsalat', stand: 'Kirchenküche', art: 'hauptgang', was: 'Joghurtsauce', kcal: 480, p: 34, kh: 42, f: 17, sicher: 'mittel', enthaelt: [], quelle: 'seite', url: 'https://ausgedacht.example/wrap', wiki: 'Wrap (Speise)' },
     { name: 'Smørrebrød mit Krabben', stand: 'Smørrebrød', art: 'snack', kcal: 350, p: 16, kh: 28, f: 19, sicher: 'mittel', enthaelt: ['fisch'], quelle: 'typisch', wiki: 'Smørrebrød' },
     { name: 'Waffel mit Marmelade und Sahne', stand: 'Kirchencafé', art: 'dessert', kcal: 420, p: 7, kh: 50, f: 21, sicher: 'mittel', enthaelt: [], quelle: 'typisch', wiki: 'Waffel' },
@@ -146,6 +146,8 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
 
 /* ------------------------------------------------------ Veranstaltung */
 
+const PREISE = karteBereinigen({ gerichte: ['10', '3.5', '17,00 €', 'ab 8 €'].map((preis, i) => ({ name: `Gericht ${i}`, art: 'hauptgang', preis, was: '', kcal: 400, p: 30, kh: 40, f: 10, sicher: 'mittel', enthaelt: [] })) }).gerichte.map((g) => g.preis);
+check(PREISE.join('|') === '10 €|3,5 €|17,00 €|ab 8 €', `Ein Preis ohne Währung bekommt Euro (${PREISE.join('|')})`);
 const TAG = tagText('2026-11-15');
 check(TAG === 'Sonntag, 15. November 2026' && tagText('kaputt') === '', 'Der Tag für die KI: „Sonntag, 15. November 2026“');
 const vsys = veranstaltungSystem({ ziel: ZIEL, wer: 'Tobi', tag: TAG });
@@ -159,7 +161,7 @@ const vb = veranstaltungBereinigen(JSON.parse(JSON.stringify(VA)), { quellen: QU
 const st = Object.fromEntries(vb.staende.map((x) => [x.name, x]));
 check(vb.art === 'veranstaltung' && vb.gefunden && vb.veranstaltung.url === SEITE && vb.veranstaltung.seite === 'seemannskirche.example', 'Bereinigt: die Seite der Veranstaltung kam in der Suche vor – gefunden');
 check(st.Waffelstand?.quelle === 'seite' && st['Hotdog-Stand']?.quelle === 'typisch' && !st['Hotdog-Stand'].url && st.Glögg?.quelle === 'typisch', 'Ein Stand mit ausgedachter Adresse zählt nicht als „laut Seite“');
-check(vb.staende.map((x) => x.name).join() === 'Waffelstand,Hotdog-Stand,Glögg,Kirchenküche,Smørrebrød,Kirchencafé', `Stände, die nur an Gerichten stehen, kommen dazu (${vb.staende.map((x) => x.name).join()})`);
+check(vb.staende.map((x) => x.name).join() === 'Waffelstand,Hotdog-Stand,Glögg,Finnische Seemannskirche – Weihnachtsbasar,Kirchenküche,Smørrebrød,Kirchencafé', `Stände, die nur an Gerichten stehen, kommen dazu (${vb.staende.map((x) => x.name).join()})`);
 const wrap = vb.gerichte.find((g) => g.name.startsWith('Hähnchen'));
 check(wrap.quelle === 'typisch' && !wrap.url && vb.gerichte[0].quelle === 'seite' && vb.gerichte[0].url === SEITE && vb.gerichte[0].wiki === 'Waffel' && vb.gerichte[0].stand === 'Waffelstand', 'Gerichte: Adresse aus der Suche „laut Seite“, ausgedacht „vermutlich“; Stand und Wikipedia-Titel bleiben');
 check(vb.gerichte.filter((g) => g.name === 'Waffel mit Marmelade und Sahne').length === 2, 'Dasselbe Gericht an zwei Ständen bleibt zweimal');
@@ -270,6 +272,12 @@ const vorn = sortieren(veranstaltungBereinigen(JSON.parse(JSON.stringify(VA)), {
 check(ersteVa.includes(vorn.name) && ersteVa.includes(`Stand: ${vorn.stand}`) && ersteVa.includes(vorn.quelle === 'seite' ? 'laut Seite' : 'vermutlich'), `Am nächsten am Ziel: ${vorn.name}, mit Stand und woher (${ersteVa.slice(0, 120)})`);
 const wrapText = (await vp.locator('.sk-gericht, .sk-zeile', { hasText: 'Hähnchen-Wrap' }).first().innerText()).replace(/\s+/g, ' ');
 check(wrapText.includes('vermutlich') && !wrapText.includes('laut Seite'), `Der Wrap: „vermutlich“ – seine Adresse war ausgedacht (${wrapText.slice(0, 100)})`);
+// Nichts ragt aus den Karten heraus – auch nicht der lange Name (Handybreite)
+const raus = await vp.evaluate(() => [...document.querySelectorAll('.sk-ergebnis .sk-gericht, .sk-ergebnis .sk-va')].flatMap((k) => {
+  const r = k.getBoundingClientRect();
+  return [...k.querySelectorAll('*')].filter((e) => e.getBoundingClientRect().right > r.right + 1).map((e) => `${e.className || e.tagName}: ${(e.textContent || '').slice(0, 30)}`);
+}));
+check(!raus.length && await vp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `Lange Namen brechen um, nichts ragt aus den Karten (${raus.slice(0, 3).join(' | ')})`);
 const staendeText = (await vp.locator('.sk-staende').innerText()).replace(/\s+/g, ' ');
 check(/Waffelstand laut Seite/.test(staendeText) && /Hotdog-Stand vermutlich/.test(staendeText) && staendeText.includes('Kirchenküche') && (await vp.locator('.sk-ohne').textContent()).includes('Smørrebrød') && !(await vp.locator('.sk-ohne').textContent()).includes('Köttbullar'), 'Die Stände: „laut Seite“ und „vermutlich“; Smørrebrød unter „Esst ihr nicht“, Köttbullar nicht');
 check(await bis(() => vp.evaluate(() => [...document.querySelectorAll('.sk-ergebnis .sk-bild img')].some((i) => i.src === 'https://upload.wikimedia.org/test/waffel.jpg'))) && wiki.anfragen.length === 1 && wiki.anfragen[0].kopf['api-user-agent'] === KENNUNG, 'Bilder aus Wikipedia – eine Anfrage, mit der Kennung der App');

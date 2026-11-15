@@ -115,8 +115,8 @@ function gerichtKarte({ g, b }, gross = false) {
   const va = istVa();
   const stand = va ? `<p class="sk-stand">${g.stand ? `Stand: <b>${esc(g.stand)}</b> · ` : ''}${quelleHTML(g.quelle)}</p>` : '';
   return `<article class="sk-gericht${gross ? ' sk-erste' : ''}${va ? ' mit-bild' : ''}">
-${va ? bildHTML(g, gross ? 'gross' : '') : ''}<div class="sk-gericht-t">
 ${gross ? `<span class="sk-eyebrow">Am nächsten an ${wessenZiel()} Ziel</span>` : ''}
+${va ? bildHTML(g, gross ? 'gross' : '') : ''}<div class="sk-gericht-t">
 <h${gross ? 2 : 3} class="sk-name">${esc(g.name)}</h${gross ? 2 : 3}>
 ${stand}
 ${g.was ? `<p class="sk-was">${esc(g.was)}</p>` : ''}
