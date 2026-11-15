@@ -81,7 +81,10 @@ check(beschreibung(leer(), s).includes('Essensplan'), `Commit: „Essensplan“ 
 // --- Im Browser
 const browser = await starteBrowser();
 const gh = githubAttrappe();
-const heute = heuteTag();
+// Sonntags läge „morgen“ (Montag) schon in der nächsten Woche, außerhalb der
+// Ansicht, und der Test fände die Box nicht. Dann spielt der Browser Samstag.
+const UHR = new Date().getDay() === 0 ? new Date(Date.now() - 86400000) : null;
+const heute = heuteTag(UHR || new Date());
 const montag = montagVon(heute);
 // Ein Plan, den Amy und Tobi teilen; Amy verträgt keine Zwiebeln; in ihren Notizen stehen Ideen
 const start = [
@@ -92,6 +95,7 @@ gh.zustand.datei = JSON.stringify({ ...anwenden(leer(), start), rev: 1, leute: {
 gh.zustand.sha = 'sha0';
 const verbunden = async (wer) => {
   const h = await handy(browser, { attrappe: gh });
+  if (UHR) await h.page.clock.install({ time: UHR });
   await h.page.evaluate(([k, n]) => localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: k, name: n })), [SCHLUESSEL, wer]);
   await h.page.reload({ waitUntil: 'load' });
   await h.page.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);

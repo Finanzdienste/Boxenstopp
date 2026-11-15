@@ -17,6 +17,10 @@ Bei normalen Aufgaben erwähnst du Ultracode nicht.
   (`liste.json`), der Katalog (`katalog.json`) und was die Actions schreiben.
 - **Finanzdienste/Boxenstopp-Marielle**: Marielles Liste – nie hineinschreiben.
   Den Katalog gleicht die App selbst ab (Tobis Handy, alle 5 Minuten).
+- **Finanzdienste/Bildschirmzeit** (öffentlich): Tobis Widget-App (Android)
+  und die Quelle von `js/bildschirmzeit.js` (`web/bildschirmzeit.js`) – nur
+  dort ändern, dann byte-gleich hierher, nach Freizeit und Workout kopieren.
+  Ohne Verbinden-Link (`#bildschirmzeit=…`) tut das Modul nichts.
 - **Finanzdienste/Amy**: Amys App „Frag mal“ und die Supabase-Funktionen, die
   Boxenstopp nutzt (`api-kosten`, `produkt-bild`). Änderungen über einen PR;
   ist die Prüfung grün und gibt es keine Konflikte, merged Claude ihn selbst.
