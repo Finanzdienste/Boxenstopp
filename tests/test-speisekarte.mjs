@@ -265,7 +265,11 @@ check(vr && vr.tools?.some((t) => t.type === 'web_search_20250305') && vr.tools?
 const kopfText = (await vp.locator('.sk-va').innerText()).replace(/\s+/g, ' ');
 check(kopfText.includes('God Jul – Weihnachtsbasar der Seemannskirche') && kopfText.includes('Hamburg') && kopfText.includes('11–17 Uhr') && kopfText.includes('Im Netz gefunden') && await vp.locator('.sk-va-link').getAttribute('href') === SEITE, 'Oben: Name, Ort, wann, „Im Netz gefunden“, die Seite');
 const ersteVa = (await vp.locator('.sk-erste').innerText()).replace(/\s+/g, ' ');
-check(ersteVa.includes('Hähnchen-Wrap') && ersteVa.includes('Stand: Kirchenküche') && ersteVa.includes('vermutlich'), `Am nächsten am Ziel: der Wrap, mit Stand – „vermutlich“ (die Adresse war ausgedacht) (${ersteVa.slice(0, 120)})`);
+// Welches vorn steht, hängt am Ziel der Liste (weiter oben auf 1100 kcal gesetzt) – die App rechnet es so wie sortieren
+const vorn = sortieren(veranstaltungBereinigen(JSON.parse(JSON.stringify(VA)), { quellen: QUELLEN }).gerichte, gh.liste()?.profil?.ziel || ZIEL).oben[0].g;
+check(ersteVa.includes(vorn.name) && ersteVa.includes(`Stand: ${vorn.stand}`) && ersteVa.includes(vorn.quelle === 'seite' ? 'laut Seite' : 'vermutlich'), `Am nächsten am Ziel: ${vorn.name}, mit Stand und woher (${ersteVa.slice(0, 120)})`);
+const wrapText = (await vp.locator('.sk-gericht, .sk-zeile', { hasText: 'Hähnchen-Wrap' }).first().innerText()).replace(/\s+/g, ' ');
+check(wrapText.includes('vermutlich') && !wrapText.includes('laut Seite'), `Der Wrap: „vermutlich“ – seine Adresse war ausgedacht (${wrapText.slice(0, 100)})`);
 const staendeText = (await vp.locator('.sk-staende').innerText()).replace(/\s+/g, ' ');
 check(/Waffelstand laut Seite/.test(staendeText) && /Hotdog-Stand vermutlich/.test(staendeText) && staendeText.includes('Kirchenküche') && (await vp.locator('.sk-ohne').textContent()).includes('Smørrebrød') && !(await vp.locator('.sk-ohne').textContent()).includes('Köttbullar'), 'Die Stände: „laut Seite“ und „vermutlich“; Smørrebrød unter „Esst ihr nicht“, Köttbullar nicht');
 check(await bis(() => vp.evaluate(() => [...document.querySelectorAll('.sk-ergebnis .sk-bild img')].some((i) => i.src === 'https://upload.wikimedia.org/test/waffel.jpg'))) && wiki.anfragen.length === 1 && wiki.anfragen[0].kopf['api-user-agent'] === KENNUNG, 'Bilder aus Wikipedia – eine Anfrage, mit der Kennung der App');
