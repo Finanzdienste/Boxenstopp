@@ -199,9 +199,9 @@ check(Object.keys(nw).every((k) => katalog[k] && !['gewuerz', 'haushalt'].includ
 const ohneTabelle = Object.entries(katalog).filter(([k, v]) => !['gewuerz', 'haushalt'].includes(v.c) && !nw[k] && !/koriander|basilikum|petersilie|dill|tk-kraeuter/.test(k)).map(([k]) => k);
 check(!ohneTabelle.length, `jede Zutat im Katalog hat Werte${ohneTabelle.length ? ` – nicht: ${ohneTabelle.join(', ')}` : ''}`);
 
-// Kein Fisch, kein Putenhack – und kein körniger Hüttenkäse mehr (Schwein geht).
+// Kein Fisch, kein Putenhack (Schwein und Hüttenkäse gehen).
 const alles = JSON.stringify(daten);
-check(!/putenhack|huettenkaese|hüttenkäse/i.test(alles), 'kein Putenhack und kein Hüttenkäse, weder in Rezepten noch im Katalog');
+check(!/putenhack/i.test(alles), 'kein Putenhack, weder in Rezepten noch im Katalog');
 const verboten = /fisch|lachs|thunfisch|garnele|shrimp|sardelle|anchovi/i;
 const tabu = rezepte.flatMap((r) => [...r.items.map((it) => it.n), ...r.spices.map((x) => x.n), r.name, r.desc].filter((t) => verboten.test(t)).map((t) => `${r.id}: ${t}`));
 check(!tabu.length, `kein Fisch${tabu.length ? `: ${tabu.join('; ')}` : ''}`);

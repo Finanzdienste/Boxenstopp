@@ -83,4 +83,5 @@ Bei normalen Aufgaben erwähnst du Ultracode nicht.
 - 8 Boxen, ordentlich gewürzt, Mengen in handelsüblichen Packungsgrößen.
 - Ziel pro Box (Standard): 443 kcal, 33 g Eiweiß, 39 g KH, 15,4 g Fett –
   eine Liste kann ein eigenes Ziel haben (`profil.ziel`).
-- Kein Fisch, kein Putenhack, kein Hüttenkäse. Schwein geht.
+- Kein Fisch, kein Putenhack. Schwein und Hüttenkäse gehen – Hüttenkäse in
+  warmen Saucen nur glatt püriert (sonst wird er körnig).

@@ -9,7 +9,7 @@
  * kcal durch 8). So kommt bei derselben Antwort immer dieselbe Reihenfolge
  * heraus, und ändert man sein Ziel, sortiert die App neu, ohne die KI.
  *
- * Fisch, Putenhack und Hüttenkäse markiert die KI (enthaelt); diese
+ * Fisch und Putenhack markiert die KI (enthaelt); diese
  * Gerichte stehen nicht oben, sondern für sich (wie alle Rezepte der App
  * ohne sie).
  *
@@ -32,8 +32,8 @@ import { linkAus, WEBSUCHE, SEITE_LESEN } from './amy-import.js';
 export const ARTEN = ['hauptgang', 'salat', 'suppe', 'vorspeise', 'snack', 'beilage', 'dessert'];
 export const ART_NAME = { hauptgang: 'Hauptgang', salat: 'Salat', suppe: 'Suppe', vorspeise: 'Vorspeise', snack: 'Snack', beilage: 'Beilage', dessert: 'Dessert' };
 export const SICHER = ['grob', 'mittel', 'gut'];
-export const ENTHAELT = ['fisch', 'putenhack', 'huettenkaese'];
-export const ENTHAELT_NAME = { fisch: 'Fisch', putenhack: 'Putenhack', huettenkaese: 'Hüttenkäse' };
+export const ENTHAELT = ['fisch', 'putenhack'];
+export const ENTHAELT_NAME = { fisch: 'Fisch', putenhack: 'Putenhack' };
 /** Was als Mahlzeit oben stehen kann – Desserts und Beilagen nicht. */
 const MAHLZEIT = new Set(['hauptgang', 'salat', 'suppe', 'vorspeise', 'snack']);
 const MAX_GERICHTE = 80;
@@ -77,7 +77,7 @@ export const KARTE_SCHEMA = {
 };
 
 const zahl1 = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
-const REGEL_ENTHAELT = '- enthaelt: fisch (auch Meeresfrüchte, Hering, Sardellen, Fischsauce), putenhack, huettenkaese – wenn es drin ist oder sehr wahrscheinlich drin ist. Schwein ist kein Problem. Das Gericht bleibt trotzdem in der Liste.';
+const REGEL_ENTHAELT = '- enthaelt: fisch (auch Meeresfrüchte, Hering, Sardellen, Fischsauce), putenhack – wenn es drin ist oder sehr wahrscheinlich drin ist. Schwein und Hüttenkäse sind kein Problem. Das Gericht bleibt trotzdem in der Liste.';
 const REGEL_TIPP = '- tipp: eine konkrete Bestellung, die es näher ans Ziel bringt (Sauce extra, halbe Portion Beilage, Salat statt Pommes, Dressing weglassen) – und mit_tipp die Werte dann. Kein Tipp, wenn es schon gut passt.';
 const zielSatz = (ziel) => `${Math.round(ziel.kcal)} kcal, ${zahl1(ziel.p)} g Protein, ${zahl1(ziel.kh)} g Kohlenhydrate, ${zahl1(ziel.f)} g Fett`;
 

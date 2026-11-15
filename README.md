@@ -1216,7 +1216,8 @@ und im Vorrat liegt (bis zu 4 Fotos), Portionen wählen (2, 4, 6 oder 8),
 sagen, ob dazugekauft werden darf, und Wünsche. Die KI macht daraus **ein**
 Rezept im selben Format wie alle anderen – Mise en place mit Schalen, ein
 Schritt pro Zeile, Minuten – und mit denselben Regeln: kein Fisch, kein
-Putenhack, kein Hüttenkäse in warmen Saucen (Schwein geht), ordentlich
+Putenhack (Schwein und Hüttenkäse gehen – Hüttenkäse, Quark und Skyr in
+warmen Saucen nur glatt püriert, sonst werden sie körnig), ordentlich
 gewürzt. Was ihr mit Daumen hoch oder runter bewertet habt, geht als
 Geschmackshinweis mit.
 
@@ -1300,8 +1301,8 @@ schätzt je Portion kcal, Protein, KH und Fett, so wie sie im Restaurant kommt
 Tipp zum Bestellen („Remoulade weglassen“) mit den Werten dann. Was am nächsten
 am Ziel pro Box liegt, rechnet die App (`js/speisekarte.js`, dieselbe
 Abweichung wie beim Anpassen) – oben das Gericht, darunter die nächsten zwei,
-dann alle; Desserts und Beilagen nie oben, Fisch, Putenhack und Hüttenkäse
-für sich („Esst ihr nicht“; Schwein ist ganz normal). Das Ergebnis merkt sich das Gerät (`boxenstopp.speisekarte.v1`,
+dann alle; Desserts und Beilagen nie oben, Fisch und Putenhack für sich
+(„Esst ihr nicht“; Schwein und Hüttenkäse sind ganz normal). Das Ergebnis merkt sich das Gerät (`boxenstopp.speisekarte.v1`,
 nicht in liste.json): Im Restaurant ohne Netz ist es noch da, und mit einem
 anderen Ziel sortiert die App neu, ohne die KI. Restaurantportionen
 schwanken – die App sagt ±20 %. PDFs bis 15 MB (Gemini: `type: document`,
@@ -1366,7 +1367,7 @@ Resteverwertung) bekommt das Rezept, wie es gerade steht, im Format ihrer
 Antwort (`alsVorlage()` in `js/ki-rezept.js`; Auftrag im Modus `aendern` in
 `js/ki.js`): Sie ändert nur, was verlangt ist, und lässt alles andere mit
 denselben ids, Mengen und Schritten stehen. Die App prüft die Antwort wie jedes
-KI-Rezept (kein Fisch, kein Putenhack, kein Hüttenkäse),
+KI-Rezept (kein Fisch, kein Putenhack),
 schließt sie ans Original an (`aenderungUebernehmen()`: neue Zutaten „neu“,
 verschwundene „weggelassen“, mit „zurück“ wiederzuholen) und rechnet die
 Mengen wieder auf die Ziele – im Beispiel 441 kcal / 33,0 P / 39,2 KH /

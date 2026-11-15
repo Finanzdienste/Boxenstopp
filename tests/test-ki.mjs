@@ -124,7 +124,7 @@ const inhalt = rumpf.messages[0].content;
 check(inhalt.length === 3 && inhalt[0].type === 'image' && inhalt[0].source.media_type === 'image/jpeg' && inhalt[2].type === 'text', 'erst die Fotos, dann der Text');
 check(/Portionen: 4/.test(inhalt[2].text) && /Dazukaufen: nein/.test(inhalt[2].text) && /was Griechisches/.test(inhalt[2].text) && /Daumen hoch\): Butter Chicken/.test(inhalt[2].text) && /nicht noch einmal: Feta-Reispfanne/.test(inhalt[2].text), 'im Text: Portionen, Dazukaufen, Wünsche, was ihr mögt und was nicht');
 const sys = rumpf.system;
-check(/Kein Fisch/.test(sys) && /Kein Putenhack/.test(sys) && /Hüttenkäse/.test(sys) && /Rind, Schwein, Eier/.test(sys) && !/Kein Schweinefleisch/.test(sys), 'die Regeln gehen mit: kein Fisch, kein Putenhack, kein Hüttenkäse – Schwein ist gut');
+check(/Kein Fisch/.test(sys) && /Kein Putenhack/.test(sys) && /Hüttenkäse, Quark und Skyr werden in heißen Saucen körnig/.test(sys) && /glatt püriert/.test(sys) && !/Kein Hüttenkäse/.test(sys) && /Rind, Schwein, Eier/.test(sys) && !/Kein Schweinefleisch/.test(sys), 'die Regeln gehen mit: kein Fisch, kein Putenhack – Schwein ist gut, Hüttenkäse in warmen Saucen nur glatt püriert');
 check(sys.includes('443 kcal') && sys.includes('33 g Protein') && /Mise en place/.test(sys) && /Schale 2/.test(sys) && /\{id\}/.test(sys) && /nichts dazugekauft/.test(sys), 'Ziel, Mise en place, Schalen, Platzhalter und „nichts dazukaufen“ stehen im Auftrag');
 check(sys.includes('haehnchenbrust=Hähnchenbrustfilet') && !sys.includes('backpapier='), 'der Katalog geht mit (ohne Haushalt)');
 

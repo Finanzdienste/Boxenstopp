@@ -218,7 +218,7 @@ Ziel pro Box: ${ziel.kcal} kcal, ${ziel.p} g Protein, ${ziel.kh} g Kohlenhydrate
 Feste Regeln:
 - Kein Fisch und keine Meeresfrüchte, auch nichts, was sie enthält (Fischsauce, Garnelenpaste, Sardellen, Worcestersauce). Bei Currypaste „vegan“ dazuschreiben.
 - Kein Putenhack. Hähnchen, Putenbrust, Rind, Schwein, Eier, Hülsenfrüchte und Milchprodukte sind gut.
-- Kein Hüttenkäse und kein Quark oder Skyr in warmen Saucen – die werden körnig. Quark und Skyr nur kalt (Dip, Marinade).
+- Hüttenkäse, Quark und Skyr werden in heißen Saucen körnig: In eine warme Sauce kommen sie nur glatt püriert und zum Schluss, nicht mehr kochen lassen – sonst kalt (Dip, Topping, Marinade).
 - Richtig lecker und ordentlich gewürzt, so dass man es gern vier Tage hintereinander isst. Lieber ein bewährtes Gericht gut gemacht als ein wildes Experiment.
 - ${wunsch
     ? 'Alles wird eingekauft (quelle: kaufen, Packungsgröße in packung), nichts ist schon da; Öl, Mehl, Brühe, Zucker, Senf und Sojasauce sind vorrat. Möglichst ganze Supermarkt-Packungen (500 g Hackfleisch, 1 Dose Kokosmilch, 1 Hokkaido-Kürbis), damit nichts übrig bleibt. Bei anpassbar min und max großzügig (etwa halb bis doppelt so viel), damit die App das Rezept auch auf andere Ziele rechnen kann. Hast du dem Gericht etwas fürs Ziel dazugegeben, sagst du es in hinweis in einem Satz.'

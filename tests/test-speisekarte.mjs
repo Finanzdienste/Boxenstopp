@@ -61,7 +61,7 @@ const QUELLEN = [{ url: 'https://seemannskirche.example/basar-2026', titel: 'Bas
 /* ----------------------------------------------------------- Anfrage */
 
 const sys = karteSystem({ ziel: ZIEL, wer: 'Tobi' });
-check(sys.includes('443 kcal, 33 g Protein, 39 g Kohlenhydrate, 15,4 g Fett') && /mehr Fett als zu Hause/.test(sys) && /fisch/.test(sys) && /Schwein ist kein Problem/.test(sys), 'System: Ziel, ehrliche Restaurant-Portionen, Fisch markieren – Schwein nicht');
+check(sys.includes('443 kcal, 33 g Protein, 39 g Kohlenhydrate, 15,4 g Fett') && /mehr Fett als zu Hause/.test(sys) && /fisch/.test(sys) && /Schwein und Hüttenkäse sind kein Problem/.test(sys), 'System: Ziel, ehrliche Restaurant-Portionen, Fisch markieren – Schwein nicht');
 const g1 = rumpfKarte({ anbieter: 'gemini', ziel: ZIEL, wer: 'Tobi', pdf: 'UERG', fotos: [] });
 check(g1.input[0].type === 'document' && g1.input[0].mime_type === 'application/pdf' && g1.input[0].data === 'UERG' && g1.response_format?.schema === KARTE_SCHEMA && g1.store === false && g1.stream === true, 'Gemini mit PDF: document mit application/pdf, Schema, nicht gespeichert, gestreamt');
 const g2 = rumpfKarte({ anbieter: 'gemini', ziel: ZIEL, fotos: ['AAA', 'BBB'] });
@@ -149,7 +149,7 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
 const TAG = tagText('2026-11-15');
 check(TAG === 'Sonntag, 15. November 2026' && tagText('kaputt') === '', 'Der Tag für die KI: „Sonntag, 15. November 2026“');
 const vsys = veranstaltungSystem({ ziel: ZIEL, wer: 'Tobi', tag: TAG });
-check(vsys.includes('am Sonntag, 15. November 2026') && vsys.includes('443 kcal, 33 g Protein') && /Websuche/.test(vsys) && /„typisch“/.test(vsys) && /Wikipedia/.test(vsys) && /Schwein ist kein Problem/.test(vsys) && /Nichts als „seite“ ausgeben, was nicht auf einer Seite stand/.test(vsys), 'System Veranstaltung: Tag, Ziel, suchen, sonst „typisch“, Wikipedia-Titel, Schwein markieren, nichts erfinden');
+check(vsys.includes('am Sonntag, 15. November 2026') && vsys.includes('443 kcal, 33 g Protein') && /Websuche/.test(vsys) && /„typisch“/.test(vsys) && /Wikipedia/.test(vsys) && /Schwein und Hüttenkäse sind kein Problem/.test(vsys) && /Nichts als „seite“ ausgeben, was nicht auf einer Seite stand/.test(vsys), 'System Veranstaltung: Tag, Ziel, suchen, sonst „typisch“, Wikipedia-Titel, Schwein markieren, nichts erfinden');
 check(/nicht im Netz nachsehen/.test(veranstaltungSystem({ ziel: ZIEL, suchen: false })), 'Ohne Suche (Gemini): schätzen, was es dort meistens gibt');
 const va1 = rumpfVeranstaltung({ anbieter: 'anthropic', ziel: ZIEL, wer: 'Tobi', was: '  God Jul Seemannskirche  ', tag: TAG });
 check(va1.model === ANBIETER.anthropic.modell && va1.tools.map((t) => t.type).join() === 'web_search_20250305,web_fetch_20250910' && va1.tools[0].max_uses === 6 && va1.tools[0].user_location?.country === 'DE' && va1.messages[0].content[0].text === 'Die Veranstaltung: God Jul Seemannskirche\nWann: Sonntag, 15. November 2026', 'Claude: Websuche (6) und Seiten lesen, in der Frage nur die Veranstaltung und der Tag');
