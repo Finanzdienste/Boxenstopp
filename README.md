@@ -544,6 +544,16 @@ Die Teile:
     dieselben Fotos. Ein Foto, das keine Sache mehr braucht
     (gelöscht, ersetzt), löscht die App, wenn die Zeit für „Rückgängig“ um
     ist.
+  - **Groß und zoomen** (v85, `js/bildzoom.js`) – Tobi: „Man soll auch
+    ranzoomen können.“ In der Sache war das Foto nur ein beschnittenes
+    Quadrat. Jetzt antippen (die Lupe unten rechts): Es steht ganz da, auf
+    schwarzem Grund über den ganzen Bildschirm. Zwei Finger zoomen um die
+    Stelle zwischen ihnen (bis 6-fach), ein Finger verschiebt – nie weiter,
+    als das Foto reicht –, doppelt tippen zoomt 2,5-fach an der Stelle und
+    wieder zurück; am Rechner Mausrad, + und −; × oder Esc schließt. Die
+    Seite selbst zoomt dabei nicht mit (`touch-action: none`). In der
+    Sachen-App und in einer Gästeliste gleich (`test-sachen.mjs` spielt es
+    durch, `test-inventar.mjs` kurz).
   - **Mit Foto** (in einer Liste): fotografieren – mit KI-Schlüssel füllt
     die KI gleich Name, Marke, die passende Liste, bis zu drei Tags und die
     Nummer aus, wenn ein Strichcode zu sehen ist; „Mit KI ausfüllen“ geht
@@ -2132,6 +2142,7 @@ die Action „Rezeptfotos“.
 | `js/sachen.js` | Amys Sachen in `sachen.json`: bereinigen, anwenden, Grabsteine (`weg`), Commit-Nachricht, `ART_SACHEN` für den Abgleich, der Umzug aus `liste.json` (`umzugZusammen`, `umzugInSachen`, `umzugAusListe`) und Löschungen von vorher (`wegInSachen`) – ohne DOM |
 | `js/ansicht-sachen-app.js` | In Amys Bereich (gemeinsame Liste): der Knopf zur Sachen-App mit dem Tipp zum Home-Bildschirm, der einmalige Hinweis für Amy |
 | `js/foto.js` | Fotos verkleinern, als JPEG und base64 – für die Sachen-App ohne den Rest; `js/ansicht-ki.js` gibt es weiter |
+| `js/bildzoom.js` | Ein Foto groß und zum Zoomen (zwei Finger, doppelt tippen, Mausrad, + und −) – für die Sachen, ohne DOM der App (der Dialog entsteht selbst) |
 | `sachen/` | Amys Sachen-App (siehe `sachen/README.md`): `index.html` (mit dem Skript für den ersten Besuch unter einem fremden Worker), `app.js` (Zugang, Abgleich, Umzug, Service Worker anmelden), `sw.js` (eigener Worker, Vorrat `sachen-<VERSION>`, gibt die App nur ganz aus dem Vorrat), `manifest.webmanifest` (Kennung `/Boxenstopp/sachen/`), `icon.svg` und die PNGs, `sachen.css` – den Rest lädt sie aus `js/` und `css/styles.css` |
 | `js/inventar-ki.js` | Sachen erkennen: das Foto an die KI (Name, Marke, Liste, Tags, Strichcode) – ohne DOM |
 | `js/scanner.js` | Der Scanner für Strichcodes: Kamera in der App mit Rahmen, Taschenlampe, Live-Lesen (BarcodeDetector) oder „Auslösen“, sonst die Kamera-App |

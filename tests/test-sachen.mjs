@@ -467,6 +467,72 @@ check(await bis(() => FOTO_PFAD.test(fotoPfad()) && !!gh.zustand.roh[fotoPfad()]
 check(Object.keys(sache('Blümchenbluse').foto).sort().join() === 'pfad,sha' && sache('Blümchenbluse').foto.sha === gh.zustand.shas[fotoPfad()] && !/base64|data:image/.test(gh.zustand.dateien['sachen.json']), 'in sachen.json nur pfad und sha – kein Bild darin');
 check(gh.zustand.commits.some((c) => c.pfad === fotoPfad() && c.message === 'Amy: Foto für die Sachen'), 'der Commit dazu: „Amy: Foto für die Sachen“');
 
+// Hineinzoomen (Tobi: „Man soll auch ranzoomen können“): das Foto antippen → ganz und groß; zwei Finger, doppelt tippen, Rad, −, verschieben, zu
+await amy.click('[data-act="inv-zoom"]');
+check(await bis(() => amy.evaluate(() => {
+  const b = document.querySelector('#zoom-dlg[open] .zoom-bild');
+  return !!b && /^blob:/.test(b.src) && b.complete && b.naturalWidth > 0;
+})), 'Foto antippen: groß im Zoom (#zoom-dlg, das Foto der Sache)');
+const zStufe = () => amy.evaluate(() => Number(document.querySelector('#zoom-dlg').dataset.zoom));
+const zVersatz = () => amy.evaluate(() => { const m = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(document.querySelector('#zoom-dlg .zoom-bild').style.transform); return m ? [Number(m[1]), Number(m[2])] : null; });
+const zFlaeche = () => amy.evaluate(() => { const r = document.querySelector('#zoom-dlg .zoom-flaeche').getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height }; });
+check(await zStufe() === 1 && (await amy.evaluate(() => window.getComputedStyle(document.querySelector('#zoom-dlg .zoom-bild')).objectFit)) === 'contain' && (await amy.evaluate(() => window.getComputedStyle(document.querySelector('#zoom-dlg .zoom-flaeche')).touchAction)) === 'none', 'erst ganz zu sehen (1-fach, nicht beschnitten); die Seite selbst zoomt nicht mit (touch-action: none)');
+const zf = await zFlaeche();
+// Zwei Finger auseinander, um die Mitte: von 80 auf 240 px Abstand
+await amy.evaluate(() => {
+  const f = document.querySelector('#zoom-dlg .zoom-flaeche');
+  const r = f.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  const ev = (typ, id, x) => f.dispatchEvent(new window.PointerEvent(typ, { pointerId: id, clientX: x, clientY: cy, pointerType: 'touch', isPrimary: id === 11, bubbles: true }));
+  ev('pointerdown', 11, cx - 40);
+  ev('pointerdown', 12, cx + 40);
+  for (let i = 1; i <= 8; i++) { ev('pointermove', 11, cx - 40 - i * 10); ev('pointermove', 12, cx + 40 + i * 10); }
+  ev('pointerup', 11, cx - 120);
+  ev('pointerup', 12, cx + 120);
+});
+const zPinch = await zStufe();
+const [px, py] = (await zVersatz()) || [NaN, NaN];
+check(Math.abs(zPinch - 3) < 0.05, `zwei Finger auseinander: dreifach hineingezoomt (${zPinch}-fach)`);
+check(Math.abs(px - (zf.w / 2 - (zf.w / 2) * zPinch)) < 2 && Math.abs(py - (zf.h / 2 - (zf.h / 2) * zPinch)) < 2, `die Stelle zwischen den Fingern bleibt, wo sie war (${Math.round(px)}, ${Math.round(py)})`);
+// Mit einem Finger (hier der Maus) verschieben – nie weiter, als das Bild reicht
+await amy.mouse.move(zf.l + zf.w / 2, zf.t + zf.h / 2);
+await amy.mouse.down();
+await amy.mouse.move(zf.l + zf.w / 2 + 60, zf.t + zf.h / 2 + 30, { steps: 6 });
+await amy.mouse.up();
+const [vx, vy] = await zVersatz();
+check(Math.abs(vx - px - 60) < 2 && Math.abs(vy - py - 30) < 2, `gezoomt: mit einem Finger verschieben (+60, +30 → ${Math.round(vx - px)}, ${Math.round(vy - py)})`);
+await amy.mouse.move(zf.l + 5, zf.t + 5);
+await amy.mouse.down();
+await amy.mouse.move(zf.l + zf.w - 5, zf.t + zf.h - 5, { steps: 6 });
+await amy.mouse.move(zf.l + zf.w - 5 + 2000, zf.t + zf.h - 5 + 2000, { steps: 4 });
+await amy.mouse.up();
+const [rx, ry] = await zVersatz();
+// Bis an den Rand des Fotos selbst – nicht in den schwarzen Rand daneben (object-fit: contain)
+const zRand = await amy.evaluate(() => {
+  const b = document.querySelector('#zoom-dlg .zoom-bild');
+  const r = document.querySelector('#zoom-dlg .zoom-flaeche').getBoundingClientRect();
+  const s = Number(document.querySelector('#zoom-dlg').dataset.zoom);
+  const g = Math.min(r.width / b.naturalWidth, r.height / b.naturalHeight);
+  return [-((r.width - b.naturalWidth * g) / 2) * s, -((r.height - b.naturalHeight * g) / 2) * s];
+});
+check(Math.abs(rx - zRand[0]) < 2 && Math.abs(ry - zRand[1]) < 2, `nicht über den Rand hinaus: höchstens bis an die Kante des Fotos (${Math.round(rx)}, ${Math.round(ry)} = ${Math.round(zRand[0])}, ${Math.round(zRand[1])})`);
+// Doppelt tippen: gezoomt → zurück auf 1; noch einmal → 2,5-fach an der Stelle
+await amy.mouse.dblclick(zf.l + zf.w / 2, zf.t + zf.h / 2);
+check(await bis(async () => (await zStufe()) === 1), 'doppelt tippen, gezoomt: zurück auf ganz');
+await amy.mouse.dblclick(zf.l + zf.w / 4, zf.t + zf.h / 4);
+check(await bis(async () => (await zStufe()) === 2.5), 'doppelt tippen: 2,5-fach hinein');
+await amy.mouse.move(zf.l + zf.w / 2, zf.t + zf.h / 2);
+await amy.mouse.wheel(0, -4000);
+check(await bis(async () => (await zStufe()) === 6), 'Mausrad: hinein, höchstens 6-fach');
+await amy.click('#zoom-dlg [data-zoom-stufe="aus"]');
+check(Math.abs((await zStufe()) - 6 / 1.6) < 0.02, `„−“: heraus (${await zStufe()}-fach)`);
+await amy.click('#zoom-dlg .zoom-zu');
+check(await bis(() => amy.evaluate(() => !document.querySelector('#zoom-dlg[open]'))) && (await amy.inputValue('#inv-name')) === 'Blümchenbluse', '× schließt – die Sache ist noch offen');
+await amy.click('[data-act="inv-zoom"]');
+await amy.keyboard.press('Escape');
+check(await bis(() => amy.evaluate(() => !document.querySelector('#zoom-dlg[open]'))), 'Esc schließt auch');
+
 // Neu laden: was die Seite lädt – nur aus sachen/, ../js, ../css, ../schrift, ../bilder, alles da
 await amy.click('[data-act="inv-ding-zu"]');
 await amy.click('[data-act="inv-zu"]');

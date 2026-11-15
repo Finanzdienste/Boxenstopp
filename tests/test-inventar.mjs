@@ -364,6 +364,13 @@ check(await bis(() => FOTO_PFAD.test(pfad()) && !!mar.zustand.roh[pfad()], 8000)
 check(mar.zustand.roh[pfad()].subarray(0, 3).toString('hex') === 'ffd8ff' && ding('Lederjacke').foto.sha.startsWith('w') && mar.zustand.nachrichten.includes('Marielle: Foto für die Sachen'), 'ein JPEG, verkleinert; der Commit sagt nur „Foto für die Sachen“');
 check(await bis(async () => (await m.locator('#inv-foto-teil img.inv-foto-img').getAttribute('src'))?.startsWith('blob:')), 'und gleich zu sehen');
 check(!JSON.stringify(mar.liste()).includes('base64') && JSON.stringify(mar.liste()).length < 5000, 'liste.json bleibt klein – kein Bild darin');
+// Hineinzoomen geht auch in Boxenstopp (bildzoom.js, ganz durchgespielt in test-sachen.mjs)
+await m.click('[data-act="inv-zoom"]');
+check(await bis(() => m.evaluate(() => /^blob:/.test(document.querySelector('#zoom-dlg[open] .zoom-bild')?.src || ''))), 'Foto antippen: groß zum Zoomen – auch in einer Gästeliste');
+await m.mouse.dblclick(195, 420);
+check(await bis(async () => (await m.evaluate(() => document.querySelector('#zoom-dlg').dataset.zoom)) === '2.5'), 'doppelt tippen zoomt hinein');
+await m.click('#zoom-dlg .zoom-zu');
+check(await bis(() => m.evaluate(() => !document.querySelector('#zoom-dlg[open]'))), '× schließt');
 
 // Der Strichcode: das Handy liest ihn selbst
 await scanne(m, 'code');

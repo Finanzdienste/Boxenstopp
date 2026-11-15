@@ -54,6 +54,7 @@ import { jsonAus } from './amy-import.js';
 import { rumpfErkennen, erkanntBereinigen } from './inventar-ki.js';
 import { nachschlagen, rumpfNachschlagen, gesuchtBereinigen, shopBild } from './inventar-netz.js';
 import { scannen } from './scanner.js';
+import { bildZoomen } from './bildzoom.js';
 import {
   FOTO_PFAD, LISTEN_VORSCHLAEGE, SORTEN, MAX_NAME, MAX_MARKE, MAX_NOTIZ, MAX_LISTEN, MAX_DINGE,
   neueListeId, neueDingId, fotoPfad, codeBereinigen, opInvListe, opInvListeWeg, opDing, opDingWeg,
@@ -74,6 +75,7 @@ const PLUS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentCol
 const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
 const KAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg>';
 const STRICHCODE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6v12M7 6v12M10.5 6v12M13 6v12M16.5 6v12M20 6v12"/></svg>';
+const LUPE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5M10.5 8v5M8 10.5h5"/></svg>';
 const FUNKEN = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>';
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -339,7 +341,9 @@ function fotoTeilHTML(d) {
   const lauf = laeuft.get(d.id);
   const hat = !!(d.foto || vorschau.has(d.id));
   const text = { foto: 'Foto wird gespeichert …', ki: 'Die KI schaut es sich an …', code: 'Liest den Strichcode …', netz: 'Schlägt im Netz nach …', suche: 'Claude sucht im Internet …', bild: 'Holt das Bild vom Shop …' }[lauf] || '';
-  return `<div class="inv-gross">${bildHTML(d, true)}${text ? `<span class="inv-lauf" role="status">${text}</span>` : ''}</div>
+  // Mit Foto: antippen zeigt es ganz und groß, zum Hineinzoomen (bildzoom.js)
+  const gross = hat ? `<button type="button" class="inv-zoom-k" data-act="inv-zoom" aria-label="Foto groß ansehen und zoomen">${bildHTML(d, true)}<span class="inv-zoom-ic" aria-hidden="true">${LUPE}</span></button>` : bildHTML(d, true);
+  return `<div class="inv-gross">${gross}${text ? `<span class="inv-lauf" role="status">${text}</span>` : ''}</div>
 <div class="inv-foto-knoepfe"><label class="amy-btn inv-datei-btn" for="inv-foto-datei">${KAMERA}${hat ? 'Anderes Foto' : 'Foto'}</label><input class="vh" id="inv-foto-datei" type="file" accept="image/*"${lauf === 'foto' ? ' disabled' : ''}>${d.foto && ladeKi() ? `<button type="button" class="btn btn-quiet" data-act="inv-ki"${lauf ? ' disabled' : ''}>${FUNKEN}Mit KI ausfüllen</button>` : ''}${d.foto ? `<button type="button" class="btn btn-quiet" data-act="inv-foto-weg"${lauf ? ' disabled' : ''}>Foto weg</button>` : ''}</div>
 ${d.quelle ? `<p class="fine inv-quelle">Gefunden bei <a href="${esc(d.quelle.url)}" target="_blank" rel="noopener">${esc(d.quelle.name)}</a></p>` : ''}`;
 }
@@ -657,6 +661,17 @@ function fotoWeg() {
   melde('Foto weg', { knopf: 'Rückgängig', beiKnopf: () => { const x = aktuell(d.id); if (x) app.aendern(opDing({ ...x, foto: d.foto }, app.name())); } });
 }
 
+/** Das Foto der Sache groß, zum Zoomen – das eben aufgenommene oder das gespeicherte (aus dem Vorrat, sonst aus dem Repo). */
+async function fotoGross(id) {
+  const d = aktuell(id);
+  if (!d) return;
+  const pfad = d.foto?.pfad || '';
+  let src = vorschau.get(id) || (pfad && urls.get(pfad)) || '';
+  if (!src && pfad) { await fotoLaden(pfad); src = urls.get(pfad) || ''; }
+  if (!src) { melde('Das Foto ist gerade nicht da – ohne Netz?'); return; }
+  bildZoomen(src, { alt: dingName(d) });
+}
+
 /** Die KI schaut sich das Foto an und füllt aus, was noch leer ist. */
 async function kiAusfuellen(id) {
   const schluessel = ladeKi();
@@ -972,6 +987,7 @@ export function klickInventar(el) {
     case 'inv-ding-zu': verlassen(); zustand = { ...zustand, ding: null }; merken(); neuZeichnen(); return true;
     case 'inv-ding-weg': dingLoeschen(); return true;
     case 'inv-foto-weg': fotoWeg(); return true;
+    case 'inv-zoom': fotoGross(zustand.ding); return true;
     case 'inv-ki': inventarJetztSpeichern(); kiAusfuellen(zustand.ding); return true;
     case 'inv-nachschlagen': inventarJetztSpeichern(); nachschlagenFuer(zustand.ding, { alles: true }); return true;
     case 'inv-scan-zu': scanZeigen(null); return true;

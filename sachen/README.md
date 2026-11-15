@@ -5,7 +5,8 @@ Make-up, Pflege, Schmuck, Taschen, Bücher –, je Sache mit Foto, Name, Marke,
 Tags, Notiz und Strichcode. Sortieren, Suchen, „Hab ich das schon?“, Scannen
 mit Nachschlagen (Open Beauty Facts & Co., Claude im Internet, das Bild der
 Shopseite über die Supabase-Funktion `produkt-bild`), Scanner mit
-Taschenlampe und Kamera-Suche, das Foto an die KI. Bis v82 war das der Teil
+Taschenlampe und Kamera-Suche, das Foto an die KI; ein Foto antippen zeigt
+es groß zum Hineinzoomen (`../js/bildzoom.js`, seit Sachen v3). Bis v82 war das der Teil
 „Sachen“ in Amys Bereich von Boxenstopp (Daten in `liste.json` unter
 `inventar`); seit v83 ist es diese App, weil Amy die Sachen als eigene App
 wollte. Was die Sachen können, steht im README von Boxenstopp unter „Amys
