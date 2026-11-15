@@ -11,6 +11,7 @@ import {
 } from '../js/liste.js';
 import { menge, ungefaehr, abteilung, esc, abweichung, tagKurz, heute } from '../js/format.js';
 import { nachBereichen, alsText } from '../js/bereiche.js';
+import { hakenZaehlen, bleibtMerken, merkAufraeumen, abgelaufen, PIN_HAKEN, PIN_TAGE } from '../js/anpinnen.js';
 
 const { check, ende } = pruefer();
 const KAT = { haehnchenbrust: { n: 'Hähnchenbrustfilet', c: 'fleisch' }, reis: { n: 'Basmati- oder Jasminreis', c: 'trocken' }, oel: { n: 'Öl, neutral', c: 'vorrat' } };
@@ -167,5 +168,27 @@ check(text === erwartet, `Text zum Kopieren${text === erwartet ? '' : `:\n${text
 const fast = anwenden(k2, opHaken(k2, 'penne', true, 'Tobi'));
 check(!alsText(fast, KAT2).includes('Penne'), 'abgehakte Einträge kommen nicht mit in den Text');
 check(alsText(leer(), KAT2) === '', 'leere Liste: leerer Text');
+
+/* ---------------------------------- Angepinnt: wann es nicht mehr läuft */
+
+const PIN_AT = '2026-11-10T18:00:00.000Z';
+let pm = {};
+const zaehle = (rid, at = PIN_AT) => { const x = hakenZaehlen(pm, rid, at); pm = x.merk; return x.gekocht; };
+check(PIN_HAKEN === 3 && !zaehle('chili') && !zaehle('chili') && zaehle('chili') && !pm.chili, 'Drei Haken nach dem Anpinnen: es wird gekocht (dann vergessen)');
+check(!zaehle('gulasch') && !zaehle('gulasch', '2026-11-12T09:00:00.000Z') && pm.gulasch.n === 1 && pm.gulasch.pin === '2026-11-12T09:00:00.000Z', 'Neu angepinnt: das Zählen fängt von vorn an');
+pm = bleibtMerken(pm, 'gulasch', '2026-11-12T09:00:00.000Z');
+check(!zaehle('gulasch', '2026-11-12T09:00:00.000Z') && !zaehle('gulasch', '2026-11-12T09:00:00.000Z') && !zaehle('gulasch', '2026-11-12T09:00:00.000Z') && !zaehle('gulasch', '2026-11-12T09:00:00.000Z'), 'Nach „Wieder anpinnen“: bleibt, auch mit vielen Haken');
+check(!zaehle('gulasch', '2026-11-13T09:00:00.000Z') && pm.gulasch.n === 1 && !pm.gulasch.bleibt, '… bis es ein anderes Mal angepinnt wird');
+check(JSON.stringify(Object.keys(merkAufraeumen({ ...pm, alt: { pin: 'x', n: 2 } }, { gulasch: { at: '2026-11-13T09:00:00.000Z' } }))) === '["gulasch"]', 'Aufräumen: nur, was so noch angepinnt ist');
+const JETZT = new Date('2026-11-15T12:00:00');
+const vorTagen = (n) => new Date(JETZT.getTime() - n * 864e5).toISOString();
+const planTag = (n) => { const d = new Date(JETZT.getFullYear(), JETZT.getMonth(), JETZT.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const st0 = { items: {}, essensplan: { tage: {} } };
+check(PIN_TAGE === 7 && abgelaufen('pasta', { at: vorTagen(14) }, st0, JETZT) && !abgelaufen('pasta', { at: vorTagen(6) }, st0, JETZT), 'Seit 14 Tagen angepinnt, nichts offen: läuft nicht mehr – nach 6 Tagen schon noch');
+const stListe = { items: { rinderhack: { parts: { pasta: { q: 500, u: 'g' } } } }, essensplan: { tage: {} } };
+check(!abgelaufen('pasta', { at: vorTagen(14) }, stListe, JETZT) && abgelaufen('pasta', { at: vorTagen(14) }, { items: { rinderhack: { parts: { pasta: { q: 500, u: 'g', done: true } } } } }, JETZT), 'Noch offen auf der Einkaufsliste: bleibt – schon gekauft: nicht');
+const stPlan = (n, m = 'kochen') => ({ items: {}, essensplan: { tage: { [planTag(n)]: { [m]: [{ id: 'ek-test01', rid: 'pasta' }] } } } });
+check(!abgelaufen('pasta', { at: vorTagen(14) }, stPlan(2), JETZT) && !abgelaufen('pasta', { at: vorTagen(14) }, stPlan(0, 'abend'), JETZT) && abgelaufen('pasta', { at: vorTagen(14) }, stPlan(-3), JETZT), 'Im Essensplan ab heute: bleibt – nur in der Vergangenheit: nicht');
+check(!abgelaufen('pasta', { at: 'kaputt' }, st0, JETZT) && !abgelaufen('pasta', null, st0, JETZT), 'Ohne gültiges Datum: nichts tun');
 
 ende();

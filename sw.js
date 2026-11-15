@@ -51,7 +51,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v85';
+const VERSION = 'v86';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -86,6 +86,7 @@ const SHELL = [
   './js/ansicht-doppel.js',
   './js/tempo.js',
   './js/kochstand.js',
+  './js/anpinnen.js',
   './js/kochmodus.js',
   './js/waage.js',
   './js/wiegen.js',

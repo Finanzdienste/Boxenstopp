@@ -24,6 +24,7 @@ import { zutatImg, rezeptBildchen, bildPfad } from './bilder.js';
 import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, opAnpinnen, DAUMEN } from './liste.js';
 import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
+import { hakenZaehlen, bleibtMerken, merkAufraeumen, abgelaufen, PIN_TAGE } from './anpinnen.js';
 import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
 import { angepasstHTML, daneben } from './ansicht-ziel.js';
 import { istEigen } from './profil.js';
@@ -996,15 +997,53 @@ export function schrittUmschalten(rid, i, an, { tempo = true, lob = true } = {})
   if (lob) lobPruefen(r, s, vorher, { name: app.name() });
   // Der letzte Haken: Das Rezept ist zubereitet und läuft nicht mehr – raus aus „Läuft gerade“
   const alle = (r.ablauf || []).reduce((n, p) => n + p.schritte.length, 0);
-  if (an && alle && s.size >= alle && vorher.size < alle && app.stand.gepinnt?.[rid]) {
+  const pin = app.stand.gepinnt?.[rid];
+  if (an && alle && s.size >= alle && vorher.size < alle && pin) {
     app.aendern(opAnpinnen(rid, false, app.name()));
     window.setTimeout(() => entpinntMelden(rid, 'Alle Schritte abgehakt'), lob ? 1200 : 0);
+  } else if (an && pin) {
+    // Ein paar Schritte nach dem Anpinnen abgehakt: Es wird gekocht – raus aus „Läuft gerade“ (anpinnen.js)
+    const { merk, gekocht } = hakenZaehlen(merkAufraeumen(lese(PIN_MERK, {}), app.stand.gepinnt), rid, pin.at);
+    schreibe(PIN_MERK, merk);
+    if (gekocht) {
+      app.aendern(opAnpinnen(rid, false, app.name()));
+      window.setTimeout(() => entpinntMelden(rid, 'Wird gekocht'), lob ? 1200 : 0);
+    }
   }
+}
+
+const PIN_MERK = 'boxenstopp.pinhaken.v1'; // { <rid>: { pin, n, bleibt? } } – Haken seit dem Anpinnen, auf diesem Gerät
+
+/** Wieder anpinnen – und dieses Mal bleibt es, auch wenn noch Schritte abgehakt werden. */
+function wiederAnpinnen(rid) {
+  const op = opAnpinnen(rid, true, app.name());
+  schreibe(PIN_MERK, bleibtMerken(lese(PIN_MERK, {}), rid, op.at));
+  app.aendern(op);
 }
 
 /** „… – nicht mehr angepinnt“ mit „Wieder anpinnen“. */
 function entpinntMelden(rid, warum) {
-  melde(`${warum} – ${app.nachId[rid]?.short || 'das Rezept'} ist nicht mehr angepinnt`, { knopf: 'Wieder anpinnen', beiKnopf: () => app.aendern(opAnpinnen(rid, true, app.name())) });
+  melde(`${warum} – ${app.nachId[rid]?.short || 'das Rezept'} ist nicht mehr angepinnt`, { knopf: 'Wieder anpinnen', beiKnopf: () => wiederAnpinnen(rid) });
+}
+
+const pinGeprueft = new Set(); // `${rid}|${at}` – je Anpinnen einmal je App-Start
+
+/**
+ * Nach dem Abgleich (app.js): Was länger als eine Woche angepinnt ist und
+ * für das nichts mehr offen ist – nichts auf der Einkaufsliste, nichts im
+ * Essensplan –, läuft nicht mehr (anpinnen.js abgelaufen). Erst nach dem
+ * Abgleich, damit ein Anpinnen vom anderen Handy schon da ist.
+ */
+export function pinsPruefen() {
+  if (!app.listeDa || !app.zugang) return;
+  const neu = Object.entries(app.stand.gepinnt || {}).filter(([rid, p]) => !pinGeprueft.has(`${rid}|${p?.at}`));
+  for (const [rid, p] of neu) pinGeprueft.add(`${rid}|${p?.at}`);
+  const weg = neu.filter(([rid, p]) => abgelaufen(rid, p, app.stand)).map(([rid]) => rid);
+  if (!weg.length) return;
+  app.aendern(weg.map((rid) => opAnpinnen(rid, false, app.name())));
+  const namen = weg.map((rid) => app.nachId[rid]?.short || 'ein Rezept');
+  const text = `Seit über ${PIN_TAGE === 7 ? 'einer Woche' : `${PIN_TAGE} Tagen`} angepinnt – ${namen.join(', ')} ${weg.length === 1 ? 'ist' : 'sind'} nicht mehr angepinnt`;
+  melde(text, weg.length === 1 ? { knopf: 'Wieder anpinnen', beiKnopf: () => wiederAnpinnen(weg[0]) } : {});
 }
 
 /** Der Kochstand kam von einem anderen Gerät: Haken und Zeiten im offenen Rezept neu, sonst das Raster. */

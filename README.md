@@ -272,7 +272,15 @@ Rezepten, mit Foto und dem Fortschritt beim Kochen („5 von 26 Schritten“ –
 eigenen Haken), auf seiner Karte steht „Läuft gerade“. Höchstens vier,
 für beide in `liste.json` unter `gepinnt`. Ist es zubereitet – „Heute gekocht“
 oder der letzte Schritt abgehakt –, läuft es nicht mehr: Die App nimmt es aus
-„Läuft gerade“ und bietet „Wieder anpinnen“ an.
+„Läuft gerade“ und bietet „Wieder anpinnen“ an. Ebenso, sobald klar ist, dass
+es gekocht wird: **drei Schritte nach dem Anpinnen abgehakt** („Wird
+gekocht“ – gezählt auf dem Gerät, das abhakt; Haken von früher zählen nicht,
+die bleiben ja stehen, bis man sie zurücksetzt; nach „Wieder anpinnen“ bleibt
+es, egal wie viel noch abgehakt wird). Und wer gar nichts abhakt: **Seit über
+einer Woche angepinnt** und nichts mehr offen dafür – nichts davon auf der
+Einkaufsliste, nichts ab heute im Essensplan –, dann ist es wohl längst
+gekocht; das prüft die App nach dem Abgleich, mit „Wieder anpinnen“
+(`js/anpinnen.js`).
 
 ### Kochmodus
 
@@ -2179,6 +2187,7 @@ die Action „Rezeptfotos“.
 | `js/amy-import.js` | Rezept übernehmen: Anfrage aus Foto, Link oder Text, Antwort als Entwurf; Im Internet suchen: Anfrage, Treffer bereinigen, Quelle in die Notiz – ohne DOM |
 | `js/kochmodus.js` | Kochmodus: ein Schritt groß, Wischen, Tasten, Timer, Bildschirm an |
 | `js/kochstand.js` | Haken, Tempo und Timer je Person über ihre Geräte (`kochen` in liste.json) |
+| `js/anpinnen.js` | Wann ein angepinntes Rezept nicht mehr läuft: drei Haken nach dem Anpinnen, oder seit über einer Woche und nichts mehr offen dafür – ohne DOM |
 | `js/push.js`, `js/ansicht-push.js` | Push-Nachrichten: Schlüsselpaar, An- und Abmelden in push.json, der Bereich in den Einstellungen |
 | `js/ansicht-einstellungen.js` | Reiter Einstellungen: welche Reiter unten stehen, KI-Schlüssel, Gelerntes vergessen, Fassung und Updates |
 | `js/haushalt.js` | Haushalt: Räume, Vorlagen, Vorschläge, welcher Tag dran ist, Wiederholung in Worten – ohne DOM |

@@ -28,7 +28,7 @@ import { hatInventar, opUmgezogen, inventarZusammen } from './inventar.js';
 import { umzugInSachen, umzugNoetig, umzugZusammen, wegInSachen, ART_SACHEN } from './sachen.js';
 import { preiseMitBons } from './kosten.js';
 import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe, KI_DATEI, geteiltenKiUebernehmen } from './zugang.js';
-import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen } from './ansicht-rezepte.js';
+import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen, pinsPruefen } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen, eingabeZugang, GETRENNT, anderesGeraet } from './ansicht-liste.js';
 import { kiStart, kiAbgleichen, resteZeichnen, klickKi, eingabeKi, aenderungKi, absendenKi } from './ansicht-ki.js';
@@ -286,8 +286,10 @@ function beiStatus(s) {
   // Abgeglichen: Ist Push eingerichtet, aber hier noch aus, fragt die App einmal (ansicht-push.js);
   // wem Tobis Dashboard etwas zeigt, der erfährt es einmal (ansicht-gaeste.js), und Amy, dass Sachen
   // jetzt eine eigene App ist (ansicht-sachen-app.js – wartet, bis kein anderes Fenster offen ist);
-  // stehen noch Sachen in der Liste, ziehen sie um
+  // stehen noch Sachen in der Liste, ziehen sie um; was seit über einer Woche angepinnt ist und
+  // für das nichts mehr offen ist, läuft nicht mehr (ansicht-rezepte.js)
   if (s.zustand === 'ok') {
+    setTimeout(() => sicher('Angepinnt', pinsPruefen), 1500);
     setTimeout(pushHinweisPruefen, 2500);
     setTimeout(dashboardHinweisPruefen, 2500);
     setTimeout(sachenHinweisPruefen, 2500);

@@ -8,7 +8,8 @@
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS, ROOT, APP_URL } from './hilfe.mjs';
+import { pruefer, starteBrowser, handy, bis, tierAttrappe, TIER_HOSTS, ROOT, APP_URL, githubAttrappe, SCHLUESSEL } from './hilfe.mjs';
+import { leer, anwenden, opTeil } from '../js/liste.js';
 import { woche } from '../js/angebote.js';
 import { wochenAbstand, wochenSchluessel } from '../js/preisverlauf.js';
 
@@ -350,6 +351,25 @@ check(await bis(async () => (await page.locator('[data-act="anpinnen"][aria-pres
 await page.click('[data-act="anpinnen"]');
 await page.click('[data-act="zurueck"]');
 check(await bis(async () => page.locator('#gepinnt').isHidden()) && (await page.locator('.box .pill-pin').count()) === 0, 'gelöst: Leiste und Pille sind weg');
+// Wer nach dem Anpinnen drei Schritte abhakt, kocht es gerade: nicht mehr angepinnt – „Wieder anpinnen“ hält es dann fest
+await page.click('[data-open="chili"]');
+await page.click('[data-step="0"]');
+await page.click('[data-act="anpinnen"]');
+await bis(async () => (await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 1);
+await page.click('[data-step="1"]');
+await page.click('[data-step="2"]');
+check((await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 1, 'Ein Haken von vor dem Anpinnen und zwei danach: bleibt angepinnt');
+await page.click('[data-step="3"]');
+check(await bis(async () => (await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 0) && await bis(async () => (await page.locator('#toast').innerText()).includes('Wird gekocht – ') && (await page.locator('#toast').innerText()).includes('nicht mehr angepinnt'), 8000), 'Der dritte Haken danach: „Wird gekocht“ – nicht mehr angepinnt, mit „Wieder anpinnen“');
+if (await page.locator('#lob [data-lob="zu"]').count()) await page.locator('#lob [data-lob="zu"]').first().click().catch(() => {});
+await page.click('#toast button');
+check(await bis(async () => (await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 1), '„Wieder anpinnen“: wieder da');
+for (const i of [4, 5, 6, 7]) await page.click(`[data-step="${i}"]`);
+check((await page.locator('[data-act="anpinnen"][aria-pressed="true"]').count()) === 1, 'Wieder angepinnt: bleibt, auch mit vier weiteren Haken');
+await page.click('[data-act="schritte-zurueck"]');
+await page.click('[data-act="anpinnen"]');
+await page.click('[data-act="zurueck"]');
+check(await bis(async () => page.locator('#gepinnt').isHidden()), 'wieder gelöst');
 
 // --- Preis und Reihenfolge: zusätzlich zum Chip, das Handy merkt sie sich
 const kosten = () => page.$$eval('#grid .box', (bs) => bs.map((b) => { const m = b.querySelector('.box-cost')?.textContent.match(/(\d+),(\d\d)/); return m ? Number(`${m[1]}.${m[2]}`) : null; }));
@@ -460,6 +480,31 @@ const ipadBanner = async () => (await ipd.locator('#zugang .zugang-banner').inne
 check(await bis(async () => (await ipadBanner()).startsWith('Nur hier in Safari.') && (await ipadBanner()).includes('Safari hat auf dem iPad einen eigenen Speicher') && (await ipadBanner()).includes('Home-Bildschirm')), `iPad in Safari: „Nur hier in Safari.“ – die App vom Home-Bildschirm hat ihren eigenen Stand (${(await ipadBanner()).slice(0, 90)})`);
 check(await ipd.locator('#zugang [data-act="z-einfuegen"]').count() === 0, 'in Safari kein „Einfügen“ – dort öffnet ja der Link selbst');
 await ipad.close();
+
+// --- Angepinnt seit über einer Woche und nichts mehr offen dafür: läuft nicht mehr (nach dem Abgleich)
+{
+  const gp = githubAttrappe();
+  const alt = (tage) => new Date(Date.now() - tage * 864e5).toISOString();
+  let st = anwenden(leer(), [
+    { typ: 'anpinnen', rid: 'gulasch', an: true, by: 'Tobi', at: alt(14) },
+    { typ: 'anpinnen', rid: 'chili', an: true, by: 'Tobi', at: alt(10) },
+    { typ: 'anpinnen', rid: 'bolognese', an: true, by: 'Amy', at: alt(2) },
+    opTeil('rinderhack', 'chili', { q: 500, u: 'g', h: '' }, { n: 'Rinderhackfleisch', c: 'fleisch' }),
+  ]);
+  st = { ...st, rev: 4 };
+  gp.zustand.datei = JSON.stringify(st);
+  gp.zustand.version = 4;
+  gp.zustand.sha = 'sha4';
+  const g = await handy(browser, { attrappe: gp });
+  const gq = g.page;
+  await gq.evaluate((k) => localStorage.setItem('boxenstopp.zugang.v1', JSON.stringify({ token: k, name: 'Tobi' })), SCHLUESSEL);
+  await gq.reload();
+  await gq.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
+  check(await bis(() => !gp.liste()?.gepinnt?.gulasch, 10000) && !!gp.liste()?.gepinnt?.chili && !!gp.liste()?.gepinnt?.bolognese, 'Nach dem Abgleich: das Gulasch (seit 14 Tagen, nichts offen) ist gelöst – das Chili (noch auf der Liste) und die Bolognese (seit 2 Tagen) bleiben');
+  check(await bis(async () => (await gq.locator('#toast').innerText()).includes('Seit über einer Woche angepinnt') && (await gq.locator('#toast button').innerText()).includes('Wieder anpinnen')), 'Mit Meldung und „Wieder anpinnen“');
+  check(g.fehler.length === 0, `Angepinnt mit gemeinsamer Liste: keine Fehler (${g.fehler.join(' | ')})`);
+  await g.ctx.close();
+}
 
 // --- Layout
 check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'kein seitliches Scrollen auf dem Handy');
