@@ -46,7 +46,8 @@ Was gerade läuft, zeigt `get_session` (`model`, `effort_level`,
   Den Katalog gleicht die App selbst ab (Tobis Handy, alle 5 Minuten).
 - **Finanzdienste/Bildschirmzeit** (öffentlich): Tobis Widget-App (Android)
   und die Quelle von `js/bildschirmzeit.js` (`web/bildschirmzeit.js`) – nur
-  dort ändern, dann byte-gleich hierher, nach Freizeit und Workout kopieren.
+  dort ändern, dann byte-gleich hierher, nach Freizeit, Workout und
+  Bewerbungszentrale kopieren.
   Ohne Verbinden-Link (`#bildschirmzeit=…`) tut das Modul nichts.
 - **Finanzdienste/Amy**: Amys App „Frag mal“ und die Supabase-Funktionen, die
   Boxenstopp nutzt (`api-kosten`, `produkt-bild`). Änderungen über einen PR;

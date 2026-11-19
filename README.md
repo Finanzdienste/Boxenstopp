@@ -1306,7 +1306,10 @@ Zuwachses, damit nichts doppelt zählt, wenn eine Meldung zweimal ankommt.
 **Wo der Code liegt:** `js/bildschirmzeit.js` ist eine wortgleiche Kopie aus
 dem Repo **Finanzdienste/Bildschirmzeit** (`web/bildschirmzeit.js`, dort mit
 eigenen Tests und dem SQL für Supabase) – dieselbe Datei in Boxenstopp,
-Freizeit und Workout; geändert wird nur dort, dann in alle drei kopiert.
+Freizeit, Workout und der Bewerbungszentrale; geändert wird nur dort, dann in
+alle vier kopiert. Seit v87 die Fassung, die die Bewerbungszentrale als vierte
+App kennt (Tobi, 19.11.: „Hab nh zusätzliche App die noch nicht connected
+ist. Geht um die Bewerbungs app“) – für Boxenstopp ändert sich nichts.
 `js/ansicht-bildschirmzeit.js` bindet sie hier ein (Start, Karte, Trennen).
 
 **Geprüft** in `tests/test-bildschirmzeit.mjs`, gegen eine nachgebaute
