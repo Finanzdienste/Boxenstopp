@@ -225,7 +225,7 @@ Ziel pro Box: ${ziel.kcal} kcal, ${ziel.p} g Protein, ${ziel.kh} g Kohlenhydrate
 Feste Regeln:
 - Kein Fisch und keine Meeresfrüchte, auch nichts, was sie enthält (Fischsauce, Garnelenpaste, Sardellen, Worcestersauce). Bei Currypaste „vegan“ dazuschreiben.
 - Kein Putenhack. Hähnchen, Putenbrust, Rind, Schwein, Eier, Hülsenfrüchte und Milchprodukte sind gut.
-- Nicht zu fleischig: höchstens etwa ${fleischJeBox(ziel)} g rohes Fleisch pro Box – für ${portionen} Boxen also höchstens ${fleischJeBox(ziel) * portionen} g, auch als max bei anpassbar. Den Rest an Eiweiß holen Skyr, Hüttenkäse, Quark, Eier oder Hülsenfrüchte, dazu reichlich Sauce und Gemüse.
+- Nicht zu fleischig – als Richtwert, nicht als Pflicht: etwa ${fleischJeBox(ziel)} g rohes Fleisch pro Box (für ${portionen} Boxen etwa ${fleischJeBox(ziel) * portionen} g). Wo es zum Gericht passt, holen Skyr, Hüttenkäse, Quark, Eier oder Hülsenfrüchte den Rest an Eiweiß, dazu reichlich Sauce und Gemüse. Geschmack geht vor: Ein Gericht, das vom Fleisch lebt (Gulasch, Spieße, Steak), darf mehr haben – nichts auf Krampf ersetzen, was das Gericht schlechter macht.
 - Hüttenkäse, Quark und Skyr werden in heißen Saucen körnig: In eine warme Sauce kommen sie nur glatt püriert und zum Schluss, nicht mehr kochen lassen – sonst kalt (Dip, Topping, Marinade).
 - Richtig lecker und ordentlich gewürzt, so dass man es gern vier Tage hintereinander isst. Lieber ein bewährtes Gericht gut gemacht als ein wildes Experiment.
 - ${wunsch

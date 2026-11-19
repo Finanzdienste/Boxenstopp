@@ -1325,10 +1325,11 @@ Rezept im selben Format wie alle anderen – Mise en place mit Schalen, ein
 Schritt pro Zeile, Minuten – und mit denselben Regeln: kein Fisch, kein
 Putenhack (Schwein und Hüttenkäse gehen – Hüttenkäse, Quark und Skyr in
 warmen Saucen nur glatt püriert, sonst werden sie körnig), nicht zu
-fleischig (höchstens etwa 90 g rohes Fleisch pro Box, mit einem höheren
-Eiweißziel anteilig mehr – `fleischJeBox` in `js/ki.js`; den Rest an Eiweiß
-bringen Skyr, Hüttenkäse, Quark, Eier oder Hülsenfrüchte, dazu reichlich
-Sauce und Gemüse), ordentlich gewürzt. Was ihr mit Daumen hoch oder runter bewertet habt, geht als
+fleischig – als Richtwert etwa 90 g rohes Fleisch pro Box, mit einem höheren
+Eiweißziel anteilig mehr (`fleischJeBox` in `js/ki.js`); wo es passt, bringen
+Skyr, Hüttenkäse, Quark, Eier oder Hülsenfrüchte den Rest an Eiweiß, dazu
+reichlich Sauce und Gemüse; Geschmack geht vor, ein Fleischgericht darf eins
+bleiben –, ordentlich gewürzt. Was ihr mit Daumen hoch oder runter bewertet habt, geht als
 Geschmackshinweis mit.
 
 **Damit die Werte wirklich stimmen**, rechnet die App selbst
