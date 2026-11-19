@@ -18,7 +18,7 @@ N = {
  'mais':(80,2.5,12,1.3), 'kidney':(95,7.5,12,0.6), 'schwarzebohnen':(100,7.5,13,0.6),
  'tomatendose':(22,1,3.5,0.2), 'passata':(26,1.3,4.3,0.2), 'tomatenmark':(90,4.5,15,0.5), 'ajvar':(90,1.5,9,5),
  'kokosmilch':(180,1.6,3,18), 'kokosmilchlight':(80,0.7,2,7.5), 'currypaste':(150,3,13,9),
- 'skyr':(63,11,4,0.2), 'magerquark':(67,12,4,0.2), 'frischkaese':(145,7,4.5,11),
+ 'skyr':(63,11,4,0.2), 'magerquark':(67,12,4,0.2), 'huettenkaese':(98,12.3,2.6,4.3), 'frischkaese':(145,7,4.5,11),
  'kochsahne':(160,2.8,3.8,15), 'schlagsahne':(292,2.4,3.3,30), 'schmand':(240,2.6,3.5,24), 'milch':(47,3.4,4.8,1.5),
  'cheddar':(400,25,0,33), 'mozzarella':(240,18,1,18), 'mozzalight':(160,19,1,9), 'parmesan':(390,33,0,28), 'feta':(270,17,0.5,22),
  'ei':(145,12.5,0.7,10), 'oel':(900,0,0,100), 'butter':(741,0.7,0.6,82), 'butterschmalz':(898,0,0,99.8),

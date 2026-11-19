@@ -51,7 +51,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v87';
+const VERSION = 'v88';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';

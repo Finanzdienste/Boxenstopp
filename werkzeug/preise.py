@@ -32,7 +32,7 @@ PREISE = {
  'lauch': (1.49, 1, 'Stange'), 'kohlrabi': (0.69, 1, 'Stk'), 'weisskohl': (1.29, 1000, 'g'),
  'koriander': (0.99, 1, 'Bund'), 'basilikum': (1.19, 1, 'Topf'), 'petersilie': (0.99, 1, 'Bund'), 'dill': (0.99, 1, 'Bund'),
  # Kühlregal & Käse
- 'skyr': (1.29, 500, 'g'), 'magerquark': (0.99, 500, 'g'), 'frischkaese': (1.19, 200, 'g'),
+ 'skyr': (1.29, 500, 'g'), 'magerquark': (0.99, 500, 'g'), 'huettenkaese': (1.19, 200, 'g'), 'frischkaese': (1.19, 200, 'g'),
  'kochsahne': (0.79, 200, 'g'), 'schlagsahne': (0.99, 200, 'g'), 'schmand': (0.79, 200, 'g'), 'milch': (1.09, 1000, 'ml'),
  'cheddar': (2.19, 200, 'g'), 'parmesan': (1.99, 100, 'g'), 'feta': (1.39, 150, 'g'), 'gnocchi': (1.49, 500, 'g'),
  'butter': (2.19, 250, 'g'), 'mozzarella': (0.89, 125, 'g'), 'mozzarella-light': (0.89, 125, 'g'),

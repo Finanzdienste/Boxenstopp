@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme, fleischJeBox } from '../js/ki.js';
 import { createHash } from 'node:crypto';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
@@ -125,6 +125,8 @@ check(inhalt.length === 3 && inhalt[0].type === 'image' && inhalt[0].source.medi
 check(/Portionen: 4/.test(inhalt[2].text) && /Dazukaufen: nein/.test(inhalt[2].text) && /was Griechisches/.test(inhalt[2].text) && /Daumen hoch\): Butter Chicken/.test(inhalt[2].text) && /nicht noch einmal: Feta-Reispfanne/.test(inhalt[2].text), 'im Text: Portionen, Dazukaufen, Wünsche, was ihr mögt und was nicht');
 const sys = rumpf.system;
 check(/Kein Fisch/.test(sys) && /Kein Putenhack/.test(sys) && /Hüttenkäse, Quark und Skyr werden in heißen Saucen körnig/.test(sys) && /glatt püriert/.test(sys) && !/Kein Hüttenkäse/.test(sys) && /Rind, Schwein, Eier/.test(sys) && !/Kein Schweinefleisch/.test(sys), 'die Regeln gehen mit: kein Fisch, kein Putenhack – Schwein ist gut, Hüttenkäse in warmen Saucen nur glatt püriert');
+check(/Nicht zu fleischig: höchstens etwa 90 g rohes Fleisch pro Box – für 4 Boxen also höchstens 360 g, auch als max bei anpassbar/.test(sys) && /Skyr, Hüttenkäse, Quark, Eier oder Hülsenfrüchte, dazu reichlich Sauce und Gemüse/.test(sys), 'Nicht zu fleischig: höchstens 90 g rohes Fleisch pro Box (für 4 Boxen 360 g), der Rest an Eiweiß aus Milch und Hülsenfrüchten');
+check(fleischJeBox({ p: 33 }) === 90 && fleischJeBox({ p: 50 }) === 135 && fleischJeBox({ p: 15 }) === 60 && fleischJeBox(null) === 90, 'Die Grenze wächst mit dem Eiweißziel (33 g → 90 g, 50 g → 135 g), nie unter 60 g');
 check(sys.includes('443 kcal') && sys.includes('33 g Protein') && /Mise en place/.test(sys) && /Schale 2/.test(sys) && /\{id\}/.test(sys) && /nichts dazugekauft/.test(sys), 'Ziel, Mise en place, Schalen, Platzhalter und „nichts dazukaufen“ stehen im Auftrag');
 check(sys.includes('haehnchenbrust=Hähnchenbrustfilet') && !sys.includes('backpapier='), 'der Katalog geht mit (ohne Haushalt)');
 

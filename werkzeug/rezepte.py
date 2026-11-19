@@ -9,7 +9,10 @@ Jedes Rezept ergibt 8 Boxen. Ziel pro Box: 443 kcal, 33 g Protein, 39 g KH,
 `nutrows` aus den Werten pro 100 g in naehrwerte.py.
 
 Mengen immer in Supermarkt-Packungen denken: 400 g Hähnchen, 500 g Hack,
-Dosen, Becher. Kein Fisch, kein Putenhack (Schwein geht). Wer ein Rezept
+Dosen, Becher. Kein Fisch, kein Putenhack (Schwein geht). Nicht zu
+fleischig: höchstens etwa 90 g rohes Fleisch pro Box, den Rest an Eiweiß aus
+Skyr, Hüttenkäse (in warmen Saucen glatt püriert), Quark oder
+Hülsenfrüchten (Butter Chicken: 75 g Hähnchen, viel Sauce). Wer ein Rezept
 ändert, lässt das Skript laufen und schaut in die Tabelle am Ende: kcal, P,
 KH, F pro Box und die Zeiten. tests/test-rezepte.mjs prüft die Grenzen.
 
@@ -63,7 +66,7 @@ CAT = {
  'koriander': ('Koriander, frisch', 'obst'), 'basilikum': ('Basilikum, frisch', 'obst'), 'petersilie': ('Petersilie, frisch', 'obst'),
  'dill': ('Dill oder Minze, frisch', 'obst'),
  # Kühlregal & Käse
- 'skyr': ('Skyr natur', 'kuehl'), 'magerquark': ('Magerquark', 'kuehl'),
+ 'skyr': ('Skyr natur', 'kuehl'), 'magerquark': ('Magerquark', 'kuehl'), 'huettenkaese': ('Hüttenkäse', 'kuehl'),
  'frischkaese': ('Frischkäse leicht', 'kuehl'), 'kochsahne': ('Kochsahne 15 %', 'kuehl'), 'schlagsahne': ('Schlagsahne 30 %', 'kuehl'),
  'schmand': ('Schmand', 'kuehl'), 'milch': ('Milch 1,5 %', 'kuehl'), 'cheddar': ('Cheddar', 'kuehl'),
  'parmesan': ('Parmesan', 'kuehl'), 'feta': ('Feta', 'kuehl'),
@@ -329,20 +332,21 @@ R.append(dict(
 # ======================================================================= 2 Butter Chicken
 R.append(dict(
  id='butter-chicken', name='Butter Chicken mit Reis', short='Butter Chicken',
- desc='Hähnchen in Skyr-Marinade aus dem Ofen, cremige Tomaten-Butter-Sauce und Basmati.',
+ desc='Hähnchen in Skyr-Marinade aus dem Ofen, viel cremige Tomaten-Butter-Sauce mit glatt püriertem Hüttenkäse und Basmati.',
  protein='Hähnchen', base='Reis', method='Ofen + Topf', fridge='4 Tage', freeze='3 Monate',
  items=[
-  I('Hähnchenbrustfilet', '800 g', 'haehnchenbrust', 800, 'g', '2 × 400 g'),
+  I('Hähnchenbrustfilet', '600 g', 'haehnchenbrust', 600, 'g', '1 Packung à 600 g'),
   I('Skyr natur', '300 g', 'skyr', 300, 'g', '2 Becher à 150 g'),
+  I('Hüttenkäse', '400 g', 'huettenkaese', 400, 'g', '2 Becher à 200 g'),
   I('Schlagsahne 30 %', '200 g', 'schlagsahne', 200, 'g', '1 Becher'),
-  I('Passierte Tomaten', '500 g', 'passata', 500, 'g', '1 Packung'),
+  I('Passierte Tomaten', '1 kg', 'passata', 1000, 'g', '2 Packungen à 500 g'),
   I('Tomatenmark', '70 g', 'tomatenmark', 70, 'g', 'kleine Dose'),
   I('Zwiebeln', '2 große (300 g)', 'zwiebeln', 300, 'g'),
   I('Knoblauch', '6 Zehen', 'knoblauch', 6, 'Zehe'),
   I('Ingwer', '30 g (daumengroß)', 'ingwer', 30, 'g'),
   I('Zitrone', '1 Stück', 'zitrone', 1, 'Stk'),
-  I('Basmatireis', '280 g', 'reis', 280, 'g'),
-  I('Butter', '40 g', 'butter', pantry=True),
+  I('Basmatireis', '240 g', 'reis', 240, 'g'),
+  I('Butter', '30 g', 'butter', pantry=True),
   I('Öl', '10 g', 'oel', pantry=True),
   I('Honig', '1 TL (10 g)', 'honig', pantry=True),
   I('Koriander, frisch', 'zum Servieren', 'koriander', opt=True),
@@ -353,7 +357,7 @@ R.append(dict(
   S('Kasuri Methi (optional, Asia-Laden)','2 EL','kasuri-methi')],
  schalen=[('Zwiebeln', 'mittel'), ('Hähnchen in Marinade', 'groß'), ('Knoblauch & Ingwer', 'klein'),
           ('Gewürze & Tomatenmark', 'klein'), ('Zum Schluss', 'klein')],
- geraete=['großer Topf', 'kleiner Topf mit Deckel', 'Backblech', 'Messbecher', 'Schüssel zum Wiegen', 'Pürierstab (optional)'],
+ geraete=['großer Topf', 'kleiner Topf mit Deckel', 'Backblech', 'Messbecher', 'Schüssel zum Wiegen', 'Pürierstab'],
  ablauf=[
   ('Vorbereiten', [
    X('2 Knoblauchzehen schälen und fein reiben → Schale 2', Z('knoblauch', 2)),
@@ -361,8 +365,8 @@ R.append(dict(
    X('½ Zitrone auspressen → Schale 2', 1),
    X('In Schale 2 dazugeben und verrühren:', 3, liste=['300 g Skyr', '10 g Öl', '1 TL Garam Masala', '1 TL Kurkuma',
      '1 TL Paprika edelsüß', '½ TL Kreuzkümmel', '½ TL Chilipulver', '1 TL Salz']),
-   X('800 g Hähnchenbrust in 3-cm-Würfel schneiden → Schale 2 und mit der Marinade mischen. Abgedeckt kalt stellen, mind. 30 Min.',
-     Z('fleisch', 8), ruhe=30),
+   X('600 g Hähnchenbrust in 3-cm-Würfel schneiden → Schale 2 und mit der Marinade mischen. Abgedeckt kalt stellen, mind. 30 Min.',
+     Z('fleisch', 6), ruhe=30),
    ABWASCHEN,
    X('2 große Zwiebeln (300 g) schälen und fein würfeln → Schale 1', Z('zwiebel-wuerfel', 3)),
    X('4 Knoblauchzehen schälen und fein hacken → Schale 3', Z('knoblauch', 4)),
@@ -373,10 +377,10 @@ R.append(dict(
    X('Die andere Zitronenhälfte auspressen → Schale 5', 1),
    X('In Schale 5 dazu: 10 g Butter und 2 EL Kasuri Methi, zwischen den Fingern zerrieben (optional)', 1),
    leer_wiegen('Den großen Topf'),
-   X('30 g Butter abwiegen → in den großen Topf', 1),
-   X('500 g passierte Tomaten öffnen', 1),
-   X('200 ml Wasser, 10 g Honig und 1 TL Salz im Messbecher verrühren', 2),
-   reis_vorbereiten(280, 420),
+   X('20 g Butter abwiegen → in den großen Topf', 1),
+   X('Die 2 Packungen passierte Tomaten (1 kg) öffnen', 1),
+   X('100 ml Wasser, 10 g Honig und 1 TL Salz im Messbecher verrühren', 2),
+   reis_vorbereiten(240, 360),
   ]),
   ('Kochen', [
    X('Den großen Topf mit der Butter auf mittlere Hitze, Schale 1 darin 8–10 Min. goldbraun braten', 10),
@@ -385,13 +389,14 @@ R.append(dict(
    W('Hände waschen', 1),
    X('Schale 3 zu den Zwiebeln und 1 Min. mitbraten', 1),
    X('Schale 4 einrühren und 1–2 Min. anrösten', 2),
-   X('Die passierten Tomaten (500 g) und den Messbecher einrühren', 1),
-   X('Halb zugedeckt 15 Min. köcheln', 15),
+   X('Die passierten Tomaten (1 kg) und den Messbecher einrühren', 1),
+   X('Halb zugedeckt 20 Min. köcheln, ab und zu umrühren', 20),
    W('Blech herausnehmen, sobald die 10–12 Min. um sind, Ofen aus', 1),
    W(REIS_KOCHEN['d'], REIS_KOCHEN['min'], ruhe=REIS_KOCHEN['ruhe']),
    X('Für eine glatte Sauce wie im Restaurant jetzt pürieren (optional)', 2),
    X('Hähnchen samt Bratensaft vom Blech in die Sauce, 5 Min. leise köcheln, bis es innen nicht mehr rosa ist', 5),
-   X('200 g Sahne und Schale 5 einrühren, ab jetzt nicht mehr sprudelnd kochen', 1),
+   X('2 Kellen Sauce ohne Hähnchen und 400 g Hüttenkäse im Messbecher ganz glatt pürieren – sonst bleibt er körnig', 2),
+   X('Herd auf kleinste Stufe: die Hüttenkäse-Creme, 200 g Sahne und Schale 5 einrühren, ab jetzt nicht mehr kochen', 1),
    X('Mit Salz abschmecken', 1),
   ]),
   ('Portionieren', [
@@ -401,7 +406,8 @@ R.append(dict(
  ],
  tips=['Über Nacht mariniert wird das Hähnchen noch zarter, und die 30 Min. Wartezeit fallen weg.',
        'Kasuri Methi bringt den typischen Restaurant-Geschmack. Gibt es im Asia-Laden oder online.',
-       'Mit Kochsahne 15 % (400 g) statt Schlagsahne wird die Sauce leichter, dann 270 g Reis nehmen.',
+       'Mit Kochsahne 15 % (2 Becher à 200 g) statt Schlagsahne wird die Sauce milder, dann 225 g Reis nehmen.',
+       'Noch weniger Fleisch: 500 g Hähnchen und 1 Dose Kichererbsen (abgetropft) mit den Tomaten dazu – dann 200 g Reis.',
        'Koriander erst beim Essen drüberstreuen.'],
  pauschal=[('Gewürze', 24)],
 ))

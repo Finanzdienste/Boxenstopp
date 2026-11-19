@@ -195,6 +195,13 @@ export function schemaFuerClaude(schema) {
 /** Der Teil der Anfrage an Claude, der die Antwort als JSON nach dem Schema verlangt. */
 export const ausgabeFuerClaude = (schema) => ({ output_config: { format: { type: 'json_schema', schema: schemaFuerClaude(schema) } } });
 
+/**
+ * Wie viel rohes Fleisch eine Box höchstens haben soll – mit dem Eiweißziel:
+ * beim Standard (33 g Protein) etwa 90 g, den Rest an Eiweiß bringen Skyr,
+ * Hüttenkäse, Hülsenfrüchte (Tobi: das Butter Chicken war zu fleischig).
+ */
+export const fleischJeBox = (ziel) => Math.max(60, Math.round((Number(ziel?.p) || 33) * 2.7 / 5) * 5);
+
 export function systemText({ portionen, ziel, dazukaufen, katalog, modus = 'reste', wer = 'Tobi und Amy' }) {
   const kat = Object.entries(katalog || {})
     .filter(([, v]) => v.c !== 'haushalt')
@@ -218,6 +225,7 @@ Ziel pro Box: ${ziel.kcal} kcal, ${ziel.p} g Protein, ${ziel.kh} g Kohlenhydrate
 Feste Regeln:
 - Kein Fisch und keine Meeresfrüchte, auch nichts, was sie enthält (Fischsauce, Garnelenpaste, Sardellen, Worcestersauce). Bei Currypaste „vegan“ dazuschreiben.
 - Kein Putenhack. Hähnchen, Putenbrust, Rind, Schwein, Eier, Hülsenfrüchte und Milchprodukte sind gut.
+- Nicht zu fleischig: höchstens etwa ${fleischJeBox(ziel)} g rohes Fleisch pro Box – für ${portionen} Boxen also höchstens ${fleischJeBox(ziel) * portionen} g, auch als max bei anpassbar. Den Rest an Eiweiß holen Skyr, Hüttenkäse, Quark, Eier oder Hülsenfrüchte, dazu reichlich Sauce und Gemüse.
 - Hüttenkäse, Quark und Skyr werden in heißen Saucen körnig: In eine warme Sauce kommen sie nur glatt püriert und zum Schluss, nicht mehr kochen lassen – sonst kalt (Dip, Topping, Marinade).
 - Richtig lecker und ordentlich gewürzt, so dass man es gern vier Tage hintereinander isst. Lieber ein bewährtes Gericht gut gemacht als ein wildes Experiment.
 - ${wunsch

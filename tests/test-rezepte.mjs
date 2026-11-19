@@ -22,6 +22,10 @@ const ABT = ['obst', 'fleisch', 'kuehl', 'tk', 'konserven', 'trocken', 'vorrat',
 
 check(daten.version === 1 && Array.isArray(rezepte) && rezepte.length === 50, `${rezepte.length} Rezepte`);
 check(ziel.kcal === 443 && ziel.p === 33 && ziel.kh === 39 && ziel.f === 15.4, 'Ziel pro Box: 443 kcal, 33 P, 39 KH, 15,4 F');
+// Butter Chicken war zu fleischig: weniger Hähnchen, mehr Sauce – mit glatt püriertem Hüttenkäse
+const bc = rezepte.find((r) => r.id === 'butter-chicken');
+const bcSchritte = bc.ablauf.flatMap((p) => p.schritte.map((x) => x.d));
+check(bc.items.find((it) => it.k === 'haehnchenbrust').q / 8 <= 90 && bc.items.some((it) => it.k === 'huettenkaese') && bcSchritte.some((d) => /Hüttenkäse.*ganz glatt pürieren/.test(d)) && bcSchritte.some((d) => /nicht mehr kochen/.test(d)) && katalog.huettenkaese?.c === 'kuehl', 'Butter Chicken: höchstens 90 g Hähnchen pro Box, der Hüttenkäse ganz glatt püriert und nicht mehr gekocht');
 const ids = rezepte.map((r) => r.id);
 check(new Set(ids).size === ids.length && ids.every((id) => /^[a-z0-9-]+$/.test(id)), 'jede Rezept-id einmal, klein mit Bindestrichen');
 check(Object.values(katalog).every((v) => v.n && ABT.includes(v.c)), 'jeder Katalogeintrag hat Namen und eine bekannte Abteilung');

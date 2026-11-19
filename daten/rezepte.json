@@ -697,7 +697,7 @@
    "id": "butter-chicken",
    "name": "Butter Chicken mit Reis",
    "short": "Butter Chicken",
-   "desc": "Hähnchen in Skyr-Marinade aus dem Ofen, cremige Tomaten-Butter-Sauce und Basmati.",
+   "desc": "Hähnchen in Skyr-Marinade aus dem Ofen, viel cremige Tomaten-Butter-Sauce mit glatt püriertem Hüttenkäse und Basmati.",
    "protein": "Hähnchen",
    "base": "Reis",
    "method": "Ofen + Topf",
@@ -706,15 +706,15 @@
    "items": [
     {
      "n": "Hähnchenbrustfilet",
-     "a": "800 g",
+     "a": "600 g",
      "k": "haehnchenbrust",
-     "q": 800,
+     "q": 600,
      "u": "g",
-     "h": "2 × 400 g",
+     "h": "1 Packung à 600 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 800,
+     "g": 600,
      "gu": "g",
      "pro100": {
       "kcal": 106,
@@ -723,9 +723,9 @@
       "f": 1.5
      },
      "anpassbar": true,
-     "min": 400,
-     "max": 1280,
-     "eur": 9.05
+     "min": 300,
+     "max": 960,
+     "eur": 6.79
     },
     {
      "n": "Skyr natur",
@@ -749,6 +749,29 @@
      "min": 150,
      "max": 480,
      "eur": 0.77
+    },
+    {
+     "n": "Hüttenkäse",
+     "a": "400 g",
+     "k": "huettenkaese",
+     "q": 400,
+     "u": "g",
+     "h": "2 Becher à 200 g",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 400,
+     "gu": "g",
+     "pro100": {
+      "kcal": 98,
+      "p": 12.3,
+      "kh": 2.6,
+      "f": 4.3
+     },
+     "anpassbar": false,
+     "min": 400,
+     "max": 400,
+     "eur": 2.38
     },
     {
      "n": "Schlagsahne 30 %",
@@ -775,15 +798,15 @@
     },
     {
      "n": "Passierte Tomaten",
-     "a": "500 g",
+     "a": "1 kg",
      "k": "passata",
-     "q": 500,
+     "q": 1000,
      "u": "g",
-     "h": "1 Packung",
+     "h": "2 Packungen à 500 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 500,
+     "g": 1000,
      "gu": "g",
      "pro100": {
       "kcal": 26,
@@ -792,9 +815,9 @@
       "f": 0.2
      },
      "anpassbar": false,
-     "min": 500,
-     "max": 500,
-     "eur": 0.69
+     "min": 1000,
+     "max": 1000,
+     "eur": 1.38
     },
     {
      "n": "Tomatenmark",
@@ -913,15 +936,15 @@
     },
     {
      "n": "Basmatireis",
-     "a": "280 g",
+     "a": "240 g",
      "k": "reis",
-     "q": 280,
+     "q": 240,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 280,
+     "g": 240,
      "gu": "g",
      "pro100": {
       "kcal": 350,
@@ -930,21 +953,21 @@
       "f": 0.6
      },
      "anpassbar": true,
-     "min": 140,
-     "max": 448,
-     "eur": 0.64
+     "min": 120,
+     "max": 384,
+     "eur": 0.55
     },
     {
      "n": "Butter",
-     "a": "40 g",
+     "a": "30 g",
      "k": "butter",
-     "q": 40.0,
+     "q": 30.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 40.0,
+     "g": 30.0,
      "gu": "g",
      "pro100": {
       "kcal": 741,
@@ -953,9 +976,9 @@
       "f": 82
      },
      "anpassbar": true,
-     "min": 20,
-     "max": 64,
-     "eur": 0.35
+     "min": 15,
+     "max": 48,
+     "eur": 0.26
     },
     {
      "n": "Öl",
@@ -1110,7 +1133,7 @@
     "Backblech",
     "Messbecher",
     "Schüssel zum Wiegen",
-    "Pürierstab (optional)"
+    "Pürierstab"
    ],
    "ablauf": [
     {
@@ -1144,7 +1167,7 @@
       },
       {
        "d": "{haehnchenbrust} Hähnchenbrust in 3-cm-Würfel schneiden → Schale 2 und mit der Marinade mischen. Abgedeckt kalt stellen, mind. 30 Min.",
-       "min": 7,
+       "min": 5,
        "ruhe": 30
       },
       {
@@ -1196,19 +1219,19 @@
        "min": 1
       },
       {
-       "d": "30 g Butter abwiegen → in den großen Topf",
+       "d": "20 g Butter abwiegen → in den großen Topf",
        "min": 1
       },
       {
-       "d": "{passata} passierte Tomaten öffnen",
+       "d": "Die 2 Packungen passierte Tomaten ({passata}) öffnen",
        "min": 1
       },
       {
-       "d": "200 ml Wasser, {honig} Honig und 1 TL Salz im Messbecher verrühren",
+       "d": "100 ml Wasser, {honig} Honig und 1 TL Salz im Messbecher verrühren",
        "min": 2
       },
       {
-       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 420 ml Wasser und 1 Prise Salz in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 360 ml Wasser und 1 Prise Salz in den kleinen Topf",
        "min": 3
       }
      ]
@@ -1249,8 +1272,8 @@
        "min": 1
       },
       {
-       "d": "Halb zugedeckt 15 Min. köcheln",
-       "min": 15
+       "d": "Halb zugedeckt 20 Min. köcheln, ab und zu umrühren",
+       "min": 20
       },
       {
        "d": "Blech herausnehmen, sobald die 10–12 Min. um sind, Ofen aus",
@@ -1272,7 +1295,11 @@
        "min": 5
       },
       {
-       "d": "{schlagsahne} Sahne und Schale 5 einrühren, ab jetzt nicht mehr sprudelnd kochen",
+       "d": "2 Kellen Sauce ohne Hähnchen und {huettenkaese} Hüttenkäse im Messbecher ganz glatt pürieren – sonst bleibt er körnig",
+       "min": 2
+      },
+      {
+       "d": "Herd auf kleinste Stufe: die Hüttenkäse-Creme, {schlagsahne} Sahne und Schale 5 einrühren, ab jetzt nicht mehr kochen",
        "min": 1
       },
       {
@@ -1310,7 +1337,8 @@
    "tips": [
     "Über Nacht mariniert wird das Hähnchen noch zarter, und die 30 Min. Wartezeit fallen weg.",
     "Kasuri Methi bringt den typischen Restaurant-Geschmack. Gibt es im Asia-Laden oder online.",
-    "Mit Kochsahne 15 % (400 g) statt Schlagsahne wird die Sauce leichter, dann 270 g Reis nehmen.",
+    "Mit Kochsahne 15 % (2 Becher à 200 g) statt Schlagsahne wird die Sauce milder, dann 225 g Reis nehmen.",
+    "Noch weniger Fleisch: 500 g Hähnchen und 1 Dose Kichererbsen (abgetropft) mit den Tomaten dazu – dann 200 g Reis.",
     "Koriander erst beim Essen drüberstreuen."
    ],
    "pauschal": [
@@ -1329,11 +1357,11 @@
    "nut": [
     [
      "Hähnchenbrustfilet",
-     "800 g",
-     848.0,
-     184.0,
+     "600 g",
+     636.0,
+     138.0,
      0.0,
-     12.0
+     9.0
     ],
     [
      "Skyr natur",
@@ -1342,6 +1370,14 @@
      33.0,
      12.0,
      0.6
+    ],
+    [
+     "Hüttenkäse",
+     "400 g",
+     392.0,
+     49.2,
+     10.4,
+     17.2
     ],
     [
      "Schlagsahne 30 %",
@@ -1353,11 +1389,11 @@
     ],
     [
      "Passierte Tomaten",
-     "500 g",
-     130.0,
-     6.5,
-     21.5,
-     1.0
+     "1 kg",
+     260.0,
+     13.0,
+     43.0,
+     2.0
     ],
     [
      "Tomatenmark",
@@ -1401,19 +1437,19 @@
     ],
     [
      "Basmatireis",
-     "280 g",
-     980.0,
-     22.4,
-     215.6,
-     1.7
+     "240 g",
+     840.0,
+     19.2,
+     184.8,
+     1.4
     ],
     [
      "Butter",
-     "40 g",
-     296.4,
-     0.3,
+     "30 g",
+     222.3,
      0.2,
-     32.8
+     0.2,
+     24.6
     ],
     [
      "Öl",
@@ -1441,30 +1477,30 @@
     ]
    ],
    "kosten": {
-    "gesamt": 14.25,
-    "box": 1.78
+    "gesamt": 14.88,
+    "box": 1.86
    },
    "total": [
-    3461.5,
-    262.9,
-    312.3,
-    121.9
+    3557.4,
+    269.3,
+    313.4,
+    128.6
    ],
    "m": {
-    "kcal": 433,
-    "p": 32.9,
-    "kh": 39.0,
-    "f": 15.2
+    "kcal": 445,
+    "p": 33.7,
+    "kh": 39.2,
+    "f": 16.1
    },
    "zeit": {
     "phasen": [
      45,
-     40,
+     45,
      15
     ],
-    "gesamt": 100
+    "gesamt": 105
    },
-   "time": 100,
+   "time": 105,
    "bild": "bilder/rezepte/butter-chicken.webp?v=68d05471"
   },
   {
@@ -32243,6 +32279,10 @@
    "n": "Magerquark",
    "c": "kuehl"
   },
+  "huettenkaese": {
+   "n": "Hüttenkäse",
+   "c": "kuehl"
+  },
   "frischkaese": {
    "n": "Frischkäse leicht",
    "c": "kuehl"
@@ -33104,6 +33144,17 @@
    "u": "g",
    "je": 100,
    "anpassbar": true
+  },
+  "huettenkaese": {
+   "pro100": {
+    "kcal": 98,
+    "p": 12.3,
+    "kh": 2.6,
+    "f": 4.3
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": false
   },
   "frischkaese": {
    "pro100": {
@@ -34218,6 +34269,12 @@
    "je_g": 0.00198,
    "eur": 0.99,
    "menge": 500,
+   "u": "g"
+  },
+  "huettenkaese": {
+   "je_g": 0.00595,
+   "eur": 1.19,
+   "menge": 200,
    "u": "g"
   },
   "frischkaese": {

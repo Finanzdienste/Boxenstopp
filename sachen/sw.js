@@ -56,7 +56,7 @@
  * ../js/ ein Import dazu, gehört er auch hierher.
  */
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `sachen-${VERSION}`;
 /** So lange wartet die App aufs Netz, dann nimmt sie den Vorrat (die Antwort kommt trotzdem noch hinein). */
 const GEDULD = 4000;

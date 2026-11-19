@@ -116,3 +116,7 @@ Was gerade läuft, zeigt `get_session` (`model`, `effort_level`,
   eine Liste kann ein eigenes Ziel haben (`profil.ziel`).
 - Kein Fisch, kein Putenhack. Schwein und Hüttenkäse gehen – Hüttenkäse in
   warmen Saucen nur glatt püriert (sonst wird er körnig).
+- Nicht zu fleischig: höchstens etwa 90 g rohes Fleisch pro Box (beim
+  Standardziel; mit mehr Eiweiß anteilig mehr). Den Rest an Eiweiß bringen
+  Skyr, Hüttenkäse, Quark, Eier oder Hülsenfrüchte, dazu reichlich Sauce und
+  Gemüse. Butter Chicken hat deshalb 75 g Hähnchen und mehr Sauce.
