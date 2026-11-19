@@ -6,8 +6,9 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { pruefer, ROOT } from './hilfe.mjs';
-import { ZUTAT_BILD, KAT_BILD, ALLE_BILDER, bildName, bildPfad, zutatImg, rezeptBildchen } from '../js/bilder.js';
+import { ZUTAT_BILD, KAT_BILD, ALLE_BILDER, bildName, bildPfad, zutatImg, rezeptBildchen, fotoVon } from '../js/bilder.js';
 import { MOTIVE, auftrag } from '../werkzeug/bilder.mjs';
+import { motive, plan, indexBereinigen, zutatOhneMenge, JE_LAUF } from '../werkzeug/eigene-fotos.mjs';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -63,5 +64,37 @@ check(Object.keys(MOTIVE).every((id) => rezepte.some((r) => r.id === id)), 'kein
 const a = auftrag(rezepte.find((r) => r.id === 'chili'));
 check(a.length < 2048 && /meal prep container/.test(a) && /no text/.test(a) && /chili con carne/.test(a), 'der Auftrag: Box von oben, kein Text, das Motiv; unter 2048 Zeichen');
 check(!Object.values(MOTIVE).some((m) => /fish|salmon|tuna|shrimp|prawn/i.test(m)), 'kein Fisch in den Motiven');
+
+// --- Fotos für gewünschte, KI- und Amys Rezepte (werkzeug/eigene-fotos.mjs, daten/fotos.json) – erfundene Rezepte
+const index = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'fotos.json'), 'utf8'));
+const eigeneOk = Object.entries(index.fotos || {}).every(([id, e]) => {
+  const m = String(e?.bild || '').match(/^bilder\/eigene\/([a-z0-9-]+)\.webp\?v=([0-9a-f]{8})$/);
+  const datei = path.join(ROOT, 'bilder', 'eigene', `${id}.webp`);
+  return m && m[1] === id && existsSync(datei) && createHash('sha1').update(readFileSync(datei)).digest('hex').slice(0, 8) === m[2];
+});
+check(index.v === 1 && eigeneOk && JSON.stringify(indexBereinigen(index)) === JSON.stringify(index), `daten/fotos.json: jeder Eintrag zeigt auf seine Datei mit Prüfsumme (${Object.keys(index.fotos || {}).length} Fotos)`);
+const eigeneDateien = existsSync(path.join(ROOT, 'bilder', 'eigene')) ? readdirSync(path.join(ROOT, 'bilder', 'eigene')).filter((f) => f.endsWith('.webp')).map((f) => f.slice(0, -5)) : [];
+check(eigeneDateien.every((id) => index.fotos[id]), 'kein Foto in bilder/eigene ohne Eintrag');
+
+check(zutatOhneMenge('1 Handvoll groben Parmesan') === 'Parmesan' && zutatOhneMenge('g+ 75g shredded Cheddar') === 'shredded Cheddar'
+  && zutatOhneMenge('2 EL Olivenöl') === '' && zutatOhneMenge('1 großen (Dürüm)Wrap') === 'Wrap' && zutatOhneMenge('1 Teelöffel Feines Salz') === '', 'Amys Zeilen: nur, was es ist – ohne Menge, ohne Salz und Öl');
+const kat = { v: 1, rezepte: { 'kat-test1': { k: { name: 'Kürbis-Testcurry', beschreibung: 'Mild und cremig – schmeckt am zweiten Tag', zutaten: [{ name: 'Kürbis', quelle: 'frisch' }, { name: 'Mehl', quelle: 'vorrat' }, { name: 'Wasser, lauwarm' }] } }, 'kat-kaputt': { k: {} } }, weg: {} };
+const listeProbe = { ki: { 'ki-probe': { r: { name: 'Reste-Pfanne', zutaten: [] } } }, amy: { 'amy-probe-x1': { name: 'Testwrap', zutaten: ['1 Wrap', '100 g Hähnchen'], notiz: 'GEHEIM verträgt keine Zwiebeln' } } };
+const soll = motive({ katalog: kat, liste: listeProbe });
+check(Object.keys(soll).join() === 'kat-test1,ki-probe,amy-probe-x1', `Katalog, KI und Amy, Kaputtes nicht (${Object.keys(soll).join(', ')})`);
+check(/meal prep container filled with Kürbis-Testcurry – Mild und cremig \(with Kürbis\), on a light oak/.test(soll['kat-test1'].auftrag), 'Katalog: Box, Name, Beschreibung bis zum Gedankenstrich, sichtbare Zutaten (ohne Vorrat, Wasser)');
+check(/top-down view of Testwrap \(made with Wrap, Hähnchen\), served on a plate/.test(soll['amy-probe-x1'].auftrag) && !Object.values(soll).some((m) => /GEHEIM/.test(m.auftrag)), 'Amy: ein Teller mit ihren Zutaten – ihre Notiz nie');
+const leer = indexBereinigen(null);
+check(plan(soll, leer).machen.length === 3 && !plan(soll, leer).weg.length, 'ohne Fotos: alle drei machen');
+const mit = indexBereinigen({ fotos: { 'kat-test1': { bild: 'bilder/eigene/kat-test1.webp?v=12345678', q: soll['kat-test1'].q }, 'amy-probe-x1': { bild: 'bilder/eigene/amy-probe-x1.webp?v=12345678', q: 'anders' }, 'kat-weg': { bild: 'bilder/eigene/kat-weg.webp?v=12345678', q: 'x' }, 'kat-boese': { bild: 'https://example.com/x.webp' } } });
+const p1 = plan(soll, mit);
+check(!mit.fotos['kat-boese'] && p1.machen.join() === 'ki-probe,amy-probe-x1' && p1.weg.join() === 'kat-weg', `neu, umbenannt (anderes q) und weg (${p1.machen.join(', ')} | ${p1.weg.join(', ')})`);
+check(plan(soll, mit, { da: (id) => id !== 'kat-test1' }).machen.includes('kat-test1') && plan(soll, mit, { nur: ['kat-test1'] }).machen.join() === 'kat-test1', 'fehlt die Datei, kommt es neu; mit ids nur die');
+const viele = Object.fromEntries(Array.from({ length: 40 }, (_, i) => [`kat-v${i}`, { q: 'q' }]));
+check(plan(viele, leer).machen.length === JE_LAUF, `höchstens ${JE_LAUF} je Lauf`);
+check(fotoVon({ id: 'chili', bild: 'bilder/rezepte/chili.webp?v=abc12345' }, {}) === 'bilder/rezepte/chili.webp?v=abc12345'
+  && fotoVon({ id: 'kat-test1' }, mit.fotos) === 'bilder/eigene/kat-test1.webp?v=12345678'
+  && fotoVon({ id: 'kat-test1' }, { 'kat-test1': { bild: 'https://boese.example/x.webp' } }) === ''
+  && fotoVon({ id: 'toString' }, {}) === '' && fotoVon({ id: 'x', bild: 'burrito' }, null) === '', 'fotoVon: das eigene, sonst aus fotos.json – fremde Adressen nie');
 
 ende();

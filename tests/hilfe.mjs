@@ -267,7 +267,7 @@ export function tierAttrappe() {
  * Die einmaligen Hinweise (Dashboard, Sachen als eigene App) gelten als
  * gesehen – außer mit `hinweise: true`.
  */
-export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, bildschirmzeit = null, takt = 400, adresse = APP_URL, bereit = String(adresse).includes('/sachen/') ? 'html[data-bereit]' : '#grid .box', viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null, hinweise = false } = {}) {
+export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, bildschirmzeit = null, takt = 400, adresse = APP_URL, bereit = String(adresse).includes('/sachen/') ? 'html[data-bereit]' : '#grid .box', viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null, hinweise = false, fotos = {} } = {}) {
   const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow', ...(userAgent ? { userAgent } : {}) });
   if (skript) await ctx.addInitScript(skript);
   // z. B. ['notifications', 'clipboard-read', 'clipboard-write'] – Headless-Chromium verweigert Mitteilungen sonst
@@ -279,6 +279,14 @@ export async function handy(browser, { attrappe = null, tiere = null, datenbank 
   await ctx.route(FUNKTIONEN, (r) => r.abort('blockedbyclient'));
   await ctx.route(WIKI_HOSTS, (r) => r.abort('blockedbyclient'));
   await ctx.route(BILDSCHIRMZEIT, bildschirmzeit ? bildschirmzeit.route : (r) => r.abort('blockedbyclient'));
+  // Fotos der gewünschten und Amys Rezepte: was der Test in `fotos` legt (auch später, dann neu laden) –
+  // die Bilder sind alle das Chili; eins mit kaputt: true lädt nicht
+  await ctx.route('**/daten/fotos.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ v: 1, fotos }) }));
+  await ctx.route('**/bilder/eigene/**', (r) => {
+    const id = new URL(r.request().url()).pathname.split('/').pop().replace(/\.webp$/, '');
+    if (!fotos[id] || fotos[id].kaputt) return r.fulfill({ status: 404, body: '' });
+    return r.fulfill({ status: 200, contentType: 'image/webp', body: readFileSync(path.join(ROOT, 'bilder', 'rezepte', 'chili.webp')) });
+  });
   // Die Angebote der Woche: in den Tests immer dieselben (tests/daten/angebote.json), nie das echte Feld
   await ctx.route('**/daten/angebote.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'angebote.json'), 'utf8') }));
   await ctx.route('**/daten/preisverlauf.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(path.join(ROOT, 'tests', 'daten', 'preisverlauf.json'), 'utf8') }));

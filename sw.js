@@ -27,7 +27,8 @@
  *                    Update der App übersteht; gefragt wird mit „no-cache“
  *                    (unverändert: nur ein kurzes 304 statt 600 KB).
  *   bilder/rezepte/  aus einem eigenen Vorrat (BILDER), der ein Update der
- *                    App übersteht. Alle Fotos aus daten/rezepte.json holt
+ *   bilder/eigene/   App übersteht. Alle Fotos aus daten/rezepte.json und
+ *                    daten/fotos.json (gewünschte und Amys Rezepte) holt
  *                    der Worker von selbst (fotosVorrat) – ohne Netz soll
  *                    jedes Rezept sein Foto haben, nicht nur die schon
  *                    gesehenen. Ein neues Rezeptfoto hat eine neue Adresse
@@ -51,7 +52,7 @@
  * ändert, muss diese Datei nicht anfassen.
  */
 
-const VERSION = 'v90';
+const VERSION = 'v91';
 const CACHE = `boxenstopp-${VERSION}`;
 const BILDER = 'boxenstopp-bilder-v1';
 const DATEN = 'boxenstopp-daten-v1';
@@ -60,7 +61,7 @@ const SACHEN = 'boxenstopp-sachen-v1';
 /** Amys Sachen-App mit eigenem Worker – darunter fasst dieser nichts an (s. o.). */
 const SACHEN_APP = new URL('./sachen/', self.location).pathname;
 const zurSachenApp = (url) => { const p = new URL(url).pathname; return p === SACHEN_APP.slice(0, -1) || p.startsWith(SACHEN_APP); };
-const DATEN_DATEIEN = ['daten/rezepte.json', 'daten/angebote.json', 'daten/preisverlauf.json'];
+const DATEN_DATEIEN = ['daten/rezepte.json', 'daten/fotos.json', 'daten/angebote.json', 'daten/preisverlauf.json'];
 /** So lange wartet die App aufs Netz, dann nimmt sie den Vorrat (die Antwort kommt trotzdem noch hinein). */
 const GEDULD = 4000;
 
@@ -224,22 +225,26 @@ self.addEventListener('activate', (event) => {
 });
 
 /*
- * Alle Rezeptfotos aus daten/rezepte.json in den Vorrat (BILDER): Was schon
- * da ist, bleibt; fehlende kommen aus dem Netz (je vier auf einmal), alte
- * Fassungen (anderes ?v=) und Fotos von Rezepten, die es nicht mehr gibt,
- * fliegen raus. Läuft nach jedem frischen daten/rezepte.json.
+ * Alle Rezeptfotos aus daten/rezepte.json und daten/fotos.json in den Vorrat
+ * (BILDER): Was schon da ist, bleibt; fehlende kommen aus dem Netz (je vier
+ * auf einmal), alte Fassungen (anderes ?v=) und Fotos von Rezepten, die es
+ * nicht mehr gibt, fliegen raus. Läuft nach jeder frischen der beiden Dateien.
  */
 let fotosLaeuft = null;
 function fotosVorrat() {
   fotosLaeuft = fotosLaeuft || (async () => {
-    const res = await (await caches.open(DATEN)).match(new URL('daten/rezepte.json', self.registration.scope).href, { ignoreSearch: true });
-    if (!res) return;
-    let rezepte = [];
-    try { rezepte = (await res.json()).rezepte || []; } catch { return; }
+    const daten = await caches.open(DATEN);
+    const lesen = async (pfad) => {
+      const res = await daten.match(new URL(pfad, self.registration.scope).href, { ignoreSearch: true });
+      try { return res ? await res.json() : null; } catch { return null; }
+    };
+    const rezepte = await lesen('daten/rezepte.json');
+    if (!Array.isArray(rezepte?.rezepte)) return;
+    const eigene = (await lesen('daten/fotos.json'))?.fotos;
     const soll = new Map(); // Pfad → Adresse mit ?v=
-    for (const r of rezepte) {
-      if (typeof r?.bild !== 'string' || !/^bilder\/rezepte\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(r.bild)) continue;
-      const u = new URL(r.bild, self.registration.scope);
+    for (const bild of [...rezepte.rezepte.map((r) => r?.bild), ...Object.values(eigene && typeof eigene === 'object' ? eigene : {}).map((e) => e?.bild)]) {
+      if (typeof bild !== 'string' || !/^bilder\/(?:rezepte|eigene)\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(bild)) continue;
+      const u = new URL(bild, self.registration.scope);
       soll.set(u.pathname, u.href);
     }
     if (!soll.size) return;
@@ -363,11 +368,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   if (url.pathname.startsWith(new URL('./daten/', self.location).pathname)) {
-    const rezepte = url.pathname.endsWith('/daten/rezepte.json');
+    const rezepte = /\/daten\/(?:rezepte|fotos)\.json$/.test(url.pathname);
     event.respondWith(erstNetz(() => fetch(new Request(request, { cache: 'no-cache' })), DATEN, () => imVorrat(request, DATEN), rezepte ? fotosVorrat : null));
     return;
   }
-  if (url.pathname.startsWith(new URL('./bilder/rezepte/', self.location).pathname)) {
+  if (['./bilder/rezepte/', './bilder/eigene/'].some((p) => url.pathname.startsWith(new URL(p, self.location).pathname))) {
     event.respondWith(caches.open(BILDER).then((c) => c.match(request).then((hit) => hit || fetch(request).then((res) => {
       if (gut(res)) {
         // Ablegen und ältere Fassungen desselben Fotos (andere ?v=) wegräumen

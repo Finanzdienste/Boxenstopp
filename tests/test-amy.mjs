@@ -193,7 +193,8 @@ check(z2.amy['amy-a-1'].name === 'A' && z2.amy['amy-b-2'].name === 'C', 'zusamme
 // --- Im Browser: zwei Handys, eine GitHub-Attrappe
 const browser = await starteBrowser();
 const gh = githubAttrappe();
-const tobi = await handy(browser, { attrappe: gh });
+const fotosT = {};
+const tobi = await handy(browser, { attrappe: gh, fotos: fotosT });
 const t = tobi.page;
 await t.click('.tab[data-tab="einkauf"]');
 await t.click('[data-act="z-oeffnen"]');
@@ -239,6 +240,20 @@ check(await bis(() => Object.values(gh.liste()?.amy || {}).some((r) => r.name ==
 await t.click('.tab[data-tab="amy"]');
 check(await bis(async () => (await t.locator('.amy-karte').count()) === 1), 'Tobi sieht Amys Rezept');
 check((await t.locator('.amy-karte').innerText()).includes('Kokos-Curry'), '… mit Namen');
+{
+  // Ein KI-Foto (daten/fotos.json) statt ihres Bildchens – lädt es nicht, wieder das Bildchen
+  const rid = await t.locator('.amy-karte').getAttribute('data-amy-open');
+  check(await t.locator('.amy-karte .amy-karte-bild.hat-foto').count() === 0, 'Amys Rezept ohne Foto: ihr Bildchen');
+  fotosT[rid] = { bild: `bilder/eigene/${rid}.webp?v=12345678`, q: 'x' };
+  await t.reload();
+  await t.click('.tab[data-tab="amy"]');
+  check(await bis(async () => (await t.locator('.amy-karte .amy-karte-bild.hat-foto img').getAttribute('src').catch(() => '')) === `bilder/eigene/${rid}.webp?v=12345678`), 'Mit Foto: das Foto im Kreis');
+  fotosT[rid] = { bild: `bilder/eigene/${rid}.webp?v=87654321`, q: 'x', kaputt: true };
+  await t.reload();
+  await t.click('.tab[data-tab="amy"]');
+  check(await bis(async () => (await t.locator('.amy-karte .amy-karte-bild:not(.hat-foto) img').getAttribute('src').catch(() => '')).startsWith('bilder/zutaten/')), 'Lädt es nicht: wieder ihr Bildchen');
+  delete fotosT[rid];
+}
 
 // Auf die gemeinsame Einkaufsliste – und zusammen mit einem festen Rezept
 await a.click('[data-act="amy-alle-dazu"]');

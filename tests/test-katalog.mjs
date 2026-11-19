@@ -121,7 +121,8 @@ mar.zustand.sha = 'sha1';
 const alle = githubMehrere(haupt, mar);
 
 // Tobi: die gemeinsame Liste, ein KI-Schlüssel, Marielle als Gast auf seinem Handy
-const tobi = await handy(browser, { attrappe: alle });
+const fotosT = {};
+const tobi = await handy(browser, { attrappe: alle, fotos: fotosT });
 await tobi.ctx.route('https://generativelanguage.googleapis.com/**', gemini);
 const t = tobi.page;
 await t.evaluate(([s, g, m]) => {
@@ -192,6 +193,22 @@ check(await bis(async () => (await t.locator('#grid .box').first().getAttribute(
 check(await bis(() => kat(mar).rezepte[id2]?.k.name === OHNE_KOKOS_NAME, 8000), 'Marielles Katalog bekommt die geänderte');
 antwort = SUPPE;
 await t.click(`[data-open="${id2}"]`);
+// Das KI-Foto aus daten/fotos.json (die Action „Fotos für Wünsche“) – statt der Bildchen, in der Karte und im Rezept
+check(await t.locator(`#grid .box[data-open="${id2}"] .box-foto-ersatz`).count() === 1, 'Ohne Foto: die Bildchen');
+fotosT[id2] = { bild: `bilder/eigene/${id2}.webp?v=12345678`, q: 'x' };
+await t.reload();
+check(await bis(async () => (await t.locator(`#grid .box[data-open="${id2}"] .box-foto img`).getAttribute('src').catch(() => '')) === `bilder/eigene/${id2}.webp?v=12345678`), 'Mit Foto in daten/fotos.json: das Foto auf der Karte');
+if (await t.locator('#detail .back').isVisible()) await t.click('#detail .back');
+await t.locator(`#grid .box[data-open="${id2}"]`).scrollIntoViewIfNeeded();
+check(await bis(() => t.evaluate((i) => { const img = document.querySelector(`#grid .box[data-open="${i}"] .box-foto img`); return !!img && img.complete && img.naturalWidth === 800; }, id2)), '… und es lädt');
+await t.click(`#grid .box[data-open="${id2}"]`);
+check(await bis(async () => (await t.locator('#detail .d-foto figcaption').innerText().catch(() => '')) === 'KI-Bild'), '… und groß im Rezept, „KI-Bild“');
+await t.click('#detail .back');
+fotosT[id2].kaputt = true;
+fotosT[id2].bild = `bilder/eigene/${id2}.webp?v=87654321`;
+await t.reload();
+check(await bis(async () => (await t.locator(`#grid .box[data-open="${id2}"] .box-foto-ersatz`).count()) === 1), 'Lädt das Foto nicht: wieder die Bildchen');
+
 check(tobi.fehler.length === 0, `Tobi: keine Fehler im Browser (${tobi.fehler.join(' | ')})`);
 
 // Marielle: ihre Liste, ihr Ziel, 2 Boxen – die Suppe ist da, auf sie gerechnet

@@ -963,8 +963,27 @@ Hände), und legt das Foto 800 × 600 als WebP nach `bilder/rezepte/<id>.webp`
 selbst, bis dahin zeigt die Karte Bildchen seiner Hauptzutaten. Gefällt
 eins nicht: Actions → Rezeptfotos → Run workflow mit der Rezept-id, dann
 kommt ein neues. Der Lauf braucht die Secrets `CF_ACCOUNT_ID` und
-`CF_API_TOKEN` (API-Token mit dem Recht „Workers AI“). Rezepte aus der
-Resteverwertung haben kein Foto, sondern die Bildchen.
+`CF_API_TOKEN` (API-Token mit dem Recht „Workers AI“).
+
+**Gewünschte, KI- und Amys Rezepte** (seit v91) bekommen ihr Foto von der
+Action „Fotos für Wünsche“ (`.github/workflows/eigene-fotos.yml`,
+`werkzeug/eigene-fotos.mjs`): Sie läuft stündlich, liest `katalog.json` und
+`liste.json` (`ki`, `amy`) aus dem Daten-Repo mit dem Secret `DATEN_TOKEN`
+(Fine-grained Token, nur Boxenstopp-Daten, *Contents: Read-only*) und macht
+mit demselben Modell ein Foto für jedes Rezept, das noch keins hat. Das Motiv
+sind Name, Beschreibung (bis zum ersten Gedankenstrich) und die sichtbaren
+Zutaten – ohne Vorrat, Salz, Öl und Wasser; bei Amy ein Teller statt der Box,
+ihre Notizen nie. Die Fotos liegen öffentlich unter `bilder/eigene/<id>.webp`
+(Tobi, 19.11.2026: „wir können alle unsere Infos ruhig veröffentlichen“),
+`daten/fotos.json` verzeichnet sie (`{ v, fotos: { <id>: { bild, q } } }`,
+`q` hängt am Namen: Heißt ein Rezept anders, kommt ein neues Foto; ist es weg,
+fliegt sein Foto raus). Höchstens 25 je Lauf, ins Protokoll kommen nur ids.
+Die App lädt `daten/fotos.json` beim Start mit (`fotoVon` in `js/bilder.js`):
+Katalogkarte, Rezept, „Läuft gerade“, Essensplan und Amys Kreis zeigen das
+Foto, solange es fehlt oder nicht lädt, die Bildchen. Ein Foto neu machen:
+Actions → Fotos für Wünsche → Run workflow mit der id. Ohne `DATEN_TOKEN`
+tut die Action nichts. Ein Rezept aus der Resteverwertung bekommt ein Foto
+erst, wenn es behalten ist.
 
 **Zutaten** haben auf der Einkaufsliste und im Rezept ein Bildchen: Fluent
 Emoji von Microsoft (MIT-Lizenz, `bilder/zutaten/LIZENZ.txt`), als SVG aus
@@ -987,7 +1006,7 @@ konnte.
 | **die App** | beim Installieren ganz (SHELL); fehlt beim Update eine Datei (schlechtes Netz), gilt das Update nicht – die alte, vollständige Fassung bleibt, der Browser versucht es später noch einmal |
 | **Bildchen** | kommen schon beim Installieren mit (Liste in `bilder/zutaten/alle.json`), damit die Liste auch im Laden ohne Netz vollständig ist |
 | **Rezepte, Angebote, Preisverlauf** | `daten/*.json` in einem eigenen Vorrat, der Updates der App übersteht (bis v39 lagen sie im Vorrat der Fassung und waren nach einem Update weg, bis die App sie neu lud – beim Update ziehen sie um); gefragt wird mit „no-cache“: unverändert nur ein kurzes 304 statt 600 KB |
-| **Rezeptfotos** | alle 50 in einem eigenen Vorrat, der Updates übersteht – der Worker holt sie von selbst nach jedem frischen `rezepte.json`, nicht erst beim Ansehen (vorher fehlten ohne Netz 40 von 50); ein neues Foto hat eine neue Adresse, das alte fliegt raus; fehlt doch eins, steht das Ersatzbild aus den Zutaten-Bildchen da |
+| **Rezeptfotos** | alle 50 (und die aus `daten/fotos.json`) in einem eigenen Vorrat, der Updates übersteht – der Worker holt sie von selbst nach jedem frischen `rezepte.json`, nicht erst beim Ansehen (vorher fehlten ohne Netz 40 von 50); ein neues Foto hat eine neue Adresse, das alte fliegt raus; fehlt doch eins, steht das Ersatzbild aus den Zutaten-Bildchen da |
 | **schlechtes Netz** | Seite und Daten: erst das Netz, aber nach 4 s ohne Antwort aus dem Vorrat (die späte Antwort kommt trotzdem noch hinein) |
 | **Links** | eine Seite, die mit `#zugang=…` oder `#bildschirmzeit=…` geöffnet wurde, liegt ohne den Teil hinter `#` im Vorrat (seit v78; vorher stand dort die Adresse samt Schlüssel bzw. Kennung, bis die App das nächste Mal ohne Link mit Netz geladen wurde) |
 | **die Liste** | wie zuletzt gesehen aus dem localStorage (`js/speicher.js`), Änderungen warten, bis wieder Netz da ist |
@@ -2224,6 +2243,7 @@ die Action „Rezeptfotos“.
 | `js/ansicht-angebote.js` | Reiter Angebote: automatischer Abruf, eigene Angebote, passende Rezepte, Rezept daraus |
 | `js/bilder.js` | Bildchen je Zutat (Schlüssel, Stichwort, Abteilung) und für Rezepte ohne Foto – ohne DOM; die Sachen-App setzt `bildBasis('../')` |
 | `werkzeug/bilder.mjs`, `.github/workflows/bilder.yml` | Rezeptfotos per KI (Cloudflare Workers AI) → bilder/rezepte |
+| `werkzeug/eigene-fotos.mjs`, `.github/workflows/eigene-fotos.yml` | Fotos für gewünschte, KI- und Amys Rezepte → bilder/eigene, daten/fotos.json |
 | `werkzeug/zutaten-bilder.mjs` | Bildchen aus Fluent Emoji → bilder/zutaten (mit alle.json für den Offline-Vorrat) |
 | `werkzeug/angebote.mjs` | holt die Angebote mit Produktfoto (Aldi, Kaufland, Penny; Lidl liest Claude oder Gemini aus dem Prospekt) → daten/angebote.json |
 | `.github/workflows/angebote.yml` | Montag, Donnerstag und Sonntag: Angebote holen, Preisverlauf rechnen, einchecken |

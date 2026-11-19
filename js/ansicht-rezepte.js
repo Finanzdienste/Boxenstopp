@@ -20,7 +20,7 @@ import { timerFuer, timerStarten, timerStoppen, timerText } from './timer.js';
 import { pruefeFest, pilleHTML as vtPille, hinweisHTML as vtHinweis, zeichenHTML as vtZeichen, stufeVon as vtStufe, hatVertraeglich, wem as vtWem } from './ansicht-vertraeglich.js';
 import { lobPruefen, lobGross, tierVorladen } from './lob.js';
 import { euro, kostenRezept } from './kosten.js';
-import { zutatImg, rezeptBildchen, bildPfad } from './bilder.js';
+import { zutatImg, rezeptBildchen, bildPfad, fotoVon } from './bilder.js';
 import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, opAnpinnen, DAUMEN } from './liste.js';
 import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
@@ -161,14 +161,16 @@ export function filterZeichnen() {
 }
 
 /*
- * Das Bild eines Rezepts: das KI-Foto (r.bild aus daten/rezepte.json), sonst
+ * Das Bild eines Rezepts: das KI-Foto (r.bild aus daten/rezepte.json, für
+ * gewünschte, KI- und Amys Rezepte aus daten/fotos.json – fotoVon), sonst
  * ein Ersatzbild aus den Bildchen der Hauptzutaten (Eiweiß, Beilage, Gemüse).
  */
-function rezeptFoto(r, { gross = false } = {}) {
-  if (r.bild && /^bilder\/rezepte\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(r.bild)) {
+function rezeptFoto(r, { gross = false, ohneFoto = false } = {}) {
+  const foto = ohneFoto ? '' : fotoVon(r, app.fotos);
+  if (foto) {
     return gross
-      ? `<figure class="d-foto"><img src="${esc(r.bild)}" alt="${esc(r.name)}" decoding="async" width="800" height="600"><figcaption>KI-Bild</figcaption></figure>`
-      : `<span class="box-foto"><img src="${esc(r.bild)}" alt="" loading="lazy" decoding="async" width="800" height="600"></span>`;
+      ? `<figure class="d-foto"><img src="${esc(foto)}" alt="${esc(r.name)}" decoding="async" width="800" height="600"><figcaption>KI-Bild</figcaption></figure>`
+      : `<span class="box-foto"><img src="${esc(foto)}" alt="" loading="lazy" decoding="async" width="800" height="600"></span>`;
   }
   const bildchen = rezeptBildchen(r, app.katalog).map((b, i) => `<img class="e${i}" src="${bildPfad(b)}" alt="" loading="lazy" decoding="async" width="64" height="64">`).join('');
   return gross ? `<div class="d-foto d-foto-ersatz" aria-hidden="true">${bildchen}</div>` : `<span class="box-foto box-foto-ersatz" aria-hidden="true">${bildchen}</span>`;
@@ -181,12 +183,12 @@ function rezeptFoto(r, { gross = false } = {}) {
  */
 document.addEventListener('error', (ev) => {
   const img = ev.target;
-  if (img?.tagName !== 'IMG' || !/(^|\/)bilder\/rezepte\//.test(img.getAttribute('src') || '')) return;
+  if (img?.tagName !== 'IMG' || !/(^|\/)bilder\/(rezepte|eigene)\//.test(img.getAttribute('src') || '')) return;
   if (img.closest('.gepinnt-b')) { img.hidden = true; return; }
   const huelle = img.closest('.box-foto:not(.box-foto-ersatz), .d-foto:not(.d-foto-ersatz)');
   const gross = !!huelle?.classList.contains('d-foto');
   const r = app.nachId[(gross ? aktuell : img.closest('[data-open]')?.dataset.open) || ''];
-  if (huelle && r) huelle.outerHTML = rezeptFoto({ ...r, bild: '' }, { gross });
+  if (huelle && r) huelle.outerHTML = rezeptFoto(r, { gross, ohneFoto: true });
 }, true);
 
 /** Die Zeit auf der Karte – in eurem Tempo hervorgehoben. */
@@ -231,8 +233,9 @@ function gepinntZeichnen() {
   el.hidden = !laufen.length;
   el.innerHTML = laufen.length ? `<h2 class="gepinnt-k">${ic('pin')}Läuft gerade</h2><div class="gepinnt-liste">${laufen.map(([rid, e]) => {
     const r = app.nachId[rid];
-    const bild = r.bild && /^bilder\/rezepte\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(r.bild)
-      ? `<img src="${esc(r.bild)}" alt="" width="64" height="48" decoding="async">`
+    const foto = fotoVon(r, app.fotos);
+    const bild = foto
+      ? `<img src="${esc(foto)}" alt="" width="64" height="48" decoding="async">`
       : `<span class="g-ersatz"><img src="${bildPfad(rezeptBildchen(r, app.katalog)[0] || 'pot-of-food')}" alt="" width="30" height="30"></span>`;
     const fertig = (schritte[rid] || []).length;
     const alle = (r.ablauf || []).reduce((n, p) => n + p.schritte.length, 0);

@@ -479,6 +479,8 @@ async function start() {
   // Kosten an „Frag mal“ melden – nur in der echten App, nicht in den Tests
   if (location.hostname === 'finanzdienste.github.io') kostenMeldenAn(KOSTEN_MELDEN);
   let daten;
+  // Die Fotos der gewünschten und Amys Rezepte (werkzeug/eigene-fotos.mjs) – nebenher; ohne sie gibt es die Bildchen
+  const fotos = fetch('daten/fotos.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   try {
     const r = await fetch('daten/rezepte.json', { cache: 'no-cache' });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -492,6 +494,8 @@ async function start() {
   app.datenVersion = String(daten.version || '');
   app.katalog = daten.katalog;
   app.extras = daten.extras || {};
+  const f = await fotos;
+  app.fotos = f?.fotos && typeof f.fotos === 'object' && !Array.isArray(f.fotos) ? f.fotos : {};
   app.naehrwerte = daten.naehrwerte || {};
   app.richtpreise = daten.preise || {};
   app.preise = app.richtpreise;

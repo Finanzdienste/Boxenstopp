@@ -7,11 +7,26 @@
  *             SVG-Dateien legt werkzeug/zutaten-bilder.mjs aus dem npm-Paket
  *             @iconify-json/fluent-emoji an – nur die, die hier vorkommen.
  *   Rezepte   ein Foto in bilder/rezepte/<id>.webp (KI, werkzeug/bilder.mjs),
- *             steht dann als `bild` in daten/rezepte.json. Ohne Foto zeigt die
- *             App ein Ersatzbild aus den Bildchen der Hauptzutaten.
+ *             steht dann als `bild` in daten/rezepte.json. Gewünschte, KI- und
+ *             Amys Rezepte: bilder/eigene/<id>.webp, verzeichnet in
+ *             daten/fotos.json (werkzeug/eigene-fotos.mjs, fotoVon). Ohne Foto
+ *             zeigt die App ein Ersatzbild aus den Bildchen der Hauptzutaten.
  *   Angebote  die Produktfotos der Händler (Feld `bild` im Feed), sonst das
  *             Bildchen der Zutat.
  */
+
+/** So sieht die Adresse eines KI-Fotos aus – andere nimmt die App nicht. */
+export const FOTO = /^bilder\/(?:rezepte|eigene)\/[a-z0-9-]+\.webp(?:\?v=[0-9a-f]+)?$/;
+
+/**
+ * Das KI-Foto eines Rezepts: sein eigenes (`bild`, feste Rezepte), sonst das aus
+ * daten/fotos.json (fotos: { <id>: { bild } }) – oder '' fürs Ersatzbild.
+ */
+export function fotoVon(r, fotos = null) {
+  if (typeof r?.bild === 'string' && FOTO.test(r.bild)) return r.bild;
+  const f = r?.id && fotos && Object.hasOwn(fotos, r.id) ? fotos[r.id]?.bild : '';
+  return typeof f === 'string' && FOTO.test(f) ? f : '';
+}
 
 /** Katalog-Schlüssel → Bildchen. */
 export const ZUTAT_BILD = {

@@ -58,7 +58,7 @@ Was gerade läuft, zeigt `get_session` (`model`, `effort_level`,
 - Tokens, API-Schlüssel und Passwörter nie in Chat, Code, Commits oder Logs –
   auch nicht abgekürzt. GitHub-Token und KI-Schlüssel liegen nur im
   localStorage der Handys.
-- GitHub-Secrets (GEMINI_KEY, CF_ACCOUNT_ID, CF_API_TOKEN, VAPID_PRIVATE_KEY)
+- GitHub-Secrets (GEMINI_KEY, CF_ACCOUNT_ID, CF_API_TOKEN, VAPID_PRIVATE_KEY, DATEN_TOKEN)
   hat Tobi selbst angelegt: nicht anfassen, nicht erzeugen, nicht ausgeben.
   Ebenso keine Push-Endpunkte ausgeben.
 - To-Do-Refresh-Tokens nur verschlüsselt (AES-256-GCM, Schlüssel per HKDF aus
@@ -72,8 +72,10 @@ Was gerade läuft, zeigt `get_session` (`model`, `effort_level`,
 
 ## Daten
 - Echte Listendaten nie in diesem Repo, in Tests oder Beispielen – Tests
-  arbeiten mit erfundenen Daten. Wer echte Daten ansieht: nur lokal, und nur
-  Namen, IDs und Zahlen ausgeben.
+  arbeiten mit erfundenen Daten. Ausnahme (Tobi, 19.11.2026): die KI-Fotos
+  gewünschter, KI- und Amys Rezepte unter `bilder/eigene/` mit
+  `daten/fotos.json` (nur ids und Pfade) – die Action schreibt sie selbst.
+  Wer echte Daten ansieht: nur lokal, und nur Namen, IDs und Zahlen ausgeben.
 - Amys Gesundheitsdaten (Verträglichkeiten, Notizen) stehen nur in der privaten
   `liste.json`, nie im öffentlichen Code. Die KI-Suche schickt höchstens
   Zutatennamen, nie Notizen.

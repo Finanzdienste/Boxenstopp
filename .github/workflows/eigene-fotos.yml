@@ -1,0 +1,97 @@
+# Fotos für die gewünschten, KI- und Amys Rezepte (werkzeug/eigene-fotos.mjs):
+# dasselbe Modell wie die Rezeptfotos (Cloudflare Workers AI, Secrets
+# CF_ACCOUNT_ID und CF_API_TOKEN). Die Rezepte stehen im privaten Daten-Repo –
+# gelesen wird mit dem Secret DATEN_TOKEN: ein Fine-grained Token, nur
+# Boxenstopp-Daten, „Contents: Read-only“. Die Fotos liegen danach öffentlich
+# unter bilder/eigene/, verzeichnet in daten/fotos.json (nur ids und Pfade).
+#
+# Läuft stündlich (schaut nur nach – sharp und Fotos nur, wenn etwas fehlt)
+# und von Hand: Actions → Fotos für Wünsche → Run workflow, leer für alles,
+# was fehlt, oder ids mit Leerzeichen, um die neu zu machen.
+name: Fotos für Wünsche
+
+on:
+  schedule:
+    - cron: '41 * * * *'
+  workflow_dispatch:
+    inputs:
+      rezepte:
+        description: 'Nur diese Rezepte (ids mit Leerzeichen), auch wenn sie schon ein Foto haben – leer: alle ohne Foto'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bilder
+  cancel-in-progress: false
+
+jobs:
+  fotos:
+    name: Fotos machen
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Eingerichtet?
+        id: da
+        env:
+          DATEN_TOKEN: ${{ secrets.DATEN_TOKEN }}
+        run: |
+          if [ -z "$DATEN_TOKEN" ]; then echo "Ohne das Secret DATEN_TOKEN keine Fotos für Wünsche."; echo "ja=nein" >> "$GITHUB_OUTPUT"; else echo "ja=ja" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.da.outputs.ja == 'ja'
+      - uses: actions/checkout@v4
+        if: steps.da.outputs.ja == 'ja'
+        with:
+          repository: Finanzdienste/Boxenstopp-Daten
+          token: ${{ secrets.DATEN_TOKEN }}
+          path: privat
+          sparse-checkout: |
+            katalog.json
+            liste.json
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        if: steps.da.outputs.ja == 'ja'
+        with:
+          node-version: '22'
+
+      - name: Was fehlt
+        id: plan
+        if: steps.da.outputs.ja == 'ja'
+        env:
+          REZEPTE: ${{ inputs.rezepte }}
+        run: node werkzeug/eigene-fotos.mjs --daten privat --zaehlen $REZEPTE
+
+      - name: sharp für WebP
+        if: steps.da.outputs.ja == 'ja' && steps.plan.outputs.arbeit != '0'
+        run: npm install --no-save --no-package-lock sharp@0.35.5
+
+      - name: Fotos machen
+        if: steps.da.outputs.ja == 'ja' && steps.plan.outputs.arbeit != '0'
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          REZEPTE: ${{ inputs.rezepte }}
+        run: |
+          node werkzeug/eigene-fotos.mjs --daten privat $REZEPTE
+          rm -rf privat
+
+      - name: Einchecken
+        if: steps.da.outputs.ja == 'ja' && steps.plan.outputs.arbeit != '0'
+        run: |
+          git config user.name "Boxenstopp-Bot"
+          git config user.email "boxenstopp-bot@users.noreply.github.com"
+          git add -A daten/fotos.json
+          if [ -d bilder/eigene ]; then git add -A bilder/eigene; fi
+          if git diff --cached --quiet; then
+            echo "Keine Änderung."
+            exit 0
+          fi
+          NEU=$(git diff --cached --name-only --diff-filter=AM -- bilder/eigene | wc -l)
+          git commit -m "Fotos für Wünsche: ${NEU} neu oder erneuert"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1

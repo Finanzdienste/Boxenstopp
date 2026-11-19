@@ -17,7 +17,7 @@ import { hatTeil, einkaufsZutaten, opTeil } from './liste.js';
 import { opEssensplan, neueId, heuteTag, tagPlus, montagVon, wocheVon, tagName, tagKurzName, tagDatum, tageZwischen, MAHLZEITEN, MAHLZEIT_NAME, kochtagVon, kochtage, verplant, boxenVerteilen, boxenVon, einkaufDerWoche, geplanteMahlzeiten, MAX_BOXEN } from './essensplan.js';
 import { ideenAus } from './notizbuch.js';
 import { amyEinkauf, zutatenVon } from './amy.js';
-import { bildPfad } from './bilder.js';
+import { bildPfad, fotoVon } from './bilder.js';
 import { pruefeFest, pruefeZutaten } from './ansicht-vertraeglich.js';
 import { normal } from './vertraeglich.js';
 import { oeffneRezept } from './ansicht-rezepte.js';
@@ -67,9 +67,9 @@ const daten = () => ({ katalog: app.katalog, naehrwerte: app.naehrwerte, preise:
 /** Ein Rezept aus dem Plan: fest (Katalog, Resteverwertung) oder Amys. */
 function rezeptVon(rid) {
   const r = app.nachId[rid] || app.extras?.[rid];
-  if (r) return { art: 'fest', r, name: r.name, kurz: r.short || r.name, bild: r.bild && /^bilder\/rezepte\/[a-z0-9-]+\.webp(\?v=[0-9a-f]+)?$/.test(r.bild) ? r.bild : '' };
+  if (r) return { art: 'fest', r, name: r.name, kurz: r.short || r.name, bild: fotoVon(r, app.fotos) };
   const a = app.stand.amy?.[rid];
-  if (a) return { art: 'amy', r: a, name: a.name, kurz: a.name, bild: bildPfad(a.bild), amy: true };
+  if (a) return { art: 'amy', r: a, name: a.name, kurz: a.name, bild: fotoVon(a, app.fotos) || bildPfad(a.bild), amy: true };
   return null;
 }
 

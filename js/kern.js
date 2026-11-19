@@ -22,6 +22,8 @@ export const app = {
   preiseStand: '',
   katalog: {},
   extras: {},
+  /** KI-Fotos der gewünschten, KI- und Amys Rezepte: daten/fotos.json → { <id>: { bild } } (fotoVon in bilder.js). */
+  fotos: {},
   /** Die Rezepte aus daten/rezepte.json, wie sie dort stehen – app.rezepte sind sie auf das Ziel gerechnet (ansicht-ziel.js). */
   rezepteBasis: [],
   /** Ziel pro Box: aus daten/rezepte.json oder das eigene der Liste (Einstellungen → Ziel pro Box). */

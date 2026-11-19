@@ -39,7 +39,7 @@ import { esc, nf1, nfi } from './format.js';
 import { dauer } from './zeiten.js';
 import { euro } from './kosten.js';
 import { zutatenVon, zutatLesen, amyNaehrwerte, amyKosten, offeneZeilen, amyEinkauf, teilFuer, alsRezept, amySchaetzung, neueAmyId, AMY_ID, tagsBereinigen, tagsAusText, alleTags, hatTags, tagFarbe, TAG_VORSCHLAEGE, MAX_TAGS } from './amy.js';
-import { AMY_BILDER, bildPfad, zutatImg } from './bilder.js';
+import { AMY_BILDER, bildPfad, zutatImg, fotoVon } from './bilder.js';
 import { opAmy, opAmyWeg, opAmyTags, opAmyWerte, opTeil, opTeilWeg, hatTeil } from './liste.js';
 import { rumpfWerte, werteBereinigen, zeilenAbdruck } from './amy-werte.js';
 import { timerKnopf, timerUmschalten, mengenHervor } from './ansicht-rezepte.js';
@@ -111,6 +111,26 @@ const ZURUECK = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="current
 const LUPE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>';
 const KREUZ = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 const SORT_IC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/></svg>';
+/**
+ * Amys Bild zum Rezept: das KI-Foto aus daten/fotos.json im Kreis, sonst (und
+ * wenn es nicht lädt) ihr Bildchen.
+ */
+function amyBild(r, klasse, gr) {
+  const foto = fotoVon(r, app.fotos);
+  const bildchen = bildPfad(r.bild);
+  return foto
+    ? `<span class="${klasse} hat-foto"><img src="${esc(foto)}" alt="" width="${gr}" height="${gr}" decoding="async" loading="lazy" data-ersatz="${esc(bildchen)}"></span>`
+    : `<span class="${klasse}"><img src="${bildchen}" alt="" width="${gr}" height="${gr}" decoding="async"></span>`;
+}
+document.addEventListener('error', (ev) => {
+  const img = ev.target;
+  const huelle = img?.tagName === 'IMG' ? img.closest('.amy-karte-bild.hat-foto, .amy-d-bild.hat-foto') : null;
+  if (!huelle || !img.dataset.ersatz) return;
+  huelle.classList.remove('hat-foto');
+  img.src = img.dataset.ersatz;
+  delete img.dataset.ersatz;
+}, true);
+
 const deko = (name, k = '') => `<img class="amy-deko ${k}" src="${bildPfad(name)}" alt="" width="22" height="22" decoding="async">`;
 
 /** Für die Einkaufsliste und die Timer: Amys Rezepte so, wie die anderen Teile sie verstehen. */
@@ -148,7 +168,7 @@ function karte(r) {
   const zahlen = [nw.bekannt && !nw.unbekannt.length ? `≈ ${nfi(nw.kcal)} kcal` : '', ko.gesamt > 0 && !ko.luecken ? `≈ ${euro(ko.portion)}` : ''].filter(Boolean).join(' · ');
   const tags = tagsVon(r.id);
   return `<button type="button" class="amy-karte" data-amy-open="${esc(r.id)}">
-<span class="amy-karte-bild"><img src="${bildPfad(r.bild)}" alt="" width="56" height="56" decoding="async"></span>
+${amyBild(r, 'amy-karte-bild', 56)}
 <span class="amy-karte-t"><b>${esc(r.name)}</b><small>${r.portionen} ${r.portionen === 1 ? 'Portion' : 'Portionen'} · ${esc(zeitText(zeitVon(r)))}</small>${zahlen ? `<small class="amy-karte-z">${esc(zahlen)} pro Portion</small>` : ''}${tags.length ? `<span class="amy-tags">${tags.map(tagPille).join('')}</span>` : ''}</span>
 ${st.drauf ? `<span class="amy-pill">${HERZ}auf der Liste</span>` : ''}
 </button>`;
@@ -279,7 +299,7 @@ function detailHTML(r) {
   const von = r.by ? `von ${r.by === app.name() ? 'dir' : esc(r.by)}` : '';
   const tags = tagsVon(r.id);
   return `<button type="button" class="back" data-act="amy-liste">${ZURUECK}${HERZ}${esc(wessen(person()))} Rezepte</button>
-<header class="amy-d-kopf"><span class="amy-d-bild"><img src="${bildPfad(r.bild)}" alt="" width="72" height="72" decoding="async"></span>
+<header class="amy-d-kopf">${amyBild(r, 'amy-d-bild', 72)}
 <div><h1 class="amy-d-titel" id="amy-d-titel">${esc(r.name)}</h1><p class="amy-d-fakten">${fakten.map(esc).join(' · ')}</p>${von ? `<p class="amy-d-von">${von}</p>` : ''}${tags.length ? `<div class="amy-tags amy-d-tags" role="group" aria-label="Tags">${tags.map((t) => `<button type="button" class="amy-tag tf${tagFarbe(t)}" data-amy-tag-filter="${esc(t)}" aria-label="Alle Rezepte mit „${esc(t)}“">${esc(t)}</button>`).join('')}</div>` : ''}</div></header>
 ${nw.bekannt ? `<div class="amy-etikett" role="group" aria-label="Nährwerte pro Portion"><span><b>${nfi(nw.kcal)}</b> kcal</span><span class="m-p">P ${nf1(nw.p)}</span><span class="m-kh">KH ${nf1(nw.kh)}</span><span class="m-f">F ${nf1(nw.f)}</span><small>pro Portion, ungefähr${nw.geschaetzt ? ' – teils von der KI geschätzt' : ''}${nw.unbekannt.length ? ` – ohne ${esc(nw.unbekannt.slice(0, 3).join(', '))}${nw.unbekannt.length > 3 ? ' …' : ''}${werteLauf?.id === r.id ? ' (die KI schätzt sie gerade)' : ''}` : ''}</small></div>` : ''}
 ${vtHinweisHTML(vtJetzt)}

@@ -24,8 +24,8 @@ const MODELL = '@cf/black-forest-labs/flux-1-schnell';
 const SCHRITTE = 6; // 4 ist die Vorgabe, 8 das Höchste – 6 sieht deutlich besser aus als 4 und kostet wenig mehr
 
 // Bildaufbau für alle gleich: eine Meal-Prep-Box von oben, Tageslicht, Holztisch
-const VORN = 'Realistic food photography, top-down view of one rectangular glass meal prep container filled with';
-const HINTEN = 'on a light oak kitchen table, soft natural window light, appetizing, sharp focus, no text, no labels, no people, no hands.';
+export const VORN = 'Realistic food photography, top-down view of one rectangular glass meal prep container filled with';
+export const HINTEN = 'on a light oak kitchen table, soft natural window light, appetizing, sharp focus, no text, no labels, no people, no hands.';
 
 /** Was in der Box ist, je Rezept auf Englisch – damit das Bild zum Rezept passt. */
 export const MOTIVE = {
@@ -84,6 +84,36 @@ export const MOTIVE = {
 /** Der Auftrag fürs Bild; ein Rezept ohne Motiv bekommt Name und Beschreibung. */
 export const auftrag = (r) => `${VORN} ${MOTIVE[r.id] || `${r.name}: ${r.desc}`}, ${HINTEN}`;
 
+/**
+ * Ein Foto zum Auftrag machen und 800 × 600 als WebP nach `datei` legen.
+ * → { ok, text, stopp }: stopp, wenn weitere Versuche sinnlos sind
+ * (Tageskontingent aufgebraucht, Schlüssel falsch). Auch für
+ * werkzeug/eigene-fotos.mjs.
+ */
+export async function fotoMachen(prompt, datei, { sharp, konto = KONTO, token = TOKEN } = {}) {
+  let res;
+  let j = null;
+  try {
+    res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${konto}/ai/run/${MODELL}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      // Einen festen Zufall (seed) nimmt die Schnittstelle nicht an – jedes Neumachen gibt ein anderes Bild
+      body: JSON.stringify({ prompt, steps: SCHRITTE }),
+    });
+    j = await res.json().catch(() => null);
+  } catch (e) {
+    return { ok: false, text: `keine Verbindung (${e?.message || e})` };
+  }
+  if (!res.ok || !j?.success || !j?.result?.image) {
+    const grund = (j?.errors || []).map((e) => `${e.code || ''} ${e.message || ''}`.trim()).join('; ') || `HTTP ${res.status}`;
+    return { ok: false, text: `abgelehnt – ${grund}`, stopp: res.status === 429 || res.status === 401 || res.status === 403 || /limit|quota|neuron/i.test(grund) };
+  }
+  const roh = Buffer.from(j.result.image, 'base64');
+  const info = await sharp(roh).metadata();
+  await sharp(roh).resize(800, 600, { fit: 'cover', position: 'centre' }).webp({ quality: 72 }).toFile(datei);
+  return { ok: true, text: `ok (${info.width}×${info.height} → 800×600, ${Math.round(readFileSync(datei).length / 1024)} KB)` };
+}
+
 async function main() {
   if (!KONTO || !TOKEN) { console.log('Ohne CF_ACCOUNT_ID und CF_API_TOKEN keine Fotos.'); return; }
   const { default: sharp } = await import('sharp');
@@ -94,33 +124,10 @@ async function main() {
   console.log(`${ziele.length} Foto${ziele.length === 1 ? '' : 's'} zu machen`);
   let gemacht = 0;
   for (const r of ziele) {
-    let res;
-    let j = null;
-    try {
-      res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${KONTO}/ai/run/${MODELL}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${TOKEN}`, 'content-type': 'application/json' },
-        // Einen festen Zufall (seed) nimmt die Schnittstelle nicht an – jedes Neumachen gibt ein anderes Bild
-        body: JSON.stringify({ prompt: auftrag(r), steps: SCHRITTE }),
-      });
-      j = await res.json().catch(() => null);
-    } catch (e) {
-      console.log(`${r.id}: keine Verbindung (${e?.message || e})`);
-      continue;
-    }
-    if (!res.ok || !j?.success || !j?.result?.image) {
-      const grund = (j?.errors || []).map((e) => `${e.code || ''} ${e.message || ''}`.trim()).join('; ') || `HTTP ${res.status}`;
-      console.log(`${r.id}: abgelehnt – ${grund}`);
-      // Tageskontingent aufgebraucht oder Schlüssel falsch: weitere Versuche sind sinnlos
-      if (res.status === 429 || res.status === 401 || res.status === 403 || /limit|quota|neuron/i.test(grund)) break;
-      continue;
-    }
-    const roh = Buffer.from(j.result.image, 'base64');
-    const info = await sharp(roh).metadata();
-    const datei = path.join(ZIEL, `${r.id}.webp`);
-    await sharp(roh).resize(800, 600, { fit: 'cover', position: 'centre' }).webp({ quality: 72 }).toFile(datei);
-    gemacht++;
-    console.log(`${r.id}: ok (${info.width}×${info.height} → 800×600, ${Math.round(readFileSync(datei).length / 1024)} KB)`);
+    const f = await fotoMachen(auftrag(r), path.join(ZIEL, `${r.id}.webp`), { sharp });
+    console.log(`${r.id}: ${f.text}`);
+    if (f.ok) gemacht++;
+    if (f.stopp) break;
   }
   console.log(`${gemacht} von ${ziele.length} Fotos gemacht`);
 }
