@@ -141,7 +141,7 @@ deshalb **„Bleibt übrig“** (`js/reste.js`, `js/ansicht-reste.js`):
   Dose Mais …“, Dazukaufen erlaubt, startet gleich.
 
 Für 8 Boxen bleibt meist nichts – die Rezepte sind auf Packungen gebaut;
-wo doch (Köttbullar: 300 g mageres Hack), steht es genauso da.
+wo doch (Frikassee: 300 g Hähnchenbrust), steht es genauso da.
 
 ### Zwei auf einmal
 
@@ -2121,6 +2121,16 @@ je Dose, Stück, Zehe. Weicht die verwendete Menge ab (Kartoffeln geschält,
 halbe Zitrone), steht `g=` an der Zutat; Gewürze und Brühpulver sind
 `pauschal`. Eine neue Zutat braucht also `CAT` und `N`.
 
+Nicht zu fleischig, aber ohne Dogma: Richtwert etwa 90 g rohes Fleisch pro
+Box. Wo es zum Gericht passt, bringen Hülsenfrüchte (Linsen in Bolognese,
+Cottage Pie und Moussaka, Kichererbsen in der Shawarma-Bowl, Kidneybohnen im
+Jambalaya), Edamame (Teriyaki Bowl), Ei (gebratener Reis), Quark
+(Frikadellen, Köttbullar-Püree, Kräuterquark) oder Skyr (Honig-Senf-Dip,
+Coleslaw, Biryani-Marinade) den Rest an Eiweiß; Gulasch, Schaschlik und Co.
+bleiben Fleischgerichte. Zwei Fleischsorten mit derselben Menge (400 g Keule
+und 400 g Brust) gehen nicht: Die Platzhalter in den Schritten können die
+beiden „400 g“ nicht auseinanderhalten.
+
 Im Vorbereiten steht jede Zutat mit ihrer Menge („3 Zwiebeln (300 g) schälen
 und fein würfeln → Schale 1“); beim Kochen wird nichts mehr abgewogen,
 abgemessen oder ausgepresst – außer eine Zutat geht als ganze Packung in den
@@ -2327,7 +2337,7 @@ dazu“, die Suche ohne und mit Treffer, „Neuer Vorschlag“ ersetzt sie; bei
 Marielle auf ihr Ziel und 2 Boxen gerechnet, sie nimmt sie heraus, Tobis Handy
 gleicht das ab; ohne gemeinsame Liste ein Vorschlag.
 `test-reste.mjs` rechnet in Node Packungen, was verdirbt, die Reste von
-Chili für 2 und 8 und Köttbullar, den Plan (nachgerechnet, ohne Ausgenommenes)
+Chili für 2 und 8 und Frikassee, den Plan (nachgerechnet, ohne Ausgenommenes)
 und die Posten der Liste, und spielt im Browser Marielle durch: die Karte im
 Chili, „Beide auf die Liste“, die Karte auf der Liste, noch ein Rezept dazu,
 das KI-Rezept aus den Resten (mit nachgebauter API), dazu Tobi mit 8 Boxen.

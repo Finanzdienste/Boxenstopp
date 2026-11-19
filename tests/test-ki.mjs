@@ -105,7 +105,7 @@ const boxVar = proBox(var2);
 check(Math.abs(boxVar.kcal - ZIEL.kcal) <= 8 && Math.abs(boxVar.p - ZIEL.p) <= 1 && Math.abs(boxVar.kh - ZIEL.kh) <= 1.5 && Math.abs(boxVar.f - ZIEL.f) <= 1, `200 g Brokkoli statt 1 kg, 400 g Erbsen dazu, Sesam weg – die Box trifft trotzdem: ${boxVar.kcal.toFixed(0)} / ${boxVar.p.toFixed(1)} / ${boxVar.kh.toFixed(1)} / ${boxVar.f.toFixed(1)}`);
 check(var2.zutaten.find((z) => z.id === 'brokkoli').menge === 200 && var2.zutaten.find((z) => z.id === 'erbsen').menge === 400, 'was man selbst gesetzt hat, bleibt');
 const aend = aenderungenText(var2, fk);
-check(aend.some((a) => a.startsWith('Brokkoli 1 kg → 200 g')) && aend.some((a) => a === 'TK-Erbsen 400 g neu') && aend.includes('Sesam weggelassen') && aend.some((a) => /Hähnchen-Oberkeulenfilet 1 kg → /.test(a)), `die Änderungen in Worten: ${aend.join(' · ')}`);
+check(aend.some((a) => a.startsWith('Brokkoli 1 kg → 200 g')) && aend.some((a) => a === 'TK-Erbsen 400 g neu') && aend.includes('Sesam weggelassen') && aend.some((a) => /Hähnchen-Oberkeulenfilet 800 g → /.test(a)), `die Änderungen in Worten: ${aend.join(' · ')}`);
 const appVar = alsRezept(var2, { id: 'ki-var1', katalog: daten.katalog, einheiten, von: { by: 'Tobi' } });
 const sesamSchritt = appVar.ablauf.flatMap((p) => p.schritte).find((x) => /Sesam/.test(x.d));
 check(sesamSchritt?.entfaellt === true && /\(ohne Sesam\)/.test(sesamSchritt.d), 'der Sesam-Schritt entfällt und sagt das');

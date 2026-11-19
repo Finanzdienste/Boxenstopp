@@ -40,7 +40,7 @@ check(schnell.length >= 5 && schnell.every((t) => minuten(t) < 90), `Filter „U
 await page.click('[data-filter="alle"]');
 // Suche: Name, Zutat, Gericht – mit Umlauten egal wie geschrieben
 await page.fill('#suche', 'kichererbsen');
-check(await page.locator('#grid .box').count() === 3, `Suche „kichererbsen“ findet 3 (${await page.locator('#grid .box').count()})`);
+check(await page.locator('#grid .box').count() === 4, `Suche „kichererbsen“ findet 4 (${await page.locator('#grid .box').count()})`);
 await page.fill('#suche', 'Hähnchen ofen');
 const ofen = await page.$$eval('#grid .box .tape', (xs) => xs.map((x) => x.textContent));
 check(ofen.length >= 4 && ofen.length < 50 && ofen.includes('Ofen-Hähnchen'), `Suche „Hähnchen ofen“ (${ofen.length}, beide Wörter müssen passen)`);
@@ -159,7 +159,7 @@ await page.click('[data-open="teriyaki"]');
 await page.click('[data-act="alle-dazu"]');
 await page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await zeile('Basmati- oder Jasminreis').count()) === 1), 'Reis steht einmal auf der Liste');
-check((await zeile('Basmati- oder Jasminreis').locator('.item-qty').innerText()).startsWith('480 g'), 'Reis aus beiden Rezepten: 480 g');
+check((await zeile('Basmati- oder Jasminreis').locator('.item-qty').innerText()).startsWith('460 g'), 'Reis aus beiden Rezepten: 460 g');
 check(/≈ \d+(,\d\d)? €/.test(await text('#l-count')), `die Liste summiert die Richtpreise (${await text('#l-count')})`);
 check((await zeile('Knoblauch').locator('.item-qty').innerText()).replace(/\s+/g, ' ') === '10 Zehen ≈ 1 Knolle', 'Knoblauch: 10 Zehen, etwa 1 Knolle');
 check((await zeile('Öl, neutral').innerText()).includes('Butter Chicken: 10 g'), 'Öl mit Text statt Menge');
@@ -207,7 +207,7 @@ await page.click('[data-act="a-leeren-ja"]');
 await page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await huhnAngebote.locator('.l-auch').count()) === 0 && (await huhnAngebote.locator('.l-angebot').count()) === 1), 'eigenes Angebot wieder weg: nur noch Aldi');
 const offenVorher = await badge();
-check(offenVorher === 18, `18 offene Einträge (${offenVorher})`);
+check(offenVorher === 19, `19 offene Einträge (${offenVorher})`);
 
 // --- abhaken, eigene Einträge, löschen
 await zeile('Brokkoli').locator('.cb').click();

@@ -35,8 +35,8 @@ const r2 = resteVon(postenVon(chili2), d);
 check(rest(r2, 'rinderhack')?.rest === 375 && rest(r2, 'rinderhack').pack === 500 && rest(r2, 'rinderhack-mager')?.rest === 300 && rest(r2, 'kidney')?.rest === 0.5, `Chili für 2: 375 g Rinderhack von 500 g, 300 g mageres, ½ Dose Kidneybohnen bleiben (≈ ${restWert(postenVon(chili2), d).toFixed(2)} €)`);
 check(!rest(r2, 'zwiebeln') && !rest(r2, 'knoblauch') && !rest(r2, 'paprika') && r2.every((x, i) => i === 0 || r2[i - 1].wert >= x.wert), 'Keine Zwiebeln, kein Knoblauch, keine Paprika (die ist ganz) – das Teuerste zuerst');
 check(resteVon(postenVon(nach(daten.rezepte, 'chili')), d).length === 0, 'Chili für 8: nichts bleibt übrig – das Rezept ist auf Packungen gebaut');
-const koett8 = resteVon(postenVon(nach(daten.rezepte, 'koettbullar')), d);
-check(rest(koett8, 'rinderhack-mager')?.rest === 300, 'Köttbullar für 8: 300 g mageres Hack bleiben (2 × 400 g für 500 g)');
+const frik8 = resteVon(postenVon(nach(daten.rezepte, 'frikassee')), d);
+check(rest(frik8, 'haehnchenbrust')?.rest === 300, 'Frikassee für 8: 300 g Hähnchenbrust bleiben (3 × 400 g für 900 g)');
 
 /* ----------------------------------------------------------- der Plan */
 
@@ -120,13 +120,13 @@ check(await bis(() => m.locator('#reste').isVisible()) && (await m.locator('#k-t
 check(await bis(() => anfragen.length === 1) && anfragen[0].includes('Reste von den Packungen') && anfragen[0].includes('Rinderhackfleisch'), 'Und die KI bekommt sie');
 check(marielle.fehler.length === 0, `Keine Fehler im Browser (${marielle.fehler.join(' | ')})`);
 await marielle.ctx.close();
-// Tobi und Amy, 8 Boxen: beim Chili bleibt nichts, bei Köttbullar Hack
+// Tobi und Amy, 8 Boxen: beim Chili bleibt nichts, beim Frikassee Hähnchen
 const tobi = await handy(browser);
 await tobi.page.click('[data-open="chili"]');
 check(await tobi.page.locator('#d-reste').isHidden(), 'Für 8 Boxen: beim Chili keine Karte');
 await tobi.page.click('#detail [data-act="zurueck"]');
-await tobi.page.click('[data-open="koettbullar"]');
-check(await bis(() => tobi.page.locator('#d-reste').isVisible()) && (await lesen(tobi.page.locator('#d-reste'))).includes('300 g Rinderhackfleisch mager'), 'Köttbullar für 8: 300 g mageres Hack bleiben übrig');
+await tobi.page.click('[data-open="frikassee"]');
+check(await bis(() => tobi.page.locator('#d-reste').isVisible()) && (await lesen(tobi.page.locator('#d-reste'))).includes('300 g Hähnchenbrustfilet'), 'Frikassee für 8: 300 g Hähnchenbrust bleiben übrig');
 check(tobi.fehler.length === 0, `Tobi: keine Fehler im Browser (${tobi.fehler.join(' | ')})`);
 await tobi.ctx.close();
 await browser.close();

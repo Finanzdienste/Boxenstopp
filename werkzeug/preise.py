@@ -40,6 +40,7 @@ PREISE = {
  # Tiefkühl
  'tk-kraeuter': (0.99, 1, 'Pck'), 'erbsen': (1.19, 450, 'g'), 'tk-brokkoli': (1.19, 750, 'g'),
  'tk-blumenkohl': (1.19, 750, 'g'), 'tk-bohnen': (1.49, 450, 'g'), 'tk-spinat': (1.29, 450, 'g'),
+ 'edamame': (2.49, 400, 'g'),
  # Konserven & Gläser
  'tomaten-dose': (0.69, 1, 'Dose'), 'passata': (0.69, 500, 'g'), 'tomatenmark': (0.69, 200, 'g'),
  'kidney': (0.69, 1, 'Dose'), 'schwarze-bohnen': (0.89, 1, 'Dose'), 'mais': (0.79, 1, 'Dose'),

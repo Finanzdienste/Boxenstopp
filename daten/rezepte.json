@@ -3379,7 +3379,7 @@
    "id": "teriyaki",
    "name": "Chicken Teriyaki Bowl",
    "short": "Teriyaki Bowl",
-   "desc": "Saftige Hähnchenkeule in glänzender Teriyaki-Sauce mit Brokkoli, Möhren und Sesam.",
+   "desc": "Saftige Hähnchenkeule in glänzender Teriyaki-Sauce mit Brokkoli, Edamame, Möhren und Sesam.",
    "protein": "Hähnchen",
    "base": "Reis",
    "method": "Wok / Pfanne",
@@ -3388,15 +3388,15 @@
    "items": [
     {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "1 kg",
+     "a": "800 g",
      "k": "haehnchenkeule",
-     "q": 1000,
+     "q": 800,
      "u": "g",
-     "h": "2 × 500 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1000,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -3405,21 +3405,21 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 500,
-     "max": 1600,
-     "eur": 9.15
+     "min": 400,
+     "max": 1280,
+     "eur": 7.32
     },
     {
      "n": "Basmati- oder Jasminreis",
-     "a": "240 g",
+     "a": "220 g",
      "k": "reis",
-     "q": 240,
+     "q": 220,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 240,
+     "g": 220,
      "gu": "g",
      "pro100": {
       "kcal": 350,
@@ -3428,9 +3428,9 @@
       "f": 0.6
      },
      "anpassbar": true,
-     "min": 120,
-     "max": 384,
-     "eur": 0.55
+     "min": 110,
+     "max": 352,
+     "eur": 0.5
     },
     {
      "n": "Brokkoli",
@@ -3454,6 +3454,29 @@
      "min": 1000,
      "max": 1000,
      "eur": 2.38
+    },
+    {
+     "n": "TK-Edamame, geschält",
+     "a": "400 g",
+     "k": "edamame",
+     "q": 400,
+     "u": "g",
+     "h": "1 Beutel à 400 g",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 400,
+     "gu": "g",
+     "pro100": {
+      "kcal": 125,
+      "p": 11.5,
+      "kh": 4,
+      "f": 5.5
+     },
+     "anpassbar": true,
+     "min": 200,
+     "max": 640,
+     "eur": 2.49
     },
     {
      "n": "Möhren",
@@ -3659,15 +3682,15 @@
     },
     {
      "n": "Öl, neutral",
-     "a": "15 g",
+     "a": "10 g",
      "k": "oel",
-     "q": 15.0,
+     "q": 10.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 15.0,
+     "g": 10.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -3676,9 +3699,9 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 8,
-     "max": 24,
-     "eur": 0.04
+     "min": 5,
+     "max": 16,
+     "eur": 0.02
     },
     {
      "n": "Sesamöl",
@@ -3719,7 +3742,7 @@
    "schalen": [
     {
      "n": 1,
-     "name": "Brokkoli & Möhren",
+     "name": "Brokkoli, Möhren & Edamame",
      "gr": "groß"
     },
     {
@@ -3754,7 +3777,7 @@
        "min": 1
       },
       {
-       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 360 ml Wasser und 1 Prise Salz in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 330 ml Wasser und 1 Prise Salz in den kleinen Topf",
        "min": 3
       },
       {
@@ -3764,6 +3787,10 @@
       {
        "d": "3 Möhren ({moehren}) schälen und schräg in dünne Scheiben schneiden → Schale 1",
        "min": 5
+      },
+      {
+       "d": "{edamame} TK-Edamame → Schale 1, bleiben gefroren",
+       "min": 1
       },
       {
        "d": "1 Bund Frühlingszwiebeln in feine Ringe schneiden → Schale 4",
@@ -3805,7 +3832,7 @@
       },
       {
        "d": "{haehnchenkeule} Hähnchen-Oberkeulenfilet in 3-cm-Stücke schneiden, grobes Fett wegschneiden → Schale 2",
-       "min": 9
+       "min": 7
       },
       {
        "d": "Brett und Messer heiß abwaschen, Hände waschen",
@@ -3874,7 +3901,8 @@
     }
    ],
    "tips": [
-    "Oberkeule bleibt beim Aufwärmen viel saftiger als Brust. Mit 1 kg Brust fehlen dir pro Portion ca. 6 g Fett, dann 2 EL Öl mehr nehmen."
+    "Oberkeule bleibt beim Aufwärmen viel saftiger als Brust. Mit 800 g Brust fehlen dir pro Portion ca. 6 g Fett, dann 2 EL Öl mehr nehmen.",
+    "Edamame gibt es geschält im Tiefkühlregal (oft bei den Asia-Sachen). Sie garen beim Blanchieren mit."
    ],
    "pauschal": [
     {
@@ -3892,19 +3920,19 @@
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "1 kg",
-     1460.0,
-     187.0,
+     "800 g",
+     1168.0,
+     149.6,
      0.0,
-     79.0
+     63.2
     ],
     [
      "Basmati- oder Jasminreis",
-     "240 g",
-     840.0,
-     19.2,
-     184.8,
-     1.4
+     "220 g",
+     770.0,
+     17.6,
+     169.4,
+     1.3
     ],
     [
      "Brokkoli",
@@ -3913,6 +3941,14 @@
      30.0,
      30.0,
      4.0
+    ],
+    [
+     "TK-Edamame, geschält",
+     "400 g",
+     500.0,
+     46.0,
+     16.0,
+     22.0
     ],
     [
      "Möhren",
@@ -3980,11 +4016,11 @@
     ],
     [
      "Öl, neutral",
-     "15 g",
-     135.0,
+     "10 g",
+     90.0,
      0.0,
      0.0,
-     15.0
+     10.0
     ],
     [
      "Sesamöl",
@@ -4004,20 +4040,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 15.6,
-    "box": 1.95
+    "gesamt": 16.2,
+    "box": 2.02
    },
    "total": [
-    3530.9,
-    259.0,
-    312.6,
-    126.0
+    3623.9,
+    266.0,
+    313.2,
+    127.1
    ],
    "m": {
-    "kcal": 441,
-    "p": 32.4,
+    "kcal": 453,
+    "p": 33.2,
     "kh": 39.1,
-    "f": 15.8
+    "f": 15.9
    },
    "zeit": {
     "phasen": [
@@ -6118,7 +6154,7 @@
    "id": "bolognese",
    "name": "Spaghetti Bolognese",
    "short": "Bolognese",
-   "desc": "Langsam geschmortes Ragù aus zweierlei Rinderhack mit Soffritto und einem Schuss Milch, Spaghetti und Parmesan.",
+   "desc": "Langsam geschmortes Ragù aus zweierlei Rinderhack und Linsen mit Soffritto und einem Schuss Milch, Spaghetti und Parmesan.",
    "protein": "Rind",
    "base": "Nudeln",
    "method": "Topf",
@@ -6172,16 +6208,39 @@
      "eur": 5.49
     },
     {
+     "n": "Linsen (braun, aus der Dose)",
+     "a": "1 Dose à 400 g (240 g abgetropft)",
+     "k": "linsen-dose",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 240,
+     "gu": "g",
+     "pro100": {
+      "kcal": 95,
+      "p": 6.5,
+      "kh": 12,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 120,
+     "max": 384,
+     "eur": 0.79
+    },
+    {
      "n": "Spaghetti",
-     "a": "320 g",
+     "a": "270 g",
      "k": "spaghetti",
-     "q": 320,
+     "q": 270,
      "u": "g",
      "h": "aus 500-g-Packung",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 320,
+     "g": 270,
      "gu": "g",
      "pro100": {
       "kcal": 356,
@@ -6190,9 +6249,9 @@
       "f": 1.8
      },
      "anpassbar": true,
-     "min": 160,
-     "max": 512,
-     "eur": 0.63
+     "min": 135,
+     "max": 432,
+     "eur": 0.53
     },
     {
      "n": "Zwiebeln",
@@ -6357,15 +6416,15 @@
     },
     {
      "n": "Parmesan",
-     "a": "60 g",
+     "a": "50 g",
      "k": "parmesan",
-     "q": 60,
+     "q": 50,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 60,
+     "g": 50,
      "gu": "g",
      "pro100": {
       "kcal": 390,
@@ -6374,9 +6433,9 @@
       "f": 28
      },
      "anpassbar": true,
-     "min": 30,
-     "max": 96,
-     "eur": 1.19
+     "min": 25,
+     "max": 80,
+     "eur": 1.0
     },
     {
      "n": "Rinderbrühe",
@@ -6557,6 +6616,10 @@
        "min": 1
       },
       {
+       "d": "1 Dose Linsen im Sieb abspülen, abtropfen lassen und zu den Tomaten stellen",
+       "min": 2
+      },
+      {
        "d": "{bruehe-rind} heiße Rinderbrühe anrühren → Messbecher",
        "min": 2
       },
@@ -6606,7 +6669,7 @@
        "min": 3
       },
       {
-       "d": "Tomaten, Brühe, Schale 3 und Lorbeer einrühren und aufkochen",
+       "d": "Tomaten, Linsen, Brühe, Schale 3 und Lorbeer einrühren und aufkochen – die Linsen zerfallen beim Schmoren im Ragù",
        "min": 2
       },
       {
@@ -6698,12 +6761,20 @@
      20.0
     ],
     [
+     "Linsen",
+     "240 g",
+     228.0,
+     15.6,
+     28.8,
+     1.4
+    ],
+    [
      "Spaghetti",
-     "320 g",
-     1139.2,
-     40.0,
-     225.6,
-     5.8
+     "270 g",
+     961.2,
+     33.8,
+     190.3,
+     4.9
     ],
     [
      "Zwiebeln",
@@ -6763,11 +6834,11 @@
     ],
     [
      "Parmesan",
-     "60 g",
-     234.0,
-     19.8,
+     "50 g",
+     195.0,
+     16.5,
      0.0,
-     16.8
+     14.0
     ],
     [
      "Rinderbrühe",
@@ -6795,30 +6866,30 @@
     ]
    ],
    "kosten": {
-    "gesamt": 16.0,
-    "box": 2.0
+    "gesamt": 16.49,
+    "box": 2.06
    },
    "total": [
-    3593.6,
-    258.5,
-    311.2,
-    133.4
+    3604.6,
+    264.6,
+    304.7,
+    131.1
    ],
    "m": {
-    "kcal": 449,
-    "p": 32.3,
-    "kh": 38.9,
-    "f": 16.7
+    "kcal": 451,
+    "p": 33.1,
+    "kh": 38.1,
+    "f": 16.4
    },
    "zeit": {
     "phasen": [
-     30,
+     35,
      75,
      10
     ],
-    "gesamt": 115
+    "gesamt": 120
    },
-   "time": 115,
+   "time": 120,
    "bild": "bilder/rezepte/bolognese.webp?v=f86e33e6"
   },
   {
@@ -7561,7 +7632,7 @@
    "id": "ofen-haehnchen",
    "name": "Ofen-Hähnchen mit Kartoffeln & Kräuterquark",
    "short": "Ofen-Hähnchen",
-   "desc": "Hähnchen, Kartoffeln, Paprika und Zucchini vom Blech mit Rosmarin, dazu kalter Kräuterquark.",
+   "desc": "Hähnchenkeule, Kartoffeln, Paprika und Zucchini vom Blech mit Rosmarin, dazu reichlich kalter Kräuterquark.",
    "protein": "Hähnchen",
    "base": "Kartoffeln",
    "method": "Ofen",
@@ -7569,39 +7640,16 @@
    "freeze": "2 Monate, ohne Quark",
    "items": [
     {
-     "n": "Hähnchenbrustfilet",
-     "a": "400 g",
-     "k": "haehnchenbrust",
-     "q": 400,
-     "u": "g",
-     "h": "1 × 400 g",
-     "pantry": false,
-     "opt": false,
-     "haus": false,
-     "g": 400,
-     "gu": "g",
-     "pro100": {
-      "kcal": 106,
-      "p": 23,
-      "kh": 0,
-      "f": 1.5
-     },
-     "anpassbar": true,
-     "min": 200,
-     "max": 640,
-     "eur": 4.53
-    },
-    {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "500 g",
+     "a": "800 g",
      "k": "haehnchenkeule",
-     "q": 500,
+     "q": 800,
      "u": "g",
-     "h": "1 × 500 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 500,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -7610,9 +7658,9 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 250,
-     "max": 800,
-     "eur": 4.58
+     "min": 400,
+     "max": 1280,
+     "eur": 7.32
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -7731,15 +7779,15 @@
     },
     {
      "n": "Magerquark",
-     "a": "250 g",
+     "a": "500 g",
      "k": "magerquark",
-     "q": 250,
+     "q": 500,
      "u": "g",
-     "h": "1 Becher",
+     "h": "2 Becher à 250 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 250,
+     "g": 500,
      "gu": "g",
      "pro100": {
       "kcal": 67,
@@ -7748,9 +7796,9 @@
       "f": 0.2
      },
      "anpassbar": true,
-     "min": 125,
-     "max": 400,
-     "eur": 0.49
+     "min": 250,
+     "max": 800,
+     "eur": 0.99
     },
     {
      "n": "Zitrone",
@@ -7777,7 +7825,7 @@
     },
     {
      "n": "TK-Kräuter",
-     "a": "2 EL",
+     "a": "3 EL",
      "k": "tk-kraeuter",
      "q": 1,
      "u": "Pck",
@@ -7795,15 +7843,15 @@
     },
     {
      "n": "Olivenöl",
-     "a": "70 g",
+     "a": "50 g",
      "k": "olivenoel",
-     "q": 70.0,
+     "q": 50.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 70.0,
+     "g": 50.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -7812,9 +7860,9 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 35,
-     "max": 112,
-     "eur": 0.65
+     "min": 25,
+     "max": 80,
+     "eur": 0.47
     },
     {
      "n": "Backpapier",
@@ -7940,14 +7988,14 @@
        "min": 15
       },
       {
-       "d": "In Schale 1 mischen: 40 g Olivenöl, 1 EL Paprika edelsüß, 1 EL Rosmarin, 1 TL Salz",
+       "d": "In Schale 1 mischen: 30 g Olivenöl, 1 EL Paprika edelsüß, 1 EL Rosmarin, 1 TL Salz",
        "min": 2
       },
       {
        "d": "In Schale 2 abmessen:",
        "min": 4,
        "liste": [
-        "20 g Olivenöl",
+        "10 g Olivenöl",
         "1 EL Paprika edelsüß",
         "2 TL Paprika geräuchert",
         "1 TL Thymian",
@@ -7958,8 +8006,8 @@
        ]
       },
       {
-       "d": "{haehnchenbrust} Hähnchenbrust und {haehnchenkeule} Oberkeulenfilet in 3-cm-Stücke schneiden → Schale 2 und gut mischen",
-       "min": 8
+       "d": "{haehnchenkeule} Oberkeulenfilet in 3-cm-Stücke schneiden, grobes Fett wegschneiden → Schale 2 und gut mischen",
+       "min": 7
       },
       {
        "d": "Brett und Messer heiß abwaschen, Hände waschen",
@@ -8034,11 +8082,11 @@
        "neben": true,
        "liste": [
         "{magerquark} Magerquark",
-        "2 EL TK-Kräuter",
+        "3 EL TK-Kräuter",
         "Saft von ½ Zitrone",
         "½ TL Pfeffer",
-        "1 Prise Salz",
-        "2–3 EL Wasser"
+        "½ TL Salz",
+        "4–5 EL Wasser"
        ]
       }
      ]
@@ -8063,7 +8111,7 @@
        "min": 8
       },
       {
-       "d": "Den Kräuterquark (Schale 4) in 8 Döschen füllen, je ca. 40 g",
+       "d": "Den Kräuterquark (Schale 4) in 8 Döschen füllen, je ca. 70 g",
        "min": 3
       },
       {
@@ -8095,20 +8143,12 @@
    ],
    "nut": [
     [
-     "Hähnchenbrustfilet",
-     "400 g",
-     424.0,
-     92.0,
-     0.0,
-     6.0
-    ],
-    [
      "Hähnchen-Oberkeulenfilet",
-     "500 g",
-     730.0,
-     93.5,
+     "800 g",
+     1168.0,
+     149.6,
      0.0,
-     39.5
+     63.2
     ],
     [
      "Kartoffeln, festkochend",
@@ -8152,11 +8192,11 @@
     ],
     [
      "Magerquark",
-     "250 g",
-     167.5,
-     30.0,
-     10.0,
-     0.5
+     "500 g",
+     335.0,
+     60.0,
+     20.0,
+     1.0
     ],
     [
      "Zitrone",
@@ -8168,11 +8208,11 @@
     ],
     [
      "Olivenöl",
-     "70 g",
-     630.0,
+     "50 g",
+     450.0,
      0.0,
      0.0,
-     70.0
+     50.0
     ],
     [
      "Gewürze",
@@ -8184,20 +8224,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 18.07,
-    "box": 2.26
+    "gesamt": 16.59,
+    "box": 2.07
    },
    "total": [
-    3501.6,
-    267.6,
-    311.4,
-    124.2
+    3503.1,
+    261.7,
+    321.4,
+    122.4
    ],
    "m": {
     "kcal": 438,
-    "p": 33.5,
-    "kh": 38.9,
-    "f": 15.5
+    "p": 32.7,
+    "kh": 40.2,
+    "f": 15.3
    },
    "zeit": {
     "phasen": [
@@ -11402,7 +11442,7 @@
    "id": "shawarma-bowl",
    "name": "Hähnchen-Shawarma-Bowl mit Bulgur & Joghurt-Sauce",
    "short": "Shawarma-Bowl",
-   "desc": "Kräftig gewürzte Hähnchenkeule aus dem Ofen auf Bulgur mit Tomaten-Gurken-Salat und kalter Knoblauch-Joghurt-Sauce.",
+   "desc": "Kräftig gewürzte Hähnchenkeule und knusprige Kichererbsen aus dem Ofen auf Bulgur mit Tomaten-Gurken-Salat und kalter Knoblauch-Joghurt-Sauce.",
    "protein": "Hähnchen",
    "base": "Bulgur",
    "method": "Ofen + Topf",
@@ -11411,15 +11451,15 @@
    "items": [
     {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "1 kg",
+     "a": "800 g",
      "k": "haehnchenkeule",
-     "q": 1000,
+     "q": 800,
      "u": "g",
-     "h": "2 × 500 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1000,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -11428,21 +11468,44 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 500,
-     "max": 1600,
-     "eur": 9.15
+     "min": 400,
+     "max": 1280,
+     "eur": 7.32
+    },
+    {
+     "n": "Kichererbsen",
+     "a": "1 Dose à 400 g (240 g abgetropft)",
+     "k": "kichererbsen",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 240,
+     "gu": "g",
+     "pro100": {
+      "kcal": 120,
+      "p": 7,
+      "kh": 16,
+      "f": 2.5
+     },
+     "anpassbar": true,
+     "min": 120,
+     "max": 384,
+     "eur": 0.69
     },
     {
      "n": "Bulgur",
-     "a": "360 g",
+     "a": "320 g",
      "k": "bulgur",
-     "q": 360,
+     "q": 320,
      "u": "g",
      "h": "aus 500-g-Packung",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 360,
+     "g": 320,
      "gu": "g",
      "pro100": {
       "kcal": 350,
@@ -11451,9 +11514,9 @@
       "f": 1.5
      },
      "anpassbar": true,
-     "min": 180,
-     "max": 576,
-     "eur": 0.93
+     "min": 160,
+     "max": 512,
+     "eur": 0.83
     },
     {
      "n": "Tomaten",
@@ -11572,15 +11635,15 @@
     },
     {
      "n": "Skyr natur",
-     "a": "300 g",
+     "a": "450 g",
      "k": "skyr",
-     "q": 300,
+     "q": 450,
      "u": "g",
-     "h": "2 Becher à 150 g",
+     "h": "3 Becher à 150 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 300,
+     "g": 450,
      "gu": "g",
      "pro100": {
       "kcal": 63,
@@ -11589,44 +11652,21 @@
       "f": 0.2
      },
      "anpassbar": true,
-     "min": 150,
-     "max": 480,
-     "eur": 0.77
-    },
-    {
-     "n": "Joghurt 1,5 %",
-     "a": "150 g",
-     "k": "joghurt",
-     "q": 150,
-     "u": "g",
-     "h": "1 Becher",
-     "pantry": false,
-     "opt": false,
-     "haus": false,
-     "g": 150,
-     "gu": "g",
-     "pro100": {
-      "kcal": 50,
-      "p": 4,
-      "kh": 5,
-      "f": 1.5
-     },
-     "anpassbar": true,
-     "min": 75,
-     "max": 240,
-     "eur": 0.3
+     "min": 225,
+     "max": 720,
+     "eur": 1.16
     },
     {
      "n": "Olivenöl",
-     "a": "30 g",
+     "a": "45 g",
      "k": "olivenoel",
-     "q": 30.0,
+     "q": 45.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 30.0,
+     "g": 45.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -11635,21 +11675,21 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 15,
-     "max": 48,
-     "eur": 0.28
+     "min": 22,
+     "max": 72,
+     "eur": 0.42
     },
     {
      "n": "Gemüsebrühe",
-     "a": "600 ml",
+     "a": "550 ml",
      "k": "bruehe-gemuese",
-     "q": 600.0,
+     "q": 550.0,
      "u": "ml",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 600.0,
+     "g": 550.0,
      "gu": "ml",
      "pro100": {
       "kcal": 4,
@@ -11658,9 +11698,9 @@
       "f": 0.2
      },
      "anpassbar": false,
-     "min": 600.0,
-     "max": 600.0,
-     "eur": 0.21
+     "min": 550.0,
+     "max": 550.0,
+     "eur": 0.19
     },
     {
      "n": "Petersilie, frisch",
@@ -11777,7 +11817,7 @@
    "schalen": [
     {
      "n": 1,
-     "name": "Hähnchen in Marinade",
+     "name": "Hähnchen & Kichererbsen",
      "gr": "groß"
     },
     {
@@ -11800,6 +11840,7 @@
     "Backblech",
     "mittlerer Topf mit Deckel",
     "Messbecher",
+    "Sieb",
     "Reibe",
     "Schüssel zum Wiegen"
    ],
@@ -11811,7 +11852,7 @@
        "d": "In Schale 1 abmessen und verrühren:",
        "min": 6,
        "liste": [
-        "20 g Olivenöl",
+        "35 g Olivenöl",
         "2 TL Kreuzkümmel",
         "2 TL Paprika edelsüß",
         "1 TL Paprika geräuchert",
@@ -11830,8 +11871,12 @@
        "min": 1
       },
       {
-       "d": "{haehnchenkeule} Hähnchen-Oberkeulenfilet in 2-cm-Streifen schneiden → Schale 1 und mit der Marinade mischen",
-       "min": 9
+       "d": "1 Dose Kichererbsen im Sieb abspülen, gut abtropfen lassen und trocken tupfen → Schale 1",
+       "min": 3
+      },
+      {
+       "d": "{haehnchenkeule} Hähnchen-Oberkeulenfilet in 2-cm-Streifen schneiden → Schale 1 und alles mit der Marinade mischen",
+       "min": 7
       },
       {
        "d": "Schale 1 abgedeckt kalt stellen, mind. 30 Min.",
@@ -11884,7 +11929,7 @@
        "min": 2,
        "liste": [
         "{skyr} Skyr",
-        "{joghurt} Joghurt",
+        "4 EL Wasser",
         "½ TL Salz",
         "1 Prise Pfeffer"
        ]
@@ -11895,7 +11940,7 @@
      "t": "Kochen",
      "schritte": [
       {
-       "d": "Schale 1 mit der ganzen Marinade auf dem Blech verteilen, nicht stapeln",
+       "d": "Schale 1 mit der ganzen Marinade auf dem Blech verteilen, nicht stapeln – die Kichererbsen werden am Rand knusprig",
        "min": 2
       },
       {
@@ -11949,7 +11994,7 @@
        "min": 2
       },
       {
-       "d": "Die Sauce (Schale 4) in 8 Döschen füllen, je ca. 55 g",
+       "d": "Die Sauce (Schale 4) in 8 Döschen füllen, je ca. 65 g",
        "min": 3
       },
       {
@@ -11983,19 +12028,27 @@
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "1 kg",
-     1460.0,
-     187.0,
+     "800 g",
+     1168.0,
+     149.6,
      0.0,
-     79.0
+     63.2
+    ],
+    [
+     "Kichererbsen",
+     "240 g",
+     288.0,
+     16.8,
+     38.4,
+     6.0
     ],
     [
      "Bulgur",
-     "360 g",
-     1260.0,
-     43.2,
-     252.0,
-     5.4
+     "320 g",
+     1120.0,
+     38.4,
+     224.0,
+     4.8
     ],
     [
      "Tomaten",
@@ -12039,35 +12092,27 @@
     ],
     [
      "Skyr natur",
-     "300 g",
-     189.0,
-     33.0,
-     12.0,
-     0.6
-    ],
-    [
-     "Joghurt 1,5 %",
-     "150 g",
-     75.0,
-     6.0,
-     7.5,
-     2.2
+     "450 g",
+     283.5,
+     49.5,
+     18.0,
+     0.9
     ],
     [
      "Olivenöl",
-     "30 g",
-     270.0,
+     "45 g",
+     405.0,
      0.0,
      0.0,
-     30.0
+     45.0
     ],
     [
      "Gemüsebrühe",
-     "600 ml",
-     24.0,
-     1.2,
-     2.4,
-     1.2
+     "550 ml",
+     22.0,
+     1.1,
+     2.2,
+     1.1
     ],
     [
      "Gewürze",
@@ -12079,37 +12124,37 @@
     ]
    ],
    "kosten": {
-    "gesamt": 14.38,
-    "box": 1.8
+    "gesamt": 13.35,
+    "box": 1.67
    },
    "total": [
-    3537.4,
-    281.5,
-    309.8,
-    122.7
+    3545.9,
+    266.5,
+    318.5,
+    125.3
    ],
    "m": {
-    "kcal": 442,
-    "p": 35.2,
-    "kh": 38.7,
-    "f": 15.3
+    "kcal": 443,
+    "p": 33.3,
+    "kh": 39.8,
+    "f": 15.7
    },
    "zeit": {
     "phasen": [
-     45,
+     50,
      20,
      15
     ],
-    "gesamt": 80
+    "gesamt": 85
    },
-   "time": 80,
+   "time": 85,
    "bild": "bilder/rezepte/shawarma-bowl.webp?v=54644d72"
   },
   {
    "id": "jambalaya",
    "name": "Jambalaya mit Hähnchen",
    "short": "Jambalaya",
-   "desc": "Reis, Hähnchenkeule, Paprika, Sellerie und Bohnen aus einem Topf, würzig nach Cajun-Art.",
+   "desc": "Reis, Hähnchenkeule, Paprika, Sellerie und reichlich Kidneybohnen aus einem Topf, würzig nach Cajun-Art.",
    "protein": "Hähnchen",
    "base": "Reis",
    "method": "Topf",
@@ -12118,15 +12163,15 @@
    "items": [
     {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "1,2 kg",
+     "a": "1 kg",
      "k": "haehnchenkeule",
-     "q": 1200,
+     "q": 1000,
      "u": "g",
-     "h": "2 × 600 g",
+     "h": "2 × 500 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1200,
+     "g": 1000,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -12135,21 +12180,21 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 600,
-     "max": 1920,
-     "eur": 10.98
+     "min": 500,
+     "max": 1600,
+     "eur": 9.15
     },
     {
      "n": "Basmati- oder Jasminreis",
-     "a": "270 g",
+     "a": "250 g",
      "k": "reis",
-     "q": 270,
+     "q": 250,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 270,
+     "g": 250,
      "gu": "g",
      "pro100": {
       "kcal": 350,
@@ -12158,9 +12203,9 @@
       "f": 0.6
      },
      "anpassbar": true,
-     "min": 135,
-     "max": 432,
-     "eur": 0.62
+     "min": 125,
+     "max": 400,
+     "eur": 0.57
     },
     {
      "n": "Paprika (rot, gelb, grün)",
@@ -12279,15 +12324,15 @@
     },
     {
      "n": "Kidneybohnen",
-     "a": "1 Dose à 400 g (255 g abgetropft)",
+     "a": "2 Dosen à 400 g (510 g abgetropft)",
      "k": "kidney",
-     "q": 1,
+     "q": 2,
      "u": "Dose",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 255,
+     "g": 510,
      "gu": "g",
      "pro100": {
       "kcal": 95,
@@ -12296,9 +12341,9 @@
       "f": 0.6
      },
      "anpassbar": false,
-     "min": 255,
-     "max": 255,
-     "eur": 0.69
+     "min": 510,
+     "max": 510,
+     "eur": 1.38
     },
     {
      "n": "Tomatenmark",
@@ -12325,15 +12370,15 @@
     },
     {
      "n": "Öl, neutral",
-     "a": "20 g",
+     "a": "30 g",
      "k": "oel",
-     "q": 20.0,
+     "q": 30.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 20.0,
+     "g": 30.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -12342,9 +12387,9 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 10,
-     "max": 32,
-     "eur": 0.05
+     "min": 15,
+     "max": 48,
+     "eur": 0.07
     },
     {
      "n": "Hühnerbrühe",
@@ -12496,8 +12541,8 @@
        "min": 3
       },
       {
-       "d": "1 Dose Kidneybohnen öffnen, im Sieb abspülen und abtropfen lassen → Schale 6",
-       "min": 2
+       "d": "2 Dosen Kidneybohnen öffnen, im Sieb abspülen und abtropfen lassen → Schale 6",
+       "min": 3
       },
       {
        "d": "1 Dose stückige Tomaten öffnen, 2 Lorbeerblätter danebenlegen",
@@ -12513,7 +12558,7 @@
       },
       {
        "d": "{haehnchenkeule} Hähnchen-Oberkeulenfilet in 3-cm-Stücke schneiden, grobes Fett wegschneiden, mit ½ TL Salz mischen → Schale 1",
-       "min": 11
+       "min": 9
       },
       {
        "d": "Brett und Messer heiß abwaschen, Hände waschen",
@@ -12605,19 +12650,19 @@
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "1,2 kg",
-     1752.0,
-     224.4,
+     "1 kg",
+     1460.0,
+     187.0,
      0.0,
-     94.8
+     79.0
     ],
     [
      "Basmati- oder Jasminreis",
-     "270 g",
-     945.0,
-     21.6,
-     207.9,
-     1.6
+     "250 g",
+     875.0,
+     20.0,
+     192.5,
+     1.5
     ],
     [
      "Paprika",
@@ -12661,11 +12706,11 @@
     ],
     [
      "Kidneybohnen",
-     "255 g",
-     242.2,
-     19.1,
-     30.6,
-     1.5
+     "510 g",
+     484.5,
+     38.2,
+     61.2,
+     3.1
     ],
     [
      "Tomatenmark",
@@ -12677,11 +12722,11 @@
     ],
     [
      "Öl, neutral",
-     "20 g",
-     180.0,
+     "30 g",
+     270.0,
      0.0,
      0.0,
-     20.0
+     30.0
     ],
     [
      "Hühnerbrühe",
@@ -12701,20 +12746,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 16.97,
-    "box": 2.12
+    "gesamt": 15.81,
+    "box": 1.98
    },
    "total": [
-    3598.9,
-    284.6,
-    309.7,
-    125.3
+    3569.2,
+    264.7,
+    324.9,
+    121.0
    ],
    "m": {
-    "kcal": 450,
-    "p": 35.6,
-    "kh": 38.7,
-    "f": 15.7
+    "kcal": 446,
+    "p": 33.1,
+    "kh": 40.6,
+    "f": 15.1
    },
    "zeit": {
     "phasen": [
@@ -13991,7 +14036,7 @@
    "id": "honig-senf",
    "name": "Honig-Senf-Hähnchen mit Ofenkartoffeln & Brokkoli",
    "short": "Honig-Senf-Hähnchen",
-   "desc": "Hähnchen in Honig-Senf-Glasur und knusprige Kartoffelwürfel vom Blech, dazu kurz blanchierter Brokkoli.",
+   "desc": "Hähnchenkeule in Honig-Senf-Glasur und knusprige Kartoffelwürfel vom Blech, Brokkoli und ein kalter Honig-Senf-Dip aus Skyr.",
    "protein": "Hähnchen",
    "base": "Kartoffeln",
    "method": "Ofen + Topf",
@@ -14000,15 +14045,15 @@
    "items": [
     {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "600 g",
+     "a": "800 g",
      "k": "haehnchenkeule",
-     "q": 600,
+     "q": 800,
      "u": "g",
-     "h": "1 × 600 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 600,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -14017,44 +14062,21 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 300,
-     "max": 960,
-     "eur": 5.49
-    },
-    {
-     "n": "Hähnchenbrustfilet",
-     "a": "400 g",
-     "k": "haehnchenbrust",
-     "q": 400,
-     "u": "g",
-     "h": "1 × 400 g",
-     "pantry": false,
-     "opt": false,
-     "haus": false,
-     "g": 400,
-     "gu": "g",
-     "pro100": {
-      "kcal": 106,
-      "p": 23,
-      "kh": 0,
-      "f": 1.5
-     },
-     "anpassbar": true,
-     "min": 200,
-     "max": 640,
-     "eur": 4.53
+     "min": 400,
+     "max": 1280,
+     "eur": 7.32
     },
     {
      "n": "Kartoffeln, festkochend",
-     "a": "1,6 kg",
+     "a": "1,5 kg",
      "k": "kartoffeln",
-     "q": 1600,
+     "q": 1500,
      "u": "g",
-     "h": "aus 2-kg-Beutel",
+     "h": "Beutel 1,5 kg",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1600,
+     "g": 1500,
      "gu": "g",
      "pro100": {
       "kcal": 72,
@@ -14063,9 +14085,9 @@
       "f": 0.1
      },
      "anpassbar": true,
-     "min": 800,
-     "max": 2560,
-     "eur": 1.59
+     "min": 750,
+     "max": 2400,
+     "eur": 1.49
     },
     {
      "n": "Brokkoli",
@@ -14137,16 +14159,39 @@
      "eur": 0.26
     },
     {
+     "n": "Skyr natur",
+     "a": "450 g",
+     "k": "skyr",
+     "q": 450,
+     "u": "g",
+     "h": "3 Becher à 150 g",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 450,
+     "gu": "g",
+     "pro100": {
+      "kcal": 63,
+      "p": 11,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 225,
+     "max": 720,
+     "eur": 1.16
+    },
+    {
      "n": "Senf, mittelscharf",
-     "a": "60 g (3 EL)",
+     "a": "80 g (4 EL)",
      "k": "senf",
-     "q": 60.0,
+     "q": 80.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 60.0,
+     "g": 80.0,
      "gu": "g",
      "pro100": {
       "kcal": 90,
@@ -14155,21 +14200,21 @@
       "f": 4
      },
      "anpassbar": false,
-     "min": 60.0,
-     "max": 60.0,
-     "eur": 0.19
+     "min": 80.0,
+     "max": 80.0,
+     "eur": 0.25
     },
     {
      "n": "Honig",
-     "a": "40 g (2 EL)",
+     "a": "50 g (2½ EL)",
      "k": "honig",
-     "q": 40.0,
+     "q": 50.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 40.0,
+     "g": 50.0,
      "gu": "g",
      "pro100": {
       "kcal": 320,
@@ -14178,21 +14223,21 @@
       "f": 0
      },
      "anpassbar": true,
-     "min": 20,
-     "max": 64,
-     "eur": 0.32
+     "min": 25,
+     "max": 80,
+     "eur": 0.4
     },
     {
      "n": "Olivenöl",
-     "a": "60 g",
+     "a": "50 g",
      "k": "olivenoel",
-     "q": 60.0,
+     "q": 50.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 60.0,
+     "g": 50.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -14201,14 +14246,32 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 30,
-     "max": 96,
-     "eur": 0.56
+     "min": 25,
+     "max": 80,
+     "eur": 0.47
     },
     {
      "n": "Backpapier",
      "a": "2 Blätter für zwei Bleche",
      "k": "backpapier",
+     "q": null,
+     "u": null,
+     "h": "",
+     "pantry": false,
+     "opt": false,
+     "haus": true,
+     "g": 0,
+     "gu": "g",
+     "pro100": null,
+     "anpassbar": false,
+     "min": 0,
+     "max": 0,
+     "eur": null
+    },
+    {
+     "n": "Kleine Döschen mit Deckel",
+     "a": "8 Stück für den Dip",
+     "k": "doeschen",
      "q": null,
      "u": null,
      "h": "",
@@ -14271,6 +14334,11 @@
      "n": 3,
      "name": "Hähnchen in Marinade",
      "gr": "groß"
+    },
+    {
+     "n": 4,
+     "name": "Honig-Senf-Dip",
+     "gr": "mittel"
     }
    ],
    "geraete": [
@@ -14313,9 +14381,9 @@
        "d": "In Schale 3 dazu und verrühren:",
        "min": 4,
        "liste": [
-        "{senf} Senf",
-        "{honig} Honig",
-        "30 g Olivenöl",
+        "60 g Senf",
+        "40 g Honig",
+        "20 g Olivenöl",
         "1 TL Paprika edelsüß",
         "1 TL Thymian",
         "1 TL Knoblauchpulver",
@@ -14324,8 +14392,8 @@
        ]
       },
       {
-       "d": "{haehnchenkeule} Oberkeulenfilet und {haehnchenbrust} Hähnchenbrust in 3-cm-Stücke schneiden → Schale 3 und gut mischen",
-       "min": 9
+       "d": "{haehnchenkeule} Oberkeulenfilet in 3-cm-Stücke schneiden, grobes Fett wegschneiden → Schale 3 und gut mischen",
+       "min": 7
       },
       {
        "d": "Brett und Messer heiß abwaschen, Hände waschen",
@@ -14339,6 +14407,10 @@
        "d": "Den großen Topf mit Salzwasser für den Brokkoli aufsetzen",
        "min": 1,
        "ruhe": 12
+      },
+      {
+       "d": "In Schale 4 glatt rühren und kalt stellen: {skyr} Skyr, 20 g Senf, 10 g Honig, ½ TL Salz, 1 Prise Pfeffer",
+       "min": 2
       },
       {
        "d": "Die große Schüssel leer wiegen und unten im Rechner bei „Gefäß leer“ eintragen",
@@ -14401,6 +14473,14 @@
        "min": 8
       },
       {
+       "d": "Den Dip (Schale 4) in 8 Döschen füllen, je ca. 60 g",
+       "min": 3
+      },
+      {
+       "d": "Die Döschen gleich mit Deckel kalt stellen",
+       "min": 1
+      },
+      {
        "d": "Offen abkühlen lassen, höchstens 1–2 Std., dann Deckel drauf und kalt stellen",
        "min": 1
       }
@@ -14427,27 +14507,19 @@
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "600 g",
-     876.0,
-     112.2,
+     "800 g",
+     1168.0,
+     149.6,
      0.0,
-     47.4
-    ],
-    [
-     "Hähnchenbrustfilet",
-     "400 g",
-     424.0,
-     92.0,
-     0.0,
-     6.0
+     63.2
     ],
     [
      "Kartoffeln, festkochend",
-     "1,6 kg",
-     1152.0,
-     32.0,
-     248.0,
-     1.6
+     "1,5 kg",
+     1080.0,
+     30.0,
+     232.5,
+     1.5
     ],
     [
      "Brokkoli",
@@ -14474,28 +14546,36 @@
      0.0
     ],
     [
+     "Skyr natur",
+     "450 g",
+     283.5,
+     49.5,
+     18.0,
+     0.9
+    ],
+    [
      "Senf, mittelscharf",
-     "60 g",
-     54.0,
-     3.6,
-     3.0,
-     2.4
+     "80 g",
+     72.0,
+     4.8,
+     4.0,
+     3.2
     ],
     [
      "Honig",
-     "40 g",
-     128.0,
+     "50 g",
+     160.0,
      0.2,
-     32.0,
+     40.0,
      0.0
     ],
     [
      "Olivenöl",
-     "60 g",
-     540.0,
+     "50 g",
+     450.0,
      0.0,
      0.0,
-     60.0
+     50.0
     ],
     [
      "Gewürze",
@@ -14507,30 +14587,30 @@
     ]
    ],
    "kosten": {
-    "gesamt": 15.14,
-    "box": 1.89
+    "gesamt": 13.56,
+    "box": 1.69
    },
    "total": [
-    3516.9,
-    266.8,
-    315.6,
-    122.5
+    3556.4,
+    260.9,
+    327.1,
+    123.9
    ],
    "m": {
-    "kcal": 440,
-    "p": 33.4,
-    "kh": 39.5,
-    "f": 15.3
+    "kcal": 445,
+    "p": 32.6,
+    "kh": 40.9,
+    "f": 15.5
    },
    "zeit": {
     "phasen": [
-     60,
+     55,
      45,
      15
     ],
-    "gesamt": 120
+    "gesamt": 115
    },
-   "time": 120,
+   "time": 115,
    "bild": "bilder/rezepte/honig-senf.webp?v=f8112161"
   },
   {
@@ -16300,7 +16380,7 @@
    "id": "biryani",
    "name": "Hähnchen-Biryani",
    "short": "Biryani",
-   "desc": "Hähnchenkeule in Joghurt-Gewürz-Marinade, geschichtet mit Basmati, Röstzwiebeln und Erbsen, im Topf gedämpft.",
+   "desc": "Hähnchenkeule in Joghurt-Skyr-Gewürz-Marinade, geschichtet mit Basmati, Röstzwiebeln, reichlich Erbsen und Butter, im Topf gedämpft.",
    "protein": "Hähnchen",
    "base": "Reis",
    "method": "Topf",
@@ -16309,15 +16389,15 @@
    "items": [
     {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "1,2 kg",
+     "a": "1 kg",
      "k": "haehnchenkeule",
-     "q": 1200,
+     "q": 1000,
      "u": "g",
-     "h": "2 × 600 g",
+     "h": "2 × 500 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1200,
+     "g": 1000,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -16326,21 +16406,21 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 600,
-     "max": 1920,
-     "eur": 10.98
+     "min": 500,
+     "max": 1600,
+     "eur": 9.15
     },
     {
      "n": "Basmatireis",
-     "a": "300 g",
+     "a": "280 g",
      "k": "reis",
-     "q": 300,
+     "q": 280,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 300,
+     "g": 280,
      "gu": "g",
      "pro100": {
       "kcal": 350,
@@ -16349,9 +16429,9 @@
       "f": 0.6
      },
      "anpassbar": true,
-     "min": 150,
-     "max": 480,
-     "eur": 0.69
+     "min": 140,
+     "max": 448,
+     "eur": 0.64
     },
     {
      "n": "Zwiebeln",
@@ -16401,15 +16481,15 @@
     },
     {
      "n": "Joghurt 1,5 %",
-     "a": "200 g",
+     "a": "150 g",
      "k": "joghurt",
-     "q": 200,
+     "q": 150,
      "u": "g",
      "h": "1 Becher",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 200,
+     "g": 150,
      "gu": "g",
      "pro100": {
       "kcal": 50,
@@ -16418,21 +16498,44 @@
       "f": 1.5
      },
      "anpassbar": true,
-     "min": 100,
-     "max": 320,
-     "eur": 0.4
+     "min": 75,
+     "max": 240,
+     "eur": 0.3
     },
     {
-     "n": "TK-Erbsen",
-     "a": "200 g",
-     "k": "erbsen",
-     "q": 200,
+     "n": "Skyr natur",
+     "a": "150 g",
+     "k": "skyr",
+     "q": 150,
      "u": "g",
-     "h": "aus 450-g-Beutel",
+     "h": "1 Becher",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 200,
+     "g": 150,
+     "gu": "g",
+     "pro100": {
+      "kcal": 63,
+      "p": 11,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 75,
+     "max": 240,
+     "eur": 0.39
+    },
+    {
+     "n": "TK-Erbsen",
+     "a": "450 g",
+     "k": "erbsen",
+     "q": 450,
+     "u": "g",
+     "h": "1 Beutel à 450 g",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 450,
      "gu": "g",
      "pro100": {
       "kcal": 75,
@@ -16441,9 +16544,9 @@
       "f": 0.4
      },
      "anpassbar": true,
-     "min": 100,
-     "max": 320,
-     "eur": 0.53
+     "min": 225,
+     "max": 720,
+     "eur": 1.19
     },
     {
      "n": "Knoblauch",
@@ -16539,15 +16642,15 @@
     },
     {
      "n": "Butter",
-     "a": "10 g",
+     "a": "30 g",
      "k": "butter",
-     "q": 10.0,
+     "q": 30.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 10.0,
+     "g": 30.0,
      "gu": "g",
      "pro100": {
       "kcal": 741,
@@ -16556,9 +16659,9 @@
       "f": 82
      },
      "anpassbar": true,
-     "min": 5,
-     "max": 16,
-     "eur": 0.09
+     "min": 15,
+     "max": 48,
+     "eur": 0.26
     },
     {
      "n": "Koriander, frisch",
@@ -16681,6 +16784,7 @@
        "min": 5,
        "liste": [
         "{joghurt} Joghurt",
+        "{skyr} Skyr",
         "1 EL Garam Masala",
         "1 TL Kurkuma",
         "1 TL Kreuzkümmel",
@@ -16693,7 +16797,7 @@
       },
       {
        "d": "{haehnchenkeule} Hähnchen-Oberkeulenfilet in 3-cm-Stücke schneiden, grobes Fett wegschneiden → Schale 3 und mischen",
-       "min": 11
+       "min": 9
       },
       {
        "d": "Schale 3 abgedeckt kalt stellen, mind. 30 Min.",
@@ -16718,7 +16822,7 @@
        "ruhe": 20
       },
       {
-       "d": "{erbsen} TK-Erbsen und {butter} Butter → Schale 5",
+       "d": "{erbsen} TK-Erbsen und {butter} Butter in Flöckchen → Schale 5",
        "min": 1
       },
       {
@@ -16762,7 +16866,7 @@
        "min": 5
       },
       {
-       "d": "Schale 4 dazu, 10 Min. köcheln, bis die Sauce dick ist, mit Salz abschmecken",
+       "d": "Schale 4 dazu, 10 Min. leise köcheln, bis die Sauce dick ist, mit Salz abschmecken",
        "min": 10
       },
       {
@@ -16826,19 +16930,19 @@
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "1,2 kg",
-     1752.0,
-     224.4,
+     "1 kg",
+     1460.0,
+     187.0,
      0.0,
-     94.8
+     79.0
     ],
     [
      "Basmatireis",
-     "300 g",
-     1050.0,
-     24.0,
-     231.0,
-     1.8
+     "280 g",
+     980.0,
+     22.4,
+     215.6,
+     1.7
     ],
     [
      "Zwiebeln",
@@ -16858,19 +16962,27 @@
     ],
     [
      "Joghurt 1,5 %",
-     "200 g",
-     100.0,
-     8.0,
-     10.0,
-     3.0
+     "150 g",
+     75.0,
+     6.0,
+     7.5,
+     2.2
+    ],
+    [
+     "Skyr natur",
+     "150 g",
+     94.5,
+     16.5,
+     6.0,
+     0.3
     ],
     [
      "TK-Erbsen",
-     "200 g",
-     150.0,
-     11.0,
-     20.0,
-     0.8
+     "450 g",
+     337.5,
+     24.8,
+     45.0,
+     1.8
     ],
     [
      "Knoblauch",
@@ -16906,11 +17018,11 @@
     ],
     [
      "Butter",
-     "10 g",
-     74.1,
-     0.1,
-     0.1,
-     8.2
+     "30 g",
+     222.3,
+     0.2,
+     0.2,
+     24.6
     ],
     [
      "Gewürze",
@@ -16922,20 +17034,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 14.63,
-    "box": 1.83
+    "gesamt": 13.87,
+    "box": 1.73
    },
    "total": [
-    3505.9,
-    278.8,
-    304.1,
-    122.8
+    3549.1,
+    268.2,
+    317.3,
+    123.8
    ],
    "m": {
-    "kcal": 438,
-    "p": 34.9,
-    "kh": 38.0,
-    "f": 15.3
+    "kcal": 444,
+    "p": 33.5,
+    "kh": 39.7,
+    "f": 15.5
    },
    "zeit": {
     "phasen": [
@@ -18821,7 +18933,7 @@
    "id": "gebratener-reis",
    "name": "Gebratener Reis mit Hähnchen & Ei",
    "short": "Gebratener Reis",
-   "desc": "Wie beim Chinesen: Reis mit Hähnchenkeule, Ei, Erbsen, Möhren und Frühlingszwiebeln aus dem Wok.",
+   "desc": "Wie beim Chinesen: Reis mit Hähnchenkeule, viel Ei, Erbsen, Möhren und Frühlingszwiebeln aus dem Wok.",
    "protein": "Hähnchen",
    "base": "Reis",
    "method": "Wok / Pfanne",
@@ -18830,15 +18942,15 @@
    "items": [
     {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "1 kg",
+     "a": "800 g",
      "k": "haehnchenkeule",
-     "q": 1000,
+     "q": 800,
      "u": "g",
-     "h": "2 × 500 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1000,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -18847,21 +18959,21 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 500,
-     "max": 1600,
-     "eur": 9.15
+     "min": 400,
+     "max": 1280,
+     "eur": 7.32
     },
     {
      "n": "Basmati- oder Jasminreis",
-     "a": "340 g",
+     "a": "310 g",
      "k": "reis",
-     "q": 340,
+     "q": 310,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 340,
+     "g": 310,
      "gu": "g",
      "pro100": {
       "kcal": 350,
@@ -18870,21 +18982,21 @@
       "f": 0.6
      },
      "anpassbar": true,
-     "min": 170,
-     "max": 544,
-     "eur": 0.78
+     "min": 155,
+     "max": 496,
+     "eur": 0.71
     },
     {
      "n": "Eier",
-     "a": "3 Stück",
+     "a": "6 Stück",
      "k": "eier",
-     "q": 3,
+     "q": 6,
      "u": "Stk",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 180,
+     "g": 360,
      "gu": "g",
      "pro100": {
       "kcal": 145,
@@ -18893,21 +19005,21 @@
       "f": 10
      },
      "anpassbar": true,
-     "min": 90,
-     "max": 288,
-     "eur": 0.75
+     "min": 180,
+     "max": 576,
+     "eur": 1.49
     },
     {
      "n": "TK-Erbsen",
-     "a": "250 g",
+     "a": "450 g",
      "k": "erbsen",
-     "q": 250,
+     "q": 450,
      "u": "g",
-     "h": "aus 450-g-Beutel",
+     "h": "1 Beutel à 450 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 250,
+     "g": 450,
      "gu": "g",
      "pro100": {
       "kcal": 75,
@@ -18916,9 +19028,9 @@
       "f": 0.4
      },
      "anpassbar": true,
-     "min": 125,
-     "max": 400,
-     "eur": 0.66
+     "min": 225,
+     "max": 720,
+     "eur": 1.19
     },
     {
      "n": "Möhren",
@@ -19148,12 +19260,12 @@
        "min": 1
       },
       {
-       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 480 ml Wasser in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 440 ml Wasser in den kleinen Topf",
        "min": 3
       },
       {
-       "d": "3 Eier in Schale 2 aufschlagen, mit 1 Prise Salz verquirlen",
-       "min": 1
+       "d": "6 Eier in Schale 2 aufschlagen, mit 1 Prise Salz verquirlen",
+       "min": 2
       },
       {
        "d": "2 Möhren ({moehren}) schälen und in kleine Würfel schneiden → Schale 3",
@@ -19185,7 +19297,7 @@
       },
       {
        "d": "{haehnchenkeule} Hähnchen-Oberkeulenfilet in 1,5-cm-Würfel schneiden, grobes Fett wegschneiden, mit ½ TL Salz mischen → Schale 1",
-       "min": 9
+       "min": 7
       },
       {
        "d": "Brett und Messer heiß abwaschen, Hände waschen",
@@ -19214,8 +19326,8 @@
        "min": 6
       },
       {
-       "d": "Schale 2 in den Wok und unter Rühren 1 Min. stocken lassen, in kleine Stücke zerteilen, auf den Teller",
-       "min": 2
+       "d": "Schale 2 in den Wok und unter Rühren 2 Min. stocken lassen, in kleine Stücke zerteilen, auf den Teller",
+       "min": 3
       },
       {
        "d": "Schale 3 in den Wok und 3 Min. braten",
@@ -19285,35 +19397,35 @@
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "1 kg",
-     1460.0,
-     187.0,
+     "800 g",
+     1168.0,
+     149.6,
      0.0,
-     79.0
+     63.2
     ],
     [
      "Basmati- oder Jasminreis",
-     "340 g",
-     1190.0,
-     27.2,
-     261.8,
-     2.0
+     "310 g",
+     1085.0,
+     24.8,
+     238.7,
+     1.9
     ],
     [
      "Eier",
-     "180 g",
-     261.0,
-     22.5,
-     1.3,
-     18.0
+     "360 g",
+     522.0,
+     45.0,
+     2.5,
+     36.0
     ],
     [
      "TK-Erbsen",
-     "250 g",
-     187.5,
-     13.8,
-     25.0,
-     1.0
+     "450 g",
+     337.5,
+     24.8,
+     45.0,
+     1.8
     ],
     [
      "Möhren",
@@ -19381,20 +19493,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 13.63,
-    "box": 1.7
+    "gesamt": 13.01,
+    "box": 1.63
    },
    "total": [
-    3493.4,
-    264.1,
-    319.4,
-    121.6
+    3507.4,
+    257.8,
+    317.5,
+    124.5
    ],
    "m": {
-    "kcal": 437,
-    "p": 33.0,
-    "kh": 39.9,
-    "f": 15.2
+    "kcal": 438,
+    "p": 32.2,
+    "kh": 39.7,
+    "f": 15.6
    },
    "zeit": {
     "phasen": [
@@ -22539,7 +22651,7 @@
    "id": "koettbullar",
    "name": "Köttbullar mit Kartoffelpüree, Rahmsauce & Erbsen",
    "short": "Köttbullar",
-   "desc": "Schwedische Hackbällchen aus magerem Rind in brauner Rahmsauce, dazu Kartoffelpüree und Erbsen.",
+   "desc": "Schwedische Hackbällchen aus magerem Rind in brauner Rahmsauce, dazu cremiges Kartoffel-Quark-Püree und Erbsen.",
    "protein": "Rind",
    "base": "Kartoffeln",
    "method": "Pfanne + Topf",
@@ -22548,15 +22660,15 @@
    "items": [
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
-     "a": "900 g",
+     "a": "800 g",
      "k": "rinderhack-mager",
-     "q": 900,
+     "q": 800,
      "u": "g",
-     "h": "Theke oder 1 × 500 g + 1 × 400 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 900,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 129,
@@ -22565,9 +22677,9 @@
       "f": 5
      },
      "anpassbar": true,
-     "min": 450,
-     "max": 1440,
-     "eur": 12.35
+     "min": 400,
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Kartoffeln, mehligkochend",
@@ -22686,15 +22798,15 @@
     },
     {
      "n": "Milch 1,5 %",
-     "a": "250 ml",
+     "a": "200 ml",
      "k": "milch",
-     "q": 250,
+     "q": 200,
      "u": "ml",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 250,
+     "g": 200,
      "gu": "ml",
      "pro100": {
       "kcal": 47,
@@ -22703,9 +22815,9 @@
       "f": 1.5
      },
      "anpassbar": true,
-     "min": 125,
-     "max": 400,
-     "eur": 0.27
+     "min": 100,
+     "max": 320,
+     "eur": 0.22
     },
     {
      "n": "Kochsahne 15 %",
@@ -22729,6 +22841,29 @@
      "min": 100,
      "max": 320,
      "eur": 0.79
+    },
+    {
+     "n": "Magerquark",
+     "a": "250 g",
+     "k": "magerquark",
+     "q": 250,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 250,
+     "gu": "g",
+     "pro100": {
+      "kcal": 67,
+      "p": 12,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 125,
+     "max": 400,
+     "eur": 0.49
     },
     {
      "n": "Butter",
@@ -22864,7 +22999,7 @@
     {
      "n": 4,
      "name": "Fürs Püree",
-     "gr": "klein"
+     "gr": "mittel"
     },
     {
      "n": 5,
@@ -22939,7 +23074,7 @@
        "min": 1
       },
       {
-       "d": "In Schale 4 dazu: 20 g Butter, ½ TL Muskatnuss, 1 TL Salz",
+       "d": "In Schale 4 dazu: {magerquark} Magerquark, 20 g Butter, ½ TL Muskatnuss, 1 TL Salz",
        "min": 1
       },
       {
@@ -23040,11 +23175,11 @@
    "nut": [
     [
      "Rinderhackfleisch mager",
-     "900 g",
-     1161.0,
-     189.0,
+     "800 g",
+     1032.0,
+     168.0,
      0.0,
-     45.0
+     40.0
     ],
     [
      "Kartoffeln, mehligkochend",
@@ -23088,11 +23223,11 @@
     ],
     [
      "Milch 1,5 %",
-     "250 ml",
-     117.5,
-     8.5,
-     12.0,
-     3.8
+     "200 ml",
+     94.0,
+     6.8,
+     9.6,
+     3.0
     ],
     [
      "Kochsahne 15 %",
@@ -23101,6 +23236,14 @@
      5.6,
      7.6,
      30.0
+    ],
+    [
+     "Magerquark",
+     "250 g",
+     167.5,
+     30.0,
+     10.0,
+     0.5
     ],
     [
      "Butter",
@@ -23136,20 +23279,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 16.96,
-    "box": 2.12
+    "gesamt": 16.03,
+    "box": 2.0
    },
    "total": [
-    3517.4,
-    268.8,
-    313.5,
-    124.5
+    3532.4,
+    276.1,
+    321.1,
+    119.2
    ],
    "m": {
-    "kcal": 440,
-    "p": 33.6,
-    "kh": 39.2,
-    "f": 15.6
+    "kcal": 442,
+    "p": 34.5,
+    "kh": 40.1,
+    "f": 14.9
    },
    "zeit": {
     "phasen": [
@@ -23166,7 +23309,7 @@
    "id": "cottage-pie",
    "name": "Cottage Pie",
    "short": "Cottage Pie",
-   "desc": "Englischer Auflauf: Rinderhack mit Möhren, Erbsen und Sellerie in dunkler Sauce, bedeckt mit Kartoffelpüree und Cheddar.",
+   "desc": "Englischer Auflauf: Rinderhack und Linsen mit Möhren, Erbsen und Sellerie in dunkler Sauce, bedeckt mit Kartoffelpüree und Cheddar.",
    "protein": "Rind",
    "base": "Kartoffeln",
    "method": "Pfanne + Ofen",
@@ -23175,15 +23318,15 @@
    "items": [
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
-     "a": "900 g",
+     "a": "800 g",
      "k": "rinderhack-mager",
-     "q": 900,
+     "q": 800,
      "u": "g",
-     "h": "Theke oder 1 × 500 g + 1 × 400 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 900,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 129,
@@ -23192,21 +23335,44 @@
       "f": 5
      },
      "anpassbar": true,
-     "min": 450,
-     "max": 1440,
-     "eur": 12.35
+     "min": 400,
+     "max": 1280,
+     "eur": 10.98
     },
     {
-     "n": "Kartoffeln, mehligkochend",
-     "a": "1,5 kg geschält",
-     "k": "kartoffeln",
-     "q": 1750,
-     "u": "g",
-     "h": "aus 2-kg-Beutel",
+     "n": "Linsen (braun, aus der Dose)",
+     "a": "1 Dose à 400 g (240 g abgetropft)",
+     "k": "linsen-dose",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1500,
+     "g": 240,
+     "gu": "g",
+     "pro100": {
+      "kcal": 95,
+      "p": 6.5,
+      "kh": 12,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 120,
+     "max": 384,
+     "eur": 0.79
+    },
+    {
+     "n": "Kartoffeln, mehligkochend",
+     "a": "1,3 kg geschält",
+     "k": "kartoffeln",
+     "q": 1500,
+     "u": "g",
+     "h": "Beutel 1,5 kg",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 1300,
      "gu": "g",
      "pro100": {
       "kcal": 72,
@@ -23215,9 +23381,9 @@
       "f": 0.1
      },
      "anpassbar": true,
-     "min": 750,
-     "max": 2400,
-     "eur": 1.49
+     "min": 650,
+     "max": 2080,
+     "eur": 1.29
     },
     {
      "n": "Cheddar",
@@ -23405,15 +23571,15 @@
     },
     {
      "n": "Butter",
-     "a": "20 g",
+     "a": "30 g",
      "k": "butter",
-     "q": 20.0,
+     "q": 30.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 20.0,
+     "g": 30.0,
      "gu": "g",
      "pro100": {
       "kcal": 741,
@@ -23422,9 +23588,9 @@
       "f": 82
      },
      "anpassbar": true,
-     "min": 10,
-     "max": 32,
-     "eur": 0.18
+     "min": 15,
+     "max": 48,
+     "eur": 0.26
     },
     {
      "n": "Öl, neutral",
@@ -23569,7 +23735,7 @@
     },
     {
      "n": 4,
-     "name": "Erbsen",
+     "name": "Erbsen & Linsen",
      "gr": "mittel"
     },
     {
@@ -23597,12 +23763,12 @@
      "t": "Vorbereiten",
      "schritte": [
       {
-       "d": "{kartoffeln} Kartoffeln schälen, davon 1,5 kg abwiegen",
-       "min": 18
+       "d": "{kartoffeln} Kartoffeln schälen, davon 1,3 kg abwiegen",
+       "min": 15
       },
       {
        "d": "Die Kartoffeln in grobe Stücke schneiden → Schale 1, mit kaltem Wasser bedecken",
-       "min": 11
+       "min": 9
       },
       {
        "d": "2 Zwiebeln ({zwiebeln}) schälen und fein würfeln → Schale 2",
@@ -23635,6 +23801,10 @@
       {
        "d": "{erbsen} TK-Erbsen → Schale 4, bleiben gefroren",
        "min": 1
+      },
+      {
+       "d": "1 Dose Linsen im Sieb abspülen und abtropfen lassen → Schale 4",
+       "min": 2
       },
       {
        "d": "In Schale 5: {butter} Butter, {milch} Milch, ½ TL Muskatnuss, 1 TL Salz, ½ TL Pfeffer",
@@ -23684,8 +23854,8 @@
        "min": 10
       },
       {
-       "d": "Schale 4 unterrühren, Lorbeer herausnehmen, mit Salz abschmecken",
-       "min": 1
+       "d": "Schale 4 unterrühren und 2 Min. heiß werden lassen, Lorbeer herausnehmen, mit Salz abschmecken",
+       "min": 2
       },
       {
        "d": "Kartoffeln abgießen, kurz ausdampfen lassen, Schale 5 dazu und zu Püree stampfen",
@@ -23748,19 +23918,27 @@
    "nut": [
     [
      "Rinderhackfleisch mager",
-     "900 g",
-     1161.0,
-     189.0,
+     "800 g",
+     1032.0,
+     168.0,
      0.0,
-     45.0
+     40.0
+    ],
+    [
+     "Linsen",
+     "240 g",
+     228.0,
+     15.6,
+     28.8,
+     1.4
     ],
     [
      "Kartoffeln, mehligkochend",
-     "1,5 kg",
-     1080.0,
-     30.0,
-     232.5,
-     1.5
+     "1,3 kg",
+     936.0,
+     26.0,
+     201.5,
+     1.3
     ],
     [
      "Cheddar",
@@ -23828,11 +24006,11 @@
     ],
     [
      "Butter",
-     "20 g",
-     148.2,
-     0.1,
-     0.1,
-     16.4
+     "30 g",
+     222.3,
+     0.2,
+     0.2,
+     24.6
     ],
     [
      "Öl, neutral",
@@ -23868,20 +24046,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 17.26,
-    "box": 2.16
+    "gesamt": 16.57,
+    "box": 2.07
    },
    "total": [
-    3576.8,
-    274.9,
-    323.9,
-    122.9
+    3605.9,
+    265.6,
+    321.8,
+    127.3
    ],
    "m": {
-    "kcal": 447,
-    "p": 34.4,
-    "kh": 40.5,
-    "f": 15.4
+    "kcal": 451,
+    "p": 33.2,
+    "kh": 40.2,
+    "f": 15.9
    },
    "zeit": {
     "phasen": [
@@ -23898,7 +24076,7 @@
    "id": "moussaka",
    "name": "Moussaka",
    "short": "Moussaka",
-   "desc": "Griechischer Auflauf aus Auberginen, Kartoffeln und Zimt-Hackragout unter einer Béchamel mit Parmesan.",
+   "desc": "Griechischer Auflauf aus Auberginen, Kartoffeln und Zimt-Ragout aus Hack und Linsen unter einer Béchamel mit Parmesan.",
    "protein": "Rind",
    "base": "Kartoffeln",
    "method": "Ofen + Pfanne",
@@ -23907,15 +24085,15 @@
    "items": [
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
-     "a": "900 g",
+     "a": "800 g",
      "k": "rinderhack-mager",
-     "q": 900,
+     "q": 800,
      "u": "g",
-     "h": "Theke oder 1 × 500 g + 1 × 400 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 900,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 129,
@@ -23924,9 +24102,9 @@
       "f": 5
      },
      "anpassbar": true,
-     "min": 450,
-     "max": 1440,
-     "eur": 12.35
+     "min": 400,
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Aubergine",
@@ -23953,7 +24131,7 @@
     },
     {
      "n": "Kartoffeln, festkochend",
-     "a": "1,2 kg geschält",
+     "a": "1 kg geschält",
      "k": "kartoffeln",
      "q": 1500,
      "u": "g",
@@ -23961,7 +24139,7 @@
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1200,
+     "g": 1000,
      "gu": "g",
      "pro100": {
       "kcal": 72,
@@ -23970,9 +24148,9 @@
       "f": 0.1
      },
      "anpassbar": true,
-     "min": 600,
-     "max": 1920,
-     "eur": 1.2
+     "min": 500,
+     "max": 1600,
+     "eur": 1.0
     },
     {
      "n": "Stückige Tomaten",
@@ -23996,6 +24174,29 @@
      "min": 400,
      "max": 400,
      "eur": 0.69
+    },
+    {
+     "n": "Linsen (braun, aus der Dose)",
+     "a": "1 Dose à 400 g (240 g abgetropft)",
+     "k": "linsen-dose",
+     "q": 1,
+     "u": "Dose",
+     "h": "",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 240,
+     "gu": "g",
+     "pro100": {
+      "kcal": 95,
+      "p": 6.5,
+      "kh": 12,
+      "f": 0.6
+     },
+     "anpassbar": true,
+     "min": 120,
+     "max": 384,
+     "eur": 0.79
     },
     {
      "n": "Tomatenmark",
@@ -24091,15 +24292,15 @@
     },
     {
      "n": "Parmesan",
-     "a": "30 g",
+     "a": "50 g",
      "k": "parmesan",
-     "q": 30,
+     "q": 50,
      "u": "g",
-     "h": "",
+     "h": "aus 100-g-Stück",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 30,
+     "g": 50,
      "gu": "g",
      "pro100": {
       "kcal": 390,
@@ -24108,9 +24309,9 @@
       "f": 28
      },
      "anpassbar": true,
-     "min": 15,
-     "max": 48,
-     "eur": 0.6
+     "min": 25,
+     "max": 80,
+     "eur": 1.0
     },
     {
      "n": "Weizenmehl",
@@ -24276,7 +24477,8 @@
     "große Auflaufform (ca. 30 × 40 cm)",
     "Schneebesen",
     "Messbecher",
-    "Reibe"
+    "Reibe",
+    "Sieb"
    ],
    "ablauf": [
     {
@@ -24300,7 +24502,7 @@
        "min": 1
       },
       {
-       "d": "{kartoffeln} Kartoffeln schälen, davon 1,2 kg abwiegen",
+       "d": "{kartoffeln} Kartoffeln schälen, davon 1 kg abwiegen",
        "min": 15
       },
       {
@@ -24328,6 +24530,10 @@
        "min": 1
       },
       {
+       "d": "1 Dose Linsen im Sieb abspülen, abtropfen lassen und zu den Tomaten stellen",
+       "min": 2
+      },
+      {
        "d": "{mehl} Weizenmehl abwiegen → Schale 5",
        "min": 1
       },
@@ -24337,7 +24543,7 @@
       },
       {
        "d": "{parmesan} Parmesan fein reiben → Schale 6, ½ TL Muskatnuss, ½ TL Salz und ½ TL Pfeffer dazu",
-       "min": 1
+       "min": 2
       },
       {
        "d": "150 ml Wasser abmessen → Messbecher",
@@ -24373,7 +24579,7 @@
        "min": 1
       },
       {
-       "d": "Stückige Tomaten, Lorbeer und den Messbecher mit Wasser dazu, 10 Min. köcheln, bis das Ragout dick ist, mit Salz abschmecken",
+       "d": "Stückige Tomaten, Linsen, Lorbeer und den Messbecher mit Wasser dazu, 10 Min. köcheln, bis das Ragout dick ist, abschmecken",
        "min": 10
       },
       {
@@ -24449,11 +24655,11 @@
    "nut": [
     [
      "Rinderhackfleisch mager",
-     "900 g",
-     1161.0,
-     189.0,
+     "800 g",
+     1032.0,
+     168.0,
      0.0,
-     45.0
+     40.0
     ],
     [
      "Aubergine",
@@ -24465,11 +24671,11 @@
     ],
     [
      "Kartoffeln, festkochend",
-     "1,2 kg",
-     864.0,
-     24.0,
-     186.0,
-     1.2
+     "1 kg",
+     720.0,
+     20.0,
+     155.0,
+     1.0
     ],
     [
      "Stückige Tomaten",
@@ -24478,6 +24684,14 @@
      4.0,
      14.0,
      0.8
+    ],
+    [
+     "Linsen",
+     "240 g",
+     228.0,
+     15.6,
+     28.8,
+     1.4
     ],
     [
      "Tomatenmark",
@@ -24513,11 +24727,11 @@
     ],
     [
      "Parmesan",
-     "30 g",
-     117.0,
-     9.9,
+     "50 g",
+     195.0,
+     16.5,
      0.0,
-     8.4
+     14.0
     ],
     [
      "Weizenmehl",
@@ -24553,20 +24767,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 19.6,
-    "box": 2.45
+    "gesamt": 19.22,
+    "box": 2.4
    },
    "total": [
-    3495.8,
-    263.7,
-    305.2,
-    123.8
+    3528.8,
+    260.9,
+    303.0,
+    125.6
    ],
    "m": {
-    "kcal": 437,
-    "p": 33.0,
-    "kh": 38.1,
-    "f": 15.5
+    "kcal": 441,
+    "p": 32.6,
+    "kh": 37.9,
+    "f": 15.7
    },
    "zeit": {
     "phasen": [
@@ -25240,7 +25454,7 @@
    "id": "hackbaellchen",
    "name": "Hackbällchen in Tomatensauce mit Spaghetti",
    "short": "Hackbällchen-Pasta",
-   "desc": "Saftige Rinder-Hackbällchen in Knoblauch-Tomatensauce auf Spaghetti, mit Parmesan.",
+   "desc": "Saftige Rinder-Hackbällchen mit Parmesan und Ei in Knoblauch-Tomatensauce auf Spaghetti, mit Parmesan obendrauf.",
    "protein": "Rind",
    "base": "Nudeln",
    "method": "Pfanne + Topf",
@@ -25249,15 +25463,15 @@
    "items": [
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
-     "a": "900 g",
+     "a": "800 g",
      "k": "rinderhack-mager",
-     "q": 900,
+     "q": 800,
      "u": "g",
-     "h": "Theke oder 1 × 500 g + 1 × 400 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 900,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 129,
@@ -25266,9 +25480,9 @@
       "f": 5
      },
      "anpassbar": true,
-     "min": 450,
-     "max": 1440,
-     "eur": 12.35
+     "min": 400,
+     "max": 1280,
+     "eur": 10.98
     },
     {
      "n": "Spaghetti",
@@ -25318,15 +25532,15 @@
     },
     {
      "n": "Parmesan",
-     "a": "50 g",
+     "a": "100 g",
      "k": "parmesan",
-     "q": 50,
+     "q": 100,
      "u": "g",
-     "h": "",
+     "h": "1 Stück",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 50,
+     "g": 100,
      "gu": "g",
      "pro100": {
       "kcal": 390,
@@ -25335,9 +25549,9 @@
       "f": 28
      },
      "anpassbar": true,
-     "min": 25,
-     "max": 80,
-     "eur": 1.0
+     "min": 50,
+     "max": 160,
+     "eur": 1.99
     },
     {
      "n": "Zwiebeln",
@@ -25387,15 +25601,15 @@
     },
     {
      "n": "Eier",
-     "a": "1 Stück",
+     "a": "2 Stück",
      "k": "eier",
-     "q": 1,
+     "q": 2,
      "u": "Stk",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 60,
+     "g": 120,
      "gu": "g",
      "pro100": {
       "kcal": 145,
@@ -25404,21 +25618,21 @@
       "f": 10
      },
      "anpassbar": true,
-     "min": 30,
-     "max": 96,
-     "eur": 0.25
+     "min": 60,
+     "max": 192,
+     "eur": 0.5
     },
     {
      "n": "Semmelbrösel",
-     "a": "40 g",
+     "a": "50 g",
      "k": "semmelbroesel",
-     "q": 40,
+     "q": 50,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 40,
+     "g": 50,
      "gu": "g",
      "pro100": {
       "kcal": 360,
@@ -25427,21 +25641,21 @@
       "f": 2
      },
      "anpassbar": true,
-     "min": 20,
-     "max": 64,
-     "eur": 0.08
+     "min": 25,
+     "max": 80,
+     "eur": 0.1
     },
     {
      "n": "Olivenöl",
-     "a": "50 g",
+     "a": "35 g",
      "k": "olivenoel",
-     "q": 50.0,
+     "q": 35.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 50.0,
+     "g": 35.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -25450,9 +25664,9 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 25,
-     "max": 80,
-     "eur": 0.47
+     "min": 18,
+     "max": 56,
+     "eur": 0.33
     },
     {
      "n": "Zucker",
@@ -25580,11 +25794,15 @@
        "min": 4
       },
       {
+       "d": "{parmesan} Parmesan fein reiben, die Hälfte → Schale 1, der Rest → Schale 5",
+       "min": 3
+      },
+      {
        "d": "In Schale 1 dazu und mit den Händen gut verkneten:",
        "min": 5,
        "liste": [
         "{rinderhack-mager} Rinderhackfleisch",
-        "1 Ei",
+        "2 Eier",
         "{semmelbroesel} Semmelbrösel",
         "2 TL italienische Kräuter",
         "1 TL Paprika edelsüß",
@@ -25608,10 +25826,6 @@
       {
        "d": "{spaghetti} Spaghetti abwiegen → Schale 4",
        "min": 1
-      },
-      {
-       "d": "{parmesan} Parmesan fein reiben → Schale 5",
-       "min": 2
       },
       {
        "d": "{passata} passierte Tomaten öffnen, 200 ml Wasser abmessen → Messbecher",
@@ -25726,11 +25940,11 @@
    "nut": [
     [
      "Rinderhackfleisch mager",
-     "900 g",
-     1161.0,
-     189.0,
+     "800 g",
+     1032.0,
+     168.0,
      0.0,
-     45.0
+     40.0
     ],
     [
      "Spaghetti",
@@ -25750,11 +25964,11 @@
     ],
     [
      "Parmesan",
-     "50 g",
-     195.0,
-     16.5,
+     "100 g",
+     390.0,
+     33.0,
      0.0,
-     14.0
+     28.0
     ],
     [
      "Zwiebeln",
@@ -25774,27 +25988,27 @@
     ],
     [
      "Eier",
-     "60 g",
-     87.0,
-     7.5,
-     0.4,
-     6.0
+     "120 g",
+     174.0,
+     15.0,
+     0.8,
+     12.0
     ],
     [
      "Semmelbrösel",
-     "40 g",
-     144.0,
-     4.8,
-     28.8,
-     0.8
+     "50 g",
+     180.0,
+     6.0,
+     36.0,
+     1.0
     ],
     [
      "Olivenöl",
-     "50 g",
-     450.0,
+     "35 g",
+     315.0,
      0.0,
      0.0,
-     50.0
+     35.0
     ],
     [
      "Zucker",
@@ -25814,19 +26028,19 @@
     ]
    ],
    "kosten": {
-    "gesamt": 16.72,
-    "box": 2.09
+    "gesamt": 16.47,
+    "box": 2.06
    },
    "total": [
-    3526.8,
-    273.6,
-    310.0,
-    125.3
+    3580.8,
+    277.8,
+    317.6,
+    125.5
    ],
    "m": {
-    "kcal": 441,
-    "p": 34.2,
-    "kh": 38.8,
+    "kcal": 448,
+    "p": 34.7,
+    "kh": 39.7,
     "f": 15.7
    },
    "zeit": {
@@ -26397,7 +26611,7 @@
    "id": "frikadellen",
    "name": "Frikadellen mit Joghurt-Kartoffelsalat",
    "short": "Frikadellen",
-   "desc": "Rinder-Frikadellen aus der Pfanne und leichter Kartoffelsalat mit Joghurt-Senf-Dressing, Gurke und Gewürzgurken – kalt oder warm.",
+   "desc": "Saftige Rinder-Frikadellen mit Quark aus der Pfanne und leichter Kartoffelsalat mit Joghurt-Senf-Dressing, Gurke und Gewürzgurken – kalt oder warm.",
    "protein": "Rind",
    "base": "Kartoffeln",
    "method": "Topf + Pfanne",
@@ -26406,15 +26620,15 @@
    "items": [
     {
      "n": "Rinderhackfleisch mager (max. 5 % Fett)",
-     "a": "1 kg",
+     "a": "800 g",
      "k": "rinderhack-mager",
-     "q": 1000,
+     "q": 800,
      "u": "g",
-     "h": "2 × 500 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1000,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 129,
@@ -26423,21 +26637,44 @@
       "f": 5
      },
      "anpassbar": true,
-     "min": 500,
-     "max": 1600,
-     "eur": 13.73
+     "min": 400,
+     "max": 1280,
+     "eur": 10.98
+    },
+    {
+     "n": "Magerquark",
+     "a": "250 g",
+     "k": "magerquark",
+     "q": 250,
+     "u": "g",
+     "h": "1 Becher",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 250,
+     "gu": "g",
+     "pro100": {
+      "kcal": 67,
+      "p": 12,
+      "kh": 4,
+      "f": 0.2
+     },
+     "anpassbar": true,
+     "min": 125,
+     "max": 400,
+     "eur": 0.49
     },
     {
      "n": "Kartoffeln, festkochend",
-     "a": "1,4 kg",
+     "a": "1,25 kg",
      "k": "kartoffeln",
-     "q": 1400,
+     "q": 1250,
      "u": "g",
      "h": "Beutel 1,5 kg",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1400,
+     "g": 1250,
      "gu": "g",
      "pro100": {
       "kcal": 72,
@@ -26446,9 +26683,9 @@
       "f": 0.1
      },
      "anpassbar": true,
-     "min": 700,
-     "max": 2240,
-     "eur": 1.39
+     "min": 625,
+     "max": 2000,
+     "eur": 1.25
     },
     {
      "n": "Joghurt 1,5 %",
@@ -26567,15 +26804,15 @@
     },
     {
      "n": "Semmelbrösel",
-     "a": "60 g",
+     "a": "80 g",
      "k": "semmelbroesel",
-     "q": 60,
+     "q": 80,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 60,
+     "g": 80,
      "gu": "g",
      "pro100": {
       "kcal": 360,
@@ -26584,9 +26821,9 @@
       "f": 2
      },
      "anpassbar": true,
-     "min": 30,
-     "max": 96,
-     "eur": 0.12
+     "min": 40,
+     "max": 128,
+     "eur": 0.16
     },
     {
      "n": "Senf, mittelscharf",
@@ -26636,15 +26873,15 @@
     },
     {
      "n": "Öl, neutral",
-     "a": "60 g",
+     "a": "75 g",
      "k": "oel",
-     "q": 60.0,
+     "q": 75.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 60.0,
+     "g": 75.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -26653,9 +26890,9 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 30,
-     "max": 96,
-     "eur": 0.15
+     "min": 38,
+     "max": 120,
+     "eur": 0.19
     },
     {
      "n": "Gemüsebrühe (Pulver)",
@@ -26774,7 +27011,7 @@
      "schritte": [
       {
        "d": "{kartoffeln} Kartoffeln waschen, ungeschält → Schale 1",
-       "min": 4
+       "min": 3
       },
       {
        "d": "Schale 1 in den großen Topf, mit Wasser bedecken, 1 TL Salz, aufkochen und 20–25 Min. kochen, bis sie gar sind",
@@ -26790,6 +27027,7 @@
        "min": 5,
        "liste": [
         "{rinderhack-mager} Rinderhackfleisch",
+        "{magerquark} Magerquark",
         "1 Ei",
         "{semmelbroesel} Semmelbrösel",
         "10 g Senf",
@@ -26883,7 +27121,8 @@
    ],
    "tips": [
     "Der Salat schmeckt am zweiten Tag am besten. Zu trocken? 1–2 EL Wasser oder Gurkenwasser dazu.",
-    "Die Frikadellen kalt zum Salat oder kurz in der Mikrowelle – beides geht."
+    "Die Frikadellen kalt zum Salat oder kurz in der Mikrowelle – beides geht.",
+    "Der Quark macht die Frikadellen saftig. Ist die Masse zu weich zum Formen, 1–2 EL Semmelbrösel mehr und 10 Min. ruhen lassen."
    ],
    "pauschal": [
     {
@@ -26901,19 +27140,27 @@
    "nut": [
     [
      "Rinderhackfleisch mager",
-     "1 kg",
-     1290.0,
-     210.0,
+     "800 g",
+     1032.0,
+     168.0,
      0.0,
-     50.0
+     40.0
+    ],
+    [
+     "Magerquark",
+     "250 g",
+     167.5,
+     30.0,
+     10.0,
+     0.5
     ],
     [
      "Kartoffeln, festkochend",
-     "1,4 kg",
-     1008.0,
-     28.0,
-     217.0,
-     1.4
+     "1,25 kg",
+     900.0,
+     25.0,
+     193.8,
+     1.2
     ],
     [
      "Joghurt 1,5 %",
@@ -26957,11 +27204,11 @@
     ],
     [
      "Semmelbrösel",
-     "60 g",
-     216.0,
-     7.2,
-     43.2,
-     1.2
+     "80 g",
+     288.0,
+     9.6,
+     57.6,
+     1.6
     ],
     [
      "Senf, mittelscharf",
@@ -26981,11 +27228,11 @@
     ],
     [
      "Öl, neutral",
-     "60 g",
-     540.0,
+     "75 g",
+     675.0,
      0.0,
      0.0,
-     60.0
+     75.0
     ],
     [
      "Gewürze & Brühpulver",
@@ -26997,20 +27244,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 18.19,
-    "box": 2.27
+    "gesamt": 15.87,
+    "box": 1.98
    },
    "total": [
-    3541.5,
-    274.7,
-    310.3,
-    126.9
+    3550.0,
+    262.1,
+    311.5,
+    132.6
    ],
    "m": {
-    "kcal": 443,
-    "p": 34.3,
-    "kh": 38.8,
-    "f": 15.9
+    "kcal": 444,
+    "p": 32.8,
+    "kh": 38.9,
+    "f": 16.6
    },
    "zeit": {
     "phasen": [
@@ -28878,7 +29125,7 @@
    "id": "puten-ananas-curry",
    "name": "Puten-Curry mit Ananas & Reis",
    "short": "Puten-Ananas-Curry",
-   "desc": "Fruchtig-mildes Kokos-Curry mit Putenbrust, Ananas, Paprika und Erbsen, dazu Reis.",
+   "desc": "Fruchtig-mildes Kokos-Curry mit Putenbrust, Ananas, Paprika, viel Erbsen und gerösteten Cashews, dazu Reis.",
    "protein": "Pute",
    "base": "Reis",
    "method": "Topf",
@@ -28887,15 +29134,15 @@
    "items": [
     {
      "n": "Putenbrust, geschnetzelt",
-     "a": "900 g",
+     "a": "800 g",
      "k": "putenbrust",
-     "q": 900,
+     "q": 800,
      "u": "g",
-     "h": "Theke oder 2 × 450 g",
+     "h": "2 × 400 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 900,
+     "g": 800,
      "gu": "g",
      "pro100": {
       "kcal": 105,
@@ -28904,21 +29151,21 @@
       "f": 1.0
      },
      "anpassbar": true,
-     "min": 450,
-     "max": 1440,
-     "eur": 10.11
+     "min": 400,
+     "max": 1280,
+     "eur": 8.99
     },
     {
      "n": "Basmati- oder Jasminreis",
-     "a": "260 g",
+     "a": "220 g",
      "k": "reis",
-     "q": 260,
+     "q": 220,
      "u": "g",
      "h": "",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 260,
+     "g": 220,
      "gu": "g",
      "pro100": {
       "kcal": 350,
@@ -28927,9 +29174,9 @@
       "f": 0.6
      },
      "anpassbar": true,
-     "min": 130,
-     "max": 416,
-     "eur": 0.6
+     "min": 110,
+     "max": 352,
+     "eur": 0.5
     },
     {
      "n": "Ananas in Saft",
@@ -29002,15 +29249,15 @@
     },
     {
      "n": "TK-Erbsen",
-     "a": "200 g",
+     "a": "450 g",
      "k": "erbsen",
-     "q": 200,
+     "q": 450,
      "u": "g",
-     "h": "aus 450-g-Beutel",
+     "h": "1 Beutel à 450 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 200,
+     "g": 450,
      "gu": "g",
      "pro100": {
       "kcal": 75,
@@ -29019,9 +29266,32 @@
       "f": 0.4
      },
      "anpassbar": true,
-     "min": 100,
-     "max": 320,
-     "eur": 0.53
+     "min": 225,
+     "max": 720,
+     "eur": 1.19
+    },
+    {
+     "n": "Cashewkerne",
+     "a": "50 g",
+     "k": "cashews",
+     "q": 50,
+     "u": "g",
+     "h": "aus 200-g-Tüte",
+     "pantry": false,
+     "opt": false,
+     "haus": false,
+     "g": 50,
+     "gu": "g",
+     "pro100": {
+      "kcal": 600,
+      "p": 20,
+      "kh": 26,
+      "f": 46
+     },
+     "anpassbar": true,
+     "min": 25,
+     "max": 80,
+     "eur": 0.75
     },
     {
      "n": "Zwiebeln",
@@ -29094,15 +29364,15 @@
     },
     {
      "n": "Öl, neutral",
-     "a": "40 g",
+     "a": "20 g",
      "k": "oel",
-     "q": 40.0,
+     "q": 20.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 40.0,
+     "g": 20.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -29111,9 +29381,9 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 20,
-     "max": 64,
-     "eur": 0.1
+     "min": 10,
+     "max": 32,
+     "eur": 0.05
     },
     {
      "n": "Hühnerbrühe",
@@ -29217,8 +29487,8 @@
     },
     {
      "n": 6,
-     "name": "Erbsen",
-     "gr": "klein"
+     "name": "Erbsen & Cashews",
+     "gr": "mittel"
     }
    ],
    "geraete": [
@@ -29239,7 +29509,7 @@
        "min": 1
       },
       {
-       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 390 ml Wasser und 1 Prise Salz in den kleinen Topf",
+       "d": "{reis} Reis im Sieb waschen, bis das Wasser klar ist, mit 330 ml Wasser und 1 Prise Salz in den kleinen Topf",
        "min": 3
       },
       {
@@ -29275,6 +29545,10 @@
        "min": 1
       },
       {
+       "d": "{cashews} Cashews im trockenen großen Topf 3 Min. goldbraun rösten → Schale 6",
+       "min": 3
+      },
+      {
        "d": "1 Dose Kokosmilch öffnen",
        "min": 1
       },
@@ -29284,7 +29558,7 @@
       },
       {
        "d": "{putenbrust} Putenbrust trocken tupfen, große Stücke nachschneiden, mit 1 TL Salz mischen → Schale 1",
-       "min": 8
+       "min": 7
       },
       {
        "d": "Brett und Messer heiß abwaschen, Hände waschen",
@@ -29380,19 +29654,19 @@
    "nut": [
     [
      "Putenbrust, geschnetzelt",
-     "900 g",
-     945.0,
-     216.0,
+     "800 g",
+     840.0,
+     192.0,
      0.0,
-     9.0
+     8.0
     ],
     [
      "Basmati- oder Jasminreis",
-     "260 g",
-     910.0,
-     20.8,
-     200.2,
-     1.6
+     "220 g",
+     770.0,
+     17.6,
+     169.4,
+     1.3
     ],
     [
      "Ananas in Saft",
@@ -29420,11 +29694,19 @@
     ],
     [
      "TK-Erbsen",
-     "200 g",
-     150.0,
-     11.0,
-     20.0,
-     0.8
+     "450 g",
+     337.5,
+     24.8,
+     45.0,
+     1.8
+    ],
+    [
+     "Cashewkerne",
+     "50 g",
+     300.0,
+     10.0,
+     13.0,
+     23.0
     ],
     [
      "Zwiebeln",
@@ -29452,11 +29734,11 @@
     ],
     [
      "Öl, neutral",
-     "40 g",
-     360.0,
+     "20 g",
+     180.0,
      0.0,
      0.0,
-     40.0
+     20.0
     ],
     [
      "Hühnerbrühe",
@@ -29476,20 +29758,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 16.17,
-    "box": 2.02
+    "gesamt": 16.31,
+    "box": 2.04
    },
    "total": [
-    3537.0,
-    264.8,
-    313.4,
-    127.9
+    3599.5,
+    261.4,
+    320.6,
+    130.6
    ],
    "m": {
-    "kcal": 442,
-    "p": 33.1,
-    "kh": 39.2,
-    "f": 16.0
+    "kcal": 450,
+    "p": 32.7,
+    "kh": 40.1,
+    "f": 16.3
    },
    "zeit": {
     "phasen": [
@@ -31473,7 +31755,7 @@
    "id": "pulled-chicken",
    "name": "Pulled Chicken BBQ mit Ofenkartoffeln & Coleslaw",
    "short": "Pulled Chicken",
-   "desc": "Zart gezupfte Hähnchenkeule in BBQ-Sauce, Ofenkartoffeln und ein leichter Joghurt-Coleslaw.",
+   "desc": "Zart gezupfte Hähnchenkeule in BBQ-Sauce, Ofenkartoffeln und ein cremiger Skyr-Coleslaw.",
    "protein": "Hähnchen",
    "base": "Kartoffeln",
    "method": "Topf + Ofen",
@@ -31482,15 +31764,15 @@
    "items": [
     {
      "n": "Hähnchen-Oberkeulenfilet",
-     "a": "1,2 kg",
+     "a": "1 kg",
      "k": "haehnchenkeule",
-     "q": 1200,
+     "q": 1000,
      "u": "g",
-     "h": "2 × 600 g",
+     "h": "2 × 500 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 1200,
+     "g": 1000,
      "gu": "g",
      "pro100": {
       "kcal": 146,
@@ -31499,9 +31781,9 @@
       "f": 7.9
      },
      "anpassbar": true,
-     "min": 600,
-     "max": 1920,
-     "eur": 10.98
+     "min": 500,
+     "max": 1600,
+     "eur": 9.15
     },
     {
      "n": "Kartoffeln, festkochend",
@@ -31619,27 +31901,27 @@
      "eur": 0.26
     },
     {
-     "n": "Joghurt 1,5 %",
-     "a": "200 g",
-     "k": "joghurt",
-     "q": 200,
+     "n": "Skyr natur",
+     "a": "300 g",
+     "k": "skyr",
+     "q": 300,
      "u": "g",
-     "h": "1 Becher",
+     "h": "2 Becher à 150 g",
      "pantry": false,
      "opt": false,
      "haus": false,
-     "g": 200,
+     "g": 300,
      "gu": "g",
      "pro100": {
-      "kcal": 50,
-      "p": 4,
-      "kh": 5,
-      "f": 1.5
+      "kcal": 63,
+      "p": 11,
+      "kh": 4,
+      "f": 0.2
      },
      "anpassbar": true,
-     "min": 100,
-     "max": 320,
-     "eur": 0.4
+     "min": 150,
+     "max": 480,
+     "eur": 0.77
     },
     {
      "n": "Reis- oder Apfelessig",
@@ -31666,15 +31948,15 @@
     },
     {
      "n": "Öl, neutral",
-     "a": "20 g",
+     "a": "40 g",
      "k": "oel",
-     "q": 20.0,
+     "q": 40.0,
      "u": "g",
      "h": "",
      "pantry": true,
      "opt": false,
      "haus": false,
-     "g": 20.0,
+     "g": 40.0,
      "gu": "g",
      "pro100": {
       "kcal": 900,
@@ -31683,9 +31965,9 @@
       "f": 100
      },
      "anpassbar": true,
-     "min": 10,
-     "max": 32,
-     "eur": 0.05
+     "min": 20,
+     "max": 64,
+     "eur": 0.1
     },
     {
      "n": "Hühnerbrühe",
@@ -31872,7 +32154,7 @@
        "min": 2
       },
       {
-       "d": "{oel} Öl abwiegen und in den großen Topf geben",
+       "d": "20 g Öl abwiegen und in den großen Topf geben",
        "min": 1
       },
       {
@@ -31889,7 +32171,7 @@
        "min": 11
       },
       {
-       "d": "In Schale 3 mischen: 1 TL Salz, ½ TL Pfeffer – das Öl ist schon im Topf, die Kartoffeln bleiben ohne",
+       "d": "In Schale 3 mischen: 20 g Öl, 1 TL Salz, ½ TL Pfeffer",
        "min": 1
       },
       {
@@ -31901,7 +32183,7 @@
        "min": 6
       },
       {
-       "d": "In Schale 4 dazu und gut mischen: {joghurt} Joghurt, 2 EL Essig, 1 TL Senf, ½ TL Salz, 1 Prise Pfeffer",
+       "d": "In Schale 4 dazu und gut mischen: {skyr} Skyr, 3 EL Wasser, 2 EL Essig, 1 TL Senf, ½ TL Salz, 1 Prise Pfeffer",
        "min": 2
       },
       {
@@ -31969,7 +32251,7 @@
        "min": 3
       },
       {
-       "d": "Den Coleslaw (Schale 4) in 8 Döschen füllen, je ca. 110 g",
+       "d": "Den Coleslaw (Schale 4) in 8 Döschen füllen, je ca. 140 g",
        "min": 3
       },
       {
@@ -32003,11 +32285,11 @@
    "nut": [
     [
      "Hähnchen-Oberkeulenfilet",
-     "1,2 kg",
-     1752.0,
-     224.4,
+     "1 kg",
+     1460.0,
+     187.0,
      0.0,
-     94.8
+     79.0
     ],
     [
      "Kartoffeln, festkochend",
@@ -32050,12 +32332,12 @@
      0.2
     ],
     [
-     "Joghurt 1,5 %",
-     "200 g",
-     100.0,
-     8.0,
-     10.0,
-     3.0
+     "Skyr natur",
+     "300 g",
+     189.0,
+     33.0,
+     12.0,
+     0.6
     ],
     [
      "Reis- oder Apfelessig",
@@ -32067,11 +32349,11 @@
     ],
     [
      "Öl, neutral",
-     "20 g",
-     180.0,
+     "40 g",
+     360.0,
      0.0,
      0.0,
-     20.0
+     40.0
     ],
     [
      "Hühnerbrühe",
@@ -32091,20 +32373,20 @@
     ]
    ],
    "kosten": {
-    "gesamt": 14.98,
-    "box": 1.87
+    "gesamt": 13.58,
+    "box": 1.7
    },
    "total": [
-    3568.0,
-    274.1,
-    323.4,
-    125.0
+    3545.0,
+    261.7,
+    325.4,
+    126.8
    ],
    "m": {
-    "kcal": 446,
-    "p": 34.3,
-    "kh": 40.4,
-    "f": 15.6
+    "kcal": 443,
+    "p": 32.7,
+    "kh": 40.7,
+    "f": 15.8
    },
    "zeit": {
     "phasen": [
@@ -32365,6 +32647,10 @@
   },
   "tk-spinat": {
    "n": "TK-Blattspinat",
+   "c": "tk"
+  },
+  "edamame": {
+   "n": "TK-Edamame, geschält",
    "c": "tk"
   },
   "tomaten-dose": {
@@ -33375,6 +33661,17 @@
    "u": "g",
    "je": 100,
    "anpassbar": false
+  },
+  "edamame": {
+   "pro100": {
+    "kcal": 125,
+    "p": 11.5,
+    "kh": 4,
+    "f": 5.5
+   },
+   "u": "g",
+   "je": 100,
+   "anpassbar": true
   },
   "tomaten-dose": {
    "pro100": {
@@ -34395,6 +34692,12 @@
    "je_g": 0.002867,
    "eur": 1.29,
    "menge": 450,
+   "u": "g"
+  },
+  "edamame": {
+   "je_g": 0.006225,
+   "eur": 2.49,
+   "menge": 400,
    "u": "g"
   },
   "tomaten-dose": {

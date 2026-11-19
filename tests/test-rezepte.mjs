@@ -26,6 +26,11 @@ check(ziel.kcal === 443 && ziel.p === 33 && ziel.kh === 39 && ziel.f === 15.4, '
 const bc = rezepte.find((r) => r.id === 'butter-chicken');
 const bcSchritte = bc.ablauf.flatMap((p) => p.schritte.map((x) => x.d));
 check(bc.items.find((it) => it.k === 'haehnchenbrust').q / 8 <= 90 && bc.items.some((it) => it.k === 'huettenkaese') && bcSchritte.some((d) => /Hüttenkäse.*ganz glatt pürieren/.test(d)) && bcSchritte.some((d) => /nicht mehr kochen/.test(d)) && katalog.huettenkaese?.c === 'kuehl', 'Butter Chicken: höchstens 90 g Hähnchen pro Box, der Hüttenkäse ganz glatt püriert und nicht mehr gekocht');
+// Weniger Fleisch, wo es zum Gericht passt: Hülsenfrüchte, Edamame, Quark oder Skyr bringen den Rest an Eiweiß
+const fleischJeBox = (r) => r.items.filter((it) => katalog[it.k]?.c === 'fleisch').reduce((s, it) => s + it.g, 0) / 8;
+const mit = (id, k) => rezepte.find((r) => r.id === id).items.some((it) => it.k === k);
+const ueber125 = rezepte.filter((r) => fleischJeBox(r) > 125).map((r) => r.id);
+check(ueber125.join() === 'schaschlik' && mit('teriyaki', 'edamame') && katalog.edamame?.c === 'tk' && mit('shawarma-bowl', 'kichererbsen') && ['bolognese', 'cottage-pie', 'moussaka'].every((id) => mit(id, 'linsen-dose')) && mit('frikadellen', 'magerquark') && mit('koettbullar', 'magerquark') && mit('honig-senf', 'skyr'), `weniger fleischig: höchstens 125 g Fleisch pro Box außer Schaschlik (${ueber125.join(', ')}), Edamame, Kichererbsen, Linsen, Quark und Skyr, wo sie passen`);
 const ids = rezepte.map((r) => r.id);
 check(new Set(ids).size === ids.length && ids.every((id) => /^[a-z0-9-]+$/.test(id)), 'jede Rezept-id einmal, klein mit Bindestrichen');
 check(Object.values(katalog).every((v) => v.n && ABT.includes(v.c)), 'jeder Katalogeintrag hat Namen und eine bekannte Abteilung');
