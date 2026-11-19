@@ -67,16 +67,16 @@ check((await page.$$eval('.phase-name', (hs) => hs.map((h) => h.textContent))).j
 check(await page.locator('.mise .schalen li').count() === 5, 'oben steht, welche 5 Schalen bereitstehen sollen');
 const marinade = page.locator('.step', { has: page.locator('.step-l') }).first();
 check(await marinade.locator('.mg').count() >= 8, `die Marinade als Liste, jede Menge hervorgehoben (${await marinade.locator('.mg').count()})`);
-const haehnchenSchritt = page.locator('.step', { hasText: '800 g Hähnchenbrust' }).first();
+const haehnchenSchritt = page.locator('.step', { hasText: '600 g Hähnchenbrust' }).first();
 check(await haehnchenSchritt.locator('.schale').textContent() === 'Schale 2Hähnchen in Marinade', `„→ Schale 2“ wird zum Schild mit Inhalt (${await haehnchenSchritt.locator('.schale').textContent()})`);
-check(Number(await haehnchenSchritt.getAttribute('data-step')) < await page.locator('.steps').first().locator('.step').count(), '„800 g Hähnchenbrust“ steht im Vorbereiten, nicht erst beim Kochen');
+check(Number(await haehnchenSchritt.getAttribute('data-step')) < await page.locator('.steps').first().locator('.step').count(), '„600 g Hähnchenbrust“ steht im Vorbereiten, nicht erst beim Kochen');
 const haehnchenLi = page.locator('.step-li', { has: haehnchenSchritt });
-check((await haehnchenLi.locator('.step-z').innerText()) === '7 Min.' && (await haehnchenLi.locator('.step-timer').innerText()).trim() === '30 Min.', `Schneiden 7 Min. steht klein im Text, der Timer für 30 Min. marinieren daneben (${await haehnchenLi.locator('.step-z').innerText()} / ${await haehnchenLi.locator('.step-timer').innerText()})`);
+check((await haehnchenLi.locator('.step-z').innerText()) === '5 Min.' && (await haehnchenLi.locator('.step-timer').innerText()).trim() === '30 Min.', `Schneiden 5 Min. steht klein im Text, der Timer für 30 Min. marinieren daneben (${await haehnchenLi.locator('.step-z').innerText()} / ${await haehnchenLi.locator('.step-timer').innerText()})`);
 // Timer nur, wo man einen braucht: köcheln, backen, marinieren – nicht bei jedem Schritt
 const mitTimer = await page.$$eval('#detail .step-li', (ls) => ls.filter((l) => l.querySelector('.step-timer')).map((l) => Number(l.dataset.li)));
-check(JSON.stringify(mitTimer) === JSON.stringify([4, 19, 21, 26, 28, 30, 37]), `nur 7 von 38 Schritten haben einen Timer (${mitTimer.join(', ')})`);
+check(JSON.stringify(mitTimer) === JSON.stringify([4, 19, 21, 26, 28, 30, 38]), `nur 7 von 39 Schritten haben einen Timer (${mitTimer.join(', ')})`);
 check(await page.locator('.step-li[data-li="0"] .step-timer').count() === 0 && (await page.locator('.step-li[data-li="0"] .step-z').innerText()) === '2 Min.' && await page.locator('.step-li[data-li="9"] .step-timer').count() === 0, 'Knoblauch reiben und Ofen vorheizen: kein Timer, die Minuten stehen klein im Text');
-check((await page.locator('.step-li[data-li="28"] .step-timer').innerText()).trim() === '12 + 10 Min.' && (await page.locator('.step-li[data-li="26"] .step-timer').innerText()).trim() === '15 Min.', 'Reis: 12 + 10 Min. (garen, dann ruhen), Sauce: 15 Min.');
+check((await page.locator('.step-li[data-li="28"] .step-timer').innerText()).trim() === '12 + 10 Min.' && (await page.locator('.step-li[data-li="26"] .step-timer').innerText()).trim() === '20 Min.', 'Reis: 12 + 10 Min. (garen, dann ruhen), Sauce: 20 Min.');
 const timerHoehe = await page.locator('.step-li[data-li="26"] .step-timer').evaluate((b) => b.getBoundingClientRect().height);
 check(timerHoehe <= 32, `der Timer-Knopf ist klein (${Math.round(timerHoehe)} px hoch)`);
 check(await page.locator('.step.neben .step-k').first().textContent() === 'währenddessen', 'was nebenbei passiert, steht als „währenddessen“ da');
@@ -122,7 +122,7 @@ await page.click('#d-notizen [data-notiz-weg]');
 check(await bis(async () => (await page.locator('#d-notizen .notiz').count()) === 0), 'Notiz gelöscht');
 await page.click('#toast button');
 check(await bis(async () => (await page.locator('#d-notizen .notiz').count()) === 1), 'rückgängig: Notiz wieder da');
-check((await page.locator('.facts .pill').first().textContent()) === 'ca. 1 Std. 40 Min.', `im Kopf steht die ehrliche Zeit (${await page.locator('.facts .pill').first().textContent()})`);
+check((await page.locator('.facts .pill').first().textContent()) === 'ca. 1 Std. 45 Min.', `im Kopf steht die ehrliche Zeit (${await page.locator('.facts .pill').first().textContent()})`);
 check(/^≈ 1,\d\d € pro Box$/.test(await page.locator('.facts .pill-cost').textContent()), `und was eine Box kostet (${await page.locator('.facts .pill-cost').textContent()})`);
 check(/Kostet ≈ \d+(,\d\d)? € für 8 Boxen/.test(await text('#d-kosten')) && (await text('#d-kosten')).includes('Richtpreise Discounter'), 'bei den Zutaten: Gesamtkosten mit Hinweis auf Richtpreise');
 check(/≈ \d,\d\d €\/Box/.test(await page.locator('[data-open="chili"] .box-cost').textContent()), 'auf der Karte: Kosten pro Box');
@@ -136,10 +136,10 @@ check(await page.getAttribute('[data-bewerten="runter"]', 'aria-pressed') === 't
 await page.click('[data-bewerten="runter"]');
 check((await text('.bew-von')).startsWith('Noch nicht bewertet'), 'nochmal tippen nimmt den Daumen weg');
 await page.click('[data-bewerten="hoch"]');
-check((await text('.label .c-kcal .v')).startsWith('433'), 'Etikett: 433 kcal pro Box');
-check((await text('.label .c-kcal .dlt')) === '−10', 'Etikett: 10 kcal unter dem Ziel');
+check((await text('.label .c-kcal .v')).startsWith('445'), 'Etikett: 445 kcal pro Box');
+check((await text('.label .c-kcal .dlt')) === '+2', 'Etikett: 2 kcal über dem Ziel');
 await page.click('[data-act="alle-dazu"]');
-check(await bis(async () => (await badge()) === 10), `alles auf die Liste: 10 offen (${await badge()})`);
+check(await bis(async () => (await badge()) === 11), `alles auf die Liste: 11 offen, mit dem Hüttenkäse (${await badge()})`);
 check(await page.locator('.onlist').count() === 1, '„Alle 10 Zutaten stehen auf der Liste“');
 // Öl aus dem Vorrat einzeln dazu
 const oel = page.locator('.ing', { has: page.locator('.ing-name', { hasText: /^Öl$/ }) }).locator('.tog');
@@ -159,7 +159,7 @@ await page.click('[data-open="teriyaki"]');
 await page.click('[data-act="alle-dazu"]');
 await page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await zeile('Basmati- oder Jasminreis').count()) === 1), 'Reis steht einmal auf der Liste');
-check((await zeile('Basmati- oder Jasminreis').locator('.item-qty').innerText()).startsWith('520 g'), 'Reis aus beiden Rezepten: 520 g');
+check((await zeile('Basmati- oder Jasminreis').locator('.item-qty').innerText()).startsWith('480 g'), 'Reis aus beiden Rezepten: 480 g');
 check(/≈ \d+(,\d\d)? €/.test(await text('#l-count')), `die Liste summiert die Richtpreise (${await text('#l-count')})`);
 check((await zeile('Knoblauch').locator('.item-qty').innerText()).replace(/\s+/g, ' ') === '10 Zehen ≈ 1 Knolle', 'Knoblauch: 10 Zehen, etwa 1 Knolle');
 check((await zeile('Öl, neutral').innerText()).includes('Butter Chicken: 10 g'), 'Öl mit Text statt Menge');
@@ -207,7 +207,7 @@ await page.click('[data-act="a-leeren-ja"]');
 await page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await huhnAngebote.locator('.l-auch').count()) === 0 && (await huhnAngebote.locator('.l-angebot').count()) === 1), 'eigenes Angebot wieder weg: nur noch Aldi');
 const offenVorher = await badge();
-check(offenVorher === 17, `17 offene Einträge (${offenVorher})`);
+check(offenVorher === 18, `18 offene Einträge (${offenVorher})`);
 
 // --- abhaken, eigene Einträge, löschen
 await zeile('Brokkoli').locator('.cb').click();
@@ -228,7 +228,7 @@ check(bereiche.join(' > ') === 'frisch > tierisch > trocken > gewuerze > extras'
 await page.evaluate(() => { window.__kopie = null; navigator.clipboard.writeText = async (t) => { window.__kopie = t; }; });
 await page.click('#kopieren');
 const kopie = await page.evaluate(() => window.__kopie || '');
-check(kopie.startsWith('Frisches:\n') && kopie.includes('\n\nTierisches:\n') && kopie.includes('\n800 g Hähnchenbrustfilet\n') && kopie.includes('\n\nGewürze:\nGaram Masala\n') && kopie.includes('Extras:\nZahnpasta'), `Liste kopieren: nach Bereichen, mit Mengen (${kopie.split('\n').slice(0, 3).join(' | ')} …)`);
+check(kopie.startsWith('Frisches:\n') && kopie.includes('\n\nTierisches:\n') && kopie.includes('\n600 g Hähnchenbrustfilet\n') && kopie.includes('\n\nGewürze:\nGaram Masala\n') && kopie.includes('Extras:\nZahnpasta'), `Liste kopieren: nach Bereichen, mit Mengen (${kopie.split('\n').slice(0, 3).join(' | ')} …)`);
 check(!kopie.includes('Brokkoli'), 'Abgehakter Brokkoli fehlt im kopierten Text');
 if (process.env.ZEIGEN) console.log(kopie);
 // Ohne Zwischenablage: Text zum Markieren

@@ -251,7 +251,7 @@ await t.click('[data-open="butter-chicken"]');
 await t.click('[data-act="alle-dazu"]');
 await t.click('.tab[data-tab="einkauf"]');
 const huhn = t.locator('#list-body .item', { has: t.locator('.item-name', { hasText: /^Hähnchenbrustfilet$/ }) });
-check(await bis(async () => (await huhn.locator('.item-qty').innerText()).startsWith('1,3 kg')), `Hähnchen aus beiden Rezepten in einer Zeile: 800 g + 500 g = 1,3 kg (${await huhn.locator('.item-qty').innerText().catch(() => '–')})`);
+check(await bis(async () => (await huhn.locator('.item-qty').innerText()).startsWith('1,1 kg')), `Hähnchen aus beiden Rezepten in einer Zeile: 600 g + 500 g = 1,1 kg (${await huhn.locator('.item-qty').innerText().catch(() => '–')})`);
 check((await huhn.locator('.item-sub').innerText()).includes('♡ Kokos-Curry 500 g'), `darunter steht, für welches Rezept (${await huhn.locator('.item-sub').innerText()})`);
 const chip = t.locator(`#forrow [data-amy-open="${amyId}"]`);
 check(await chip.count() === 1 && (await chip.innerText()) === '♡ Kokos-Curry', 'oben bei „Für“: ♡ Kokos-Curry');

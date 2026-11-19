@@ -134,7 +134,7 @@ check(await bis(async () => (await gruppeVon('Hähnchenbrustfilet')) === 'tieris
 // Bon
 await page.click('#list-body [data-mehr="haehnchenbrust"]');
 const vorher = await page.locator('#l-count').innerText();
-check((await page.inputValue('#l-mehr form[data-bon] input[name="q"]')) === '800' && (await page.inputValue('#l-mehr form[data-bon] select[name="u"]')) === 'g', 'Bon: die Menge von der Liste ist vorbelegt (800 g)');
+check((await page.inputValue('#l-mehr form[data-bon] input[name="q"]')) === '600' && (await page.inputValue('#l-mehr form[data-bon] select[name="u"]')) === 'g', 'Bon: die Menge von der Liste ist vorbelegt (600 g, Butter Chicken)');
 await page.fill('#l-mehr form[data-bon] input[name="eur"]', '9,99');
 await page.fill('#l-mehr form[data-bon] input[name="q"]', '1');
 await page.selectOption('#l-mehr form[data-bon] select[name="u"]', 'kg');
@@ -152,6 +152,8 @@ check(await bis(async () => (await page.locator('#l-mehr .l-alarm-treffer').inne
 check(await page.locator('#list-body .l-tief').count() >= 1 && /Tiefstpreis seit \d+ Wochen/.test(await page.locator('#list-body .l-tief').first().innerText()), 'beim Angebot auf der Liste: „Tiefstpreis seit … Wochen“');
 // Zahlt ihr sonst weniger (noch ein Bon: 5,49 €/kg, im Mittel 7,74 €/kg), ist das Angebot kein Grund zum Feiern
 await page.fill('#l-mehr form[data-bon] input[name="eur"]', '5,49');
+await page.fill('#l-mehr form[data-bon] input[name="q"]', '1');
+await page.selectOption('#l-mehr form[data-bon] select[name="u"]', 'kg');
 await page.press('#l-mehr form[data-bon] input[name="eur"]', 'Enter');
 check(await bis(async () => (await page.locator('#list-body .l-angebot').first().innerText()).includes('teurer als sonst')) && await page.locator('#list-body .l-tief').count() === 0, 'teurer als das, was ihr sonst zahlt: kein „Tiefstpreis“ daneben');
 await page.click('#l-mehr [data-bon-weg]');
