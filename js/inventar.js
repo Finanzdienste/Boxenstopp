@@ -5,7 +5,7 @@
  * (ansicht-inventar.js). In liste.json unter `inventar`:
  *
  *   { listen: { 'sl-…': { id, name, bild, reihe, at, geaendert, by } },
- *     dinge:  { 'sd-…': { id, liste, name, marke, notiz, tags, code, foto, quelle, reihe, at, geaendert, by } } }
+ *     dinge:  { 'sd-…': { id, liste, name, marke, notiz, tags, code, foto, quelle, wertung, reihe, at, geaendert, by } } }
  *
  * bild ist das Bildchen der Liste (Fluent Emoji, INVENTAR_BILDER in
  * bilder.js), reihe die eigene Reihenfolge (kleinere zuerst), code die Nummer
@@ -14,6 +14,8 @@
  * bleibt – ansicht-inventar.js lädt es hoch und holt es mit dem Schlüssel.
  * quelle ist { name, url } oder null: wo die App Name, Marke und Bild zum
  * Strichcode gefunden hat (inventar-netz.js) – etwa Open Beauty Facts.
+ * wertung sind 1 bis WERTUNG_MAX Sterne, 0 heißt noch nicht bewertet
+ * (Marielle, 19.11.2026: „bewerten können mit 1–10 Sternen“).
  *
  * Wie die Notizblätter wird eine Liste oder eine Sache immer ganz geschrieben;
  * eine noch nicht gesendete Fassung ersetzt die vorige (ersetzt), und eine
@@ -33,10 +35,11 @@ export const MAX_NAME = 80;
 export const MAX_MARKE = 60;
 export const MAX_NOTIZ = 2000;
 export const MAX_QUELLE = 60;
+export const WERTUNG_MAX = 10;
 /** Zum Anfangen – antippen legt die Liste an. */
 export const LISTEN_VORSCHLAEGE = [['Kleidung', 'womans-clothes'], ['Schuhe', 'high-heeled-shoe'], ['Make-up', 'lipstick'], ['Pflege', 'lotion-bottle'], ['Schmuck', 'ring'], ['Taschen', 'handbag'], ['Bücher', 'books']];
 /** Wie eine Liste sortiert sein kann – die Wahl merkt sich das Gerät je Liste. */
-export const SORTEN = [['eigen', 'Eigene Reihenfolge'], ['name', 'Name A–Z'], ['neu', 'Neueste zuerst'], ['marke', 'Nach Marke'], ['tags', 'Nach Tags']];
+export const SORTEN = [['eigen', 'Eigene Reihenfolge'], ['name', 'Name A–Z'], ['neu', 'Neueste zuerst'], ['wertung', 'Beste zuerst'], ['marke', 'Nach Marke'], ['tags', 'Nach Tags']];
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const jetzt = () => new Date().toISOString();
@@ -66,6 +69,9 @@ export function eanOk(code) {
 }
 
 /* ------------------------------------------------------------- Bereinigen */
+
+/** Sterne: eine ganze Zahl 1 bis WERTUNG_MAX, sonst 0 (nicht bewertet). */
+export const wertungBereinigen = (w) => { const n = Number(w); return Number.isInteger(n) && n >= 1 && n <= WERTUNG_MAX ? n : 0; };
 
 export function fotoBereinigen(f) {
   if (!istObj(f) || !FOTO_PFAD.test(String(f.pfad))) return null;
@@ -111,6 +117,7 @@ export function dingBereinigen(d) {
     code: codeBereinigen(d.code),
     foto: fotoBereinigen(d.foto),
     quelle: quelleBereinigen(d.quelle),
+    wertung: wertungBereinigen(d.wertung),
     reihe: reiheVon(d.reihe),
     at,
     geaendert: kurz(d.geaendert, 40) || at,
@@ -138,10 +145,10 @@ export const hatInventar = (x) => !!x && (Object.keys(x.listen || {}).length > 0
 /** Eine Liste anlegen oder ändern – immer ganz: { id, name, bild, reihe }. */
 export const opInvListe = (l, by, at = jetzt()) => ({ typ: 'invListe', l: { id: l.id, name: einzeilig(l.name, MAX_NAME), bild: l.bild, reihe: reiheVon(l.reihe) }, by: by || null, at, ersetzt: `invListe:${l.id}` });
 export const opInvListeWeg = (id, at = jetzt()) => ({ typ: 'invListeWeg', id, at });
-/** Eine Sache anlegen oder ändern – immer ganz: { id, liste, name, marke, notiz, tags, code, foto, quelle, reihe }. */
+/** Eine Sache anlegen oder ändern – immer ganz: { id, liste, name, marke, notiz, tags, code, foto, quelle, wertung, reihe }. */
 export const opDing = (d, by, at = jetzt()) => ({
   typ: 'ding',
-  d: { id: d.id, liste: d.liste || null, name: einzeilig(d.name, MAX_NAME), marke: einzeilig(d.marke, MAX_MARKE), notiz: kurz(d.notiz, MAX_NOTIZ), tags: tagsBereinigen(d.tags), code: codeBereinigen(d.code), foto: fotoBereinigen(d.foto), quelle: quelleBereinigen(d.quelle), reihe: reiheVon(d.reihe) },
+  d: { id: d.id, liste: d.liste || null, name: einzeilig(d.name, MAX_NAME), marke: einzeilig(d.marke, MAX_MARKE), notiz: kurz(d.notiz, MAX_NOTIZ), tags: tagsBereinigen(d.tags), code: codeBereinigen(d.code), foto: fotoBereinigen(d.foto), quelle: quelleBereinigen(d.quelle), wertung: wertungBereinigen(d.wertung), reihe: reiheVon(d.reihe) },
   by: by || null,
   at,
   ersetzt: `ding:${d.id}`,
@@ -230,6 +237,8 @@ export function sortiert(xs, sort = 'eigen') {
   const a = [...(xs || [])];
   if (sort === 'name' || sort === 'tags') return a.sort(nachName);
   if (sort === 'neu') return a.sort((x, y) => String(y.at).localeCompare(String(x.at)) || nachName(x, y));
+  // Unbewertet ans Ende
+  if (sort === 'wertung') return a.sort((x, y) => (wertungBereinigen(y.wertung) - wertungBereinigen(x.wertung)) || nachName(x, y));
   // Ohne Marke ans Ende
   if (sort === 'marke') return a.sort((x, y) => (!x.marke - !y.marke) || klein(x.marke).localeCompare(klein(y.marke), 'de') || nachName(x, y));
   return a.sort(nachReihe);
@@ -264,7 +273,7 @@ export function mitCode(inv, code) {
 }
 
 /** Nichts eingetragen – eine neue, leere Sache verschwindet wieder, wenn man sie verlässt. */
-export const dingLeer = (d) => !d || (!String(d.name || '').trim() && !String(d.marke || '').trim() && !String(d.notiz || '').trim() && !(d.tags || []).length && !d.code && !d.foto);
+export const dingLeer = (d) => !d || (!String(d.name || '').trim() && !String(d.marke || '').trim() && !String(d.notiz || '').trim() && !(d.tags || []).length && !d.code && !d.foto && !wertungBereinigen(d.wertung));
 
 /** Name fürs Anzeigen – ohne Namen die Marke. */
 export const dingName = (d) => String(d?.name || '').trim() || String(d?.marke || '').trim() || 'Ohne Namen';

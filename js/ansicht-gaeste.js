@@ -853,7 +853,7 @@ function sacheHTML(r, d, l) {
     foto = `<img class="inv-foto-img" data-ub-foto="${esc(d.foto)}"${u ? ` src="${esc(u)}"` : ''} alt="">`;
   } else if (d.foto) foto = `<img class="inv-foto-img" data-inv-foto="${esc(d.foto)}" alt="">`;
   const tags = d.tags.length ? `<span class="inv-ding-tags">${d.tags.slice(0, 3).map(tagPille).join('')}</span>` : '';
-  return `<li class="ub-sache"><span class="inv-bild${da ? ' hat-foto' : ''}"><img class="inv-ersatz" src="${esc(bildPfad(l.bild || 'package'))}" alt="" aria-hidden="true">${foto}</span><span class="ub-sache-t"><b>${esc(d.name)}</b>${d.marke ? `<small>${esc(d.marke)}</small>` : ''}${tags}${d.notiz ? `<span class="ub-sache-n">${esc(kurz(d.notiz, 140))}</span>` : ''}</span></li>`;
+  return `<li class="ub-sache"><span class="inv-bild${da ? ' hat-foto' : ''}"><img class="inv-ersatz" src="${esc(bildPfad(l.bild || 'package'))}" alt="" aria-hidden="true">${foto}</span><span class="ub-sache-t"><b>${esc(d.name)}</b>${d.marke || d.wertung ? `<small>${[d.wertung ? `<span class="inv-sterne-k">★ ${Number(d.wertung)}/10</span>` : '', esc(d.marke || '')].filter(Boolean).join(' · ')}</small>` : ''}${tags}${d.notiz ? `<span class="ub-sache-n">${esc(kurz(d.notiz, 140))}</span>` : ''}</span></li>`;
 }
 
 /** sachen.offen/fehler: nur bei Amy – ihre Sachen kommen erst noch aus sachen.json (amyInhalt). */

@@ -56,7 +56,7 @@ import { nachschlagen, rumpfNachschlagen, gesuchtBereinigen, shopBild } from './
 import { scannen } from './scanner.js';
 import { bildZoomen } from './bildzoom.js';
 import {
-  FOTO_PFAD, LISTEN_VORSCHLAEGE, SORTEN, MAX_NAME, MAX_MARKE, MAX_NOTIZ, MAX_LISTEN, MAX_DINGE,
+  FOTO_PFAD, LISTEN_VORSCHLAEGE, SORTEN, MAX_NAME, MAX_MARKE, MAX_NOTIZ, MAX_LISTEN, MAX_DINGE, WERTUNG_MAX, wertungBereinigen,
   neueListeId, neueDingId, fotoPfad, codeBereinigen, opInvListe, opInvListeWeg, opDing, opDingWeg,
   listenVon, dingeIn, naechsteReihe, sortiert, tagsVon, mitTag, suchen, mitCode, dingLeer, dingName, verschieben,
 } from './inventar.js';
@@ -243,9 +243,18 @@ function bildHTML(d, gross = false) {
 
 const pfeileHTML = (art, id, i, n) => `<span class="inv-pfeile"><button type="button" class="inv-pfeil" data-inv-hoch="${art}:${esc(id)}" aria-label="Nach oben"${i === 0 ? ' disabled' : ''}>↑</button><button type="button" class="inv-pfeil" data-inv-runter="${art}:${esc(id)}" aria-label="Nach unten"${i === n - 1 ? ' disabled' : ''}>↓</button></span>`;
 
+/** Die Sterne einer Sache – auf der Karte klein: „★ 8/10“. */
+const sterneKurz = (d) => { const w = wertungBereinigen(d.wertung); return w ? `<span class="inv-sterne-k" aria-label="${w} von ${WERTUNG_MAX} Sternen">★ ${w}/${WERTUNG_MAX}</span>` : ''; };
+
+/** Im Formular: WERTUNG_MAX Sterne zum Antippen; derselbe noch einmal nimmt die Bewertung weg. */
+function sterneHTML(d) {
+  const w = wertungBereinigen(d.wertung);
+  return `<div class="inv-sterne" role="group" aria-label="Bewertung">${Array.from({ length: WERTUNG_MAX }, (_, i) => `<button type="button" class="inv-stern${i < w ? ' an' : ''}" data-inv-wertung="${i + 1}" aria-pressed="${i + 1 === w}" aria-label="${i + 1} von ${WERTUNG_MAX} Sternen">★</button>`).join('')}</div><small class="inv-sterne-t">${w ? `${w} von ${WERTUNG_MAX} Sternen` : 'Noch nicht bewertet'}</small>`;
+}
+
 function dingKarte(d, { extra = '', mitListe = false } = {}) {
   const unter = [d.name.trim() && d.marke.trim() ? d.marke : '', mitListe ? listenName(liste(d.liste)) : ''].filter(Boolean);
-  return `<li class="inv-ding-z"><button type="button" class="inv-ding-k" data-inv-ding="${esc(d.id)}">${bildHTML(d)}<span class="inv-ding-t"><b>${esc(dingName(d))}</b>${unter.length ? `<small>${esc(unter.join(' · '))}</small>` : ''}${(d.tags || []).length ? `<span class="inv-ding-tags">${d.tags.slice(0, 3).map((t) => tagPille(t, ' klein')).join('')}</span>` : ''}</span></button>${extra}</li>`;
+  return `<li class="inv-ding-z"><button type="button" class="inv-ding-k" data-inv-ding="${esc(d.id)}">${bildHTML(d)}<span class="inv-ding-t"><b>${esc(dingName(d))}</b>${unter.length || sterneKurz(d) ? `<small>${[sterneKurz(d), esc(unter.join(' · '))].filter(Boolean).join(' · ')}</small>` : ''}${(d.tags || []).length ? `<span class="inv-ding-tags">${d.tags.slice(0, 3).map((t) => tagPille(t, ' klein')).join('')}</span>` : ''}</span></button>${extra}</li>`;
 }
 
 function listeFormHTML(l) {
@@ -367,6 +376,7 @@ function dingHTML(d) {
 <div class="inv-foto-teil" id="inv-foto-teil">${fotoTeilHTML(d)}</div>
 <label class="inv-feld"><span>Name</span><input id="inv-name" type="text" maxlength="${MAX_NAME}" value="${esc(d.name)}" placeholder="z. B. Schwarze Lederjacke" autocomplete="off"></label>
 <label class="inv-feld"><span>Marke</span><input id="inv-marke" type="text" maxlength="${MAX_MARKE}" value="${esc(d.marke)}" placeholder="z. B. Zara" autocomplete="off"></label>
+<div class="inv-feld"><span>Bewertung</span><div id="inv-wertung">${sterneHTML(d)}</div></div>
 <label class="inv-feld"><span>Liste</span><select id="inv-liste">${listenOptionen(d)}</select></label>
 <div class="inv-feld"><span>Tags</span><div class="nb-tag-teil" id="inv-tag-teil">${tagsHTML(d)}</div></div>
 <label class="inv-feld"><span>Notiz</span><textarea id="inv-notiz" maxlength="${MAX_NOTIZ}" placeholder="Größe, wozu es passt, wann gekauft, was es gekostet hat …">${esc(d.notiz)}</textarea></label>
@@ -441,6 +451,8 @@ export function inventarAktualisieren(el) {
     if (wahl && document.activeElement !== wahl) wahl.innerHTML = listenOptionen(d);
     const zurueck = el.querySelector('#inv-ding > .back');
     if (zurueck) zurueck.innerHTML = `${ZURUECK}${esc(listenName(liste(d.liste)))}`;
+    const sterne = el.querySelector('#inv-wertung');
+    if (sterne) sterne.innerHTML = sterneHTML(d);
     const tags = el.querySelector('#inv-tag-teil');
     if (tags) {
       const fokus = document.activeElement?.id === 'inv-tag-text';
@@ -496,7 +508,7 @@ function speichern(d) {
   const alt = ding(d.id);
   // In eine andere Liste: dort ans Ende
   const neu = alt && d.liste !== alt.liste ? { ...d, reihe: naechsteReihe(dingeIn(inv(), d.liste)) } : d;
-  if (alt && ['name', 'marke', 'notiz', 'code', 'liste', 'reihe'].every((k) => (alt[k] ?? '') === (neu[k] ?? '')) && JSON.stringify(alt.tags) === JSON.stringify(tagsBereinigen(neu.tags)) && JSON.stringify(alt.foto) === JSON.stringify(neu.foto || null) && JSON.stringify(alt.quelle || null) === JSON.stringify(neu.quelle || null)) return;
+  if (alt && ['name', 'marke', 'notiz', 'code', 'liste', 'reihe', 'wertung'].every((k) => (alt[k] ?? '') === (neu[k] ?? '')) && JSON.stringify(alt.tags) === JSON.stringify(tagsBereinigen(neu.tags)) && JSON.stringify(alt.foto) === JSON.stringify(neu.foto || null) && JSON.stringify(alt.quelle || null) === JSON.stringify(neu.quelle || null)) return;
   app.aendern(opDing(neu, app.name()));
 }
 
@@ -967,6 +979,18 @@ export function klickInventar(el) {
     return true;
   }
   if ('invTagDazu' in d) { tagDazu(d.invTagDazu); return true; }
+  if ('invWertung' in d) {
+    const x = ausFormular();
+    if (!x) return true;
+    const n = wertungBereinigen(d.invWertung);
+    const w = n === wertungBereinigen(x.wertung) ? 0 : n;
+    clearTimeout(timer);
+    timer = null;
+    speichern({ ...x, wertung: w });
+    const t = $('#inv-wertung');
+    if (t) t.innerHTML = sterneHTML({ ...x, wertung: w });
+    return true;
+  }
   switch (d.act) {
     case 'inv-liste-neu':
       zustand.neu = !zustand.neu;

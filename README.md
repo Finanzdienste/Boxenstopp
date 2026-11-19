@@ -535,10 +535,14 @@ Die Teile:
   sich selbst anlegt, je mit Name und Bildchen (16 zur Wahl). Zum Anfangen
   stehen Vorschläge da, ein Tipp legt die Liste an. Je Sache: **Foto**, Name,
   Marke, Liste, Tags (wie bei ihren Rezepten), **Notiz** (Größe, wozu es
-  passt, was es gekostet hat …) und die **Nummer unter dem Strichcode**;
-  gespeichert wird beim Tippen, eine leere neue Sache verschwindet wieder.
+  passt, was es gekostet hat …), die **Nummer unter dem Strichcode** und
+  eine **Bewertung** mit 1 bis 10 Sternen (v92, Marielle: „bewerten können“ –
+  `wertung` in der Sache, 0 heißt nicht bewertet; derselbe Stern noch mal
+  nimmt sie weg; auf der Karte „★ 8/10“, im Dashboard auch); gespeichert wird
+  beim Tippen, eine leere neue Sache verschwindet wieder.
   In der Liste: **Sortieren** (eigene Reihenfolge mit ↑ ↓, Name, Neueste,
-  Marke, nach Tags in Abschnitten – je Liste gemerkt), nach Tags filtern;
+  **Beste zuerst** (unbewertet ans Ende), Marke, nach Tags in Abschnitten –
+  je Liste gemerkt), nach Tags filtern;
   über allen Listen eine **Suche** (Name, Marke, Tag, Notiz, Nummer).
   - **Foto:** auf 1200 px verkleinert als eigene Datei ins Daten-Repo der
     Liste (`sachen/sd-…-….jpg`, `dateiHochladen` in `js/speicher.js`, Commit

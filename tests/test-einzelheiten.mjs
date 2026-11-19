@@ -150,6 +150,13 @@ check(zeile(e, 'Liste angelegt')?.x.join() === 'Kleidung' && zeile(e, 'Dazu')?.x
 const i2 = nach(i1, [opDing({ ...ROCK, notiz: 'Größe 38, zurückgelegt', tags: ['Sommer', 'Lieblingsstück'] }, 'Marielle')]);
 e = einzelheiten(i1, i2, hilfe);
 check(zeile(e, 'Geändert')?.x.join() === 'Rock (Zara): Notiz, Tags' && !text(e).includes('Größe 38'), `Sache geändert: welche Felder – nicht, was in der Notiz steht (${text(e)})`);
+{
+  const iw = nach(i2, [opDing({ ...ROCK, notiz: 'Größe 38, zurückgelegt', tags: ['Sommer', 'Lieblingsstück'], wertung: 7 }, 'Marielle')]);
+  e = einzelheiten(i2, iw, hilfe);
+  const alt = JSON.parse(JSON.stringify(i2));
+  delete alt.inventar.dinge[ROCK.id].wertung;
+  check(zeile(e, 'Geändert')?.x.join() === 'Rock (Zara): Sterne' && !einzelheiten(alt, i2, hilfe).length, `Sterne vergeben: „Sterne“; ohne das Feld (ältere Fassung) ist nichts geändert (${text(e)})`);
+}
 const i3 = nach(i2, [opInvListe(SCHUH, 'Marielle'), opDing({ ...ROCK, liste: SCHUH.id, notiz: 'Größe 38, zurückgelegt', tags: ['Sommer', 'Lieblingsstück'] }, 'Marielle')]);
 e = einzelheiten(i2, i3, hilfe);
 check(zeile(e, 'Liste angelegt')?.x.join() === 'Schuhe' && zeile(e, 'Geändert')?.x.join() === 'Rock (Zara): nach Schuhe', `Sache in eine andere Liste: „nach Schuhe“ (${text(e)})`);

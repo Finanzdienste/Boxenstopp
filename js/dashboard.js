@@ -4,7 +4,7 @@
  * tests/test-gaeste.mjs prüft es in Node.
  *
  *   inhaltVon(stand, { hilfe, heute }) → {
- *     sachen:   { anzahl, listen: [{ id, name, bild, dinge: [{ id, name, marke, tags, notiz, foto, code, quelle }] }] }
+ *     sachen:   { anzahl, listen: [{ id, name, bild, dinge: [{ id, name, marke, tags, notiz, foto, code, quelle, wertung }] }] }
  *               (eigene Reihenfolge; Sachen ohne Liste zuletzt unter „Ohne Liste“)
  *     einkauf:  { offen: [Name], erledigt: n }     die Einkaufsliste (offen nach Namen)
  *     rezepte:  [{ name, tags }]                   eigene Rezepte (amy), nach Namen
@@ -40,6 +40,7 @@ const dingKurz = (d) => ({
   foto: d.foto?.pfad || '',
   code: d.code || '',
   quelle: d.quelle?.name || '',
+  wertung: Number(d.wertung) || 0,
 });
 
 export function inhaltVon(stand, { hilfe = {}, heute = new Date() } = {}) {

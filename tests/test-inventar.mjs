@@ -20,7 +20,7 @@ import { pruefer, starteBrowser, handy, bis, githubAttrappe, ROOT } from './hilf
 import { leer, anwenden, bereinigen, beschreibung, opZusammen, bescheidNoetig } from '../js/liste.js';
 import {
   inventarBereinigen, opInvListe, opInvListeWeg, opDing, opDingWeg, eanOk, codeBereinigen, fotoPfad, FOTO_PFAD, listenVon, dingeIn,
-  sortiert, tagsVon, mitTag, suchen, mitCode, verschieben, dingLeer, dingName, naechsteReihe, MAX_DINGE, neueDingId, neueListeId, LISTE_ID, DING_ID, quelleBereinigen,
+  sortiert, tagsVon, mitTag, suchen, mitCode, verschieben, dingLeer, dingName, naechsteReihe, MAX_DINGE, neueDingId, neueListeId, LISTE_ID, DING_ID, quelleBereinigen, wertungBereinigen, WERTUNG_MAX,
 } from '../js/inventar.js';
 import { rumpfErkennen, erkanntBereinigen, ERKENNEN_SCHEMA } from '../js/inventar-ki.js';
 import { nachschlagen, nachschlagenAdresse, produktSeite, bildAdresse, produktAus, andereDatenbank, rumpfNachschlagen, gesuchtBereinigen, shopBild, DATENBANKEN, KENNUNG, PRODUKT_BILD } from '../js/inventar-netz.js';
@@ -87,6 +87,13 @@ check(listenVon(s.inventar).map((l) => l.name).join() === 'Kleidung,Make-up' && 
 check(tagsVon(Object.values(s.inventar.dinge))[0].join() === 'schwarz,2' && mitTag(kleider, 'SCHWARZ').map((d) => d.name).join() === 'Lederjacke', 'Tags: häufigste zuerst, filtern groß/klein egal');
 check(suchen(s.inventar, 'zara').map((d) => d.name).join() === 'Lederjacke' && suchen(s.inventar, 'Schwarz').length === 2 && suchen(s.inventar, '0360002').map((d) => d.name).join() === 'Mascara' && suchen(s.inventar, 'leer').map((d) => d.name).join() === 'Mascara' && !suchen(s.inventar, ' ').length, 'Suchen über Name, Marke, Tags, Code und Notiz');
 check(mitCode(s.inventar, '4006381333931')[0].name === 'Lederjacke' && !mitCode(s.inventar, '').length && !mitCode(s.inventar, '73513537').length, '„Hab ich das schon?“ – nach dem Strichcode');
+check(WERTUNG_MAX === 10 && [1, 10, '7'].map(wertungBereinigen).join() === '1,10,7' && [0, 11, -1, 2.5, 'x', null].every((w) => wertungBereinigen(w) === 0), 'Sterne: ganze Zahl 1 bis 10, sonst 0 (nicht bewertet)');
+{
+  const bewertet = [{ name: 'B', wertung: 3 }, { name: 'A' }, { name: 'C', wertung: 9 }, { name: 'D', wertung: 3 }];
+  check(sortiert(bewertet, 'wertung').map((d) => d.name).join() === 'C,B,D,A', 'Beste zuerst: nach Sternen, gleich viele nach Name, unbewertet ans Ende');
+  const mit = inventarBereinigen({ dinge: { 'sd-stern001': { liste: 'sl-kleider1', name: 'X', wertung: 8 }, 'sd-stern002': { liste: 'sl-kleider1', name: 'Y', wertung: 42 } } });
+  check(mit.dinge['sd-stern001'].wertung === 8 && mit.dinge['sd-stern002'].wertung === 0 && opDing({ id: 'sd-stern001', wertung: 8 }, 'M').d.wertung === 8 && !dingLeer({ wertung: 5 }), 'Sterne bleiben beim Bereinigen und in der Änderung; nur Sterne ist keine leere Sache');
+}
 const runter = verschieben(kleider, 'sd-jacke001', 1);
 check(runter.map((d) => `${d.name}:${d.reihe}`).join() === 'Abendkleid:1,Lederjacke:2' && verschieben(kleider, 'sd-jacke001', -1) === null && verschieben(kleider, 'sd-kleid0001', 1) === null, 'Verschieben: tauschen und durchnummerieren – am Rand geht es nicht weiter');
 check(dingLeer({ name: ' ', marke: '', notiz: '', tags: [], code: '', foto: null }) && !dingLeer({ code: '123' }) && !dingLeer({ foto: { pfad: 'x' } }) && dingName({ name: '', marke: 'Nike' }) === 'Nike' && dingName({}) === 'Ohne Namen', 'Leer ist, wo nichts drinsteht; ohne Namen zählt die Marke');
@@ -357,6 +364,17 @@ await m.press('#inv-tag-text', 'Enter');
 check(await bis(() => ding('Lederjacke')?.marke === 'Zara' && ding('Lederjacke')?.notiz.startsWith('Größe M') && ding('Lederjacke')?.tags.join() === 'schwarz'), 'Name, Marke, Notiz und Tag – in ihrer Liste');
 check(!mar.zustand.nachrichten.some((x) => /Lederjacke|Zara|Größe/.test(x)) && mar.zustand.nachrichten.some((x) => /^Marielle: .*Sachen/.test(x)), 'Im Commit steht nur „Sachen“ – nie, was es ist');
 
+// Bewerten: 1 bis 10 Sterne, derselbe noch mal nimmt es weg
+check(await m.locator('#inv-wertung .inv-stern').count() === 10 && (await m.locator('.inv-sterne-t').innerText()) === 'Noch nicht bewertet', 'Bewertung: zehn Sterne, noch keiner an');
+const sterneBreit = await m.evaluate(() => { const r = document.querySelector('#inv-wertung .inv-sterne').getBoundingClientRect(); return r.right <= window.innerWidth && r.width > 200; });
+check(sterneBreit, 'alle zehn passen in die Breite des Handys');
+await m.click('#inv-wertung [data-inv-wertung="8"]');
+check(await bis(() => ding('Lederjacke')?.wertung === 8) && await m.locator('#inv-wertung .inv-stern.an').count() === 8 && (await m.locator('.inv-sterne-t').innerText()) === '8 von 10 Sternen', '8 Sterne antippen: gespeichert, acht leuchten');
+await m.click('#inv-wertung [data-inv-wertung="8"]');
+check(await bis(() => ding('Lederjacke')?.wertung === 0) && await m.locator('#inv-wertung .inv-stern.an').count() === 0, 'dieselben noch mal: nicht mehr bewertet');
+await m.click('#inv-wertung [data-inv-wertung="9"]');
+check(await bis(() => ding('Lederjacke')?.wertung === 9) && ding('Lederjacke')?.marke === 'Zara', '9 Sterne – Name und Marke bleiben');
+
 // Das Foto: als eigene Datei ins Repo, in der Sache nur der Pfad
 await m.setInputFiles('#inv-foto-datei', BILD);
 const pfad = () => ding('Lederjacke')?.foto?.pfad || '';
@@ -379,7 +397,7 @@ check(db.anfragen.length === 0 && (await m.locator('.inv-nachschlagen').count())
 
 // Zurück zur Liste: die Karte mit Foto, eine zweite Sache, sortieren, ordnen, filtern
 await m.click('[data-act="inv-ding-zu"]');
-check(await bis(async () => (await m.locator('.inv-ding-k').count()) === 1) && (await m.locator('.inv-ding-k').innerText()).includes('Zara'), 'In der Liste: die Karte mit Name und Marke');
+check(await bis(async () => (await m.locator('.inv-ding-k').count()) === 1) && (await m.locator('.inv-ding-k').innerText()).includes('Zara') && (await m.locator('.inv-ding-k .inv-sterne-k').innerText()) === '★ 9/10', 'In der Liste: die Karte mit Name, Marke und Sternen');
 check(await bis(async () => (await m.locator('.inv-ding-k img.inv-foto-img').getAttribute('src'))?.startsWith('blob:')), 'mit Foto');
 await m.click('[data-act="inv-ding-neu"]');
 await m.fill('#inv-name', 'Abendkleid');
@@ -391,6 +409,8 @@ await m.click('[data-act="inv-ding-zu"]');
 check(await bis(async () => (await namen()) === 'Lederjacke,Abendkleid') && await bis(() => dinge().length === 2), 'Eine leere neue Sache verschwindet wieder');
 await m.selectOption('#inv-sort', 'name');
 check(await bis(async () => (await namen()) === 'Abendkleid,Lederjacke'), 'Sortieren: Name A–Z');
+await m.selectOption('#inv-sort', 'wertung');
+check(await bis(async () => (await namen()) === 'Lederjacke,Abendkleid'), 'Sortieren: Beste zuerst (die Jacke hat Sterne, das Kleid keine)');
 await m.selectOption('#inv-sort', 'eigen');
 await m.click('[data-act="inv-ordnen"]');
 await m.locator('[data-inv-runter^="ding:"]').first().click();

@@ -335,12 +335,14 @@ export function einzelheiten(vorher, nachher, hilfe = {}) {
     else if ((lv[id].name || '') !== (l.name || '')) dazu('Sachen', 'Liste umbenannt', `${kurz(lv[id].name, 40)} → ${kurz(l.name, 40)}`);
   }
   for (const [id, l] of wieAngelegt(lv)) if (!ln[id]) dazu('Sachen', 'Liste gelöscht', kurz(l.name, 40));
-  const FELDER = [['name', 'Name'], ['marke', 'Marke'], ['notiz', 'Notiz'], ['tags', 'Tags'], ['foto', 'Foto'], ['code', 'Strichcode']];
+  const FELDER = [['name', 'Name'], ['marke', 'Marke'], ['notiz', 'Notiz'], ['tags', 'Tags'], ['foto', 'Foto'], ['code', 'Strichcode'], ['wertung', 'Sterne']];
   let umsortiert = false;
   for (const [id, d] of wieAngelegt(dn)) {
     const alt = dv[id];
     if (!istObj(alt)) { dazu('Sachen', 'Dazu', `${mitMarke(d)} – ${listenName(d.liste)}`); continue; }
-    const felder = FELDER.filter(([k]) => !gleich(alt[k], d[k])).map(([, t]) => t);
+    // Sterne: fehlt das Feld (ältere Fassung), ist es 0
+    const wert = (x, k) => (k === 'wertung' ? Number(x[k]) || 0 : x[k]);
+    const felder = FELDER.filter(([k]) => !gleich(wert(alt, k), wert(d, k))).map(([, t]) => t);
     if ((alt.liste || '') !== (d.liste || '')) felder.push(`nach ${listenName(d.liste)}`);
     if (felder.length) dazu('Sachen', 'Geändert', `${mitMarke(d)}: ${felder.join(', ')}`);
     else if (alt.reihe !== d.reihe) umsortiert = true;
