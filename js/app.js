@@ -20,14 +20,14 @@
  */
 // Als erstes: Fehler mitschreiben (Einstellungen → Über die App), auch beim Laden der anderen Teile
 import { sicher, fehlerMerken } from './fehler.js';
-import { kostenMeldenAn, KOSTEN_MELDEN } from './ki.js';
+import { kostenMeldenAn, KOSTEN_MELDEN, kiErsatzAn } from './ki.js';
 import { app, $, ansicht, zeigeReiter, melde, lese, schreibe, reiterBeobachten, breiteAnwenden } from './kern.js';
 import { lokal, github, lokalerStand, lokalLoeschen, githubVergessen, pruefeSchluessel, privatLesen, bekanntesProfil, offeneListe, API } from './speicher.js';
 import { opZusammen, opPerson, opEinePerson } from './liste.js';
 import { hatInventar, opUmgezogen, inventarZusammen } from './inventar.js';
 import { umzugInSachen, umzugNoetig, umzugZusammen, wegInSachen, ART_SACHEN } from './sachen.js';
 import { preiseMitBons } from './kosten.js';
-import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe, KI_DATEI, geteiltenKiUebernehmen } from './zugang.js';
+import { ladeZugang, speichereZugang, loescheZugang, linkAusAdresse, kiAusAdresse, speichereKi, ortVon, eigeneListe, KI_DATEI, geteiltenKiUebernehmen, geteiltenErsatzUebernehmen, ladeKiErsatz } from './zugang.js';
 import { filterZeichnen, rasterZeichnen, oeffneRezept, schliesseRezept, offenesRezept, detailAktualisieren, klickRezepte, eingabeRezepte, aenderungRezepte, absendenRezepte, timerZeichnen, zuSchritt, abschnittGeklappt, kochstandZeichnen, pinsPruefen } from './ansicht-rezepte.js';
 import { timerAnmelden, leisteHTML, klickTimer } from './timer.js';
 import { listeZeichnen, zahlZeichnen, statusZeichnen, zugangZeichnen, formularMitSchluessel, klickListe, absendenListe, aenderungListe, wegPruefen, eingabeZugang, GETRENNT, anderesGeraet } from './ansicht-liste.js';
@@ -85,6 +85,7 @@ const geteiltenKiHolen = async () => {
   const k = await privatLesen(KI_DATEI, { token: app.zugang.token, api: apiBasis(), ort: ortVon(app.zugang) });
   app.kiGeteilt = k && typeof k === 'object' && !Array.isArray(k) ? k : null;
   if (!app.kiGeteilt) return;
+  geteiltenErsatzUebernehmen(app.kiGeteilt);
   if (geteiltenKiUebernehmen(app.kiGeteilt)) {
     einstellungenZeichnen();
     resteZeichnen();
@@ -478,6 +479,8 @@ async function start() {
   breiteAnwenden(); // falls index.html es nicht schon gesetzt hat
   // Kosten an „Frag mal“ melden – nur in der echten App, nicht in den Tests
   if (location.hostname === 'finanzdienste.github.io') kostenMeldenAn(KOSTEN_MELDEN);
+  // Kein Guthaben bei Anthropic: der Gemini-Schlüssel springt ein (Einstellungen → KI-Schlüssel)
+  kiErsatzAn(ladeKiErsatz, { beiWechsel: () => melde('Claude-Guthaben leer – Gemini springt ein (eine Stunde lang).') });
   let daten;
   // Die Fotos der gewünschten und Amys Rezepte (werkzeug/eigene-fotos.mjs) – nebenher; ohne sie gibt es die Bildchen
   const fotos = fetch('daten/fotos.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);

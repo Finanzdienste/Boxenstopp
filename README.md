@@ -1564,6 +1564,23 @@ Billing → API credits die Console-Organisation verknüpfen, dort unter API
 Keys einen Schlüssel anlegen und ihn genauso in die App einfügen. Beide
 Antworten werden gestreamt.
 
+**Ersatz, wenn das Claude-Guthaben leer ist** (v94, Tobi): Unter
+Einstellungen → KI-Schlüssel steht bei einem Anthropic-Schlüssel ein zweites
+Feld für einen kostenlosen Gemini-Schlüssel (nur AQ.… oder AIza…,
+`ladeKiErsatz` in `js/zugang.js`). Sagt Anthropic „kein Guthaben“ (`guthaben`,
+`artVonStatus`), schickt `kiAnfragen` dieselbe Anfrage an Gemini – umgebaut
+mit `alsGemini` (Systemtext, Text, Fotos, Schema ohne
+`additionalProperties`) – und meldet „Claude-Guthaben leer – Gemini springt
+ein“. Eine Stunde lang geht danach alles gleich an Gemini
+(`ERSATZ_PAUSE`), dann wird Claude wieder gefragt. Das gilt für alles, was
+nicht im Internet sucht: Resteverwertung und Speisekammer, neue Rezepte,
+„Mit KI ändern“, Fotos (Speisekammer, Sachen), Amys Nährwerte, Rezepte aus
+Text und Foto, die Speisekarte. Ohne Ersatz: die Suche im Internet (Amys
+Suche, Rezept aus einem Link, Nachschlagen, Veranstaltung) – Gemini mit
+Google-Suche wird nicht benutzt. Ist der Hauptschlüssel für die Liste
+freigegeben, steht der Ersatz mit in `ki.json` (`ersatz`, `ersatzStand`) und
+kommt so auf die anderen Handys.
+
 **Kosten melden (nur Claude, `kostenMelden` in `js/ki.js`):** Nach jeder
 Anfrage meldet die App – und die Angebots-Action – die ungefähren Kosten an
 die Supabase-Funktion `api-kosten` (Repo Amy). Dort zählt „Frag mal“

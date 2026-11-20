@@ -40,7 +40,7 @@
 import { app, $, $$, ansicht, zeigeReiter, melde, lese, schreibe, istSchmal, leisteFaerben, DANEBEN, listeDaneben, kannBreit, breiteAnwenden } from './kern.js';
 import { esc, tagKurz, menge, nfi } from './format.js';
 import { euro } from './kosten.js';
-import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon, eigeneListe } from './zugang.js';
+import { ladeKi, speichereKi, loescheKi, kiAus, KI_DATEI, ortVon, eigeneListe, ladeKiErsatz, ladeKiErsatzEintrag, speichereKiErsatz, loescheKiErsatz } from './zugang.js';
 import { privatSchreiben, API } from './speicher.js';
 import { ladeGaeste } from './ansicht-gaeste.js';
 import { ANBIETER, anbieterVon, schluesselPruefsumme } from './ki.js';
@@ -195,9 +195,28 @@ ${kiFormHTML(false)}
   return `<p class="e-ki-da"><span class="e-ok">✓</span> Ein Schlüssel von <b>${esc(ANBIETER[da].name)}</b> ist eingetragen.</p>
 ${kiOffen ? kiFormHTML(true) : '<div class="zugang-btns"><button type="button" class="btn" data-act="e-ki-aendern">Schlüssel ändern</button><button type="button" class="btn btn-quiet" data-act="e-ki-weg">Entfernen</button></div>'}
 ${kiTeilenHTML()}
+${da === 'anthropic' ? ersatzHTML() : ''}
 ${da === 'anthropic' && !istEigen() ? pruefsummeHTML() : ''}
 <p class="fine">${wofuer} ${bleibt}</p>`;
 }
+
+/*
+ * Der Ersatz (zugang.js ladeKiErsatz, ki.js kiErsatzAn): ein kostenloser
+ * Gemini-Schlüssel, der einspringt, wenn bei Anthropic kein Guthaben mehr ist.
+ * Ist der Hauptschlüssel für die Liste freigegeben, geht der Ersatz mit.
+ */
+let ersatzOffen = false;
+let ersatzFehler = '';
+function ersatzHTML() {
+  const e = ladeKiErsatzEintrag();
+  const kopf = '<h3 class="e-ki-ersatz-k">Ersatz, wenn das Claude-Guthaben leer ist</h3>';
+  const erkl = 'Ein kostenloser Schlüssel von Google (Gemini) springt ein, sobald Anthropic „kein Guthaben“ sagt – eine Stunde lang, dann wird Claude wieder gefragt. Nicht für die Suche im Internet (die geht nur mit Claude).';
+  const form = `<form class="e-ki-form" id="e-ki-ersatz-form" novalidate><label class="sr" for="e-ki-ersatz-feld">Gemini-Schlüssel als Ersatz</label><input id="e-ki-ersatz-feld" type="password" autocomplete="off" spellcheck="false" placeholder="AQ.… oder AIza… (Google)">${ersatzFehler ? `<p class="zugang-fehler" role="alert">${esc(ersatzFehler)}</p>` : ''}<div class="zugang-btns"><button type="submit" class="btn btn-primary">Speichern</button>${e ? '<button type="button" class="btn btn-quiet" data-act="e-ersatz-zu">Abbrechen</button>' : ''}</div></form>`;
+  if (!e) return `<div class="e-ki-ersatz">${kopf}<p class="fine">${erkl} Holen: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> → „Create API key“.</p>${form}</div>`;
+  return `<div class="e-ki-ersatz">${kopf}<p class="e-ki-da"><span class="e-ok">✓</span> Ein Gemini-Schlüssel ist als Ersatz eingetragen${e.geteilt ? ' (für alle Handys der Liste)' : ''}.</p>${ersatzOffen ? form : '<div class="zugang-btns"><button type="button" class="btn" data-act="e-ersatz-aendern">Ändern</button><button type="button" class="btn btn-quiet" data-act="e-ersatz-weg">Entfernen</button></div>'}<p class="fine">${erkl}</p></div>`;
+}
+/** Ist der Hauptschlüssel für die Liste freigegeben, den Ersatz gleich mitschicken. */
+const ersatzMitTeilen = () => { if (app.kiGeteilt && kiAus(app.kiGeteilt.schluessel) === ladeKi()) kiTeilen(ladeKi()); };
 
 /*
  * „Frag mal“ zählt die Kosten mit (ki.js kostenMelden). Die App schickt dafür
@@ -236,7 +255,8 @@ async function kiTeilen(schluessel) {
   const wer = app.name() || 'Jemand';
   const nachricht = schluessel ? `${wer}: KI-Schlüssel für alle Handys` : `${wer}: KI-Schlüssel nicht mehr geteilt`;
   try {
-    const neu = { schluessel, von: app.name() || '', stand: new Date().toISOString() };
+    const ersatz = schluessel ? ladeKiErsatzEintrag() : null;
+    const neu = { schluessel, von: app.name() || '', stand: new Date().toISOString(), ...(ersatz ? { ersatz: ersatz.schluessel, ersatzStand: ersatz.stand } : {}) };
     app.kiGeteilt = await privatSchreiben(KI_DATEI, () => neu, { token: app.zugang.token, api, ort: ortVon(app.zugang), nachricht });
     // Die Gäste, die dieses Gerät eingeladen hat: dieselbe Datei in ihre Listen
     const klappt = [];
@@ -481,6 +501,17 @@ export function klickEinstellungen(el) {
       melde('Waage entfernt – auf allen Geräten der Liste', { knopf: 'Rückgängig', beiKnopf: () => { app.aendern(opProfil({ waage: alt }, alt.by || app.name())); einstellungenZeichnen(); } });
       return true;
     }
+    case 'e-ersatz-aendern': ersatzOffen = true; ersatzFehler = ''; einstellungenZeichnen(); $('#e-ki-ersatz-feld')?.focus(); return true;
+    case 'e-ersatz-zu': ersatzOffen = false; ersatzFehler = ''; einstellungenZeichnen(); return true;
+    case 'e-ersatz-weg': {
+      const alt = ladeKiErsatz();
+      loescheKiErsatz();
+      ersatzOffen = false;
+      einstellungenZeichnen();
+      ersatzMitTeilen();
+      melde('Ersatz-Schlüssel entfernt', { knopf: 'Rückgängig', beiKnopf: () => { speichereKiErsatz(alt); einstellungenZeichnen(); ersatzMitTeilen(); } });
+      return true;
+    }
     case 'e-ki-weg': {
       const alt = ladeKi();
       loescheKi();
@@ -574,6 +605,24 @@ export function absendenEinstellungen(ev) {
     waageFehler = '';
     einstellungenZeichnen();
     melde(`Waage eingerichtet – Kanal „${w.kanal}“, für alle Geräte der Liste.`);
+    return true;
+  }
+  if (ev.target.id === 'e-ki-ersatz-form') {
+    ev.preventDefault();
+    const s = kiAus($('#e-ki-ersatz-feld')?.value || '');
+    if (!/^(?:AQ\.|AIza)/.test(s)) {
+      ersatzFehler = 'Als Ersatz geht nur ein Schlüssel von Google – er beginnt mit AQ. oder AIza.';
+      $('#e-ki').innerHTML = kiHTML();
+      $('#e-ki-ersatz-feld')?.focus();
+      return true;
+    }
+    speichereKiErsatz(s);
+    ersatzOffen = false;
+    ersatzFehler = '';
+    $('#e-ki').innerHTML = kiHTML();
+    einstellungenZeichnen();
+    ersatzMitTeilen();
+    melde('Gespeichert: Ist das Claude-Guthaben leer, springt Gemini ein.');
     return true;
   }
   if (ev.target.id !== 'e-ki-form') return false;

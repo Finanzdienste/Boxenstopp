@@ -155,6 +155,40 @@ export function geteiltenKiUebernehmen(geteilt) {
   speichereKi(neu.schluessel, { stand: neu.stand, geteilt: true });
   return neu.schluessel !== eigen?.schluessel;
 }
+/*
+ * Der Ersatz: ein Gemini-Schlüssel (AQ.… oder AIza…, kostenlos), der
+ * einspringt, wenn bei Anthropic kein Guthaben mehr ist (ki.js kiErsatzAn).
+ * Eigener Eintrag { schluessel, stand, geteilt }; geteilt wird er mit dem
+ * Hauptschlüssel in ki.json ({ …, ersatz, ersatzStand }) und genauso
+ * übernommen (kiUebernehmen).
+ */
+const KI_ERSATZ = 'boxenstopp.ki.ersatz.v1';
+const istGemini = (s) => /^(?:AQ\.|AIza)/.test(String(s || ''));
+export function ladeKiErsatzEintrag() {
+  try {
+    const k = JSON.parse(localStorage.getItem(KI_ERSATZ) || 'null');
+    if (!(k && typeof k.schluessel === 'string' && KI_MUSTER.test(k.schluessel) && istGemini(k.schluessel))) return null;
+    return { schluessel: k.schluessel, stand: typeof k.stand === 'string' ? k.stand : '', geteilt: k.geteilt === true };
+  } catch { return null; }
+}
+export const ladeKiErsatz = () => ladeKiErsatzEintrag()?.schluessel || '';
+export function speichereKiErsatz(schluessel, { stand = new Date().toISOString(), geteilt = false } = {}) {
+  if (!istGemini(schluessel) || !KI_MUSTER.test(schluessel)) return false;
+  try { localStorage.setItem(KI_ERSATZ, JSON.stringify({ schluessel, stand, ...(geteilt ? { geteilt: true } : {}) })); return true; } catch { return false; }
+}
+export function loescheKiErsatz() {
+  try { localStorage.removeItem(KI_ERSATZ); } catch { /* egal */ }
+}
+/** Den Ersatz aus ki.json übernehmen (wie den Hauptschlüssel); true, wenn er auf diesem Handy jetzt ein anderer ist. */
+export function geteiltenErsatzUebernehmen(geteilt) {
+  if (!istGemini(geteilt?.ersatz)) return false;
+  const eigen = ladeKiErsatzEintrag();
+  const neu = kiUebernehmen(eigen, { schluessel: geteilt.ersatz, stand: typeof geteilt.ersatzStand === 'string' ? geteilt.ersatzStand : geteilt.stand });
+  if (!neu) return false;
+  speichereKiErsatz(neu.schluessel, { stand: neu.stand, geteilt: true });
+  return neu.schluessel !== eigen?.schluessel;
+}
+
 export function loescheKi() {
   try { localStorage.removeItem(KI); } catch { /* egal */ }
 }

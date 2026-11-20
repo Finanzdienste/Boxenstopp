@@ -183,6 +183,14 @@ check(await bis(async () => (await ap.locator('#e-ki').innerText()).includes('An
 await ap.click('#e-ki [data-act="e-ki-teilen"]');
 const kiDatei = () => { try { return JSON.parse(gh.zustand.dateien['ki.json']); } catch { return null; } };
 check(await bis(() => kiDatei()?.schluessel === AKEY, 8000) && kiDatei().von === 'Amy' && /^\d{4}-/.test(kiDatei().stand) && await bis(async () => (await ap.locator('#e-ki .e-ki-teilen').innerText()).includes('Freigegeben für alle Handys')) && (await ap.locator('#toast').innerText()).includes('Freigegeben'), 'freigegeben: ki.json mit Schlüssel, von Amy und Stand; „Freigegeben für alle Handys dieser Liste“');
+// Der Ersatz: ein Gemini-Schlüssel, wenn das Claude-Guthaben leer ist – geht mit ki.json mit
+check((await ap.locator('#e-ki .e-ki-ersatz').innerText()).includes('Ersatz, wenn das Claude-Guthaben leer ist'), 'Mit Anthropic-Schlüssel: „Ersatz, wenn das Claude-Guthaben leer ist“');
+await ap.fill('#e-ki-ersatz-feld', AKEY);
+await ap.press('#e-ki-ersatz-feld', 'Enter');
+check(await bis(async () => (await ap.locator('#e-ki .e-ki-ersatz .zugang-fehler').innerText().catch(() => '')).includes('nur ein Schlüssel von Google')), 'Ein Anthropic-Schlüssel ist kein Ersatz');
+await ap.fill('#e-ki-ersatz-feld', GKEY);
+await ap.press('#e-ki-ersatz-feld', 'Enter');
+check(await bis(() => kiDatei()?.ersatz === GKEY && kiDatei().schluessel === AKEY, 8000) && await ap.evaluate((g) => JSON.parse(localStorage.getItem('boxenstopp.ki.ersatz.v1')).schluessel === g, GKEY) && (await ap.locator('#e-ki .e-ki-ersatz').innerText()).includes('als Ersatz eingetragen'), 'Gespeichert – und weil der Schlüssel geteilt ist, steht der Ersatz gleich in ki.json');
 const c = await handy(browser, { attrappe: gh, adresse: `${APP_URL}#zugang=${encodeURIComponent(SCHLUESSEL)}` });
 const cp = c.page;
 await cp.fill('#z-name', 'Tobi');
@@ -190,6 +198,7 @@ await cp.click('#z-los');
 check(await bis(async () => await cp.evaluate((k) => JSON.parse(localStorage.getItem('boxenstopp.ki.v1') || '{}').schluessel === k, AKEY), 8000) && await cp.evaluate(() => JSON.parse(localStorage.getItem('boxenstopp.ki.v1')).geteilt === true) && await bis(async () => (await cp.locator('#toast').innerText()).includes('KI-Schlüssel von Amy übernommen')), 'das zweite Handy bekommt den Schlüssel beim Verbinden, als geteilt gemerkt, mit Hinweis');
 await cp.click('.tab[data-tab="einstellungen"]');
 check(await bis(async () => (await cp.locator('#e-ki').innerText()).includes('Anthropic')) && (await cp.locator('#e-ki .e-ki-teilen').innerText()).includes('Freigegeben für alle Handys dieser Liste (von Amy)'), 'dort steht: Anthropic, freigegeben von Amy');
+check(await cp.evaluate((g) => { const e = JSON.parse(localStorage.getItem('boxenstopp.ki.ersatz.v1') || '{}'); return e.schluessel === g && e.geteilt === true; }, GKEY) && (await cp.locator('#e-ki .e-ki-ersatz').innerText()).includes('für alle Handys der Liste'), 'Das zweite Handy hat auch den Ersatz');
 check((await cp.locator('#e-ki .e-ki-summe').innerText()).includes('ERLAUBTE_SCHLUESSEL'), 'für „Frag mal“: die Prüfsumme des Schlüssels zum Kopieren');
 await cp.evaluate(() => { window.__kopiert = ''; navigator.clipboard.writeText = async (t) => { window.__kopiert = t; }; });
 await cp.click('#e-ki [data-act="e-ki-summe"]');

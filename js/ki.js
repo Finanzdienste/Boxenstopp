@@ -331,7 +331,7 @@ export const KI_FEHLER = {
   },
   anthropic: {
     schluessel: 'Anthropic lehnt den Schlüssel ab. Prüf ihn unter platform.claude.com → API Keys und trag ihn neu ein.',
-    guthaben: 'Auf dem Anthropic-Konto ist kein Guthaben: Das Monatsguthaben des Abos ist aufgebraucht (kommt mit der nächsten Abo-Zahlung wieder), oder es wurde noch keins verknüpft. Unter platform.claude.com → Billing nachsehen oder aufladen, dann nochmal.',
+    guthaben: 'Auf dem Anthropic-Konto ist kein Guthaben: Das Monatsguthaben des Abos ist aufgebraucht (kommt mit der nächsten Abo-Zahlung wieder), oder es wurde noch keins verknüpft. Unter platform.claude.com → Billing nachsehen oder aufladen, dann nochmal. Oder in den Einstellungen einen kostenlosen Gemini-Schlüssel als Ersatz eintragen – dann springt Gemini ein.',
     workspace: 'Der Anthropic-Schlüssel gehört keinem Workspace. In der Console (platform.claude.com → API Keys) einen neuen Schlüssel anlegen und dabei den Default Workspace wählen, dann den neuen Schlüssel hier eintragen.',
     grenze: 'Gerade zu viele Anfragen. In einer Minute nochmal versuchen.',
     ueberlastet: 'Claude ist gerade überlastet. Gleich nochmal versuchen.',
@@ -433,9 +433,71 @@ export function kostenCent(usage, anbieter = 'anthropic') {
  * Der Anbieter ergibt sich aus dem Schlüssel; `api` übersteuert die Adresse
  * (für die Tests).
  */
+/*
+ * Ersatz, wenn das Guthaben bei Anthropic leer ist (Tobi, 20.11.2026): Ein
+ * Gemini-Schlüssel (kostenlos, zugang.js ladeKiErsatz) übernimmt – dieselbe
+ * Anfrage, umgebaut (alsGemini). Nach so einer Absage geht eine Stunde lang
+ * alles gleich an Gemini, dann wird Claude wieder gefragt. Was das Internet
+ * durchsucht (kiMitWerkzeugen), hat keinen Ersatz: Gemini mit Google-Suche
+ * wird nicht benutzt.
+ */
+let ersatzQuelle = () => '';
+let beiErsatz = () => {};
+let leerBis = 0;
+export const ERSATZ_PAUSE = 60 * 60 * 1000;
+/** Woher der Ersatz-Schlüssel kommt, und was passieren soll, wenn er einspringt (eine Meldung). */
+export function kiErsatzAn(quelle, { beiWechsel = () => {} } = {}) { ersatzQuelle = typeof quelle === 'function' ? quelle : () => ''; beiErsatz = beiWechsel; }
+/** Für die Tests: Claude wieder zuerst fragen. */
+export const ersatzZuruecksetzen = () => { leerBis = 0; };
+
+/** Ein Schema für Gemini: ohne additionalProperties (das setzt nur schemaFuerClaude). */
+const ohneZusatz = (k) => {
+  if (Array.isArray(k)) return k.map(ohneZusatz);
+  if (!k || typeof k !== 'object') return k;
+  return Object.fromEntries(Object.entries(k).filter(([key]) => key !== 'additionalProperties').map(([key, v]) => [key, ohneZusatz(v)]));
+};
+
+/**
+ * Ein Rumpf für Anthropic als Rumpf für Geminis Interactions-API – oder null,
+ * wenn er Werkzeuge braucht, die es dort nicht gibt (Websuche, Seiten lesen).
+ */
+export function alsGemini(rumpf) {
+  if (!rumpf || !Array.isArray(rumpf.messages) || (rumpf.tools || []).some((t) => /web_search|web_fetch/.test(String(t?.type || t?.name || '')))) return null;
+  const system = typeof rumpf.system === 'string' ? rumpf.system : Array.isArray(rumpf.system) ? rumpf.system.map((b) => b?.text || '').filter(Boolean).join('\n\n') : '';
+  const erste = rumpf.messages.find((m) => m?.role === 'user');
+  const teile = typeof erste?.content === 'string' ? [{ type: 'text', text: erste.content }] : Array.isArray(erste?.content) ? erste.content : [];
+  const input = [];
+  for (const t of teile) {
+    if (t?.type === 'text' && typeof t.text === 'string') input.push({ type: 'text', text: t.text });
+    else if (t?.type === 'image' && t.source?.type === 'base64') input.push({ type: 'image', data: t.source.data, mime_type: t.source.media_type || 'image/jpeg' });
+    else if (t?.type === 'document' && t.source?.type === 'base64') input.push({ type: 'document', data: t.source.data, mime_type: t.source.media_type || 'application/pdf' });
+  }
+  if (!input.length) return null;
+  const schema = rumpf.output_config?.format?.schema;
+  return {
+    model: ANBIETER.gemini.modell,
+    ...(system ? { system_instruction: system } : {}),
+    input,
+    ...(schema ? { response_format: { type: 'text', mime_type: 'application/json', schema: ohneZusatz(schema) } } : {}),
+    generation_config: { max_output_tokens: Number(rumpf.max_tokens) || 8000 },
+    store: false,
+    stream: true,
+  };
+}
+
 export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiFortschritt = () => {}, roh: alsText = false, fortsetzung = null, berater = !OHNE_BERATER.has(schemaVon(rumpf)) }) {
   const anbieter = anbieterVon(schluessel) || 'anthropic';
   const gemini = anbieter === 'gemini';
+  // Gerade erst „kein Guthaben“ bei Anthropic: gleich an den Ersatz
+  const ersatz = () => {
+    const e = ersatzQuelle();
+    const g = !gemini && !fortsetzung && anbieterVon(e) === 'gemini' ? alsGemini(rumpf) : null;
+    return g ? () => kiAnfragen(g, { schluessel: e, signal, beiFortschritt, roh: alsText }) : null;
+  };
+  if (!gemini && leerBis > Date.now()) {
+    const weiter = ersatz();
+    if (weiter) return weiter();
+  }
   const fehler = (art, detail) => kiFehler(art, detail, anbieter);
   // Nach pause_turn: die angefangene Antwort unverändert anhängen, der Server macht dort weiter
   const vorher = fortsetzung || { bloecke: [], json: '', usage: { ein: 0, aus: 0 }, runde: 0 };
@@ -469,7 +531,17 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       OHNE_BERATER.add(schemaVon(rumpf));
       return kiAnfragen(rumpf, { schluessel, api, signal, beiFortschritt, roh: alsText, fortsetzung, berater: false });
     }
-    throw fehler(artVonStatus(res.status, info), text);
+    const art = artVonStatus(res.status, info);
+    // Kein Guthaben bei Anthropic: der Gemini-Schlüssel springt ein (und eine Stunde lang gleich)
+    if (!gemini && art === 'guthaben') {
+      const weiter = ersatz();
+      if (weiter) {
+        leerBis = Date.now() + ERSATZ_PAUSE;
+        try { beiErsatz(); } catch { /* nur eine Meldung */ }
+        return weiter();
+      }
+    }
+    throw fehler(art, text);
   }
   if (!res.body?.getReader) throw fehler('antwort', 'kein Datenstrom');
 

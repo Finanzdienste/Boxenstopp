@@ -40,13 +40,13 @@
 // Als erstes: Fehler mitschreiben (in Boxenstopp unter Einstellungen → Über die App, derselbe Speicher)
 import { sicher, fehlerMerken } from '../js/fehler.js';
 import { bildBasis, bildPfad } from '../js/bilder.js';
-import { kostenMeldenAn, KOSTEN_MELDEN } from '../js/ki.js';
+import { kostenMeldenAn, KOSTEN_MELDEN, kiErsatzAn } from '../js/ki.js';
 import { app, $, lese, melde } from '../js/kern.js';
 import { esc } from '../js/format.js';
 import { github, githubVergessen, pruefeSchluessel, privatLesen, API, DATEN } from '../js/speicher.js';
 import { ART_SACHEN, SACHEN_ORT, umzugAusListe } from '../js/sachen.js';
 import { hatInventar } from '../js/inventar.js';
-import { ladeZugang, speichereZugang, linkAusAdresse, kiAusAdresse, speichereKi, ladeKi, schluesselAus, linkExtras, kiAus, eigeneListe, einladungsLink, KI_DATEI, geteiltenKiUebernehmen } from '../js/zugang.js';
+import { ladeZugang, speichereZugang, linkAusAdresse, kiAusAdresse, speichereKi, ladeKi, schluesselAus, linkExtras, kiAus, eigeneListe, einladungsLink, KI_DATEI, geteiltenKiUebernehmen, geteiltenErsatzUebernehmen, ladeKiErsatz } from '../js/zugang.js';
 import { person, wessen } from '../js/profil.js';
 import { inventarHTML, inventarAktualisieren, klickInventar, eingabeInventar, aenderungInventar, tasteInventar, absendenInventar } from '../js/ansicht-inventar.js';
 
@@ -54,6 +54,8 @@ import { inventarHTML, inventarAktualisieren, klickInventar, eingabeInventar, ae
 bildBasis('../');
 // Kosten an „Frag mal“ melden – nur in der echten App, nicht in den Tests
 if (location.hostname === 'finanzdienste.github.io') kostenMeldenAn(KOSTEN_MELDEN);
+// Kein Guthaben bei Anthropic: der Gemini-Ersatz aus ki.json springt ein (wie in Boxenstopp)
+kiErsatzAn(ladeKiErsatz, { beiWechsel: () => melde('Claude-Guthaben leer – Gemini springt ein (eine Stunde lang).') });
 
 const apiBasis = () => lese('__api', null) || API;
 const takt = () => Number(lese('__takt', 0)) || 8000;
@@ -283,6 +285,7 @@ async function geteiltenKiHolen() {
   const k = await privatLesen(KI_DATEI, { token: z.token, api: apiBasis(), ort: DATEN });
   if (app.zugang !== z) return;
   app.kiGeteilt = k && typeof k === 'object' && !Array.isArray(k) ? k : null;
+  if (app.kiGeteilt) geteiltenErsatzUebernehmen(app.kiGeteilt);
   if (!app.kiGeteilt || !geteiltenKiUebernehmen(app.kiGeteilt)) return;
   const von = typeof app.kiGeteilt.von === 'string' && app.kiGeteilt.von.trim() ? ` von ${app.kiGeteilt.von.trim().slice(0, 30)}` : '';
   melde(`KI-Schlüssel${von} übernommen – die KI liest jetzt Fotos und Strichcodes.`);

@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme, fleischJeBox } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme, fleischJeBox, alsGemini, kiErsatzAn, ersatzZuruecksetzen } from '../js/ki.js';
 import { createHash } from 'node:crypto';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
@@ -366,6 +366,32 @@ const ohneStrom = `event: interaction.completed\r\ndata: ${JSON.stringify({ even
 check((await mitFetch(() => new Response(ohneStrom, { status: 200 }), () => kiAnfragen(rg, { schluessel: GKEY }))).eingabe.name === ANTWORT.name, 'kommt der Text erst am Ende in steps, wird er auch gelesen');
 const umzaeunt = await mitFetch(() => new Response(GEMINI_STROM(`\`\`\`json\n${JSON.stringify(ANTWORT)}\n\`\`\``), { status: 200 }), () => kiAnfragen(rg, { schluessel: GKEY }));
 check(umzaeunt.eingabe.name === ANTWORT.name, 'JSON in ```-Zaun wird trotzdem gelesen');
+
+// --- Ersatz, wenn das Claude-Guthaben leer ist: dieselbe Anfrage an Gemini
+const ag = alsGemini(rumpf);
+check(ag.model === ANBIETER.gemini.modell && ag.system_instruction === rumpf.system && ag.input.filter((x) => x.type === 'image').length === 2 && ag.input.at(-1).text === rumpf.messages[0].content.at(-1).text && ag.store === false && ag.stream === true, 'alsGemini: Systemtext, beide Fotos, der Text, nicht gespeichert, als Strom');
+check(!JSON.stringify(ag.response_format.schema).includes('additionalProperties') && ag.response_format.mime_type === 'application/json' && ag.generation_config.max_output_tokens === rumpf.max_tokens, 'alsGemini: das Schema (ohne additionalProperties), JSON, dieselbe Länge');
+check(alsGemini({ ...rumpf, tools: [{ type: 'web_search_20260209', name: 'web_search' }] }) === null, 'Mit Websuche gibt es keinen Ersatz (Gemini mit Google-Suche wird nicht benutzt)');
+const LEER = () => new Response(JSON.stringify({ error: { type: 'invalid_request_error', message: 'Your credit balance is too low to access the Anthropic API.' } }), { status: 400 });
+const wohin = [];
+const zweiWege = async (f) => {
+  globalThis.fetch = async (url, opt) => { wohin.push(String(url)); return /anthropic/.test(String(url)) ? LEER() : new Response(GEMINI_STROM(JSON.stringify(ANTWORT)), { status: 200 }); };
+  try { return await f(); } finally { globalThis.fetch = echtFetch; }
+};
+let gewechselt = 0;
+kiErsatzAn(() => GKEY, { beiWechsel: () => { gewechselt++; } });
+const ersetzt = await zweiWege(() => kiAnfragen(rumpf, { schluessel: 'sk-ant-test' }));
+check(ersetzt.eingabe.name === ANTWORT.name && ersetzt.anbieter === 'gemini' && wohin.length === 2 && /anthropic/.test(wohin[0]) && /googleapis/.test(wohin[1]) && gewechselt === 1, 'Kein Guthaben: Gemini springt ein – mit Meldung');
+wohin.length = 0;
+const gleich = await zweiWege(() => kiAnfragen(rumpf, { schluessel: 'sk-ant-test' }));
+check(gleich.anbieter === 'gemini' && wohin.length === 1 && /googleapis/.test(wohin[0]) && gewechselt === 1, 'Danach eine Stunde lang gleich Gemini – ohne erst Claude zu fragen');
+ersatzZuruecksetzen();
+kiErsatzAn(() => '');
+check(await fehlerArt(LEER) === 'guthaben' && /Gemini-Schlüssel als Ersatz/.test(KI_FEHLER.anthropic.guthaben), 'Ohne Ersatz: die Meldung „kein Guthaben“ – mit dem Tipp zum Ersatz');
+kiErsatzAn(() => 'sk-ant-noch-einer-test');
+check(await fehlerArt(LEER) === 'guthaben', 'Ein zweiter Anthropic-Schlüssel ist kein Ersatz');
+kiErsatzAn(() => '');
+ersatzZuruecksetzen();
 
 // --- in liste.json, für beide
 const behalten = anwenden(leer(), opKiBehalten('ki-abcd1234', k1, 'Amy'));
