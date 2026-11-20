@@ -27,6 +27,7 @@
  * Angebot höchstens so viel kostet), dazu der Preisverlauf der letzten Wochen.
  */
 import { app, $, melde, lese, schreibe, zeigeReiter } from './kern.js';
+import { gekauftVon, opKammerMenge, mengeKurz } from './speisekammer.js';
 import { lobKlein } from './lob.js';
 import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
@@ -472,13 +473,16 @@ function zeile([k, d]) {
   const von = fertig && d.by ? `<span class="item-by">abgehakt von ${d.by === app.name() ? 'dir' : esc(d.by)}</span>` : '';
   // In der Gruppe „Bei Aldi nicht bekommen“ sagt es schon die Überschrift
   const fehlt = !fertig && app.stand.fehlt?.[k] && !fehltHier(k) ? `<span class="item-fehlt">${app.stand.fehlt[k].laden ? `bei ${esc(app.stand.fehlt[k].laden)} nicht bekommen` : 'nicht bekommen'}</span>` : '';
+  // Schon zu Hause (Speisekammer)? Dann vielleicht gar nicht kaufen
+  const daheim = fertig ? null : app.stand.speisekammer?.[k];
+  const zuHause = daheim ? `<span class="item-da">zu Hause: ${esc(mengeKurz(daheim) || 'noch da')}</span>` : '';
   // Gerade im Angebot, und wo am günstigsten? Eigene Einträge über den Namen („Hähnchenbrust“)
   const angebot = fertig ? '' : angebotZeilen(angebotJe.get(d.custom ? schluesselRaten(d.name, app.katalog) : k));
   const auf = offenZeile === k;
   return `<li class="item${fertig ? ' is-done' : ''}${auf ? ' is-auf' : ''}">
 <button type="button" class="cb" role="checkbox" aria-checked="${fertig}" data-check="${esc(k)}" aria-label="${esc(d.name)}">${ic('check')}</button>
 ${zutatImg(d.custom ? '' : k, { name: d.name, cat: abteilungHier(k, d) })}
-<button type="button" class="item-main" data-mehr="${esc(k)}" aria-expanded="${auf}"${auf ? ' aria-controls="l-mehr"' : ''}><span class="item-name">${esc(d.name)}${d.wie ? ` <span class="item-wie">„${esc(d.wie)}“</span>` : ''}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${fehlt}${von}</button>
+<button type="button" class="item-main" data-mehr="${esc(k)}" aria-expanded="${auf}"${auf ? ' aria-controls="l-mehr"' : ''}><span class="item-name">${esc(d.name)}${d.wie ? ` <span class="item-wie">„${esc(d.wie)}“</span>` : ''}</span>${herkunft ? `<span class="item-sub">${herkunft}</span>` : ''}${fehlt}${zuHause}${von}</button>
 <span class="item-qty">${esc(mengeText)}${etwa ? `<small>${esc(etwa)}</small>` : ''}</span>
 <button type="button" class="x" data-del="${esc(k)}" aria-label="${esc(d.name)} löschen">${X}</button>
 ${angebot ? `<div class="l-angebote">${angebot}</div>` : ''}
@@ -801,7 +805,10 @@ export function klickListe(el) {
     const wirdFertig = !erledigt(e);
     const laden = app.ladenJetzt();
     if (laden) wegHaken(laden, d.check, e, wirdFertig);
-    app.aendern(opHaken(app.stand, d.check, wirdFertig, app.name()));
+    // Was gekauft ist, kommt in die Speisekammer (ganze Packungen) – der Haken zurück nimmt es wieder heraus
+    const wechseln = teileVon(e).filter(([, p]) => (p.done === true) !== wirdFertig).map(([rid]) => rid);
+    const posten = gekauftVon(d.check, e, teileVon(e).length ? wechseln : null, { preise: app.preise, katalog: app.katalog });
+    app.aendern([opHaken(app.stand, d.check, wirdFertig, app.name()), ...(posten.length ? [opKammerMenge(posten, wirdFertig ? 1 : -1, app.name())] : [])]);
     // Das letzte Häkchen auf der Liste (was es hier nicht gab, zählt nicht): ein Satz dafür – und der Weg durch den Laden ist gelernt.
     if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x) || fehltHier(k))) {
       lobKlein('einkauf');

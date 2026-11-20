@@ -354,8 +354,8 @@ function lokalUebernehmen(bisher) {
   if (!bisher || !app.zugang) return;
   const gemeinsam = !eigeneListe(app.zugang);
   const sachen = bisher && hatInventar(bisher.inventar) ? bisher.inventar : null;
-  const mehr = bisher ? { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege, gemeint: bisher.gemeint, notizbuch: bisher.notizbuch, essensplan: bisher.essensplan, vertraeglich: bisher.vertraeglich, wuensche: bisher.wuensche, ...(gemeinsam ? {} : { inventar: bisher.inventar }) } : {};
-  const hatWas = bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(bisher[k] || {}).length) || Object.keys(bisher.essensplan?.tage || {}).length || (!gemeinsam && !!sachen));
+  const mehr = bisher ? { amy: bisher.amy, amyTags: bisher.amyTags, abteilungen: bisher.abteilungen, gleich: bisher.gleich, ungleich: bisher.ungleich, wege: bisher.wege, gemeint: bisher.gemeint, notizbuch: bisher.notizbuch, essensplan: bisher.essensplan, vertraeglich: bisher.vertraeglich, wuensche: bisher.wuensche, speisekammer: bisher.speisekammer, ...(gemeinsam ? {} : { inventar: bisher.inventar }) } : {};
+  const hatWas = bisher && (Object.keys(bisher.items).length || Object.keys(bisher.ki).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche', 'speisekammer'].some((k) => Object.keys(bisher[k] || {}).length) || Object.keys(bisher.essensplan?.tage || {}).length || (!gemeinsam && !!sachen));
   if (hatWas) app.aendern(opZusammen(bisher.items, bisher.ki, mehr));
   if (gemeinsam && sachen) {
     // Erst auf dem Gerät merken (lokalLoeschen räumt gleich die Liste weg), dann umziehen, sobald die Liste gelesen ist –
@@ -597,7 +597,7 @@ async function start() {
     if (!eigeneListe(app.zugang)) sicher('Umzug der Sachen', loeschungenVormerken);
     nimmSpeicher(speicherFuer(app.zugang));
     // Hat die Sachen-App verbunden (gleicher Speicher), steht hier vielleicht noch eine lokale Liste – jetzt übernehmen
-    sicher('Lokale Liste', () => { const l = lokalerStand(); if (Object.keys(l.items || {}).length || Object.keys(l.ki || {}).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche'].some((k) => Object.keys(l[k] || {}).length) || Object.keys(l.essensplan?.tage || {}).length || hatInventar(l.inventar)) lokalUebernehmen(l); });
+    sicher('Lokale Liste', () => { const l = lokalerStand(); if (Object.keys(l.items || {}).length || Object.keys(l.ki || {}).length || ['amy', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche', 'speisekammer'].some((k) => Object.keys(l[k] || {}).length) || Object.keys(l.essensplan?.tage || {}).length || hatInventar(l.inventar)) lokalUebernehmen(l); });
   } else nimmSpeicher(lokal());
   sicher('Angebote (privat)', privateAngebote);
   sicher('Katalog', () => katalogLaden({ abgleich: true }));

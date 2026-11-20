@@ -22,7 +22,7 @@ Sechs Reiter (welche davon unten stehen und in welcher Reihenfolge, wählt jedes
 
 | Reiter | Inhalt |
 | --- | --- |
-| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben **Zwei auf einmal** (zwei Rezepte zusammen kochen – welche gut zusammen gehen, ein gemeinsamer Plan, siehe unten) und die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
+| **Rezepte** | 50 Rezepte als Boxen mit Kreppband und ehrlicher Gesamtzeit – auf das **Ziel pro Box** der Liste gerechnet (siehe unten), dazu **neue Rezepte nach Wunsch** im gemeinsamen Katalog („Kürbissuppe“ – die KI schreibt es, jede Liste bekommt es auf ihr Ziel und ihre Boxen gerechnet, siehe unten), daneben die **Speisekammer** (was zu Hause ist – füllt sich beim Einkaufen, leert sich beim Kochen, die KI kocht daraus, siehe unten), **Zwei auf einmal** (zwei Rezepte zusammen kochen – welche gut zusammen gehen, ein gemeinsamer Plan, siehe unten) und die **Speisekarte** (welches Gericht im Restaurant passt) – Suchfeld (Name, Zutat, Gericht), Filter (Hähnchen, Rind, Pute, Reis, Nudeln, Kartoffel & Co., Bulgur & Co., unter 1½ Std., auf der Liste), dazu **Preis** („Bis 2 €“ pro Box, mit der Zahl der Rezepte) und **Sortieren** (Empfohlen, Günstigste, Schnellste) – beides lässt sich mit jedem Filter kombinieren und bleibt auf dem Handy gemerkt. Im Rezept: Nährwerte pro Box gegen das Ziel, Zutaten mit Packungsgrößen und was davon übrig bleibt (siehe unten), **Zubereitung als Mise en place** (siehe unten), **Kochmodus** fürs iPad (ein Schritt groß, Bildschirm bleibt an – mit der **Waage** zählt er mit, siehe unten), „Bildschirm anlassen“, Portionsrechner (Topf leer/voll → Gramm pro Box), Aufbewahren, Tipps, die ganze Nährwertrechnung. **Daumen** hoch, zur Seite oder runter: einer pro Gericht für euch beide, mit Namen, wer zuletzt gedrückt hat; steht auch auf der Box, Filter „Daumen hoch“ |
 | **Einkaufsliste** | In Einkaufsreihenfolge: **Frisches** → **Tierisches** (erst Fleisch, dann Milchprodukte) → **Trockenes** (auch Konserven und TK) → **Gewürze** → **Extras** (Haushalt wie Backpapier oder Döschen, nur wenn nötig). Gleiche Zutaten aus mehreren Rezepten stehen in einer Zeile und werden addiert (Reis 280 g + 240 g = 520 g), mit Herkunft und Packungshinweis. Abhaken, eigene Einträge, löschen mit Rückgängig, Erledigtes weg, Frühstück für 7 Tage. **Eine Zeile antippen:** **Mehr davon** (Amy will zu den 250 g Sahne fürs Rezept noch 500 g für sich – steht als „Amy dazu 500 g“ in der Zeile, wird addiert und bleibt, wenn das Rezept von der Liste kommt; bei eigenen Einträgen einfach die Menge), in eine andere Abteilung verschieben („Nuggets“ gehört zu Fleisch) oder mit einer anderen Zeile zusammenlegen („leckere Dino nuggies“ ist dasselbe wie „Dino nuggets“), bei eigenen Einträgen **„Gemeint ist …“** („chicki nuggies“ sind Chicken Nuggets) – alles gemerkt, für beide und fürs nächste Mal; zwei Zeilen, die dasselbe sein könnten, schlägt die App über der Liste selbst vor (siehe unten). Im Laden: **„Bei Aldi nicht bekommen“** (bleibt für den nächsten Einkauf), **was es gekostet hat** (dann rechnen die Kosten mit euren Preisen) und ein **Preisalarm**. **„Ich kaufe bei Aldi“** über der Liste: Dann merkt sich das Handy, in welcher Reihenfolge abgehakt wird, und beim nächsten Einkauf dort steht die Liste nach Abteilungen in der Reihenfolge eures Wegs durch den Markt (siehe unten). **Liste kopieren** gibt alles Offene als Text aus, Bereich für Bereich („Frisches:“, „300 g Zwiebeln (≈ 3 Stück)“ …) – zum Einfügen in eine andere Einkaufsliste. Unten **„Bleibt übrig“**: was von den Packungen übrig bleibt und welche Rezepte es aufbrauchen (siehe Was übrig bleibt) |
 | **Amys Bereich** | Oben ein Schalter **Rezepte · Notizen · Verträglich · Vorschläge**, darunter der Knopf **„Sachen ist jetzt eine eigene App – öffnen“** (seit v83; in einer eigenen Liste „Marielles Bereich“, in ihrer Farbe: **Rezepte · Notizen · Verträglich · Sachen**, ohne Vorschläge und ohne den Knopf), rosa und verspielt. **Rezepte:** Amys eigene, mit ihren Tags zum Filtern und Sortieren; **Im Internet suchen** – sag, worauf du Lust hast, Claude findet bis zu drei passende Rezepte und füllt den Editor; **Rezept übernehmen** aus einem Foto, einem Link oder Text; ihre Zutaten kommen auf dieselbe gemeinsame Liste. **Notizen:** Blätter wie bei OneNote – je Thema eins, mit Farbe und Tags, für Ideen, die bleiben; der Essensplan zeigt sie beim Planen als Inspiration. **Verträglich:** was Amy verträgt, nur wenig oder gar nicht – die App sagt es an Rezepten, Zutaten und im Essensplan. **Sachen** (Amys in der eigenen App, siehe oben; in einer Gästeliste hier im Bereich): eigene Listen für Kleidung, Make-up und was sie will – je Sache Foto, Name, Marke, Tags, Notiz und Strichcode, sortieren und suchen; **Scannen** schlägt die Sache nach (Open Beauty Facts & Co., sonst Claude) und legt sie gleich an, mit Bild; „Hab ich das schon?“ per Scan (siehe unten). **Vorschläge:** was Tobi besser machen soll; er hakt ab und antwortet (siehe unten) |
 | **Essensplan** | Die nächsten Tage und Wochen: je Tag Mittag und Abend, wer isst mit, dazu **Kochtage** („Chili kochen, 8 Boxen“) mit **Boxen verteilen** auf die Tage danach – und mit einem Tipp **die Woche auf die Einkaufsliste** (siehe unten) |
@@ -1339,6 +1339,39 @@ ist. Geht um die Bewerbungs app“) – für Boxenstopp ändert sich nichts.
 Supabase-API (`BILDSCHIRMZEIT` in `tests/hilfe.mjs` lässt keinen Test an die
 echte) und mit erfundenen Kennungen – siehe „Tests“.
 
+## Speisekammer
+
+Seit v93 (Amy: „alles einmal einspeichern, und dann behält er die Sachen“):
+oben in Rezepte → **Speisekammer** (früher „Resteverwertung“) steht über dem
+Formular, was zu Hause ist – in `liste.json` unter `speisekammer`, für alle an
+der Liste (`js/speisekammer.js`, ohne DOM; Ansicht `js/ansicht-speisekammer.js`).
+Je Sache: Name, Menge (oder nur „ist da“), seit wann, „muss bald weg“.
+Damit sie niemand von Hand pflegen muss:
+
+- **Abhaken auf der Einkaufsliste** legt hinein, was gekauft wurde – ganze
+  Packungen, wie bei den Resten (125 g Hack gebraucht, 500 g gekauft); der
+  Haken zurück nimmt es wieder heraus. Haushaltssachen nicht.
+- **„Heute gekocht“** zieht ab, was das Rezept braucht (auch Öl und Gewürze);
+  was auf null geht, ist weg, was ohne Menge da ist, bleibt. Einmal am Tag.
+- **Von Hand:** tippen („500 g Hackfleisch, 6 Eier, 1 Packung Feta“ – gelesen
+  wie Amys Zutaten, in der Einheit der Rezepte: eine Packung Feta sind 150 g,
+  „Hackfleisch“ ist das Rinderhack aus dem Katalog), ein **Foto** von Regal
+  oder Kühlschrank (mit KI-Schlüssel: die KI liest Sorte und ungefähre Menge
+  ab, `js/kammer-ki.js`), die Menge antippen und ändern, ☆ „muss bald weg“,
+  ✓ „ist alle“ (mit Rückgängig).
+- **Muss bald weg** sind angetippte – und Frisches (Fleisch, Kühlregal,
+  Gemüse), das seit 4 Tagen da ist. Das steht oben, rot hinterlegt.
+- **Kochen damit:** Sachen antippen und „Rezept mit dem Angetippten“ – oder
+  nichts antippen und „Mach mir einfach was“. Die Resteverwertung schickt die
+  Speisekammer mit: „Unbedingt verwenden: …“ (angetippt), „Am besten
+  verwenden (muss bald weg): …“, „Außerdem in der Speisekammer: …“, dazu, was
+  im Feld steht. Danach ist nichts mehr angetippt.
+- **Auf der Einkaufsliste** steht bei einer offenen Zeile, was schon zu Hause
+  ist („zu Hause: 4 Stk“) – vielleicht muss es gar nicht mit.
+
+Im Commit steht nur „Speisekammer“, nie, was drin ist. Höchstens 300 Sachen.
+Ohne KI-Schlüssel geht alles außer dem Foto und dem Rezept.
+
 ## Resteverwertung
 
 Oben im Reiter Rezepte: aufschreiben oder fotografieren, was im Kühlschrank
@@ -2257,6 +2290,7 @@ die Action „Rezeptfotos“.
 | `js/ki.js` | Resteverwertung: Auftrag an die KI, Anfrage für Gemini oder Claude, Antwortstrom lesen, Fehler |
 | `js/ki-rezept.js` | Resteverwertung: Antwort prüfen, Mengen auf die Ziele rechnen, als Rezept der App – ohne DOM |
 | `js/ansicht-ki.js` | Resteverwertung: Formular, Fotos, Fortschritt, Leiste im Rezept, Behalten |
+| `js/speisekammer.js`, `js/kammer-ki.js`, `js/ansicht-speisekammer.js` | Speisekammer: Daten, Einkauf und Kochen, Getipptes und Fotos lesen, die Ansicht |
 | `js/ansicht-anpassen.js` | Rezept anpassen: Mengen, Zutaten tauschen, auf Ziel rechnen, als eigenes Rezept speichern |
 | `sw.js` | Offline-Betrieb; `VERSION` hochzählen, wenn sich eine Datei aus `SHELL` ändert. Lässt `sachen/` in Ruhe (seit v83). Ändert sich eine Datei, die die Sachen-App mitlädt (`js/…`, `css/styles.css`), zählen **beide** `VERSION` hoch – hier und in `sachen/sw.js` (dazu `tests/daten/sachen-fassung.json` nachziehen, `test-sachen.mjs` nennt die Werte); ohne neue `VERSION` bekommt kein Handy die Änderung in der Sachen-App, und sie zählt nur hoch |
 

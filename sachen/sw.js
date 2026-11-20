@@ -56,7 +56,7 @@
  * ../js/ ein Import dazu, gehört er auch hierher.
  */
 
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = `sachen-${VERSION}`;
 /** So lange wartet die App aufs Netz, dann nimmt sie den Vorrat (die Antwort kommt trotzdem noch hinein). */
 const GEDULD = 4000;
@@ -93,6 +93,8 @@ const SHELL = [
   '../js/ki.js',
   '../js/kosten.js',
   '../js/liste.js',
+  '../js/speisekammer.js',
+  '../js/reste.js',
   '../js/notizbuch.js',
   '../js/profil.js',
   '../js/sachen.js',

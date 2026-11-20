@@ -23,6 +23,7 @@ import { euro, kostenRezept } from './kosten.js';
 import { zutatImg, rezeptBildchen, bildPfad, fotoVon } from './bilder.js';
 import { opNotiz, opNotizWeg } from './liste.js';
 import { hatTeil, rezeptStand, einkaufsZutaten, opTeil, opTeilWeg, opGekocht, opBewerten, opAnpinnen, DAUMEN } from './liste.js';
+import { verbrauchtVon, opKammerMenge } from './speisekammer.js';
 import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
 import { hakenZaehlen, bleibtMerken, merkAufraeumen, abgelaufen, PIN_TAGE } from './anpinnen.js';
 import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
@@ -913,7 +914,10 @@ export function klickRezepte(el) {
       const rid = aktuell;
       // Fertig gekocht: läuft nicht mehr – raus aus „Läuft gerade“
       const gepinnt = !!app.stand.gepinnt?.[rid];
-      app.aendern([opGekocht(rid, heute(), app.name()), ...(gepinnt ? [opAnpinnen(rid, false, app.name())] : [])]);
+      // Was das Rezept braucht, ist aus der Speisekammer raus – nur einmal am Tag (zweimal drücken zieht nicht doppelt ab)
+      const schonHeute = app.stand.cooked?.[rid]?.at === heute();
+      const verbraucht = schonHeute ? [] : verbrauchtVon(app.nachId[rid], app.katalog).filter((p) => app.stand.speisekammer?.[p.k]);
+      app.aendern([opGekocht(rid, heute(), app.name()), ...(gepinnt ? [opAnpinnen(rid, false, app.name())] : []), ...(verbraucht.length ? [opKammerMenge(verbraucht, -1, app.name())] : [])]);
       lobGross({ rezept: app.nachId[rid], name: app.name(), grund: 'gekocht' }).then((da) => {
         if (gepinnt) entpinntMelden(rid, 'Heute gekocht');
         else if (!da) melde('Eingetragen: heute gekocht');

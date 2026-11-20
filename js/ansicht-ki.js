@@ -10,7 +10,9 @@
  * Vorschlag wie bei der Resteverwertung.
  *
  *   1. #reste zeigt das Formular: Text, Fotos, Portionen, Dazukaufen,
- *      Wünsche. Ohne KI-Schlüssel zuerst das Einrichten.
+ *      Wünsche. Ohne KI-Schlüssel zuerst das Einrichten. Darüber die
+ *      Speisekammer (ansicht-speisekammer.js): was zu Hause ist, geht mit –
+ *      angetippt als „unbedingt verwenden“.
  *   2. „Rezept machen“ schickt alles an Gemini oder Claude (ki.js) und zeigt, wie weit
  *      die Antwort ist. Abbrechen geht jederzeit.
  *   3. Die Antwort wird geprüft und gerechnet (ki-rezept.js) und als
@@ -34,6 +36,7 @@ import { oeffneRezept, schliesseRezept, offenesRezept, rasterZeichnen, ic } from
 import { fuerWen, linkFuerGeraet, istEigen } from './profil.js';
 import { hatEigenesZiel } from './ansicht-ziel.js';
 import { fotoVorbereiten } from './foto.js';
+import { kammerHTML, kammerFuerKi, kammerLeer, wahlZuruecksetzen, klickKammer, eingabeKammer, aenderungKammer, absendenKammer } from './ansicht-speisekammer.js';
 
 const EINGABE = 'boxenstopp.ki.eingabe.v1';
 const ENTWURF = 'boxenstopp.ki.entwurf.v1';
@@ -227,7 +230,7 @@ function formularHTML() {
   if (istWunsch()) return wunschHTML();
   const voll = fotos.length >= MAX_FOTOS;
   return `<form class="ki-form" id="k-form" novalidate>
-<label for="k-text">${eingabe.modus === 'angebote' ? 'Im Angebot' : 'Im Kühlschrank und Vorrat'}</label>
+<label for="k-text">${eingabe.modus === 'angebote' ? 'Im Angebot' : kammerLeer() ? 'Im Kühlschrank und Vorrat' : 'Sonst noch da <small>optional – die Speisekammer geht mit</small>'}</label>
 <textarea id="k-text" rows="5" maxlength="2000" placeholder="${eingabe.modus === 'angebote' ? 'z. B. Aldi: Hähnchenbrustfilet 1 kg 7,49 €; Paprika 500 g 1,29 €' : 'z. B. 500 g Hähnchenbrust, 1 Zucchini, halbe Packung Basmati, Feta, 3 Eier, Frühlingszwiebeln, Kokosmilch'}">${esc(eingabe.text)}</textarea>
 <div class="k-fotos">
 <label class="btn${voll ? ' is-aus' : ''}" for="k-kamera">${KAMERA}Foto machen</label><input class="vh" id="k-kamera" type="file" accept="image/*" capture="environment"${voll ? ' disabled' : ''}>
@@ -307,13 +310,17 @@ export function resteZeichnen() {
 <div class="d-head"><span class="tape">Angebote</span><h1 id="k-titel">Rezept aus den Angeboten</h1>
 <p class="d-desc">Die KI macht aus den Angeboten der Woche ein Rezept für ${istEigen() ? 'deine' : 'eure'} Boxen, und die App rechnet die Mengen auf ${ziele}. <button type="button" class="linkbtn" data-act="k-modus-reste">Lieber Resteverwertung</button></p></div>`
     : `<button type="button" class="back" data-act="reste-zu">${ic('back')}Alle Rezepte</button>
-<div class="d-head"><span class="tape">Resteverwertung</span><h1 id="k-titel">Was ist noch da?</h1>
-<p class="d-desc">Schreib auf oder fotografier, was im Kühlschrank und im Vorrat liegt. Die KI macht daraus ein Rezept für ${istEigen() ? 'deine' : 'eure'} Boxen, und die App rechnet die Mengen auf ${ziele}.</p></div>`;
+<div class="d-head"><span class="tape">Speisekammer</span><h1 id="k-titel">Was ist noch da?</h1>
+<p class="d-desc">Die Speisekammer merkt sich, was zu Hause ist. Die KI macht daraus ein Rezept für ${istEigen() ? 'deine' : 'eure'} Boxen – mit dem, was du antippst, oder einfach mit allem –, und die App rechnet die Mengen auf ${ziele}.</p></div>`;
   let rumpf;
   if (!schluessel || einrichten) rumpf = einrichtenHTML(schluessel);
   else if (lauf) rumpf = laufHTML();
   else rumpf = `${formularHTML()}${gemerktHTML()}`;
-  el.innerHTML = kopf + rumpf;
+  // Die Speisekammer geht auch ohne KI-Schlüssel (tippen, abhaken, kochen) – nur nicht, während die KI kocht
+  const kammer = eingabe.modus === 'reste' && !istWunsch() && !lauf ? kammerHTML() : '';
+  const fokus = document.activeElement?.id;
+  el.innerHTML = kopf + kammer + rumpf;
+  if (fokus === 'kammer-neu' || fokus === 'kammer-menge') $(`#${fokus}`)?.focus({ preventScroll: true });
 }
 
 /* ------------------------------------------------------- Fotos */
@@ -354,8 +361,10 @@ async function rezeptMachen() {
   const schluessel = ladeKi();
   if (!schluessel) { einrichten = true; resteZeichnen(); return; }
   if (lauf) return;
-  const text = eingabe.text.trim();
   const wunsch = istWunsch();
+  // Resteverwertung: was in der Speisekammer ist, geht mit (angetippt zuerst)
+  const ausKammer = !wunsch && eingabe.modus === 'reste' ? kammerFuerKi() : '';
+  const text = [eingabe.text.trim(), ausKammer].filter(Boolean).join('\n\n');
   if (!text && (wunsch || !fotos.length)) {
     fehler = wunsch ? 'Schreib, was du kochen möchtest – ein Wort reicht.' : eingabe.modus === 'angebote' ? 'Es stehen keine Angebote drin.' : 'Schreib auf, was da ist, oder mach ein Foto.';
     resteZeichnen();
@@ -420,6 +429,7 @@ async function rezeptMachen() {
     const id = `ki-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     entwurf = { id, r: mengenAnpassen(r, app.ziel), von: { by: app.name() || null, at: new Date().toISOString(), modus: eingabe.modus } };
     entwurfMerken();
+    if (ausKammer) wahlZuruecksetzen();
     kiAbgleichen();
     fertig();
     oeffneRezept(id);
@@ -447,6 +457,7 @@ function linkKopieren() {
 
 /** true, wenn der Klick hierher gehörte. */
 export function klickKi(el) {
+  if (klickKammer(el)) return true;
   const d = el.dataset;
   if (d.portionen) {
     eingabe.portionen = Number(d.portionen);
@@ -512,12 +523,14 @@ export function klickKi(el) {
 }
 
 export function eingabeKi(t) {
+  if (eingabeKammer(t)) return true;
   if (t.id === 'k-text') { eingabe.text = t.value.slice(0, 2000); eingabeMerken(); if (fehler) { fehler = null; const f = $('#k-fehler'); if (f) f.hidden = true; } return true; }
   if (t.id === 'k-wunsch') { eingabe.wuensche = t.value.slice(0, 200); eingabeMerken(); return true; }
   return false;
 }
 
 export function aenderungKi(t) {
+  if (aenderungKammer(t)) return true;
   if (t.id === 'k-kaufen') { eingabe.dazukaufen = t.checked; eingabeMerken(); return true; }
   if (t.id === 'k-kamera' || t.id === 'k-bilder') {
     const dateien = [...(t.files || [])];
@@ -529,6 +542,7 @@ export function aenderungKi(t) {
 }
 
 export function absendenKi(ev) {
+  if (absendenKammer(ev)) return true;
   if (ev.target.id === 'k-form') {
     ev.preventDefault();
     rezeptMachen();

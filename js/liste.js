@@ -28,6 +28,7 @@
  *     vertraeglich: { amy: { <Schlüssel>: { name, stufe, notiz, by, at } } },   was jemand verträgt (vertraeglich.js)
  *     wuensche:  { <w-…>: { id, text, by, at, erledigt, antwort } },   Amys Vorschläge für Tobi (wuensche.js)
  *     amyWerte:  { <amy-…>: { at, z: { <Zeile>: { g, kcal, p, kh, f, eur } } } },   was die KI für Amys unbekannte Zutaten geschätzt hat (amy-werte.js)
+ *     speisekammer: { <Schlüssel>: { k, name, cat, q, u, bald, at, geaendert, by } },   was zu Hause da ist (speisekammer.js)
  *     inventar:  { listen: { <sl-…>: … }, dinge: { <sd-…>: … } } }   Sachen in eigenen Listen (inventar.js) – nur in der eigenen Liste
  *                eines Gasts; Amys Sachen liegen seit v83 in sachen.json (sachen.js), was hier noch steht, zieht dorthin um
  *
@@ -95,9 +96,10 @@ import { inventarBereinigen, inventarAnwenden, inventarZusammen, leerInventar } 
 import { essensplanBereinigen, essensplanAnwenden, essensplanZusammen } from './essensplan.js';
 import { vertraeglichBereinigen, vertraeglichAnwenden, vertraeglichZusammen } from './vertraeglich.js';
 import { wuenscheBereinigen, wuenscheAnwenden, wuenscheZusammen } from './wuensche.js';
+import { speisekammerBereinigen, kammerAnwenden, kammerZusammen } from './speisekammer.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {}, amyWerte: {}, inventar: leerInventar() });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {}, amyWerte: {}, inventar: leerInventar(), speisekammer: {} });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
 const MAX_BONS = 200;
@@ -332,6 +334,7 @@ export function beschreibung(vorher, nachher, name = () => '') {
   if (JSON.stringify(v.inventar || {}) !== JSON.stringify(n.inventar || {})) teile.push('Sachen');
   if (JSON.stringify(v.essensplan || {}) !== JSON.stringify(n.essensplan || {})) teile.push('Essensplan');
   if (JSON.stringify(v.vertraeglich || {}) !== JSON.stringify(n.vertraeglich || {})) teile.push('Verträglichkeit');
+  if (JSON.stringify(v.speisekammer || {}) !== JSON.stringify(n.speisekammer || {})) teile.push('Speisekammer');
   const wNeu = Object.keys(n.wuensche || {}).filter((id) => !v.wuensche?.[id]).length;
   const wFertig = Object.values(n.wuensche || {}).filter((w) => w.erledigt && !v.wuensche?.[w.id]?.erledigt).length;
   if (wNeu) teile.push(wNeu === 1 ? 'ein neuer Vorschlag' : `${wNeu} neue Vorschläge`);
@@ -519,6 +522,7 @@ export function bereinigen(roh) {
   s.wuensche = wuenscheBereinigen(roh.wuensche);
   s.amyWerte = amyWerteBereinigen(roh.amyWerte, s.amy);
   s.inventar = inventarBereinigen(roh.inventar);
+  s.speisekammer = speisekammerBereinigen(roh.speisekammer);
   return s;
 }
 
@@ -823,14 +827,14 @@ export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || 
  * Einträge und behaltene KI-Rezepte von einem anderen Stand dazunehmen, ohne
  * Vorhandenes zu überschreiben – dazu, was sonst noch fehlt:
  * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich, kochen, fehlt, bons, preisalarm,
- * haushalt, leute, profil, gemeint, notizbuch, essensplan, vertraeglich, wuensche, amyWerte, inventar }.
+ * haushalt, leute, profil, gemeint, notizbuch, essensplan, vertraeglich, wuensche, amyWerte, inventar, speisekammer }.
  */
 export const opZusammen = (items, ki = {}, mehr = {}) => ({
   typ: 'zusammen', items: klon(items), ki: klon(ki || {}),
   amy: klon(mehr.amy || {}), amyTags: klon(mehr.amyTags || {}), wege: klon(mehr.wege || {}), abteilungen: klon(mehr.abteilungen || {}), gleich: klon(mehr.gleich || {}), ungleich: klon(mehr.ungleich || []), kochen: klon(mehr.kochen || {}),
   fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}), profil: klon(mehr.profil || {}),
   gemeint: klon(mehr.gemeint || {}), notizbuch: klon(mehr.notizbuch || {}), essensplan: klon(mehr.essensplan || {}), vertraeglich: klon(mehr.vertraeglich || {}), wuensche: klon(mehr.wuensche || {}),
-  amyWerte: klon(mehr.amyWerte || {}), inventar: klon(mehr.inventar || {}),
+  amyWerte: klon(mehr.amyWerte || {}), inventar: klon(mehr.inventar || {}), speisekammer: klon(mehr.speisekammer || {}),
 });
 /**
  * Eine ältere App-Fassung kennt Material und „jedes 2. Mal“ der Putztage
@@ -1236,6 +1240,7 @@ function aendere(s, op) {
       if (istObj(op.essensplan)) essensplanZusammen(s, op.essensplan);
       if (istObj(op.vertraeglich)) vertraeglichZusammen(s, op.vertraeglich);
       if (istObj(op.wuensche)) wuenscheZusammen(s, op.wuensche);
+      if (istObj(op.speisekammer)) kammerZusammen(s, op.speisekammer);
       if (istObj(op.amyWerte)) {
         // Schätzungen, die hier fehlen (eine ältere Fassung hat sie weggelassen), kommen dazu
         if (!istObj(s.amyWerte)) s.amyWerte = {};
@@ -1484,6 +1489,11 @@ function aendere(s, op) {
     case 'wunschAntwort':
     case 'wunschWeg':
       wuenscheAnwenden(s, op);
+      return;
+    case 'kammer':
+    case 'kammerWeg':
+    case 'kammerMenge':
+      kammerAnwenden(s, op);
       return;
     default:
   }
