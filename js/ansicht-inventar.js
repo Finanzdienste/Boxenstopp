@@ -48,7 +48,8 @@ import { bildPfad, INVENTAR_BILDER } from './bilder.js';
 import { tagsBereinigen, tagFarbe, MAX_TAGS } from './amy.js';
 import { dateiHochladen, dateiHolen, dateiLoeschen } from './speicher.js';
 import { ortVon, ladeKi } from './zugang.js';
-import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
+import { kiAnfragen, anbieterVon, ersatzSchluessel } from './ki.js';
+import { mitWebsuche } from './web.js';
 import { fotoVorbereiten } from './foto.js';
 import { jsonAus } from './amy-import.js';
 import { rumpfErkennen, erkanntBereinigen } from './inventar-ki.js';
@@ -797,16 +798,18 @@ async function nachschlagenFuer(id, { vorher = null, gefragt = false, alles = fa
       try { t = await nachschlagen(code); } catch { fehler = 'Nachschlagen ging gerade nicht – ohne Netz?'; }
     }
     const schluessel = ladeKi();
-    if ((!t || alles) && anbieterVon(schluessel) === 'anthropic') {
+    if ((!t || alles) && (anbieterVon(schluessel) === 'anthropic' || anbieterVon(schluessel) === 'gemini' || ersatzSchluessel())) {
       laeuft.set(id, 'suche');
       fotoTeilNeu(id);
       const listen = listenVon(inv()).map((l) => ({ id: l.id, name: listenName(l) }));
       try {
-        const a = await kiMitWerkzeugen(rumpfNachschlagen({ code, listen: listen.map((l) => l.name) }), { schluessel, berater: false });
+        // Mit Claude sucht Claude; sonst Tavily (rezept-web) und Gemini (web.js)
+        const a = await mitWebsuche(rumpfNachschlagen({ code, listen: listen.map((l) => l.name) }), { schluessel, berater: false, suche: { q: code, max: 5, seiten: true } });
         t = zusammen(t, gesuchtBereinigen(jsonAus(a.text), { quellen: a.quellen, listen }));
         fehler = '';
       } catch (e) {
-        if (!t) fehler = e?.message || 'Die Suche im Internet hat nicht geklappt.';
+        // Geht nur die Suche ohne Claude nicht (rezept-web): dann eben nichts gefunden
+        if (!t && e?.art !== 'web') fehler = e?.message || 'Die Suche im Internet hat nicht geklappt.';
       }
     }
   } finally {

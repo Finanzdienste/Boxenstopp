@@ -11,6 +11,7 @@ import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID
 import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme, fleischJeBox, alsGemini, kiErsatzAn, ersatzZuruecksetzen } from '../js/ki.js';
 import { createHash } from 'node:crypto';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
+import { mitWebsuche, REZEPT_WEB, trefferText } from '../js/web.js';
 import { bereinigen, anwenden, leer, opKiBehalten, opKiWeg, opZusammen } from '../js/liste.js';
 import { zeitVon } from '../js/zeiten.js';
 import { euro, kostenMenge, kostenRezept, kostenListe } from '../js/kosten.js';
@@ -392,6 +393,47 @@ kiErsatzAn(() => 'sk-ant-noch-einer-test');
 check(await fehlerArt(LEER) === 'guthaben', 'Ein zweiter Anthropic-Schlüssel ist kein Ersatz');
 kiErsatzAn(() => '');
 ersatzZuruecksetzen();
+
+// --- Suchen ohne Claude: Tavily (rezept-web) und Gemini schreibt aus den Treffern (web.js)
+{
+  const rs = { model: 'claude-opus-5-5', max_tokens: 4000, system: 'Suche Rezepte.', tools: [{ type: 'web_search_20250305', name: 'web_search' }], messages: [{ role: 'user', content: [{ type: 'text', text: 'Amys Wunsch: Pasta' }] }] };
+  const TR = [{ titel: 'Pasta – Chefkoch', url: 'https://www.chefkoch.de/p', text: '500 g Nudeln' }];
+  const wege = [];
+  let geminiRumpf = null;
+  let webRumpf = null;
+  const netz = async (url, opt) => {
+    const u = String(url);
+    wege.push(u);
+    if (/anthropic/.test(u)) return LEER();
+    if (u === REZEPT_WEB) { webRumpf = { kopf: opt.headers, e: JSON.parse(opt.body) }; return new Response(JSON.stringify({ ergebnisse: TR }), { status: 200 }); }
+    geminiRumpf = JSON.parse(opt.body);
+    return new Response(GEMINI_STROM(JSON.stringify({ rezepte: [], fehler: '' })), { status: 200 });
+  };
+  globalThis.fetch = netz;
+  let meldung = 0;
+  kiErsatzAn(() => GKEY, { beiWechsel: () => { meldung++; } });
+  try {
+    const a = await mitWebsuche(rs, { schluessel: 'sk-ant-test', suche: { q: 'Pasta Rezept', max: 4 } });
+    check(a.anbieter === 'gemini' && a.quellen[0].url === TR[0].url && /anthropic/.test(wege[0]) && wege[1] === REZEPT_WEB && /googleapis/.test(wege[2]) && meldung === 1, 'Claude ohne Guthaben: Tavily sucht, Gemini schreibt – mit Meldung, die Quellen aus der Suche');
+    check(webRumpf.e.q === 'Pasta Rezept' && webRumpf.e.max === 4 && webRumpf.e.seiten === true && /^[0-9a-f]{64}$/.test(webRumpf.kopf['x-schluessel-hash']) && !JSON.stringify(webRumpf).includes('sk-ant-test'), 'an rezept-web: die Suche und die Prüfsumme – nie der Schlüssel');
+    check(!geminiRumpf.tools && geminiRumpf.input.at(-1).text === `Treffer der Suche nach „Pasta Rezept“:\n\n${trefferText(TR)}` && geminiRumpf.system_instruction.startsWith('Suche Rezepte.') && geminiRumpf.system_instruction.includes('nicht selbst im Internet suchen'), 'an Gemini: ohne Werkzeuge, die Treffer als Text, „du kannst nicht selbst suchen“');
+    wege.length = 0;
+    await mitWebsuche(rs, { schluessel: 'sk-ant-test', suche: { q: 'Pasta Rezept' } });
+    check(!wege.some((u) => /anthropic/.test(u)) && meldung === 1, 'danach eine Stunde lang gleich so – ohne Claude zu fragen');
+    ersatzZuruecksetzen();
+    kiErsatzAn(() => '');
+    let art = '';
+    try { await mitWebsuche(rs, { schluessel: 'sk-ant-test', suche: { q: 'x' } }); } catch (e) { art = e.art; }
+    check(art === 'guthaben', 'ohne Ersatz: „kein Guthaben“ wie bisher');
+    wege.length = 0;
+    const g = await mitWebsuche(rs, { schluessel: GKEY, suche: { q: 'Pasta Rezept' } });
+    check(g.anbieter === 'gemini' && !wege.some((u) => /anthropic/.test(u)), 'mit dem Google-Schlüssel: gleich Tavily und Gemini');
+  } finally {
+    globalThis.fetch = echtFetch;
+    kiErsatzAn(() => '');
+    ersatzZuruecksetzen();
+  }
+}
 
 // --- in liste.json, für beide
 const behalten = anwenden(leer(), opKiBehalten('ki-abcd1234', k1, 'Amy'));

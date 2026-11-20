@@ -141,6 +141,20 @@ const amy = await handy(browser, { attrappe: gh, adresse: `${APP_URL}#zugang=${e
 const p = amy.page;
 await amy.ctx.route('https://generativelanguage.googleapis.com/**', kiRoute);
 await amy.ctx.route('https://api.anthropic.com/**', claudeRoute);
+// Die Funktion rezept-web (Repo Amy): Seiten lesen und suchen – hier nachgebaut; was nicht vorbereitet ist, geht nicht (502)
+const web = { anfragen: [], seiten: {}, ergebnisse: [] };
+await amy.ctx.route('https://vjyohppohmvhhxgwouti.supabase.co/functions/v1/rezept-web', async (r) => {
+  const req = r.request();
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, OPTIONS' };
+  if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  const e = JSON.parse(req.postData() || '{}');
+  web.anfragen.push({ kopf: req.headers(), e });
+  if (e.art === 'suche') return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ ergebnisse: web.ergebnisse }) });
+  const x = web.seiten[e.seite];
+  if (!x) return r.fulfill({ status: 502, headers: cors, body: 'Ging nicht.' });
+  if (x.status) return r.fulfill({ status: x.status, headers: cors, body: 'nein' });
+  return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(x) });
+});
 await p.fill('#z-name', 'Amy');
 await p.click('#z-los');
 check(await bis(async () => (await p.locator('#sync-text').innerText()) === 'Geteilt'), 'Amy: eingerichtet');
@@ -171,7 +185,35 @@ await p.fill('#amy-import-text', CK);
 await uebernehmen();
 check(await bis(async () => (await feld('amy-name')) === 'Shakshuka nach Chefkoch'), 'Link übernommen');
 const a2 = ki.anfragen.at(-1);
-check(JSON.stringify(a2.rumpf.tools) === JSON.stringify([{ type: 'url_context' }]) && !a2.rumpf.response_format && a2.rumpf.input.at(-1).text === `Das Rezept steht hier: ${CK}`, 'die Anfrage: der Link, Gemini liest die Seite (url_context)');
+check(JSON.stringify(a2.rumpf.tools) === JSON.stringify([{ type: 'url_context' }]) && !a2.rumpf.response_format && a2.rumpf.input.at(-1).text === `Das Rezept steht hier: ${CK}`, 'die Funktion ging nicht: Gemini liest die Seite selbst (url_context)');
+check(web.anfragen.at(-1)?.e.seite === CK && /^[0-9a-f]{64}$/.test(web.anfragen.at(-1).kopf['x-schluessel-hash']) && !JSON.stringify(web.anfragen.at(-1)).includes(GKEY), 'erst wurde rezept-web gefragt – mit der Prüfsumme, nie dem Schlüssel');
+
+// Link mit dem Rezept in den Angaben der Seite (JSON-LD): ganz ohne KI
+const LINK2 = 'https://www.lecker.de/kuerbis-curry-123.html';
+web.seiten[LINK2] = { url: LINK2, titel: 'Kürbiscurry', text: '…', rezept: { name: 'Kürbiscurry von Lecker', zutaten: ['500 g Hokkaido', '1 Dose Kokosmilch'], schritte: ['Kürbis würfeln.', '20 Min. köcheln.'], portionen: 3, minuten: 40, bild: '' } };
+const kiVorher = ki.anfragen.length;
+await p.click('#view-amy details.amy-import summary');
+await p.fill('#amy-import-text', LINK2);
+await uebernehmen();
+check(await bis(async () => (await feld('amy-name')) === 'Kürbiscurry von Lecker'), 'Link mit Rezept-Angaben: übernommen');
+check((await feld('amy-zutaten')) === '500 g Hokkaido\n1 Dose Kokosmilch' && (await feld('amy-portionen')) === '3' && (await feld('amy-zeit')) === '40' && (await feld('amy-notiz')) === `Quelle: ${LINK2}` && ki.anfragen.length === kiVorher, 'Zutaten, Portionen, Zeit, die Quelle – und keine Anfrage an die KI');
+// Eine Seite ohne Angaben: ihr Text an die KI
+const LINK3 = 'https://blog.example/omas-eintopf';
+web.seiten[LINK3] = { url: LINK3, titel: 'Omas Eintopf', text: 'Omas Eintopf. 3 Kartoffeln, 2 Möhren. Alles kochen.', rezept: null };
+ki.antwort = JSON.stringify({ ...R, name: 'Omas Eintopf' });
+await p.click('#view-amy details.amy-import summary');
+await p.fill('#amy-import-text', LINK3);
+await uebernehmen();
+check(await bis(async () => (await feld('amy-name')) === 'Omas Eintopf') && ki.anfragen.at(-1).rumpf.input.at(-1).text.includes('3 Kartoffeln, 2 Möhren') && !ki.anfragen.at(-1).rumpf.tools, 'ohne Angaben: der Text der Seite geht an Gemini (ohne dass Gemini selbst liest)');
+// robots.txt verbietet es: nichts holen, sagen warum
+const LINK4 = 'https://zu.example/rezept';
+web.seiten[LINK4] = { status: 451 };
+await p.click('#view-amy details.amy-import summary');
+await p.fill('#amy-import-text', LINK4);
+await uebernehmen();
+check(await bis(async () => (await p.locator('#amy-import-inhalt .zugang-fehler').innerText().catch(() => '')).includes('nicht von Programmen gelesen')), 'robots.txt verbietet die Seite: „möchte nicht von Programmen gelesen werden“');
+await p.fill('#amy-import-text', '');
+await p.click('#view-amy details.amy-import summary'); // zu – das Foto macht es gleich wieder auf
 
 // Foto
 ki.antwort = JSON.stringify({ ...R, name: 'Omas Shakshuka' });
@@ -298,12 +340,20 @@ await p.click('#amy-suche-inhalt [data-act="amy-suche-los"]');
 check(await bis(async () => (await p.locator('#amy-suche-inhalt [data-act="amy-suche-stopp"]').count()) === 1), 'während der Suche: Abbrechen');
 await p.click('#amy-suche-inhalt [data-act="amy-suche-stopp"]');
 check(await bis(async () => (await p.locator('#amy-suche-inhalt [data-act="amy-suche-los"]').count()) === 1) && await p.locator('#amy-suche-inhalt .zugang-fehler').count() === 0 && await p.locator('#amy-suche-inhalt .amy-treffer-k').count() === 0, 'abgebrochen: ohne Fehler, ohne Treffer');
-// Mit Googles Schlüssel: der Hinweis statt der Suche
+// Mit Googles Schlüssel: Tavily sucht (rezept-web), Gemini schreibt aus den Treffern
 await schluessel(GKEY);
 await p.locator('#view-amy [data-act="amy-abbrechen"]').first().click();
 await p.click('#view-amy [data-act="amy-neu"]');
 await p.click('#view-amy details.amy-suche summary');
-check((await p.locator('#amy-suche-inhalt').innerText()).includes('mit dem Claude-Schlüssel') && await p.locator('#amy-suche-text').count() === 0, 'Google-Schlüssel: „Im Internet sucht die App mit dem Claude-Schlüssel“');
+web.ergebnisse = TREFFER.slice(0, 2).map((t) => ({ titel: t.name, url: t.url, text: t.zutaten.join(', ') }));
+ki.antwort = JSON.stringify({ rezepte: TREFFER, fehler: '' });
+const kiVorSuche = ki.anfragen.length;
+await p.fill('#amy-suche-text', 'Kürbissuppe');
+await p.click('#amy-suche-inhalt [data-act="amy-suche-los"]');
+check(await bis(async () => (await p.locator('#amy-suche-inhalt .amy-treffer-k').count()) === 2), 'Google-Schlüssel: die Suche geht – zwei Treffer, der ausgedachte bleibt weg');
+const ws = web.anfragen.filter((x) => x.e.art === 'suche').at(-1)?.e;
+const gs = ki.anfragen.slice(kiVorSuche).at(-1)?.rumpf;
+check(ws?.q === 'Kürbissuppe Rezept' && ws.seiten === true && gs && !gs.tools && gs.input.at(-1).text.includes('Treffer der Suche nach „Kürbissuppe Rezept“') && gs.input.at(-1).text.includes(TREFFER[0].url) && gs.system_instruction.includes('nicht selbst im Internet suchen'), 'gesucht hat Tavily, Gemini bekommt die Treffer – und sucht nicht selbst');
 
 check(amy.fehler.length === 0, `keine Fehler in der Konsole${amy.fehler.length ? `: ${amy.fehler.slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();

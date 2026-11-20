@@ -17,11 +17,12 @@
  */
 import { app, $, melde, lese, schreibe } from './kern.js';
 import { esc, nfi } from './format.js';
-import { rumpfKarte, karteBereinigen, sortieren, ART_NAME, ENTHAELT_NAME, rumpfVeranstaltung, veranstaltungBereinigen, tagText, quellenVon, wikiTitel, wikiAdresse, wikiBilderAus, symbolFuer, hostVon } from './speisekarte.js';
-import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
+import { rumpfKarte, karteBereinigen, sortieren, ART_NAME, ENTHAELT_NAME, rumpfVeranstaltung, veranstaltungBereinigen, VERANSTALTUNG_SCHEMA, tagText, quellenVon, wikiTitel, wikiAdresse, wikiBilderAus, symbolFuer, hostVon } from './speisekarte.js';
+import { kiAnfragen, anbieterVon } from './ki.js';
 import { shopBild, KENNUNG } from './inventar-netz.js';
 import { bildPfad } from './bilder.js';
 import { jsonAus, linkAus } from './amy-import.js';
+import { mitWebsuche } from './web.js';
 import { ladeKi } from './zugang.js';
 import { fotoVorbereiten, blobZuB64, oeffneEinrichten } from './ansicht-ki.js';
 import { offenesRezept, schliesseRezept, rasterZeichnen, ic } from './ansicht-rezepte.js';
@@ -202,7 +203,7 @@ function vaFormularHTML() {
 <button type="submit" class="btn btn-primary k-los" id="sk-va-los">Nachsehen, was es gibt</button>
 <p class="fine">${claude
     ? 'Claude sucht die Veranstaltung im Netz – Stände, Essen, Preise – und schätzt, was nicht dasteht. Dauert etwa eine Minute.'
-    : 'Mit Gemini sucht die App nicht im Netz (Ergebnisse der Google-Suche dürfen nicht gespeichert werden) – sie schätzt, was es dort meistens gibt. Mit einem Schlüssel von Anthropic sucht Claude.'} Gemerkt wird das Ergebnis nur auf diesem Gerät.</p>
+    : 'Mit Gemini sucht die App über Tavily (nicht mit der Google-Suche – deren Ergebnisse dürfen nicht gespeichert werden), und Gemini schreibt aus den Treffern. Geht die Suche nicht, schätzt Gemini, was es dort meistens gibt.'} Gemerkt wird das Ergebnis nur auf diesem Gerät.</p>
 ${ergebnis ? '<div class="zugang-btns"><button type="button" class="btn btn-quiet" data-act="sk-letzte">Letztes Ergebnis zeigen</button></div>' : ''}
 </form>`;
 }
@@ -358,13 +359,20 @@ async function nachsehen() {
     const rumpf = rumpfVeranstaltung({ anbieter, ziel: app.ziel, wer: istEigen() ? fuerWen() : (app.name() || 'Tobi'), was: wohin, tag: tagText(wann) });
     let roh;
     let quellen = [];
-    if (anbieter === 'gemini') {
-      const antwort = await kiAnfragen(rumpf, { schluessel, signal: meinLauf.controller.signal, beiFortschritt: ({ gerichte }) => { meinLauf.gerichte = gerichte; } });
-      roh = antwort.eingabe;
-    } else {
-      const antwort = await kiMitWerkzeugen(rumpf, { schluessel, signal: meinLauf.controller.signal });
+    // Mit Claude sucht Claude selbst; sonst Tavily (rezept-web) und Gemini schreibt aus den Treffern (web.js).
+    // Geht die Suche nicht (nicht eingerichtet, Kontingent leer), schätzt Gemini wie bisher – ohne Belege.
+    const suche = { q: `${wohin.trim()} ${tagText(wann)} Essen Stände Food`, max: 6, seiten: true };
+    const fest = { schluessel, signal: meinLauf.controller.signal, suche, schema: VERANSTALTUNG_SCHEMA };
+    try {
+      const antwort = anbieter === 'gemini'
+        ? await mitWebsuche(rumpfVeranstaltung({ anbieter: 'anthropic', ziel: app.ziel, wer: istEigen() ? fuerWen() : (app.name() || 'Tobi'), was: wohin, tag: tagText(wann) }), fest)
+        : await mitWebsuche(rumpf, fest);
       roh = jsonAus(antwort.text);
       quellen = antwort.quellen || [];
+    } catch (e) {
+      if (anbieter !== 'gemini' || e?.art === 'abbruch') throw e;
+      const antwort = await kiAnfragen(rumpf, { schluessel, signal: meinLauf.controller.signal, beiFortschritt: ({ gerichte }) => { meinLauf.gerichte = gerichte; } });
+      roh = antwort.eingabe;
     }
     // Gemini hat nicht gesucht: nichts ist belegt, alles ist geschätzt
     const b = veranstaltungBereinigen(roh, { quellen });

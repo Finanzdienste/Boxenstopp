@@ -1575,9 +1575,19 @@ ein“. Eine Stunde lang geht danach alles gleich an Gemini
 (`ERSATZ_PAUSE`), dann wird Claude wieder gefragt. Das gilt für alles, was
 nicht im Internet sucht: Resteverwertung und Speisekammer, neue Rezepte,
 „Mit KI ändern“, Fotos (Speisekammer, Sachen), Amys Nährwerte, Rezepte aus
-Text und Foto, die Speisekarte. Ohne Ersatz: die Suche im Internet (Amys
-Suche, Rezept aus einem Link, Nachschlagen, Veranstaltung) – Gemini mit
-Google-Suche wird nicht benutzt. Ist der Hauptschlüssel für die Liste
+Text und Foto, die Speisekarte. Die Suche im Internet (Amys Suche,
+Nachschlagen per Strichcode, Veranstaltung) geht ohne Claude über **Tavily**
+(v95, `js/web.js` `mitWebsuche`): Die Supabase-Funktion `rezept-web` (Repo
+Amy, Secret `TAVILY_API_KEY`, Tavily hat die private Nutzung erlaubt) sucht,
+Gemini schreibt aus den Treffern – ohne selbst zu suchen; Gemini mit
+Google-Suche wird nicht benutzt. Das gilt mit dem Google-Schlüssel immer und
+mit Claude, sobald das Guthaben leer ist. **Ein Rezept aus einem Link** liest
+`rezept-web` zuerst ganz ohne KI: Die meisten Rezeptseiten haben es als
+Angaben eingebaut (JSON-LD „Recipe“) – dann stehen Name, Zutaten, Schritte,
+Portionen und Zeit sofort im Editor, mit der Quelle in der Notiz. Sonst geht
+der Text der Seite an die KI; geht die Funktion nicht, liest die KI die Seite
+selbst wie bisher. robots.txt gilt: Verbietet sie die Seite, holt die App
+nichts und sagt es. Ist der Hauptschlüssel für die Liste
 freigegeben, steht der Ersatz mit in `ki.json` (`ersatz`, `ersatzStand`) und
 kommt so auf die anderen Handys.
 

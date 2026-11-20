@@ -139,6 +139,8 @@ const shopRoute = async (r) => {
   const req = r.request();
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, x-schluessel-hash', 'access-control-allow-methods': 'POST, OPTIONS' };
   if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  // rezept-web (die Suche ohne Claude): hier nicht eingerichtet
+  if (req.url().endsWith('/rezept-web')) return r.fulfill({ status: 503, headers: cors, body: 'Die Suche ist nicht eingerichtet.' });
   shop.anfragen.push(JSON.parse(req.postData() || '{}'));
   return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'image/png' }, body: BILD_ROH });
 };
@@ -294,19 +296,19 @@ check(await bis(() => vp.locator('.sk-va').count()) && await vp.evaluate(() => [
 // Neu nachsehen: das Formular für die Veranstaltung (das Gerät merkt sich die Wahl)
 await vp.click('[data-act="sk-neu"]');
 check(await vp.locator('#sk-va-form').isVisible() && await vp.inputValue('#sk-wohin') === '', '„Neu nachsehen“: wieder das Formular für die Veranstaltung, die Frage ist weg');
-// Mit Gemini: keine Suche, alles geschätzt
+// Mit Gemini, aber die Suche (rezept-web) geht nicht: alles geschätzt
 await vp.evaluate((g) => localStorage.setItem('boxenstopp.ki.v1', JSON.stringify({ schluessel: g })), GKEY);
 await vp.reload();
 await vp.waitForFunction(() => document.querySelectorAll('#grid .box').length > 0);
 await vp.click('#browse .abk-karte');
 await vp.click('[data-act="sk-neu"]');
-check((await vp.locator('#sk-va-form').innerText()).includes('Mit Gemini sucht die App nicht im Netz'), 'Mit Gemini: der Hinweis, dass nicht gesucht wird');
+check((await vp.locator('#sk-va-form').innerText()).includes('Mit Gemini sucht die App über Tavily'), 'Mit Gemini: der Hinweis, dass über Tavily gesucht wird');
 const geminiVorher = anfragen.length;
 const shopVorher = shop.anfragen.length;
 await vp.fill('#sk-wohin', 'God Jul');
 await vp.click('#sk-va-los');
 check(await bis(async () => (await vp.locator('.sk-va').innerText().catch(() => '')).includes('Nicht gefunden – geschätzt'), 8000) && anfragen.length === geminiVorher + 1 && !anfragen.at(-1).tools && anfragen.at(-1).response_format?.schema && !(await vp.locator('.sk-staende').innerText()).includes('laut Seite'), 'Gemini: ohne Werkzeuge – „Nicht gefunden – geschätzt“, alles „vermutlich“');
-check(shop.anfragen.length === shopVorher, 'Mit Gemini kein Bild der Seite (die Funktion prüft den Schlüssel von Anthropic)');
+check(shop.anfragen.length === shopVorher, 'Geschätzt: keine Seite, also kein Bild der Seite');
 check(v.fehler.length === 0, `Veranstaltung: keine Fehler im Browser (${v.fehler.join(' | ')})`);
 
 await browser.close();

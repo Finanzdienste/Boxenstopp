@@ -277,7 +277,7 @@ export const PRODUKT_BILD = 'https://vjyohppohmvhhxgwouti.supabase.co/functions/
  * holen ist fetch (die Tests geben ihr eigenes).
  */
 export async function shopBild(seite, { schluessel, adresse = PRODUKT_BILD, holen = (...a) => fetch(...a) } = {}) {
-  if (!sichereUrl(seite).startsWith('https://') || !/^sk-ant-/.test(String(schluessel || ''))) return null;
+  if (!sichereUrl(seite).startsWith('https://') || !/^(?:sk-ant-|AQ\.|AIza)/.test(String(schluessel || ''))) return null;
   try {
     const res = await holen(adresse, {
       method: 'POST',

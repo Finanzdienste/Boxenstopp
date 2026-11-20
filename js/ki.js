@@ -447,6 +447,15 @@ let leerBis = 0;
 export const ERSATZ_PAUSE = 60 * 60 * 1000;
 /** Woher der Ersatz-Schlüssel kommt, und was passieren soll, wenn er einspringt (eine Meldung). */
 export function kiErsatzAn(quelle, { beiWechsel = () => {} } = {}) { ersatzQuelle = typeof quelle === 'function' ? quelle : () => ''; beiErsatz = beiWechsel; }
+/** Hat Anthropic gerade „kein Guthaben“ gesagt (die nächste Stunde)? */
+export const claudeLeer = () => leerBis > Date.now();
+/** Merken, dass Anthropic kein Guthaben hat (auch von web.js, nach einer Suche) – mit der Meldung. */
+export function claudeLeerMerken() {
+  if (!claudeLeer()) { try { beiErsatz(); } catch { /* nur eine Meldung */ } }
+  leerBis = Date.now() + ERSATZ_PAUSE;
+}
+/** Der Gemini-Ersatz, wenn einer da ist – sonst ''. */
+export const ersatzSchluessel = () => { const e = ersatzQuelle(); return anbieterVon(e) === 'gemini' ? e : ''; };
 /** Für die Tests: Claude wieder zuerst fragen. */
 export const ersatzZuruecksetzen = () => { leerBis = 0; };
 

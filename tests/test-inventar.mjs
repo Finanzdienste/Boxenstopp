@@ -195,7 +195,7 @@ check(gefunden.seite === SEITE && treffer.seite === '', 'Claudes Treffer kennt d
   const kaputt = async () => { throw new TypeError('Failed to fetch'); };
   check(await shopBild(SEITE, { schluessel: SCHLUESSEL, holen: nein }) === null && await shopBild(SEITE, { schluessel: SCHLUESSEL, holen: text }) === null && await shopBild(SEITE, { schluessel: SCHLUESSEL, holen: kaputt }) === null, 'kein Bild, keins als Bild, kein Netz: null');
   rufe.length = 0;
-  check(await shopBild(SEITE, { schluessel: 'AQ.gemini-test', holen }) === null && await shopBild('http://unsicher.example/p', { schluessel: SCHLUESSEL, holen }) === null && rufe.length === 0, 'ohne Schlüssel von Anthropic oder ohne https: gar nicht gefragt');
+  check(await shopBild(SEITE, { schluessel: 'kein-schluessel', holen }) === null && await shopBild('http://unsicher.example/p', { schluessel: SCHLUESSEL, holen }) === null && rufe.length === 0, 'ohne KI-Schlüssel oder ohne https: gar nicht gefragt (ein Gemini-Schlüssel darf, wenn seine Prüfsumme erlaubt ist)');
 }
 // Die Quelle in der Sache
 check(JSON.stringify(quelleBereinigen({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' })) === JSON.stringify({ name: 'Open Beauty Facts', url: 'https://world.openbeautyfacts.org/product/1' }) && quelleBereinigen({ name: 'x', url: 'javascript:alert(1)' }) === null && quelleBereinigen({ name: 'x', url: 'http://a.example' }) === null && quelleBereinigen({ url: 'https://a.example' }) === null && quelleBereinigen('x') === null, 'Quelle: Name und https-Adresse – javascript: oder http nicht');
@@ -535,7 +535,7 @@ check(await bis(async () => (await m2.locator('#inv-scan .inv-scan').count()) ==
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: CODE };
 await scanne(m2, 'finden');
 check(await bis(async () => (await m2.locator('#inv-name').count()) === 1 && (await m2.inputValue('#inv-name')) === 'Lederjacke'), 'Richtig gelesen: „Hast du schon“ – die Lederjacke ist offen');
-// Mit Gemini sucht niemand im Internet (die Internetsuche läuft nur über Claude)
+// Mit Gemini sucht die App über Tavily (rezept-web) – hier geht die Funktion nicht, also bleibt es bei der Nummer
 await m2.click('[data-act="inv-ding-zu"]');
 await m2.click('[data-act="inv-zu"]');
 ki.antwort = { name: '', marke: '', liste: '', tags: [], code: '4000000000037' };
@@ -543,7 +543,7 @@ const kiVorher = ki.anfragen.length;
 await scanne(m2, 'finden');
 check(await bis(async () => (await m2.locator('#inv-scan').innerText()).includes('4000000000037: noch nicht in deinen Listen')), 'Gemini liest eine unbekannte Nummer: „noch nicht in deinen Listen“');
 await m2.click('[data-act="inv-scan-knopf"]');
-check(await bis(async () => (await m2.locator('#toast').innerText()).includes('nichts gefunden')) && ki.anfragen.length === kiVorher + 1 && await bis(() => !!mitNummer('4000000000037')), 'Eintragen: die Datenbanken kennen sie nicht – mit Gemini sucht niemand im Internet, die Sache hat nur die Nummer');
+check(await bis(async () => (await m2.locator('#toast').innerText()).includes('nichts gefunden')) && ki.anfragen.length === kiVorher + 1 && await bis(() => !!mitNummer('4000000000037')), 'Eintragen: die Datenbanken kennen sie nicht, die Suche geht nicht – die Sache hat nur die Nummer');
 
 // Mit einem Schlüssel von Anthropic: kennt keine Datenbank die Nummer, sucht Claude im Internet
 const m3h = await geraet({ leser: true, schluessel: AKEY });

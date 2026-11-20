@@ -49,7 +49,8 @@ import { istIpad, TABLET_IC } from './ansicht-tablet.js';
 import { schritte, schritteVon, schritteSetzen } from './kochstand.js';
 import { kochmodusOeffnen, KOCHMODUS_IC } from './kochmodus.js';
 import { rumpfImport, importBereinigen, jsonAus, linkAus, rumpfLinkClaude, rumpfSuche, sucheBereinigen, notizMitQuelle } from './amy-import.js';
-import { kiAnfragen, kiMitWerkzeugen, anbieterVon } from './ki.js';
+import { seiteLesen, alsAmyRezept, mitWebsuche } from './web.js';
+import { kiAnfragen, kiMitWerkzeugen, anbieterVon, claudeLeer } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { fotoVorbereiten, oeffneEinrichten } from './ansicht-ki.js';
 import { notizenHTML, notizenAktualisieren, klickNotizen, eingabeNotizen, tasteNotizen, notizenZahl, notizJetztSpeichern } from './ansicht-notizen.js';
@@ -399,12 +400,26 @@ async function importieren() {
   importZeichnen();
   try {
     const tags = alleTags(app.stand.amyTags).map(([t]) => t);
-    // Ein Link mit Claude: Die Seite liest das Werkzeug web_fetch (ohne Strom, die Antwort ist JSON wie sonst)
-    const link = anbieter === 'anthropic' && !importFotos.length ? linkAus(text) : '';
-    const antwort = link
-      ? await kiMitWerkzeugen(rumpfLinkClaude({ link, tags }), { schluessel, signal: lauf.controller.signal })
-      : await kiAnfragen(rumpfImport({ anbieter, text, fotos: importFotos.map((f) => f.b64), tags }), { schluessel, signal: lauf.controller.signal, roh: true });
-    const neu = importBereinigen(jsonAus(antwort.text));
+    const link = !importFotos.length ? linkAus(text) : '';
+    let neu = null;
+    if (link) {
+      // Zuerst ohne KI: Die meisten Rezeptseiten haben das Rezept als Angaben eingebaut (rezept-web, web.js).
+      // Sonst der Text der Seite für die KI; geht die Funktion nicht, liest die KI die Seite selbst (wie bisher).
+      let seite = null;
+      try { seite = await seiteLesen(link, { schluessel, signal: lauf.controller.signal }); } catch (e) { if (e?.art === 'abbruch' || e?.status === 451) throw e; }
+      if (seite?.rezept) neu = importBereinigen(alsAmyRezept(seite.rezept, seite.url || link));
+      else if (seite?.text && (anbieter !== 'anthropic' || claudeLeer())) {
+        const a = await kiAnfragen(rumpfImport({ anbieter, text: `Rezept von ${seite.url || link}${seite.titel ? ` („${seite.titel}“)` : ''}:\n\n${seite.text}`, fotos: [], tags }), { schluessel, signal: lauf.controller.signal, roh: true });
+        neu = importBereinigen(jsonAus(a.text));
+      } else if (anbieter === 'anthropic') {
+        neu = importBereinigen(jsonAus((await kiMitWerkzeugen(rumpfLinkClaude({ link, tags }), { schluessel, signal: lauf.controller.signal })).text));
+      } else {
+        neu = importBereinigen(jsonAus((await kiAnfragen(rumpfImport({ anbieter, text, fotos: [], tags }), { schluessel, signal: lauf.controller.signal, roh: true })).text));
+      }
+    } else {
+      const antwort = await kiAnfragen(rumpfImport({ anbieter, text, fotos: importFotos.map((f) => f.b64), tags }), { schluessel, signal: lauf.controller.signal, roh: true });
+      neu = importBereinigen(jsonAus(antwort.text));
+    }
     if (neu.fehler) throw new Error(neu.fehler);
     entwurfAusFormular();
     const vorher = { ...entwurf };
@@ -449,10 +464,7 @@ ${t.kurz ? `<p class="amy-treffer-kurz">${esc(t.kurz)}</p>` : ''}${warn}
 
 /** „Im Internet suchen“: Wunsch, ohne Unverträgliches, und was gefunden wurde. */
 function sucheInnenHTML() {
-  const schluessel = ladeKi();
-  if (schluessel && anbieterVon(schluessel) === 'gemini') {
-    return '<p class="fine">Im Internet sucht die App mit dem Claude-Schlüssel. Mit dem Google-Schlüssel: bei „Rezept übernehmen“ einen Link von Chefkoch &amp; Co. einfügen.</p>';
-  }
+  // Mit dem Google-Schlüssel sucht die App über Tavily (rezept-web), und Gemini schreibt daraus (web.js)
   const lauf = !!suche.lauf;
   const { ohne, wenig } = unvertraeglich();
   const namen = [...ohne, ...wenig];
@@ -483,7 +495,6 @@ async function suchen() {
   suche.wunsch = wunsch;
   suche.fehler = '';
   if (!schluessel) { suche.fehler = 'Dafür braucht die App euren KI-Schlüssel – denselben wie bei der Resteverwertung.'; sucheZeichnen(); return; }
-  if (anbieterVon(schluessel) !== 'anthropic') { sucheZeichnen(); return; }
   if (wunsch.length < 2) {
     suche.fehler = 'Schreib kurz, worauf du Lust hast – etwa „Kürbissuppe“ oder „schnelles Abendessen mit Hähnchen“.';
     sucheZeichnen();
@@ -498,7 +509,8 @@ async function suchen() {
   sucheZeichnen();
   try {
     const tags = alleTags(app.stand.amyTags).map(([t]) => t);
-    const antwort = await kiMitWerkzeugen(rumpfSuche({ wunsch, ohne, wenig, tags }), { schluessel, signal: lauf.controller.signal });
+    // Mit Claude sucht Claude selbst; sonst Tavily (rezept-web) und Gemini schreibt daraus (web.js)
+    const antwort = await mitWebsuche(rumpfSuche({ wunsch, ohne, wenig, tags }), { schluessel, signal: lauf.controller.signal, suche: { q: `${wunsch} Rezept`, max: 6, seiten: true } });
     if (suche.lauf !== lauf) return;
     const r = sucheBereinigen(jsonAus(antwort.text), antwort.quellen);
     suche.treffer = r.rezepte;
