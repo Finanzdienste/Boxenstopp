@@ -1564,6 +1564,13 @@ Billing → API credits die Console-Organisation verknüpfen, dort unter API
 Keys einen Schlüssel anlegen und ihn genauso in die App einfügen. Beide
 Antworten werden gestreamt.
 
+**Gemini reihum** (v96): Ist Gemini im Gratis-Kontingent überlastet (503,
+auch erst im Strom) oder hat ein Modell sein Kontingent erreicht (429) oder
+gibt es ein Modell nicht (404), nimmt `kiAnfragen` das nächste aus
+`GEMINI_MODELLE` (3.8-flash → 3.7 → 3.6 → 3.5-flash → 3.5-flash-lite, wie die
+Angebots-Action); das Modell, das zuletzt geantwortet hat, kommt beim nächsten
+Mal zuerst dran. Erst wenn alle abwinken, kommt die Meldung.
+
 **Ersatz, wenn das Claude-Guthaben leer ist** (v94, Tobi): Unter
 Einstellungen → KI-Schlüssel steht bei einem Anthropic-Schlüssel ein zweites
 Feld für einen kostenlosen Gemini-Schlüssel (nur AQ.… oder AIza…,

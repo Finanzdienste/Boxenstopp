@@ -6,6 +6,7 @@
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { GEMINI_MODELLE } from '../js/ki.js';
 import { pruefer, ROOT, handy, githubAttrappe, starteBrowser, bis } from './hilfe.mjs';
 import { leer, anwenden, opTeil, opEigener } from '../js/liste.js';
 import { aufBoxen } from '../js/boxen.js';
@@ -117,7 +118,7 @@ await m.click('.tabbar .tab[data-tab="einkauf"]');
 check(await bis(() => lkarte.locator('[data-act="reste-ki"]').isVisible()), 'Mit KI-Schlüssel: „Aus den Resten ein Rezept (KI)“');
 await lkarte.locator('[data-act="reste-ki"]').click();
 check(await bis(() => m.locator('#reste').isVisible()) && (await m.locator('#k-text').inputValue()).startsWith('Reste von den Packungen: '), 'Die Resteverwertung öffnet, die Reste stehen drin');
-check(await bis(() => anfragen.length === 1) && anfragen[0].includes('Reste von den Packungen') && anfragen[0].includes('Rinderhackfleisch'), 'Und die KI bekommt sie');
+check(await bis(() => anfragen.length === GEMINI_MODELLE.length) && anfragen[0].includes('Reste von den Packungen') && anfragen[0].includes('Rinderhackfleisch') && new Set(anfragen.map((x) => JSON.parse(x).model)).size === GEMINI_MODELLE.length, 'Und die KI bekommt sie – hier ist Gemini überlastet, also reihum jedes Modell einmal');
 check(marielle.fehler.length === 0, `Keine Fehler im Browser (${marielle.fehler.join(' | ')})`);
 await marielle.ctx.close();
 // Tobi und Amy, 8 Boxen: beim Chili bleibt nichts, beim Frikassee Hähnchen

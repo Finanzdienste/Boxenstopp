@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pruefer, ROOT, starteBrowser, handy, bis, githubAttrappe, SCHLUESSEL, APP_URL } from './hilfe.mjs';
 import { kiBereinigen, mengenAnpassen, alsRezept, proBox, abstand, schoen, KI_ID, festAlsKi, aenderungenText, alsVorlage, aenderungUebernehmen, SCHEMA } from '../js/ki-rezept.js';
-import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme, fleischJeBox, alsGemini, kiErsatzAn, ersatzZuruecksetzen } from '../js/ki.js';
+import { anfrageBauen, anfrageBauenGemini, rumpfFuer, kiAnfragen, kostenCent, anbieterVon, ANBIETER, MODELL, KI_FEHLER, schemaFuerClaude, mitBerater, mitZwischenspeicher, BERATER_HINWEIS, kostenMeldenAn, KOSTEN_MELDEN, schluesselPruefsumme, fleischJeBox, alsGemini, kiErsatzAn, ersatzZuruecksetzen, GEMINI_MODELLE, geminiModellZuruecksetzen } from '../js/ki.js';
 import { createHash } from 'node:crypto';
 import { kiAus, kiUebernehmen } from '../js/zugang.js';
 import { mitWebsuche, REZEPT_WEB, trefferText } from '../js/web.js';
@@ -367,6 +367,38 @@ const ohneStrom = `event: interaction.completed\r\ndata: ${JSON.stringify({ even
 check((await mitFetch(() => new Response(ohneStrom, { status: 200 }), () => kiAnfragen(rg, { schluessel: GKEY }))).eingabe.name === ANTWORT.name, 'kommt der Text erst am Ende in steps, wird er auch gelesen');
 const umzaeunt = await mitFetch(() => new Response(GEMINI_STROM(`\`\`\`json\n${JSON.stringify(ANTWORT)}\n\`\`\``), { status: 200 }), () => kiAnfragen(rg, { schluessel: GKEY }));
 check(umzaeunt.eingabe.name === ANTWORT.name, 'JSON in ```-Zaun wird trotzdem gelesen');
+
+// --- Gemini überlastet oder Kontingent voll: reihum das nächste Modell, das zuletzt gute zuerst
+{
+  geminiModellZuruecksetzen();
+  const modelle = [];
+  const antworten = [];
+  const reihe = async (f) => {
+    globalThis.fetch = async (url, opt) => { modelle.push(JSON.parse(opt.body).model); return antworten.shift()(); };
+    try { return await f(); } finally { globalThis.fetch = echtFetch; }
+  };
+  const UEBER = () => new Response(JSON.stringify({ error: { code: 503, message: 'gemini is currently experiencing high demand', status: 'UNAVAILABLE' } }), { status: 503 });
+  const VOLL = () => new Response(JSON.stringify([{ error: { code: 429, message: 'Quota exceeded', status: 'RESOURCE_EXHAUSTED' } }]), { status: 429 });
+  const GUT = () => new Response(GEMINI_STROM(JSON.stringify(ANTWORT)), { status: 200 });
+  const IM_STROM = () => new Response(`event: error\r\ndata: ${JSON.stringify({ event_type: 'error', error: { code: 503, message: 'overloaded' } })}\r\n\r\n`, { status: 200 });
+  antworten.push(UEBER, VOLL, GUT);
+  const a = await reihe(() => kiAnfragen(rg, { schluessel: GKEY }));
+  check(a.eingabe.name === ANTWORT.name && modelle.join() === GEMINI_MODELLE.slice(0, 3).join(), `überlastet, dann Kontingent voll: das dritte Modell antwortet (${modelle.join(' → ')})`);
+  modelle.length = 0;
+  antworten.push(GUT);
+  await reihe(() => kiAnfragen(rg, { schluessel: GKEY }));
+  check(modelle.join() === GEMINI_MODELLE[2], 'beim nächsten Mal gleich das Modell, das zuletzt geantwortet hat');
+  modelle.length = 0;
+  antworten.push(IM_STROM, GUT);
+  await reihe(() => kiAnfragen(rg, { schluessel: GKEY }));
+  check(modelle.join() === `${GEMINI_MODELLE[2]},${GEMINI_MODELLE[0]}`, '„überlastet“ erst im Strom, bevor Text kam: auch dann das nächste');
+  modelle.length = 0;
+  antworten.push(...GEMINI_MODELLE.map(() => UEBER));
+  let art = '';
+  try { await reihe(() => kiAnfragen(rg, { schluessel: GKEY })); } catch (e) { art = e.art; }
+  check(art === 'ueberlastet' && modelle.length === GEMINI_MODELLE.length && new Set(modelle).size === GEMINI_MODELLE.length, 'alle überlastet: jedes einmal versucht, dann „überlastet“');
+  geminiModellZuruecksetzen();
+}
 
 // --- Ersatz, wenn das Claude-Guthaben leer ist: dieselbe Anfrage an Gemini
 const ag = alsGemini(rumpf);

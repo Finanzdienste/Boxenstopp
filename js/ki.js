@@ -456,6 +456,18 @@ export function claudeLeerMerken() {
 }
 /** Der Gemini-Ersatz, wenn einer da ist – sonst ''. */
 export const ersatzSchluessel = () => { const e = ersatzQuelle(); return anbieterVon(e) === 'gemini' ? e : ''; };
+/*
+ * Gemini im Gratis-Kontingent ist manchmal überlastet (503) oder ein Modell
+ * hat sein Tageskontingent erreicht (429): dann reihum das nächste Modell
+ * (wie die Angebots-Action, werkzeug/angebote.mjs). Das Modell, das zuletzt
+ * geantwortet hat, kommt beim nächsten Mal zuerst dran (nur im Speicher).
+ */
+export const GEMINI_MODELLE = [ANBIETER.gemini.modell, 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
+let geminiZuletzt = '';
+/** Für die Tests: wieder mit dem ersten Modell anfangen. */
+export const geminiModellZuruecksetzen = () => { geminiZuletzt = ''; };
+const AUSWEICHEN = new Set(['ueberlastet', 'grenze', 'modell']);
+
 /** Für die Tests: Claude wieder zuerst fragen. */
 export const ersatzZuruecksetzen = () => { leerBis = 0; };
 
@@ -494,9 +506,12 @@ export function alsGemini(rumpf) {
   };
 }
 
-export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiFortschritt = () => {}, roh: alsText = false, fortsetzung = null, berater = !OHNE_BERATER.has(schemaVon(rumpf)) }) {
+export async function kiAnfragen(rumpf0, { schluessel, api = '', signal, beiFortschritt = () => {}, roh: alsText = false, fortsetzung = null, berater = !OHNE_BERATER.has(schemaVon(rumpf0)), versucht = [] }) {
   const anbieter = anbieterVon(schluessel) || 'anthropic';
   const gemini = anbieter === 'gemini';
+  // Gemini: das Modell, das zuletzt geantwortet hat, zuerst
+  const reihum = gemini && GEMINI_MODELLE.includes(rumpf0.model);
+  const rumpf = reihum && !versucht.length && geminiZuletzt && geminiZuletzt !== rumpf0.model ? { ...rumpf0, model: geminiZuletzt } : rumpf0;
   // Gerade erst „kein Guthaben“ bei Anthropic: gleich an den Ersatz
   const ersatz = () => {
     const e = ersatzQuelle();
@@ -533,7 +548,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
     if (gemini && res.status === 400 && /thinking/i.test(text) && rumpf.generation_config?.thinking_level) {
       const ohne = { ...rumpf.generation_config };
       delete ohne.thinking_level;
-      return kiAnfragen({ ...rumpf, generation_config: ohne }, { schluessel, api, signal, beiFortschritt, roh: alsText });
+      return kiAnfragen({ ...rumpf, generation_config: ohne }, { schluessel, api, signal, beiFortschritt, roh: alsText, versucht });
     }
     // Schema zu groß für den Berater: dieselbe Anfrage ohne ihn, und künftig gleich ohne
     if (!gemini && berater && grammatikZuGross(res.status, text)) {
@@ -541,6 +556,11 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       return kiAnfragen(rumpf, { schluessel, api, signal, beiFortschritt, roh: alsText, fortsetzung, berater: false });
     }
     const art = artVonStatus(res.status, info);
+    // Gemini überlastet oder das Kontingent dieses Modells voll: das nächste Modell
+    if (reihum && AUSWEICHEN.has(art)) {
+      const weiter = GEMINI_MODELLE.find((m) => m !== rumpf.model && !versucht.includes(m));
+      if (weiter) return kiAnfragen({ ...rumpf, model: weiter }, { schluessel, api, signal, beiFortschritt, roh: alsText, versucht: [...versucht, rumpf.model] });
+    }
     // Kein Guthaben bei Anthropic: der Gemini-Schlüssel springt ein (und eine Stunde lang gleich)
     if (!gemini && art === 'guthaben') {
       const weiter = ersatz();
@@ -633,17 +653,25 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
       default:
     }
   };
-  for (;;) {
-    let stueck;
-    try { stueck = await leser.read(); } catch (e) { throw fehler(e?.name === 'AbortError' ? 'abbruch' : 'netz', e?.message); }
-    if (stueck.done) break;
-    puffer += dekoder.decode(stueck.value, { stream: true }).replace(/\r\n/g, '\n');
-    for (let i = puffer.indexOf('\n\n'); i >= 0; i = puffer.indexOf('\n\n')) {
-      verarbeite(puffer.slice(0, i));
-      puffer = puffer.slice(i + 2);
+  try {
+    for (;;) {
+      let stueck;
+      try { stueck = await leser.read(); } catch (e) { throw fehler(e?.name === 'AbortError' ? 'abbruch' : 'netz', e?.message); }
+      if (stueck.done) break;
+      puffer += dekoder.decode(stueck.value, { stream: true }).replace(/\r\n/g, '\n');
+      for (let i = puffer.indexOf('\n\n'); i >= 0; i = puffer.indexOf('\n\n')) {
+        verarbeite(puffer.slice(0, i));
+        puffer = puffer.slice(i + 2);
+      }
     }
+    if (puffer.trim()) verarbeite(puffer);
+  } catch (e) {
+    // Gemini meldet „überlastet“ erst im Strom, bevor etwas kam: das nächste Modell
+    const weiter = reihum && !json && AUSWEICHEN.has(e?.art) ? GEMINI_MODELLE.find((m) => m !== rumpf.model && !versucht.includes(m)) : '';
+    if (!weiter) throw e;
+    leser.cancel().catch(() => {});
+    return kiAnfragen({ ...rumpf, model: weiter }, { schluessel, api, signal, beiFortschritt, roh: alsText, versucht: [...versucht, rumpf.model] });
   }
-  if (puffer.trim()) verarbeite(puffer);
   // Der Server hat pausiert (etwa nach vielen Rückfragen beim Berater): fortsetzen, höchstens viermal
   if (!gemini && stopp === 'pause_turn') {
     if (vorher.runde >= 4) throw fehler('antwort', 'zu oft pausiert');
@@ -657,6 +685,7 @@ export async function kiAnfragen(rumpf, { schluessel, api = '', signal, beiForts
   if (gemini && stopp && /safety|prohibited|blocklist|recitation|block/i.test(stopp)) throw fehler('sicherheit', stopp);
   if (gemini && stopp) throw fehler('antwort', stopp);
   if (!werkzeug || !json.trim()) throw fehler('antwort', 'keine Antwort');
+  if (reihum) geminiZuletzt = rumpf.model;
   // Ohne festes Schema (etwa mit url_context): den Text zurück, das JSON sucht sich der Aufrufer
   if (!gemini) kostenMelden({ schluessel, usage, modell: rumpf.model, api });
   if (alsText) return { text: json, usage, anbieter };
