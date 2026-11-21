@@ -510,11 +510,14 @@ export function listeZeichnen() {
   gleichZeichnen();
   // Was es in diesem Laden nicht gab, steht unten – beim nächsten Laden wieder an seinem Platz
   const nichtHier = eintraege.filter(([k, d]) => !erledigt(d) && fehltHier(k));
-  const ohne = nichtHier.length ? { ...app.stand, items: Object.fromEntries(eintraege.filter(([k]) => !nichtHier.some(([x]) => x === k))) } : app.stand;
+  // Was Amy bei Amazon bestellt (Abteilung amazon): ein eigener Bereich ganz unten, immer da – mit eigenem Feld
+  const beiAmazon = eintraege.filter(([k, d]) => !erledigt(d) && !fehltHier(k) && abteilungHier(k, d) === 'amazon');
+  const raus = new Set([...nichtHier, ...beiAmazon].map(([k]) => k));
+  const ohne = raus.size ? { ...app.stand, items: Object.fromEntries(eintraege.filter(([k]) => !raus.has(k))) } : app.stand;
   // Im gewählten Laden mit gelerntem Weg: Abteilungen in dessen Reihenfolge
   const weg = app.ladenJetzt() ? app.stand.wege?.[app.ladenJetzt()] : null;
   const gruppen = weg?.n ? nachWeg(ohne, app.katalog, weg) : nachBereichen(ohne, app.katalog);
-  const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0);
+  const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0) + beiAmazon.length;
   const fertig = eintraege.filter(([, d]) => erledigt(d));
   const nachName = (a, b) => String(a[1].name).localeCompare(String(b[1].name), 'de');
   let html = '';
@@ -534,6 +537,7 @@ export function listeZeichnen() {
       html += `<section class="grp grp-done"><h3><span>Im Wagen</span><span class="num">${fertig.length}</span></h3><ul class="items">${fertig.sort(nachName).map(zeile).join('')}</ul></section>`;
     }
   }
+  html += amazonHTML(beiAmazon.sort(nachName));
   body.innerHTML = html;
   const ko = kostenListe(app.stand, app);
   $('#l-count').textContent = eintraege.length ? `${offen} offen${fertig.length ? ` · ${fertig.length} erledigt` : ''}${ko.gesamt > 0 ? ` · ≈ ${euro(ko.gesamt)}` : ''}` : '';
@@ -542,6 +546,13 @@ export function listeZeichnen() {
   // Was von den Packungen übrig bleibt – und welche Rezepte es aufbrauchen
   resteListeZeichnen();
   fussZeichnen(fertig.length);
+}
+
+/** Der Bereich „Amazon“: was jemand mit Prime bestellt (bei Tobi und Amy: Amy) – auch leer, damit man dort eintragen kann. */
+function amazonHTML(eintraege) {
+  const wer = app.stand.leute?.amy && app.name() !== 'Amy' ? 'Amy bestellt mit Prime' : 'zum Bestellen (Prime)';
+  return `<section class="grp grp-amazon" data-bereich="amazon"><h3><span class="grp-name">Amazon <small>${esc(wer)}</small></span><span class="num">${eintraege.length}</span></h3>${eintraege.length ? `<ul class="items">${eintraege.map(zeile).join('')}</ul>` : ''}
+<form class="addform l-amazon-form" data-amazon autocomplete="off"><label class="sr" for="amazon-input">Für Amazon</label><input id="amazon-input" type="text" maxlength="80" placeholder="Für Amazon, z. B. Ladekabel" enterkeyhint="done"><button type="submit" class="btn">Dazu</button></form></section>`;
 }
 
 function fussZeichnen(fertigAnzahl) {
@@ -804,13 +815,14 @@ export function klickListe(el) {
     if (!e) return true;
     const wirdFertig = !erledigt(e);
     const laden = app.ladenJetzt();
-    if (laden) wegHaken(laden, d.check, e, wirdFertig);
+    // Was Amy bei Amazon bestellt, gehört nicht zum Weg durch den Laden
+    if (laden && abteilungHier(d.check, e) !== 'amazon') wegHaken(laden, d.check, e, wirdFertig);
     // Was gekauft ist, kommt in die Speisekammer (ganze Packungen) – der Haken zurück nimmt es wieder heraus
     const wechseln = teileVon(e).filter(([, p]) => (p.done === true) !== wirdFertig).map(([rid]) => rid);
     const posten = gekauftVon(d.check, e, teileVon(e).length ? wechseln : null, { preise: app.preise, katalog: app.katalog });
     app.aendern([opHaken(app.stand, d.check, wirdFertig, app.name()), ...(posten.length ? [opKammerMenge(posten, wirdFertig ? 1 : -1, app.name())] : [])]);
     // Das letzte Häkchen auf der Liste (was es hier nicht gab, zählt nicht): ein Satz dafür – und der Weg durch den Laden ist gelernt.
-    if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x) || fehltHier(k))) {
+    if (wirdFertig && Object.entries(app.stand.items).every(([k, x]) => k === d.check || erledigt(x) || fehltHier(k) || abteilungHier(k, x) === 'amazon')) {
       lobKlein('einkauf');
       if (laden) wegAbschliessen();
     }
@@ -963,13 +975,16 @@ export function aufListe(name, stand = app.stand) {
  * cat: die Abteilung, wenn die App sie nicht kennt (Haushalt).
  */
 export function aufDieListe(getippt, { cat: sonst = '' } = {}) {
+  // „Amazon: Ladekabel“ – nicht im Laden, Amy bestellt es (Abteilung amazon)
+  const amazon = /^\s*amazon\s*[:–-]\s*/i.exec(getippt);
+  if (amazon) { getippt = getippt.slice(amazon[0].length).trim(); sonst = 'amazon'; }
   // „chicki nuggies“ – gemeint sind Chicken Nuggets (gemeintHTML)
   const gemeint = gemeintVon(app.stand, getippt);
   const name = gemeint || getippt;
   const wie = gemeint ? getippt : '';
   const nk = nameSchluessel(name);
   const geraten = abteilung(name, app.katalog);
-  const cat = app.stand.abteilungen?.[nk] || (sonst && geraten === 'sonstiges' ? sonst : geraten);
+  const cat = amazon ? 'amazon' : app.stand.abteilungen?.[nk] || (sonst && geraten === 'sonstiges' ? sonst : geraten);
   // Schon einmal zusammengelegt („Nuggets“ ist „Dino Nuggets“)? Dann gehört der Eintrag in diese Zeile
   const ziel = app.stand.gleich?.[nk] ? aufloesen(app.stand, nk) : null;
   const da = ziel ? app.stand.items[ziel] : null;
@@ -992,6 +1007,17 @@ export function aufDieListe(getippt, { cat: sonst = '' } = {}) {
 
 export function absendenListe(ev) {
   if (ev.target.matches?.('form[data-extra]')) { ev.preventDefault(); extraMerken(ev.target); return true; }
+  if (ev.target.matches?.('form[data-amazon]')) {
+    ev.preventDefault();
+    const f = ev.target.querySelector('#amazon-input');
+    const t = String(f?.value || '').trim();
+    if (!t) { f?.focus(); return true; }
+    const r = aufDieListe(`Amazon: ${t}`);
+    if (r.art === 'schon') melde(`„${r.name}“ steht schon drauf.`);
+    if (f) f.value = '';
+    $('#amazon-input')?.focus();
+    return true;
+  }
   if (ev.target.matches?.('form[data-bon]')) { ev.preventDefault(); bonMerken(ev.target); return true; }
   if (ev.target.matches?.('form[data-gemeint]')) { ev.preventDefault(); gemeintMerken(ev.target); return true; }
   if (ev.target.matches?.('form[data-alarm]')) { ev.preventDefault(); alarmMerken(ev.target); return true; }

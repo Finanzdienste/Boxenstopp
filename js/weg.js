@@ -19,10 +19,10 @@ import { erledigt } from './liste.js';
 import { abteilungVon, nameSchluessel } from './bereiche.js';
 
 /** Die übliche Reihenfolge der Abteilungen (wie bereiche.js), für Läden ohne Messung. */
-export const REIHE = ['obst', 'fleisch', 'kuehl', 'trocken', 'konserven', 'vorrat', 'tk', 'gewuerz', 'haushalt', 'sonstiges'];
+export const REIHE = ['obst', 'fleisch', 'kuehl', 'trocken', 'konserven', 'vorrat', 'tk', 'gewuerz', 'haushalt', 'sonstiges', 'amazon'];
 export const ABTEILUNG_NAME = {
   obst: 'Obst & Gemüse', fleisch: 'Fleisch', kuehl: 'Kühlregal', trocken: 'Nudeln, Reis & Co.', konserven: 'Konserven',
-  vorrat: 'Öl, Saucen & Vorrat', tk: 'Tiefkühl', gewuerz: 'Gewürze', haushalt: 'Haushalt', sonstiges: 'Sonstiges',
+  vorrat: 'Öl, Saucen & Vorrat', tk: 'Tiefkühl', gewuerz: 'Gewürze', haushalt: 'Haushalt', sonstiges: 'Sonstiges', amazon: 'Amazon',
 };
 /** Ein Einkauf zählt ab so vielen Haken, und so lange darf zwischen zwei Haken Pause sein. */
 export const MIN_HAKEN = 3;

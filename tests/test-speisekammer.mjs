@@ -14,7 +14,7 @@ import { leer, anwenden, bereinigen, beschreibung, opZusammen } from '../js/list
 import {
   speisekammerBereinigen, opKammer, opKammerWeg, opKammerMenge, gekauftVon, verbrauchtVon, mussBaldWeg, kammerListe, kammerText, mengeKurz, alterTage, nameVon, MAX_KAMMER, FRISCH_TAGE,
 } from '../js/speisekammer.js';
-import { postenAusText, postenAusZeilen, erkanntAlsPosten, rumpfKammer, KAMMER_SCHEMA } from '../js/kammer-ki.js';
+import { postenAusText, postenAusZeilen, erkanntAlsPosten, rumpfKammer, KAMMER_SCHEMA, kammerAusProdukt } from '../js/kammer-ki.js';
 
 const { check, ende } = pruefer();
 const daten = JSON.parse(readFileSync(path.join(ROOT, 'daten', 'rezepte.json'), 'utf8'));
@@ -101,6 +101,9 @@ check(postenAusText('Salz', katalog, mehr) === null && postenAusText('Feta', kat
 check(postenAusZeilen('6 Eier, 1,5 kg Kartoffeln; Feta\nMais', katalog, mehr).map((p) => `${p.k}:${p.q}`).join() === 'eier:6,kartoffeln:1500,feta:null,mais:null', 'Mehrere auf einmal (Komma, Semikolon, Zeile) – „1,5 kg“ bleibt eine Zahl');
 const erkannt = erkanntAlsPosten({ sachen: [{ name: 'Basmatireis', menge: 500, einheit: 'g' }, { name: 'Mais', menge: 2, einheit: 'Stk' }, { name: 'Mais', menge: 1, einheit: 'Stk' }, { name: 'Spülmittel', menge: 1, einheit: 'Stk' }, { name: '', menge: 1 }] }, katalog, mehr);
 check(erkannt.find((p) => p.k === 'reis')?.q === 500 && erkannt.find((p) => p.k === 'mais')?.q === 3 && erkannt.find((p) => p.k === 'mais')?.u === 'Dose', `Vom Foto: Reis 500 g, zweimal Mais zusammen (3 Dosen) (${erkannt.map((p) => `${p.name} ${p.q} ${p.u}`).join(', ')})`);
+const aus = (name, menge) => kammerAusProdukt({ name, notiz: menge ? `Menge: ${menge}\nInhaltsstoffe: x` : '' }, katalog, mehr);
+check(JSON.stringify(aus('Kokosmilch', '400 ml')) === JSON.stringify({ k: 'kokosmilch', name: 'Kokosmilch', cat: 'konserven', q: 1, u: 'Dose' }) && aus('Kidney Bohnen', '400 g')?.u === 'Dose' && aus('Basmati Reis', '1 kg')?.q === 1000 && aus('Skyr Natur', '450 g')?.q === 450, 'Gescannt: 400 ml Kokosmilch ist 1 Dose (die Packung steht im Katalog), 1 kg Reis 1000 g, Skyr 450 g');
+check(aus('Feta', '')?.q === null && kammerAusProdukt({ name: '', marke: '' }, katalog, mehr) === null && aus('Tomatensauce Mama', '2 x 400 g')?.q === 400, 'Ohne Menge: „ist da“; ohne Namen: nichts; „2 x 400 g“ nimmt die Packung');
 const rk = rumpfKammer({ anbieter: 'anthropic', fotos: ['AAA', 'BBB'] });
 const rg = rumpfKammer({ anbieter: 'gemini', fotos: ['AAA'] });
 check(rk.messages[0].content.filter((c) => c.type === 'image').length === 2 && rk.output_config?.format?.type === 'json_schema' && rg.input[0].type === 'image' && rg.response_format.schema === KAMMER_SCHEMA && /Speisekammer/.test(rk.system), 'Foto-Anfrage: Claude mit Schema, Gemini mit Schema, Bilder dabei');
@@ -128,7 +131,23 @@ async function gemini(r) {
 
 const browser = await starteBrowser();
 const gh = githubAttrappe();
-const tobi = await handy(browser, { attrappe: gh });
+// Strichcodes: das Handy liest sie selbst (BarcodeDetector wie in Chrome auf Android), Open Food Facts ist nachgebaut
+const LESER = 'window.BarcodeDetector = class { static async getSupportedFormats() { return ["ean_13"]; } async detect() { return [{ rawValue: window.__code || "", format: "ean_13" }]; } };';
+const PRODUKTE = { 4000000000012: { name: 'Kokosmilch', quantity: '400 ml' }, 4000000000029: { name: 'Basmati Reis', quantity: '1 kg' } };
+const datenbank = { route: async (r) => {
+  const req = r.request();
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'X-User-Agent', 'access-control-allow-methods': 'GET, OPTIONS' };
+  if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  const u = new URL(req.url());
+  const code = u.pathname.split('/').pop();
+  const p = PRODUKTE[code];
+  const art = /openfoodfacts/.test(u.hostname) ? 'food' : 'beauty';
+  const json = (status, body) => r.fulfill({ status, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  if (!p) return json(404, { code, status: 'failure', errors: [{ message: { id: 'product_not_found' } }] });
+  if (art !== 'food') return json(404, { code, status: 'failure', errors: [{ message: { id: 'product_found_with_a_different_product_type' }, field: { id: 'product_type', value: 'food' } }] });
+  return json(200, { code, status: 'success', product: { code, product_name: p.name, quantity: p.quantity, product_type: 'food' } });
+} };
+const tobi = await handy(browser, { attrappe: gh, skript: LESER, datenbank });
 await tobi.ctx.route('https://generativelanguage.googleapis.com/**', gemini);
 const t = tobi.page;
 const kammer = () => gh.liste()?.speisekammer || {};
@@ -190,6 +209,25 @@ await t.click('[data-act="gekocht"]');
 await lobZu();
 check(await bis(() => (kammer().rinderhack?.q || 0) === Math.max(0, vorher - hackGebraucht) || (!kammer().rinderhack && vorher <= hackGebraucht)), `Heute gekocht: ${hackGebraucht} g Hack raus (vorher ${vorher} g)`);
 check(kammer().feta?.q === 150, 'Was das Chili nicht braucht, bleibt');
+// Strichcode scannen: nachgeschlagen, in der Einheit der Rezepte hinein (400 ml Kokosmilch → 1 Dose)
+await zurueck();
+await t.click('#browse .abk-reste');
+const BILD = { name: 'code.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGM4UaEBRwzEcQBTUhaBGaoOzwAAAABJRU5ErkJggg==', 'base64') };
+const scanne = async (code) => {
+  await t.evaluate((c) => { window.__code = c; }, code);
+  await t.click('[data-act="kammer-scannen"]');
+  await t.waitForSelector('#scan-dlg[open]');
+  await t.setInputFiles('#scan-datei', BILD);
+};
+await scanne('4000000000012');
+check(await bis(() => kammer().kokosmilch?.q === 1 && kammer().kokosmilch.u === 'Dose', 8000) && await bis(async () => (await t.locator('#toast').innerText()).includes('Kokosmilch (1 Dose) ist in der Speisekammer')), 'Scannen: Kokosmilch 400 ml – als 1 Dose in der Speisekammer, wie die Rezepte rechnen');
+await scanne('4000000000029');
+check(await bis(() => kammer().reis?.q === 1000 && kammer().reis.u === 'g', 8000), 'Basmati 1 kg: 1000 g Reis');
+await scanne('4000000000999');
+check(await bis(async () => (await t.locator('#toast').innerText()).includes('kennt keine Datenbank')), 'Unbekannte Nummer: „kennt keine Datenbank – tipp ein, was es ist“');
+await t.click('[data-act="kammer-wahl-weg"]').catch(() => {});
+await t.click('[data-act="reste-zu"]');
+
 // Mit der KI: angetippt zuerst, und ein Foto liest ein, was da ist
 await t.evaluate((k) => localStorage.setItem('boxenstopp.ki.v1', JSON.stringify({ schluessel: k })), KI);
 await zurueck();
@@ -209,7 +247,7 @@ if (await t.locator('#reste').isHidden()) await t.click('#browse .abk-reste');
 await bis(async () => (await t.locator('#kammer-foto').count()) === 1);
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGM4UaEBRwzEcQBTUhaBGaoOzwAAAABJRU5ErkJggg==', 'base64');
 await t.setInputFiles('#kammer-foto', { name: 'regal.png', mimeType: 'image/png', buffer: PNG });
-check(await bis(() => kammer().reis?.q === 500 && kammer().kokosmilch?.q === 2 && kammer().kokosmilch?.u === 'Dose', 10000), 'Ein Foto: die KI liest ab – 500 g Reis, 2 Dosen Kokosmilch');
+check(await bis(() => kammer().reis?.q === 1500 && kammer().kokosmilch?.q === 3 && kammer().kokosmilch?.u === 'Dose', 10000), 'Ein Foto: die KI liest ab – 500 g Reis und 2 Dosen Kokosmilch kommen dazu (jetzt 1,5 kg und 3 Dosen)');
 check(anfragen.at(-1).input.some((x) => x.type === 'image'), 'mit dem Bild in der Anfrage');
 check(gh.zustand.nachrichten.some((x) => /Speisekammer/.test(x)), 'Im Commit steht „Speisekammer“');
 check(tobi.fehler.length === 0, `keine Fehler im Browser (${tobi.fehler.join(' | ')})`);

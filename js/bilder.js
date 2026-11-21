@@ -70,7 +70,7 @@ export const ZUTAT_BILD = {
 /** Abteilung (Katalog `c` bzw. `cat` eines Eintrags) → Bildchen, wenn es keins für den Schlüssel gibt. */
 export const KAT_BILD = {
   fleisch: 'cut-of-meat', obst: 'leafy-green', kuehl: 'glass-of-milk', tk: 'ice', konserven: 'canned-food', trocken: 'cooked-rice',
-  vorrat: 'jar', gewuerz: 'salt', haushalt: 'package', sonstiges: 'shopping-cart',
+  vorrat: 'jar', gewuerz: 'salt', haushalt: 'package', sonstiges: 'shopping-cart', amazon: 'package',
 };
 
 /* Für frei getippte Einträge („Bananen“, „Klopapier“): Stichwort → Bildchen. Reihenfolge zählt. */

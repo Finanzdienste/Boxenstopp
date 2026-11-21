@@ -1,5 +1,5 @@
 /*
- * Die Speisekammer – was zu Hause da ist (Amy, 20.11.2026: „alles einmal
+ * Die Speisekammer – was zu Hause da ist (Marielle, 20.11.2026: „alles einmal
  * einspeichern, und dann behält er die Sachen“). Ohne DOM, tests/test-
  * speisekammer.mjs prüft es in Node. In liste.json unter `speisekammer`:
  *
@@ -18,7 +18,8 @@
  *   - „Heute gekocht“ zieht ab, was das Rezept braucht (verbrauchtVon). Was
  *     dabei auf null geht, ist weg; was ohne Menge da ist, bleibt.
  *   - Von Hand: tippen („500 g Hackfleisch“), ein Foto (die KI liest ab,
- *     kammer-ki.js), „ist alle“ und „muss bald weg“.
+ *     kammer-ki.js), den Strichcode scannen (Open Food Facts, kammerAusProdukt),
+ *     „ist alle“ und „muss bald weg“.
  * Die Resteverwertung (ansicht-ki.js) nimmt, was da ist – angetippt zuerst.
  * Auf der Einkaufsliste steht dabei, was ihr noch habt (ansicht-liste.js).
  */
@@ -29,7 +30,7 @@ export const KAMMER_SCHLUESSEL = /^[A-Za-z0-9_.~:@+-]{1,120}$/;
 /** Ab so vielen Tagen meldet sich Frisches (Fleisch, Kühlregal, Obst und Gemüse) von selbst als „muss bald weg“. */
 export const FRISCH_TAGE = 4;
 /** Was nicht in die Speisekammer gehört, auch wenn es auf der Einkaufsliste steht. */
-const NICHT_ESSEN = new Set(['haushalt']);
+const NICHT_ESSEN = new Set(['haushalt', 'amazon']);
 
 const istObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const istZahl = (v) => typeof v === 'number' && Number.isFinite(v);

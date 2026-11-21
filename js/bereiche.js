@@ -31,6 +31,8 @@ export const BEREICHE = [
   { id: 'gewuerze', name: 'Gewürze', hinweis: '', teile: ['gewuerz'] },
   { id: 'extras', name: 'Extras', hinweis: 'Haushalt', teile: ['haushalt'] },
   { id: 'sonstiges', name: 'Sonstiges', hinweis: '', teile: ['sonstiges'] },
+  // Nicht im Laden: was Amy mit Prime bestellt (Tobi hat kein Prime) – „Amazon: Ladekabel“ oder in der Zeile verschieben
+  { id: 'amazon', name: 'Amazon', hinweis: 'zum Bestellen (Prime)', teile: ['amazon'] },
 ];
 
 const PLATZ = {};

@@ -98,7 +98,13 @@ export function postenAusText(t, katalog = {}, mehr = {}) {
     const pack = mehr.preise?.[k];
     if (ZAEHLEN.has(u) && ZAEHLEN.has(soll)) u = soll;
     else if (ZAEHLEN.has(u) && pack?.u === soll && pack.menge > 0) { q *= pack.menge; u = soll; }
-    else if (u === 'kg' && soll === 'g') { q *= 1000; u = 'g'; } else if (u === 'l' && soll === 'ml') { q *= 1000; u = 'ml'; }
+    else if (u === 'kg' && soll === 'g') { q *= 1000; u = 'g'; } else if (u === 'l' && soll === 'ml') { q *= 1000; u = 'ml'; } else if (['g', 'ml', 'kg', 'l'].includes(u) && ZAEHLEN.has(soll)) {
+      // „400 ml Kokosmilch“, die Rezepte zählen Dosen: die Packung steht im Katalog („Dose à 400 ml“)
+      const m = String(katalog[k]?.n || '').match(/(\d+(?:[.,]\d+)?)\s*(g|ml|kg|l)\b/i);
+      const gross = m ? Number(m[1].replace(',', '.')) * (/^(?:kg|l)$/i.test(m[2]) ? 1000 : 1) : 0;
+      const menge = q * (/^(?:kg|l)$/.test(u) ? 1000 : 1);
+      if (gross > 0) { q = Math.round((menge / gross) * 4) / 4 || 1; u = soll; }
+    }
   }
   const name = String(katalog[k]?.n || z.kat?.n || z.name).split(',')[0].trim();
   return { k, name, cat: katalog[k]?.c || z.kat?.c || 'sonstiges', q, u };
@@ -123,4 +129,16 @@ export function erkanntAlsPosten(roh, katalog = {}, mehr = {}) {
     else if (alt.q !== null && p.q !== null && alt.u === p.u) alt.q += p.q;
   }
   return [...aus.values()];
+}
+
+/**
+ * Ein gescannter Strichcode, nachgeschlagen in Open Food Facts & Co.
+ * (inventar-netz.js nachschlagen → { name, marke, notiz „Menge: 400 ml“ … }),
+ * als Posten für die Speisekammer – oder null, wenn nichts Brauchbares dabei ist.
+ */
+export function kammerAusProdukt(treffer, katalog = {}, mehr = {}) {
+  const name = zeile(treffer?.name, 80) || zeile(treffer?.marke, 60);
+  if (!name) return null;
+  const menge = zeile(String(treffer?.notiz || '').match(/^Menge:\s*(.+)$/m)?.[1] || '', 30).replace(/^(\d+)\s*[x×]\s*/i, '').match(/^\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l|cl)\b/i)?.[0].replace(/cl$/i, '0 ml') || '';
+  return postenAusText(menge ? `${menge} ${name}` : name, katalog, mehr) || { k: `n:${name.toLowerCase().replace(/[^a-z0-9äöüß]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)}`, name, cat: 'sonstiges', q: null, u: '' };
 }

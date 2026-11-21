@@ -223,7 +223,7 @@ check((await zeile('Bananen').locator('img.zb').getAttribute('src')) === 'bilder
 check(await page.evaluate(() => [...document.querySelectorAll('#list-body img.zb')].every((i) => i.getAttribute('alt') === '')), 'die Bildchen sind Schmuck (alt leer) – der Name steht daneben');
 check((await gruppeVon('Zahnpasta')) === 'extras', 'Zahnpasta bei Extras');
 const bereiche = await page.$$eval('#list-body .grp:not(.grp-done)', (gs) => gs.map((g) => g.dataset.bereich));
-check(bereiche.join(' > ') === 'frisch > tierisch > trocken > gewuerze > extras', `Bereiche von oben nach unten (${bereiche.join(' > ')})`);
+check(bereiche.join(' > ') === 'frisch > tierisch > trocken > gewuerze > extras > amazon', `Bereiche von oben nach unten, Amazon immer ganz unten (${bereiche.join(' > ')})`);
 // Kopieren: der Text kommt in die Zwischenablage (hier abgefangen)
 await page.evaluate(() => { window.__kopie = null; navigator.clipboard.writeText = async (t) => { window.__kopie = t; }; });
 await page.click('#kopieren');

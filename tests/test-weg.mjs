@@ -17,7 +17,7 @@ check(wegSchluessel('c-abc123', { name: 'Bananen', custom: true }) === 'n:banane
 
 // --- Werte: gemessen und die übliche Reihenfolge, gemischt
 const ohne = wegWerte(null);
-check(ohne.abteilung('obst') === 0 && ohne.abteilung('sonstiges') === 1 && ohne.abteilung('fleisch') < ohne.abteilung('trocken'), 'ohne Messung: die übliche Reihenfolge');
+check(ohne.abteilung('obst') === 0 && ohne.abteilung('amazon') === 1 && ohne.abteilung('sonstiges') < 1 && ohne.abteilung('fleisch') < ohne.abteilung('trocken'), 'ohne Messung: die übliche Reihenfolge (Amazon ganz hinten)');
 const w = wegWerte({ n: 1, k: { kidney: { c: 'konserven', p: [0] }, rinderhack: { c: 'fleisch', p: [0.5] }, zwiebeln: { c: 'obst', p: [1] } } });
 check(w.abteilung('konserven') < w.abteilung('fleisch') && w.abteilung('fleisch') < w.abteilung('obst'), `ein Einkauf: Konserven vor Fleisch vor Obst (${['konserven', 'fleisch', 'obst'].map((c) => w.abteilung(c).toFixed(2)).join(' < ')})`);
 check(w.zutat('kidney', 'konserven') < w.zutat('mais', 'konserven') || w.zutat('kidney', 'konserven') <= w.abteilung('konserven'), 'eine gemessene Zutat steht vor den ungemessenen ihrer Abteilung');
@@ -52,7 +52,7 @@ await page.click('[data-open="chili"]');
 await page.click('#detail [data-act="alle-dazu"]');
 await page.click('.tab[data-tab="einkauf"]');
 check(await bis(async () => (await page.locator('#l-laden').isVisible())) && (await page.locator('#l-laden-info').innerText()).startsWith('Wähl den Laden'), 'über der Liste: „Wähl den Laden, in dem du einkaufst“');
-const bereiche = () => page.$$eval('#list-body .grp:not(.grp-done)', (gs) => gs.map((x) => x.dataset.bereich));
+const bereiche = () => page.$$eval('#list-body .grp:not(.grp-done):not(.grp-amazon)', (gs) => gs.map((x) => x.dataset.bereich));
 check(JSON.stringify(await bereiche()) === JSON.stringify(['frisch', 'tierisch', 'trocken']), 'ohne Weg: die übliche Reihenfolge (Frisches, Tierisches, Trockenes)');
 await page.selectOption('#l-laden-wahl', 'Aldi');
 check((await page.locator('#l-laden-info').innerText()).startsWith('Hak in der Reihenfolge ab') && (await page.locator('.tab[data-tab="angebote"]').count()) === 1, 'Aldi gewählt: „Hak in der Reihenfolge ab, in der du durch den Laden gehst“');

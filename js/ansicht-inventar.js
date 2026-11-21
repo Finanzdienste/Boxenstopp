@@ -718,8 +718,8 @@ async function kiAusfuellen(id) {
   }
 }
 
-/** Den Strichcode von einem Foto lesen: erst das Gerät (BarcodeDetector), sonst die KI. '' ohne Erfolg. */
-async function codeLesen(datei) {
+/** Den Strichcode von einem Foto lesen: erst das Gerät (BarcodeDetector), sonst die KI. '' ohne Erfolg. Auch für die Speisekammer. */
+export async function codeLesen(datei) {
   if ('BarcodeDetector' in window) {
     try {
       const da = await window.BarcodeDetector.getSupportedFormats?.() || [];

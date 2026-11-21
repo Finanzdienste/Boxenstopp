@@ -3,7 +3,8 @@
  * Rezepte → Speisekammer, ansicht-ki.js). Was zu Hause ist, mit Menge, was
  * bald weg muss zuerst. Antippen markiert für das nächste Rezept („Unbedingt
  * verwenden“), ☆ heißt „muss bald weg“, ✓ „ist alle“. Dazu: tippen („500 g
- * Hackfleisch, 6 Eier“) oder fotografieren (die KI liest ab, kammer-ki.js).
+ * Hackfleisch, 6 Eier“), fotografieren (die KI liest ab, kammer-ki.js) oder
+ * den Strichcode scannen (Open Food Facts & Co., inventar-netz.js).
  * Gefüllt wird sie sonst von selbst – beim Abhaken auf der Einkaufsliste,
  * geleert bei „Heute gekocht“ (speisekammer.js).
  */
@@ -11,7 +12,10 @@ import { app, $, melde, lese, schreibe } from './kern.js';
 import { esc } from './format.js';
 import { zutatImg } from './bilder.js';
 import { kammerListe, kammerText, mengeKurz, alterTage, opKammer, opKammerWeg, opKammerMenge, MAX_KAMMER } from './speisekammer.js';
-import { postenAusZeilen, rumpfKammer, erkanntAlsPosten } from './kammer-ki.js';
+import { postenAusZeilen, rumpfKammer, erkanntAlsPosten, kammerAusProdukt } from './kammer-ki.js';
+import { scannen } from './scanner.js';
+import { nachschlagen } from './inventar-netz.js';
+import { codeLesen } from './ansicht-inventar.js';
 import { kiAnfragen, anbieterVon } from './ki.js';
 import { ladeKi } from './zugang.js';
 import { jsonAus } from './amy-import.js';
@@ -26,6 +30,8 @@ let bearbeiten = ''; // Schlüssel, dessen Menge gerade geändert wird
 const KURZ = 12; // so viele zeigt die Liste zuerst
 
 const KAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg>';
+
+const STRICHCODE = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6v12M7 6v12M10.5 6v12M13 6v12M16.5 6v12M20 6v12"/></svg>';
 
 const kammer = () => app.stand?.speisekammer || {};
 const wahlMerken = () => schreibe(WAHL, [...gewaehlt]);
@@ -77,7 +83,7 @@ export function kammerHTML() {
     ? `<p class="kammer-hilfe">Tipp an, was ins nächste Rezept soll${markiert ? ` – ${markiert === 1 ? '1 angetippt' : `${markiert} angetippt`}` : ''}. ☆ muss bald weg, ✓ ist alle. Was du auf der Einkaufsliste abhakst, kommt von selbst dazu; „Heute gekocht“ nimmt es wieder raus.</p>`
     : '<p class="kammer-hilfe">Noch leer. Schreib oder fotografier einmal, was da ist – danach füllt sie sich beim Einkaufen von selbst (was du auf der Liste abhakst), und „Heute gekocht“ nimmt raus, was das Rezept braucht.</p>';
   const dazu = `<form class="kammer-dazu" id="kammer-dazu-form" novalidate><input id="kammer-neu" type="text" maxlength="400" value="${esc(neuText)}" placeholder="Dazu: z. B. 500 g Hackfleisch, 6 Eier, Feta" aria-label="Was ist noch da?" autocomplete="off" enterkeyhint="done"><button type="submit" class="btn">Dazu</button>
-<label class="btn${liest ? ' is-aus' : ''}" for="kammer-foto">${KAMERA}${liest ? 'Liest …' : 'Foto'}</label><input class="vh" id="kammer-foto" type="file" accept="image/*" multiple${liest ? ' disabled' : ''}></form>`;
+<button type="button" class="btn" data-act="kammer-scannen"${liest ? ' disabled' : ''}>${STRICHCODE}Scannen</button><label class="btn${liest ? ' is-aus' : ''}" for="kammer-foto">${KAMERA}${liest ? 'Liest …' : 'Foto'}</label><input class="vh" id="kammer-foto" type="file" accept="image/*" multiple${liest ? ' disabled' : ''}></form>`;
   const zeilen = n ? `<ul class="kammer-liste" aria-labelledby="kammer-titel">${zeigen.map(zeileHTML).join('')}</ul>${zeigen.length < n ? `<button type="button" class="linkbtn kammer-mehr" data-act="kammer-alle-zeigen">Alle ${n} zeigen</button>` : ''}` : '';
   const los = n ? `<div class="kammer-los"><button type="button" class="btn btn-primary" data-act="kammer-los">${markiert ? 'Rezept mit dem Angetippten' : 'Mach mir einfach was'}</button>${markiert ? '<button type="button" class="btn btn-quiet" data-act="kammer-wahl-weg">Nichts antippen</button>' : ''}</div>` : '';
   return `<section class="kammer" id="kammer" aria-labelledby="kammer-titel">${kopf}${erkl}${zeilen}${dazu}${los}</section>`;
@@ -120,6 +126,27 @@ async function fotoLesen(dateien) {
     melde(`Erkannt und eingeräumt: ${posten.slice(0, 4).map((p) => p.name).join(', ')}${posten.length > 4 ? ` und ${posten.length - 4} mehr` : ''}. Stimmt eine Menge nicht, tipp sie an.`);
   } catch (e) {
     melde(e?.message ? `Das Foto ging nicht: ${e.message}` : 'Das Foto ging gerade nicht.');
+  } finally {
+    liest = false;
+    neuZeichnen();
+  }
+}
+
+/** Strichcode scannen: nachschlagen (Open Food Facts & Co.) und hinein – mit der Packungsgröße. */
+async function scannenUndDazu() {
+  const quelle = await scannen({ titel: 'In die Speisekammer scannen' });
+  if (!quelle) return;
+  liest = true;
+  neuZeichnen();
+  try {
+    const code = quelle.code ? String(quelle.code).replace(/\D/g, '') : await codeLesen(quelle.datei);
+    if (!code) { melde('Kein Strichcode erkannt – näher ran und gerade halten, oder tipp ein, was es ist.'); return; }
+    let treffer = null;
+    try { treffer = await nachschlagen(code); } catch { melde('Nachschlagen ging gerade nicht – ohne Netz? Tipp ein, was es ist.'); return; }
+    const p = treffer ? kammerAusProdukt(treffer, app.katalog, mehr()) : null;
+    if (!p) { melde(`${code}: kennt keine Datenbank – tipp ein, was es ist.`); $('#kammer-neu')?.focus(); return; }
+    app.aendern(opKammerMenge([p], 1, app.name()));
+    melde(`${p.name}${mengeKurz(p) ? ` (${mengeKurz(p)})` : ''} ist in der Speisekammer.`);
   } finally {
     liest = false;
     neuZeichnen();
@@ -183,6 +210,7 @@ export function klickKammer(el) {
     case 'kammer-alle-zeigen': alleZeigen = true; neuZeichnen(); return true;
     case 'kammer-wahl-weg': wahlZuruecksetzen(); neuZeichnen(); return true;
     case 'kammer-los': $('#k-form')?.requestSubmit(); return true;
+    case 'kammer-scannen': scannenUndDazu(); return true;
     default: return false;
   }
 }

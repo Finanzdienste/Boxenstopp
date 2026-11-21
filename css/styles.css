@@ -2241,3 +2241,5 @@ li.vt-wenig b{color:#9A5B00}
 :root[data-design="dunkel"] .abk-plan .abk-ic{background:#45300C;color:#FFD38A}
 .e-ki-ersatz{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .e-ki-ersatz-k{margin:0 0 6px;font:650 15px/1.3 var(--f-body)}
+/* Amazon: was jemand mit Prime bestellt – eigener Bereich ganz unten, mit eigenem Feld */
+.grp-amazon .l-amazon-form{margin:8px 0 4px}

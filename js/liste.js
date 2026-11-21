@@ -122,7 +122,8 @@ const TODO_WUENSCHE = ['verbinden', 'trennen', 'abgleichen'];
 export const TODO_APP_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_UNGLEICH = 200;
 /** Die Abteilungen, in die man eine Zeile verschieben kann (weg.js REIHE). */
-export const ABTEILUNGEN = ['obst', 'fleisch', 'kuehl', 'trocken', 'konserven', 'vorrat', 'tk', 'gewuerz', 'haushalt', 'sonstiges'];
+/** amazon: nicht im Laden – Amy bestellt es mit Prime (Tobi, 21.11.2026). */
+export const ABTEILUNGEN = ['obst', 'fleisch', 'kuehl', 'trocken', 'konserven', 'vorrat', 'tk', 'gewuerz', 'haushalt', 'sonstiges', 'amazon'];
 const MAX_ABTEILUNGEN = 400;
 const MAX_LAEDEN_WEG = 12;
 const MAX_WEG_ZUTATEN = 300;
