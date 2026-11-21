@@ -587,7 +587,9 @@ function fussZeichnen(fertigAnzahl) {
 
 function fuerZeichnen() {
   const el = $('#forrow');
-  const rids = rezepteAufListe(app.stand);
+  // Nur, wofür noch etwas offen ist – ist alles abgehakt (im Wagen), ist das Rezept eingekauft
+  const offen = new Set(Object.values(app.stand.items).flatMap((d) => teileVon(d).filter(([, p]) => p.done !== true).map(([rid]) => rid)));
+  const rids = rezepteAufListe(app.stand).filter((rid) => offen.has(rid));
   if (!rids.length) { el.hidden = true; el.innerHTML = ''; return; }
   el.hidden = false;
   el.innerHTML = '<span class="for-k">Für</span>' + rids.map((rid) => {

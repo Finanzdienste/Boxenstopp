@@ -229,6 +229,22 @@ check(await page.locator('#list-body section:not([data-bereich="amazon"]) .item-
 const kabel = await amazon.locator('[data-check]').first().getAttribute('data-check');
 await amazon.locator(`[data-check="${kabel}"]`).click();
 check(await bis(async () => (await amazon.locator('.item-name').count()) === 1), 'Bestellt (abgehakt): raus aus dem Amazon-Bereich');
+// „Für“: nur Rezepte, für die noch etwas offen ist – ganz eingekauft, steht es nicht mehr oben
+await page.click('.tab[data-tab="rezepte"]');
+if (await page.locator('#detail:not([hidden]) [data-act="zurueck"]').count()) await page.click('#detail [data-act="zurueck"]');
+await page.click('#grid [data-open="gnocchi"]');
+await page.click('[data-act="alle-dazu"]');
+await page.click('.tab[data-tab="einkauf"]');
+check(await bis(async () => (await page.locator('#forrow [data-rmrec="gnocchi"]').count()) === 1), '„Für“: die Gnocchi-Pfanne, solange etwas offen ist');
+for (let i = 0; i < 40; i++) {
+  const offen = page.locator('#list-body section.grp:not(.grp-done) li.item', { has: page.locator('.item-sub', { hasText: 'Gnocchi-Pfanne' }) }).locator('[data-check]').first();
+  if (!(await offen.count())) break;
+  await offen.click();
+  await page.waitForTimeout(80);
+}
+check(await bis(async () => (await page.locator('#forrow [data-rmrec="gnocchi"]').count()) === 0), 'Alles für die Gnocchi abgehakt: oben nicht mehr bei „Für“');
+await page.click('[data-act="erledigte-weg"]').catch(() => {});
+
 // Urlaub: die Liste von zu Hause beiseite, eine neue leere – und zurück
 const namenDa = () => page.$$eval('#list-body .item-name', (xs) => xs.map((x) => x.textContent.trim()).sort().join());
 const vorUrlaub = await namenDa();
