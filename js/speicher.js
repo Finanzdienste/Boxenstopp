@@ -256,7 +256,7 @@ export const UMZUG_NACHRICHT = 'Umzug der Sachen nach sachen.json';
 function listeNachtrag(roh, stand, bekannt, { ohneInventar = false } = {}) {
   const fehlt = (k) => roh && typeof roh === 'object' && !(k in roh);
   const mehr = {};
-  for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm', 'profil', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche', 'amyWerte']) if (fehlt(k) && Object.keys(bekannt?.[k] || {}).length) mehr[k] = bekannt[k];
+  for (const k of ['amy', 'amyTags', 'wege', 'abteilungen', 'gleich', 'kochen', 'fehlt', 'bons', 'preisalarm', 'profil', 'gemeint', 'notizbuch', 'vertraeglich', 'wuensche', 'amyWerte', 'speisekammer']) if (fehlt(k) && Object.keys(bekannt?.[k] || {}).length) mehr[k] = bekannt[k];
   if (fehlt('essensplan') && Object.keys(bekannt?.essensplan?.tage || {}).length) mehr.essensplan = bekannt.essensplan;
   if (fehlt('ungleich') && bekannt?.ungleich?.length) mehr.ungleich = bekannt.ungleich;
   if (fehlt('haushalt') && hatHaushalt(bekannt?.haushalt)) mehr.haushalt = bekannt.haushalt;
@@ -265,6 +265,7 @@ function listeNachtrag(roh, stand, bekannt, { ohneInventar = false } = {}) {
     else if (!ohneInventar) mehr.inventar = bekannt.inventar;
   }
   if (fehlt('leute') && Object.keys(bekannt?.leute || {}).length) mehr.leute = bekannt.leute;
+  if (fehlt('urlaub') && bekannt?.urlaub?.an) mehr.urlaub = bekannt.urlaub;
   // Dasselbe in den Putztagen: Material und „jedes 2. Mal“
   const nachtrag = [...planNachtrag(roh, stand, bekannt), ...profilNachtrag(roh, stand, bekannt)];
   if (Object.keys(mehr).length) nachtrag.unshift(opZusammen({}, {}, mehr));

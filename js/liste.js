@@ -29,6 +29,7 @@
  *     wuensche:  { <w-…>: { id, text, by, at, erledigt, antwort } },   Amys Vorschläge für Tobi (wuensche.js)
  *     amyWerte:  { <amy-…>: { at, z: { <Zeile>: { g, kcal, p, kh, f, eur } } } },   was die KI für Amys unbekannte Zutaten geschätzt hat (amy-werte.js)
  *     speisekammer: { <Schlüssel>: { k, name, cat, q, u, bald, at, geaendert, by } },   was zu Hause da ist (speisekammer.js)
+ *     urlaub:    null | { an: true, seit, by, items, speisekammer }   im Urlaub: die Liste und die Speisekammer von zu Hause, beiseitegelegt (opUrlaub)
  *     inventar:  { listen: { <sl-…>: … }, dinge: { <sd-…>: … } } }   Sachen in eigenen Listen (inventar.js) – nur in der eigenen Liste
  *                eines Gasts; Amys Sachen liegen seit v83 in sachen.json (sachen.js), was hier noch steht, zieht dorthin um
  *
@@ -99,7 +100,7 @@ import { wuenscheBereinigen, wuenscheAnwenden, wuenscheZusammen } from './wuensc
 import { speisekammerBereinigen, kammerAnwenden, kammerZusammen } from './speisekammer.js';
 
 export const leerHaushalt = () => ({ sachen: {}, plaene: {}, stand: {}, todoApp: '', todoWunsch: {}, todoAn: {}, todoZiel: {} });
-export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {}, amyWerte: {}, inventar: leerInventar(), speisekammer: {} });
+export const leer = () => ({ version: 1, rev: 0, items: {}, cooked: {}, bewertung: {}, ki: {}, notizen: {}, gepinnt: {}, angebote: { stand: '', von: null, eintraege: [] }, amy: {}, amyTags: {}, wege: {}, abteilungen: {}, gleich: {}, ungleich: [], kochen: {}, fehlt: {}, bons: {}, preisalarm: {}, haushalt: leerHaushalt(), leute: {}, profil: {}, gemeint: {}, notizbuch: {}, essensplan: { tage: {} }, vertraeglich: {}, wuensche: {}, amyWerte: {}, inventar: leerInventar(), speisekammer: {}, urlaub: null });
 const MAX_KOCHEN = 6;
 const MAX_BONS_JE = 5;
 const MAX_BONS = 200;
@@ -335,7 +336,9 @@ export function beschreibung(vorher, nachher, name = () => '') {
   if (JSON.stringify(v.inventar || {}) !== JSON.stringify(n.inventar || {})) teile.push('Sachen');
   if (JSON.stringify(v.essensplan || {}) !== JSON.stringify(n.essensplan || {})) teile.push('Essensplan');
   if (JSON.stringify(v.vertraeglich || {}) !== JSON.stringify(n.vertraeglich || {})) teile.push('Verträglichkeit');
-  if (JSON.stringify(v.speisekammer || {}) !== JSON.stringify(n.speisekammer || {})) teile.push('Speisekammer');
+  if (!v.urlaub?.an && n.urlaub?.an) teile.push('Urlaub');
+  else if (v.urlaub?.an && !n.urlaub?.an) teile.push('zurück aus dem Urlaub');
+  else if (JSON.stringify(v.speisekammer || {}) !== JSON.stringify(n.speisekammer || {})) teile.push('Speisekammer');
   const wNeu = Object.keys(n.wuensche || {}).filter((id) => !v.wuensche?.[id]).length;
   const wFertig = Object.values(n.wuensche || {}).filter((w) => w.erledigt && !v.wuensche?.[w.id]?.erledigt).length;
   if (wNeu) teile.push(wNeu === 1 ? 'ein neuer Vorschlag' : `${wNeu} neue Vorschläge`);
@@ -390,17 +393,17 @@ export function summen(d) {
 
 /* -------------------------------------------------------------- bereinigen */
 
-/**
- * Macht aus beliebigem JSON einen gültigen Stand. Was aus GitHub oder dem
- * localStorage kommt, hat womöglich eine ältere oder kaputte Form – oder das
- * andere Handy hat Unsinn geschrieben. Unbekanntes fällt weg.
- */
-export function bereinigen(roh) {
-  const s = leer();
-  if (!istObj(roh)) return s;
-  s.rev = Number.isInteger(roh.rev) && roh.rev >= 0 ? roh.rev : 0;
-  if (istObj(roh.items)) {
-    for (const [k, d] of Object.entries(roh.items)) {
+/** Im Urlaub: was von zu Hause beiseitegelegt ist – oder null. */
+function urlaubBereinigen(u) {
+  if (!istObj(u) || u.an !== true) return null;
+  return { an: true, seit: text(u.seit, 40) || '', by: text(u.by, 40), items: itemsBereinigen(u.items), speisekammer: speisekammerBereinigen(u.speisekammer) };
+}
+
+/** Die Einträge der Liste, wie sie in der Datei stehen (auch die geparkten im Urlaub). */
+function itemsBereinigen(roh) {
+  const items = {};
+  if (istObj(roh)) {
+    for (const [k, d] of Object.entries(roh)) {
       if (!SCHLUESSEL.test(k) || !istObj(d)) continue;
       const e = {
         name: text(d.name, 120) || k,
@@ -424,9 +427,22 @@ export function bereinigen(roh) {
           }
         }
       }
-      s.items[k] = e;
+      items[k] = e;
     }
   }
+  return items;
+}
+
+/**
+ * Macht aus beliebigem JSON einen gültigen Stand. Was aus GitHub oder dem
+ * localStorage kommt, hat womöglich eine ältere oder kaputte Form – oder das
+ * andere Handy hat Unsinn geschrieben. Unbekanntes fällt weg.
+ */
+export function bereinigen(roh) {
+  const s = leer();
+  if (!istObj(roh)) return s;
+  s.rev = Number.isInteger(roh.rev) && roh.rev >= 0 ? roh.rev : 0;
+  s.items = itemsBereinigen(roh.items);
   if (istObj(roh.bewertung)) {
     for (const [rid, b] of Object.entries(roh.bewertung)) {
       if (SCHLUESSEL.test(rid) && istObj(b) && DAUMEN.includes(b.wert)) s.bewertung[rid] = { wert: b.wert, by: text(b.by, 40), at: text(b.at, 40) };
@@ -524,6 +540,7 @@ export function bereinigen(roh) {
   s.amyWerte = amyWerteBereinigen(roh.amyWerte, s.amy);
   s.inventar = inventarBereinigen(roh.inventar);
   s.speisekammer = speisekammerBereinigen(roh.speisekammer);
+  s.urlaub = urlaubBereinigen(roh.urlaub);
   return s;
 }
 
@@ -825,6 +842,14 @@ export const opErledigteWeg = () => ({ typ: 'erledigteWeg' });
 export const opLeeren = () => ({ typ: 'leeren' });
 export const opGekocht = (rid, at, by) => ({ typ: 'gekocht', rid, at, by: by || null });
 /**
+ * Urlaub (Tobi, 21.11.2026: „auf Urlaub stellen, sodass ein neuer Bereich kommt,
+ * der komplett leer ist“): an legt die Liste und die Speisekammer von zu Hause
+ * beiseite – die Liste ist leer, die Speisekammer auch (eine andere Küche). aus
+ * holt beides zurück; was im Urlaub noch offen ist, kommt mit auf die Liste,
+ * Abgehaktes und die Speisekammer aus dem Urlaub fallen weg.
+ */
+export const opUrlaub = (an, by, at = jetzt()) => ({ typ: 'urlaub', an: !!an, by: by || null, at });
+/**
  * Einträge und behaltene KI-Rezepte von einem anderen Stand dazunehmen, ohne
  * Vorhandenes zu überschreiben – dazu, was sonst noch fehlt:
  * mehr = { amy, amyTags, wege, abteilungen, gleich, ungleich, kochen, fehlt, bons, preisalarm,
@@ -836,6 +861,7 @@ export const opZusammen = (items, ki = {}, mehr = {}) => ({
   fehlt: klon(mehr.fehlt || {}), bons: klon(mehr.bons || {}), preisalarm: klon(mehr.preisalarm || {}), haushalt: klon(mehr.haushalt || {}), leute: klon(mehr.leute || {}), profil: klon(mehr.profil || {}),
   gemeint: klon(mehr.gemeint || {}), notizbuch: klon(mehr.notizbuch || {}), essensplan: klon(mehr.essensplan || {}), vertraeglich: klon(mehr.vertraeglich || {}), wuensche: klon(mehr.wuensche || {}),
   amyWerte: klon(mehr.amyWerte || {}), inventar: klon(mehr.inventar || {}), speisekammer: klon(mehr.speisekammer || {}),
+  ...(mehr.urlaub ? { urlaub: klon(mehr.urlaub) } : {}),
 });
 /**
  * Eine ältere App-Fassung kennt Material und „jedes 2. Mal“ der Putztage
@@ -1155,6 +1181,30 @@ function aendere(s, op) {
       if (DAUMEN.includes(op.wert)) s.bewertung[op.rid] = { wert: op.wert, by: op.by || null, at: op.at };
       else delete s.bewertung[op.rid];
       return;
+    case 'urlaub': {
+      if (op.an) {
+        if (s.urlaub?.an) return;
+        s.urlaub = { an: true, seit: op.at, by: op.by || null, items: klon(s.items), speisekammer: klon(s.speisekammer || {}) };
+        s.items = {};
+        s.fehlt = {};
+        s.speisekammer = {};
+        return;
+      }
+      if (!s.urlaub?.an) return;
+      const zuHause = klon(s.urlaub.items || {});
+      for (const [k, d] of Object.entries(s.items)) {
+        if (erledigt(d)) continue;
+        const da = zuHause[k];
+        if (!da) { zuHause[k] = d; continue; }
+        // Steht es zu Hause schon drauf: die offenen Teile dazu
+        for (const [rid, p] of teileVon(d)) if (p.done !== true) da.parts[rid] = p;
+        if (d.custom) da.checked = false;
+      }
+      s.items = zuHause;
+      s.speisekammer = klon(s.urlaub.speisekammer || {});
+      s.urlaub = null;
+      return;
+    }
     case 'gekocht':
       if (SCHLUESSEL.test(String(op.rid)) && TAG.test(String(op.at))) s.cooked[op.rid] = { at: op.at, by: op.by || null };
       return;
@@ -1242,6 +1292,8 @@ function aendere(s, op) {
       if (istObj(op.vertraeglich)) vertraeglichZusammen(s, op.vertraeglich);
       if (istObj(op.wuensche)) wuenscheZusammen(s, op.wuensche);
       if (istObj(op.speisekammer)) kammerZusammen(s, op.speisekammer);
+      // Eine ältere Fassung hat den Urlaub weggelassen: was dieses Handy davon kannte, kommt zurück
+      if (istObj(op.urlaub) && !s.urlaub) s.urlaub = urlaubBereinigen(op.urlaub);
       if (istObj(op.amyWerte)) {
         // Schätzungen, die hier fehlen (eine ältere Fassung hat sie weggelassen), kommen dazu
         if (!istObj(s.amyWerte)) s.amyWerte = {};

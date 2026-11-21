@@ -31,7 +31,7 @@ import { gekauftVon, opKammerMenge, mengeKurz } from './speisekammer.js';
 import { lobKlein } from './lob.js';
 import { euro, kostenListe, offenJeZutat } from './kosten.js';
 import { esc, menge, ungefaehr, abteilung, uhrzeit } from './format.js';
-import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, opTeil, opTeilWeg, opGemeint, opGemeintWeg, gemeintVon, extraId, istExtra, aufloesen, ABTEILUNGEN } from './liste.js';
+import { teileVon, erledigt, summen, rezeptStand, rezepteAufListe, offeneAnzahl, opHaken, opLoeschen, opSetzen, opEigener, opErledigteWeg, opLeeren, opWeg, opWegVergessen, opZusammen, opAbteilung, opGleich, opGleichWeg, opUngleich, opFehlt, opFehltWeg, opBon, opBonWeg, opPreisalarm, opTeil, opTeilWeg, opGemeint, opGemeintWeg, gemeintVon, extraId, istExtra, aufloesen, ABTEILUNGEN, opUrlaub } from './liste.js';
 import { verlaufHinweis, verlaufText, wochenSchluessel } from './preisverlauf.js';
 import { nachWeg, wegSchluessel, wegStellen, PAUSE_MS, ABTEILUNG_NAME } from './weg.js';
 import { aehnlich, vorschlaege, richtung, merkName } from './gleich.js';
@@ -520,9 +520,9 @@ export function listeZeichnen() {
   const offen = gruppen.reduce((n, g) => n + g.eintraege.length, 0) + beiAmazon.length;
   const fertig = eintraege.filter(([, d]) => erledigt(d));
   const nachName = (a, b) => String(a[1].name).localeCompare(String(b[1].name), 'de');
-  let html = '';
+  let html = urlaubHTML();
   if (!eintraege.length) {
-    html = '<div class="empty-state"><p class="es-t">Noch nichts auf der Liste.</p><p>Öffne ein Rezept und tippe auf „Alles auf die Einkaufsliste“. Alles andere schreibt ihr oben ins Feld.</p></div>';
+    html += '<div class="empty-state"><p class="es-t">Noch nichts auf der Liste.</p><p>Öffne ein Rezept und tippe auf „Alles auf die Einkaufsliste“. Alles andere schreibt ihr oben ins Feld.</p></div>';
   } else {
     if (!offen) html += '<div class="alldone"><b>Alles im Wagen.</b> Erledigtes könnt ihr unten entfernen.</div>';
     for (const { bereich, eintraege: g } of gruppen) {
@@ -555,15 +555,34 @@ function amazonHTML(eintraege) {
 <form class="addform l-amazon-form" data-amazon autocomplete="off"><label class="sr" for="amazon-input">Für Amazon</label><input id="amazon-input" type="text" maxlength="80" placeholder="Für Amazon, z. B. Ladekabel" enterkeyhint="done"><button type="submit" class="btn">Dazu</button></form></section>`;
 }
 
+/*
+ * Urlaub (opUrlaub): oben ein Streifen, solange er läuft – mit „Zurück nach
+ * Hause“; sonst unten der Knopf „Urlaub“. Beim Zurück fragt die App einmal nach.
+ */
+let urlaubFragen = false;
+const tagMonat = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : `${d.getDate()}.${d.getMonth() + 1}.`; };
+function urlaubHTML() {
+  const u = app.stand.urlaub;
+  if (!u?.an) return '';
+  const n = Object.keys(u.items || {}).length;
+  const zuHause = n === 1 ? '1 Eintrag von zu Hause liegt' : `${n} Einträge von zu Hause liegen`;
+  const offen = Object.values(app.stand.items).filter((d) => !erledigt(d)).length;
+  const frage = urlaubFragen
+    ? `<div class="confirm" role="group" aria-label="Zurück nach Hause"><span>Die Liste von zu Hause kommt zurück${offen ? `, die ${offen === 1 ? 'eine offene Sache' : `${offen} offenen Sachen`} von hier ${offen === 1 ? 'kommt' : 'kommen'} dazu` : ''}. Abgehaktes und die Speisekammer vom Urlaub fallen weg.</span><div class="confirm-btns"><button type="button" class="btn btn-primary" data-act="urlaub-aus-ja">Zurück nach Hause</button><button type="button" class="btn btn-quiet" data-act="urlaub-aus-nein">Abbrechen</button></div></div>`
+    : '<button type="button" class="btn" data-act="urlaub-aus">Zurück nach Hause</button>';
+  return `<div class="l-urlaub" role="status"><p><b>Im Urlaub</b>${u.seit ? ` seit ${esc(tagMonat(u.seit))}` : ''} – ${esc(zuHause)} beiseite, die Speisekammer von zu Hause auch.</p>${frage}</div>`;
+}
+
 function fussZeichnen(fertigAnzahl) {
   const fuss = $('#l-foot');
   const anzahl = Object.keys(app.stand.items).length;
-  if (!anzahl) { fuss.innerHTML = ''; leerenFragen = false; return; }
+  const urlaub = app.stand.urlaub?.an ? '' : '<button type="button" class="btn btn-quiet" data-act="urlaub-an">Urlaub: neue, leere Liste</button>';
+  if (!anzahl) { fuss.innerHTML = urlaub; leerenFragen = false; return; }
   if (leerenFragen) {
     fuss.innerHTML = `<div class="confirm" role="group" aria-label="Liste leeren"><span>Alle ${anzahl} Einträge löschen? Das gilt auch auf dem anderen Handy.</span><div class="confirm-btns"><button type="button" class="btn btn-danger" data-act="leeren-ja">Ja, Liste leeren</button><button type="button" class="btn btn-quiet" data-act="leeren-nein">Abbrechen</button></div></div>`;
     return;
   }
-  fuss.innerHTML = `${fertigAnzahl ? `<button type="button" class="btn" data-act="erledigte-weg">Erledigte entfernen<span class="btn-n">${fertigAnzahl}</span></button>` : ''}<button type="button" class="btn btn-quiet" data-act="leeren">Liste leeren</button>`;
+  fuss.innerHTML = `${fertigAnzahl ? `<button type="button" class="btn" data-act="erledigte-weg">Erledigte entfernen<span class="btn-n">${fertigAnzahl}</span></button>` : ''}<button type="button" class="btn btn-quiet" data-act="leeren">Liste leeren</button>${urlaub}`;
 }
 
 function fuerZeichnen() {
@@ -908,6 +927,16 @@ export function klickListe(el) {
       return true;
     }
     case 'leeren': leerenFragen = true; listeZeichnen(); return true;
+    case 'urlaub-an': {
+      const n = Object.keys(app.stand.items).length;
+      app.aendern(opUrlaub(true, app.name()));
+      urlaubFragen = false;
+      melde(n ? `Urlaub: eine neue, leere Liste. Die ${n === 1 ? 'eine Sache' : `${n} Sachen`} von zu Hause ${n === 1 ? 'liegt' : 'liegen'} beiseite.` : 'Urlaub: eine neue, leere Liste.', { knopf: 'Rückgängig', beiKnopf: () => app.aendern(opUrlaub(false, app.name())) });
+      return true;
+    }
+    case 'urlaub-aus': urlaubFragen = true; listeZeichnen(); return true;
+    case 'urlaub-aus-nein': urlaubFragen = false; listeZeichnen(); return true;
+    case 'urlaub-aus-ja': urlaubFragen = false; app.aendern(opUrlaub(false, app.name())); melde('Willkommen zurück – die Liste von zu Hause ist wieder da.'); return true;
     case 'leeren-nein': leerenFragen = false; listeZeichnen(); return true;
     case 'leeren-ja': leerenFragen = false; app.aendern(opLeeren()); melde('Liste geleert'); return true;
     case 'z-oeffnen':

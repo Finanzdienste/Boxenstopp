@@ -229,6 +229,23 @@ check(await page.locator('#list-body section:not([data-bereich="amazon"]) .item-
 const kabel = await amazon.locator('[data-check]').first().getAttribute('data-check');
 await amazon.locator(`[data-check="${kabel}"]`).click();
 check(await bis(async () => (await amazon.locator('.item-name').count()) === 1), 'Bestellt (abgehakt): raus aus dem Amazon-Bereich');
+// Urlaub: die Liste von zu Hause beiseite, eine neue leere – und zurück
+const namenDa = () => page.$$eval('#list-body .item-name', (xs) => xs.map((x) => x.textContent.trim()).sort().join());
+const vorUrlaub = await namenDa();
+await page.click('[data-act="urlaub-an"]');
+check(await bis(async () => (await page.locator('#list-body .l-urlaub').count()) === 1 && (await page.locator('#list-body .item').count()) === 0), 'Urlaub: der Streifen oben, die Liste ist leer');
+check((await page.locator('#list-body .l-urlaub').innerText()).includes('von zu Hause liegen beiseite'), '… und sagt, dass die Liste von zu Hause beiseiteliegt');
+await page.fill('#add-input', 'Sonnencreme');
+await page.press('#add-input', 'Enter');
+await page.fill('#add-input', 'Brötchen');
+await page.press('#add-input', 'Enter');
+check(await bis(async () => (await namenDa()) === 'Brötchen,Sonnencreme'), 'Im Urlaub: nur das Neue');
+const broetchen = await page.locator('#list-body li.item', { hasText: 'Brötchen' }).locator('[data-check]').getAttribute('data-check');
+await page.click(`[data-check="${broetchen}"]`);
+await page.click('[data-act="urlaub-aus"]');
+check(await bis(async () => (await page.locator('[data-act="urlaub-aus-ja"]').count()) === 1) && (await page.locator('.l-urlaub .confirm').innerText()).includes('die eine offene Sache von hier kommt dazu'), 'Zurück nach Hause: erst fragen – was offen ist, kommt mit');
+await page.click('[data-act="urlaub-aus-ja"]');
+check(await bis(async () => (await page.locator('#list-body .l-urlaub').count()) === 0 && (await namenDa()) === [...vorUrlaub.split(','), 'Sonnencreme'].filter(Boolean).sort().join()), 'Zurück: die Liste von zu Hause ist wieder da, die offene Sonnencreme dazu, die abgehakten Brötchen nicht');
 check(fehler.length === 0, `keine Fehler in der Konsole${fehler.length ? `: ${fehler.slice(0, 3).join(' | ')}` : ''}`);
 await browser.close();
 ende();
