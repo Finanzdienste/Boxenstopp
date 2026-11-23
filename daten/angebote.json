@@ -1,6 +1,6 @@
 {
- "stand": "2026-11-22T17:13:18.923Z",
- "woche": "2026-47",
+ "stand": "2026-11-23T14:54:00.338Z",
+ "woche": "2026-48",
  "gesperrt": [
   "Rewe",
   "Edeka"
@@ -9,9 +9,9 @@
   {
    "laden": "Aldi",
    "ok": true,
-   "anzahl": 234,
+   "anzahl": 239,
    "hinweis": "Aldi Nord, bundesweit, mit Vorschau auf nächste Woche (106)",
-   "stand": "2026-11-22T17:13:05.818Z"
+   "stand": "2026-11-23T14:53:47.165Z"
   },
   {
    "laden": "Lidl",
@@ -37,14 +37,14 @@
    "ok": true,
    "anzahl": 277,
    "hinweis": "bundesweite Angebote, regional kann es abweichen; nächste Woche 12",
-   "stand": "2026-11-22T17:13:14.075Z"
+   "stand": "2026-11-23T14:53:55.470Z"
   },
   {
    "laden": "Penny",
    "ok": true,
    "anzahl": 54,
    "hinweis": "KW 48, bundesweit",
-   "stand": "2026-11-22T17:13:18.902Z"
+   "stand": "2026-11-23T14:54:00.310Z"
   }
  ],
  "angebote": [
@@ -517,6 +517,18 @@
    "bild": "https://s7g10.scene7.com/is/image/aldinord/6257_49_2026_minicherryrispentomaten_an_ai_on_161126_103314?wid=200&hei=200"
   },
   {
+   "id": "a-1srwwc7",
+   "laden": "Aldi",
+   "name": "Mini-Gurken",
+   "preis": 1.59,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-28",
+   "von": "2026-11-23",
+   "k": "gurke",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/1031850_27_2026_minigurken_on_181126_125850?wid=200&hei=200"
+  },
+  {
    "id": "a-1f4r1d9",
    "laden": "Aldi",
    "name": "Mini-Roma-Rispentomaten",
@@ -599,6 +611,18 @@
    "von": "2026-12-03",
    "k": "kartoffeln",
    "bild": "https://s7g10.scene7.com/is/image/aldinord/1046511_speisekartoffeln_rot_normal_ai_on_161126_102144?wid=200&hei=200"
+  },
+  {
+   "id": "a-1900o13",
+   "laden": "Aldi",
+   "name": "Spitzpaprika rot",
+   "preis": 1.69,
+   "menge": 500,
+   "einheit": "g",
+   "bis": "2026-11-28",
+   "von": "2026-11-23",
+   "k": "paprika",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6176_1030426_1024527_redpointedpepper_03_ai_on_271026_084354_181126_130127?wid=200&hei=200"
   },
   {
    "id": "a-0f0aen9",
@@ -838,7 +862,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "oliven",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260012587654_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260012587654_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1d8ugua",
@@ -2161,6 +2185,18 @@
    "bild": "https://s7g10.scene7.com/is/image/aldinord/1037962_49_2026_tk_gourmet_wildschweingulasch_400g_1_on?wid=200&hei=200"
   },
   {
+   "id": "a-1trjvdd",
+   "laden": "Aldi",
+   "name": "Granatapfel",
+   "preis": 0.79,
+   "menge": 1,
+   "einheit": "Stk",
+   "bis": "2026-11-28",
+   "von": "2026-11-23",
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6130_19_2026_granatapfel_0037_on_181126_125115?wid=200&hei=200"
+  },
+  {
    "id": "a-0u98lat",
    "laden": "Aldi",
    "name": "Grapefruit",
@@ -2555,6 +2591,18 @@
    "von": "2026-11-23",
    "k": "",
    "bild": "https://s7g10.scene7.com/is/image/aldinord/8682_42_2026_minutensteaks_qs_400_g_1_on_230926_125346?wid=200&hei=200"
+  },
+  {
+   "id": "a-01sckgh",
+   "laden": "Aldi",
+   "name": "Möhren-Mix",
+   "preis": 0.99,
+   "menge": 750,
+   "einheit": "g",
+   "bis": "2026-11-28",
+   "von": "2026-11-23",
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/9297_34_2026_moehrenmix750gr_on_120826_165132_181126_125149?wid=200&hei=200"
   },
   {
    "id": "a-1yj1jrd",
@@ -3013,6 +3061,18 @@
    "bild": "https://s7g10.scene7.com/is/image/aldinord/1029056_48_2026_eukal_bonbon_200g_4_on_comp2_111126_162749?wid=200&hei=200"
   },
   {
+   "id": "a-1b6gxjh",
+   "laden": "Aldi",
+   "name": "Tafelbirnen",
+   "preis": 1.59,
+   "menge": 1,
+   "einheit": "kg",
+   "bis": "2026-11-28",
+   "von": "2026-11-23",
+   "k": "",
+   "bild": "https://s7g10.scene7.com/is/image/aldinord/6294_15_2026_birnengruenconference_tz1_on_160426_160352_181126_130511?wid=200&hei=200"
+  },
+  {
    "id": "a-02j5keu",
    "laden": "Aldi",
    "name": "The Singleton Andalucia Reserva",
@@ -3322,7 +3382,7 @@
    "bis": "2026-11-23",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8002230000319_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8002230000319_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1d3i97b",
@@ -3334,7 +3394,7 @@
    "bis": "2026-11-23",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3073781229547_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3073781229547_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0kr3kmr",
@@ -3814,7 +3874,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8410066145331_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8410066145331_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1nxke71",
@@ -3934,7 +3994,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4063367296291_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4063367296291_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1m0w41q",
@@ -3994,7 +4054,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/20616385_P_1072165?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006496024229_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0wc4tol",
@@ -4090,7 +4150,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006196029845_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20935895-P-4006196029845?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1bnfhm9",
@@ -4114,7 +4174,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4006196029852_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20935720-P-4006196029852?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0redk8p",
@@ -4210,7 +4270,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8001522000402_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8001522000402_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-04hf3tx",
@@ -4246,7 +4306,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/9001745009021_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/9001745009021_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0vf92nx",
@@ -4318,7 +4378,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2200950000000_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00053983_P_1070926?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-04jkzsz",
@@ -4342,7 +4402,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20845298-P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20845298_23P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-085635f",
@@ -4390,7 +4450,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2257310000000_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/DE20967496-P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1ahc4qn",
@@ -4486,7 +4546,7 @@
    "bis": "2026-11-23",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3392590205567_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3392590205567_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0f8mewv",
@@ -4546,7 +4606,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/3153126826003_DE_P_?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00502221?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-168vz0j",
@@ -4606,7 +4666,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2897050000000_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/2897050000000_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-174watq",
@@ -4726,7 +4786,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4260071790057_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01120962?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0ppfs9j",
@@ -5002,7 +5062,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8690804682902_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/8690804682902_DE_P-1?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-0wu93rm",
@@ -5050,7 +5110,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/5908230515804_DE_P?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01204444?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-01gtcov",
@@ -5098,7 +5158,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/01257645?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/5762385036726_DE_P_?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1hcilsl",
@@ -5170,7 +5230,7 @@
    "bis": "2026-11-28",
    "von": "2026-11-23",
    "k": "",
-   "bild": "https://kaufland.media.schwarz/is/image/schwarz/4001956465260_DE_P_?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
+   "bild": "https://kaufland.media.schwarz/is/image/schwarz/00150003?JGstbGVnYWN5LW9uc2l0ZS0xJA=="
   },
   {
    "id": "a-1pwghvs",
