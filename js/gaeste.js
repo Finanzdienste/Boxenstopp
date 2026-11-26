@@ -221,6 +221,28 @@ export function zusammenfassen(listen, { tage = 7, jetzt = new Date() } = {}) {
   };
 }
 
+/** Wie eine Liste in Tobis „Meine Apps“ heißt (aktiv-melden.js): „haupt“ oder „gast:Marielle“. */
+export const listeVon = (l) => (l.id === 'haupt' ? 'haupt' : `gast:${String(l.name || '').trim().slice(0, 50)}`);
+
+/**
+ * Aus zusammenfassen() die Zeilen für „Meine Apps“: [{ wer, liste, tag, anzahl,
+ * zuletzt }] je Person und Tag mit Änderungen – nur aus den Listen ls (die,
+ * deren Verlauf gekommen ist). Was geändert wurde, geht nicht mit.
+ */
+export function zeilenFuerUebersicht(z, ls) {
+  const name = new Map((ls || []).map((l) => [l.id, listeVon(l)]));
+  const zeilen = [];
+  for (const p of z?.personen || []) {
+    const liste = name.get(p.liste);
+    if (!liste) continue;
+    (p.jeTag || []).forEach((n, i) => {
+      const tag = z.tage?.[i];
+      if (n > 0 && tag) zeilen.push({ wer: String(p.name).trim().slice(0, 40), liste, tag, anzahl: n, zuletzt: p.zuletzt || null });
+    });
+  }
+  return zeilen;
+}
+
 /** Neue Commits (neueste zuerst) vor die gemerkten; älter als tage fällt weg. */
 export function verlaufMischen(alt, neu, { tage = 31, jetzt = new Date() } = {}) {
   const grenze = new Date(jetzt.getTime() - tage * 86400000).toISOString();

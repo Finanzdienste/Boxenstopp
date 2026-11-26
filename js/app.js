@@ -16,7 +16,8 @@
  *
  * Für die Tests lassen sich drei Dinge über den localStorage verstellen:
  * __api (statt https://api.github.com), __takt (Abgleich in ms) und
- * __umzugPause (die Pause des Umzugs der Sachen in ms, sonst 60 s).
+ * __umzugPause (die Pause des Umzugs der Sachen in ms, sonst 60 s) und
+ * __aktivPause (bis „Meine Apps“ erfährt, wer was geändert hat, sonst 20 s).
  */
 // Als erstes: Fehler mitschreiben (Einstellungen → Über die App), auch beim Laden der anderen Teile
 import { sicher, fehlerMerken } from './fehler.js';
@@ -57,6 +58,7 @@ import { klickDoppel, doppelNeu } from './ansicht-doppel.js';
 import { planZeichnen, planGezeigt, klickPlan, eingabePlan, tastePlan } from './ansicht-essensplan.js';
 import { boxenText } from './boxen.js';
 import { bildschirmzeitStart, klickBildschirmzeit } from './ansicht-bildschirmzeit.js';
+import { aktivMelden } from './aktiv-melden.js';
 import { klickSachenApp, sachenHinweisPruefen } from './ansicht-sachen-app.js';
 
 /*
@@ -295,8 +297,13 @@ function beiStatus(s) {
     setTimeout(dashboardHinweisPruefen, 2500);
     setTimeout(sachenHinweisPruefen, 2500);
     sicher('Umzug der Sachen', sachenUmzug);
+    // Für Tobis „Meine Apps“: wer an welchem Tag etwas geändert hat (nur auf Tobis Gerät, höchstens stündlich)
+    setTimeout(() => aktivMelden(), aktivPause());
   }
 }
+// 20 s nach dem Abgleich, damit er dem Start nicht im Weg steht; für die Tests kürzer (localStorage __aktivPause in ms)
+const aktivPause = () => Number(lese('__aktivPause', 0)) || 20 * 1000;
+window.addEventListener('online', () => setTimeout(() => aktivMelden(), aktivPause()));
 
 function nimmSpeicher(neu) {
   if (app.speicher) app.speicher.stop();
@@ -465,7 +472,7 @@ document.addEventListener('change', (ev) => {
 document.addEventListener('touchstart', wischStart, { passive: true });
 document.addEventListener('touchend', wischEnde, { passive: true });
 // Ein Einkauf, der lange ruht, ist vorbei – auch wenn die App zwischendurch zu war
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wegPruefen(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wegPruefen(); aktivMelden(); } });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
 document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
 document.addEventListener('submit', (ev) => {

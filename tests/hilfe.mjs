@@ -233,6 +233,8 @@ export const FUNKTIONEN = /^https:\/\/[a-z0-9]+\.supabase\.co\/functions\//;
 export const WIKI_HOSTS = /^https:\/\/(?:[a-z-]+\.)?(?:wikipedia|wikimedia)\.org\//;
 /** Die Bildschirmzeit fürs Widget (js/bildschirmzeit.js: bildschirmzeit_melden & Co.) – in den Tests nie die echte. */
 export const BILDSCHIRMZEIT = /^https:\/\/[a-z0-9]+\.supabase\.co\/rest\/v1\/rpc\/bildschirmzeit_/;
+/** Was Tobis Gerät an „Meine Apps“ meldet (aktiv-melden.js) – in den Tests nie ins echte Netz. */
+export const AKTIV = /^https:\/\/[a-z0-9]+\.supabase\.co\/rest\/v1\/rpc\/boxenstopp_aktiv_melden/;
 
 /**
  * Eine Attrappe für die Tierquellen: jede Antwort zeigt auf ein Bild unter
@@ -267,7 +269,7 @@ export function tierAttrappe() {
  * Die einmaligen Hinweise (Dashboard, Sachen als eigene App) gelten als
  * gesehen – außer mit `hinweise: true`.
  */
-export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, bildschirmzeit = null, takt = 400, adresse = APP_URL, bereit = String(adresse).includes('/sachen/') ? 'html[data-bereit]' : '#grid .box', viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null, hinweise = false, fotos = {} } = {}) {
+export async function handy(browser, { attrappe = null, tiere = null, datenbank = null, bildschirmzeit = null, aktiv = null, takt = 400, adresse = APP_URL, bereit = String(adresse).includes('/sachen/') ? 'html[data-bereit]' : '#grid .box', viewport = { width: 390, height: 844 }, ohneWorker = true, userAgent = undefined, skript = null, rechte = null, hinweise = false, fotos = {} } = {}) {
   const ctx = await browser.newContext({ viewport, locale: 'de-DE', serviceWorkers: ohneWorker ? 'block' : 'allow', ...(userAgent ? { userAgent } : {}) });
   if (skript) await ctx.addInitScript(skript);
   // z. B. ['notifications', 'clipboard-read', 'clipboard-write'] – Headless-Chromium verweigert Mitteilungen sonst
@@ -279,6 +281,7 @@ export async function handy(browser, { attrappe = null, tiere = null, datenbank 
   await ctx.route(FUNKTIONEN, (r) => r.abort('blockedbyclient'));
   await ctx.route(WIKI_HOSTS, (r) => r.abort('blockedbyclient'));
   await ctx.route(BILDSCHIRMZEIT, bildschirmzeit ? bildschirmzeit.route : (r) => r.abort('blockedbyclient'));
+  await ctx.route(AKTIV, aktiv ? aktiv.route : (r) => r.abort('blockedbyclient'));
   // Fotos der gewünschten und Amys Rezepte: was der Test in `fotos` legt (auch später, dann neu laden) –
   // die Bilder sind alle das Chili; eins mit kaputt: true lädt nicht
   await ctx.route('**/daten/fotos.json', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ v: 1, fotos }) }));

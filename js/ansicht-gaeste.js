@@ -536,6 +536,22 @@ export async function ueberblickLaden(neu = false) {
   ueberblickZeichnen();
 }
 
+/**
+ * Für Tobis Übersicht „Meine Apps“ (aktiv-melden.js): den Verlauf aller
+ * Listen auffrischen wie beim Öffnen des Dashboards und zusammenfassen –
+ * wer an welchem Tag wie viel geändert hat. Dazu, welche Listen dabei nicht
+ * durchkamen (dann meldet aktiv-melden.js sie nicht, statt ihre Tage zu leeren).
+ */
+export async function aktivitaetFuerUebersicht(tageZahl = 31) {
+  await ueberblickLaden();
+  const alle = listen();
+  const ls = alle.filter((l) => !l.teilVon);
+  const verlauf = gemerkterVerlauf();
+  const eintraege = (l) => alle.filter((x) => x.id === l.id || x.teilVon === l.id).flatMap((x) => reiheVon(verlauf, x.id));
+  const z = zusammenfassen(ls.map((l) => ({ id: l.id, name: l.name, farbe: l.farbe, gast: l.id === 'haupt' ? '' : l.name, eintraege: eintraege(l) })), { tage: tageZahl });
+  return { ls, z, fehler: { ...fehlerJe } };
+}
+
 function ueberblickOeffnen() {
   const dlg = $('#ueberblick-dlg');
   if (!dlg) return;

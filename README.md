@@ -1339,6 +1339,50 @@ ist. Geht um die Bewerbungs app“) – für Boxenstopp ändert sich nichts.
 Supabase-API (`BILDSCHIRMZEIT` in `tests/hilfe.mjs` lässt keinen Test an die
 echte) und mit erfundenen Kennungen – siehe „Tests“.
 
+### Für Tobis „Meine Apps“ (v100)
+
+Tobi, 26.11.2026: „Boxenstopp soll natürlich auch marielle und Amy melden“.
+Gemeint ist seine Übersicht über alle Apps
+(<https://finanzdienste.github.io/Apps/>, Repo Finanzdienste/Apps). Dort sah
+man bis dahin nur ihn, über die Bildschirmzeit.
+
+**Neu erhoben wird nichts.** Das Dashboard (Einstellungen → Gäste & Überblick
+→ Aktivität) liest auf Tobis Handy schon aus den Commits der Listen, wer wann
+etwas ändert. Amy und den Gästen hat die App das einmal gesagt („Tobi hat
+jetzt ein Dashboard … wann du was änderst“, `DASH_HINWEIS`).
+
+`js/aktiv-melden.js` schickt davon an Tobis Supabase-Projekt
+(`boxenstopp_aktiv_melden`, SQL im Repo Apps, `tools/apps-uebersicht.sql`):
+- **Was:** nur die Zahl der Änderungen je Person, Liste und Tag, für 31 Tage
+  (`zeilenFuerUebersicht()` in `js/gaeste.js`), etwa „Amy, haupt, 26.11.,
+  3“. Nie, was geändert wurde, nie einen Schlüssel.
+- **Wer schickt:** nur Tobis Gerät, also eure Liste und der Name „Tobi“
+  (`meldetHier()`). Amys Gerät und das eines Gasts schicken nichts, auch wenn
+  es sich „Tobi“ nennt.
+- **Wann:** 20 s nach dem Abgleich (`__aktivPause` in den Tests), bei `online`
+  und beim Zurückkommen, höchstens stündlich, und nur, wenn sich etwas
+  geändert hat (`boxenstopp.aktivgemeldet.v1`).
+- **Ohne Netz:** nichts gemerkt; es geht beim nächsten Mal.
+- **Kommt der Verlauf einer Liste nicht** (Schlüssel abgelaufen, GitHub
+  hakt), steht sie nicht in `p_listen`. Die Übersicht behält dann ihre Tage,
+  statt sie zu leeren.
+- **Liste:** „haupt“ für eure, „gast:<Name>“ für die eines Gasts.
+
+Wer Boxenstopp nur öffnet und nichts ändert, taucht so nicht auf. Das ist
+Absicht, denn mehr als „wann du was änderst“ wurde niemandem gesagt.
+
+**Geprüft** in `tests/test-aktiv.mjs`:
+- **In Node:** Zeilen je Person und Tag, Automatik zählt nicht, Marielle
+  immer Marielle, nur Zahlen.
+- **Im Browser,** gegen die GitHub-Attrappe und eine nachgebaute
+  Supabase-Funktion (`AKTIV` in `tests/hilfe.mjs` lässt keinen Test an die
+  echte):
+  - Tobis Gerät meldet Amy, Marielle und sich
+  - nicht noch einmal binnen einer Stunde
+  - ohne Marielles Verlauf nur eure Liste
+  - ohne Netz nichts gemerkt, mit `online` nachgeholt
+  - Amys und Marielles Gerät schicken nichts
+
 ## Speisekammer
 
 Seit v93 (Marielle: „alles einmal einspeichern, und dann behält er die Sachen“):
@@ -2286,6 +2330,7 @@ die Action „Rezeptfotos“.
 | `js/ansicht-willkommen.js` | das Willkommen für einen Gast (Makros, aufs Handy, wem die Liste gehört) |
 | `js/bildschirmzeit.js` | Bildschirmzeit fürs Widget: messen, solange sichtbar, an Supabase melden, trennen – wortgleiche Kopie aus Finanzdienste/Bildschirmzeit (`web/bildschirmzeit.js`), nur dort ändern |
 | `js/ansicht-bildschirmzeit.js` | Bildschirmzeit in Boxenstopp: als Erstes beim Start, die Karte in den Einstellungen (nur verbunden), Trennen |
+| `js/aktiv-melden.js` | für Tobis „Meine Apps“: aus dem Dashboard die Zahl der Änderungen je Person und Tag an Supabase – nur auf Tobis Gerät, höchstens stündlich (v100) |
 | `js/speisekarte.js`, `js/ansicht-speisekarte.js` | Speisekarte: Anfrage, Antwort bereinigen, sortieren nach dem Ziel; Veranstaltung (Claude sucht Stände und Gerichte, Bilder aus Wikipedia) – und die Ansicht |
 | `icon-lila*.png`, `icon-lila.svg`, `manifest-lila.webmanifest` | Symbol und Manifest einer lila Liste |
 | `js/ansicht-rezepte.js`, `js/ansicht-liste.js` | Rezepte (mit Preis und Sortierung) und Einkaufsliste |
