@@ -15,17 +15,24 @@ Tobi, 16.11.2026: „Sowas sollst du immer konkret mit angeben“ – und: „So
 nachricht gibst du mir irgendwie nur in diesen chat, nicht in den anderen.“
 Was gerade läuft, zeigt `get_session` (`model`, `effort_level`,
 `flag_settings.ultracode`).
-- Am Ende jeder Antwort, mit der du eine Aufgabe abschließt (nicht bei
-  Zwischenständen), ein Satz: was lief und ob es passte – mit dem genauen
-  Befehl, wenn etwas anderes besser passt. Etwa „Opus 5.5 mit `/effort max`,
-  passt – nichts umstellen“ oder „für so etwas reicht `/effort high`“.
+- **Nur melden, wenn etwas zu ändern ist** (Tobi, 26.11.2026: „Dass Opus okay
+  ist brauch ich nicht zu wissen, ich brauch nur zu wissen wenn was geändert
+  werden muss“): Kein Schlusssatz mehr wie „passt – nichts umstellen“. Sollte
+  etwas umgestellt werden (Modell, Aufwand, neuer Chat), am Ende ein Satz mit
+  Grund und dem genauen Befehl.
+- **Neuer Chat** (Tobi, 26.11.2026: „in allen Chats bescheid geben wenn ein
+  neuer Chat nötig ist“): von selbst in einem Satz sagen, sobald einer nötig
+  ist – wenn der Verlauf schon zusammengefasst wurde oder `get_session` mehr
+  als etwa die Hälfte von `context_usage.max_tokens` belegt zeigt, wenn du
+  frühere Entscheidungen nicht mehr sicher weißt, oder wenn ein ganz neues
+  Thema anfängt. Vorher alles Offene in die Dateien schreiben und einen kurzen
+  Starttext zum Einfügen mitgeben.
 - Rätst du von etwas ab (Ultracode, ein anderes Modell), sag, was stattdessen
   gilt.
 - **Mehr** – vorschlagen und auf meine Antwort warten: `/model fable` mit
   `/effort high`, wenn eine Ursache nach dem ersten Durchgang unklar bleibt
-  oder ein Fehler nach einer Korrektur wiederkommt. Fable kann
-  Nutzungsguthaben kosten (im Modellmenü „Requires usage credits“) – das
-  gehört in den Vorschlag. Ist der Aufwand gerade gesenkt, zuerst zurück auf
+  oder ein Fehler nach einer Korrektur wiederkommt. Fable kostet kein Nutzungsguthaben (Tobi, 26.11.2026; Guthaben kostet nur
+  die Claude-API). Ist der Aufwand gerade gesenkt, zuerst zurück auf
   `/effort max`.
 - **Weniger** – erledigen und am Ende sagen: Für reine Texte, README und
   Daten reicht `/effort high` (oder `medium`); für eine einzelne schwere Frage
