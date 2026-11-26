@@ -93,7 +93,7 @@ check(b.p_tage?.some((x) => x.wer === 'Amy' && x.liste === 'haupt' && x.tag === 
 check(!/Chili|Bananen|Rezept|github_pat/.test(JSON.stringify(b)) && ak.zustand.anfragen[0].kopf.apikey?.startsWith('sb_publishable_') && !ak.zustand.anfragen[0].kopf.authorization, 'nur Zahlen, kein Schlüssel, nur der öffentliche apikey');
 await t.page.reload();
 await t.page.waitForTimeout(1500);
-await t.page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+await t.page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new window.Event('visibilitychange')); });
 await t.page.waitForTimeout(800);
 check(ak.zustand.anfragen.length === 1, 'innerhalb einer Stunde nicht noch einmal');
 check(!t.fehler.length, `keine Fehler in der Seite${t.fehler.length ? `: ${t.fehler.join(' | ')}` : ''}`);
@@ -116,7 +116,7 @@ t = await geraet('Tobi', { gaeste: gast, aktiv: ak, attrappe: v.beide });
 await t.page.waitForTimeout(2500);
 check(ak.zustand.anfragen.length === 0 && await t.page.evaluate(() => localStorage.getItem('boxenstopp.aktivgemeldet.v1')) === null, 'ohne Netz: nichts gemerkt');
 ak.zustand.netz = true;
-await t.page.evaluate(() => window.dispatchEvent(new Event('online')));
+await t.page.evaluate(() => window.dispatchEvent(new window.Event('online')));
 check(await bis(() => ak.zustand.anfragen.length === 1, 8000), 'wieder Netz („online“): es geht von selbst');
 await t.ctx.close();
 
