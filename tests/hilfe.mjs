@@ -309,6 +309,9 @@ export async function handy(browser, { attrappe = null, tiere = null, datenbank 
   await page.evaluate(([t, h]) => {
     localStorage.clear();
     localStorage.setItem('__takt', String(t));
+    // Die Meldung an „Meine Apps“ (aktiv-melden.js) bleibt in den Tests aus – sie holte sonst nach 20 s
+    // nebenbei den Verlauf und verschöbe die Zeiten der anderen Tests; test-aktiv.mjs stellt sie kurz
+    localStorage.setItem('__aktivPause', '999999999');
     if (!h) {
       localStorage.setItem('boxenstopp.dashboard.hinweis.v1', 'true');
       localStorage.setItem('boxenstopp.sachen.hinweis.v1', 'true');

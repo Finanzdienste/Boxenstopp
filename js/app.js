@@ -472,7 +472,7 @@ document.addEventListener('change', (ev) => {
 document.addEventListener('touchstart', wischStart, { passive: true });
 document.addEventListener('touchend', wischEnde, { passive: true });
 // Ein Einkauf, der lange ruht, ist vorbei – auch wenn die App zwischendurch zu war
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wegPruefen(); aktivMelden(); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wegPruefen(); setTimeout(() => aktivMelden(), aktivPause()); } });
 // Bereiche im Rezept auf- und zuklappen: „toggle“ steigt nicht auf, darum in der Capture-Phase
 document.addEventListener('toggle', (ev) => abschnittGeklappt(ev.target), true);
 document.addEventListener('submit', (ev) => {
